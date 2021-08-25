@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestZboxCliRegisterWallet(t *testing.T) {
+func TestShouldReturnWalletRegisteredOnRunningRegisterCommand(t *testing.T) {
 	t.Run("Checks terminal output", func(t *testing.T) {
 		// Run the "./zbox register" command from the latest build
 		// fetched dynamically using the getLatestBuild.sh script
