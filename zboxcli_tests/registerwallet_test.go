@@ -13,11 +13,11 @@ func TestZboxCliRegisterWallet(t *testing.T) {
 	// fetched dynamically using the getLatestBuild.sh script
 	err := exec.Command("sh", "-c", "../getLatestBuild.sh").Run()
 
-	if err != nil {
-		cmd := exec.Command("./zbox register")
+	if assert.Nil(t, err) {
+		cmd := exec.Command("./zbox", "register")
 		output, err := cmd.Output()
 
-		if err != nil {
+		if assert.Nil(t, err) {
 			assert.Equal(t, "Wallet registered\n", string(output))
 		}
 	}
