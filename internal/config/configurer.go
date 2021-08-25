@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -36,6 +37,12 @@ func NewConfigurer(fileLocation string) (*Configurer, error) {
 	if err != nil {
 		log.Errorf("failed to unmarshal configuration %v", err)
 		return nil, errors.Wrap(err, "failed to unmarshal configuration")
+	}
+
+	validate := validator.New()
+
+	if err := validate.Struct(requiredConfig); err!=nil {
+		return nil, errors.Wrap(err, "missing configuration values")
 	}
 
 	return &Configurer{
