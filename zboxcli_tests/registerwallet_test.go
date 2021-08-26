@@ -13,13 +13,17 @@ func TestShouldReturnWalletRegisteredOnRunningRegisterCommand(t *testing.T) {
 		// fetched dynamically using the getLatestBuild.sh script
 		err := exec.Command("sh", "-c", "../getLatestBuild.sh").Run()
 
-		if assert.Nil(t, err) {
-			cmd := exec.Command("./zbox", "register")
-			output, err := cmd.Output()
-
-			if assert.Nil(t, err) {
-				assert.Equal(t, "Wallet registered\n", string(output))
-			}
+		if err != nil {
+			t.Errorf(err.Error())
 		}
+
+		cmd := exec.Command("./zbox", "register")
+		output, err := cmd.Output()
+
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+
+		assert.Equal(t, "Wallet registered\n", string(output))
 	})
 }
