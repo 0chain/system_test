@@ -48,7 +48,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Equal(t, "Get balance failed.", output[0])
 	})
 
-	t.Run("Non-zero Balance is returned", func(t *testing.T) {
+	t.Run("Non-zero Balance is returned after faucet execution", func(t *testing.T) {
 		output, err := executeFaucet()
 		if err != nil {
 			t.Error("Faucet execution failed : ", err)
