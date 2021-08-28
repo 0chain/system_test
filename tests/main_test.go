@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 
 	level, _ := log.ParseLevel(*requiredConfig.LogLevel)
 	log.SetLevel(level)
+
 	exitRun := m.Run()
 
 	os.Exit(exitRun)

@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
 	"github.com/0chain/system_test/internal/model"
 	"github.com/0chain/system_test/internal/utils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +10,8 @@ import (
 )
 
 func TestWalletRegisterAndBalanceOperations(t *testing.T) {
-	output, err := registerWallet()
+	walletConfigFilename := "system_tests_wallet_" + utils.RandomAlphaNumericString(10) + ".json"
+	output, err := utils.RegisterWallet(walletConfigFilename)
 
 	t.Run("CLI output matches expected", func(t *testing.T) {
 		if err != nil {
@@ -27,7 +27,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	var wallet model.Wallet
 	t.Run("Get wallet outputs expected", func(t *testing.T) {
-		err := getWallet(t, wallet)
+		err := utils.GetWallet(t, wallet, walletConfigFilename)
 
 		if err != nil {
 			t.Error(err)
@@ -39,7 +39,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Zero Balance is returned", func(t *testing.T) {
-		output, err := getBalance()
+		output, err := utils.GetBalance(walletConfigFilename)
 		if err == nil {
 			t.Error("Expected initial getBalance operation to fail but was successful with output " + strings.Join(output, "\n"))
 		}
@@ -49,15 +49,30 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Non-zero Balance is returned after faucet execution", func(t *testing.T) {
-		output, err := executeFaucet()
-		if err != nil {
-			t.Error("Faucet execution failed : ", err)
-		}
+		t.Run("Execute Faucet", func(t *testing.T) {
+			output, err := utils.ExecuteFaucet(walletConfigFilename)
+			if err != nil {
+				t.Error("Faucet execution failed : ", err)
+			}
 
-		assert.Equal(t, 1, len(output))
-		assert.Regexp(t, regexp.MustCompile("Execute faucet smart contract success with txn :  ([a-f0-9]{64})$"), output[0], "Faucet execution output did not match expected")
+			assert.Equal(t, 1, len(output))
+			matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
+			assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
+			txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
 
-		output, err = getBalance()
+			t.Run("Faucet Execution Verified", func(t *testing.T) {
+				output, err = utils.VerifyTransaction(walletConfigFilename, txnId)
+				if err != nil {
+					t.Error("Faucet verification failed : ", err)
+				}
+
+				assert.Equal(t, 1, len(output))
+				assert.Equal(t, "Transaction verification success", output[0])
+				t.Log("Faucet executed successful with txn id [" + txnId + "]")
+			})
+		})
+
+		output, err = utils.GetBalance(walletConfigFilename)
 		if err != nil {
 			t.Error(err)
 		}
@@ -65,28 +80,4 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Equal(t, 1, len(output))
 		assert.Regexp(t, regexp.MustCompile("Balance: 1 \\([0-9.]+ USD\\)$"), output[0])
 	})
-}
-
-func registerWallet() ([]string, error) {
-	return utils.RunCommand("./zbox register --silent")
-}
-
-func getBalance() ([]string, error) {
-	return utils.RunCommand("./zwallet getbalance --silent")
-}
-
-func getWallet(t *testing.T, wallet model.Wallet) error {
-	output, err := utils.RunCommand("./zbox getwallet --json --silent")
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	assert.Equal(t, 1, len(output))
-
-	return json.Unmarshal([]byte(output[0]), &wallet)
-}
-
-func executeFaucet() ([]string, error) {
-	return utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent")
 }
