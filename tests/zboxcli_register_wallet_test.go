@@ -38,7 +38,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.NotNil(t, wallet.Encryption_public_key)
 	})
 
-	t.Run("Zero Balance is returned", func(t *testing.T) {
+	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
 		output, err := utils.GetBalance(walletConfigFilename)
 		if err == nil {
 			t.Error("Expected initial getBalance operation to fail but was successful with output " + strings.Join(output, "\n"))
@@ -48,7 +48,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Equal(t, "Get balance failed.", output[0])
 	})
 
-	t.Run("Non-zero Balance is returned after faucet execution", func(t *testing.T) {
+	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
 		t.Run("Execute Faucet", func(t *testing.T) {
 			output, err := utils.ExecuteFaucet(walletConfigFilename)
 			if err != nil {
