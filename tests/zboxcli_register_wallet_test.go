@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"github.com/0chain/system_test/internal/config"
 	"github.com/0chain/system_test/internal/model"
 	"github.com/0chain/system_test/internal/utils"
 	"github.com/stretchr/testify/assert"
@@ -10,12 +11,28 @@ import (
 )
 
 func TestWalletRegisterAndBalanceOperations(t *testing.T) {
-	walletConfigFilename := "system_tests_wallet_" + utils.RandomAlphaNumericString(10) + ".json"
-	output, err := utils.RegisterWallet(walletConfigFilename)
+	walletConfigFilename := "wallet_TestWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".json"
+	cliConfigFilename := "config_TestWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".yaml"
+
+	configuration := GetConfig(t)
+	cliConfig := model.Config{
+		*configuration.DNSHostName + "/dns",
+		"bls0chain",
+		50,
+		50,
+		3,
+		5,
+		5,
+	}
+	err := config.WriteConfig(cliConfigFilename, cliConfig)
+	if err != nil {
+		t.Errorf("Error when writing CLI config: %v", err)
+	}
 
 	t.Run("CLI output matches expected", func(t *testing.T) {
+		output, err := utils.RegisterWallet(walletConfigFilename, cliConfigFilename)
 		if err != nil {
-			t.Error(err)
+			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
 
 		assert.Equal(t, 4, len(output))
@@ -25,12 +42,11 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Equal(t, "Wallet registered", output[3])
 	})
 
-	var wallet model.Wallet
 	t.Run("Get wallet outputs expected", func(t *testing.T) {
-		err := utils.GetWallet(t, wallet, walletConfigFilename)
+		wallet, err := utils.GetWallet(t, walletConfigFilename, cliConfigFilename)
 
 		if err != nil {
-			t.Error(err)
+			t.Errorf("Error occured when retreiving wallet due to error: %v", err)
 		}
 
 		assert.NotNil(t, wallet.Client_id)
@@ -39,9 +55,9 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
-		output, err := utils.GetBalance(walletConfigFilename)
+		output, err := utils.GetBalance(walletConfigFilename, cliConfigFilename)
 		if err == nil {
-			t.Error("Expected initial getBalance operation to fail but was successful with output " + strings.Join(output, "\n"))
+			t.Errorf("Expected initial getBalance operation to fail but was successful with output %v", strings.Join(output, "\n"))
 		}
 
 		assert.Equal(t, 1, len(output))
@@ -50,9 +66,9 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
 		t.Run("Execute Faucet", func(t *testing.T) {
-			output, err := utils.ExecuteFaucet(walletConfigFilename)
+			output, err := utils.ExecuteFaucet(walletConfigFilename, cliConfigFilename)
 			if err != nil {
-				t.Error("Faucet execution failed : ", err)
+				t.Errorf("Faucet execution failed due to error: %v", err)
 			}
 
 			assert.Equal(t, 1, len(output))
@@ -61,9 +77,9 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 			txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
 
 			t.Run("Faucet Execution Verified", func(t *testing.T) {
-				output, err = utils.VerifyTransaction(walletConfigFilename, txnId)
+				output, err = utils.VerifyTransaction(walletConfigFilename, cliConfigFilename, txnId)
 				if err != nil {
-					t.Error("Faucet verification failed : ", err)
+					t.Errorf("Faucet verification failed due to error: %v", err)
 				}
 
 				assert.Equal(t, 1, len(output))
@@ -72,7 +88,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 			})
 		})
 
-		output, err = utils.GetBalance(walletConfigFilename)
+		output, err := utils.GetBalance(walletConfigFilename, cliConfigFilename)
 		if err != nil {
 			t.Error(err)
 		}

@@ -10,7 +10,6 @@ import (
 )
 
 var configPath string
-var requiredConfig config.RequiredConfig
 
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
@@ -20,31 +19,27 @@ func TestMain(m *testing.M) {
 		panic("CONFIG_PATH must be passed")
 	}
 
-	requiredConfig = *GetConfig()
-
-	level, _ := log.ParseLevel(*requiredConfig.LogLevel)
-	log.SetLevel(level)
-
+	log.SetLevel(log.ErrorLevel)
 	exitRun := m.Run()
-
 	os.Exit(exitRun)
 }
 
-func GetConfig() *config.RequiredConfig {
+func GetConfig(t *testing.T) *config.RequiredConfig {
+	t.Helper()
 	if configPath == "" {
-		panic("configPath is empty, TestMain not called")
+		t.Fatal("configPath is empty, TestMain not called")
 	}
 
-	configurer, err := config.NewConfigurer(configPath)
+	configurer, err := config.ReadConfig(configPath)
 	if err != nil {
-		panic(fmt.Sprintf("failed to fetch configuration from the ConfigPath: %v", err))
+		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
 	}
 
 	requiredConfig := configurer.RequiredConfig
 
 	validate := validator.New()
 	if err := validate.Struct(requiredConfig); err != nil {
-		panic(fmt.Sprintf("failed to get configuration from the configFile: %v", err))
+		t.Fatalf("failed to get configuration from the configFile: %v", err)
 	}
 
 	return requiredConfig

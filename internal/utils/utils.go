@@ -24,32 +24,34 @@ func RunCommand(command string) ([]string, error) {
 	return output, err
 }
 
-func RegisterWallet(walletConfigFilename string) ([]string, error) {
-	return RunCommand("./zbox register --silent --wallet " + walletConfigFilename)
+func RegisterWallet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zbox register --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
 }
 
-func GetBalance(walletConfigFilename string) ([]string, error) {
-	return RunCommand("./zwallet getbalance --silent --wallet " + walletConfigFilename)
+func GetBalance(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zwallet getbalance --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
 }
 
-func GetWallet(t *testing.T, wallet model.Wallet, walletConfigFilename string) error {
-	output, err := RunCommand("./zbox getwallet --json --silent --wallet " + walletConfigFilename)
+func GetWallet(t *testing.T, walletConfigFilename string, cliConfigFilename string) (*model.Wallet, error) {
+	output, err := RunCommand("./zbox getwallet --json --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
 
 	if err != nil {
-		t.Error(err)
+		return nil, err
 	}
 
 	assert.Equal(t, 1, len(output))
 
-	return json.Unmarshal([]byte(output[0]), &wallet)
+	var wallet model.Wallet
+
+	return &wallet, json.Unmarshal([]byte(output[0]), &wallet)
 }
 
-func ExecuteFaucet(walletConfigFilename string) ([]string, error) {
-	return RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + walletConfigFilename)
+func ExecuteFaucet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
 }
 
-func VerifyTransaction(walletConfigFilename string, txn string) ([]string, error) {
-	return RunCommand("./zwallet verify --silent --wallet " + walletConfigFilename + " --hash " + txn)
+func VerifyTransaction(walletConfigFilename string, cliConfigFilename string, txn string) ([]string, error) {
+	return RunCommand("./zwallet verify --silent --wallet " + walletConfigFilename + " --hash " + txn + " --configDir ./temp --config " + cliConfigFilename)
 }
 
 func RandomAlphaNumericString(n int) string {
