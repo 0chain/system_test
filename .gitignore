@@ -16,7 +16,13 @@
 
 # Dependency directories (remove the comment below to include it)
 
- vendor/
+vendor/
+
+# Temp test output
+*/temp
+*/cmdlog.log
+*/zbox
+*/zwallet
 
 .DS_STORE
 .idea
