@@ -30,7 +30,7 @@ func GetConfig(t *testing.T) *config.RequiredConfig {
 		t.Fatal("configPath is empty, TestMain not called")
 	}
 
-	configurer, err := config.ReadConfig(configPath)
+	configurer, err := config.NewConfigurer(configPath)
 	if err != nil {
 		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
 	}
