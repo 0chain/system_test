@@ -25,21 +25,21 @@ func TestNewConfigurer(t *testing.T) {
 				cfg: &viper.Viper{},
 				RequiredConfig: &RequiredConfig{
 					DNSHostName: StringToStringPointer("https://dev.0chain.net"),
-					LogLevel: StringToStringPointer("error"),
-					},
+					LogLevel:    StringToStringPointer("error"),
 				},
+			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewConfigurer(tt.args.fileLocation)
+			got, err := ReadConfig(tt.args.fileLocation)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewConfigurer() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if diff := cmp.Diff(got.RequiredConfig, tt.want.RequiredConfig); diff != "" {
-				t.Errorf("NewConfigurer() got = %v, want %v", got, tt.want)
+				t.Errorf("ReadConfig() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
