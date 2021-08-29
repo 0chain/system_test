@@ -14,9 +14,9 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	walletConfigFilename := "wallet_TestWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".json"
 	cliConfigFilename := "config_TestWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".yaml"
 
-	configuration := GetConfig(t)
+	systemTestConfig := GetConfig(t)
 	cliConfig := model.Config{
-		*configuration.DNSHostName + "/dns",
+		*systemTestConfig.DNSHostName + "/dns",
 		"bls0chain",
 		50,
 		50,
