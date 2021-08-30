@@ -1,14 +1,10 @@
 package config
 
 import (
-	"github.com/0chain/system_test/internal/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"os"
 )
 
 var (
@@ -21,7 +17,7 @@ type Configurer struct {
 	RequiredConfig *RequiredConfig
 }
 
-func ReadConfig(fileLocation string) (*Configurer, error) {
+func NewConfigurer(fileLocation string) (*Configurer, error) {
 	v := viper.New()
 	if fileLocation == "" {
 		fileLocation = defaultFileLocation
@@ -53,22 +49,4 @@ func ReadConfig(fileLocation string) (*Configurer, error) {
 		cfg:            v,
 		RequiredConfig: requiredConfig,
 	}, nil
-}
-
-func WriteConfig(fileLocation string, config model.Config) error {
-	data, err := yaml.Marshal(&config)
-
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat("./temp"); os.IsNotExist(err) {
-		err = os.Mkdir("./temp", 0755)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return ioutil.WriteFile("./temp/"+fileLocation, data, 0644)
 }
