@@ -1,0 +1,79 @@
+cases:
+  # simple tests cases for usual using
+  session:
+    start_update_stop_ok: true
+    start_stop_ok: true
+    update_non_existing_session_ok: false
+    stop_non_existing_session_ok: false
+
+  # represents test case with big number of users connections
+  stress:
+    enable: false
+    users_num: 100
+
+log:
+  enable: true
+
+building_wait_time: 10 # in seconds
+
+default_user_grpc_timeout: 300 # in seconds
+
+server_chain:
+  # address of dns service
+  block_worker: http://localhost:9091
+#  block_worker: https://magma.0chain.net/dns
+
+  signature_scheme: "bls0chain"
+
+magma:
+  # represents docker image build tags that will be pulled.
+  ref: "0chaindev/magma:master-0b6d12b8"
+
+  port: "5181"
+  grpc_port: "7251"
+
+  # address of the node in the docker`s network.
+  ipv4: "198.18.0.22"
+
+consumer:
+  # represents docker image build tags that will be pulled.
+  ref: "0chaindev/consumer:master-0b6d12b8"
+
+  port: "5151"
+  grpc_port: "7131"
+
+  # address of the node in the docker`s network.
+  ipv4: "198.18.0.97"
+
+  # represents external ID.
+  # NOTE need be synchronised with "consumer.ext_id" section of the
+  # "./src/consumer/config/config.yaml" file
+  ext_id: "int_test_cons"
+
+  # represents relative path of sources
+  node_dir: "./src/consumer"
+
+  keys_file: "./src/consumer/config/keys.txt"
+
+  pour_wallet: true
+
+provider:
+  # represents docker image build tags that will be pulled.
+  ref: "0chaindev/provider:master-0b6d12b8"
+
+  port: "5171"
+  grpc_port: "7141"
+
+  # address of the node in the docker`s network.
+  ipv4: "198.18.0.17"
+
+  # represents external ID.
+  # NOTE need be synchronised with "provider.ext_id" section of the
+  # "./src/provider/config/config.yaml" file
+  ext_id: "int_test_prov"
+
+  # represents relative path of sources
+  node_dir: "./src/provider"
+
+  keys_file: "./src/provider/config/keys.txt"
+

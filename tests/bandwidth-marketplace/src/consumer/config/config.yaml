@@ -1,0 +1,62 @@
+server_chain:
+  id: ""
+  owner_id: ""
+  signature_scheme: "bls0chain"
+
+  # Represents dns address.
+  block_worker: http://198.18.0.98:9091
+#  block_worker: https://magma.0chain.net/dns
+
+# Used for registering node in the blockchain.
+# If node already registered in the blockchain, it will be updated.
+consumer:
+  # external id
+  ext_id: "int_test_cons"
+
+  # grpc server address for interacting between bandwidth nodes
+  host: "198.18.0.97:7131"
+
+handler:
+  # per second
+  rate_limit: 10
+
+  # represents configs for logs handler
+  log:
+    buf_length: 2048 # in kilobytes
+
+logging:
+  level: "debug"
+
+proxy:
+  # Represents configuration which determines consumer's decision about accepting provider terms.
+  terms:
+    # token per MB
+    max_price: 5000000
+
+    qos:
+      # megabits per second
+      min_download_mbps: 0
+
+      # megabits per second
+      min_upload_mbps: 0
+
+# in seconds
+grpc_server_timeout: 300
+
+# timeout includes verifying time too.
+executing_txn_default_timeout: 300 # in seconds
+
+# time allotted for registration
+registration_timeout: 60 # in seconds
+
+workers:
+  session_closer:
+    enable: false
+
+    # represents time interval for scanning db
+    scraping_time: 1 # in minutes
+
+  balance:
+    wait_response_timeout: 10 # in seconds
+
+    scraping_time: 120 # in seconds

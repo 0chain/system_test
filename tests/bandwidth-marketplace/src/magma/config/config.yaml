@@ -1,0 +1,23 @@
+server_chain:
+  signature_scheme: "bls0chain"
+
+  # Represents dns address.
+  block_worker: http://198.18.0.98:9091
+#  block_worker: https://magma.0chain.net/dns
+
+logging:
+  level: "debug"
+  dir: "/magma/log"
+
+handler:
+  rate_limit: 10 # per second
+
+  # represents configs for logs handler
+  log:
+    buf_length: 2048 # in kilobytes
+
+# in seconds
+grpc_server_timeout: 300
+
+# in seconds
+grpc_client_default_timeout: 300

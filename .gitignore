@@ -20,3 +20,11 @@
 
 .DS_STORE
 .idea
+
+# bandwidth-markeplace
+
+tests/bandwidth-marketplace/src/consumer/log
+tests/bandwidth-marketplace/src/consumer/data
+tests/bandwidth-marketplace/src/magma/log
+tests/bandwidth-marketplace/src/provider/log
+tests/bandwidth-marketplace/src/provider/data

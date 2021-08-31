@@ -1,0 +1,28 @@
+# token per megabyte
+price: 0.000000001
+
+# min const for session
+min_cost: 0.000000001 # ZCN
+
+# bytes per a session
+volume: 0
+
+# price change on auto update
+auto_update_price: 0.000000001
+
+# qos change on auto update
+qos_auto_update:
+  download_mbps: 0.001
+  upload_mbps: 0.001
+
+prolong_duration: 3600 # in seconds
+
+# represents the time that will be added to current time while registering
+session_duration: 60 # in minutes
+
+qos:
+  # megabits per second
+  download_mbps: 1
+
+  # megabits per second
+  upload_mbps: 1
