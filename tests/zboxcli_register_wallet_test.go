@@ -16,13 +16,13 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	systemTestConfig := GetConfig(t)
 	cliConfig := model.Config{
-		*systemTestConfig.DNSHostName + "/dns",
-		"bls0chain",
-		50,
-		50,
-		3,
-		5,
-		5,
+		BlockWorker:             *systemTestConfig.DNSHostName + "/dns",
+		SignatureScheme:         "bls0chain",
+		MinSubmit:               50,
+		MinConfirmation:         50,
+		ConfirmationChainLength: 3,
+		MaxTxnQuery:             5,
+		QuerySleepTime:          5,
 	}
 	err := config.WriteConfig(cliConfigFilename, cliConfig)
 	if err != nil {
