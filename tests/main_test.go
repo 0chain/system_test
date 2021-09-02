@@ -15,7 +15,11 @@ func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 
 	if configPath == "" {
-		fmt.Print("Config_Path is not set")
+		configPath = "../internal/config/test_with/system_test.yaml"
+	}
+
+	if configPath == "" {
+		fmt.Println("Config_Path is not set")
 		panic("CONFIG_PATH must be passed")
 	}
 
@@ -30,7 +34,7 @@ func GetConfig(t *testing.T) *config.RequiredConfig {
 		t.Fatal("configPath is empty, TestMain not called")
 	}
 
-	configurer, err := config.NewConfigurer(configPath)
+	configurer, err := config.ReadConfig(configPath)
 	if err != nil {
 		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
 	}
