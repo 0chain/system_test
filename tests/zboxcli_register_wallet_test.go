@@ -101,8 +101,8 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 }
 
 func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
-	msWalletConfigFilename := "wallet_TestMultiSigWalletRegisterAndBalanceOperations_" + "1" + ".json"
-	cliConfigFilename := "config_TestMultiSigWalletRegisterAndBalanceOperations_" + "1" + ".yaml"
+	msWalletConfigFilename := "wallet_TestMultiSigWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".json"
+	cliConfigFilename := "config_TestMultiSigWalletRegisterAndBalanceOperations_" + utils.RandomAlphaNumericString(10) + ".yaml"
 
 	systemTestConfig := GetConfig(t)
 
