@@ -3,7 +3,7 @@ module github.com/0chain/system_test
 go 1.16
 
 require (
-	github.com/0chain/gosdk v1.2.83-0.20210819074657-b6c0b3d44915
+	github.com/0chain/gosdk v1.2.85-0.20210901120814-93f8c4380e37
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/containerd/containerd v1.5.5 // indirect
 	github.com/docker/docker v20.10.8+incompatible
