@@ -1,5 +1,6 @@
 name: system-tests
 on:
+  push:
   pull_request:
     branches:
       - 'master'
