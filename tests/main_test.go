@@ -15,10 +15,6 @@ func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 
 	if configPath == "" {
-		configPath = "../internal/config/test_with/system_test.yaml"
-	}
-
-	if configPath == "" {
 		fmt.Println("Config_Path is not set")
 		panic("CONFIG_PATH must be passed")
 	}

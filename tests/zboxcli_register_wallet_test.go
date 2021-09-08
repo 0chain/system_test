@@ -67,36 +67,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
-		t.Run("Execute Faucet", func(t *testing.T) {
-			output, err := utils.ExecuteFaucet(walletConfigFilename, cliConfigFilename)
-			if err != nil {
-				t.Errorf("Faucet execution failed due to error: %v", err)
-			}
-
-			assert.Equal(t, 1, len(output))
-			matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
-			assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
-			txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-
-			t.Run("Faucet Execution Verified", func(t *testing.T) {
-				output, err = utils.VerifyTransaction(walletConfigFilename, cliConfigFilename, txnId)
-				if err != nil {
-					t.Errorf("Faucet verification failed due to error: %v", err)
-				}
-
-				assert.Equal(t, 1, len(output))
-				assert.Equal(t, "Transaction verification success", output[0])
-				t.Log("Faucet executed successful with txn id [" + txnId + "]")
-			})
-		})
-
-		output, err := utils.GetBalance(walletConfigFilename, cliConfigFilename)
-		if err != nil {
-			t.Error(err)
-		}
-
-		assert.Equal(t, 1, len(output))
-		assert.Regexp(t, regexp.MustCompile("Balance: 1 \\([0-9.]+ USD\\)$"), output[0])
+		testFaucet(t, walletConfigFilename, cliConfigFilename)
 	})
 }
 
@@ -122,75 +93,69 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	t.Run("CLI output matches expected", func(t *testing.T) {
 
-		testCases := []struct {
-			NumSigners int
-			Threshold  int
-			Fail       bool
-		}{
-			{NumSigners: 3, Threshold: 0, Fail: true},
-			{NumSigners: 3, Threshold: 2, Fail: false},
-			{NumSigners: 3, Threshold: 3, Fail: false},
-			{NumSigners: 3, Threshold: 4, Fail: true},
-		}
-		var newWalletCreated bool
+		t.Run("Should fail when threshold is 0", func(t *testing.T) {
+			numSigners, threshold := 3, 0
 
-		for i, tc := range testCases {
-
-			output, err := utils.RunCommand(fmt.Sprintf(
-				"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./temp --config %s",
-				tc.NumSigners, tc.Threshold,
-				msWalletConfigFilename,
-				cliConfigFilename))
-			if err != nil && !tc.Fail {
-				fmt.Printf("An error occured registering a wallet due to error: %v\n", err)
-			}
+			output, err := utils.CreateMultiSigWallet(msWalletConfigFilename, cliConfigFilename, numSigners, threshold)
+			assert.NotNil(t, err)
 
 			// This is true for the first round only since the wallet is created here
-			if i == 0 {
-				if output[1] == "ZCN wallet created!!" {
-					// This means a new wallet has been created
-					newWalletCreated = true
-					assert.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-					assert.Equal(t, "Read pool created successfully", output[3])
-				}
-			}
+			assert.Equal(t, "ZCN wallet created!!", output[1])
+			assert.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
+			assert.Equal(t, "Read pool created successfully", output[3])
 
-			if tc.Fail {
-				assert.NotEqual(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
+			assert.NotEqual(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
+		})
 
-				// Check the error when threshold is greater than signers
-				if tc.Threshold > tc.NumSigners {
-					errMsg := fmt.Sprintf(
-						"Error: given threshold (%d) is too high. Threshold has to be less than or equal to numsigners (%d)",
-						tc.Threshold, tc.NumSigners,
-					)
-					assert.Equal(t, errMsg, output[len(output)-1])
-				}
-			}
-			if !tc.Fail {
-				base := 0
-				if i == 0 {
-					base += 5
-				}
-				// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
-				msg := fmt.Sprintf("registering %d wallets ", tc.NumSigners+1)
-				assert.Equal(t, msg, output[base])
-				assert.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
-			}
+		t.Run("Should not fail when 0 < threshold <= num-signers", func(t *testing.T) {
+			numSigners, threshold := 3, 2
+
+			output, err := utils.CreateMultiSigWallet(msWalletConfigFilename, cliConfigFilename, numSigners, threshold)
+			assert.Nil(t, err)
+
+			// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
+			msg := fmt.Sprintf("registering %d wallets ", numSigners+1)
+			assert.Equal(t, msg, output[0])
+			assert.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
+		})
+
+		t.Run("Should not fail when threshold is equal to num-signers", func(t *testing.T) {
+			numSigners, threshold := 3, 3
+
+			output, err := utils.CreateMultiSigWallet(msWalletConfigFilename, cliConfigFilename, numSigners, threshold)
+			assert.Nil(t, err)
+
+			// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
+			msg := fmt.Sprintf("registering %d wallets ", numSigners+1)
+			assert.Equal(t, msg, output[0])
+			assert.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
+		})
+
+		t.Run("Should fail when threshold is greater than num-signers", func(t *testing.T) {
+			numSigners, threshold := 3, 4
+
+			output, err := utils.CreateMultiSigWallet(msWalletConfigFilename, cliConfigFilename, numSigners, threshold)
+			assert.NotNil(t, err)
+
+			assert.NotEqual(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
+
+			// Check the error when threshold is greater than signers
+			errMsg := fmt.Sprintf(
+				"Error: given threshold (%d) is too high. Threshold has to be less than or equal to numsigners (%d)",
+				threshold, numSigners,
+			)
+			assert.Equal(t, errMsg, output[len(output)-1])
+		})
+	})
+
+	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
+		output, err := utils.GetBalance(msWalletConfigFilename, cliConfigFilename)
+		if err == nil {
+			t.Errorf("Expected initial getBalance operation to fail but was successful with output %v", strings.Join(output, "\n"))
 		}
 
-		// This test should only run if new wallet is created
-		if newWalletCreated {
-			t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
-				output, err := utils.GetBalance(msWalletConfigFilename, cliConfigFilename)
-				if err == nil {
-					t.Errorf("Expected initial getBalance operation to fail but was successful with output %v", strings.Join(output, "\n"))
-				}
-
-				assert.Equal(t, 1, len(output))
-				assert.Equal(t, "Get balance failed.", output[0])
-			})
-		}
+		assert.Equal(t, 1, len(output))
+		assert.Equal(t, "Get balance failed.", output[0])
 	})
 
 	// Since at least 2 test-cases create the multi-sig wallet, we can check it's contents
@@ -207,56 +172,60 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Balance increases by 1 after faucet execution", func(t *testing.T) {
+		testFaucet(t, msWalletConfigFilename, cliConfigFilename)
+	})
+}
 
-		prevBalance := 0
-		prevOutput, err := utils.GetBalance(msWalletConfigFilename, cliConfigFilename)
-		// If the command fails, it means the balance is 0
+func testFaucet(t *testing.T, walletConfigFilename string, cliConfigFilename string) {
 
-		reBalance := regexp.MustCompile("Balance: ([0-9]+) \\([0-9.]+ USD\\)$")
-		// If it passes, extract the balance
-		if err == nil {
-			matches := reBalance.FindStringSubmatch(prevOutput[0])
-			if len(matches) > 1 {
-				num, err := strconv.Atoi(matches[1])
-				if err != nil {
-					t.Errorf("Error on extracting balance: %v", err)
-				} else {
-					prevBalance = num
-				}
+	prevBalance := 0
+	prevOutput, err := utils.GetBalance(walletConfigFilename, cliConfigFilename)
+	// If the command fails, it means the balance is 0
+
+	reBalance := regexp.MustCompile("Balance: ([0-9]+) \\([0-9.]+ USD\\)$")
+	// If it passes, extract the balance
+	if err == nil {
+		matches := reBalance.FindStringSubmatch(prevOutput[0])
+		if len(matches) > 1 {
+			num, err := strconv.Atoi(matches[1])
+			if err != nil {
+				t.Errorf("Error on extracting balance: %v", err)
+			} else {
+				prevBalance = num
 			}
 		}
+	}
 
-		t.Run("Execute Faucet", func(t *testing.T) {
-			output, err := utils.ExecuteFaucet(msWalletConfigFilename, cliConfigFilename)
-			if err != nil {
-				t.Errorf("Faucet execution failed due to error: %v", err)
-			}
-
-			assert.Equal(t, 1, len(output))
-			matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
-			assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
-			txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-
-			t.Run("Faucet Execution Verified", func(t *testing.T) {
-				output, err = utils.VerifyTransaction(msWalletConfigFilename, cliConfigFilename, txnId)
-				if err != nil {
-					t.Errorf("Faucet verification failed due to error: %v", err)
-				}
-
-				assert.Equal(t, 1, len(output))
-				assert.Equal(t, "Transaction verification success", output[0])
-				t.Log("Faucet executed successful with txn id [" + txnId + "]")
-			})
-		})
-
-		output, err := utils.GetBalance(msWalletConfigFilename, cliConfigFilename)
+	t.Run("Execute Faucet", func(t *testing.T) {
+		output, err := utils.ExecuteFaucet(walletConfigFilename, cliConfigFilename)
 		if err != nil {
-			t.Error(err)
+			t.Errorf("Faucet execution failed due to error: %v", err)
 		}
 
 		assert.Equal(t, 1, len(output))
+		matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
+		assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
+		txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
 
-		balanceReStr := fmt.Sprintf("Balance: %d \\([0-9.]+ USD\\)$", prevBalance+1)
-		assert.Regexp(t, regexp.MustCompile(balanceReStr), output[0])
+		t.Run("Faucet Execution Verified", func(t *testing.T) {
+			output, err = utils.VerifyTransaction(walletConfigFilename, cliConfigFilename, txnId)
+			if err != nil {
+				t.Errorf("Faucet verification failed due to error: %v", err)
+			}
+
+			assert.Equal(t, 1, len(output))
+			assert.Equal(t, "Transaction verification success", output[0])
+			t.Log("Faucet executed successful with txn id [" + txnId + "]")
+		})
 	})
+
+	output, err := utils.GetBalance(walletConfigFilename, cliConfigFilename)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, 1, len(output))
+
+	balanceReStr := fmt.Sprintf("Balance: %d \\([0-9.]+ USD\\)$", prevBalance+1)
+	assert.Regexp(t, regexp.MustCompile(balanceReStr), output[0])
 }

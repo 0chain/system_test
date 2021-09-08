@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/system_test/internal/model"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
@@ -62,4 +63,12 @@ func RandomAlphaNumericString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func CreateMultiSigWallet(walletConfigFilename string, cliConfigFilename string, numSigners, threshold int) ([]string, error) {
+	return RunCommand(fmt.Sprintf(
+		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./temp --config %s",
+		numSigners, threshold,
+		walletConfigFilename,
+		cliConfigFilename))
 }
