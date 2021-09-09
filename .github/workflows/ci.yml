@@ -50,3 +50,9 @@ jobs:
           tar xvf zwallet-linux.tar.gz -C ./tests
       - name: Run System Tests
         run: GOPROXY=direct GOSUMDB=off GO111MODULE=on CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
+      - name: Archive test config
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Config"
+          path: "./tests/temp"
