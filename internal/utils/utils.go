@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/0chain/system_test/internal/model"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"os/exec"
@@ -17,6 +18,7 @@ func RunCommand(command string) ([]string, error) {
 	commandName := fullCommand[0]
 	args := fullCommand[1:]
 
+	logrus.Debugf("Running command [%s]", command)
 	cmd := exec.Command(commandName, args...)
 	rawOutput, err := cmd.CombinedOutput()
 

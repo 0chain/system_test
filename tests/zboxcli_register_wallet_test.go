@@ -63,7 +63,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Equal(t, "Get balance failed.", output[0])
+		assert.Equal(t, "Failed to get balance:", output[0])
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
@@ -155,7 +155,7 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Equal(t, "Get balance failed.", output[0])
+		assert.Equal(t, "Failed to get balance:", output[0])
 	})
 
 	// Since at least 2 test-cases create the multi-sig wallet, we can check it's contents
@@ -226,6 +226,6 @@ func testFaucet(t *testing.T, walletConfigFilename string, cliConfigFilename str
 
 	assert.Equal(t, 1, len(output))
 
-	balanceReStr := fmt.Sprintf("Balance: %d \\([0-9.]+ USD\\)$", prevBalance+1)
+	balanceReStr := fmt.Sprintf("Balance: %d.000 ZCN \\([0-9.]+ USD\\)$", prevBalance+1)
 	assert.Regexp(t, regexp.MustCompile(balanceReStr), output[0])
 }
