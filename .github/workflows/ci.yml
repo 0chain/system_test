@@ -37,7 +37,7 @@ jobs:
           go-version: 1.16
       - name: Get SDKs
         run: |
-          wget https://github.com/0chain/zboxcli/releases/download/1.2.85/zbox-linux.tar.gz
+          wget https://github.com/0chain/zboxcli/releases/download/v1.2.84/zbox-linux.tar.gz
           wget https://github.com/0chain/zwalletcli/releases/download/v1.0.3/zwallet-linux.tar.gz
           tar xvf zbox-linux.tar.gz -C ./tests
           tar xvf zwallet-linux.tar.gz -C ./tests
