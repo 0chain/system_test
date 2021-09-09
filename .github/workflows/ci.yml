@@ -2,7 +2,7 @@ name: ci-pipeline
 on: push
 jobs:
   internal-unit-tests:
-    name: internal_unit_tests
+    name: Utils unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -24,7 +24,7 @@ jobs:
         run: |
           GOPROXY=direct GOSUMDB=off GO111MODULE=on go test -v ./internal/config
   system-tests:
-    name: system-tests
+    name: System Tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -48,11 +48,16 @@ jobs:
           wget https://github.com/0chain/zwalletcli/releases/download/v1.0.3/zwallet-linux.tar.gz
           tar xvf zbox-linux.tar.gz -C ./tests
           tar xvf zwallet-linux.tar.gz -C ./tests
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD_HH.mm.ss'
       - name: Run System Tests
         run: GOPROXY=direct GOSUMDB=off GO111MODULE=on CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
       - name: Archive test config
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: "Config"
+          name: "System-Test-Config-${{ steps.time.outputs.time }}"
           path: "./tests/temp"
