@@ -55,8 +55,7 @@ jobs:
           format: 'YYYY-MM-DD_HH.mm.ss'
       - name: Run System Tests
         run: |
-          curl https://gotest-release.s3.amazonaws.com/gotest_linux > gotest && chmod +x gotest
-          GOPROXY=direct GOSUMDB=off GO111MODULE=on CONFIG_PATH=../internal/config/test_with/system_test.yaml ./gotest -v ./tests
+          CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
       - name: Archive test config
         if: always()
         uses: actions/upload-artifact@v2
