@@ -21,7 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run Unit Tests
-      - run: |
+        run: |
           GOPROXY=direct GOSUMDB=off GO111MODULE=on go test -v ./internal/config
   system-tests:
     name: system-tests
