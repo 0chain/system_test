@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: Setup Cache
+      - name: Cache Go Dependencies
         uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
@@ -49,5 +49,4 @@ jobs:
           tar xvf zbox-linux.tar.gz -C ./tests
           tar xvf zwallet-linux.tar.gz -C ./tests
       - name: Run System Tests
-        run: |
-          cd ./tests && GOPROXY=direct GOSUMDB=off GO111MODULE=on CONFIG_PATH=./internal/config/test_with/system_test.yaml go test -v
+        run: GOPROXY=direct GOSUMDB=off GO111MODULE=on CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
