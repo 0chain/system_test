@@ -46,19 +46,22 @@ jobs:
         run: |
           wget https://github.com/0chain/zboxcli/releases/download/v1.2.84/zbox-linux.tar.gz
           wget https://github.com/0chain/zwalletcli/releases/download/v1.0.3/zwallet-linux.tar.gz
-          tar xvf zbox-linux.tar.gz -C ./tests
-          tar xvf zwallet-linux.tar.gz -C ./tests
+          tar xvf zbox-linux.tar.gz -C ./tests/clitests
+          tar xvf zwallet-linux.tar.gz -C ./tests/clitests
       - name: Get Time
         id: time
         uses: nanzm/get-time-action@v1.1
         with:
           format: 'YYYY-MM-DD_HH.mm.ss'
-      - name: Run System Tests
+      - name: Run CLI System Tests
         run: |
-          CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
-      - name: Archive test config
+          cd tests/zboxclitests
+          CONFIG_PATH=./zbox_config.yaml go test -v
+      - name: Archive CLI test config & console output
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: "System-Test-Config-${{ steps.time.outputs.time }}"
-          path: "./tests/temp"
+          name: "System-Test-${{ steps.time.outputs.time }}"
+          path: |
+          "./tests/clitests/config"
+          "./tests/clitests/cmdlog.log"
