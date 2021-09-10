@@ -1,12 +1,8 @@
-name: system-tests
-on:
-  pull_request:
-    branches:
-      - 'master'
-
+name: ci-pipeline
+on: push
 jobs:
-  internal-tests:
-    name: internal_system_tests
+  internal-unit-tests:
+    name: Utils unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -24,5 +20,45 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - run: |
+      - name: Run Unit Tests
+        run: |
           GOPROXY=direct GOSUMDB=off GO111MODULE=on go test -v ./internal/config
+  system-tests:
+    name: System Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Cache Go Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Get SDKs
+        run: |
+          wget https://github.com/0chain/zboxcli/releases/download/v1.2.84/zbox-linux.tar.gz
+          wget https://github.com/0chain/zwalletcli/releases/download/v1.0.3/zwallet-linux.tar.gz
+          tar xvf zbox-linux.tar.gz -C ./tests
+          tar xvf zwallet-linux.tar.gz -C ./tests
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: 'YYYY-MM-DD_HH.mm.ss'
+      - name: Run System Tests
+        run: |
+          CONFIG_PATH=../internal/config/test_with/system_test.yaml go test -v ./tests
+      - name: Archive test config
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: "System-Test-Config-${{ steps.time.outputs.time }}"
+          path: "./tests/temp"
