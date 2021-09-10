@@ -55,7 +55,8 @@ jobs:
           format: 'YYYY-MM-DD_HH.mm.ss'
       - name: Run CLI System Tests
         run: |
-          cd internal/zbox
+          pwd
+          cd ./internal/zbox
           go install ./config
           go install ./model
           go install ./utils
