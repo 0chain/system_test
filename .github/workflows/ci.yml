@@ -55,7 +55,7 @@ jobs:
           format: 'YYYY-MM-DD_HH.mm.ss'
       - name: Run CLI System Tests
         run: |
-          cd tests/zboxclitests
+          cd tests/clitests
           CONFIG_PATH=./zbox_config.yaml go test -v
       - name: Archive CLI test config & console output
         if: always()
