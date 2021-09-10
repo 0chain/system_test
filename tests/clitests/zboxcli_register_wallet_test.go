@@ -1,9 +1,9 @@
-package zboxclitests
+package clitests
 
 import (
 	"encoding/json"
 	zbox_models "github.com/0chain/system_test/internal/zbox/model"
-	"github.com/0chain/system_test/internal/zbox/utils"
+	zbox_utils "github.com/0chain/system_test/internal/zbox/utils"
 
 	"github.com/stretchr/testify/assert"
 	"regexp"
@@ -85,15 +85,15 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 }
 
 func registerWallet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zbox register --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
+	return zbox_utils.RunCommand("./zbox register --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getBalance(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet getbalance --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
+	return zbox_utils.RunCommand("./zwallet getbalance --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getWallet(t *testing.T, walletConfigFilename string, cliConfigFilename string) (*zbox_models.Wallet, error) {
-	output, err := zbox_utils.RunCommand("./zbox getwallet --json --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
+	output, err := zbox_utils.RunCommand("./zbox getwallet --json --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
 
 	if err != nil {
 		return nil, err
@@ -113,9 +113,9 @@ func getWallet(t *testing.T, walletConfigFilename string, cliConfigFilename stri
 }
 
 func executeFaucet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + walletConfigFilename + " --configDir ./temp --config " + cliConfigFilename)
+	return zbox_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func verifyTransaction(walletConfigFilename string, cliConfigFilename string, txn string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet verify --silent --wallet " + walletConfigFilename + " --hash " + txn + " --configDir ./temp --config " + cliConfigFilename)
+	return zbox_utils.RunCommand("./zwallet verify --silent --wallet " + walletConfigFilename + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
 }
