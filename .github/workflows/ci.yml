@@ -63,5 +63,5 @@ jobs:
         with:
           name: "System-Test-${{ steps.time.outputs.time }}"
           path: |
-          "./tests/clitests/config"
-          "./tests/clitests/cmdlog.log"
+            ./tests/clitests/config
+            ./tests/clitests/cmdlog.log
