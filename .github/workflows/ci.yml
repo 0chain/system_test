@@ -55,6 +55,11 @@ jobs:
           format: 'YYYY-MM-DD_HH.mm.ss'
       - name: Run CLI System Tests
         run: |
+          cd internal/zbox
+          go install ./config
+          go install ./model
+          go install ./utils
+          cd -
           cd tests/clitests
           CONFIG_PATH=./zbox_config.yaml go test -v
       - name: Archive CLI test config & console output
