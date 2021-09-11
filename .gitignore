@@ -21,8 +21,8 @@ vendor/
 # Temp test output
 */temp
 */cmdlog.log
-*/zbox
-*/zwallet
+zbox
+zwallet
 
 .DS_STORE
 .idea
