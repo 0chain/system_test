@@ -15,11 +15,13 @@ jobs:
         with:
           repository: 0chain/zwalletcli
           fetch-depth: 1
+          path: ./zwalletcli
       - name: Checkout 0box CLI
         uses: actions/checkout@v2
         with:
           repository: 0chain/zboxcli
           fetch-depth: 1
+          path: ./zboxcli
       - name: Get SDKs
         run: |
           cd zwalletcli
