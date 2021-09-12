@@ -70,7 +70,7 @@ jobs:
           format: YYYY-MM-DD_HH.mm.ss
       - name: "Run CLI System Tests"
         run: |
-          ls -l ~
+          pwd
           go install ./internal/cli/*
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
