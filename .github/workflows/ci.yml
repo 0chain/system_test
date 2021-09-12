@@ -26,7 +26,7 @@ jobs:
           path: |
             tests/cli_tests/zbox
             tests/cli_tests/zwallet
-          key: a${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
+          key: cli-cache-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v2
@@ -70,7 +70,6 @@ jobs:
           format: YYYY-MM-DD_HH.mm.ss
       - name: "Run CLI System Tests"
         run: |
-          pwd
           go install ./internal/cli/*
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
