@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"math/rand"
 	"os/exec"
 	"strings"
@@ -13,7 +12,6 @@ func RunCommand(command string) ([]string, error) {
 	commandName := fullCommand[0]
 	args := fullCommand[1:]
 
-	fmt.Printf("Running command [%s]\n", command)
 	cmd := exec.Command(commandName, args...)
 	rawOutput, err := cmd.CombinedOutput()
 
