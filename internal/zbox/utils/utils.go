@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"math/rand"
 	"os/exec"
 	"strings"
@@ -13,7 +13,7 @@ func RunCommand(command string) ([]string, error) {
 	commandName := fullCommand[0]
 	args := fullCommand[1:]
 
-	logrus.Debugf("Running command [%s]", command)
+	fmt.Printf("Running command [%s]\n", command)
 	cmd := exec.Command(commandName, args...)
 	rawOutput, err := cmd.CombinedOutput()
 
