@@ -58,8 +58,8 @@ jobs:
           go install ./internal/cli/*
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
-          ./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info'
-          ./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | | grep -A2 'Version info'
+          (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
+          (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           CONFIG_PATH=./zbox_config.yaml go test -v
       - name: "Archive CLI test config & console output"
         if: always()
