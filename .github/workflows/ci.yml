@@ -57,7 +57,7 @@ jobs:
         run: |
           go install ./internal/cli/*
           cd tests/cli_tests
-          sed "s,block_worker:\shttps://.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./zbox_config.yaml
+          sed "s,block_worker:\shttps://.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           CONFIG_PATH=./zbox_config.yaml go test -v
       - name: Archive CLI test config & console output
         if: always()
