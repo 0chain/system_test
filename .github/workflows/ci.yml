@@ -6,10 +6,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check out code
+      - name: Checkout system tests
         uses: actions/checkout@master
         with:
           fetch-depth: 1
+      - name: Checkout 0wallet CLI
+        uses: actions/checkout@v2
+        with:
+          repository: 0chain/zwalletcli
+          fetch-depth: 1
+      - name: Checkout 0box CLI
+        uses: actions/checkout@v2
+        with:
+          repository: 0chain/zboxcli
+          fetch-depth: 1
+      - name: Get SDKs
+        run: |
+          cd zwalletcli
+          make install
+          mv zwallet ../tests/cli_tests
+          cd ../zboxcli
+          make install
+          mv zbox ../tests/cli_tests
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
@@ -21,12 +39,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Get SDKs
-        run: |
-          wget -nv https://github.com/0chain/zboxcli/releases/download/v1.2.84/zbox-linux.tar.gz
-          wget -nv https://github.com/0chain/zwalletcli/releases/download/v1.0.3/zwallet-linux.tar.gz
-          tar xf zbox-linux.tar.gz -C ./tests/cli_tests
-          tar xf zwallet-linux.tar.gz -C ./tests/cli_tests
       - name: Get Time
         id: time
         uses: nanzm/get-time-action@v1.1
