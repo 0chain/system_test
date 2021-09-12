@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	zbox_models "github.com/0chain/system_test/internal/zbox/model"
 	zbox_utils "github.com/0chain/system_test/internal/zbox/utils"
-
 	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strings"
