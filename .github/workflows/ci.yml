@@ -1,5 +1,10 @@
 name: ci-pipeline
 on: push
+env:
+  NETWORK: dev.0chain.net
+  OWALLET_BRANCH: staging
+  0BOX_BRANCH: staging
+
 jobs:
   system-tests:
     name: System Tests
@@ -13,14 +18,14 @@ jobs:
       - name: Checkout 0wallet CLI
         uses: actions/checkout@v2
         with:
-          ref: staging # Please update this if you wish your tests to run against a different version pf the 0Wallet CLI eg. a feature branch
+          ref: ${{ env.OWALLET_BRANCH }}
           repository: 0chain/zwalletcli
           fetch-depth: 1
           path: ./zwalletcli
       - name: Checkout 0box CLI
         uses: actions/checkout@v2
         with:
-          ref: staging # Please update this if you wish your tests to run against a different version pf the 0Box CLI eg. a feature branch
+          ref: ${{ env.0BOX_BRANCH }}
           repository: 0chain/zboxcli
           fetch-depth: 1
           path: ./zboxcli
@@ -52,6 +57,7 @@ jobs:
         run: |
           go install ./internal/cli/*
           cd tests/cli_tests
+          sed "s,block_worker:\shttps://.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./zbox_config.yaml
           CONFIG_PATH=./zbox_config.yaml go test -v
       - name: Archive CLI test config & console output
         if: always()
