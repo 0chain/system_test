@@ -13,12 +13,14 @@ jobs:
       - name: Checkout 0wallet CLI
         uses: actions/checkout@v2
         with:
+          ref: master # Please update this if you wish your tests to run against a different version pf the 0Wallet CLI eg. a feature branch
           repository: 0chain/zwalletcli
           fetch-depth: 1
           path: ./zwalletcli
       - name: Checkout 0box CLI
         uses: actions/checkout@v2
         with:
+          ref: master # Please update this if you wish your tests to run against a different version pf the 0Box CLI eg. a feature branch
           repository: 0chain/zboxcli
           fetch-depth: 1
           path: ./zboxcli
