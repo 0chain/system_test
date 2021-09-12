@@ -17,8 +17,8 @@ jobs:
           fetch-depth: 1
       - name: "Get CLI Cache Key"
         run: |
-          echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq .object.sha) >> $GITHUB_ENV
-          echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq .object.sha) >> $GITHUB_ENV
+          echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
       - name: "Cache CLI Binaries"
         id: cli-cache
         uses: actions/cache@v2
@@ -26,7 +26,7 @@ jobs:
           path: |
             tests/cli_tests/zbox
             tests/cli_tests/zwallet
-          key: cli-cache-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
+          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v2
