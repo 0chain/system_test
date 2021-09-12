@@ -1,4 +1,4 @@
-package clitests
+package cli_tests
 
 import (
 	"fmt"

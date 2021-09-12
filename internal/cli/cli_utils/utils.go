@@ -1,4 +1,4 @@
-package utils
+package cli_utils
 
 import (
 	"math/rand"

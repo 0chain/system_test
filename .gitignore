@@ -19,7 +19,7 @@
 vendor/
 
 # Temp test output
-tests/clitests/config/*wallet.json
+tests/cli_tests/config/*wallet.json
 **/cmdlog.log
 **/zbox
 **/zwallet

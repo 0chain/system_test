@@ -1,4 +1,4 @@
-package model
+package cli_model
 
 type Wallet struct {
 	ClientId            string
