@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: "Get Cache Key"
+      - name: "Get CLI Cache Key"
         run: |
           echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/staging  | jq .object.sha) >> $GITHUB_ENV
           echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/staging  | jq .object.sha) >> $GITHUB_ENV
