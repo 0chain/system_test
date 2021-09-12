@@ -2,8 +2,8 @@ name: ci-pipeline
 on: push
 env:
   NETWORK: dev.0chain.net
-  OWALLET_BRANCH: staging
-  0BOX_BRANCH: staging
+  ZWALLET_BRANCH: staging
+  ZBOX_BRANCH: staging
 
 jobs:
   system-tests:
@@ -18,14 +18,14 @@ jobs:
       - name: Checkout 0wallet CLI
         uses: actions/checkout@v2
         with:
-          ref: ${{ env.OWALLET_BRANCH }}
+          ref: ${{ env.ZWALLET_BRANCH }}
           repository: 0chain/zwalletcli
           fetch-depth: 1
           path: ./zwalletcli
       - name: Checkout 0box CLI
         uses: actions/checkout@v2
         with:
-          ref: ${{ env.0BOX_BRANCH }}
+          ref: ${{ env.ZBOX_BRANCH }}
           repository: 0chain/zboxcli
           fetch-depth: 1
           path: ./zboxcli
