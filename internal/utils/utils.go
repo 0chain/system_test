@@ -18,6 +18,7 @@ func RunCommand(command string) ([]string, error) {
 	args := fullCommand[1:]
 
 	cmd := exec.Command(commandName, args...)
+	fmt.Println(args)
 	rawOutput, err := cmd.CombinedOutput()
 
 	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
@@ -71,4 +72,17 @@ func CreateMultiSigWallet(walletConfigFilename string, cliConfigFilename string,
 		numSigners, threshold,
 		walletConfigFilename,
 		cliConfigFilename))
+}
+
+func RecoverWalletFromMnemonic(walletConfigFilename string, cliConfigFilename string, mnemonic string) ([]string, error) {
+
+	// Need to run in this way since the mnemonics are space-separated
+	cmd := exec.Command("./zwallet", "recoverwallet", "--silent", "--wallet", walletConfigFilename,
+		"--configDir", "./temp", "--config", cliConfigFilename, "--mnemonic", mnemonic,
+	)
+	rawOutput, err := cmd.CombinedOutput()
+
+	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
+
+	return output, err
 }
