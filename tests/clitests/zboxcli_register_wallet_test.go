@@ -12,10 +12,9 @@ import (
 )
 
 func TestWalletRegisterAndBalanceOperations(t *testing.T) {
-	walletConfigFilename := "wallet_TestWalletRegisterAndBalanceOperations_" + zbox_utils.RandomAlphaNumericString(10) + ".json"
-
-	t.Run("CLI output matches expected", func(t *testing.T) {
-		output, err := registerWallet(walletConfigFilename, configPath)
+	t.Run("Register wallet outputs expected", func(t *testing.T) {
+		t.Parallel()
+		output, err := registerWallet("register_wallet_wallet.json", configPath)
 		if err != nil {
 			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
@@ -28,7 +27,13 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Get wallet outputs expected", func(t *testing.T) {
-		wallet, err := getWallet(t, walletConfigFilename, configPath)
+		t.Parallel()
+		_, err := registerWallet("get_wallet_wallet.json", configPath)
+		if err != nil {
+			t.Errorf("An error occured registering a wallet due to error: %v", err)
+		}
+
+		wallet, err := getWallet(t, "get_wallet_wallet.json", configPath)
 
 		if err != nil {
 			t.Errorf("Error occured when retreiving wallet due to error: %v", err)
@@ -40,7 +45,13 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
-		output, err := getBalance(walletConfigFilename, configPath)
+		t.Parallel()
+		_, err := registerWallet("zero_balance_wallet.json", configPath)
+		if err != nil {
+			t.Errorf("An error occured registering a wallet due to error: %v", err)
+		}
+
+		output, err := getBalance("zero_balance_wallet.json", configPath)
 		if err == nil {
 			t.Errorf("Expected initial getBalance operation to fail but was successful with output %v", strings.Join(output, "\n"))
 		}
@@ -50,7 +61,13 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
-		output, err := executeFaucet(walletConfigFilename, configPath)
+		t.Parallel()
+		_, err := registerWallet("non_zero_balance_wallet.json", configPath)
+		if err != nil {
+			t.Errorf("An error occured registering a wallet due to error: %v", err)
+		}
+
+		output, err := executeFaucet("non_zero_balance_wallet.json", configPath)
 
 		if err != nil {
 			t.Errorf("Faucet execution failed due to error: %v", err)
@@ -62,7 +79,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
 		txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-		output, err = verifyTransaction(walletConfigFilename, configPath, txnId)
+		output, err = verifyTransaction("non_zero_balance_wallet.json", configPath, txnId)
 
 		if err != nil {
 			t.Errorf("Faucet verification failed due to error: %v", err)
@@ -73,7 +90,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 		t.Log("Faucet executed successful with txn id [" + txnId + "]")
 
-		output, err = getBalance(walletConfigFilename, configPath)
+		output, err = getBalance("non_zero_balance_wallet.json", configPath)
 
 		if err != nil {
 			t.Error(err)
