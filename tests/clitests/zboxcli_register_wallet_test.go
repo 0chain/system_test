@@ -14,7 +14,7 @@ import (
 func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 	t.Run("Register wallet outputs expected", func(t *testing.T) {
 		t.Parallel()
-		output, err := registerWallet("register_wallet_wallet.json", configPath)
+		output, err := registerWallet(t, configPath)
 		if err != nil {
 			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
@@ -28,12 +28,12 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	t.Run("Get wallet outputs expected", func(t *testing.T) {
 		t.Parallel()
-		_, err := registerWallet("get_wallet_wallet.json", configPath)
+		_, err := registerWallet(t, configPath)
 		if err != nil {
 			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
 
-		wallet, err := getWallet(t, "get_wallet_wallet.json", configPath)
+		wallet, err := getWallet(t, configPath)
 
 		if err != nil {
 			t.Errorf("Error occured when retreiving wallet due to error: %v", err)
@@ -46,28 +46,28 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
 		t.Parallel()
-		_, err := registerWallet("zero_balance_wallet.json", configPath)
+		_, err := registerWallet(t, configPath)
 		if err != nil {
 			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
 
-		output, err := getBalance("zero_balance_wallet.json", configPath)
+		output, err := getBalance(t, configPath)
 		if err == nil {
 			t.Errorf("Expected initial getBalance operation to fail but was successful with output %v", strings.Join(output, "\n"))
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Equal(t, "Get balance failed.", output[0])
+		assert.Equal(t, "Failed to get balance:", output[0])
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
 		t.Parallel()
-		_, err := registerWallet("non_zero_balance_wallet.json", configPath)
+		_, err := registerWallet(t, configPath)
 		if err != nil {
 			t.Errorf("An error occured registering a wallet due to error: %v", err)
 		}
 
-		output, err := executeFaucet("non_zero_balance_wallet.json", configPath)
+		output, err := executeFaucet(t, configPath)
 
 		if err != nil {
 			t.Errorf("Faucet execution failed due to error: %v", err)
@@ -79,7 +79,7 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
 		txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-		output, err = verifyTransaction("non_zero_balance_wallet.json", configPath, txnId)
+		output, err = verifyTransaction(t, configPath, txnId)
 
 		if err != nil {
 			t.Errorf("Faucet verification failed due to error: %v", err)
@@ -90,27 +90,28 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 
 		t.Log("Faucet executed successful with txn id [" + txnId + "]")
 
-		output, err = getBalance("non_zero_balance_wallet.json", configPath)
+		output, err = getBalance(t, configPath)
 
 		if err != nil {
 			t.Error(err)
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Regexp(t, regexp.MustCompile("Balance: 1 \\([0-9.]+ USD\\)$"), output[0])
+		assert.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
 	})
 }
 
-func registerWallet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zbox register --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
+func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
+	return zbox_utils.RunCommand("./zbox register --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+
 }
 
-func getBalance(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet getbalance --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
+func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
+	return zbox_utils.RunCommand("./zwallet getbalance --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func getWallet(t *testing.T, walletConfigFilename string, cliConfigFilename string) (*zbox_models.Wallet, error) {
-	output, err := zbox_utils.RunCommand("./zbox getwallet --json --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
+func getWallet(t *testing.T, cliConfigFilename string) (*zbox_models.Wallet, error) {
+	output, err := zbox_utils.RunCommand("./zbox getwallet --json --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 
 	if err != nil {
 		return nil, err
@@ -129,10 +130,10 @@ func getWallet(t *testing.T, walletConfigFilename string, cliConfigFilename stri
 	return wallet, err
 }
 
-func executeFaucet(walletConfigFilename string, cliConfigFilename string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + walletConfigFilename + " --configDir ./config --config " + cliConfigFilename)
+func executeFaucet(t *testing.T, cliConfigFilename string) ([]string, error) {
+	return zbox_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func verifyTransaction(walletConfigFilename string, cliConfigFilename string, txn string) ([]string, error) {
-	return zbox_utils.RunCommand("./zwallet verify --silent --wallet " + walletConfigFilename + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+func verifyTransaction(t *testing.T, cliConfigFilename string, txn string) ([]string, error) {
+	return zbox_utils.RunCommand("./zwallet verify --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
 }
