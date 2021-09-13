@@ -1,4 +1,4 @@
-package zboxclitests
+package cli_tests
 
 import (
 	"fmt"
@@ -33,7 +33,6 @@ func GetConfig(t *testing.T) conf.Config {
 	if err != nil {
 		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
 	}
-
 
 	return config
 }
