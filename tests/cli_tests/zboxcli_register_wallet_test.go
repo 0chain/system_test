@@ -135,5 +135,10 @@ func executeFaucet(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func verifyTransaction(t *testing.T, cliConfigFilename string, txn string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet verify --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+	return cli_utils.RunCommand("./zwallet verify --silent --wallet " + escapedTestName(t) + ".json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+}
+
+func escapedTestName(t *testing.T) string {
+	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "<", "-", ">", "-", "|", "-", "*", "-", "?", "-")
+	return replacer.Replace(t.Name())
 }

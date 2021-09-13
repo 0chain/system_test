@@ -140,6 +140,6 @@ func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, th
 	return cli_utils.RunCommand(fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",
 		numSigners, threshold,
-		strings.Replace(t.Name(), "/", "-", -1)+"_wallet.json",
+		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename))
 }
