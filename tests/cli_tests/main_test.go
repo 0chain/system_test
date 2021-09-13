@@ -1,9 +1,8 @@
-package tests
+package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/config"
-	"github.com/go-playground/validator/v10"
+	"github.com/0chain/gosdk/core/conf"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"testing"
@@ -24,23 +23,16 @@ func TestMain(m *testing.M) {
 	os.Exit(exitRun)
 }
 
-func GetConfig(t *testing.T) *config.RequiredConfig {
+func GetConfig(t *testing.T) conf.Config {
 	t.Helper()
 	if configPath == "" {
 		t.Fatal("configPath is empty, TestMain not called")
 	}
 
-	configurer, err := config.ReadConfig(configPath)
+	config, err := conf.LoadConfigFile(configPath)
 	if err != nil {
 		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
 	}
 
-	requiredConfig := configurer.RequiredConfig
-
-	validate := validator.New()
-	if err := validate.Struct(requiredConfig); err != nil {
-		t.Fatalf("failed to get configuration from the configFile: %v", err)
-	}
-
-	return requiredConfig
+	return config
 }
