@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"github.com/0chain/system_test/internal/cli/cli_utils"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 )
 
@@ -32,5 +31,5 @@ func TestWalletRecoveryUsingMnemonics(t *testing.T) {
 }
 
 func recoverWalletFromMnemonic(t *testing.T, configPath string, mnemonic string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet recoverwallet --silent --wallet " + strings.Replace(t.Name(), "/", "-", -1) + "_wallet.json" + " --configDir ./config --config " + configPath + " --mnemonic \"" + mnemonic + "\"")
+	return cli_utils.RunCommand("./zwallet recoverwallet --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + configPath + " --mnemonic \"" + mnemonic + "\"")
 }
