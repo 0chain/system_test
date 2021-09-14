@@ -3,15 +3,20 @@ package cli_utils
 import (
 	"math/rand"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
 
 func RunCommand(command string) ([]string, error) {
-	fullCommand := strings.Split(strings.TrimSpace(command), " ")
+	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	fullCommand := r.FindAllString(command, -1)
 	commandName := fullCommand[0]
 	args := fullCommand[1:]
 
+	for index, arg := range args {
+		args[index] = strings.Replace(arg, "\"", "", -1)
+	}
 	cmd := exec.Command(commandName, args...)
 	rawOutput, err := cmd.CombinedOutput()
 
