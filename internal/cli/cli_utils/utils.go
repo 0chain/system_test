@@ -8,21 +8,15 @@ import (
 	"time"
 )
 
-func RunCommand(command string) ([]string, error) {
-	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
-	fullCommand := r.FindAllString(command, -1)
-	commandName := fullCommand[0]
-	args := fullCommand[1:]
+func RunCommand(commandString string) ([]string, error) {
+	command := parseCommand(commandString)
+	commandName := command[0]
+	args := command[1:]
 
-	for index, arg := range args {
-		args[index] = strings.Replace(arg, "\"", "", -1)
-	}
-	cmd := exec.Command(commandName, args...)
-	rawOutput, err := cmd.CombinedOutput()
+	sanitizedArgs := sanitizeArgs(args)
+	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
-
-	return output, err
+	return sanitizeOutput(rawOutput), err
 }
 
 func RandomAlphaNumericString(n int) string {
@@ -33,4 +27,40 @@ func RandomAlphaNumericString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func sanitizeOutput(rawOutput []byte) []string {
+	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
+	var sanitizedOutput []string
+
+	for _, str := range output {
+		if strings.Trim(str, " ") != "" {
+			sanitizedOutput = append(sanitizedOutput, strings.Trim(str, " "))
+		}
+	}
+
+	return sanitizedOutput
+}
+
+func executeCommand(commandName string, args []string) ([]byte, error) {
+	cmd := exec.Command(commandName, args...)
+	rawOutput, err := cmd.CombinedOutput()
+
+	return rawOutput, err
+}
+
+func sanitizeArgs(args []string) []string {
+	var sanitizedArgs []string
+	for _, arg := range args {
+		sanitizedArgs = append(sanitizedArgs, strings.Replace(arg, "\"", "", -1))
+	}
+
+	return sanitizedArgs
+}
+
+func parseCommand(command string) []string {
+	commandArgSplitter := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	fullCommand := commandArgSplitter.FindAllString(command, -1)
+
+	return fullCommand
 }
