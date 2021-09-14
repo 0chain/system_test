@@ -14,7 +14,7 @@ func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 
 	if configPath == "" {
-		fmt.Print("Config_Path is not set")
+		fmt.Println("Config_Path is not set")
 		panic("CONFIG_PATH must be passed")
 	}
 
