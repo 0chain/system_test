@@ -98,7 +98,6 @@ func TestWalletRegisterAndBalanceOperations(t *testing.T) {
 		assert.Equal(t, 1, len(output))
 		assert.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
 	})
-
 }
 
 func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
