@@ -1,20 +1,38 @@
 package cli_utils
 
 import (
+	"github.com/sirupsen/logrus"
 	"math/rand"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
 )
 
+var Logger = getLogger()
+
+func getLogger() *logrus.Logger {
+	logger := logrus.New()
+	logger.Out = os.Stdout
+
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+
+	return logger
+}
+
 func RunCommand(commandString string) ([]string, error) {
+	Logger.Debugf("Command [%v] is running", commandString)
 	command := parseCommand(commandString)
 	commandName := command[0]
 	args := command[1:]
 
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
+
+	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, rawOutput)
 
 	return sanitizeOutput(rawOutput), err
 }
