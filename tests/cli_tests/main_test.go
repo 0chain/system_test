@@ -14,8 +14,8 @@ func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 
 	if configPath == "" {
-		fmt.Print("Config_Path is not set")
-		panic("CONFIG_PATH must be passed")
+		configPath = "./zbox_config.yaml"
+		fmt.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%s]\n", configPath)
 	}
 
 	log.SetLevel(log.ErrorLevel)
