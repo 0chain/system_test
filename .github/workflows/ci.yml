@@ -1,28 +1,86 @@
-name: system-tests
-on:
-  pull_request:
-    branches:
-      - 'master'
+name: ci-pipeline
+on: push
+env:
+  NETWORK: dev.0chain.net
+  ZWALLET_BRANCH: staging
+  ZBOX_BRANCH: staging
 
 jobs:
-  internal-tests:
-    name: internal_system_tests
+  system-tests:
+    name: System Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Check out code
-        uses: actions/checkout@master
+      - name: "Checkout system tests"
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Setup Go
+      - name: "Get CLI Cache Key"
+        run: |
+          echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+      - name: "Cache CLI Binaries"
+        id: cli-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            tests/cli_tests/zbox
+            tests/cli_tests/zwallet
+          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
+      - name: "Checkout 0wallet CLI"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.ZWALLET_BRANCH }}
+          repository: 0chain/zwalletcli
+          fetch-depth: 1
+          path: ./zwalletcli
+      - name: "Checkout 0box CLI"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.ZBOX_BRANCH }}
+          repository: 0chain/zboxcli
+          fetch-depth: 1
+          path: ./zboxcli
+      - name: "Setup Go"
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: Setup Cache
+      - name: "Cache Go Dependencies"
         uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - run: |
-          GOPROXY=direct GOSUMDB=off GO111MODULE=on go test -v ./internal/config
+      - name: "Build CLI Binaries"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        run: |
+          cd zwalletcli
+          make install
+          mv zwallet ../tests/cli_tests
+          cd ../zboxcli
+          make install
+          mv zbox ../tests/cli_tests
+      - name: "Get Time"
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          format: YYYY-MM-DD_HH.mm.ss
+      - name: "Run CLI System Tests"
+        run: |
+          go install ./internal/cli/*
+          cd tests/cli_tests
+          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
+          (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
+          (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
+          CONFIG_PATH=./zbox_config.yaml go test -v
+      - name: "Archive CLI Config & Console Output"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: System-Test-${{ steps.time.outputs.time }}
+          path: |
+            ./tests/cli_tests/config
+            ./tests/cli_tests/cmdlog.log
