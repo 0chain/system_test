@@ -52,12 +52,12 @@ func RandomAlphaNumericString(n int) string {
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
-	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
+	output := strings.Split(string(rawOutput), "\n")
 	var sanitizedOutput []string
 
-	for _, str := range output {
-		if strings.Trim(str, " ") != "" {
-			sanitizedOutput = append(sanitizedOutput, strings.Trim(str, " "))
+	for _, lineOfOutput := range output {
+		if strings.TrimSpace(lineOfOutput) != "" {
+			sanitizedOutput = append(sanitizedOutput, strings.TrimSpace(lineOfOutput))
 		}
 	}
 
