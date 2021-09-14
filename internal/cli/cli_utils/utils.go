@@ -35,11 +35,10 @@ func RunCommand(commandString string) ([]string, error) {
 
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
-	sanitizedOutput := sanitizeOutput(rawOutput)
 
 	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, string(rawOutput))
 
-	return sanitizedOutput, err
+	return sanitizeOutput(rawOutput), err
 }
 
 func RandomAlphaNumericString(n int) string {
