@@ -16,6 +16,10 @@ func getLogger() *logrus.Logger {
 	logger := logrus.New()
 	logger.Out = os.Stdout
 
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+
 	if os.Getenv("DEBUG") == "true" {
 		logger.SetLevel(logrus.DebugLevel)
 	}
@@ -31,10 +35,11 @@ func RunCommand(commandString string) ([]string, error) {
 
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
+	sanitizedOutput := sanitizeOutput(rawOutput)
 
-	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, rawOutput)
+	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, string(rawOutput))
 
-	return sanitizeOutput(rawOutput), err
+	return sanitizedOutput, err
 }
 
 func RandomAlphaNumericString(n int) string {
