@@ -12,21 +12,6 @@ import (
 
 var Logger = getLogger()
 
-func getLogger() *logrus.Logger {
-	logger := logrus.New()
-	logger.Out = os.Stdout
-
-	logger.SetFormatter(&logrus.TextFormatter{
-		DisableQuote: true,
-	})
-
-	if os.Getenv("DEBUG") == "true" {
-		logger.SetLevel(logrus.DebugLevel)
-	}
-
-	return logger
-}
-
 func RunCommand(commandString string) ([]string, error) {
 	Logger.Debugf("Command [%v] is running", commandString)
 	command := parseCommand(commandString)
@@ -85,4 +70,19 @@ func parseCommand(command string) []string {
 	fullCommand := commandArgSplitter.FindAllString(command, -1)
 
 	return fullCommand
+}
+
+func getLogger() *logrus.Logger {
+	logger := logrus.New()
+	logger.Out = os.Stdout
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+
+	return logger
 }
