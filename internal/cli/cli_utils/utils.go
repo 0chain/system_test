@@ -13,7 +13,6 @@ import (
 var Logger = getLogger()
 
 func RunCommand(commandString string) ([]string, error) {
-	Logger.Debugf("Command [%v] is running", commandString)
 	command := parseCommand(commandString)
 	commandName := command[0]
 	args := command[1:]
@@ -21,7 +20,7 @@ func RunCommand(commandString string) ([]string, error) {
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, string(rawOutput))
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
 }
@@ -80,7 +79,7 @@ func getLogger() *logrus.Logger {
 		DisableQuote: true,
 	})
 
-	if os.Getenv("DEBUG") == "true" {
+	if strings.ToLower(strings.TrimSpace(os.Getenv("DEBUG"))) == "true" {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
