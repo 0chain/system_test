@@ -50,8 +50,6 @@ func TestSendAndBalance(t *testing.T) {
 
 		assert.Equal(t, "Send tokens success", output[len(output)-1])
 
-		// TODO verify send transaction and message
-
 		// After send balance checks
 		output, err = getBalance(t, configPath)
 		if err == nil {
@@ -72,7 +70,8 @@ func TestSendAndBalance(t *testing.T) {
 	})
 
 	// TODO
-	//t.Run("Send with description", func(t *testing.T) {
+	//t.Run("Send with and without description", func(t *testing.T) {
+	// TODO verify send transaction and message
 	//})
 
 	t.Run("Send attempt on zero ZCN wallet", func(t *testing.T) {
