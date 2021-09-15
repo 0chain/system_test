@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"github.com/0chain/system_test/internal/cli/cli_model"
 	"github.com/0chain/system_test/internal/cli/cli_utils"
 	"github.com/stretchr/testify/assert"
@@ -43,18 +42,13 @@ func TestSendAndBalance(t *testing.T) {
 		assert.Equal(t, 1, len(output))
 		assert.Equal(t, "Failed to get balance:", output[0])
 
-		// TODO delete this
-		fmt.Printf("target wallet: %v", target)
-		fmt.Printf("target wallet: %v", target.ClientId)
-
 		output, err = send(t, configPath, target.ClientId, "1", "")
 		if err != nil {
 			t.Errorf("Send failed due to error: Output %v", strings.Join(output, "\n"))
 			return
 		}
 
-		// TODO delete this
-		fmt.Printf("Send output: %v", output)
+		assert.Equal(t, "Send tokens success", output[len(output)-1])
 
 		// TODO verify send transaction and message
 
@@ -77,9 +71,9 @@ func TestSendAndBalance(t *testing.T) {
 		assert.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
 	})
 
-	t.Run("Send with description", func(t *testing.T) {
-		// TODO
-	})
+	// TODO
+	//t.Run("Send with description", func(t *testing.T) {
+	//})
 
 	t.Run("Send attempt on zero ZCN wallet", func(t *testing.T) {
 		t.Parallel()
@@ -174,5 +168,5 @@ func send(t *testing.T, cliConfigFilename string, toClientID string, tokens stri
 	return cli_utils.RunCommand("./zwallet send --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
 		" --to_client_id " + toClientID +
-		" --wallet " + escapedTestName(t) + " --configDir ./config --config " + cliConfigFilename)
+		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
