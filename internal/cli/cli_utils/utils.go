@@ -1,28 +1,29 @@
 package cli_utils
 
 import (
+	"github.com/sirupsen/logrus"
 	"math/rand"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
 )
 
-func RunCommand(command string) ([]string, error) {
-	r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
-	fullCommand := r.FindAllString(command, -1)
-	commandName := fullCommand[0]
-	args := fullCommand[1:]
+var Logger = getLogger()
 
-	for index, arg := range args {
-		args[index] = strings.Replace(arg, "\"", "", -1)
-	}
-	cmd := exec.Command(commandName, args...)
-	rawOutput, err := cmd.CombinedOutput()
+func RunCommand(commandString string) ([]string, error) {
+	Logger.Debugf("Command [%v] is running", commandString)
+	command := parseCommand(commandString)
+	commandName := command[0]
+	args := command[1:]
 
-	output := strings.Split(strings.TrimSpace(string(rawOutput)), "\n")
+	sanitizedArgs := sanitizeArgs(args)
+	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	return output, err
+	Logger.Debugf("Command exited with error: [%v] and output [%v]", err, string(rawOutput))
+
+	return sanitizeOutput(rawOutput), err
 }
 
 func RandomAlphaNumericString(n int) string {
@@ -33,4 +34,55 @@ func RandomAlphaNumericString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func sanitizeOutput(rawOutput []byte) []string {
+	output := strings.Split(string(rawOutput), "\n")
+	var sanitizedOutput []string
+
+	for _, lineOfOutput := range output {
+		if strings.TrimSpace(lineOfOutput) != "" {
+			sanitizedOutput = append(sanitizedOutput, strings.TrimSpace(lineOfOutput))
+		}
+	}
+
+	return sanitizedOutput
+}
+
+func executeCommand(commandName string, args []string) ([]byte, error) {
+	cmd := exec.Command(commandName, args...)
+	rawOutput, err := cmd.CombinedOutput()
+
+	return rawOutput, err
+}
+
+func sanitizeArgs(args []string) []string {
+	var sanitizedArgs []string
+	for _, arg := range args {
+		sanitizedArgs = append(sanitizedArgs, strings.Replace(arg, "\"", "", -1))
+	}
+
+	return sanitizedArgs
+}
+
+func parseCommand(command string) []string {
+	commandArgSplitter := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	fullCommand := commandArgSplitter.FindAllString(command, -1)
+
+	return fullCommand
+}
+
+func getLogger() *logrus.Logger {
+	logger := logrus.New()
+	logger.Out = os.Stdout
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+
+	if os.Getenv("DEBUG") == "true" {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+
+	return logger
 }

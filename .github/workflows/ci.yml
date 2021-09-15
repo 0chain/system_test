@@ -75,7 +75,7 @@ jobs:
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          CONFIG_PATH=./zbox_config.yaml go test -v
+          GOMAXPROCS=10 CONFIG_PATH=./zbox_config.yaml go test -v
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
