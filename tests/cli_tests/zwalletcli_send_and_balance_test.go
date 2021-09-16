@@ -35,6 +35,8 @@ func TestSendAndBalance(t *testing.T) {
 	})
 
 	t.Run("Send with and without description", func(t *testing.T) {
+		t.Parallel()
+
 		target, err := registerSenderAndTargetWallets(t)
 		if err != nil {
 			t.Errorf("Registering sender and target wallets failed: %v", err)
