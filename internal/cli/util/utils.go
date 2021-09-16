@@ -1,13 +1,15 @@
 package cli_utils
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var Logger = getLogger()
@@ -84,4 +86,36 @@ func getLogger() *logrus.Logger {
 	}
 
 	return logger
+}
+
+func RegisterWallet(cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zbox register --silent --configDir ./config --config " + cliConfigFilename)
+}
+
+func GetBalance(cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zwallet getbalance --silent --configDir ./config --config " + cliConfigFilename)
+}
+
+func ExecuteFaucet(cliConfigFilename string) ([]string, error) {
+	return RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --configDir ./config --config " + cliConfigFilename)
+}
+
+func VerifyTransaction(cliConfigFilename string, txn string) ([]string, error) {
+	return RunCommand("./zwallet verify --silent --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+}
+
+func NewAllocation(cliConfigFilename string, lock float64, options map[string]string) ([]string, error) {
+	cmd := fmt.Sprintf("./zbox newallocation --lock %v --silent --configDir ./config --config %s ", lock, cliConfigFilename)
+	for key, option := range options {
+		cmd += fmt.Sprintf(" --%s %s ", key, option)
+	}
+	return RunCommand(cmd)
+}
+
+func WritePoolInfo() ([]string, error) {
+	return RunCommand("./zbox wp-info --silent")
+}
+
+func ChallengePoolInfo(allocationID string) ([]string, error) {
+	return RunCommand("./zbox cp-info --allocation " + allocationID + " --silent")
 }
