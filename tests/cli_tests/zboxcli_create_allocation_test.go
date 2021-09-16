@@ -26,10 +26,10 @@ func TestCreateAllocation(t *testing.T) {
 			assert.Equal(t, "Read pool created successfully", output[3])
 		}
 
-		output, err = cli_utils.ExecuteFaucet(configPath)
+		_, err = cli_utils.ExecuteFaucet(configPath)
 		assert.NotNil(t, err)
 
-		output, err = cli_utils.GetBalance(configPath)
+		_, err = cli_utils.GetBalance(configPath)
 		assert.NotNil(t, err)
 
 		var lock float64 = 0.5
