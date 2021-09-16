@@ -2,7 +2,7 @@ package cli_tests
 
 import (
 	"github.com/0chain/gosdk/core/conf"
-	"github.com/0chain/system_test/internal/cli/cli_utils"
+	"github.com/0chain/system_test/internal/cli/util"
 	"os"
 	"testing"
 )
