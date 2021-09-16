@@ -34,7 +34,7 @@ func TestSendAndBalance(t *testing.T) {
 		assertGetBalanceSuccess(t, targetWallet(t), "1.000")
 	})
 
-	t.Run("Send with and without description", func(t *testing.T) {
+	t.Run("Send with description", func(t *testing.T) {
 		t.Parallel()
 
 		target, err := registerSenderAndTargetWallets(t)
@@ -45,11 +45,23 @@ func TestSendAndBalance(t *testing.T) {
 
 		requireFaucetSuccess(t)
 
-		// no desc
-		assertSendSuccess(t, target.ClientId, "0.5", "")
+		assertSendSuccess(t, target.ClientId, "1", "rich description")
 
-		// with desc
-		assertSendSuccess(t, target.ClientId, "0.5", "rich description")
+		// cannot verify transaction payload at this moment due to transaction hash not being printed.
+	})
+
+	t.Run("Send without description", func(t *testing.T) {
+		t.Parallel()
+
+		target, err := registerSenderAndTargetWallets(t)
+		if err != nil {
+			t.Errorf("Registering sender and target wallets failed: %v", err)
+			return
+		}
+
+		requireFaucetSuccess(t)
+
+		assertSendSuccess(t, target.ClientId, "1", "")
 
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
@@ -79,19 +91,6 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}"
 		assertSendFailure(t, invalidClientID, "1", "invalid address", wantFailureMsg)
-	})
-
-	t.Run("Send with zero token", func(t *testing.T) {
-		t.Parallel()
-
-		target, err := registerSenderAndTargetWallets(t)
-		if err != nil {
-			return
-		}
-
-		requireFaucetSuccess(t)
-
-		assertSendSuccess(t, target.ClientId, "0", "negative token")
 	})
 
 	t.Run("Send attempt to exceeding balance", func(t *testing.T) {
@@ -212,7 +211,8 @@ func assertSendFailure(t *testing.T, toClientID string, tokens string, desc stri
 		return
 	}
 
-	assert.Equal(t, failureMsg, output[len(output)-1])
+	assert.Len(t, output, 1)
+	assert.Equal(t, failureMsg, output[0])
 }
 
 func assertSendSuccess(t *testing.T, toClientID string, tokens string, desc string) {
@@ -222,7 +222,8 @@ func assertSendSuccess(t *testing.T, toClientID string, tokens string, desc stri
 		return
 	}
 
-	assert.Equal(t, "Send tokens success", output[len(output)-1])
+	assert.Len(t, output, 1)
+	assert.Equal(t, "Send tokens success", output[0])
 }
 
 func requireFaucetSuccess(t *testing.T) {
