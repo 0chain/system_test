@@ -1,5 +1,8 @@
-name: ci-pipeline
-on: push
+name: ci
+on:
+    pull_request:
+      branches:
+        - 'master'
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
