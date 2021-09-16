@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestWalletRecoveryUsingMnemonics(t *testing.T) {
+func TestRecoverWallet(t *testing.T) {
 
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Recover wallet valid mnemonic", func(t *testing.T) {

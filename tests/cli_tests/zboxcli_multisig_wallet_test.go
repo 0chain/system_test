@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
+func TestMultisigWallet(t *testing.T) {
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *testing.T) {
 			t.Parallel()
@@ -17,7 +17,7 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 			assert.Nil(t, err)
 
 			//FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
-			assert.Equal(t, "No wallet in path  ./config/TestMultiSigWalletRegisterAndBalanceOperations-Wallet_Creation_should_succeed_when_0_LESS_THAN_threshold_LESS_THAN=_num-signers_wallet.json found. Creating wallet...", output[0])
+			assert.Equal(t, "No wallet in path  ./config/TestMultisigWallet-parallel-Wallet_Creation_should_succeed_when_0_LESS_THAN_threshold_LESS_THAN=_num-signers_wallet.json found. Creating wallet...", output[0])
 			assert.Equal(t, "ZCN wallet created!!", output[1])
 			assert.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 			assert.Equal(t, "Read pool created successfully", output[3])
@@ -35,7 +35,7 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 			assert.Nil(t, err)
 
 			//FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
-			assert.Equal(t, "No wallet in path  ./config/TestMultiSigWalletRegisterAndBalanceOperations-Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers_wallet.json found. Creating wallet...", output[0])
+			assert.Equal(t, "No wallet in path  ./config/TestMultisigWallet-parallel-Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers_wallet.json found. Creating wallet...", output[0])
 			assert.Equal(t, "ZCN wallet created!!", output[1])
 			assert.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 			assert.Equal(t, "Read pool created successfully", output[3])
@@ -99,7 +99,7 @@ func TestMultiSigWalletRegisterAndBalanceOperations(t *testing.T) {
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
 			assert.NotNil(t, err)
 
-			assert.Equal(t, "No wallet in path  ./config/TestMultiSigWalletRegisterAndBalanceOperations-Wallet_Creation_should_fail_when_threshold_is_greater_than_num-signers_wallet.json found. Creating wallet...", output[0])
+			assert.Equal(t, "No wallet in path  ./config/TestMultisigWallet-parallel-Wallet_Creation_should_fail_when_threshold_is_greater_than_num-signers_wallet.json found. Creating wallet...", output[0])
 			assert.Equal(t, "ZCN wallet created!!", output[1])
 			assert.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 			assert.Equal(t, "Read pool created successfully", output[3])
