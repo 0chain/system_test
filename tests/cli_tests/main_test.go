@@ -1,11 +1,11 @@
 package cli_tests
 
 import (
-	"fmt"
-	"github.com/0chain/gosdk/core/conf"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"testing"
+
+	"github.com/0chain/gosdk/core/conf"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var configPath string
@@ -14,11 +14,10 @@ func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 
 	if configPath == "" {
-		fmt.Println("Config_Path is not set")
-		panic("CONFIG_PATH must be passed")
+		configPath = "./zbox_config.yaml"
+		cli_utils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	log.SetLevel(log.ErrorLevel)
 	exitRun := m.Run()
 	os.Exit(exitRun)
 }
