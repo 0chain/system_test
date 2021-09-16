@@ -23,6 +23,7 @@ tests/cli_tests/config/*wallet.json
 **/cmdlog.log
 **/zbox
 **/zwallet
+**/allocation.txt
 
 .DS_STORE
 .idea
