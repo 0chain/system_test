@@ -1,7 +1,7 @@
 package cli_tests
 
 import (
-	"github.com/0chain/system_test/internal/cli/cli_utils"
+	"github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strings"
