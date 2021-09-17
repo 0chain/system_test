@@ -11,6 +11,8 @@ import (
 )
 
 func TestRegisterWallet(t *testing.T) {
+	t.Parallel()
+
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Register wallet outputs expected", func(t *testing.T) {
 			t.Parallel()
