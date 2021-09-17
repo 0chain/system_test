@@ -35,6 +35,8 @@ func TestSendAndBalance(t *testing.T) {
 			return
 		}
 
+		successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 1.000 ZCN \([0-9]*\.?[0-9]+ USD\)$`)
+
 		// Before send balance checks
 		output, err := getBalance(t, configPath)
 		if err != nil {
@@ -42,7 +44,7 @@ func TestSendAndBalance(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
+		assert.Regexp(t, successfulBalanceOutputRegex, output[0])
 
 		output, err = getBalanceForWallet(configPath, targetWallet)
 		if err == nil {
@@ -79,7 +81,7 @@ func TestSendAndBalance(t *testing.T) {
 		}
 
 		assert.Equal(t, 1, len(output))
-		assert.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
+		assert.Regexp(t, successfulBalanceOutputRegex, output[0])
 	})
 
 	t.Run("Send with description", func(t *testing.T) {
