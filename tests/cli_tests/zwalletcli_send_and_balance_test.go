@@ -221,6 +221,10 @@ func TestSendAndBalance(t *testing.T) {
 			assert.Equal(t, wantFailureMsg, output[0])
 		})
 
+		/* FIXME - this and the exceeding balance test takes a long time to run because the CLI sends the txn and has to wait for it to fail
+		   it would be more efficient for the CLI to first run a balance check internally before sending the txn in order to fail fast
+		   https://github.com/0chain/zwalletcli/issues/52
+		*/
 		t.Run("Send with zero token", func(t *testing.T) {
 			t.Parallel()
 
