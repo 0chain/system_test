@@ -14,7 +14,7 @@ func TestRecoverWallet(t *testing.T) {
 			validMnemonic := "pull floor crop best weasel suit solid gown filter kitten loan absent noodle nation potato planet demise online ten affair rich panel rent sell"
 			output, err := recoverWalletFromMnemonic(t, configPath, validMnemonic)
 			if err != nil {
-				t.Errorf("An error occured recovering a wallet due to error: %v", err)
+				t.Errorf("error occured recovering a wallet  %v", err)
 			}
 
 			message := output[len(output)-1]
