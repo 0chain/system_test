@@ -67,7 +67,7 @@ func TestRegisterWallet(t *testing.T) {
 				t.Errorf("An error occured registering a wallet due to error: %v", err)
 			}
 
-			output, err := executeFaucet(t, configPath)
+			output, err := executeFaucetWithTokens(t, configPath, 1)
 
 			if err != nil {
 				t.Errorf("Faucet execution failed due to error: %v", err)
@@ -129,10 +129,6 @@ func getWallet(t *testing.T, cliConfigFilename string) (*cli_model.Wallet, error
 	}
 
 	return wallet, err
-}
-
-func executeFaucet(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func verifyTransaction(t *testing.T, cliConfigFilename string, txn string) ([]string, error) {

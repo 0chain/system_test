@@ -4,57 +4,58 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strings"
 	"testing"
 )
 
 var reAllocation = regexp.MustCompile(`^Allocation created: (.+)$`)
-var reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-z0-9]+$`)
-var reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-z0-9]+$`)
+var reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+var reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
 
-func TestAllocation(t *testing.T) {
+func TestUpdateAllocation(t *testing.T) {
 
 	t.Run("Update Nothing", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
 		if err != nil {
 			t.Errorf("Error in allocation setup: %v", err)
 		}
 
-		params := createParams(param{
-			key:   "allocation",
-			value: allocationID,
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
 		})
 
-		_, err = updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params)
 		// Error should not be nil
-		if err == nil {
-			t.Errorf("Should have obtained errors")
-		}
+		assert.NotNil(t, err)
+
+		assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 	})
 
 	t.Run("Update Non-existent Allocation", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID := "123abc"
 
-		params := createParams(param{
-			key:   "allocation",
-			value: allocationID,
-		}, param{
-			key:   "expiry",
-			value: "1h",
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     "1h",
 		})
 
-		_, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params)
 		// Error should not be nil
-		if err == nil {
-			t.Errorf("Should have obtained errors")
-		}
+		assert.NotNil(t, err)
+
+		assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[len(output)-3])
 	})
 
 	t.Run("Update Check Expiry", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
 		if err != nil {
@@ -65,19 +66,16 @@ func TestAllocation(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error in listing allocations: %v", err)
 		}
-		acBefore, ok := allocations[allocationID]
+		allocationBeforeUpdate, ok := allocations[allocationID]
 		if !ok {
 			t.Error("Current allocation not found")
 		}
 
 		expDuration := int64(1) // In hours
 
-		params := createParams(param{
-			key:   "allocation",
-			value: allocationID,
-		}, param{
-			key:   "expiry",
-			value: fmt.Sprintf("%dh", expDuration),
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
 
 		output, err := updateAllocation(t, configPath, params)
@@ -100,12 +98,13 @@ func TestAllocation(t *testing.T) {
 			t.Error("Current allocation not found")
 		}
 
-		if acBefore.ExpirationDate+expDuration*3600 != ac.ExpirationDate {
-			t.Error("Expiration Time doesn't match: Before:", acBefore.ExpirationDate, "After:", ac.ExpirationDate)
-		}
+		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
+		)
 	})
 
 	t.Run("Update Check Size", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
 		if err != nil {
@@ -116,19 +115,16 @@ func TestAllocation(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error in listing allocations: %v", err)
 		}
-		acBefore, ok := allocations[allocationID]
+		allocationBeforeUpdate, ok := allocations[allocationID]
 		if !ok {
 			t.Error("Current allocation not found")
 		}
 
 		size := int64(2048)
 
-		params := createParams(param{
-			key:   "allocation",
-			value: allocationID,
-		}, param{
-			key:   "size",
-			value: size,
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
 		})
 
 		output, err := updateAllocation(t, configPath, params)
@@ -151,12 +147,13 @@ func TestAllocation(t *testing.T) {
 			t.Error("Current allocation not found")
 		}
 
-		if acBefore.Size+size != ac.Size {
-			t.Error("Size doesn't match: Before:", acBefore.Size, "After:", ac.Size)
-		}
+		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, "After:", ac.Size),
+		)
 	})
 
 	t.Run("Update Check All Parameters", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
 		if err != nil {
@@ -167,7 +164,7 @@ func TestAllocation(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error in listing allocations: %v", err)
 		}
-		acBefore, ok := allocations[allocationID]
+		allocationBeforeUpdate, ok := allocations[allocationID]
 		if !ok {
 			t.Error("Current allocation not found")
 		}
@@ -175,15 +172,10 @@ func TestAllocation(t *testing.T) {
 		expDuration := int64(1) // In hours
 		size := int64(512)
 
-		params := createParams(param{
-			key:   "allocation",
-			value: allocationID,
-		}, param{
-			key:   "expiry",
-			value: fmt.Sprintf("%dh", expDuration),
-		}, param{
-			key:   "size",
-			value: size,
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     fmt.Sprintf("%dh", expDuration),
+			"size":       size,
 		})
 
 		output, err := updateAllocation(t, configPath, params)
@@ -206,16 +198,16 @@ func TestAllocation(t *testing.T) {
 			t.Error("Current allocation not found")
 		}
 
-		if acBefore.ExpirationDate+expDuration*3600 != ac.ExpirationDate {
-			t.Error("Expiration Time doesn't match: Before:", acBefore.ExpirationDate, "After:", ac.ExpirationDate)
-		}
-
-		if acBefore.Size+size != ac.Size {
-			t.Error("Size doesn't match: Before:", acBefore.Size, "After:", ac.Size)
-		}
+		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
+		)
+		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, "After:", ac.Size),
+		)
 	})
 
 	t.Run("Cancel Allocation", func(t *testing.T) {
+		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
 		if err != nil {
@@ -234,17 +226,26 @@ func TestAllocation(t *testing.T) {
 			t.Error("Error on checking allocation:", err)
 		}
 	})
+
+	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation
+	t.Run("Finalize Allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		output, err := finalizeAllocation(t, configPath, allocationID)
+		// Error should not be nil since finalize is not working
+		assert.NotNil(t, err)
+
+		assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
 }
 
-type allocation struct {
-	ID             string `json:"id"`
-	ExpirationDate int64  `json:"expiration_date"`
-	DataShards     int    `json:"data_shards"`
-	ParityShards   int    `json:"parity_shards"`
-	Size           int64  `json:"size"`
-}
+func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]cli_model.Allocation, error) {
 
-func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]allocation, error) {
 	output, err := listAllocations(t, cliConfigFilename)
 	if err != nil {
 		return nil, err
@@ -253,12 +254,12 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]al
 		return nil, fmt.Errorf("unexpected output: %v", output)
 	}
 
-	var allocations []allocation
+	var allocations []cli_model.Allocation
 	if err := json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations); err != nil {
 		return nil, err
 	}
 
-	allocationMap := make(map[string]allocation)
+	allocationMap := make(map[string]cli_model.Allocation)
 
 	for _, ac := range allocations {
 		allocationMap[ac.ID] = ac
@@ -280,15 +281,10 @@ func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
 	}
 
 	// Then create new allocation
-	allocParam := createParams(param{
-		key:   "lock",
-		value: 0.5,
-	}, param{
-		key:   "size",
-		value: 2048,
-	}, param{
-		key:   "expire",
-		value: "1h",
+	allocParam := createParams(map[string]interface{}{
+		"lock":   0.5,
+		"size":   2048,
+		"expire": "1h",
 	})
 	output, err := createNewAllocation(t, cliConfigFilename, allocParam)
 	if err != nil {
@@ -320,21 +316,13 @@ func getAllocationID(str string) (string, error) {
 	return match[1], nil
 }
 
-type param struct {
-	key   string
-	value interface{}
-}
-
-func createParams(params ...param) string {
+func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 
-	for i, p := range params {
-		builder.WriteString(fmt.Sprintf("--%s %v", p.key, p.value))
-		if i != len(params)-1 {
-			builder.WriteString(" ")
-		}
+	for k, v := range params {
+		builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
 	}
-	return builder.String()
+	return strings.TrimSpace(builder.String())
 }
 
 func updateAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
@@ -375,6 +363,8 @@ func cancelAllocation(t *testing.T, cliConfigFilename string, allocationID strin
 	return cli_utils.RunCommand(cmd)
 }
 
+// executeFaucetWithTokens executes faucet command with given tokens.
+// Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
 	return cli_utils.RunCommand(
 		fmt.Sprintf("./zwallet faucet --methodName pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
@@ -382,4 +372,14 @@ func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens floa
 			escapedTestName(t),
 			cliConfigFilename,
 		))
+}
+
+func finalizeAllocation(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+	cmd := fmt.Sprintf(
+		"./zbox alloc-fini --allocation %s --silent --wallet %s --configDir ./config --config %s",
+		allocationID,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+	return cli_utils.RunCommand(cmd)
 }
