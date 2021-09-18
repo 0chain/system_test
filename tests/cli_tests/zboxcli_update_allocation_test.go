@@ -206,6 +206,158 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
+	t.Run("Update Check Negative Expiry", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		allocations, err := parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		allocationBeforeUpdate, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		expDuration := int64(-30) // In minutes
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     fmt.Sprintf("%dm", expDuration),
+		})
+
+		output, err := updateAllocation(t, configPath, params)
+		if err != nil {
+			t.Errorf("Could not update allocation due to error: %v", err)
+		}
+		if len(output) != 1 {
+			t.Error("Unexpected outputs:", output)
+		}
+		if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
+			t.Error("Error on checking allocation:", err)
+		}
+
+		allocations, err = parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		ac, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, " After:", ac.ExpirationDate),
+		)
+	})
+
+	t.Run("Update Check Negative Size", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		allocations, err := parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		allocationBeforeUpdate, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		size := int64(-512)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+
+		output, err := updateAllocation(t, configPath, params)
+		if err != nil {
+			t.Errorf("Could not update allocation due to error: %v", err)
+		}
+		if len(output) != 1 {
+			t.Error("Unexpected outputs:", output)
+		}
+		if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
+			t.Error("Error on checking allocation:", err)
+		}
+
+		allocations, err = parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		ac, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
+		)
+	})
+
+	t.Run("Update Check Negative All Parameters", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		allocations, err := parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		allocationBeforeUpdate, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		expDuration := int64(-30) // In minutes
+		size := int64(-512)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     fmt.Sprintf("%dm", expDuration),
+			"size":       size,
+		})
+
+		output, err := updateAllocation(t, configPath, params)
+		if err != nil {
+			t.Errorf("Could not update allocation due to error: %v", err)
+		}
+		if len(output) != 1 {
+			t.Error("Unexpected outputs:", output)
+		}
+		if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
+			t.Error("Error on checking allocation:", err)
+		}
+
+		allocations, err = parseListAllocations(t, configPath)
+		if err != nil {
+			t.Errorf("Error in listing allocations: %v", err)
+		}
+		ac, ok := allocations[allocationID]
+		if !ok {
+			t.Error("Current allocation not found")
+		}
+
+		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, " After:", ac.ExpirationDate),
+		)
+		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
+		)
+	})
+
 	t.Run("Cancel Allocation", func(t *testing.T) {
 		t.Parallel()
 
