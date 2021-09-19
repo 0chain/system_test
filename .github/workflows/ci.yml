@@ -19,7 +19,7 @@ jobs:
         with:
          fetch-depth: 1
       - name: "Get list of system test suites"
-      - id: set-matrix
+        id: set-matrix
         run: |
           cd tests/cli_tests
           echo TEST_FUNCTIONS={testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]} >> $GITHUB_ENV"
