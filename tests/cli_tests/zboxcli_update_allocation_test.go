@@ -12,9 +12,11 @@ import (
 	"testing"
 )
 
-var reAllocation = regexp.MustCompile(`^Allocation created: (.+)$`)
-var reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
-var reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
+var (
+	reCreateAllocation = regexp.MustCompile(`^Allocation created: (.+)$`)
+	reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+	reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
+)
 
 func TestUpdateAllocation(t *testing.T) {
 
@@ -120,7 +122,7 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Error("Current allocation not found")
 		}
 
-		size := int64(2048)
+		size := int64(256)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -198,12 +200,8 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Error("Current allocation not found")
 		}
 
-		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
-		)
-		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
-			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, "After:", ac.Size),
-		)
+		assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+		assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 	})
 
 	t.Run("Update Negative Expiry", func(t *testing.T) {
@@ -255,7 +253,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Update Expired Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
@@ -489,7 +487,7 @@ func TestUpdateAllocation(t *testing.T) {
 		}
 	})
 
-	t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Cancel Expired Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
@@ -561,7 +559,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both expired and non-expired)
-	t.Run("Finalize Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Finalize Expired Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
@@ -639,7 +637,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 	})
 
-	t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Update Other's Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		var myAllocationID, otherAllocationID string
@@ -715,7 +713,7 @@ func TestUpdateAllocation(t *testing.T) {
 		assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 	})
 
-	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Cancel Other's Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		var myAllocationID, otherAllocationID string
@@ -761,7 +759,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
-	t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Finalize Other's Allocation", func(t *testing.T) {
 		t.Parallel()
 
 		var myAllocationID, otherAllocationID string
@@ -799,7 +797,7 @@ func TestUpdateAllocation(t *testing.T) {
 		assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 	})
 
-	t.Run("Update Mistake Expiry Should Fail", func(t *testing.T) {
+	t.Run("Update Mistake Expiry", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
@@ -826,7 +824,7 @@ func TestUpdateAllocation(t *testing.T) {
 		assert.Equal(t, expected, output[0])
 	})
 
-	t.Run("Update Mistake Size Should Fail", func(t *testing.T) {
+	t.Run("Update Mistake Size", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, err := setupAllocation(t, configPath)
@@ -893,7 +891,7 @@ func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
 	// Then create new allocation
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,
-		"size":   2048,
+		"size":   1024,
 		"expire": "1h",
 	})
 	output, err = createNewAllocation(t, cliConfigFilename, allocParam)
@@ -919,7 +917,7 @@ func checkAllocationRegex(re *regexp.Regexp, str string) error {
 }
 
 func getAllocationID(str string) (string, error) {
-	match := reAllocation.FindStringSubmatch(str)
+	match := reCreateAllocation.FindStringSubmatch(str)
 	if len(match) < 2 {
 		return "", errors.New("allocation match not found")
 	}
