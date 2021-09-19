@@ -4,4 +4,4 @@ min_submit: 50 # in percentage
 min_confirmation: 50 # in percentage
 confirmation_chain_length: 1
 max_txn_query: 5
-query_sleep_time: 1
+query_sleep_time: 2
