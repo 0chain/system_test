@@ -12,7 +12,7 @@ jobs:
   system-tests:
     name: System Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: "Checkout system tests"
         uses: actions/checkout@v2
