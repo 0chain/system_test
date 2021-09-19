@@ -12,17 +12,17 @@ jobs:
   scan-for-tests:
     runs-on: ubuntu-latest
     outputs:
-      test-functions: ${{ env.TEST_FUNCTIONS }}
+      test-functions: ${{ steps.get-test-functions.outputs.test-functions }}
     steps:
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:
          fetch-depth: 1
       - name: "Get list of system test suites"
-        id: set-matrix
+        id: get-test-functions
         run: |
           cd tests/cli_tests
-          echo TEST_FUNCTIONS={testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]} >> $GITHUB_ENV"
+          echo ::set-output name=test-functions::{testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]}"
 
   system-tests:
     name: System Tests
