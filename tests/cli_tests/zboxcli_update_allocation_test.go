@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
@@ -23,23 +23,20 @@ func TestUpdateAllocation(t *testing.T) {
 	t.Run("Parallel", func(t *testing.T) {
 		t.Parallel()
 
+		//FIXME expiry or size should be required params - should not bother sharders with an empty update
 		t.Run("Update Nothing Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			allocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
+			allocationID := setupAllocation(t, configPath)
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		t.Run("Update Non-existent Allocation Should Fail", func(t *testing.T) {
@@ -51,47 +48,32 @@ func TestUpdateAllocation(t *testing.T) {
 				"allocation": allocationID,
 				"expiry":     "1h",
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[len(output)-3])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[len(output)-3])
 		})
 
 		t.Run("Update Expiry Should Work", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(1) // In hours
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("%dh", expDuration),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
 				fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
 			)
 		})
@@ -100,35 +82,21 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			size := int64(256)
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
 				fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, "After:", ac.Size),
 			)
 		})
@@ -137,7 +105,6 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(1) // In hours
 			size := int64(512)
 
@@ -146,64 +113,37 @@ func TestUpdateAllocation(t *testing.T) {
 				"expiry":     fmt.Sprintf("%dh", expDuration),
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
-			assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+			require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 		})
 
 		t.Run("Update Negative Expiry Should Work", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(-30) // In minutes
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("\"%dm\"", expDuration),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
 				fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, " After:", ac.ExpirationDate),
 			)
 		})
@@ -212,7 +152,6 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(-1) // In hours
 
 			params := createParams(map[string]interface{}{
@@ -221,26 +160,13 @@ func TestUpdateAllocation(t *testing.T) {
 			})
 
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
-
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 			// Update the expired allocation's Expiration time
 
@@ -250,15 +176,13 @@ func TestUpdateAllocation(t *testing.T) {
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("%dh", expDuration),
 			})
-
 			output, err = updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 
 			// Update the expired allocation's size
-
 			size := int64(2048)
 
 			params = createParams(map[string]interface{}{
@@ -267,10 +191,10 @@ func TestUpdateAllocation(t *testing.T) {
 			})
 
 			output, err = updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 
 		})
 
@@ -278,35 +202,21 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			size := int64(-256)
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
 				fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
 			)
 		})
@@ -316,19 +226,17 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			size := -allocationBeforeUpdate.Size + 1023
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       fmt.Sprintf("\"%d\"", size),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		//FIXME: POSSIBLE BUG: Can't update allocation size to 0
@@ -336,26 +244,23 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			size := -allocationBeforeUpdate.Size
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       fmt.Sprintf("\"%d\"", size),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		t.Run("Update All Negative Parameters Should Work", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(-30) // In minutes
 			size := int64(-512)
 
@@ -364,31 +269,18 @@ func TestUpdateAllocation(t *testing.T) {
 				"expiry":     fmt.Sprintf("%dm", expDuration),
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
 				fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, " After:", ac.ExpirationDate),
 			)
-			assert.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
+			require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
 				fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
 			)
 		})
@@ -396,81 +288,54 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Cancel Allocation Should Work", func(t *testing.T) {
 			t.Parallel()
 
-			allocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
+			allocationID := setupAllocation(t, configPath)
 
 			output, err := cancelAllocation(t, configPath, allocationID)
-			if err != nil {
-				t.Errorf("Could not cancel allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
 
-			if err := checkAllocationRegex(reCancelAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
+			require.Nil(t, err, "error cancelling allocation", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 		})
 
 		t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(-1) // In hours
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 			// Cancel the expired allocation
 			output, err = cancelAllocation(t, configPath, allocationID)
-			// Error should not be nil
-			assert.NotNil(t, err)
-
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 			//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-			assert.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation
 		t.Run("Finalize Allocation Should Have Worked", func(t *testing.T) {
 			t.Parallel()
 
-			allocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
+			allocationID := setupAllocation(t, configPath)
 
 			output, err := finalizeAllocation(t, configPath, allocationID)
 			// Error should not be nil since finalize is not working
-			assert.NotNil(t, err)
-
-			assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both expired and non-expired)
@@ -478,66 +343,47 @@ func TestUpdateAllocation(t *testing.T) {
 			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-
 			expDuration := int64(-1) // In hours
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
 
-			allocations, err := parseListAllocations(t, configPath)
-			if err != nil {
-				t.Errorf("Error in listing allocations: %v", err)
-			}
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
-			if !ok {
-				t.Error("Current allocation not found")
-			}
-
-			assert.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+			require.True(t, ok, "current allocation not found", allocationID, allocations)
+			require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 			// Update the expired allocation's Expiration time
-
 			expDuration = int64(1) // In hours
 
 			params = createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     fmt.Sprintf("%dh", expDuration),
 			})
-
 			output, err = updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 
 			// Update the expired allocation's size
-
 			size := int64(2048)
 
 			params = createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       size,
 			})
-
 			output, err = updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
-
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
@@ -545,74 +391,50 @@ func TestUpdateAllocation(t *testing.T) {
 
 			var otherAllocationID string
 
-			myAllocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
+			myAllocationID := setupAllocation(t, configPath)
 
-			// This test creates a separate wallet and allocates there
+			// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
-				otherAllocationID, err = setupAllocation(t, configPath)
-				if err != nil {
-					t.Errorf("Error in allocation setup: %v", err)
-				}
+				otherAllocationID = setupAllocation(t, configPath)
 
 				// Updating the otherAllocationID should work here
 				size := int64(2048)
 
 				// First try updating with myAllocationID: should work
-
 				params := createParams(map[string]interface{}{
 					"allocation": otherAllocationID,
 					"size":       size,
 				})
-
 				output, err := updateAllocation(t, configPath, params)
-				if err != nil {
-					t.Errorf("Could not update allocation due to error: %v", err)
-				}
-				if len(output) != 1 {
-					t.Error("Unexpected outputs:", output)
-				}
-				if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-					t.Error("Error on checking allocation:", err)
-				}
+
+				require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+				require.Equal(t, 1, len(output), "output length did not match expected", strings.Join(output, "\n"))
+				assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 			})
 
 			// otherAllocationID should not be updatable from this level
-
 			size := int64(2048)
 
 			// First try updating with myAllocationID: should work
-
 			params := createParams(map[string]interface{}{
 				"allocation": myAllocationID,
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			if err != nil {
-				t.Errorf("Could not update allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
-			if err := checkAllocationRegex(reUpdateAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
+
+			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			// Then try updating with otherAllocationID: should not work
-
 			params = createParams(map[string]interface{}{
 				"allocation": otherAllocationID,
 				"size":       size,
 			})
-
 			output, err = updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
@@ -621,43 +443,30 @@ func TestUpdateAllocation(t *testing.T) {
 			var myAllocationID, otherAllocationID string
 			var err error
 
-			// This test creates a separate wallet and allocates there
+			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
-				otherAllocationID, err = setupAllocation(t, configPath)
-				if err != nil {
-					t.Errorf("Error in allocation setup: %v", err)
-				}
+				otherAllocationID = setupAllocation(t, configPath)
 			})
 
-			myAllocationID, err = setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
+			myAllocationID = setupAllocation(t, configPath)
 
 			// otherAllocationID should not be cancelable from this level
 
 			// First try canceling with myAllocationID: should work
 
 			output, err := cancelAllocation(t, configPath, myAllocationID)
-			if err != nil {
-				t.Errorf("Could not cancel allocation due to error: %v", err)
-			}
-			if len(output) != 1 {
-				t.Error("Unexpected outputs:", output)
-			}
+			require.Nil(t, err, "error cancelling allocation", strings.Join(output, "\n"))
+			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 
-			if err := checkAllocationRegex(reCancelAllocation, output[0]); err != nil {
-				t.Error("Error on checking allocation:", err)
-			}
+			assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 
 			// Then try canceling with otherAllocationID: should not work
-
 			output, err = cancelAllocation(t, configPath, otherAllocationID)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
+			require.NotNil(t, err, "expected error cancelling allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 			//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-			assert.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
@@ -666,129 +475,89 @@ func TestUpdateAllocation(t *testing.T) {
 
 			var myAllocationID, otherAllocationID string
 			var err error
-
-			// This test creates a separate wallet and allocates there
+			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
-				otherAllocationID, err = setupAllocation(t, configPath)
-				if err != nil {
-					t.Errorf("Error in allocation setup: %v", err)
-				}
+				otherAllocationID = setupAllocation(t, configPath)
 			})
-
-			myAllocationID, err = setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
-
-			// otherAllocationID should not be updatable from this level
+			myAllocationID = setupAllocation(t, configPath)
 
 			// First try updating with myAllocationID: should work but it's buggy now
-
 			output, err := finalizeAllocation(t, configPath, myAllocationID)
-			// Error should not be nil since finalize is not working
-			assert.NotNil(t, err)
-
-			assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			require.NotNil(t, err, "expected error finalizing allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 
 			// Then try updating with otherAllocationID: should not work
-
 			output, err = finalizeAllocation(t, configPath, otherAllocationID)
-			// Error should not be nil since finalize is not working
-			assert.NotNil(t, err)
 
-			assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+			// Error should not be nil since finalize is not working
+			require.NotNil(t, err, "expected error finalizing allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
 		t.Run("Update Mistake Expiry Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			allocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
-
+			allocationID := setupAllocation(t, configPath)
 			expiry := 1
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"expiry":     expiry,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 			expected := fmt.Sprintf(
 				`Error: invalid argument "%v" for "--expiry" flag: time: missing unit in duration "%v"`,
 				expiry, expiry,
 			)
-
-			assert.Equal(t, expected, output[0])
+			require.Equal(t, expected, output[0])
 		})
 
 		t.Run("Update Mistake Size Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			allocationID, err := setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
-
+			allocationID := setupAllocation(t, configPath)
 			size := "ab"
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"size":       size,
 			})
-
 			output, err := updateAllocation(t, configPath, params)
-			// Error should not be nil
-			assert.NotNil(t, err)
 
+			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 			expected := fmt.Sprintf(
 				`Error: invalid argument "%v" for "--size" flag: strconv.ParseInt: parsing "%v": invalid syntax`,
 				size, size,
 			)
-
-			assert.Equal(t, expected, output[0])
+			require.Equal(t, expected, output[0])
 		})
 	})
 }
 
 func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cli_model.Allocation) {
-
-	allocationID, err := setupAllocation(t, cliConfigFilename)
-	if err != nil {
-		t.Errorf("Error in allocation setup: %v", err)
-	}
-
-	allocations, err := parseListAllocations(t, cliConfigFilename)
-	if err != nil {
-		t.Errorf("Error in listing allocations: %v", err)
-	}
-
+	allocationID := setupAllocation(t, cliConfigFilename)
+	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
-	if !ok {
-		t.Error("Current allocation not found")
-	}
+	require.True(t, ok, "current allocation not found", allocationID, allocations)
 
 	return allocationID, allocation
 }
 
-func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]cli_model.Allocation, error) {
+func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli_model.Allocation {
 
 	output, err := listAllocations(t, cliConfigFilename)
-	if err != nil {
-		return nil, err
-	}
-	if len(output) != 1 {
-		return nil, fmt.Errorf("unexpected output: %v", output)
-	}
+	require.Nil(t, err, "list allocations failed", err, strings.Join(output, "\n"))
+	require.Equal(t, 1, len(output), "unexpected output", strings.Join(output, "\n"))
 
 	var allocations []cli_model.Allocation
-	if err := json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations); err != nil {
-		return nil, err
-	}
+	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations)
+	require.Nil(t, err, "error deserializng JSON", err)
 
 	allocationMap := make(map[string]cli_model.Allocation)
 
@@ -796,20 +565,16 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]cl
 		allocationMap[ac.ID] = ac
 	}
 
-	return allocationMap, nil
+	return allocationMap
 }
 
-func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
+func setupAllocation(t *testing.T, cliConfigFilename string) string {
 	// First create a wallet and run faucet command
 	output, err := registerWallet(t, cliConfigFilename)
-	if err != nil {
-		return "", fmt.Errorf("registering wallet failed: %v, CLI: %v", err, output)
-	}
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, cliConfigFilename, 9)
-	if err != nil {
-		return "", fmt.Errorf("faucet execution failed: %v, CLI: %v", err, output)
-	}
+	output, err = executeFaucetWithTokens(t, cliConfigFilename, 1)
+	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 	// Then create new allocation
 	allocParam := createParams(map[string]interface{}{
@@ -818,25 +583,18 @@ func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
 		"expire": "1h",
 	})
 	output, err = createNewAllocation(t, cliConfigFilename, allocParam)
-	if err != nil {
-		return "", fmt.Errorf("new allocation failed: %v, CLI: %v", err, output)
-	}
+	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
 
 	// Get the allocation ID and return it
 	allocationID, err := getAllocationID(output[0])
-	if err != nil {
-		return "", fmt.Errorf("could not get allocation ID: %v", err)
-	}
+	require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
 
-	return allocationID, nil
+	return allocationID
 }
 
-func checkAllocationRegex(re *regexp.Regexp, str string) error {
+func assertOutputMatchesAllocationRegex(t *testing.T, re *regexp.Regexp, str string) {
 	match := re.FindStringSubmatch(str)
-	if len(match) < 1 {
-		return fmt.Errorf("unexpected format: %v", str)
-	}
-	return nil
+	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
 }
 
 func getAllocationID(str string) (string, error) {
