@@ -9,7 +9,6 @@ import (
 )
 
 func TestMultisigWallet(t *testing.T) {
-	t.Parallel()
 
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *testing.T) {
