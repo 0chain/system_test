@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
      matrix:
-       testFile: [
+       testName: [
            "TestRegisterWallet",
            "TestRecoverWallet",
            "TestMultisigWallet",
@@ -80,18 +80,18 @@ jobs:
         uses: nanzm/get-time-action@v1.1
         with:
           format: YYYY-MM-DD_HH.mm.ss
-      - name: "Run CLI System Tests"
+      - name: "Run ${{ matrix.testName }} System Tests"
         run: |
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          go test -v ./... -run ${{ matrix.testFile }} -v -timeout 15m
+          CONFIG_PATH=./zbox_config.yaml go test -v ./... -run ${{ matrix.testName }} -v -timeout 15m
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: System-Test-${{ matrix.testFile }}-${{ steps.time.outputs.time }}
+          name: System-Test-${{ matrix.testName }}-${{ steps.time.outputs.time }}
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
