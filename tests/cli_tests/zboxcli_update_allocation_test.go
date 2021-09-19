@@ -543,8 +543,12 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			var myAllocationID, otherAllocationID string
-			var err error
+			var otherAllocationID string
+
+			myAllocationID, err := setupAllocation(t, configPath)
+			if err != nil {
+				t.Errorf("Error in allocation setup: %v", err)
+			}
 
 			// This test creates a separate wallet and allocates there
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
@@ -574,11 +578,6 @@ func TestUpdateAllocation(t *testing.T) {
 					t.Error("Error on checking allocation:", err)
 				}
 			})
-
-			myAllocationID, err = setupAllocation(t, configPath)
-			if err != nil {
-				t.Errorf("Error in allocation setup: %v", err)
-			}
 
 			// otherAllocationID should not be updatable from this level
 
