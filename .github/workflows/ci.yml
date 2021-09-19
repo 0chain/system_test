@@ -9,19 +9,24 @@ env:
   ZBOX_BRANCH: staging
 
 jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: "Checkout system tests"
+        uses: actions/checkout@v2
+        with:
+         fetch-depth: 1
+      - id: set-matrix
+        run: echo '::set-output name=matrix::testName:' "["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]"
   system-tests:
     name: System Tests
+    needs: setup-matrix
     runs-on: ubuntu-latest
     strategy:
-     matrix:
-       testName: [
-           "TestRegisterWallet",
-           "TestRecoverWallet",
-           "TestMultisigWallet",
-           "TestSendAndBalance",
-           "TestUpdateAllocation"
-       ]
-    timeout-minutes: 15
+     matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    timeout-minutes: 10
     steps:
       - name: "Checkout system tests"
         uses: actions/checkout@v2
