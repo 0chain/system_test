@@ -640,6 +640,8 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 
 	t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		var myAllocationID, otherAllocationID string
 		var err error
 
@@ -712,6 +714,144 @@ func TestUpdateAllocation(t *testing.T) {
 
 		assert.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 	})
+
+	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		var myAllocationID, otherAllocationID string
+		var err error
+
+		// This test creates a separate wallet and allocates there
+		t.Run("Get Other Allocation ID", func(t *testing.T) {
+			otherAllocationID, err = setupAllocation(t, configPath)
+			if err != nil {
+				t.Errorf("Error in allocation setup: %v", err)
+			}
+		})
+
+		myAllocationID, err = setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		// otherAllocationID should not be cancelable from this level
+
+		// First try canceling with myAllocationID: should work
+
+		output, err := cancelAllocation(t, configPath, myAllocationID)
+		if err != nil {
+			t.Errorf("Could not cancel allocation due to error: %v", err)
+		}
+		if len(output) != 1 {
+			t.Error("Unexpected outputs:", output)
+		}
+
+		if err := checkAllocationRegex(reCancelAllocation, output[0]); err != nil {
+			t.Error("Error on checking allocation:", err)
+		}
+
+		// Then try canceling with otherAllocationID: should not work
+
+		output, err = cancelAllocation(t, configPath, otherAllocationID)
+		// Error should not be nil
+		assert.NotNil(t, err)
+
+		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
+		assert.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
+	t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		var myAllocationID, otherAllocationID string
+		var err error
+
+		// This test creates a separate wallet and allocates there
+		t.Run("Get Other Allocation ID", func(t *testing.T) {
+			otherAllocationID, err = setupAllocation(t, configPath)
+			if err != nil {
+				t.Errorf("Error in allocation setup: %v", err)
+			}
+		})
+
+		myAllocationID, err = setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		// otherAllocationID should not be updatable from this level
+
+		// First try updating with myAllocationID: should work but it's buggy now
+
+		output, err := finalizeAllocation(t, configPath, myAllocationID)
+		// Error should not be nil since finalize is not working
+		assert.NotNil(t, err)
+
+		assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+
+		// Then try updating with otherAllocationID: should not work
+
+		output, err = finalizeAllocation(t, configPath, otherAllocationID)
+		// Error should not be nil since finalize is not working
+		assert.NotNil(t, err)
+
+		assert.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	t.Run("Update Mistake Expiry Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		expiry := 1
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     expiry,
+		})
+
+		output, err := updateAllocation(t, configPath, params)
+		// Error should not be nil
+		assert.NotNil(t, err)
+
+		expected := fmt.Sprintf(
+			`Error: invalid argument "%v" for "--expiry" flag: time: missing unit in duration "%v"`,
+			expiry, expiry,
+		)
+
+		assert.Equal(t, expected, output[0])
+	})
+
+	t.Run("Update Mistake Size Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, err := setupAllocation(t, configPath)
+		if err != nil {
+			t.Errorf("Error in allocation setup: %v", err)
+		}
+
+		size := "ab"
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+
+		output, err := updateAllocation(t, configPath, params)
+		// Error should not be nil
+		assert.NotNil(t, err)
+
+		expected := fmt.Sprintf(
+			`Error: invalid argument "%v" for "--size" flag: strconv.ParseInt: parsing "%v": invalid syntax`,
+			size, size,
+		)
+
+		assert.Equal(t, expected, output[0])
+	})
 }
 
 func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]cli_model.Allocation, error) {
@@ -740,14 +880,14 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) (map[string]cl
 
 func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
 	// First create a wallet and run faucet command
-	_, err := registerWallet(t, cliConfigFilename)
+	output, err := registerWallet(t, cliConfigFilename)
 	if err != nil {
-		return "", fmt.Errorf("registering wallet failed: %v", err)
+		return "", fmt.Errorf("registering wallet failed: %v, CLI: %v", err, output)
 	}
 
-	_, err = executeFaucetWithTokens(t, cliConfigFilename, 9)
+	output, err = executeFaucetWithTokens(t, cliConfigFilename, 9)
 	if err != nil {
-		return "", fmt.Errorf("faucet execution failed: %v", err)
+		return "", fmt.Errorf("faucet execution failed: %v, CLI: %v", err, output)
 	}
 
 	// Then create new allocation
@@ -756,7 +896,7 @@ func setupAllocation(t *testing.T, cliConfigFilename string) (string, error) {
 		"size":   2048,
 		"expire": "1h",
 	})
-	output, err := createNewAllocation(t, cliConfigFilename, allocParam)
+	output, err = createNewAllocation(t, cliConfigFilename, allocParam)
 	if err != nil {
 		return "", fmt.Errorf("new allocation failed: %v, CLI: %v", err, output)
 	}
