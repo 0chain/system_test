@@ -9,26 +9,27 @@ env:
   ZBOX_BRANCH: staging
 
 jobs:
-  setup-matrix:
+  scan-for-tests:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      test-functions: ${{ env.TEST_FUNCTIONS }}
     steps:
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:
          fetch-depth: 1
+      - name: "Get list of system test suites"
       - id: set-matrix
         run: |
           cd tests/cli_tests
-          echo ::set-output name=matrix::{testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]}"
+          echo TEST_FUNCTIONS={testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]} >> $GITHUB_ENV"
 
   system-tests:
     name: System Tests
-    needs: setup-matrix
+    needs: scan-for-tests
     runs-on: ubuntu-latest
     strategy:
-     matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+     matrix: ${{ fromJson(needs.scan-for-tests.outputs.test-functions) }}
     timeout-minutes: 10
     steps:
       - name: "Checkout system tests"
