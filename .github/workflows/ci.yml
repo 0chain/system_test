@@ -91,7 +91,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: System-Test-${{ matrix.testFile }}-${{ GITHUB_SHA }}-${{ steps.time.outputs.time }}
+          name: System-Test-${{ matrix.testFile }}-${{ steps.time.outputs.time }}
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
