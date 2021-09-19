@@ -21,7 +21,7 @@ jobs:
       - id: set-matrix
         run: |
           cd tests/cli_tests
-          echo '::set-output name=matrix::testName:' "["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]"
+          echo ::set-output name=matrix::{testName:"["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]}"
 
   system-tests:
     name: System Tests
