@@ -19,7 +19,10 @@ jobs:
         with:
          fetch-depth: 1
       - id: set-matrix
-        run: echo '::set-output name=matrix::testName:' "["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]"
+        run: |
+          cd tests/cli_tests
+          echo '::set-output name=matrix::testName:' "["$(find *.go | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]"
+
   system-tests:
     name: System Tests
     needs: setup-matrix
