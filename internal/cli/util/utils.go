@@ -1,15 +1,23 @@
 package cli_utils
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/0chain/gosdk/core/conf"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 var Logger = getLogger()
@@ -118,4 +126,89 @@ func WritePoolInfo() ([]string, error) {
 
 func ChallengePoolInfo(allocationID string) ([]string, error) {
 	return RunCommand("./zbox cp-info --allocation " + allocationID + " --silent")
+}
+
+func GetNetworkConfiguration(configPath string) (map[string]interface{}, error) {
+	config, err := getConfig(configPath)
+	if err != nil {
+		Logger.Error(err)
+		return nil, err
+	}
+
+	u, err := url.Parse(config.BlockWorker)
+	if err != nil {
+		Logger.Errorf("failed to parse config.BlockWorker (%s): %v", config.BlockWorker, err)
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, "network")
+	res := &map[string]interface{}{}
+	err = getJson(u.String(), res)
+	if err != nil {
+		Logger.Errorf("failed to get configuration from the dns network (%s): %v", u, err)
+		return nil, err
+	}
+
+	return *res, nil
+}
+
+func GetChainConfiguration(configPath string) (map[string]interface{}, error) {
+	networkConfig, err := GetNetworkConfiguration(configPath)
+	if err != nil {
+		return nil, err
+	}
+	var miners []interface{} = (networkConfig["miners"]).([]interface{})
+	if len(miners) == 0 {
+		errMsg := fmt.Sprintf("Cannot read miners from the dns network configuration: %v", networkConfig["miners"])
+		Logger.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	u, err := url.Parse(miners[0].(string))
+	if err != nil {
+		Logger.Errorf("failed to parse miner 0 address (%s): %v", miners[0], err)
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, "v1/config/get")
+
+	res := &map[string]interface{}{}
+	err = getYaml(u.String(), res)
+	if err != nil {
+		Logger.Fatalf("failed to get chain configuration from miner (%s): %v", u.String(), err)
+	}
+
+	return *res, nil
+}
+
+func getConfig(configPath string) (conf.Config, error) {
+	config, err := conf.LoadConfigFile("./config/zbox_config.yaml")
+	if err != nil {
+		Logger.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
+	}
+	return config, err
+}
+
+func getJson(url string, target interface{}) error {
+	myClient := &http.Client{Timeout: 30 * time.Second}
+	r, err := myClient.Get(url)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
+func getYaml(url string, target interface{}) error {
+	myClient := &http.Client{Timeout: 30 * time.Second}
+	r, err := myClient.Get(url)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		Logger.Fatal(err)
+	}
+	return yaml.Unmarshal(b, target)
 }
