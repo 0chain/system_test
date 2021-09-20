@@ -27,3 +27,4 @@ tests/cli_tests/config/*wallet.json
 
 .DS_STORE
 .idea
+.vscode
