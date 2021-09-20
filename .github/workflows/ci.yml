@@ -1,7 +1,6 @@
 name: system-tests
 on:
   push:
-
   pull_request:
     branches:
       - 'master'
@@ -26,5 +25,5 @@ jobs:
       #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       #     restore-keys: |
       #       ${{ runner.os }}-go-
-      - name: Run test
-        run: go test -v ./internal/config
+      - run: |
+        go test -v ./internal/config
