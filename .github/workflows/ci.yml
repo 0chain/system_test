@@ -1,8 +1,6 @@
 name: ci
-on: 
-  push:
-  pull_request:
-    types: [opened]
+on:
+  workflow_dispatch:
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
