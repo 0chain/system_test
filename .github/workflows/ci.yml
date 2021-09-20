@@ -23,7 +23,6 @@ jobs:
         run: |
           cd tests/cli_tests
 #         CHANGE THE LINE BELOW IF YOU ONLY WANT TO RUN A SPECIFIC TEST FILE - USEFUL FOR FEATURE BRANCHES
-#         TEST_FILENAME=zboxcli_register_wallet_test.go #SPECIFIC FILE
           TEST_FILENAME=*.go #All FILES
           echo ::set-output name=test-functions::{testName:"["$(eval find ${TEST_FILENAME} | grep -v main | xargs grep -h '^func Test' | perl -l -n -e'/func ([^\(]*)/ && print "\"$1\""' | paste -sd "," -)"]}"
 
