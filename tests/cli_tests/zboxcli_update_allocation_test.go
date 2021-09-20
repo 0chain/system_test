@@ -19,7 +19,6 @@ var (
 )
 
 func TestUpdateAllocation(t *testing.T) {
-	t.Parallel()
 
 	t.Run("Parallel", func(t *testing.T) {
 		t.Parallel()
