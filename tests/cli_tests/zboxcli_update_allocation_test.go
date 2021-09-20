@@ -71,6 +71,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -94,6 +95,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -119,6 +121,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -141,6 +144,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -164,6 +168,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -214,6 +219,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -275,6 +281,7 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -306,13 +313,14 @@ func TestUpdateAllocation(t *testing.T) {
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
-				"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
+				"expiry":     fmt.Sprintf("%dh", expDuration),
 			})
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -322,6 +330,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err = cancelAllocation(t, configPath, allocationID)
 			require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+
 			//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
 			require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
@@ -348,13 +357,14 @@ func TestUpdateAllocation(t *testing.T) {
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
-				"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
+				"expiry":     fmt.Sprintf("%dh", expDuration),
 			})
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
+
 			allocations := parseListAllocations(t, configPath)
 			ac, ok := allocations[allocationID]
 			require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -401,7 +411,6 @@ func TestUpdateAllocation(t *testing.T) {
 				// Updating the otherAllocationID should work here
 				size := int64(2048)
 
-				// First try updating with myAllocationID: should work
 				params := createParams(map[string]interface{}{
 					"allocation": otherAllocationID,
 					"size":       size,
@@ -441,15 +450,12 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			var myAllocationID, otherAllocationID string
-			var err error
-
+			var otherAllocationID string
 			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
 				otherAllocationID = setupAllocation(t, configPath)
 			})
-
-			myAllocationID = setupAllocation(t, configPath)
+			myAllocationID := setupAllocation(t, configPath)
 
 			// otherAllocationID should not be cancelable from this level
 
@@ -474,13 +480,12 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
 			t.Parallel()
 
-			var myAllocationID, otherAllocationID string
-			var err error
+			var otherAllocationID string
 			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
 			t.Run("Get Other Allocation ID", func(t *testing.T) {
 				otherAllocationID = setupAllocation(t, configPath)
 			})
-			myAllocationID = setupAllocation(t, configPath)
+			myAllocationID := setupAllocation(t, configPath)
 
 			// First try updating with myAllocationID: should work but it's buggy now
 			output, err := finalizeAllocation(t, configPath, myAllocationID)
@@ -543,6 +548,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cli_model.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename)
+
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
 	require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -558,7 +564,7 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 
 	var allocations []cli_model.Allocation
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations)
-	require.Nil(t, err, "error deserializng JSON", err)
+	require.Nil(t, err, "error deserializing JSON", err)
 
 	allocationMap := make(map[string]cli_model.Allocation)
 
