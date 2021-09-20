@@ -1,5 +1,7 @@
 name: ci
 on:
+  push:
+    branches: [master]
   workflow_dispatch:
 env:
   NETWORK: dev.0chain.net
