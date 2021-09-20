@@ -11,7 +11,6 @@ import (
 )
 
 func TestRegisterWallet(t *testing.T) {
-	t.Parallel()
 
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Register wallet outputs expected", func(t *testing.T) {
@@ -57,7 +56,7 @@ func TestRegisterWallet(t *testing.T) {
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
-			output, err = executeFaucet(t, configPath)
+			output, err = executeFaucetWithTokens(t, configPath, 1)
 			require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 			require.Equal(t, 1, len(output))
@@ -118,10 +117,6 @@ func getWalletForName(t *testing.T, cliConfigFilename string, name string) (*cli
 	}
 
 	return wallet, err
-}
-
-func executeFaucet(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet faucet --methodName pour --tokens 1 --input {} --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func verifyTransaction(t *testing.T, cliConfigFilename string, txn string) ([]string, error) {
