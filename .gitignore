@@ -16,7 +16,14 @@
 
 # Dependency directories (remove the comment below to include it)
 
- vendor/
+vendor/
+
+# Temp test output
+tests/cli_tests/config/*wallet.json
+tests/cli_tests/config/*allocation.txt
+**/cmdlog.log
+**/zbox
+**/zwallet
 
 .DS_STORE
 .idea
