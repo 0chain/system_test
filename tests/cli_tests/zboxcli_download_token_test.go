@@ -12,213 +12,181 @@ import (
 
 	cli_model "github.com/0chain/system_test/internal/cli/model"
 	cli_utils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFileDownloadTokenMovement(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	balance := 0.4 // 800.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {
 		t.Run("Read pool must have no tokens locked for a newly created allocation", func(t *testing.T) {
 			t.Parallel()
-			if _, err := registerWallet(t, configPath); err != nil {
-				t.Errorf("Failed to register wallet due to error: %v", err)
-			}
 
-			if _, err := executeFaucetWithTokens(t, configPath, 1.0); err != nil {
-				t.Errorf("Failed to execute faucet transaction due to error: %v", err)
-			}
+			output, err := registerWallet(t, configPath)
+			require.Nil(err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			output, err := newAllocation(t, configPath, balance)
-			if err != nil {
-				t.Errorf("Failed to create new allocation with output: %v", strings.Join(output, "\n"))
-			}
+			output, err = executeFaucetWithTokens(t, configPath, 1.0)
+			require.Nil(err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			assert.Equal(1, len(output))
+			output, err = newAllocation(t, configPath, balance)
+			require.Nil(err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+			require.Equal(1, len(output))
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			assert.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
 			output, err = readPoolInfo(t, configPath, allocationID)
-			if err != nil {
-				t.Errorf("Error fetching read pool due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error fetching read pool", strings.Join(output, "\n"))
 
-			assert.Len(output, 1)
-			assert.Equal("no tokens locked", output[0])
+			require.Len(output, 1)
+			require.Equal("no tokens locked", output[0])
 		})
 
 		t.Run("Locked read pool tokens should equal total blobber balance in read pool", func(t *testing.T) {
 			t.Parallel()
-			if _, err := registerWallet(t, configPath); err != nil {
-				t.Errorf("Failed to register wallet due to error: %v", err)
-			}
 
-			if _, err := executeFaucetWithTokens(t, configPath, 1.0); err != nil {
-				t.Errorf("Failed to execute faucet transaction due to error: %v", err)
-			}
+			output, err := registerWallet(t, configPath)
+			require.Nil(err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			output, err := newAllocation(t, configPath, balance)
-			if err != nil {
-				t.Errorf("Failed to create new allocation with output: %v", strings.Join(output, "\n"))
-			}
+			output, err = executeFaucetWithTokens(t, configPath, 1.0)
+			require.Nil(err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			assert.Equal(1, len(output))
+			output, err = newAllocation(t, configPath, balance)
+			require.Nil(err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+			require.Equal(1, len(output))
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			assert.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
 			output, err = readPoolLock(t, configPath, allocationID, 0.4)
-			if err != nil {
-				t.Errorf("Tokens could not be locked due to error: %v. The CLI output was: %v.", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Tokens could not be locked", strings.Join(output, "\n"))
 
-			assert.Len(output, 1)
-			assert.Equal("locked", output[0])
+			require.Len(output, 1)
+			require.Equal("locked", output[0])
 
 			output, err = readPoolInfo(t, configPath, allocationID)
-			if err != nil {
-				t.Errorf("Error fetching read pool due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error fetching read pool", strings.Join(output, "\n"))
 
 			readPool := []cli_model.ReadPoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &readPool)
-			if err != nil {
-				t.Errorf("Error unmarshalling read pool info due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-			assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Id)
-			assert.Equal(0.4, intToZCN(readPool[0].Balance))
-			assert.IsType(int64(1), readPool[0].ExpireAt)
-			assert.Equal(allocationID, readPool[0].AllocationId)
-			assert.Less(0, len(readPool[0].Blobber))
-			assert.Equal(true, readPool[0].Locked)
+			require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Id)
+			require.Equal(0.4, intToZCN(readPool[0].Balance))
+			require.IsType(int64(1), readPool[0].ExpireAt)
+			require.Equal(allocationID, readPool[0].AllocationId)
+			require.Less(0, len(readPool[0].Blobber))
+			require.Equal(true, readPool[0].Locked)
 
 			balanceInTotal := float64(0)
 			for i := 0; i < len(readPool[0].Blobber); i += 1 {
-				assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
-				assert.IsType(int64(1), readPool[0].Blobber[i].Balance)
+				require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
+				require.IsType(int64(1), readPool[0].Blobber[i].Balance)
 				balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
 			}
 
-			assert.InEpsilon(0.4, balanceInTotal, epsilon, "Error should be within epsilon")
+			require.InEpsilon(0.4, balanceInTotal, epsilon, "Error should be within epsilon")
 		})
 
 		t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
 			t.Parallel()
-			if _, err := registerWallet(t, configPath); err != nil {
-				t.Errorf("Failed to register wallet due to error: %v", err)
-			}
 
-			if _, err := executeFaucetWithTokens(t, configPath, 1.0); err != nil {
-				t.Errorf("Failed to execute faucet transaction due to error: %v", err)
-			}
+			output, err := registerWallet(t, configPath)
+			require.Nil(err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			output, err := newAllocation(t, configPath, balance)
-			if err != nil {
-				t.Errorf("Failed to create new allocation with output: %v", strings.Join(output, "\n"))
-			}
+			output, err = executeFaucetWithTokens(t, configPath, 1.0)
+			require.Nil(err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			assert.Equal(1, len(output))
+			output, err = newAllocation(t, configPath, balance)
+			require.Nil(err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+			require.Equal(1, len(output))
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			assert.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(matcher, output[0], "Allocation creation ouput did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
 			// upload a dummy 5 MB file
 			output, err = uploadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file", "/")
-			if err != nil {
-				t.Errorf("Upload file failed due to error: %v", err)
-			}
+			require.Nil(err, "Upload file failed", strings.Join(output, "\n"))
 
-			assert.Equal(2, len(output))
-			assert.Equal("Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
+			require.Equal(2, len(output))
+			require.Equal("Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Lock read pool tokens
 			output, err = readPoolLock(t, configPath, allocationID, 0.4)
-			if err != nil {
-				t.Errorf("Tokens could not be locked due to error: %v. The CLI output was: %v.", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Tokens could not be locked", strings.Join(output, "\n"))
 
-			assert.Len(output, 1)
-			assert.Equal("locked", output[0])
+			require.Len(output, 1)
+			require.Equal("locked", output[0])
 
 			// Read pool before download
 			output, err = readPoolInfo(t, configPath, allocationID)
-			if err != nil {
-				t.Errorf("Error fetching read pool due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error fetching read pool", strings.Join(output, "\n"))
 
 			initialReadPool := []cli_model.ReadPoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &initialReadPool)
-			if err != nil {
-				t.Errorf("Error unmarshalling read pool info due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-			assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-			assert.Equal(0.4, intToZCN(initialReadPool[0].Balance))
-			assert.IsType(int64(1), initialReadPool[0].ExpireAt)
-			assert.Equal(allocationID, initialReadPool[0].AllocationId)
-			assert.Less(0, len(initialReadPool[0].Blobber))
-			assert.Equal(true, initialReadPool[0].Locked)
+			require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
+			require.Equal(0.4, intToZCN(initialReadPool[0].Balance))
+			require.IsType(int64(1), initialReadPool[0].ExpireAt)
+			require.Equal(allocationID, initialReadPool[0].AllocationId)
+			require.Less(0, len(initialReadPool[0].Blobber))
+			require.Equal(true, initialReadPool[0].Locked)
 
 			for i := 0; i < len(initialReadPool[0].Blobber); i += 1 {
-				assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-				assert.IsType(int64(1), initialReadPool[0].Blobber[i].Balance)
+				require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
+				require.IsType(int64(1), initialReadPool[0].Blobber[i].Balance)
 			}
 
 			output, err = getDownloadCostInInt(t, configPath, allocationID, "/five_MB_test_file")
-			if err != nil {
-				t.Errorf("Could not get download cost due to error: %v. The CLI output was: %v.", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Could not get download cost", strings.Join(output, "\n"))
+
 			expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-			if err != nil {
-				t.Errorf("Cost couldn't be parsed to float due to error: %v", err)
-			}
+			require.Nil(err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
 			unit := strings.Fields(output[0])[1]
 			expectedDownloadCost = unitToZCN(expectedDownloadCost, unit)
 
 			// Download the file
 			output, err = downloadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file_dowloaded", "/five_MB_test_file")
-			if err != nil {
-				t.Errorf("Downloading the file failed due to error: %v. The CLI output was: %v.", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Downloading the file failed", strings.Join(output, "\n"))
+
 			defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
 
-			assert.Len(output, 2)
-			assert.Equal("Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
+			require.Len(output, 2)
+			require.Equal("Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Necessary for rp-info to update
 			time.Sleep(5 * time.Second)
 
 			// Read pool before download
 			output, err = readPoolInfo(t, configPath, allocationID)
-			if err != nil {
-				t.Errorf("Error fetching read pool due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error fetching read pool", strings.Join(output, "\n"))
 
 			finalReadPool := []cli_model.ReadPoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &finalReadPool)
-			if err != nil {
-				t.Errorf("Error unmarshalling read pool info due to: %v. The CLI output was: %v", err, strings.Join(output, "\n"))
-			}
+			require.Nil(err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-			assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-			assert.Less(intToZCN(finalReadPool[0].Balance), 0.4)
-			assert.IsType(int64(1), finalReadPool[0].ExpireAt)
-			assert.Equal(allocationID, finalReadPool[0].AllocationId)
-			assert.Equal(len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-			assert.Equal(true, finalReadPool[0].Locked)
+			require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
+			require.Less(intToZCN(finalReadPool[0].Balance), 0.4)
+			require.IsType(int64(1), finalReadPool[0].ExpireAt)
+			require.Equal(allocationID, finalReadPool[0].AllocationId)
+			require.Equal(len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
+			require.Equal(true, finalReadPool[0].Locked)
 
 			for i := 0; i < len(finalReadPool[0].Blobber); i += 1 {
-				assert.Regexp(regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-				assert.IsType(int64(1), finalReadPool[0].Blobber[i].Balance)
+				require.Regexp(regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
+				require.IsType(int64(1), finalReadPool[0].Blobber[i].Balance)
 
 				// amount deducted
-				assert.InDelta(expectedDownloadCost, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "Error should be within epsilon.")
+				require.InDelta(expectedDownloadCost, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "Error should be within epsilon.")
 			}
 		})
 	})
