@@ -29,3 +29,4 @@ tests/cli_tests/config/*allocation.txt
 .DS_STORE
 .idea
 .vscode
+tests/cli_tests/__debug_bin
