@@ -21,6 +21,7 @@ vendor/
 # Temp test output
 tests/cli_tests/config/*wallet.json
 tests/cli_tests/config/*allocation.txt
+tests/cli_tests/config/*_test.txt
 **/cmdlog.log
 **/zbox
 **/zwallet
