@@ -228,7 +228,6 @@ func TestUpdateAllocation(t *testing.T) {
 			)
 		})
 
-		//FIXME: POSSIBLE BUG: Can't update allocation size to less than 1024
 		t.Run("Update Size To Less Than 1024 Should Fail", func(t *testing.T) {
 			t.Parallel()
 
@@ -246,7 +245,6 @@ func TestUpdateAllocation(t *testing.T) {
 			require.Equal(t, "Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 
-		//FIXME: POSSIBLE BUG: Can't update allocation size to 0
 		t.Run("Update Size To 0 Should Fail", func(t *testing.T) {
 			t.Parallel()
 
