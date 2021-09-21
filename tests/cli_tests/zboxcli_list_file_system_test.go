@@ -78,6 +78,33 @@ func TestListFileSystem(t *testing.T) {
 			require.Equal(t, "f", result.Type)
 		})
 
+		//FIXME: POSSIBLE BUG: Could not upload a file using encrypt - consensus failed
+		// Due to this, could not test list for encrypted files
+		t.Run("List Encrypted Files Should Work", func(t *testing.T) {
+			t.Parallel()
+
+			allocationID := setupAllocation(t, configPath)
+
+			// First Upload a file to the root directory
+			filesize := int64(10)
+			remotepath := "/"
+
+			filename := generateTestFile(t)
+
+			err := createFileWithSize(filename, filesize)
+			require.Nil(t, err)
+
+			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"localpath":  filename,
+				"remotepath": remotepath + filepath.Base(filename),
+				"encrypt":    "",
+			}))
+			require.NotNil(t, err)
+			require.Equal(t, 2, len(output))
+			require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:0.000000, expected:60.000000", output[1])
+		})
+
 		t.Run("List Files and Check Lookup Hash Should Work", func(t *testing.T) {
 			t.Parallel()
 
