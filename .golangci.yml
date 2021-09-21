@@ -66,6 +66,16 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
+  revive:
+    ignore-generated-header: true
+    severity: warning
+    rules:
+      - name: atomic
+      - name: line-length-limit
+        severity: error
+        arguments: [150]
+      - name: unhandled-error
+        arguments: ["fmt.Printf", "myFunction"]
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -100,10 +110,10 @@ linters:
     # - scopelint
     - staticcheck
     # - structcheck
-    - stylecheck
+#    - stylecheck
     - typecheck
     # - unconvert
-    - unparam
+#    - unparam
     - unused
     # - varcheck
     - whitespace

@@ -2,12 +2,14 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 func TestRegisterWallet(t *testing.T) {
@@ -34,7 +36,7 @@ func TestRegisterWallet(t *testing.T) {
 			wallet, err := getWallet(t, configPath)
 
 			require.Nil(t, err, "An error occurred retrieving a wallet", strings.Join(output, "\n"))
-			require.NotNil(t, wallet.ClientId)
+			require.NotNil(t, wallet.ClientID)
 			require.NotNil(t, wallet.ClientPublicKey)
 			require.NotNil(t, wallet.EncryptionPublicKey)
 		})
@@ -63,8 +65,8 @@ func TestRegisterWallet(t *testing.T) {
 			matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
 			require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
-			txnId := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-			output, err = verifyTransaction(t, configPath, txnId)
+			txnID := matcher.FindAllStringSubmatch(output[0], 1)[0][1]
+			output, err = verifyTransaction(t, configPath, txnID)
 			require.Nil(t, err, "Could not verify faucet transaction", strings.Join(output, "\n"))
 
 			require.Equal(t, 1, len(output))
@@ -84,7 +86,8 @@ func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func registerWalletForName(cliConfigFilename, name string) ([]string, error) {
-	return cli_utils.RunCommand("./zbox register --silent --wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox register --silent " +
+		"--wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
@@ -92,7 +95,8 @@ func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func getBalanceForWallet(cliConfigFilename, wallet string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet getbalance --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zwallet getbalance --silent " +
+		"--wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error) {
@@ -100,7 +104,8 @@ func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error)
 }
 
 func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
-	output, err := cli_utils.RunCommand("./zbox getwallet --json --silent --wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand("./zbox getwallet --json --silent " +
+		"--wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 
 	if err != nil {
 		return nil, err
@@ -120,10 +125,12 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 }
 
 func verifyTransaction(t *testing.T, cliConfigFilename, txn string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet verify --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zwallet verify --silent --wallet " + escapedTestName(t) + "" +
+		"_wallet.json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func escapedTestName(t *testing.T) string {
-	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-", "?", "-")
+	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-",
+		"<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-", "?", "-")
 	return replacer.Replace(t.Name())
 }
