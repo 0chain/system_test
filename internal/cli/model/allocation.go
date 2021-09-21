@@ -12,6 +12,4 @@ type AllocationFile struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
 	Type string `json:"type"`
-	Size int64  `json:"size"`
-	Hash string `json:"hash"`
 }
