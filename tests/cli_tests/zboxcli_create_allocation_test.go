@@ -138,6 +138,12 @@ func TestCreateAllocation(t *testing.T) {
 
 				output, err := createNewAllocation(t, configPath, createParams(tt.options))
 				tt.assertFunction(t, output, err)
+
+				allocationID, err := getAllocationID(output[0])
+				require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+
+				output, err = cancelAllocation(t, configPath, allocationID)
+				require.Nil(t, err, "error cancelling allocation", strings.Join(output, "\n"))
 			})
 		}
 
