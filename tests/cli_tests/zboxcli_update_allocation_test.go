@@ -526,7 +526,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 }
 
-func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cli_model.Allocation) {
+func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, climodel.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
@@ -536,17 +536,17 @@ func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cl
 	return allocationID, allocation
 }
 
-func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli_model.Allocation {
+func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]climodel.Allocation {
 
 	output, err := listAllocations(t, cliConfigFilename)
 	require.Nil(t, err, "list allocations failed", err, strings.Join(output, "\n"))
 	require.Equal(t, 1, len(output), "unexpected output", strings.Join(output, "\n"))
 
-	var allocations []cli_model.Allocation
+	var allocations []climodel.Allocation
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations)
 	require.Nil(t, err, "error deserializing JSON", err)
 
-	allocationMap := make(map[string]cli_model.Allocation)
+	allocationMap := make(map[string]climodel.Allocation)
 
 	for _, ac := range allocations {
 		allocationMap[ac.ID] = ac

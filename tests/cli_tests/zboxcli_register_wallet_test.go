@@ -95,11 +95,11 @@ func getBalanceForWallet(cliConfigFilename, wallet string) ([]string, error) {
 	return cli_utils.RunCommand("./zwallet getbalance --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func getWallet(t *testing.T, cliConfigFilename string) (*cli_model.Wallet, error) {
+func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error) {
 	return getWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getWalletForName(t *testing.T, cliConfigFilename, name string) (*cli_model.Wallet, error) {
+func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	output, err := cli_utils.RunCommand("./zbox getwallet --json --silent --wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 
 	if err != nil {
@@ -108,7 +108,7 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*cli_model.
 
 	require.Equal(t, 1, len(output))
 
-	var wallet *cli_model.Wallet
+	var wallet *climodel.Wallet
 
 	err = json.Unmarshal([]byte(output[0]), &wallet)
 	if err != nil {
