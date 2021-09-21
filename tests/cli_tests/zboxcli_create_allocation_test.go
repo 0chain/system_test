@@ -21,13 +21,25 @@ func TestCreateAllocation(t *testing.T) {
 		assertFunction AssertFunction
 	}
 
-	var allocationCreatedAssertFunction = func(t *testing.T, output []string, err error) {
-		require.Nil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0])
-	}
+	var (
+		allocationCreatedAssertFunction = func(t *testing.T, output []string, err error) {
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1")
+			require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+		}
+		allocationCreateFailedAssertFunction = func(t *testing.T, output []string, err error) {
+			require.NotNil(t, err, strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1")
+			require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		}
+	)
 
 	var successScenarioTests = []Test{
+		{
+			name:           "Create allocation without providing any additional parameters",
+			options:        map[string]interface{}{"lock": "0.5"},
+			assertFunction: allocationCreatedAssertFunction,
+		},
 		{
 			name:           "Create allocation with smallest expiry (5m)",
 			options:        map[string]interface{}{"expire": "5m", "size": "256000", "lock": "0.5"},
@@ -62,6 +74,15 @@ func TestCreateAllocation(t *testing.T) {
 
 	var failureScenarioTests = []Test{
 		{
+			name:    "Create allocation with no parameter",
+			options: map[string]interface{}{},
+			assertFunction: func(t *testing.T, output []string, err error) {
+				require.NotNil(t, err)
+				require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+				require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
+			},
+		},
+		{
 			name:    "Create allocation with invalid expiry",
 			options: map[string]interface{}{"expire": "-1", "lock": "0.5"},
 			assertFunction: func(t *testing.T, output []string, err error) {
@@ -71,22 +92,33 @@ func TestCreateAllocation(t *testing.T) {
 			},
 		},
 		{
-			name:    "Create allocation with too large parity",
-			options: map[string]interface{}{"parity": "7", "lock": "0.5", "size": 1024, "expire": "1h"},
+			name:    "Create allocation by providing expiry in wrong format (expire 1hour)",
+			options: map[string]interface{}{"expire": "1hour", "lock": "0.5", "size": 1024},
 			assertFunction: func(t *testing.T, output []string, err error) {
 				require.NotNil(t, err)
 				require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-				require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+				require.Equal(t, `Error: invalid argument "1hour" for "--expire" flag: time: unknown unit hour in duration 1hour`, output[len(output)-1])
 			},
 		},
 		{
-			name:    "Create allocation with read price range 0-0.01",
-			options: map[string]interface{}{"read_price": "0-0.01", "lock": "0.5", "size": 1024, "expire": "1h"},
-			assertFunction: func(t *testing.T, output []string, err error) {
-				require.NotNil(t, err)
-				require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-				require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
-			},
+			name:           "Create allocation with too large parity (Greater than the number of blobbers)",
+			options:        map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "expire": "1h"},
+			assertFunction: allocationCreateFailedAssertFunction,
+		},
+		{
+			name:           "Create allocation with read price range 0-0",
+			options:        map[string]interface{}{"read_price": "0-0.01", "lock": "0.5", "size": 1024, "expire": "1h"},
+			assertFunction: allocationCreateFailedAssertFunction,
+		},
+		{
+			name:           "Create allocation with size smaller than limit (size < 1024)",
+			options:        map[string]interface{}{"size": 256, "lock": "0.5"},
+			assertFunction: allocationCreateFailedAssertFunction,
+		},
+		{
+			name:           "Create allocation with expire smaller than limit (expire < 5m)",
+			options:        map[string]interface{}{"expire": "3m", "lock": "0.5", "size": 1024},
+			assertFunction: allocationCreateFailedAssertFunction,
 		},
 	}
 
