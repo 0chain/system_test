@@ -185,7 +185,7 @@ func TestUpdateAllocation(t *testing.T) {
 			assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 		})
 
-		//FIXME expiry or size should be required params - should not bother sharders with an empty update
+		// FIXME expiry or size should be required params - should not bother sharders with an empty update
 		t.Run("Update Nothing Should Fail", func(t *testing.T) {
 			t.Parallel()
 
@@ -601,7 +601,7 @@ func createParams(params map[string]interface{}) string {
 	return strings.TrimSpace(builder.String())
 }
 
-func updateAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s --configDir ./config --config %s",
 		params,
@@ -611,7 +611,7 @@ func updateAllocation(t *testing.T, cliConfigFilename string, params string) ([]
 	return cli_utils.RunCommand(cmd)
 }
 
-func createNewAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	return cli_utils.RunCommand(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
@@ -629,7 +629,7 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cli_utils.RunCommand(cmd)
 }
 
-func cancelAllocation(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent --wallet %s --configDir ./config --config %s",
 		allocationID,
@@ -650,7 +650,7 @@ func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens floa
 		))
 }
 
-func finalizeAllocation(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s --silent --wallet %s --configDir ./config --config %s",
 		allocationID,

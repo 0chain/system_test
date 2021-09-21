@@ -79,7 +79,7 @@ func getLogger() *logrus.Logger {
 		DisableQuote: true,
 	})
 
-	if strings.ToLower(strings.TrimSpace(os.Getenv("DEBUG"))) == "true" {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("DEBUG")), "true") {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
