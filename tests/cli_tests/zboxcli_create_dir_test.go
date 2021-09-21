@@ -10,8 +10,9 @@ import (
 )
 
 func TestCreateDir(t *testing.T) {
-
+	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
+		t.Parallel()
 		t.Run("create root dir", func(t *testing.T) {
 			t.Parallel()
 
