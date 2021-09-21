@@ -1,6 +1,5 @@
 name: ci
-on:
-  push:
+on: [push, pull_request]
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
