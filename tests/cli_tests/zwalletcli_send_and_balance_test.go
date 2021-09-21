@@ -28,7 +28,7 @@ func TestSendAndBalance(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1)
 			require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-			successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 1.000 ZCN \([0-9]*\.?[0-9]+ USD\)$`)
+			successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`)
 
 			// Before send balance checks
 			output, err = getBalance(t, configPath)
@@ -287,7 +287,7 @@ func TestSendAndBalance(t *testing.T) {
 	})
 }
 
-func sendZCN(t *testing.T, cliConfigFilename string, toClientID string, tokens string, desc string) ([]string, error) {
+func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string) ([]string, error) {
 	return cli_utils.RunCommand("./zwallet send --silent --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
 		" --to_client_id " + toClientID +

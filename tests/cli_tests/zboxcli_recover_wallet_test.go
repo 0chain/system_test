@@ -53,6 +53,6 @@ func TestRecoverWallet(t *testing.T) {
 	})
 }
 
-func recoverWalletFromMnemonic(t *testing.T, configPath string, mnemonic string) ([]string, error) {
+func recoverWalletFromMnemonic(t *testing.T, configPath, mnemonic string) ([]string, error) {
 	return cli_utils.RunCommand("./zwallet recoverwallet --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + configPath + " --mnemonic \"" + mnemonic + "\"")
 }
