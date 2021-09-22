@@ -30,9 +30,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			wantFile := cli_model.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}
@@ -62,9 +62,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			require.Len(t, files, 2)
@@ -96,9 +96,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			wantFile := cli_model.AllocationFile{Name: longDirName, Path: "/" + longDirName, Type: "d"}
@@ -154,9 +154,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			wantFile := cli_model.AllocationFile{Name: "existingdir", Path: "/existingdir", Type: "d"}
@@ -186,9 +186,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			require.Len(t, files, 2)
@@ -214,9 +214,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			require.Len(t, files, 2)
@@ -242,9 +242,9 @@ func TestCreateDir(t *testing.T) {
 			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 			// Directory size is either 6 or 8 and remove that size for assertions after
-			for _, dir := range files {
+			for i, dir := range files {
 				require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-				dir.Size = 0
+				files[i].Size = 0
 			}
 
 			wantFile := cli_model.AllocationFile{Name: "abc!@#$%^&*()<>{}[]:;'?,.", Path: "/abc!@#$%^&*()<>{}[]:;'?,.", Type: "d"}
