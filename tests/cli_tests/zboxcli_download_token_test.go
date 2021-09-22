@@ -16,6 +16,7 @@ import (
 )
 
 func TestFileDownloadTokenMovement(t *testing.T) {
+	t.Parallel()
 
 	balance := 0.4 // 800.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {
