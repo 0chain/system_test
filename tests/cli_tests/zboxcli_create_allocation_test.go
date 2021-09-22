@@ -234,7 +234,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, `invalid argument "1hour" for "--expire" flag: time: unknown unit hour in duration 1hour`, output[len(output)-1])
+		require.Equal(t, "invalid argument \"1hour\" for \"--expire\" flag: time: unknown unit hour in duration 1hour", output[len(output)-1])
 	})
 
 }
