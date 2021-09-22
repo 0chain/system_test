@@ -31,7 +31,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = newAllocation(t, configPath, balance)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
 			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
 
@@ -40,7 +40,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			require.Equal(t, "no tokens locked", output[0])
 		})
 
@@ -56,7 +56,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = newAllocation(t, configPath, balance)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
 			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
 
@@ -65,7 +65,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = readPoolLock(t, configPath, allocationID, 0.4)
 			require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			require.Equal(t, "locked", output[0])
 
 			output, err = readPoolInfo(t, configPath, allocationID)
@@ -104,7 +104,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = newAllocation(t, configPath, balance)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
 			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
 
@@ -114,14 +114,14 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			output, err = uploadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file", "/")
 			require.Nil(t, err, "Upload file failed", strings.Join(output, "\n"))
 
-			require.Equal(t, 2, len(output))
+			require.Len(t, output, 2)
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Lock read pool tokens
 			output, err = readPoolLock(t, configPath, allocationID, 0.4)
 			require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			require.Equal(t, "locked", output[0])
 
 			// Read pool before download
@@ -159,7 +159,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
 
-			require.Equal(t, 2, len(output))
+			require.Len(t, output, 2)
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Necessary for rp-info to update

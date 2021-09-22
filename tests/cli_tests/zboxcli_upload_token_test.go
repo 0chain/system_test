@@ -36,7 +36,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = challengePoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
 
-			require.Equal(t, 4, len(output))
+			require.Len(t, output, 4)
 			require.Regexp(t, regexp.MustCompile(fmt.Sprintf("POOL ID: ([a-f0-9]{64}):challengepool:%s", allocationID)), output[0])
 			require.Equal(t, "0", strings.Fields(output[3])[0])
 		})
@@ -53,7 +53,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = newAllocation(t, configPath, balance)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 4)
 			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation ouput did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
@@ -91,7 +91,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = newAllocation(t, configPath, balance)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Equal(t, 1, len(output))
+			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
 			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
 
@@ -129,7 +129,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = uploadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file", "/")
 			require.Nil(t, err, "Upload file failed", strings.Join(output, "\n"))
 
-			require.Equal(t, 2, len(output))
+			require.Len(t, output, 2)
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Necessary for wp-info to update
