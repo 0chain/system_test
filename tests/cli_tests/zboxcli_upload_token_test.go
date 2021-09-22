@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const epsilon float64 = 1e-04
+const epsilon float64 = 1e-03
 const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(t *testing.T) {
 	t.Parallel()
-	
+
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {
 		t.Run("Challenge pool should be 0 before any write", func(t *testing.T) {
@@ -30,7 +30,12 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1.0)
 			require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			output, err = newAllocation(t, configPath, balance)
+			allocParam := createParams(map[string]interface{}{
+				"lock":   balance,
+				"size":   10485760,
+				"expire": "1h",
+			})
+			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 			allocationID := strings.Fields(output[0])[2]
@@ -51,10 +56,15 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1.0)
 			require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			output, err = newAllocation(t, configPath, balance)
+			allocParam := createParams(map[string]interface{}{
+				"lock":   balance,
+				"size":   10485760,
+				"expire": "1h",
+			})
+			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-			require.Len(t, output, 4)
+			require.Len(t, output, 1)
 			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation ouput did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
@@ -89,7 +99,12 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1.0)
 			require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
-			output, err = newAllocation(t, configPath, balance)
+			allocParam := createParams(map[string]interface{}{
+				"lock":   balance,
+				"size":   10485760,
+				"expire": "1h",
+			})
+			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -162,10 +177,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		})
 
 	})
-}
-
-func newAllocation(t *testing.T, cliConfigFilename string, lock float64) ([]string, error) {
-	return cli_utils.RunCommand(fmt.Sprintf("./zbox newallocation --lock %v --expire 300s --size 10485760 --silent --wallet %v_wallet.json  --configDir ./config --config %s", lock, escapedTestName(t), cliConfigFilename))
 }
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
