@@ -4,7 +4,7 @@ on:
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
-  ZBOX_BRANCH: staging
+  ZBOX_BRANCH: staging 
 
 jobs:
   system-tests:
