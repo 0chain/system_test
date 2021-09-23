@@ -38,9 +38,7 @@ func TestListFileSystem(t *testing.T) {
 				"remotepath": "/",
 				"json":       "",
 			}))
-			require.Nil(t, err,
-				"List files with no files in allocation failed due to error", err,
-				strings.Join(output, "\n"))
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 
 			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -62,7 +60,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 
@@ -103,7 +101,7 @@ func TestListFileSystem(t *testing.T) {
 				"remotepath": remotepath + filepath.Base(filename),
 				"encrypt":    "",
 			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 
 			expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
@@ -114,7 +112,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 
@@ -151,7 +149,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
 			var listResults []cli_model.ListFileResult
@@ -185,7 +183,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}))
-			require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
 			var listResults []cli_model.ListFileResult
@@ -303,11 +301,11 @@ func TestListFileSystem(t *testing.T) {
 				})
 
 				output, err := shareFolderInAllocation(t, configPath, shareParam)
-				require.Nil(t, err, err)
+				require.Nil(t, err, "share folder failed", strings.Join(output, "\n"))
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, err)
+				require.Nil(t, err, "extract auth token failed")
 				require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 			})
 			fname := filepath.Base(filename)
@@ -362,11 +360,11 @@ func TestListFileSystem(t *testing.T) {
 				})
 
 				output, err := shareFolderInAllocation(t, configPath, shareParam)
-				require.Nil(t, err, err)
+				require.Nil(t, err, "share failed", strings.Join(output, "\n"))
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, err)
+				require.Nil(t, err, "extract auth token failed")
 				require.NotEqual(t, "", authTicket)
 
 				h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -384,7 +382,7 @@ func TestListFileSystem(t *testing.T) {
 				"lookuphash": lookupHash,
 				"json":       "",
 			}))
-			require.Nil(t, err, err)
+			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -411,7 +409,7 @@ func TestListFileSystem(t *testing.T) {
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
 			}))
-			require.Nil(t, err, err)
+			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
 			var listResults []cli_model.ListFileResult
