@@ -2,12 +2,14 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	cli_model "github.com/0chain/system_test/internal/cli/model"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 )
 
 func TestRegisterWallet(t *testing.T) {
@@ -74,7 +76,7 @@ func TestRegisterWallet(t *testing.T) {
 			require.Nil(t, err, "An error occurred retrieving wallet balance", strings.Join(output, "\n"))
 
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \([0-9.]+ USD\)$`), output[0])
 		})
 	})
 }
