@@ -12,11 +12,6 @@ import (
 	"testing"
 )
 
-func pretty(data interface{}) {
-	bts, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(bts))
-}
-
 func TestFileMetadata(t *testing.T) {
 
 	t.Run("Success Scenarios", func(t *testing.T) {
@@ -68,8 +63,6 @@ func TestFileMetadata(t *testing.T) {
 			var meta cli_model.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
-
-			pretty(meta)
 
 			require.Equal(t, "f", meta.Type)
 			require.Equal(t, remotepath+fname, meta.Path)
