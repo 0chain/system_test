@@ -48,13 +48,13 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: "Cache Go Dependencies"
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+#      - name: "Cache Go Dependencies" -> This is required on github hosted agents but not on self hosted as go deps are already being present in the base image
+#        uses: actions/cache@v2
+#        with:
+#          path: ~/go/pkg/mod
+#          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+#          restore-keys: |
+#            ${{ runner.os }}-go-
       - name: "Build CLI Binaries"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         run: |
@@ -70,12 +70,15 @@ jobs:
         with:
           format: YYYY-MM-DD_HH.mm.ss
       - name: "Run CLI System Tests"
+        shell: 'script --return --quiet --command "bash {0}"'
         run: |
+          go get gotest.tools/gotestsum
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          CONFIG_PATH=./zbox_config.yaml go test ./... -v -count=1
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          ~/go/bin/gotestsum --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
