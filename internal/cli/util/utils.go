@@ -1,13 +1,14 @@
 package cli_utils
 
 import (
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var Logger = getLogger()

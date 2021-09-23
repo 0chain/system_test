@@ -619,15 +619,6 @@ func updateAllocation(t *testing.T, cliConfigFilename string, params string) ([]
 	return cli_utils.RunCommand(cmd)
 }
 
-func createNewAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
-	return cli_utils.RunCommand(fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
-		params,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"))
-}
-
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent --wallet %s --configDir ./config --config %s",

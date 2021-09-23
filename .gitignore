@@ -25,6 +25,9 @@ tests/cli_tests/tmp/*_test.txt
 **/cmdlog.log
 **/zbox
 **/zwallet
+**/allocation.txt
 
 .DS_STORE
 .idea
+.vscode
+tests/cli_tests/__debug_bin
