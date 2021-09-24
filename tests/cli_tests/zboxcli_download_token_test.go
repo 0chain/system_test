@@ -79,6 +79,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Len(t, output, 1)
 			require.Equal(t, "locked", output[0])
 
+			time.Sleep(30 * time.Second)
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -141,6 +142,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Equal(t, "locked", output[0])
 
 			// Read pool before download
+			time.Sleep(30 * time.Second)
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
