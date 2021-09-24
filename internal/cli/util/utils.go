@@ -34,7 +34,7 @@ func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error
 		output, err := RunCommand(commandString)
 
 		if err == nil {
-			return output, err
+			return output, nil
 		} else if count < maxAttempts {
 			Logger.Warnf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
 			time.Sleep(time.Second * 5)
