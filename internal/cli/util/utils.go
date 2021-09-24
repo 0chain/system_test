@@ -34,7 +34,7 @@ func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error
 		if err == nil || count > maxAttempts {
 			return output, err
 		}
-		Logger.Infof("Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
+		Logger.Infof("Command failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
 		time.Sleep(time.Second * 5)
 	}
 }

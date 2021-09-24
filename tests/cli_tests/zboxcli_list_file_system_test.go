@@ -573,7 +573,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	output, err := uploadFile(t, cliConfigFilename, param)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
-	require.Len(t, output, 2)
+	require.Len(t, output, 4)
 
 	expected := fmt.Sprintf(
 		"Status completed callback. Type = application/octet-stream. Name = %s",

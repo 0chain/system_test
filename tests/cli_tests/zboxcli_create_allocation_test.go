@@ -288,12 +288,12 @@ func createNewAllocation(t *testing.T, cliConfigFilename string, params string) 
 }
 
 func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
-	return cli_utils.RunCommandWithRetry(fmt.Sprintf(
+	return cli_utils.RunCommand(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"), 3)
+		escapedTestName(t)+"_allocation.txt"))
 }
 
 func createAllocationTestTeardown(t *testing.T, allocationID string) {
