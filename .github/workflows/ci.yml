@@ -1,4 +1,22 @@
 name: ci
+
+on:
+  workflow_dispatch:
+    name: test
+    inputs:
+      network:
+        description: 'which network you want to test'
+        default: 'dev.0chain.net'
+        required: true
+      zbox_branch:
+        description: 'which branch(zbox) you want to test'
+        default: 'staging'
+        required: true
+      zwallet_branch:
+        description: 'which branch(zwallet) you want to test'
+        default: 'staging'
+        required: true
+
 on:
   push:
 env:
@@ -12,6 +30,14 @@ jobs:
     runs-on: [self-hosted, tests-suite]
     timeout-minutes: 20
     steps:
+      - name: Set environment variables
+        if: github.event_name == 'test'
+        run: |
+            echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
+            echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch}" >> $GITHUB_ENV
+            echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch}" >> $GITHUB_ENV
+
+
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:
