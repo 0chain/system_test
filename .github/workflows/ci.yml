@@ -34,8 +34,8 @@ jobs:
         if: github.event_name == 'test'
         run: |
             echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
-            echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch}" >> $GITHUB_ENV
-            echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch}" >> $GITHUB_ENV
+            echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
+            echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch})" >> $GITHUB_ENV
 
 
       - name: "Checkout system tests"
