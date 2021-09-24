@@ -17,7 +17,6 @@ on:
         default: 'staging'
         required: true
 
-on:
   push:
 env:
   NETWORK: dev.0chain.net
