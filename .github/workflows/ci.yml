@@ -30,13 +30,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Set environment variables
-        if: {{ github.event_name == 'test' }}
+        # if: {{ github.event_name }} == 'test'
         run: |
             if "${{github.event_name}}" == "test"; then
               echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
               echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
               echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch})" >> $GITHUB_ENV
             fi
+
 
       - name: "Checkout system tests"
         uses: actions/checkout@v2
