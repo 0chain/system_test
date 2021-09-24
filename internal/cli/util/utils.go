@@ -50,25 +50,33 @@ func RandomAlphaNumericString(n int) string {
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
-	output := strings.FieldsFunc(string(rawOutput), newlineSplit)
+	output := strings.Split(string(rawOutput), "\n")
 	var sanitizedOutput []string
-	existingOutput := make(map[string]bool)
 
 	for _, lineOfOutput := range output {
-		var trimmedOutput = strings.TrimSpace(lineOfOutput)
+		var uniqueOutput = strings.Join(unique(strings.Split(lineOfOutput, "\r")), "\r")
+		var trimmedOutput = strings.TrimSpace(uniqueOutput)
 		if trimmedOutput != "" {
-			if _, existing := existingOutput[trimmedOutput]; !existing {
-				existingOutput[trimmedOutput] = true
-				sanitizedOutput = append(sanitizedOutput, trimmedOutput)
-			}
+			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
 		}
 	}
 
-	return sanitizedOutput
+	return unique(sanitizedOutput)
 }
 
-func newlineSplit(r rune) bool {
-	return r == '\n' || r == '\r'
+func unique(slice []string) []string {
+	var uniqueOutput []string
+	existingOutput := make(map[string]bool)
+
+	for _, element := range slice {
+		var trimmedElement = strings.TrimSpace(element)
+		if _, existing := existingOutput[trimmedElement]; !existing {
+			existingOutput[trimmedElement] = true
+			uniqueOutput = append(uniqueOutput, trimmedElement)
+		}
+	}
+
+	return uniqueOutput
 }
 
 func executeCommand(commandName string, args []string) ([]byte, error) {
