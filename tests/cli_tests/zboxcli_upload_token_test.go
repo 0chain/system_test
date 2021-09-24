@@ -147,10 +147,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 				"localpath":  "../../internal/dummy_file/five_MB_test_file",
 				"remotepath": "/",
 			})
-
-			require.Len(t, output, 2)
-			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
-
 			// Necessary for wp-info to update
 			time.Sleep(5 * time.Second)
 

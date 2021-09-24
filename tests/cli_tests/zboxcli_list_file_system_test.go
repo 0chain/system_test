@@ -592,14 +592,15 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
+	var maxAttempts = 3
 	var count = 0
 	for {
 		count++
 		output, err := cli_utils.RunCommand(cmd)
-		if err == nil || count > 3 {
+		if err == nil || count > maxAttempts {
 			return output, err
 		}
-		t.Logf("Retrying in 5s...")
+		t.Logf("Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
 		time.Sleep(time.Second * 5)
 	}
 

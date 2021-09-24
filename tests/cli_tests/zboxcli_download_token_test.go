@@ -132,10 +132,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				"localpath":  "../../internal/dummy_file/five_MB_test_file",
 				"remotepath": "/",
 			})
-			require.Nil(t, err, "Upload file failed", strings.Join(output, "\n"))
-
-			require.Len(t, output, 2)
-			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Lock read pool tokens
 			output, err = readPoolLock(t, configPath, allocationID, 0.4)
