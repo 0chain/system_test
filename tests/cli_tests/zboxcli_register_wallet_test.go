@@ -76,7 +76,7 @@ func TestRegisterWallet(t *testing.T) {
 			require.Nil(t, err, "An error occurred retrieving wallet balance", strings.Join(output, "\n"))
 
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile("Balance: 1.000 ZCN \\([0-9.]+ USD\\)$"), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \([0-9.]+ USD\)$`), output[0])
 		})
 	})
 }
