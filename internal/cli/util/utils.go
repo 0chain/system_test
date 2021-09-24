@@ -1,12 +1,12 @@
-package cli_utils
+package cliutils
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -27,13 +27,17 @@ func RunCommand(commandString string) ([]string, error) {
 }
 
 func RandomAlphaNumericString(n int) string {
-	rand.Seed(time.Now().UnixNano())
-	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return ""
+		}
+		ret[i] = letters[num.Int64()]
 	}
-	return string(b)
+
+	return string(ret)
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
@@ -59,7 +63,7 @@ func executeCommand(commandName string, args []string) ([]byte, error) {
 func sanitizeArgs(args []string) []string {
 	var sanitizedArgs []string
 	for _, arg := range args {
-		sanitizedArgs = append(sanitizedArgs, strings.Replace(arg, "\"", "", -1))
+		sanitizedArgs = append(sanitizedArgs, strings.ReplaceAll(arg, "\"", ""))
 	}
 
 	return sanitizedArgs
@@ -80,7 +84,7 @@ func getLogger() *logrus.Logger {
 		DisableQuote: true,
 	})
 
-	if strings.ToLower(strings.TrimSpace(os.Getenv("DEBUG"))) == "true" {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("DEBUG")), "true") {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
