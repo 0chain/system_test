@@ -179,7 +179,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Necessary for rp-info to update
-			time.Sleep(5 * time.Second)
+			time.Sleep(30 * time.Second) //TODO replace with poller
 
 			// Read pool before download
 			output, err = readPoolInfo(t, configPath, allocationID)
