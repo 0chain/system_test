@@ -254,7 +254,6 @@ func TestCreateAllocation(t *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "invalid argument \"1hour\" for \"--expire\" flag: time: unknown unit \"hour\" in duration \"1hour\"", output[len(output)-1])
 	})
-
 }
 
 func setupWallet(t *testing.T, configPath string) ([]string, error) {
@@ -278,7 +277,7 @@ func setupWallet(t *testing.T, configPath string) ([]string, error) {
 	return output, nil
 }
 
-func createNewAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	return cli_utils.RunCommandWithRetry(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,

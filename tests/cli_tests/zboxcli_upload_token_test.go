@@ -65,7 +65,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
-			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
@@ -109,7 +109,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
@@ -166,7 +166,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			require.Equal(t, true, finalWritePool[0].Locked)
 
 			// Blobber pool balance should reduce by (write price*filesize) for each blobber
-			for i := 0; i < len(finalWritePool[0].Blobber); i += 1 {
+			for i := 0; i < len(finalWritePool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
 
@@ -174,7 +174,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 				require.InDelta(t, intToZCN(initialWritePool[0].Blobber[i].Balance)-intToZCN(finalWritePool[0].Blobber[i].Balance), blobberWritePrice[finalWritePool[0].Blobber[i].BlobberID]*0.005, epsilon, "Error should be within epsilon")
 			}
 		})
-
 	})
 }
 
@@ -182,11 +181,11 @@ func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func challengePoolInfo(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox cp-info --allocation " + allocationID + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func getBlobberInfoJSONByID(t *testing.T, cliConfigFilename string, blobberID string) ([]string, error) {
+func getBlobberInfoJSONByID(t *testing.T, cliConfigFilename, blobberID string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox bl-info --blobber_id " + blobberID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
