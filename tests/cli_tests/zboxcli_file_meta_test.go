@@ -7,12 +7,18 @@ import (
 	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func TestFileMetadata(t *testing.T) {
+	t.Parallel()
+
+	// Create a folder to keep all the generated files to be uploaded
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
 
 	t.Run("Success Scenarios", func(t *testing.T) {
 		t.Parallel()
