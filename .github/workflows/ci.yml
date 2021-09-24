@@ -1,9 +1,26 @@
 name: ci
-on: [push, pull_request]
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'network'
+        default: 'dev.0chain.net'
+        required: true
+      zbox_branch:
+        description: 'branch:zbox'
+        default: 'staging'
+        required: true
+      zwallet_branch:
+        description: branch:zwallet'
+        default: 'staging'
+        required: true
+
+  push:
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
-  ZBOX_BRANCH: staging
+  ZBOX_BRANCH: staging 
 
 jobs:
   golangci:
@@ -21,6 +38,14 @@ jobs:
     runs-on: [self-hosted, tests-suite]
     timeout-minutes: 20
     steps:
+      - name: Reset GITHUB_ENV from workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+            echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
+            echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
+            echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+
+
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:
@@ -57,13 +82,13 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: "Cache Go Dependencies"
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+#      - name: "Cache Go Dependencies" -> This is required on github hosted agents but not on self hosted as go deps are already being present in the base image
+#        uses: actions/cache@v2
+#        with:
+#          path: ~/go/pkg/mod
+#          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+#          restore-keys: |
+#            ${{ runner.os }}-go-
       - name: "Build CLI Binaries"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         run: |
@@ -79,12 +104,15 @@ jobs:
         with:
           format: YYYY-MM-DD_HH.mm.ss
       - name: "Run CLI System Tests"
+        shell: 'script --return --quiet --command "bash {0}"'
         run: |
+          go get gotest.tools/gotestsum
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          CONFIG_PATH=./zbox_config.yaml go test ./... -v -count=1
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          ~/go/bin/gotestsum --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
