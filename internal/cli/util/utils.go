@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
@@ -35,7 +36,7 @@ func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error
 		if err == nil || count > maxAttempts {
 			return output, err
 		}
-		Logger.Infof("Command failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
+		fmt.Printf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
 		time.Sleep(time.Second * 5)
 	}
 }
