@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"strings"
+	"testing"
+
 	cli_model "github.com/0chain/system_test/internal/cli/model"
 	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
 )
 
 func TestCreateDir(t *testing.T) {
@@ -395,11 +396,11 @@ func TestCreateDir(t *testing.T) {
 	})
 }
 
-func createDir(t *testing.T, cliConfigFilename string, allocationID string, dirname string) ([]string, error) {
+func createDir(t *testing.T, cliConfigFilename, allocationID, dirname string) ([]string, error) {
 	return createDirForWallet(cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname)
 }
 
-func createDirForWallet(cliConfigFilename string, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string) ([]string, error) {
+func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string) ([]string, error) {
 	cmd := "./zbox createdir --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if withAllocationFlag {
 		cmd += ` --allocation "` + allocationID + `"`
@@ -410,7 +411,7 @@ func createDirForWallet(cliConfigFilename string, wallet string, withAllocationF
 	return cli_utils.RunCommand(cmd)
 }
 
-func listAll(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox list-all --silent --allocation " + allocationID +
 		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }

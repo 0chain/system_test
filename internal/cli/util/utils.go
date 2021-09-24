@@ -63,7 +63,7 @@ func executeCommand(commandName string, args []string) ([]byte, error) {
 func sanitizeArgs(args []string) []string {
 	var sanitizedArgs []string
 	for _, arg := range args {
-		sanitizedArgs = append(sanitizedArgs, strings.Replace(arg, "\"", "", -1))
+		sanitizedArgs = append(sanitizedArgs, strings.ReplaceAll(arg, "\"", ""))
 	}
 
 	return sanitizedArgs
