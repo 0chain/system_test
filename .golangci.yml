@@ -73,7 +73,7 @@ linters-settings:
       - name: atomic
       - name: line-length-limit
         severity: error
-        arguments: [150]
+        arguments: [550]
       - name: unhandled-error
         arguments: ["fmt.Printf", "myFunction"]
 
