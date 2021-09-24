@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 )
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
@@ -95,12 +96,12 @@ func TestListFileSystem(t *testing.T) {
 			err := createFileWithSize(filename, filesize)
 			require.Nil(t, err)
 
-			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+			output, err := uploadFile(t, configPath, map[string]interface{}{
 				"allocation": allocationID,
 				"localpath":  filename,
 				"remotepath": remotepath + filepath.Base(filename),
 				"encrypt":    "",
-			}))
+			})
 			require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 
@@ -570,8 +571,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
 
-	p := createParams(param)
-	output, err := uploadFileInAllocation(t, cliConfigFilename, p)
+	output, err := uploadFile(t, cliConfigFilename, param)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
 	require.Equal(t, 2, len(output))
@@ -583,14 +583,26 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.Equal(t, expected, output[1])
 }
 
-func uploadFileInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {
+func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		param,
+		p,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cli_utils.RunCommand(cmd)
+
+	var count = 0
+	for {
+		count++
+		output, err := cli_utils.RunCommand(cmd)
+		if err == nil || count > 3 {
+			return output, err
+		}
+		t.Logf("Retrying in 5s...")
+		time.Sleep(time.Second * 5)
+	}
+
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {

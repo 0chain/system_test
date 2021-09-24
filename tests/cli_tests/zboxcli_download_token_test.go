@@ -127,7 +127,11 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			allocationID := strings.Fields(output[0])[2]
 
 			// upload a dummy 5 MB file
-			output, err = uploadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file", "/")
+			uploadWithParam(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"localpath":  "../../internal/dummy_file/five_MB_test_file",
+				"remotepath": "/",
+			})
 			require.Nil(t, err, "Upload file failed", strings.Join(output, "\n"))
 
 			require.Len(t, output, 2)

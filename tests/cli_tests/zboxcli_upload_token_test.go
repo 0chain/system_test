@@ -142,8 +142,11 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			}
 
 			// upload a dummy 5 MB file
-			output, err = uploadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file", "/")
-			require.Nil(t, err, "Upload file failed", strings.Join(output, "\n"))
+			uploadWithParam(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"localpath":  "../../internal/dummy_file/five_MB_test_file",
+				"remotepath": "/",
+			})
 
 			require.Len(t, output, 2)
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
@@ -189,10 +192,6 @@ func challengePoolInfo(t *testing.T, cliConfigFilename string, allocationID stri
 
 func getBlobberInfoJSONByID(t *testing.T, cliConfigFilename string, blobberID string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox bl-info --blobber_id " + blobberID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-}
-
-func uploadFile(t *testing.T, cliConfigFilename string, allocation string, localpath string, remotepath string) ([]string, error) {
-	return cli_utils.RunCommand("./zbox upload --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func intToZCN(balance int64) float64 {
