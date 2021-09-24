@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Set environment variables
-        if: github.event_name == 'test'
+        if: ${{ github.event_name == 'test' }}
         run: |
             echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
