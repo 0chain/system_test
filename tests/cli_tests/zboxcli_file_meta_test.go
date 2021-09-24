@@ -13,9 +13,9 @@ import (
 )
 
 func TestFileMetadata(t *testing.T) {
-	t.Parallel()
 
 	t.Run("Success Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *testing.T) {
 			t.Parallel()
@@ -260,6 +260,7 @@ func TestFileMetadata(t *testing.T) {
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("Get File Meta on Another Wallet File Should Fail", func(t *testing.T) {
 			t.Parallel()
