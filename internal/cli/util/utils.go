@@ -1,7 +1,6 @@
 package cli_utils
 
 import (
-	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -35,7 +34,6 @@ func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error
 		if err == nil || count > maxAttempts {
 			return output, err
 		}
-		fmt.Printf("SYSOUT: Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
 		Logger.Infof("Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
 		time.Sleep(time.Second * 5)
 	}
@@ -54,10 +52,15 @@ func RandomAlphaNumericString(n int) string {
 func sanitizeOutput(rawOutput []byte) []string {
 	output := strings.Split(string(rawOutput), "\n")
 	var sanitizedOutput []string
+	existingOutput := make(map[string]bool)
 
 	for _, lineOfOutput := range output {
-		if strings.TrimSpace(lineOfOutput) != "" {
-			sanitizedOutput = append(sanitizedOutput, strings.TrimSpace(lineOfOutput))
+		var trimmedOutput = strings.TrimSpace(lineOfOutput)
+		if trimmedOutput != "" {
+			if _, existing := existingOutput[trimmedOutput]; !existing {
+				existingOutput[trimmedOutput] = true
+				sanitizedOutput = append(sanitizedOutput, trimmedOutput)
+			}
 		}
 	}
 
