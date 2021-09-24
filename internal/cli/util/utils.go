@@ -54,7 +54,7 @@ func sanitizeOutput(rawOutput []byte) []string {
 	var sanitizedOutput []string
 
 	for _, lineOfOutput := range output {
-		var uniqueOutput = strings.Join(unique(strings.Split(lineOfOutput, "\r")), "\\r")
+		var uniqueOutput = strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
 		var trimmedOutput = strings.TrimSpace(uniqueOutput)
 		if trimmedOutput != "" {
 			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
