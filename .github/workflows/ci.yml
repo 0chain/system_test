@@ -2,7 +2,6 @@ name: ci
 
 on:
   workflow_dispatch:
-    name: test
     inputs:
       network:
         description: 'network'
@@ -32,11 +31,9 @@ jobs:
       - name: Reset GITHUB_ENV from workflow_dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
-            # if [[ "${{github.event_name}}" -eq "workflow_dispatch" ]]; then
             echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
             echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
-            # fi
 
 
       - name: "Checkout system tests"
