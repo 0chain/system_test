@@ -13,6 +13,7 @@ import (
 )
 
 func TestFileMetadata(t *testing.T) {
+	t.Parallel()
 
 	t.Run("Success Scenarios", func(t *testing.T) {
 
