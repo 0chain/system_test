@@ -30,9 +30,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Set environment variables
-        # if: {{ github.event.name }} == 'test'
+        if: github.event_name == 'workflow_dispatch'
         run: |
-            if [[ "${{github.event.name}}" -eq "test" ]]; then
+            if [[ "${{github.event_name}}" -eq "workflow_dispatch" ]]; then
               echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
               echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
               echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch})" >> $GITHUB_ENV
