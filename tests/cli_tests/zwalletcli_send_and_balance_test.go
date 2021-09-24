@@ -1,11 +1,13 @@
 package cli_tests
 
 import (
-	"github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 func TestSendAndBalance(t *testing.T) {
@@ -28,7 +30,7 @@ func TestSendAndBalance(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1)
 			require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-			successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 1.000 ZCN \([0-9]*\.?[0-9]+ USD\)$`)
+			successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`)
 
 			// Before send balance checks
 			output, err = getBalance(t, configPath)
@@ -44,7 +46,7 @@ func TestSendAndBalance(t *testing.T) {
 			require.Equal(t, "Failed to get balance:", output[0])
 
 			// Transfer ZCN from sender to target wallet
-			output, err = sendZCN(t, configPath, target.ClientId, "1", "transfer")
+			output, err = sendZCN(t, configPath, target.ClientID, "1", "transfer")
 			require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -81,7 +83,7 @@ func TestSendAndBalance(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1)
 			require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-			output, err = sendZCN(t, configPath, target.ClientId, "1", "rich description")
+			output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description")
 			require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -95,7 +97,7 @@ func TestSendAndBalance(t *testing.T) {
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-			output, err = cli_utils.RunCommand("./zwallet send --silent --tokens 1" +
+			output, err = cliutils.RunCommand("./zwallet send --silent --tokens 1" +
 				" --to_client_id 7ec733204418d72b68e3579bdf55881b1528c676850976920de3f73e45d4fafa" +
 				" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + configPath,
 			)
@@ -122,7 +124,7 @@ func TestSendAndBalance(t *testing.T) {
 
 			wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-			output, err = sendZCN(t, configPath, target.ClientId, "1", "")
+			output, err = sendZCN(t, configPath, target.ClientID, "1", "")
 			require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -170,7 +172,7 @@ func TestSendAndBalance(t *testing.T) {
 			output, err = executeFaucetWithTokens(t, configPath, 1)
 			require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-			output, err = sendZCN(t, configPath, target.ClientId, "1", "negative token")
+			output, err = sendZCN(t, configPath, target.ClientID, "1", "negative token")
 			require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -196,7 +198,7 @@ func TestSendAndBalance(t *testing.T) {
 
 			wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-			output, err = sendZCN(t, configPath, target.ClientId, "1.5", "exceed bal")
+			output, err = sendZCN(t, configPath, target.ClientID, "1.5", "exceed bal")
 			require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -223,7 +225,7 @@ func TestSendAndBalance(t *testing.T) {
 			wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 				"\"error\":\"invalid_request: Invalid request (value must be greater than or equal to zero)\"}"
 
-			output, err = sendZCN(t, configPath, target.ClientId, "-1", "negative token")
+			output, err = sendZCN(t, configPath, target.ClientID, "-1", "negative token")
 			require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -256,7 +258,7 @@ func TestSendAndBalance(t *testing.T) {
 			wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"txn_exceed_max_payload\"," +
 				"\"error\":\"txn_exceed_max_payload: transaction payload exceeds the max payload (98304)\"}"
 
-			output, err = sendZCN(t, configPath, target.ClientId, "1", longDesc)
+			output, err = sendZCN(t, configPath, target.ClientID, "1", longDesc)
 			require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -278,7 +280,7 @@ func TestSendAndBalance(t *testing.T) {
 			wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 				"\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}"
 
-			output, err = sendZCN(t, configPath, wallet.ClientId, "1", "send self")
+			output, err = sendZCN(t, configPath, wallet.ClientID, "1", "send self")
 			require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
@@ -287,8 +289,8 @@ func TestSendAndBalance(t *testing.T) {
 	})
 }
 
-func sendZCN(t *testing.T, cliConfigFilename string, toClientID string, tokens string, desc string) ([]string, error) {
-	return cli_utils.RunCommand("./zwallet send --silent --tokens " + tokens +
+func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string) ([]string, error) {
+	return cliutils.RunCommand("./zwallet send --silent --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
 		" --to_client_id " + toClientID +
 		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
