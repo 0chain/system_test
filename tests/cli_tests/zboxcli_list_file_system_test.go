@@ -14,7 +14,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 )
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
@@ -592,18 +591,7 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	var maxAttempts = 3
-	var count = 0
-	for {
-		count++
-		output, err := cli_utils.RunCommand(cmd)
-		if err == nil || count > maxAttempts {
-			return output, err
-		}
-		t.Logf("Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
-		time.Sleep(time.Second * 5)
-	}
-
+	return cli_utils.RunCommandWithRetry(cmd, 3)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {

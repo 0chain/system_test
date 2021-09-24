@@ -1,6 +1,7 @@
 package cli_utils
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -24,6 +25,20 @@ func RunCommand(commandString string) ([]string, error) {
 	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
+}
+
+func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error) {
+	var count = 0
+	for {
+		count++
+		output, err := RunCommand(commandString)
+		if err == nil || count > maxAttempts {
+			return output, err
+		}
+		fmt.Printf("SYSOUT: Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
+		Logger.Infof("Upload failed on attempt [%v/%v] due to error [%v] and output [%v]", count, maxAttempts, err, strings.Join(output, "\n"))
+		time.Sleep(time.Second * 5)
+	}
 }
 
 func RandomAlphaNumericString(n int) string {
