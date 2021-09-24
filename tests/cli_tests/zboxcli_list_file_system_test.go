@@ -41,8 +41,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 			}))
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 		})
 
@@ -413,7 +412,7 @@ func TestListFileSystem(t *testing.T) {
 			totalFiles := numFiles * len(remotepaths)
 			totalFolders := len(remotepaths) - 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Equal(t, expectedTotalEntries, len(listResults))
+			require.Len(t, listResults, expectedTotalEntries)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
