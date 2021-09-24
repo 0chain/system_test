@@ -5,15 +5,15 @@ on:
     name: test
     inputs:
       network:
-        description: 'which network you want to test'
+        description: 'network'
         default: 'dev.0chain.net'
         required: true
       zbox_branch:
-        description: 'which branch(zbox) you want to test'
+        description: 'branch:zbox'
         default: 'staging'
         required: true
       zwallet_branch:
-        description: 'which branch(zwallet) you want to test'
+        description: branch:zwallet'
         default: 'staging'
         required: true
 
@@ -30,9 +30,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Set environment variables
-        # if: {{ github.event_name }} == 'test'
+        if: {{ github.event.name }} == 'test'
         run: |
-            if "${{github.event_name}}" == "test"; then
+            if "${{github.event.name}}" == "test"; then
               echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
               echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
               echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch})" >> $GITHUB_ENV
