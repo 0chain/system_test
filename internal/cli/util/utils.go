@@ -50,7 +50,7 @@ func RandomAlphaNumericString(n int) string {
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
-	output := strings.Split(string(rawOutput), "\n")
+	output := strings.FieldsFunc(string(rawOutput), newlineSplit)
 	var sanitizedOutput []string
 	existingOutput := make(map[string]bool)
 
@@ -65,6 +65,10 @@ func sanitizeOutput(rawOutput []byte) []string {
 	}
 
 	return sanitizedOutput
+}
+
+func newlineSplit(r rune) bool {
+	return r == '\n' || r == '\r'
 }
 
 func executeCommand(commandName string, args []string) ([]byte, error) {
