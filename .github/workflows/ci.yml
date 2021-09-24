@@ -29,14 +29,14 @@ jobs:
     runs-on: [self-hosted, tests-suite]
     timeout-minutes: 20
     steps:
-      - name: Set environment variables
+      - name: Reset GITHUB_ENV from workflow_dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
-            if [[ "${{github.event_name}}" -eq "workflow_dispatch" ]]; then
-              echo "NETWORK=$(echo ${github.event.inputs.network})" >> $GITHUB_ENV
-              echo "ZWALLET_BRANCH=$(echo ${github.event.inputs.zbox_branch})" >> $GITHUB_ENV
-              echo "ZBOX_BRANCH=$(echo ${github.event.inputs.zwallet_branch})" >> $GITHUB_ENV
-            fi
+            # if [[ "${{github.event_name}}" -eq "workflow_dispatch" ]]; then
+            echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
+            echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
+            echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+            # fi
 
 
       - name: "Checkout system tests"
