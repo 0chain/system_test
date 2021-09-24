@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/0chain/gosdk/core/conf"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var configPath string
@@ -17,7 +18,7 @@ func TestMain(m *testing.M) {
 
 	if configPath == "" {
 		configPath = "./zbox_config.yaml"
-		cli_utils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
+		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {

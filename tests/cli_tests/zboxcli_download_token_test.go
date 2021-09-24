@@ -39,7 +39,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
@@ -69,7 +69,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
@@ -94,7 +94,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Equal(t, true, readPool[0].Locked)
 
 			balanceInTotal := float64(0)
-			for i := 0; i < len(readPool[0].Blobber); i += 1 {
+			for i := 0; i < len(readPool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), readPool[0].Blobber[i].Balance)
 				balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
@@ -122,7 +122,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
@@ -155,7 +155,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Less(t, 0, len(initialReadPool[0].Blobber))
 			require.Equal(t, true, initialReadPool[0].Locked)
 
-			for i := 0; i < len(initialReadPool[0].Blobber); i += 1 {
+			for i := 0; i < len(initialReadPool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
 			}
@@ -196,7 +196,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 			require.Equal(t, true, finalReadPool[0].Locked)
 
-			for i := 0; i < len(finalReadPool[0].Blobber); i += 1 {
+			for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
@@ -207,19 +207,19 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 	})
 }
 
-func readPoolInfo(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
+func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func readPoolLock(t *testing.T, cliConfigFilename string, allocationID string, tokens float64) ([]string, error) {
+func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
 	return cli_utils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, escapedTestName(t), cliConfigFilename))
 }
 
-func getDownloadCostInInt(t *testing.T, cliConfigFilename string, allocationID string, remotepath string) ([]string, error) {
+func getDownloadCostInInt(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func downloadFile(t *testing.T, cliConfigFilename string, allocation string, localpath string, remotepath string) ([]string, error) {
+func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
 	return cli_utils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
