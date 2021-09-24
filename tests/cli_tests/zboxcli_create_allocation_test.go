@@ -286,7 +286,7 @@ func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]stri
 		escapedTestName(t)+"_allocation.txt"), 3)
 }
 
-func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	return cli_utils.RunCommand(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,

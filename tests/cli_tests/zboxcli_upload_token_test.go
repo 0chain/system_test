@@ -148,7 +148,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 				"remotepath": "/",
 			})
 			// Necessary for wp-info to update
-			time.Sleep(30 * time.Second) //TODO replace with poller
+			time.Sleep(30 * time.Second) // TODO replace with poller
 
 			// Get the new Write-Pool info after upload
 			output, err = writePoolInfo(t, configPath)
