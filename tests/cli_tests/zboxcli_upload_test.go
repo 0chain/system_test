@@ -13,8 +13,10 @@ import (
 func TestUpload(t *testing.T) {
 
 	t.Run("Success Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 			fileSize := int64(256)
@@ -43,6 +45,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload File to a Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 			fileSize := int64(1024)
@@ -73,6 +76,7 @@ func TestUpload(t *testing.T) {
 		//FIXME: POSSIBLE BUG: Uploading file to a remote directory without
 		// filename causes the file to be renamed to directory's name and upload to root
 		t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 			fileSize := int64(1024)
@@ -130,6 +134,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload File to Nested Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 			fileSize := int64(1024)
@@ -158,6 +163,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload File with Thumbnail Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(10 * 1024 * 1024)
 			fileSize := int64(256)
@@ -190,6 +196,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload Image File Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(10 * 1024 * 1024)
 
@@ -216,6 +223,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload Video File Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(100 * 1024 * 1024)
 
@@ -272,8 +280,11 @@ func TestUpload(t *testing.T) {
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
+			t.Parallel()
+
 			allocSize := int64(2048)
 			fileSize := int64(1024)
 
@@ -389,6 +400,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload Non-Existent File Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 
@@ -413,6 +425,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload Blank File Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			allocSize := int64(2048)
 			fileSize := int64(0)
@@ -437,6 +450,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload without any Parameter Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			_, err := registerWallet(t, configPath)
 			require.Nil(t, err)
@@ -450,6 +464,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		t.Run("Upload to Allocation without other Parameter Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size": 2048,
