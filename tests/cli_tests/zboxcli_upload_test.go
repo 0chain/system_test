@@ -10,14 +10,7 @@ import (
 	"testing"
 )
 
-func pretty(data interface{}) {
-	bts, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(bts))
-}
-
 func TestUpload(t *testing.T) {
-
-	// Scenarios //
 
 	t.Run("Success Scenarios", func(t *testing.T) {
 
