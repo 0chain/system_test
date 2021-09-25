@@ -3,8 +3,8 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	cli_model "github.com/0chain/system_test/internal/cli/model"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 	"os"
@@ -39,7 +39,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -67,7 +67,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -96,7 +96,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -152,7 +152,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -187,7 +187,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -217,52 +217,52 @@ func TestFileMetadata(t *testing.T) {
 		})
 
 		//FIXME: Test is failing because uploading encrypted file doesn't work: Uncomment when fixed
-		//t.Run("Get File Meta for Encrypted File Should Work", func(t *testing.T) {
-		//	t.Parallel()
-		//
-		//	allocationID := setupAllocation(t, configPath, map[string]interface{}{
-		//		"size": 10000,
-		//	})
-		//
-		//	// First Upload a file to the root directory
-		//	filesize := int64(10)
-		//	remotepath := "/"
-		//	filename := generateRandomTestFileName(t)
-		//	fname := filepath.Base(filename)
-		//
-		//	err := createFileWithSize(filename, filesize)
-		//	require.Nil(t, err)
-		//
-		//	output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
-		//		"allocation": allocationID,
-		//		"localpath":  filename,
-		//		"remotepath": remotepath,
-		//		"encrypt":    "",
-		//	}))
-		//	require.Nil(t, err, strings.Join(output, "\n"))
-		//	require.Len(t, output, 2)
-		//
-		//	expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
-		//	require.Equal(t, expected, output[1], strings.Join(output, "\n"))
-		//
-		//	output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
-		//		"allocation": allocationID,
-		//		"json":       "",
-		//		"remotepath": remotepath + fname,
-		//	}))
-		//	require.Nil(t, err, strings.Join(output, "\n"))
-		//	require.Len(t, output, 1)
-		//
-		//	var meta cli_model.FileMetaResult
-		//	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-		//	require.Nil(t, err, strings.Join(output, "\n"))
-		//
-		//	require.Equal(t, "f", meta.Type)
-		//	require.Equal(t, remotepath+fname, meta.Path)
-		//	require.Equal(t, fname, meta.Name)
-		//	require.Equal(t, filesize, meta.Size)
-		//	require.NotEqual(t, "", meta.EncryptedKey)
-		//})
+		t.Run("Get File Meta for Encrypted File Should Work", func(t *testing.T) {
+			t.Parallel()
+
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
+				"size": 10000,
+			})
+
+			// First Upload a file to the root directory
+			filesize := int64(10)
+			remotepath := "/"
+			filename := generateRandomTestFileName(t)
+			fname := filepath.Base(filename)
+
+			err := createFileWithSize(filename, filesize)
+			require.Nil(t, err)
+
+			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"localpath":  filename,
+				"remotepath": remotepath,
+				"encrypt":    "",
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
+			require.Equal(t, expected, output[1], strings.Join(output, "\n"))
+
+			output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"json":       "",
+				"remotepath": remotepath + fname,
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			var meta climodel.FileMetaResult
+			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			require.Equal(t, "f", meta.Type)
+			require.Equal(t, remotepath+fname, meta.Path)
+			require.Equal(t, fname, meta.Name)
+			require.Equal(t, filesize, meta.Size)
+			require.NotEqual(t, "", meta.EncryptedKey)
+		})
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
@@ -291,7 +291,7 @@ func TestFileMetadata(t *testing.T) {
 				require.Nil(t, err, strings.Join(output, "\n"))
 				require.Len(t, output, 1)
 
-				var meta cli_model.FileMetaResult
+				var meta climodel.FileMetaResult
 				err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 				require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -314,7 +314,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var meta cli_model.FileMetaResult
+			var meta climodel.FileMetaResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 			require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -408,5 +408,5 @@ func getFileMeta(t *testing.T, cliConfigFilename string, param string) ([]string
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cli_utils.RunCommand(cmd)
+	return cliutils.RunCommand(cmd)
 }
