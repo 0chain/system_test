@@ -28,7 +28,7 @@ func RunCommand(commandString string) ([]string, error) {
 }
 
 func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error) {
-	var count = 0
+	var count int
 	for {
 		count++
 		output, err := RunCommand(commandString)
@@ -64,8 +64,8 @@ func sanitizeOutput(rawOutput []byte) []string {
 	var sanitizedOutput []string
 
 	for _, lineOfOutput := range output {
-		var uniqueOutput = strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
-		var trimmedOutput = strings.TrimSpace(uniqueOutput)
+		uniqueOutput := strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
+		trimmedOutput := strings.TrimSpace(uniqueOutput)
 		if trimmedOutput != "" {
 			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
 		}
@@ -79,7 +79,7 @@ func unique(slice []string) []string {
 	existingOutput := make(map[string]bool)
 
 	for _, element := range slice {
-		var trimmedElement = strings.TrimSpace(element)
+		trimmedElement := strings.TrimSpace(element)
 		if _, existing := existingOutput[trimmedElement]; !existing {
 			existingOutput[trimmedElement] = true
 			uniqueOutput = append(uniqueOutput, trimmedElement)
