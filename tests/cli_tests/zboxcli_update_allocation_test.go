@@ -8,6 +8,7 @@ import (
 	"github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -556,13 +557,8 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	// First create a wallet and run faucet command
-	output, err := registerWallet(t, cliConfigFilename)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, cliConfigFilename, 1)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
-
+	tokens := 1.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,
@@ -572,10 +568,23 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
 	for _, params := range extraParams {
+		// Extract parameters unrelated to upload
+		if tok, ok := params["tokens"]; ok {
+			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
+			require.Nil(t, err)
+			tokens = token
+			delete(params, "tokens")
+		}
 		for k, v := range params {
 			allocParam[k] = v
 		}
 	}
+	// First create a wallet and run faucet command
+	output, err := registerWallet(t, cliConfigFilename)
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+	output, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 	output, err = createNewAllocation(t, cliConfigFilename, createParams(allocParam))
 	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
