@@ -248,6 +248,34 @@ func TestUpload(t *testing.T) {
 			)
 			require.Equal(t, expected, output[1])
 		})
+
+		t.Run("Upload File with Encryption Should Work", func(t *testing.T) {
+			t.Parallel()
+
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
+				"size": 10000,
+			})
+
+			filename := generateRandomTestFileName(t)
+
+			err := createFileWithSize(filename, 10)
+			require.Nil(t, err)
+
+			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"localpath":  filename,
+				"remotepath": "/",
+				"encrypt":    "",
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1])
+		})
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
