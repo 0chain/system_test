@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cli_model "github.com/0chain/system_test/internal/cli/model"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,7 +44,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = challengePoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
 
-			challengePool := cli_model.ChallengePoolInfo{}
+			challengePool := climodel.ChallengePoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &challengePool)
 			require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
 
@@ -73,14 +73,14 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
-			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
 			output, err = writePoolInfo(t, configPath)
 			require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
 
-			writePool := []cli_model.WritePoolInfo{}
+			writePool := []climodel.WritePoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &writePool)
 			require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
 
@@ -117,14 +117,14 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 			require.Len(t, output, 1)
 			matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-			require.Regexp(t, matcher, output[0], "Allocation creation ouput did not match expected")
+			require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 			allocationID := strings.Fields(output[0])[2]
 
 			output, err = writePoolInfo(t, configPath)
 			require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
-			initialWritePool := []cli_model.WritePoolInfo{}
+			initialWritePool := []climodel.WritePoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &initialWritePool)
 			require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
@@ -157,13 +157,13 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			})
 
 			// Necessary for wp-info to update
-			time.Sleep(30 * time.Second) //TODO replace with poller
+			time.Sleep(30 * time.Second) // TODO replace with poller
 
 			// Get the new Write-Pool info after upload
 			output, err = writePoolInfo(t, configPath)
 			require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
 
-			finalWritePool := []cli_model.WritePoolInfo{}
+			finalWritePool := []climodel.WritePoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &finalWritePool)
 			require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
@@ -178,7 +178,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			output, err = challengePoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
 
-			challengePool := cli_model.ChallengePoolInfo{}
+			challengePool := climodel.ChallengePoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &challengePool)
 			require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
 
@@ -190,7 +190,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 			// Blobber pool balance should reduce by (write price*filesize) for each blobber
 			totalChangeInWritePool := float64(0)
-			for i := 0; i < len(finalWritePool[0].Blobber); i += 1 {
+			for i := 0; i < len(finalWritePool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
 
@@ -201,20 +201,19 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon)
 			require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon)
 		})
-
 	})
 }
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cli_utils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename string, allocationID string, localpath string) ([]string, error) {
-	return cli_utils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func challengePoolInfo(t *testing.T, cliConfigFilename string, allocationID string) ([]string, error) {
-	return cli_utils.RunCommand("./zbox cp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox cp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func intToZCN(balance int64) float64 {

@@ -6,8 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0chain/gosdk/core/conf"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var configPath string
@@ -17,7 +16,7 @@ func TestMain(m *testing.M) {
 
 	if configPath == "" {
 		configPath = "./zbox_config.yaml"
-		cli_utils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
+		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
@@ -36,18 +35,4 @@ func TestMain(m *testing.M) {
 
 	exitRun := m.Run()
 	os.Exit(exitRun)
-}
-
-func GetConfig(t *testing.T) conf.Config {
-	t.Helper()
-	if configPath == "" {
-		t.Fatal("configPath is empty, TestMain not called")
-	}
-
-	config, err := conf.LoadConfigFile(configPath)
-	if err != nil {
-		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
-	}
-
-	return config
 }

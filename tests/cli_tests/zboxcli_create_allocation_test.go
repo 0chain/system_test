@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -254,32 +254,31 @@ func TestCreateAllocation(t *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "invalid argument \"1hour\" for \"--expire\" flag: time: unknown unit \"hour\" in duration \"1hour\"", output[len(output)-1])
 	})
-
 }
 
 func setupWallet(t *testing.T, configPath string) ([]string, error) {
 	output, err := registerWallet(t, configPath)
 	if err != nil {
-		cli_utils.Logger.Errorf(err.Error())
+		cliutils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
 	_, err = executeFaucetWithTokens(t, configPath, 1)
 	if err != nil {
-		cli_utils.Logger.Errorf(err.Error())
+		cliutils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	_, err = getBalance(t, configPath)
 	if err != nil {
-		cli_utils.Logger.Errorf(err.Error())
+		cliutils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
 	return output, nil
 }
 
-func createNewAllocation(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
-	return cli_utils.RunCommandWithRetry(fmt.Sprintf(
+func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return cliutils.RunCommandWithRetry(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",
@@ -287,13 +286,13 @@ func createNewAllocation(t *testing.T, cliConfigFilename string, params string) 
 		escapedTestName(t)+"_allocation.txt"), 3)
 }
 
-func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
-	return cli_utils.RunCommandWithRetry(fmt.Sprintf(
+func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return cliutils.RunCommand(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"), 3)
+		escapedTestName(t)+"_allocation.txt"))
 }
 
 func createAllocationTestTeardown(t *testing.T, allocationID string) {

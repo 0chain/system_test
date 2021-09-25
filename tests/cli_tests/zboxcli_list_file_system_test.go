@@ -1,19 +1,21 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	cli_model "github.com/0chain/system_test/internal/cli/model"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
-	"math/rand"
+	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
@@ -39,8 +41,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 			}))
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 		})
 
@@ -64,7 +65,7 @@ func TestListFileSystem(t *testing.T) {
 
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -116,7 +117,7 @@ func TestListFileSystem(t *testing.T) {
 
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -152,7 +153,7 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -186,7 +187,7 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -219,7 +220,7 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -263,12 +264,12 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
 			require.Len(t, listResults, numFiles)
-			var result cli_model.ListFileResult
+			var result climodel.ListFileResult
 			for _, res := range listResults {
 				if res.LookupHash == lookupHash {
 					result = res
@@ -312,6 +313,7 @@ func TestListFileSystem(t *testing.T) {
 
 			// Just register a wallet so that we can work further
 			_, err := registerWallet(t, configPath)
+			require.Nil(t, err)
 
 			// Listing contents using auth-ticket: should work
 			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -321,7 +323,7 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -391,20 +393,10 @@ func TestListFileSystem(t *testing.T) {
 		t.Run("List All Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
-			filesize := int64(10)
 			remotepaths := []string{"/", "/dir/"}
 			numFiles := 2
 
 			allocationID := setupAllocation(t, configPath)
-
-			var filenames []string
-
-			// Upload files in all the remote-paths
-			for i := 0; i < numFiles; i++ {
-				for _, rp := range remotepaths {
-					filenames = append(filenames, generateFileAndUpload(t, allocationID, rp, filesize))
-				}
-			}
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -412,7 +404,7 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -420,7 +412,7 @@ func TestListFileSystem(t *testing.T) {
 			totalFiles := numFiles * len(remotepaths)
 			totalFolders := len(remotepaths) - 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Equal(t, expectedTotalEntries, len(listResults))
+			require.Len(t, listResults, expectedTotalEntries)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -492,7 +484,7 @@ func TestListFileSystem(t *testing.T) {
 
 			require.Len(t, output, 1)
 
-			var listResults []cli_model.ListFileResult
+			var listResults []climodel.ListFileResult
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
@@ -545,11 +537,11 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	return fmt.Sprintf("%s/%d_test.txt", path, rand.Int63())
+	nBig, _ := rand.Int(rand.Reader, big.NewInt(27))
+	return fmt.Sprintf("%s/%d_test.txt", path, nBig.Int64())
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
-
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
@@ -566,14 +558,13 @@ func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size i
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
-
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
 
 	output, err := uploadFile(t, cliConfigFilename, param)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
-	require.Equal(t, 2, len(output))
+	require.Len(t, output, 2)
 
 	expected := fmt.Sprintf(
 		"Status completed callback. Type = application/octet-stream. Name = %s",
@@ -591,35 +582,35 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cli_utils.RunCommandWithRetry(cmd, 3)
+	return cliutils.RunCommandWithRetry(cmd, 3)
 }
 
-func shareFolderInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {
+func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cli_utils.RunCommand(cmd)
+	return cliutils.RunCommand(cmd)
 }
 
-func listFilesInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {
+func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cli_utils.RunCommand(cmd)
+	return cliutils.RunCommand(cmd)
 }
 
-func listAllFilesInAllocation(t *testing.T, cliConfigFilename string, param string) ([]string, error) {
+func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cli_utils.RunCommand(cmd)
+	return cliutils.RunCommand(cmd)
 }
