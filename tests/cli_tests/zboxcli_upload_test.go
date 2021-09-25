@@ -195,6 +195,59 @@ func TestUpload(t *testing.T) {
 			)
 			require.Equal(t, expected, output[1])
 		})
+
+		t.Run("Upload Image File Should Work", func(t *testing.T) {
+
+			allocSize := int64(10 * 1024 * 1024)
+
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
+				"size": allocSize,
+			})
+
+			filename, err := filepath.Abs("../../internal/dummy_file/0.png")
+			require.Nil(t, err, filename)
+
+			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": "/",
+				"localpath":  filename,
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = image/png. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1])
+		})
+
+		t.Run("Upload Video File Should Work", func(t *testing.T) {
+
+			allocSize := int64(100 * 1024 * 1024)
+
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
+				"size":   allocSize,
+				"tokens": 9.9,
+			})
+
+			filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
+			require.Nil(t, err, filename)
+
+			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": "/",
+				"localpath":  filename,
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = video/mp4. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1])
+		})
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
