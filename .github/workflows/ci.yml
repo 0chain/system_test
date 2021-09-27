@@ -1,17 +1,49 @@
 name: ci
+
 on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'network'
+        default: 'dev.0chain.net'
+        required: true
+      zbox_branch:
+        description: 'zbox branch'
+        default: 'staging'
+        required: true
+      zwallet_branch:
+        description: 'zwallet branch'
+        default: 'staging'
+        required: true
+
   push:
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
-  ZBOX_BRANCH: staging
+  ZBOX_BRANCH: staging 
 
 jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.42
+
   system-tests:
     name: System Tests
     runs-on: [self-hosted, tests-suite]
     timeout-minutes: 20
     steps:
+      - name: "Use params from user input"
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+            echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
+            echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
+            echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:

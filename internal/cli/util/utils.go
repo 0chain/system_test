@@ -1,13 +1,15 @@
-package cli_utils
+package cliutils
 
 import (
-	"github.com/sirupsen/logrus"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var Logger = getLogger()
@@ -25,14 +27,36 @@ func RunCommand(commandString string) ([]string, error) {
 	return sanitizeOutput(rawOutput), err
 }
 
-func RandomAlphaNumericString(n int) string {
-	rand.Seed(time.Now().UnixNano())
-	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error) {
+	var count int
+	for {
+		count++
+		output, err := RunCommand(commandString)
+
+		if err == nil {
+			return output, nil
+		} else if count < maxAttempts {
+			Logger.Warnf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			time.Sleep(time.Second * 5)
+		} else {
+			Logger.Warnf("Command failed on final attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			return output, err
+		}
 	}
-	return string(b)
+}
+
+func RandomAlphaNumericString(n int) string {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return ""
+		}
+		ret[i] = letters[num.Int64()]
+	}
+
+	return string(ret)
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
@@ -40,12 +64,29 @@ func sanitizeOutput(rawOutput []byte) []string {
 	var sanitizedOutput []string
 
 	for _, lineOfOutput := range output {
-		if strings.TrimSpace(lineOfOutput) != "" {
-			sanitizedOutput = append(sanitizedOutput, strings.TrimSpace(lineOfOutput))
+		uniqueOutput := strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
+		trimmedOutput := strings.TrimSpace(uniqueOutput)
+		if trimmedOutput != "" {
+			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
 		}
 	}
 
-	return sanitizedOutput
+	return unique(sanitizedOutput)
+}
+
+func unique(slice []string) []string {
+	var uniqueOutput []string
+	existingOutput := make(map[string]bool)
+
+	for _, element := range slice {
+		trimmedElement := strings.TrimSpace(element)
+		if _, existing := existingOutput[trimmedElement]; !existing {
+			existingOutput[trimmedElement] = true
+			uniqueOutput = append(uniqueOutput, trimmedElement)
+		}
+	}
+
+	return uniqueOutput
 }
 
 func executeCommand(commandName string, args []string) ([]byte, error) {
@@ -58,7 +99,7 @@ func executeCommand(commandName string, args []string) ([]byte, error) {
 func sanitizeArgs(args []string) []string {
 	var sanitizedArgs []string
 	for _, arg := range args {
-		sanitizedArgs = append(sanitizedArgs, strings.Replace(arg, "\"", "", -1))
+		sanitizedArgs = append(sanitizedArgs, strings.ReplaceAll(arg, "\"", ""))
 	}
 
 	return sanitizedArgs
@@ -79,7 +120,7 @@ func getLogger() *logrus.Logger {
 		DisableQuote: true,
 	})
 
-	if strings.ToLower(strings.TrimSpace(os.Getenv("DEBUG"))) == "true" {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("DEBUG")), "true") {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
