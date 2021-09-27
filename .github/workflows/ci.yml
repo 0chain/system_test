@@ -62,7 +62,7 @@ jobs:
           key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
         with:
           ref: ${{ env.ZWALLET_BRANCH }}
           repository: 0chain/zwalletcli
@@ -70,7 +70,7 @@ jobs:
           path: ./zwalletcli
       - name: "Checkout 0box CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
         with:
           ref: ${{ env.ZBOX_BRANCH }}
           repository: 0chain/zboxcli
