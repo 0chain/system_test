@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -24,6 +25,24 @@ func RunCommand(commandString string) ([]string, error) {
 	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
+}
+
+func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error) {
+	var count int
+	for {
+		count++
+		output, err := RunCommand(commandString)
+
+		if err == nil {
+			return output, nil
+		} else if count < maxAttempts {
+			Logger.Warnf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			time.Sleep(time.Second * 5)
+		} else {
+			Logger.Warnf("Command failed on final attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			return output, err
+		}
+	}
 }
 
 func RandomAlphaNumericString(n int) string {
@@ -45,12 +64,29 @@ func sanitizeOutput(rawOutput []byte) []string {
 	var sanitizedOutput []string
 
 	for _, lineOfOutput := range output {
-		if strings.TrimSpace(lineOfOutput) != "" {
-			sanitizedOutput = append(sanitizedOutput, strings.TrimSpace(lineOfOutput))
+		uniqueOutput := strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
+		trimmedOutput := strings.TrimSpace(uniqueOutput)
+		if trimmedOutput != "" {
+			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
 		}
 	}
 
-	return sanitizedOutput
+	return unique(sanitizedOutput)
+}
+
+func unique(slice []string) []string {
+	var uniqueOutput []string
+	existingOutput := make(map[string]bool)
+
+	for _, element := range slice {
+		trimmedElement := strings.TrimSpace(element)
+		if _, existing := existingOutput[trimmedElement]; !existing {
+			existingOutput[trimmedElement] = true
+			uniqueOutput = append(uniqueOutput, trimmedElement)
+		}
+	}
+
+	return uniqueOutput
 }
 
 func executeCommand(commandName string, args []string) ([]byte, error) {

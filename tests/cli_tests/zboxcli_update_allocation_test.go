@@ -40,7 +40,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			require.Nil(t, err, "Could not update "+
 				"allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -66,7 +66,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			require.Nil(t, err, "Could not update allocation "+
 				"due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -92,7 +92,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -116,7 +116,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			require.Nil(t, err, "Could not update "+
 				"allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -141,7 +141,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -167,7 +167,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -189,7 +189,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := cancelAllocation(t, configPath, allocationID)
 
 			require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 		})
 
@@ -241,7 +241,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			output, err := updateAllocation(t, configPath, params)
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -317,7 +317,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -370,7 +370,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			require.Nil(t, err, "Could not update "+
 				"allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			allocations := parseListAllocations(t, configPath)
@@ -434,8 +434,7 @@ func TestUpdateAllocation(t *testing.T) {
 				output, err := updateAllocation(t, configPath, params)
 
 				require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-				require.Equal(t, 1, len(output), "output length "+
-					"did not match expected", strings.Join(output, "\n"))
+				require.Len(t, output, 1)
 				assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 			})
 
@@ -450,7 +449,7 @@ func TestUpdateAllocation(t *testing.T) {
 			output, err := updateAllocation(t, configPath, params)
 
 			require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 			// Then try updating with otherAllocationID: should not work
@@ -483,7 +482,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			output, err := cancelAllocation(t, configPath, myAllocationID)
 			require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 
 			assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 
@@ -595,7 +594,7 @@ func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cl
 func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]climodel.Allocation {
 	output, err := listAllocations(t, cliConfigFilename)
 	require.Nil(t, err, "list allocations failed", err, strings.Join(output, "\n"))
-	require.Equal(t, 1, len(output), "unexpected output", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
 	var allocations []climodel.Allocation
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations)
