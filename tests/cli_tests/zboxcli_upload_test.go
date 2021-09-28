@@ -3,11 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpload(t *testing.T) {
