@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -582,7 +583,7 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(cmd, 3)
+	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
