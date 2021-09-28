@@ -586,6 +586,18 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
 
+func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+
+	return cliutils.RunCommand(cmd)
+}
+
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
