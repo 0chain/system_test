@@ -10,7 +10,6 @@ import (
 )
 
 func TestRecoverWallet(t *testing.T) {
-	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Recover wallet valid mnemonic", func(t *testing.T) {
 			t.Parallel()

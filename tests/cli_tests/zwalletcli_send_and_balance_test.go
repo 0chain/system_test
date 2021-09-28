@@ -11,7 +11,6 @@ import (
 )
 
 func TestSendAndBalance(t *testing.T) {
-	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Balance checks before and after ZCN sent", func(t *testing.T) {
 			t.Parallel()

@@ -18,7 +18,6 @@ const epsilon float64 = 1e-01
 const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(t *testing.T) {
-	t.Parallel()
 
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {

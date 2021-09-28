@@ -12,7 +12,7 @@ import (
 )
 
 func TestCreateAllocation(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *testing.T) {
 		t.Parallel()

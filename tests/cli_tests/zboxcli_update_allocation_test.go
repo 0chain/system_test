@@ -21,9 +21,8 @@ var (
 )
 
 func TestUpdateAllocation(t *testing.T) {
-	t.Parallel()
+
 	t.Run("Parallel", func(t *testing.T) {
-		t.Parallel()
 
 		t.Run("Update Expiry Should Work", func(t *testing.T) {
 			t.Parallel()

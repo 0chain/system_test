@@ -22,14 +22,13 @@ import (
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
 func TestListFileSystem(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	t.Run("Success Scenarios", func(t *testing.T) {
-		t.Parallel()
+	t.Run("parallel", func(t *testing.T) {
 
 		t.Run("No Files in Allocation Should Work", func(t *testing.T) {
 			t.Parallel()
@@ -428,9 +427,6 @@ func TestListFileSystem(t *testing.T) {
 		})
 	})
 
-	t.Run("Failure Scenarios", func(t *testing.T) {
-		t.Parallel()
-
 		t.Run("No Parameter Should Fail", func(t *testing.T) {
 			t.Parallel()
 
@@ -507,7 +503,6 @@ func TestListFileSystem(t *testing.T) {
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 		})
-	})
 }
 
 func extractAuthToken(str string) (string, error) {
