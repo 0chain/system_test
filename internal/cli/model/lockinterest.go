@@ -1,4 +1,4 @@
-package cli_model
+package climodel
 
 import (
 	"time"
