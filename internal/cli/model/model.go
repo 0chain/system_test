@@ -94,17 +94,29 @@ type BlobberInfo struct {
 }
 
 type FileMetaResult struct {
-	Name            string        `json:"Name"`
-	Path            string        `json:"Path"`
-	Type            string        `json:"Type"`
-	Size            int64         `json:"Size"`
-	ActualFileSize  int64         `json:"ActualFileSize"`
-	LookupHash      string        `json:"LookupHash"`
-	Hash            string        `json:"Hash"`
-	MimeType        string        `json:"MimeType"`
-	ActualNumBlocks int           `json:"ActualNumBlocks"`
-	EncryptedKey    string        `json:"EncryptedKey"`
-	CommitMetaTxns  []interface{} `json:"CommitMetaTxns"`
-	Collaborators   []interface{} `json:"Collaborators"`
-	Attribute       Attributes    `json:"attributes"`
+	Name            string          `json:"Name"`
+	Path            string          `json:"Path"`
+	Type            string          `json:"Type"`
+	Size            int64           `json:"Size"`
+	ActualFileSize  int64           `json:"ActualFileSize"`
+	LookupHash      string          `json:"LookupHash"`
+	Hash            string          `json:"Hash"`
+	MimeType        string          `json:"MimeType"`
+	ActualNumBlocks int             `json:"ActualNumBlocks"`
+	EncryptedKey    string          `json:"EncryptedKey"`
+	CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
+	Collaborators   []Collaborator  `json:"Collaborators"`
+	Attribute       Attributes      `json:"attributes"`
+}
+
+type CommitMetaTxn struct {
+	RefID     int64  `json:"ref_id"`
+	TxnID     string `json:"txn_id"`
+	CreatedAt string `json:"created_at"`
+}
+
+type Collaborator struct {
+	RefID     int64  `json:"ref_id"`
+	ClientID  string `json:"client_id"`
+	CreatedAt string `json:"created_at"`
 }
