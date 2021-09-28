@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
+
+var reCommitResponse = regexp.MustCompile(`^Commit Metadata successful, Response : (.*)$`)
 
 func TestUpload(t *testing.T) {
 	t.Parallel()
@@ -277,6 +280,89 @@ func TestUpload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Upload File with Commit Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		filesize := int64(1024)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": 2048,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, filesize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/dir/" + filepath.Base(filename),
+			"localpath":  filename,
+			"commit":     "",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		match := reCommitResponse.FindStringSubmatch(output[2])
+		require.Len(t, match, 2)
+
+		var commitResp climodel.CommitResponse
+		err = json.NewDecoder(strings.NewReader(match[1])).Decode(&commitResp)
+		require.Nil(t, err)
+
+		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
+		require.Equal(t, filesize, commitResp.MetaData.Size)
+		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
+		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
+		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
+	})
+
+	t.Run("Upload Encrypted File with Commit Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		filesize := int64(10)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": 100000,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, filesize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/dir/" + filepath.Base(filename),
+			"localpath":  filename,
+			"commit":     "",
+			"encrypt":    "",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		match := reCommitResponse.FindStringSubmatch(output[2])
+		require.Len(t, match, 2)
+
+		var commitResp climodel.CommitResponse
+		err = json.NewDecoder(strings.NewReader(match[1])).Decode(&commitResp)
+		require.Nil(t, err)
+
+		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
+		require.Equal(t, filesize, commitResp.MetaData.Size)
+		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
+		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
+		require.NotEqual(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
 	// These test-cases test failure scenarios

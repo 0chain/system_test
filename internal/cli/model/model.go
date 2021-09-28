@@ -100,3 +100,22 @@ type ChallengePoolInfo struct {
 	Expiration int64  `json:"expiration"`
 	Finalized  bool   `json:"finalized"`
 }
+
+type CommitResponse struct {
+	TxnID    string `json:"TxnID"`
+	MetaData struct {
+		Name            string        `json:"Name"`
+		Type            string        `json:"Type"`
+		Path            string        `json:"Path"`
+		LookupHash      string        `json:"LookupHash"`
+		Hash            string        `json:"Hash"`
+		MimeType        string        `json:"MimeType"`
+		Size            int64         `json:"Size"`
+		ActualFileSize  int64         `json:"ActualFileSize"`
+		ActualNumBlocks int           `json:"ActualNumBlocks"`
+		EncryptedKey    string        `json:"EncryptedKey"`
+		CommitMetaTxns  []interface{} `json:"CommitMetaTxns"`
+		Collaborators   []interface{} `json:"Collaborators"`
+		Attributes      Attributes    `json:"Attributes"`
+	} `json:"MetaData"`
+}
