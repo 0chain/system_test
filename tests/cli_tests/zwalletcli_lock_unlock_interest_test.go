@@ -309,7 +309,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, int64(7_500_000_000), stats.Stats[0].Balance)
 		})
 
-		t.Run("Lock with durationMin and durationHr param", func(t *testing.T) {
+		t.Run("Lock with both durationMin and durationHr param", func(t *testing.T) {
 			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
@@ -568,6 +568,21 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = unlockInterest(t, configPath, true, "")
+			require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
+		})
+
+		t.Run("Unlock attempt with bad pool_id param should fail", func(t *testing.T) {
+			t.Parallel()
+
+			output, err := registerWallet(t, configPath)
+			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+			output, err = executeFaucetWithTokens(t, configPath, 1)
+			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+			output, err = unlockInterest(t, configPath, true, "abcdef")
 			require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
