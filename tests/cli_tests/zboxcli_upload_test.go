@@ -478,5 +478,4 @@ func TestUpload(t *testing.T) {
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
-
 }
