@@ -80,12 +80,11 @@ func TestListFileSystem(t *testing.T) {
 			require.Equal(t, "", result.EncryptionKey)
 		})
 
-		//FIXME: POSSIBLE BUG: Encrypted file require much more space
 		t.Run("List Encrypted Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size": 10000,
+				"size": 100000,
 			})
 
 			// First Upload a file to the root directory
@@ -242,7 +241,7 @@ func TestListFileSystem(t *testing.T) {
 
 			filesize := int64(2)
 			remotepath := "/"
-			numFiles := 10
+			numFiles := 2
 
 			// First Upload a file to the a directory
 			filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -394,10 +393,16 @@ func TestListFileSystem(t *testing.T) {
 		t.Run("List All Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
+			allocationID := setupAllocation(t, configPath)
+
 			remotepaths := []string{"/", "/dir/"}
 			numFiles := 2
 
-			allocationID := setupAllocation(t, configPath)
+			for i := 0; i < numFiles; i++ {
+				for _, path := range remotepaths {
+					generateFileAndUpload(t, allocationID, path, 10)
+				}
+			}
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
