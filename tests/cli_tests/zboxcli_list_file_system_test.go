@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -41,8 +42,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 			}))
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-
-			require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 		})
 
@@ -97,12 +97,12 @@ func TestListFileSystem(t *testing.T) {
 			err := createFileWithSize(filename, filesize)
 			require.Nil(t, err)
 
-			output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+			output, err := uploadFile(t, configPath, map[string]interface{}{
 				"allocation": allocationID,
 				"localpath":  filename,
 				"remotepath": remotepath + filepath.Base(filename),
 				"encrypt":    "",
-			}))
+			})
 			require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 
@@ -413,7 +413,7 @@ func TestListFileSystem(t *testing.T) {
 			totalFiles := numFiles * len(remotepaths)
 			totalFolders := len(remotepaths) - 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Equal(t, expectedTotalEntries, len(listResults))
+			require.Len(t, listResults, expectedTotalEntries)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -562,11 +562,10 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
 
-	p := createParams(param)
-	output, err := uploadFileInAllocation(t, cliConfigFilename, p)
+	output, err := uploadFile(t, cliConfigFilename, param)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
-	require.Equal(t, 2, len(output))
+	require.Len(t, output, 2)
 
 	expected := fmt.Sprintf(
 		"Status completed callback. Type = application/octet-stream. Name = %s",
@@ -575,14 +574,16 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.Equal(t, expected, output[1])
 }
 
-func uploadFileInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		param,
+		p,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+
+	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
