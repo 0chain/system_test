@@ -80,7 +80,7 @@ jobs:
 
           helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest --set blobber.host=devnet-0chain.net 0chain-helm/blobber
 
           helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=latest --set block.host=devnet-0chain.net 0chain-helm/zblock
 
