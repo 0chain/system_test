@@ -207,7 +207,7 @@ jobs:
 
       - if: github.event_name != 'workflow_dispatch'
         uses: azure/setup-kubectl@v1
-        id: install
+        id: install-tidyup
 
       - name: Setup helm repo
         if: github.event_name != 'workflow_dispatch'
