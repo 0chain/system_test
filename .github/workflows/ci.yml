@@ -33,7 +33,7 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     env:
-      tag: staging
+      tag: latest
     steps:
       - if: github.event_name != 'workflow_dispatch'
         uses: actions/checkout@v2
@@ -109,8 +109,8 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
           echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=master" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=master" >> $GITHUB_ENV
 
       - name: Force Install GIT latest
         run: |
