@@ -30,7 +30,6 @@ jobs:
 
   system-tests:
     name: System Tests
-    needs: deploy
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
