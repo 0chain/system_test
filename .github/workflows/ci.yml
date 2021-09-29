@@ -32,6 +32,8 @@ jobs:
     name: System Tests
     runs-on: [ tests-suite ]
     timeout-minutes: 20
+    env:
+      tag: staging
     steps:
       - if: github.event_name != 'workflow_dispatch'
         uses: actions/checkout@v2
@@ -76,23 +78,23 @@ jobs:
       - if: github.event_name != 'workflow_dispatch'
         name: Setup chain
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=latest --set miner.minerImage.tag=latest 0chain-helm/zchain
+          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.tag }} --set miner.minerImage.tag=${{ env.tag }} 0chain-helm/zchain
 
-          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
+          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=${{ env.tag }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest --set blobber.host=devnet-0chain.net 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=${{ env.tag }} --set validator.validatorImage.tag=${{ env.tag }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
 
-          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=latest --set block.host=devnet-0chain.net 0chain-helm/zblock
+          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.tag }} --set block.host=devnet-0chain.net 0chain-helm/zblock
 
-          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
+          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=${{ env.tag }} --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
 
-          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=latest --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
+          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.tag }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
 
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=latest --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.tag }} --set zbox.host=devnet-0chain.net 0chain-helm/zbox
 
-          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=latest --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
 
-          helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
+          helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=${{ env.tag }} 0chain-helm/blobberStake
 
           rm -rf ~/.kube
 
