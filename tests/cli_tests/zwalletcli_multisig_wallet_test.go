@@ -14,7 +14,7 @@ func TestMultisigWallet(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 3, 2
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -33,7 +33,7 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should succeed when threshold is equal to num-signers", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 3, 3
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -51,7 +51,7 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when threshold is 0", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 3, 0
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -67,7 +67,7 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when threshold is -1", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 3, -1
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -83,7 +83,7 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when signers is < 2", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 1, 1
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -98,7 +98,7 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when threshold is greater than num-signers", func(t *testing.T) {
-			t.Parallel()
+
 			numSigners, threshold := 3, 4
 
 			output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
@@ -118,7 +118,6 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when args not set", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
 				"--silent --wallet %s --configDir ./config --config %s", escapedTestName(t)+
@@ -135,7 +134,6 @@ func TestMultisigWallet(t *testing.T) {
 		})
 
 		t.Run("Wallet Creation should fail when threshold not set", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
 				"--numsigners %d --silent --wallet %s --configDir ./config "+

@@ -16,12 +16,11 @@ import (
 )
 
 func TestFileDownloadTokenMovement(t *testing.T) {
-	t.Parallel()
 
+	t.Parallel()
 	balance := 0.4 // 400.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {
 		t.Run("Read pool must have no tokens locked for a newly created allocation", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -51,7 +50,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		})
 
 		t.Run("Locked read pool tokens should equal total blobber balance in read pool", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -105,7 +103,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		})
 
 		t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
