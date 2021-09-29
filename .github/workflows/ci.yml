@@ -15,13 +15,6 @@ on:
         description: 'zwallet branch'
         default: 'staging'
         required: true
-
-
-# env:
-#   NETWORK: dev.0chain.net
-#   ZWALLET_BRANCH: staging
-#   ZBOX_BRANCH: staging 
-
 jobs:
   golangci:
     name: lint
@@ -34,6 +27,7 @@ jobs:
           version: v1.42
 
   deploy:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: self-hosted
     needs: golangci
     steps:
@@ -47,42 +41,44 @@ jobs:
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
           helm repo update
+      - name: Get deploy network
+        run: echo "NETWORK=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]]; then
+          if [[ "${{ env.NETWORK }}" == "dev-1" ]]; then
             echo "${{ secrets.DEV1KC }}" | base64 -d > ~/.kube/config
-          elif [[ "${{ github.event.inputs.network }}" == "dev-2" ]]; then
+          elif [[ "${{ env.NETWORK }}" == "dev-2" ]]; then
             echo "${{ secrets.DEV2KC }}" | base64 -d > ~/.kube/config
           fi
 
       - name: Cleanup
         run: |
-          helm list --short -n ${{ github.event.inputs.network }} | xargs -L1 helm delete -n ${{ github.event.inputs.network }}
+          helm list --short -n ${{ env.NETWORK }} | xargs -L1 helm delete -n ${{ env.NETWORK }}
           sleep 30
-          helm upgrade --install --wait --timeout 120s cleanup -n ${{ github.event.inputs.network }} 0chain-helm/cleanDir
-          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ github.event.inputs.network }}
+          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm/cleanDir
+          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NETWORK }}
 
       - name: Setup chain
         if: always()
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n ${{ github.event.inputs.network }} --set sharder.sharderImage.tag=latest --set miner.minerImage.tag=latest 0chain-helm/zchain
+          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=latest --set miner.minerImage.tag=latest 0chain-helm/zchain
      
-          helm upgrade --install --wait --timeout 120s 0dns -n ${{ github.event.inputs.network }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
+          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ github.event.inputs.network }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest 0chain-helm/blobber
 
-          helm upgrade --install --wait --timeout 120s 0block -n ${{ github.event.inputs.network }} --set block.blockImage.tag=latest --set block.host=devnet-0chain.net 0chain-helm/zblock
+          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=latest --set block.host=devnet-0chain.net 0chain-helm/zblock
 
-          helm upgrade --install --wait --timeout 120s explorer -n ${{ github.event.inputs.network }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
+          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
 
-          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ github.event.inputs.network }} --set proxy.image.tag=latest --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
+          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=latest --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
 
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ github.event.inputs.network }} --set zbox.zboxImage.tag=latest --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=latest --set zbox.host=devnet-0chain.net 0chain-helm/zbox
 
-          helm upgrade --install --wait --timeout 120s 0search -n ${{ github.event.inputs.network }} --set blockRecorder.blockRecorderImage.tag=latest --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=latest --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
 
-          helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ github.event.inputs.network }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
+          helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
           rm -rf ~/.kube
   system-tests:
@@ -97,6 +93,12 @@ jobs:
             echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
             echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+      - name: "Use params from newly deployed chain"
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.0chain.net)" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
       - name: Force Install GIT latest
         run: |
           apt-get install -y software-properties-common \
@@ -166,7 +168,7 @@ jobs:
         run: |
           go get gotest.tools/gotestsum
           cd tests/cli_tests
-          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}.devnet-0chain.net/dns," -i ./config/zbox_config.yaml
+          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
@@ -196,15 +198,15 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]]; then
+          if [[ "dev-${RUNNER_NAME:(-1)}" == "dev-1" ]]; then
             echo "${{ secrets.DEV1KC }}" | base64 -d > ~/.kube/config
-          elif [[ "${{ github.event.inputs.network }}" == "dev-2" ]]; then
+          elif [[ "dev-${RUNNER_NAME:(-1)}" == "dev-2" ]]; then
             echo "${{ secrets.DEV2KC }}" | base64 -d > ~/.kube/config
           fi
 
       - name: Cleanup
         run: |
-          helm list --short -n ${{ github.event.inputs.network }} | xargs -L1 helm delete -n ${{ github.event.inputs.network }}
+          helm list --short -n dev-${RUNNER_NAME:(-1)} | xargs -L1 helm delete -n dev-${RUNNER_NAME:(-1)}
           sleep 30
-          helm upgrade --install --wait --timeout 120s cleanup -n ${{ github.event.inputs.network }} 0chain-helm/cleanDir
-          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ github.event.inputs.network }}
+          helm upgrade --install --wait --timeout 120s cleanup -n $dev-${RUNNER_NAME:(-1)} 0chain-helm/cleanDir
+          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n dev-${RUNNER_NAME:(-1)}
