@@ -1,6 +1,7 @@
 name: ci
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       network:
@@ -14,6 +15,7 @@ on:
       zwallet_branch:
         description: 'zwallet branch'
         default: 'staging'
+
         required: true
 jobs:
   golangci:
@@ -182,6 +184,7 @@ jobs:
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
   Cleanup:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: self-hosted
     needs: system-tests
     steps:
