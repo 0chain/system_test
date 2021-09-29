@@ -17,10 +17,10 @@ on:
         required: true
 
 
-env:
-  NETWORK: dev.0chain.net
-  ZWALLET_BRANCH: staging
-  ZBOX_BRANCH: staging 
+# env:
+#   NETWORK: dev.0chain.net
+#   ZWALLET_BRANCH: staging
+#   ZBOX_BRANCH: staging 
 
 jobs:
   golangci:
@@ -35,7 +35,6 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
@@ -50,7 +49,7 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]] then
+          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]]; then
             echo "${{ secrets.DEV1KC }}" | base64 -d > ~/.kube/config
           elif [[ "${{ github.event.inputs.network }}" == "dev-2" ]]; then
             echo "${{ secrets.DEV2KC }}" | base64 -d > ~/.kube/config
@@ -180,7 +179,6 @@ jobs:
             ./tests/cli_tests/cmdlog.log
   Cleanup:
     runs-on: self-hosted
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
@@ -195,7 +193,7 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]] then
+          if [[ "${{ github.event.inputs.network }}" == "dev-1" ]]; then
             echo "${{ secrets.DEV1KC }}" | base64 -d > ~/.kube/config
           elif [[ "${{ github.event.inputs.network }}" == "dev-2" ]]; then
             echo "${{ secrets.DEV2KC }}" | base64 -d > ~/.kube/config
