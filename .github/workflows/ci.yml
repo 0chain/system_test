@@ -16,7 +16,7 @@ on:
         default: 'staging'
         required: true
 
-  push:
+
 env:
   NETWORK: dev.0chain.net
   ZWALLET_BRANCH: staging
