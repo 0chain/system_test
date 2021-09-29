@@ -30,7 +30,7 @@ jobs:
 
   deploy:
     if: github.event_name != 'workflow_dispatch'
-    runs-on: self-hosted
+    runs-on: tests-suite
     needs: golangci
     steps:
       - uses: actions/checkout@v2
@@ -86,7 +86,7 @@ jobs:
   system-tests:
     name: System Tests
     needs: deploy
-    runs-on: [self-hosted, tests-suite]
+    runs-on: [self-hosted]
     timeout-minutes: 20
     steps:
       - name: "Use params from user input"
@@ -185,7 +185,7 @@ jobs:
             ./tests/cli_tests/cmdlog.log
   Cleanup:
     if: github.event_name != 'workflow_dispatch'
-    runs-on: self-hosted
+    runs-on: tests-suite
     needs: system-tests
     steps:
       - uses: actions/checkout@v2
