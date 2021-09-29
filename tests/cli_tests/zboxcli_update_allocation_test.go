@@ -23,10 +23,8 @@ var (
 func TestUpdateAllocation(t *testing.T) {
 	t.Parallel()
 	t.Run("Parallel", func(t *testing.T) {
-		t.Parallel()
 
 		t.Run("Update Expiry Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(1) // In hours
@@ -52,7 +50,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Size Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			size := int64(256)
@@ -77,7 +74,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update All Parameters Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(1) // In hours
@@ -102,7 +98,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Negative Expiry Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(-30) // In minutes
@@ -128,7 +123,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Negative Size Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			size := int64(-256)
@@ -152,7 +146,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update All Negative Parameters Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(-30) // In minutes
@@ -181,7 +174,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Cancel Allocation Should Work", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -194,7 +186,6 @@ func TestUpdateAllocation(t *testing.T) {
 
 		// FIXME expiry or size should be required params - should not bother sharders with an empty update
 		t.Run("Update Nothing Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -210,7 +201,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Non-existent Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := "123abc"
 
@@ -228,7 +218,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Expired Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(-1) // In hours
@@ -283,7 +272,6 @@ func TestUpdateAllocation(t *testing.T) {
 				"to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		})
 		t.Run("Update Size To Less Than 1024 Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			size := -allocationBeforeUpdate.Size + 1023
@@ -304,7 +292,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(-1) // In hours
@@ -339,7 +326,6 @@ func TestUpdateAllocation(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation
 		t.Run("Finalize Allocation Should Have Worked", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -356,7 +342,6 @@ func TestUpdateAllocation(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both expired and non-expired)
 		t.Run("Finalize Expired Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(-1) // In hours
@@ -413,7 +398,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			var otherAllocationID string
 
@@ -466,7 +450,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			var otherAllocationID string
 			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
@@ -500,7 +483,6 @@ func TestUpdateAllocation(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
 		t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			var otherAllocationID string
 			// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
@@ -533,7 +515,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Mistake Expiry Parameter Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 			expiry := 1
@@ -556,7 +537,6 @@ func TestUpdateAllocation(t *testing.T) {
 		})
 
 		t.Run("Update Mistake Size Parameter Should Fail", func(t *testing.T) {
-			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 			size := "ab"

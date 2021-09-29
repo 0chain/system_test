@@ -13,7 +13,7 @@ func TestRecoverWallet(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Recover wallet valid mnemonic", func(t *testing.T) {
-			t.Parallel()
+
 			validMnemonic := "pull floor crop best weasel suit solid gown" +
 				" filter kitten loan absent noodle nation potato planet demise" +
 				" online ten affair rich panel rent sell"
@@ -27,7 +27,7 @@ func TestRecoverWallet(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Blank wallet created if mnemonic is invalid (same issue in missing mnemonic test)
 		t.Run("Recover wallet invalid mnemonic", func(t *testing.T) {
-			t.Parallel()
+
 			inValidMnemonic := "floor crop best weasel suit solid gown" +
 				" filter kitten loan absent noodle nation potato planet demise" +
 				" online ten affair rich panel rent sell"
@@ -46,7 +46,6 @@ func TestRecoverWallet(t *testing.T) {
 		})
 
 		t.Run("Recover wallet no mnemonic", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := cliutils.RunCommand("./zwallet recoverwallet --silent " +
 				"--wallet " + escapedTestName(t) + "_wallet.json" + " " +

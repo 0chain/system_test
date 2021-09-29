@@ -16,7 +16,6 @@ func TestRegisterWallet(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Register wallet outputs expected", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 
@@ -29,7 +28,7 @@ func TestRegisterWallet(t *testing.T) {
 		})
 
 		t.Run("Get wallet outputs expected", func(t *testing.T) {
-			t.Parallel()
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
@@ -42,7 +41,7 @@ func TestRegisterWallet(t *testing.T) {
 		})
 
 		t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
-			t.Parallel()
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
@@ -54,7 +53,7 @@ func TestRegisterWallet(t *testing.T) {
 		})
 
 		t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
-			t.Parallel()
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 

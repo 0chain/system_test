@@ -18,12 +18,11 @@ const epsilon float64 = 1e-01
 const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(t *testing.T) {
-	t.Parallel()
 
+	t.Parallel()
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Parallel", func(t *testing.T) {
 		t.Run("Challenge pool should be 0 before any write", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -56,7 +55,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		})
 
 		t.Run("Total balance in blobber pool equals locked tokens", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -99,7 +97,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		})
 
 		t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
-			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
