@@ -28,24 +28,36 @@ jobs:
         with:
           version: v1.42
 
-  deploy:
-    if: github.event_name != 'workflow_dispatch'
-    runs-on: tests-suite
-    needs: golangci
+  system-tests:
+    name: System Tests
+    needs: deploy
+    runs-on: [ tests-suite ]
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
-      - uses: azure/setup-helm@v1
+      - if: github.event_name != 'workflow_dispatch'
+        uses: actions/checkout@v2
+
+      - if: github.event_name != 'workflow_dispatch'
+        uses: azure/setup-helm@v1
         with:
           version: 'v3.2.2'
-      - uses: azure/setup-kubectl@v1
+
+      - if: github.event_name != 'workflow_dispatch'
+        uses: azure/setup-kubectl@v1
         id: install
-      - name: Setup helm repo
+
+      - if: github.event_name != 'workflow_dispatch'
+        name: Setup helm repo
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
           helm repo update
-      - name: Get deploy network
+
+      - if: github.event_name != 'workflow_dispatch'
+        name: Get deploy network
         run: echo "NETWORK=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-      - name: Setup kubeconfig
+
+      - if: github.event_name != 'workflow_dispatch'
+        name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
           if [[ "${{ env.NETWORK }}" == "dev-1" ]]; then
@@ -54,18 +66,19 @@ jobs:
             echo "${{ secrets.DEV2KC }}" | base64 -d > ~/.kube/config
           fi
 
-      - name: Cleanup
+      - if: github.event_name != 'workflow_dispatch'
+        name: Cleanup
         run: |
           helm list --short -n ${{ env.NETWORK }} | xargs -L1 helm delete -n ${{ env.NETWORK }}
           sleep 30
           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm/cleanDir
           kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NETWORK }}
 
-      - name: Setup chain
-        if: always()
+      - if: github.event_name != 'workflow_dispatch'
+        name: Setup chain
         run: |
           helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=latest --set miner.minerImage.tag=latest 0chain-helm/zchain
-     
+
           helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
           helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest 0chain-helm/blobber
@@ -83,39 +96,39 @@ jobs:
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
           rm -rf ~/.kube
-  system-tests:
-    name: System Tests
-    needs: deploy
-    runs-on: [self-hosted]
-    timeout-minutes: 20
-    steps:
+
       - name: "Use params from user input"
         if: github.event_name == 'workflow_dispatch'
         run: |
             echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
             echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+
       - name: "Use params from newly deployed chain"
         if: github.event_name != 'workflow_dispatch'
         run: |
           echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.0chain.net)" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
+
       - name: Force Install GIT latest
         run: |
           apt-get install -y software-properties-common \
           && apt-get update \
           && add-apt-repository -y ppa:git-core/ppa \
           && apt-get update \
-          && apt-get install -y git            
+          && apt-get install -y git
+
       - name: "Checkout system tests"
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
+
       - name: "Get CLI Cache Key"
         run: |
           echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
           echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+
       - name: "Cache CLI Binaries"
         id: cli-cache
         uses: actions/cache@v2
@@ -124,6 +137,7 @@ jobs:
             tests/cli_tests/zbox
             tests/cli_tests/zwallet
           key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
+
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v2
@@ -132,6 +146,7 @@ jobs:
           repository: 0chain/zwalletcli
           fetch-depth: 1
           path: ./zwalletcli
+
       - name: "Checkout 0box CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v2
@@ -140,17 +155,12 @@ jobs:
           repository: 0chain/zboxcli
           fetch-depth: 1
           path: ./zboxcli
+
       - name: "Setup Go"
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-#      - name: "Cache Go Dependencies" -> This is required on github hosted agents but not on self hosted as go deps are already being present in the base image
-#        uses: actions/cache@v2
-#        with:
-#          path: ~/go/pkg/mod
-#          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-#          restore-keys: |
-#            ${{ runner.os }}-go-
+
       - name: "Build CLI Binaries"
         if: steps.cli-cache.outputs.cache-hit != 'true'
         run: |
@@ -160,11 +170,13 @@ jobs:
           cd ../zboxcli
           make install
           mv zbox ../tests/cli_tests
+
       - name: "Get Time"
         id: time
         uses: nanzm/get-time-action@v1.1
         with:
           format: YYYY-MM-DD_HH.mm.ss
+
       - name: "Run CLI System Tests"
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
@@ -175,6 +187,7 @@ jobs:
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
           ~/go/bin/gotestsum --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
+
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
@@ -183,22 +196,27 @@ jobs:
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
-  Cleanup:
-    if: github.event_name != 'workflow_dispatch'
-    runs-on: tests-suite
-    needs: system-tests
-    steps:
-      - uses: actions/checkout@v2
-      - uses: azure/setup-helm@v1
+
+      - if: github.event_name != 'workflow_dispatch'
+        uses: actions/checkout@v2
+
+      - if: github.event_name != 'workflow_dispatch'
+        uses: azure/setup-helm@v1
         with:
           version: 'v3.2.2'
-      - uses: azure/setup-kubectl@v1
+
+      - if: github.event_name != 'workflow_dispatch'
+        uses: azure/setup-kubectl@v1
         id: install
+
       - name: Setup helm repo
+        if: github.event_name != 'workflow_dispatch'
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
           helm repo update
+
       - name: Setup kubeconfig
+        if: github.event_name != 'workflow_dispatch'
         run: |
           mkdir -p ~/.kube
           if [[ "dev-${RUNNER_NAME:(-1)}" == "dev-1" ]]; then
@@ -208,6 +226,7 @@ jobs:
           fi
 
       - name: Cleanup
+        if: github.event_name != 'workflow_dispatch'
         run: |
           helm list --short -n dev-${RUNNER_NAME:(-1)} | xargs -L1 helm delete -n dev-${RUNNER_NAME:(-1)}
           sleep 30
