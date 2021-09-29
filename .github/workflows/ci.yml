@@ -35,7 +35,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    needs: lint
+    needs: golangci
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
@@ -181,7 +181,7 @@ jobs:
             ./tests/cli_tests/cmdlog.log
   Cleanup:
     runs-on: self-hosted
-    needs: System Tests
+    needs: system-tests
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
