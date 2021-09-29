@@ -96,17 +96,17 @@ jobs:
 
           rm -rf ~/.kube
 
-      - name: "Use params from user input"
+      - name: "Use Network from user input"
         if: github.event_name == 'workflow_dispatch'
         run: |
             echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
             echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "Use params from newly deployed chain"
+      - name: "User Network from newly deployed chain"
         if: github.event_name != 'workflow_dispatch'
         run: |
-          echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.0chain.net)" >> $GITHUB_ENV
+          echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
 
