@@ -35,6 +35,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
+    needs: lint
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
@@ -65,27 +66,28 @@ jobs:
       - name: Setup chain
         if: always()
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n ${{ github.event.inputs.network }} --set sharder.sharderImage.tag=${{ github.event.inputs.chainimage }} --set miner.minerImage.tag=${{ github.event.inputs.chainimage }} 0chain-helm/zchain
+          helm upgrade --install --wait --timeout 120s 0chain -n ${{ github.event.inputs.network }} --set sharder.sharderImage.tag=latest --set miner.minerImage.tag=latest 0chain-helm/zchain
      
-          helm upgrade --install --wait --timeout 120s 0dns -n ${{ github.event.inputs.network }} --set zdns.image.tag=${{ github.event.inputs.dnsimage }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
+          helm upgrade --install --wait --timeout 120s 0dns -n ${{ github.event.inputs.network }} --set zdns.image.tag=latest --set zdns.host=devnet-0chain.net 0chain-helm/zdns
 
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ github.event.inputs.network }} --set blobber.blobberImage.tag=${{ github.event.inputs.blobberimage }} --set validator.validatorImage.tag=${{ github.event.inputs.blobberimage }} 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ github.event.inputs.network }} --set blobber.blobberImage.tag=latest --set validator.validatorImage.tag=latest 0chain-helm/blobber
 
-          helm upgrade --install --wait --timeout 120s 0block -n ${{ github.event.inputs.network }} --set block.blockImage.tag=${{ github.event.inputs.blockimage }} --set block.host=devnet-0chain.net 0chain-helm/zblock
+          helm upgrade --install --wait --timeout 120s 0block -n ${{ github.event.inputs.network }} --set block.blockImage.tag=latest --set block.host=devnet-0chain.net 0chain-helm/zblock
 
-          helm upgrade --install --wait --timeout 120s explorer -n ${{ github.event.inputs.network }} --set explorer.explorerImage.tag=${{ github.event.inputs.explorerimage }} --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
+          helm upgrade --install --wait --timeout 120s explorer -n ${{ github.event.inputs.network }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
 
-          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ github.event.inputs.network }} --set proxy.image.tag=${{ github.event.inputs.proxyimage }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
+          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ github.event.inputs.network }} --set proxy.image.tag=latest --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
 
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ github.event.inputs.network }} --set zbox.zboxImage.tag=${{ github.event.inputs.boximage }} --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0box -n ${{ github.event.inputs.network }} --set zbox.zboxImage.tag=latest --set zbox.host=devnet-0chain.net 0chain-helm/zbox
 
-          helm upgrade --install --wait --timeout 120s 0search -n ${{ github.event.inputs.network }} --set blockRecorder.blockRecorderImage.tag=${{ github.event.inputs.searchimage }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+          helm upgrade --install --wait --timeout 120s 0search -n ${{ github.event.inputs.network }} --set blockRecorder.blockRecorderImage.tag=latest --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
 
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ github.event.inputs.network }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
           rm -rf ~/.kube
   system-tests:
     name: System Tests
+    needs: deploy
     runs-on: [self-hosted, tests-suite]
     timeout-minutes: 20
     steps:
@@ -179,6 +181,7 @@ jobs:
             ./tests/cli_tests/cmdlog.log
   Cleanup:
     runs-on: self-hosted
+    needs: System Tests
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v1
