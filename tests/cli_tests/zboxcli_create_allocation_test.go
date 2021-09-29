@@ -15,6 +15,8 @@ func TestCreateAllocation(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -31,6 +33,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -47,6 +51,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with smallest possible size (1024) Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -63,6 +69,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with parity specified Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -79,6 +87,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with data specified Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -95,6 +105,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -111,6 +123,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with write price range Should Work", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -126,6 +140,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -137,6 +153,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -148,6 +166,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -159,6 +179,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -170,6 +192,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -181,6 +205,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with expire smaller than limit (expire < 5m) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -192,6 +218,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -203,6 +231,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation with invalid expiry Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -214,6 +244,8 @@ func TestCreateAllocation(t *testing.T) {
 	})
 
 	t.Run("Create allocation by providing expiry in wrong format (expire 1hour) Should Fail", func(t *testing.T) {
+		t.Parallel()
+
 		_, err := setupWallet(t, configPath)
 		require.Nil(t, err)
 
