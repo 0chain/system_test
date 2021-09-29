@@ -20,7 +20,7 @@ on:
 jobs:
   golangci:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
@@ -30,7 +30,7 @@ jobs:
 
   system-tests:
     name: System Tests
-    runs-on: [ tests-suite ]
+    runs-on: [ tests-suite01, tests-suite02 ]
     timeout-minutes: 20
     steps:
       - if: github.event_name != 'workflow_dispatch'
