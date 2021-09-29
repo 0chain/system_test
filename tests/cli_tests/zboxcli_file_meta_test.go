@@ -128,7 +128,7 @@ func TestFileMetadata(t *testing.T) {
 			})
 
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.Nil(t, err, err)
+			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
 			authTicket, err = extractAuthToken(output[0])
