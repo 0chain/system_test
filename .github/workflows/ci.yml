@@ -86,7 +86,7 @@ jobs:
 
           helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.tag }} --set block.host=devnet-0chain.net 0chain-helm/zblock
 
-          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=${{ env.tag }} --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
+          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
 
           helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.tag }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
 
