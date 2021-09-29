@@ -22,15 +22,17 @@ import (
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
 func TestListFileSystem(t *testing.T) {
-
 	t.Parallel()
+
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
 	t.Run("Success Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("No Files in Allocation Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -45,6 +47,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List Files in Root Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -79,6 +82,7 @@ func TestListFileSystem(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Encrypted file require much more space
 		t.Run("List Encrypted Files Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size": 10000,
@@ -129,6 +133,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List Files and Check Lookup Hash Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -164,6 +169,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List Files in a Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -196,6 +202,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List Files in Nested Directory Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -229,6 +236,7 @@ func TestListFileSystem(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Can't use lookuphash on self-owned wallet with remotepath doesn't work
 		t.Run("List Files Using Lookup Hash and RemotePath Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -276,6 +284,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List Shared Files Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			var authTicket, filename string
 
@@ -329,6 +338,7 @@ func TestListFileSystem(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG: Listing shared files with lookuphash doesn't list any files
 		t.Run("List Shared Files Using Lookup Hash Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			var authTicket, filename, lookupHash string
 
@@ -382,6 +392,7 @@ func TestListFileSystem(t *testing.T) {
 		})
 
 		t.Run("List All Files Should Work", func(t *testing.T) {
+			t.Parallel()
 
 			remotepaths := []string{"/", "/dir/"}
 			numFiles := 2
@@ -418,8 +429,10 @@ func TestListFileSystem(t *testing.T) {
 	})
 
 	t.Run("Failure Scenarios", func(t *testing.T) {
+		t.Parallel()
 
 		t.Run("No Parameter Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			output, err := listFilesInAllocation(t, configPath, "")
 			require.NotNil(t, err,
@@ -435,6 +448,7 @@ func TestListFileSystem(t *testing.T) {
 		//FIXME: POSSIBLE BUG: Listing contents of another wallet's allocation doesn't throw
 		// any errors. Good thing is that the contents are not shown.
 		t.Run("List Files in Other's Wallet Should Fail", func(t *testing.T) {
+			t.Parallel()
 
 			var otherAllocationID string
 			allocationID := setupAllocation(t, configPath)

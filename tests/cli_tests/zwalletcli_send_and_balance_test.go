@@ -14,6 +14,7 @@ func TestSendAndBalance(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Balance checks before and after ZCN sent", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -66,6 +67,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send with description", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -90,6 +92,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send without description should fail", func(t *testing.T) {
+			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -106,6 +109,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt on zero ZCN wallet should fail", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -128,6 +132,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt to invalid address should fail", func(t *testing.T) {
+			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -151,6 +156,7 @@ func TestSendAndBalance(t *testing.T) {
 		   https://github.com/0chain/zwalletcli/issues/52
 		*/
 		t.Run("Send with zero token should fail", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -174,6 +180,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt to exceeding balance should fail", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -199,6 +206,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt with negative token should fail", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -225,6 +233,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt with very long description should fail", func(t *testing.T) {
+			t.Parallel()
 
 			targetWallet := escapedTestName(t) + "_TARGET"
 
@@ -257,6 +266,7 @@ func TestSendAndBalance(t *testing.T) {
 		})
 
 		t.Run("Send attempt to self should fail", func(t *testing.T) {
+			t.Parallel()
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
