@@ -3,15 +3,16 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var reCommitResponse = regexp.MustCompile(`^Commit Metadata successful, Response : (.*)$`)
