@@ -3,10 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -17,7 +19,7 @@ var reCommitResponse = regexp.MustCompile(`^Commit Metadata successful, Response
 func TestUpload(t *testing.T) {
 	t.Parallel()
 
-	// These test-cases test success scenarios
+	// Success Scenarios
 
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
@@ -365,7 +367,7 @@ func TestUpload(t *testing.T) {
 		require.NotEqual(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
-	// These test-cases test failure scenarios
+	// Failure Scenarios
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
 		t.Parallel()
@@ -548,7 +550,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
-	t.Run("Upload to Allocation without other Parameter Should Fail", func(t *testing.T) {
+	t.Run("Upload to Allocation without remotepath and authticket Should Fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -564,4 +566,60 @@ func TestUpload(t *testing.T) {
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
+}
+
+func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
+	filename, ok := param["localpath"].(string)
+	require.True(t, ok)
+
+	output, err := uploadFile(t, cliConfigFilename, param)
+	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
+
+	require.Len(t, output, 2)
+
+	expected := fmt.Sprintf(
+		"Status completed callback. Type = application/octet-stream. Name = %s",
+		filepath.Base(filename),
+	)
+	require.Equal(t, expected, output[1])
+}
+
+func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+
+	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
+}
+
+func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+
+	return cliutils.RunCommand(cmd)
+}
+
+func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
+	filename := generateRandomTestFileName(t)
+
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	// Upload parameters
+	uploadWithParam(t, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"localpath":  filename,
+		"remotepath": remotepath + filepath.Base(filename),
+	})
+
+	return filename
 }
