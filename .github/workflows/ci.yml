@@ -8,6 +8,10 @@ on:
         description: 'network'
         default: 'dev-1'
         required: true
+      domain:
+        description: 'domain eg: devnet-0chain.net'
+        default: 'devnet-0chain.net'
+        required: true
       zbox_branch:
         description: 'zbox branch'
         default: 'staging'
@@ -98,7 +102,7 @@ jobs:
       - name: "Use Network from user input"
         if: github.event_name == 'workflow_dispatch'
         run: |
-            echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
+            echo "NETWORK=$(echo ${{github.event.inputs.network}}.${{github.event.inputs.domain}})" >> $GITHUB_ENV
             echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
             echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
