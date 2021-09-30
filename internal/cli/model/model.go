@@ -128,3 +128,22 @@ type Collaborator struct {
 	ClientID  string `json:"client_id"`
 	CreatedAt string `json:"created_at"`
 }
+
+type CommitResponse struct {
+	TxnID    string `json:"TxnID"`
+	MetaData struct {
+		Name            string          `json:"Name"`
+		Type            string          `json:"Type"`
+		Path            string          `json:"Path"`
+		LookupHash      string          `json:"LookupHash"`
+		Hash            string          `json:"Hash"`
+		MimeType        string          `json:"MimeType"`
+		Size            int64           `json:"Size"`
+		ActualFileSize  int64           `json:"ActualFileSize"`
+		ActualNumBlocks int             `json:"ActualNumBlocks"`
+		EncryptedKey    string          `json:"EncryptedKey"`
+		CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
+		Collaborators   []Collaborator  `json:"Collaborators"`
+		Attributes      Attributes      `json:"Attributes"`
+	} `json:"MetaData"`
+}
