@@ -1,6 +1,7 @@
 name: ci
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       network:
@@ -18,7 +19,6 @@ on:
       zwallet_branch:
         description: 'zwallet branch'
         default: 'staging'
-
         required: true
 jobs:
   golangci:
