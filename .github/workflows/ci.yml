@@ -112,12 +112,18 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           go get gotest.tools/gotestsum
+          go get github.com/vakenbolt/go-test-report
           cd tests/cli_tests
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
-          ~/go/bin/gotestsum --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
+
+          exit_code=0
+          ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh || exit_code=$?
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1
+          exit $exit_code
+
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
@@ -126,3 +132,24 @@ jobs:
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
+            ./tests/cli_tests/test_report.html
+
+#      - name: Deploy report page
+#        if: always()
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          publish_branch: test_reports
+#          keep_files: true
+#          github_token: "${{ secrets.SVC_ACCOUNT_SECRET }}"
+#          publish_dir: "./${{ env.NETWORK }}"
+#          destination_dir: "./${{ env.NETWORK }}"
+#          user_name: "github-actions[bot]"
+#          user_email: "github-actions[bot]@users.noreply.github.com"
+#
+#      - name: Wait for report deployment to complete
+#        if: always()
+#        run: counter=0; while [ $counter -lt 5 ] && curl -o /dev/null -Isw '%{http_code}\n' "https://0chain.github.io/0chain/${{ env.NETWORK }}/${{ steps.time.outputs.time }}/index.html?t=$(date +%s)" | grep -v 200 > /dev/null; do sleep 10 && echo "Waiting for report page to deploy..." && ((counter=counter+1)); done
+
+#     - name: Report Link
+#       if: always()
+#       run: echo "https://0chain.github.io/0chain/${{ env.NETWORK }}/${{ steps.time.outputs.time }}/index.html"
