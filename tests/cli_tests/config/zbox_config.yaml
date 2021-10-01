@@ -4,5 +4,5 @@ signature_scheme: bls0chain
 min_submit: 50 # in percentage
 min_confirmation: 50 # in percentage
 confirmation_chain_length: 3
-max_txn_query: 6
-query_sleep_time: 10
+max_txn_query: 15
+query_sleep_time: 2
