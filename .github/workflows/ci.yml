@@ -117,7 +117,7 @@ jobs:
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)/d\n"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
-          ~/go/bin/gotestsum --hide-summary=testname --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
+          ~/go/bin/gotestsum --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh
       - name: "Archive CLI Config & Console Output"
         if: always()
         uses: actions/upload-artifact@v2
