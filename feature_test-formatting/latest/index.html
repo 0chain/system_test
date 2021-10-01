@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>go-test-report</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">go-test-report</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>132</strong>Duration: <strong>5ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>110</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>22</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 1, 2021 15:48:13</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+                <div class="testResultGroup  " id="33"></div>
+            
+                <div class="testResultGroup  " id="34"></div>
+            
+                <div class="testResultGroup  " id="35"></div>
+            
+                <div class="testResultGroup  " id="36"></div>
+            
+                <div class="testResultGroup  " id="37"></div>
+            
+                <div class="testResultGroup  " id="38"></div>
+            
+                <div class="testResultGroup  " id="39"></div>
+            
+                <div class="testResultGroup  " id="40"></div>
+            
+                <div class="testResultGroup  " id="41"></div>
+            
+                <div class="testResultGroup  " id="42"></div>
+            
+                <div class="testResultGroup  " id="43"></div>
+            
+                <div class="testResultGroup  " id="44"></div>
+            
+                <div class="testResultGroup  " id="45"></div>
+            
+                <div class="testResultGroup  " id="46"></div>
+            
+                <div class="testResultGroup  " id="47"></div>
+            
+                <div class="testResultGroup  " id="48"></div>
+            
+                <div class="testResultGroup  " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup  " id="52"></div>
+            
+                <div class="testResultGroup failed " id="53"></div>
+            
+                <div class="testResultGroup failed " id="54"></div>
+            
+                <div class="testResultGroup  " id="55"></div>
+            
+                <div class="testResultGroup failed " id="56"></div>
+            
+                <div class="testResultGroup  " id="57"></div>
+            
+                <div class="testResultGroup failed " id="58"></div>
+            
+                <div class="testResultGroup  " id="59"></div>
+            
+                <div class="testResultGroup  " id="60"></div>
+            
+                <div class="testResultGroup  " id="61"></div>
+            
+                <div class="testResultGroup  " id="62"></div>
+            
+                <div class="testResultGroup failed " id="63"></div>
+            
+                <div class="testResultGroup failed " id="64"></div>
+            
+                <div class="testResultGroup  " id="65"></div>
+            
+                <div class="testResultGroup failed " id="66"></div>
+            
+                <div class="testResultGroup  " id="67"></div>
+            
+                <div class="testResultGroup  " id="68"></div>
+            
+                <div class="testResultGroup  " id="69"></div>
+            
+                <div class="testResultGroup  " id="70"></div>
+            
+                <div class="testResultGroup  " id="71"></div>
+            
+                <div class="testResultGroup  " id="72"></div>
+            
+                <div class="testResultGroup  " id="73"></div>
+            
+                <div class="testResultGroup  " id="74"></div>
+            
+                <div class="testResultGroup  " id="75"></div>
+            
+                <div class="testResultGroup  " id="76"></div>
+            
+                <div class="testResultGroup  " id="77"></div>
+            
+                <div class="testResultGroup  " id="78"></div>
+            
+                <div class="testResultGroup  " id="79"></div>
+            
+                <div class="testResultGroup  " id="80"></div>
+            
+                <div class="testResultGroup  " id="81"></div>
+            
+                <div class="testResultGroup  " id="82"></div>
+            
+                <div class="testResultGroup  " id="83"></div>
+            
+                <div class="testResultGroup  " id="84"></div>
+            
+                <div class="testResultGroup  " id="85"></div>
+            
+                <div class="testResultGroup  " id="86"></div>
+            
+                <div class="testResultGroup  " id="87"></div>
+            
+                <div class="testResultGroup  " id="88"></div>
+            
+                <div class="testResultGroup  " id="89"></div>
+            
+                <div class="testResultGroup  " id="90"></div>
+            
+                <div class="testResultGroup  " id="91"></div>
+            
+                <div class="testResultGroup  " id="92"></div>
+            
+                <div class="testResultGroup  " id="93"></div>
+            
+                <div class="testResultGroup  " id="94"></div>
+            
+                <div class="testResultGroup  " id="95"></div>
+            
+                <div class="testResultGroup  " id="96"></div>
+            
+                <div class="testResultGroup failed " id="97"></div>
+            
+                <div class="testResultGroup failed " id="98"></div>
+            
+                <div class="testResultGroup failed " id="99"></div>
+            
+                <div class="testResultGroup  " id="100"></div>
+            
+                <div class="testResultGroup failed " id="101"></div>
+            
+                <div class="testResultGroup failed " id="102"></div>
+            
+                <div class="testResultGroup failed " id="103"></div>
+            
+                <div class="testResultGroup failed " id="104"></div>
+            
+                <div class="testResultGroup  " id="105"></div>
+            
+                <div class="testResultGroup failed " id="106"></div>
+            
+                <div class="testResultGroup failed " id="107"></div>
+            
+                <div class="testResultGroup  " id="108"></div>
+            
+                <div class="testResultGroup failed " id="109"></div>
+            
+                <div class="testResultGroup failed " id="110"></div>
+            
+                <div class="testResultGroup  " id="111"></div>
+            
+                <div class="testResultGroup  " id="112"></div>
+            
+                <div class="testResultGroup failed " id="113"></div>
+            
+                <div class="testResultGroup  " id="114"></div>
+            
+                <div class="testResultGroup  " id="115"></div>
+            
+                <div class="testResultGroup  " id="116"></div>
+            
+                <div class="testResultGroup  " id="117"></div>
+            
+                <div class="testResultGroup  " id="118"></div>
+            
+                <div class="testResultGroup failed " id="119"></div>
+            
+                <div class="testResultGroup failed " id="120"></div>
+            
+                <div class="testResultGroup  " id="121"></div>
+            
+                <div class="testResultGroup  " id="122"></div>
+            
+                <div class="testResultGroup  " id="123"></div>
+            
+                <div class="testResultGroup  " id="124"></div>
+            
+                <div class="testResultGroup  " id="125"></div>
+            
+                <div class="testResultGroup  " id="126"></div>
+            
+                <div class="testResultGroup  " id="127"></div>
+            
+                <div class="testResultGroup  " id="128"></div>
+            
+                <div class="testResultGroup failed " id="129"></div>
+            
+                <div class="testResultGroup  " id="130"></div>
+            
+                <div class="testResultGroup  " id="131"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestCreateAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_create_allocation_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_by_providing_expiry_in_wrong_format_(expire_1hour)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.87,"Output":["","","","time=2021-10-01T15:43:19+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=41616d304aa0930ed4e31bcf49d2536e0e9e1bf28ef8240e7c773aa4775b1ab5: context canceled\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=41616d304aa0930ed4e31bcf49d2536e0e9e1bf28ef8240e7c773aa4775b1ab5: context canceled]\n","\n","--- PASS: TestCreateAllocation/Create_allocation_by_providing_expiry_in_wrong_format_(expire_1hour)_Should_Fail (18.87s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_data_specified_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":30.68,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_data_specified_Should_Work (30.68s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_expire_smaller_than_limit_(expire_\u003c_5m)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.75,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_expire_smaller_than_limit_(expire_\u003c_5m)_Should_Fail (31.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_invalid_expiry_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.5,"Output":["","","","time=2021-10-01T15:43:21+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=2339a07bec7a13c045c50bde7e3efffffa7c5710f760db5258de59c8382a66a6: context canceled\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=2339a07bec7a13c045c50bde7e3efffffa7c5710f760db5258de59c8382a66a6: context canceled]\n","\n","--- PASS: TestCreateAllocation/Create_allocation_with_invalid_expiry_Should_Fail (15.50s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_no_parameter_(missing_lock)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.7,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_no_parameter_(missing_lock)_Should_Fail (18.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_parity_specified_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.57,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_parity_specified_Should_Work (32.57s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_read_price_range_0-0_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.72,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_read_price_range_0-0_Should_Fail (31.72s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_read_price_range_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.45,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_read_price_range_Should_Work (32.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.67,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail (28.67s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_smallest_expiry_(5m)_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.89,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_smallest_expiry_(5m)_Should_Work (31.89s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_smallest_possible_size_(1024)_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":44.96,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_smallest_possible_size_(1024)_Should_Work (44.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.33,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail (32.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.18,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (34.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.59,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (26.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_write_price_range_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":42.55,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_with_write_price_range_Should_Work (42.55s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_without_providing_any_additional_parameters_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":50.81,"Output":["","","","--- PASS: TestCreateAllocation/Create_allocation_without_providing_any_additional_parameters_Should_Work (50.81s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","","--- PASS: TestCreateDir (252.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_create_dir_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: TestCreateDir/parallel (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_150-char_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.94,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_150-char_dir (28.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_empty_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.35,"Output":["","","","time=2021-10-01T15:46:17+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=70a933a54fdbfd006892393d2552c657317498f9e0b4d219ae860bd0213486be: context canceled\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=70a933a54fdbfd006892393d2552c657317498f9e0b4d219ae860bd0213486be: context canceled]\n","\n","--- PASS: TestCreateDir/parallel/create_attempt_with_empty_allocation (16.35s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_empty_dirname_param","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.45,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_empty_dirname_param (28.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_invalid_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.44,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_invalid_allocation (15.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_invalid_dir_-_no_leading_slash","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":55.23,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_invalid_dir_-_no_leading_slash (55.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_missing_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.38,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_missing_allocation (16.38s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_missing_dirname_param","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.52,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_missing_dirname_param (28.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_attempt_with_someone_else's_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.08,"Output":["","","","--- PASS: TestCreateDir/parallel/create_attempt_with_someone_else's_allocation (32.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_nested_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.16,"Output":["","","","--- PASS: TestCreateDir/parallel/create_nested_dir (32.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_root_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.25,"Output":["","","","--- PASS: TestCreateDir/parallel/create_root_dir (27.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_with_100-char_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.2,"Output":["","","","--- PASS: TestCreateDir/parallel/create_with_100-char_dir (31.20s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_with_dir_containing_special_characters","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.96,"Output":["","","","--- PASS: TestCreateDir/parallel/create_with_dir_containing_special_characters (31.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_with_existing_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.42,"Output":["","","","--- PASS: TestCreateDir/parallel/create_with_existing_dir (29.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_with_existing_dir_but_different_case","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.6,"Output":["","","","--- PASS: TestCreateDir/parallel/create_with_existing_dir_but_different_case (32.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir/parallel/create_with_non-existent_parent_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.39,"Output":["","","","--- PASS: TestCreateDir/parallel/create_with_non-existent_parent_dir (32.39s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","","--- PASS: TestFileDownloadTokenMovement (252.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_download_token_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement/Parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: TestFileDownloadTokenMovement/Parallel (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement/Parallel/Each_blobber's_read_pool_balance_should_reduce_by_download_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":116.46,"Output":["","","","--- PASS: TestFileDownloadTokenMovement/Parallel/Each_blobber's_read_pool_balance_should_reduce_by_download_cost (116.46s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement/Parallel/Locked_read_pool_tokens_should_equal_total_blobber_balance_in_read_pool","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":60.7,"Output":["","","","--- PASS: TestFileDownloadTokenMovement/Parallel/Locked_read_pool_tokens_should_equal_total_blobber_balance_in_read_pool (60.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement/Parallel/Read_pool_must_have_no_tokens_locked_for_a_newly_created_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.65,"Output":["","","","time=2021-10-01T15:43:28+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=c54e30cc52e7748c3a1800db69ea6ccf3f9e89689f5441d2000adbeeb7b2f032: context canceled\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=c54e30cc52e7748c3a1800db69ea6ccf3f9e89689f5441d2000adbeeb7b2f032: context canceled]\n","\n","--- PASS: TestFileDownloadTokenMovement/Parallel/Read_pool_must_have_no_tokens_locked_for_a_newly_created_allocation (27.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestFileMetadata (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_file_meta_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_Without_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.17,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_Without_Parameter_Should_Fail (6.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_by_Lookup_Hash_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.94,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_by_Lookup_Hash_Should_Fail (29.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_by_Path_and_Lookup_Hash_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.96,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_by_Path_and_Lookup_Hash_Should_Work (32.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_for_Encrypted_File_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.6,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_for_Encrypted_File_Should_Work (28.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_for_Missing_remotepath_and_authticket_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.48,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_for_Missing_remotepath_and_authticket_Should_Fail (27.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_in_Root_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.09,"Output":["","","","time=2021-10-01T15:44:02+02:00 level=warning msg=Command failed on final attempt [3/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc\"}\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc\"}]\n","\n","--- PASS: TestFileMetadata/Get_File_Meta_in_Root_Directory_Should_Work (29.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_in_Sub_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.39,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_in_Sub_Directory_Should_Work (32.39s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_on_Another_Wallet_File_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":55.84,"Output":["","","","--- PASS: TestFileMetadata/Get_File_Meta_on_Another_Wallet_File_Should_Fail (55.84s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_File_Meta_on_Another_Wallet_File_Should_Fail/Get_Other_Allocation_ID","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.18,"Output":["","--- PASS: TestFileMetadata/Get_File_Meta_on_Another_Wallet_File_Should_Fail/Get_Other_Allocation_ID (28.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_Folder_Meta_in_Empty_Directory_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.9,"Output":["","","","--- PASS: TestFileMetadata/Get_Folder_Meta_in_Empty_Directory_Should_Fail (23.90s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_Folder_Meta_in_Non-Empty_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":25.14,"Output":["","","","time=2021-10-01T15:43:45+02:00 level=warning msg=Command failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=72e9e4261eb15b7feb93716913f5eb4d563e104d06a1714dd5ad50ab5b6057bc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 72e9e4261eb15b7feb93716913f5eb4d563e104d06a1714dd5ad50ab5b6057bc\"}\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=72e9e4261eb15b7feb93716913f5eb4d563e104d06a1714dd5ad50ab5b6057bc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 72e9e4261eb15b7feb93716913f5eb4d563e104d06a1714dd5ad50ab5b6057bc\"}]\n","\n","--- PASS: TestFileMetadata/Get_Folder_Meta_in_Non-Empty_Directory_Should_Work (25.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_Shared_File_Meta_by_Auth_Ticket_and_Lookup_Hash_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":37.37,"Output":["","","","--- PASS: TestFileMetadata/Get_Shared_File_Meta_by_Auth_Ticket_and_Lookup_Hash_Should_Work (37.37s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata/Get_Shared_File_Meta_by_Auth_Ticket_and_Lookup_Hash_Should_Work/Share_Folder_from_Another_Wallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.8,"Output":["","--- PASS: TestFileMetadata/Get_Shared_File_Meta_by_Auth_Ticket_and_Lookup_Hash_Should_Work/Share_Folder_from_Another_Wallet (28.80s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_upload_token_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement/Parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement/Parallel/Challenge_pool_should_be_0_before_any_write","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.55,"Output":["","","","--- PASS: TestFileUploadTokenMovement/Parallel/Challenge_pool_should_be_0_before_any_write (26.55s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement/Parallel/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":70.68,"Output":["","","","","    zboxcli_upload_token_test.go:116: \n","        \tError Trace:\tzboxcli_upload_token_test.go:116\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000e0288), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestFileUploadTokenMovement/Parallel/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost\n","        \tMessages:   \tFailed to create new allocation%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc\"}\n","        \t            \thttps://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b1ac2d70c27ed54134ffb58f10f7e1384bfc602a9ec082612b7be1aee7160dc\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement/Parallel/Total_balance_in_blobber_pool_equals_locked_tokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.51,"Output":["","","","--- PASS: TestFileUploadTokenMovement/Parallel/Total_balance_in_blobber_pool_equals_locked_tokens (27.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_list_file_system_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Failure_Scenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestListFileSystem/Failure_Scenarios (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Failure_Scenarios/List_Files_in_Other's_Wallet_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":58.73,"Output":["","","","--- PASS: TestListFileSystem/Failure_Scenarios/List_Files_in_Other's_Wallet_Should_Fail (58.73s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Failure_Scenarios/List_Files_in_Other's_Wallet_Should_Fail/Get_Other_Allocation_ID","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.68,"Output":["","time=2021-10-01T15:47:33+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 2    0.00% 2 / 2  100.00% 0s\n","Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000\n","Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000]\n","\n","time=2021-10-01T15:47:53+02:00 level=warning msg=Command failed on attempt [2/3] due to error [exit status 1]. Output: [0 / 2    0.00% 2 / 2  100.00% 0s\n","Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000\n","Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000]\n","\n","time=2021-10-01T15:48:13+02:00 level=warning msg=Command failed on final attempt [3/3] due to error [exit status 1]. Output: [0 / 2    0.00% 2 / 2  100.00% 0s\n","Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000\n","Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000]\n","\n","--- PASS: TestListFileSystem/Failure_Scenarios/List_Files_in_Other's_Wallet_Should_Fail/Get_Other_Allocation_ID (29.68s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Failure_Scenarios/No_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.17,"Output":["","","","--- PASS: TestListFileSystem/Failure_Scenarios/No_Parameter_Should_Fail (6.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_All_Files_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.74,"Output":["","","","","    zboxcli_list_file_system_test.go:416: \n","        \tError Trace:\tzboxcli_list_file_system_test.go:416\n","        \tError:      \t\"[]\" should have 5 item(s), but has 0\n","        \tTest:       \tTestListFileSystem/Success_Scenarios/List_All_Files_Should_Work\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Encrypted_Files_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":35.93,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Encrypted_Files_Should_Work (35.93s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Files_Using_Lookup_Hash_and_RemotePath_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":76.19,"Output":["","","","","    zboxcli_list_file_system_test.go:566: \n","        \tError Trace:\tzboxcli_list_file_system_test.go:566\n","        \t            \t\t\t\tzboxcli_list_file_system_test.go:552\n","        \t            \t\t\t\tzboxcli_list_file_system_test.go:252\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000256210), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestListFileSystem/Success_Scenarios/List_Files_Using_Lookup_Hash_and_RemotePath_Should_Work\n","        \tMessages:   \tUpload file failed due to error %!(EXTRA *exec.ExitError=exit status 1, string=0 / 2    0.00% 2 / 2  100.00% 0s\n","        \t            \tError in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000\n","        \t            \tUpload failed. Upload failed: Consensus_rate:NaN, expected:10.000000)\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Files_and_Check_Lookup_Hash_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.19,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Files_and_Check_Lookup_Hash_Should_Work (29.19s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Files_in_Nested_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.56,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Files_in_Nested_Directory_Should_Work (31.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Files_in_Root_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":36.45,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Files_in_Root_Directory_Should_Work (36.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Files_in_a_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.33,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Files_in_a_Directory_Should_Work (31.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Shared_Files_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":38.11,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Shared_Files_Should_Work (38.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Shared_Files_Should_Work/Share_Folder_from_Another_Wallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.03,"Output":["","--- PASS: TestListFileSystem/Success_Scenarios/List_Shared_Files_Should_Work/Share_Folder_from_Another_Wallet (31.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Shared_Files_Using_Lookup_Hash_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":41.25,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/List_Shared_Files_Using_Lookup_Hash_Should_Work (41.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/List_Shared_Files_Using_Lookup_Hash_Should_Work/Share_Folder_from_Another_Wallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.34,"Output":["","--- PASS: TestListFileSystem/Success_Scenarios/List_Shared_Files_Using_Lookup_Hash_Should_Work/Share_Folder_from_Another_Wallet (34.34s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem/Success_Scenarios/No_Files_in_Allocation_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.01,"Output":["","","","--- PASS: TestListFileSystem/Success_Scenarios/No_Files_in_Allocation_Should_Work (27.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","","--- PASS: TestMultisigWallet (252.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"zwalletcli_multisig_wallet_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: TestMultisigWallet/parallel (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_args_not_set","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.1,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_args_not_set (7.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_signers_is_\u003c_2","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.11,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_signers_is_\u003c_2 (10.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_-1","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.11,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_-1 (6.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_0","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.13,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_0 (15.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_greater_than_num-signers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.12,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_is_greater_than_num-signers (6.12s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_not_set","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.1,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_fail_when_threshold_not_set (10.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_succeed_when_0_\u003c_threshold_\u003c=_num-signers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":75.7,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_succeed_when_0_\u003c_threshold_\u003c=_num-signers (75.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet/parallel/Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":88.9,"Output":["","","","--- PASS: TestMultisigWallet/parallel/Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers (88.90s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","","--- PASS: TestRecoverWallet (252.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"zwalletcli_recover_wallet_test.go","TestFunctionDetail":{"Line":12,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet/parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: TestRecoverWallet/parallel (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet/parallel/Recover_wallet_invalid_mnemonic","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.09,"Output":["","","","--- PASS: TestRecoverWallet/parallel/Recover_wallet_invalid_mnemonic (10.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet/parallel/Recover_wallet_no_mnemonic","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.12,"Output":["","","","--- PASS: TestRecoverWallet/parallel/Recover_wallet_no_mnemonic (10.12s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet/parallel/Recover_wallet_valid_mnemonic","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.11,"Output":["","","","--- PASS: TestRecoverWallet/parallel/Recover_wallet_valid_mnemonic (10.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","","--- PASS: TestRegisterWallet (252.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"zwalletcli_register_wallet_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: TestRegisterWallet/parallel (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/parallel/Balance_call_fails_due_to_zero_ZCN_in_wallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.23,"Output":["","","","--- PASS: TestRegisterWallet/parallel/Balance_call_fails_due_to_zero_ZCN_in_wallet (6.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/parallel/Balance_of_1_is_returned_after_faucet_execution","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.45,"Output":["","","","--- PASS: TestRegisterWallet/parallel/Balance_of_1_is_returned_after_faucet_execution (19.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/parallel/Get_wallet_outputs_expected","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":4.17,"Output":["","","","--- PASS: TestRegisterWallet/parallel/Get_wallet_outputs_expected (4.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/parallel/Register_wallet_outputs_expected","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.16,"Output":["","","","--- PASS: TestRegisterWallet/parallel/Register_wallet_outputs_expected (6.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":252.41,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_send_and_balance_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Balance_checks_before_and_after_ZCN_sent","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":25.77,"Output":["","","","","    zwalletcli_send_and_balance_test.go:50: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:50\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0001ca6d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestSendAndBalance/parallel/Balance_checks_before_and_after_ZCN_sent\n","        \tMessages:   \tUnexpected send failure%!(EXTRA string=Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_on_zero_ZCN_wallet_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":81.82,"Output":["","","","--- PASS: TestSendAndBalance/parallel/Send_attempt_on_zero_ZCN_wallet_should_fail (81.82s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_to_exceeding_balance_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":25.62,"Output":["","","","","    zwalletcli_send_and_balance_test.go:205: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:205\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"Send tokens failed. {\\\"error\\\": \\\"verify transaction failed\\\"}\"\n","        \t            \tactual  : \"Send tokens failed. submit transaction failed. {\\\"error\\\":\\\"invalid transaction data\\\"}\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-Send tokens failed. {\"error\": \"verify transaction failed\"}\n","        \t            \t+Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_attempt_to_exceeding_balance_should_fail\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_to_invalid_address_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.53,"Output":["","","","","    zwalletcli_send_and_balance_test.go:151: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:151\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"Send tokens failed. submit transaction failed. {\\\"code\\\":\\\"invalid_request\\\",\\\"error\\\":\\\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\\\"}\"\n","        \t            \tactual  : \"Send tokens failed. submit transaction failed. {\\\"error\\\":\\\"invalid transaction data\\\"}\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\",\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}\n","        \t            \t+Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_attempt_to_invalid_address_should_fail\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_to_self_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.39,"Output":["","","","","    zwalletcli_send_and_balance_test.go:287: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:287\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"Send tokens failed. submit transaction failed. {\\\"code\\\":\\\"invalid_request\\\",\\\"error\\\":\\\"invalid_request: Invalid request (from and to client should be different)\\\"}\"\n","        \t            \tactual  : \"Send tokens failed. submit transaction failed. {\\\"error\\\":\\\"invalid transaction data\\\"}\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\",\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}\n","        \t            \t+Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_attempt_to_self_should_fail\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_with_negative_token_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.62,"Output":["","","","","    zwalletcli_send_and_balance_test.go:232: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:232\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"Send tokens failed. submit transaction failed. {\\\"code\\\":\\\"invalid_request\\\",\\\"error\\\":\\\"invalid_request: Invalid request (value must be greater than or equal to zero)\\\"}\"\n","        \t            \tactual  : \"Send tokens failed. submit transaction failed. {\\\"error\\\":\\\"invalid transaction data\\\"}\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\",\"error\":\"invalid_request: Invalid request (value must be greater than or equal to zero)\"}\n","        \t            \t+Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_attempt_with_negative_token_should_fail\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_attempt_with_very_long_description_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.69,"Output":["","","","--- PASS: TestSendAndBalance/parallel/Send_attempt_with_very_long_description_should_fail (19.69s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_with_description","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.54,"Output":["","","","","    zwalletcli_send_and_balance_test.go:87: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:87\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0001ca330), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_with_description\n","        \tMessages:   \tUnexpected send failure%!(EXTRA string=Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_with_zero_token_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.71,"Output":["","","","","    zwalletcli_send_and_balance_test.go:176: \n","        \tError Trace:\tzwalletcli_send_and_balance_test.go:176\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000256138), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestSendAndBalance/parallel/Send_with_zero_token_should_fail\n","        \tMessages:   \tUnexpected send failure%!(EXTRA string=Send tokens failed. submit transaction failed. {\"error\":\"invalid transaction data\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance/parallel/Send_without_description_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.21,"Output":["","","","--- PASS: TestSendAndBalance/parallel/Send_without_description_should_fail (6.21s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_update_allocation_test.go","TestFunctionDetail":{"Line":23,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Cancel_Allocation_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.63,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Cancel_Allocation_Should_Work (27.63s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Cancel_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":46.45,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Cancel_Expired_Allocation_Should_Fail (46.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Cancel_Other's_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":62.26,"Output":["","","","","    zboxcli_update_allocation_test.go:483: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:483\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e048), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Parallel/Cancel_Other's_Allocation_Should_Fail\n","        \tMessages:   \terror canceling allocation%!(EXTRA string=Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=aa2fbbcbd0589856fe14afb54a48593a6767e7698bbdc94fdd7f570c1c9723ad: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = aa2fbbcbd0589856fe14afb54a48593a6767e7698bbdc94fdd7f570c1c9723ad\"}\n","        \t            \thttps://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=aa2fbbcbd0589856fe14afb54a48593a6767e7698bbdc94fdd7f570c1c9723ad: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = aa2fbbcbd0589856fe14afb54a48593a6767e7698bbdc94fdd7f570c1c9723ad\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Cancel_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.48,"Output":["","--- PASS: TestUpdateAllocation/Parallel/Cancel_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID (19.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Finalize_Allocation_Should_Have_Worked","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":37.11,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Finalize_Allocation_Should_Have_Worked (37.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Finalize_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":54.71,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Finalize_Expired_Allocation_Should_Fail (54.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Finalize_Other's_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":69.6,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Finalize_Other's_Allocation_Should_Fail (69.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Finalize_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.42,"Output":["","--- PASS: TestUpdateAllocation/Parallel/Finalize_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID (18.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_All_Negative_Parameters_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":37.85,"Output":["","","","","    zboxcli_update_allocation_test.go:168: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:168\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0002566f0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Parallel/Update_All_Negative_Parameters_Should_Work\n","        \tMessages:   \tCould not update allocation due to error%!(EXTRA string=Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=6b2e5b8465f7273ea8343b1b425a805c2b89d20c3033ab6d95aad5d041ba4286: context canceled\n","        \t            \thttps://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=6b2e5b8465f7273ea8343b1b425a805c2b89d20c3033ab6d95aad5d041ba4286: context canceled)\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_All_Parameters_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":35.87,"Output":["","","","","    zboxcli_update_allocation_test.go:93: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:93\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000e0528), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Parallel/Update_All_Parameters_Should_Work\n","        \tMessages:   \tCould not update allocation due to error%!(EXTRA string=Error updating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=81fc682254497c337aa1723bfc7b26c30b4c356c31a4ec199509e111d6f4b49c: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 81fc682254497c337aa1723bfc7b26c30b4c356c31a4ec199509e111d6f4b49c\"}\n","        \t            \thttps://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=81fc682254497c337aa1723bfc7b26c30b4c356c31a4ec199509e111d6f4b49c: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 81fc682254497c337aa1723bfc7b26c30b4c356c31a4ec199509e111d6f4b49c\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":56.38,"Output":["","","","time=2021-10-01T15:45:21+02:00 level=warning msg=Command failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=107cad4ce5c49743ab5f6f2f339c1efece1c707b9372a8d5a07ebdafa5af3313: context canceled\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=107cad4ce5c49743ab5f6f2f339c1efece1c707b9372a8d5a07ebdafa5af3313: context canceled]\n","\n","--- PASS: TestUpdateAllocation/Parallel/Update_Expired_Allocation_Should_Fail (56.38s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Expiry_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.92,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Expiry_Should_Work (29.92s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Mistake_Expiry_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.76,"Output":["","","","time=2021-10-01T15:45:38+02:00 level=warning msg=Command failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=fb62661895052cbf80895ed7c8788eb46001e87fabd4db3bb064eda4c646cebd: context canceled\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=fb62661895052cbf80895ed7c8788eb46001e87fabd4db3bb064eda4c646cebd: context canceled]\n","\n","--- PASS: TestUpdateAllocation/Parallel/Update_Mistake_Expiry_Parameter_Should_Fail (49.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Mistake_Size_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.51,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Mistake_Size_Parameter_Should_Fail (24.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Negative_Expiry_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.88,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Negative_Expiry_Should_Work (34.88s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Negative_Size_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.96,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Negative_Size_Should_Work (32.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Non-existent_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.53,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Non-existent_Allocation_Should_Fail (18.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Nothing_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.73,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Nothing_Should_Fail (31.73s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Other's_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":63.06,"Output":["","","","","    zboxcli_update_allocation_test.go:634: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:634\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:420\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e108), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Parallel/Update_Other's_Allocation_Should_Fail\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA *exec.ExitError=exit status 1, string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836\"}\n","        \t            \thttps://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Size_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":30.92,"Output":["","","","time=2021-10-01T15:45:55+02:00 level=warning msg=Command failed on final attempt [3/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","https://dev.0chain.net/sharder01/v1/transaction/get/confirmation?hash=84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836\"}\n","https://dev.0chain.net/sharder02/v1/transaction/get/confirmation?hash=84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 84c0d141f2a796373d15111a2959ebd70aeba713d8558888ac964826cef2c836\"}]\n","\n","--- PASS: TestUpdateAllocation/Parallel/Update_Size_Should_Work (30.92s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Parallel/Update_Size_To_Less_Than_1024_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.75,"Output":["","","","--- PASS: TestUpdateAllocation/Parallel/Update_Size_To_Less_Than_1024_Should_Fail (34.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
