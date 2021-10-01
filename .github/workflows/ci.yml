@@ -83,11 +83,11 @@ jobs:
         run: |
           helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.tag }} --set miner.minerImage.tag=${{ env.tag }} 0chain-helm/zchain
           helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=${{ env.tag }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=staging-d64e20b1 --set validator.validatorImage.tag=${{ env.tag }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=${{ env.tag }} --set validator.validatorImage.tag=${{ env.tag }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
           helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.tag }} --set block.host=devnet-0chain.net 0chain-helm/zblock
           helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
           helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.tag }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=staging-f0bec985  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.tag }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
           helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
           sleep 30
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
