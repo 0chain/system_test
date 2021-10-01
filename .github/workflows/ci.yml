@@ -111,8 +111,8 @@ jobs:
 
       - name: "Get CLI Cache Key"
         run: |
-          echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
-          echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} || echo '{"object":{"sha": "${{ env.ZWALLET_BRANCH }}"}}' | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  || echo '{"object":{"sha": "${{ env.ZWALLET_BRANCH }}"}}' | jq --raw-output .object.sha) >> $GITHUB_ENV
 
       - name: "Cache CLI Binaries"
         id: cli-cache
