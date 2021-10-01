@@ -1,5 +1,10 @@
 name: ci
 
+env:
+  tag: latest #master
+  zwallet_branch: 35dba9221ead55271095bd21a4dec241cd37358b #Cached master
+  zbox_branch: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
+
 on:
   push:
   workflow_dispatch:
@@ -20,10 +25,6 @@ on:
         description: 'zwallet branch'
         default: 'staging'
         required: true
-env:
-  tag: staging
-  zwallet_branch: staging
-  zbox_branch: staging
 
 jobs:
   golangci:
@@ -41,36 +42,32 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
-      - name: "Setup helm"
+      - name: "Install helm"
         if: github.event_name != 'workflow_dispatch'
         uses: azure/setup-helm@v1
         with:
           version: 'v3.2.2'
 
-      - name: "Setup kubectl"
+      - name: "Install kubectl"
         if: github.event_name != 'workflow_dispatch'
         uses: azure/setup-kubectl@v1
         id: install
 
-      - name: "Setup helm repo"
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
-          helm repo update
-
-      - name: "Get deploy network"
+      - name: "Get target k8s cluster details"
         if: github.event_name != 'workflow_dispatch'
         run: |
           echo "NETWORK=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      - name: "Setup kubeconfig"
+      - name: "Configure helm & kubectl"
         if: github.event_name != 'workflow_dispatch'
         run: |
+          helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
+          helm repo update
           mkdir -p ~/.kube
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ~/.kube/config
 
-      - name: "Teardown old chain"
+      - name: "Remove existing 0Chain instance"
         if: github.event_name != 'workflow_dispatch'
         run: |
           helm list --short -n ${{ env.NETWORK }} | xargs -L1 helm delete -n ${{ env.NETWORK }}
@@ -78,7 +75,7 @@ jobs:
           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm/cleanDir
           kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NETWORK }}
 
-      - name: "Setup chain"
+      - name: "Deploy 0Chain"
         if: github.event_name != 'workflow_dispatch'
         run: |
           helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.tag }} --set miner.minerImage.tag=${{ env.tag }} 0chain-helm/zchain
@@ -91,31 +88,21 @@ jobs:
           helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
           sleep 30
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
-
           rm -rf ~/.kube
 
-      - name: "Use Network from user input"
+      - name: "Connect to network from user input"
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "NETWORK=$(echo ${{github.event.inputs.network}}.${{github.event.inputs.domain}})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "User Network from newly deployed chain"
+      - name: "Connect to newly deployed 0Chain instance"
         if: github.event_name != 'workflow_dispatch'
         run: |
           echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=${{ env.zwallet_branch }}" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=${{ env.zbox_branch }}" >> $GITHUB_ENV
-
-
-      - name: "Force Install GIT latest"
-        run: |
-          apt-get install -y software-properties-common \
-          && apt-get update \
-          && add-apt-repository -y ppa:git-core/ppa \
-          && apt-get update \
-          && apt-get install -y git
 
       - name: "Checkout system tests"
         uses: actions/checkout@v2
