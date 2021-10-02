@@ -242,7 +242,7 @@ func TestListFileSystem(t *testing.T) {
 
 			filesize := int64(2)
 			remotepath := "/"
-			numFiles := 10
+			numFiles := 3
 
 			// First Upload a file to the a directory
 			filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -394,10 +394,12 @@ func TestListFileSystem(t *testing.T) {
 		t.Run("List All Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
-			remotepaths := []string{"/", "/dir/"}
-			numFiles := 2
-
 			allocationID := setupAllocation(t, configPath)
+
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -409,9 +411,8 @@ func TestListFileSystem(t *testing.T) {
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-			// Calculation on the basis of total files and the directories created
-			totalFiles := numFiles * len(remotepaths)
-			totalFolders := len(remotepaths) - 1
+			totalFiles := 4
+			totalFolders := 2
 			expectedTotalEntries := totalFolders + totalFiles
 			require.Len(t, listResults, expectedTotalEntries)
 
