@@ -597,6 +597,7 @@ func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]s
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -607,6 +608,7 @@ func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]str
 }
 
 func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
 		param,
