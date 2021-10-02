@@ -3,15 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 )
 
 const epsilon float64 = 1e-01
@@ -156,9 +155,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 				"remotepath": "/",
 			})
 
-			// Necessary for wp-info to update
-			time.Sleep(30 * time.Second) // TODO replace with poller
-
 			// Get the new Write-Pool info after upload
 			output, err = writePoolInfo(t, configPath)
 			require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
@@ -205,6 +201,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 }
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
