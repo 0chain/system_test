@@ -82,7 +82,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 			allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 			expDuration := int64(1) // In hours
-			size := int64(512)
+			size := int64(2048)
 
 			params := createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -610,7 +610,7 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	tokens := 8.0
+	faucetTokens := 8.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,
@@ -621,10 +621,10 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 	// Overwrite with new parameters when available
 	for _, params := range extraParams {
 		// Extract parameters unrelated to upload
-		if tok, ok := params["tokens"]; ok {
-			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
+		if tokenStr, ok := params["tokens"]; ok {
+			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tokenStr), 64)
 			require.Nil(t, err)
-			tokens = token
+			faucetTokens = token
 			delete(params, "tokens")
 		}
 		for k, v := range params {
@@ -635,7 +635,7 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 	output, err := registerWallet(t, cliConfigFilename)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
+	output, err = executeFaucetWithTokens(t, cliConfigFilename, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 	output, err = createNewAllocation(t, cliConfigFilename, createParams(allocParam))

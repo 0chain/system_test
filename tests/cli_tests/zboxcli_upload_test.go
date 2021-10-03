@@ -127,7 +127,7 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
+		err = json.Unmarshal([]byte(output[0]), &listResults)
 		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
 		require.Len(t, listResults, 1)
@@ -312,11 +312,13 @@ func TestUpload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[1])
 
+		pretty(output)
+
 		match := reCommitResponse.FindStringSubmatch(output[2])
 		require.Len(t, match, 2)
 
 		var commitResp climodel.CommitResponse
-		err = json.NewDecoder(strings.NewReader(match[1])).Decode(&commitResp)
+		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
@@ -358,7 +360,7 @@ func TestUpload(t *testing.T) {
 		require.Len(t, match, 2)
 
 		var commitResp climodel.CommitResponse
-		err = json.NewDecoder(strings.NewReader(match[1])).Decode(&commitResp)
+		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
@@ -399,7 +401,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		// Upload the file again to same directory
-		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -407,6 +409,7 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
+		//FIXME: POSSIBLE BUG: Why are we getting Consensus Rate: NaN?
 		require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000", output[1])
 		require.Equal(t, "Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000", output[2])
 	})
@@ -423,7 +426,7 @@ func TestUpload(t *testing.T) {
 		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": "ab12mn34as90",
 			"remotepath": "/",
 			"localpath":  filename,
@@ -475,7 +478,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		// Upload using otherAllocationID: should not work
-		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -497,7 +500,7 @@ func TestUpload(t *testing.T) {
 		})
 		filename := "non-existent-file.txt"
 
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  "non-existent-file.txt",
@@ -526,7 +529,7 @@ func TestUpload(t *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -543,7 +546,7 @@ func TestUpload(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = uploadFileWithoutRetry(t, configPath, nil)
+		output, err = uploadFile(t, configPath, nil)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -558,7 +561,7 @@ func TestUpload(t *testing.T) {
 			"size": 2048,
 		})
 
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 		})
 
@@ -567,6 +570,11 @@ func TestUpload(t *testing.T) {
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
+}
+
+func pretty(data interface{}) {
+	bts, _ := json.MarshalIndent(data, "", "\t")
+	fmt.Println(string(bts))
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
@@ -595,18 +603,6 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	)
 
 	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
-}
-
-func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	return cliutils.RunCommand(cmd)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
