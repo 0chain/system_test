@@ -396,9 +396,13 @@ func TestListFileSystem(t *testing.T) {
 
 			allocationID := setupAllocation(t, configPath)
 
+			t.Logf("Uploading first file in allocation [%v]", allocationID)
 			generateFileAndUpload(t, allocationID, "/", int64(10))
+			t.Logf("Uploading second file in allocation [%v]", allocationID)
 			generateFileAndUpload(t, allocationID, "/", int64(10))
+			t.Logf("Uploading third file in allocation [%v]", allocationID)
 			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
+			t.Logf("Uploading fourth file in allocation [%v]", allocationID)
 			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -547,7 +551,8 @@ func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size i
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
+	t.Logf("Generated file of name [%v] and size [%v]", filename, size)
+	require.Nil(t, err, "Could not generate file of name [%v] and size [%v]", filename, size)
 
 	// Upload parameters
 	uploadWithParam(t, configPath, map[string]interface{}{

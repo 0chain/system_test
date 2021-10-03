@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"regexp"
 	"strconv"
@@ -182,6 +183,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			t.Logf("DOWNLOAD OUTPUT: [%v}", strings.Join(output, "\n"))
 
 			// Read pool before download
+			time.Sleep(45 * time.Second) // TODO replace with poller
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -199,9 +201,11 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
+				t.Logf("Initial read pool: [%v]", initialReadPool[0])
+				t.Logf("Final read pool: [%v]", finalReadPool[0])
 
 				// amount deducted
-				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
+				assert.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
 			}
 		})
 	})
