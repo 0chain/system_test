@@ -87,17 +87,10 @@ jobs:
           helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.tag }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
           helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
-          kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack || true
-          helm status blobber-stake -n ${{ env.NETWORK }} || true
-          sleep 30
-          kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack || true
-          helm status blobber-stake -n ${{ env.NETWORK }} || true
-          sleep 30
-          kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack || true
-          helm status blobber-stake -n ${{ env.NETWORK }} || true
-          sleep 30
-          kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack || true
-          helm status blobber-stake -n ${{ env.NETWORK }} || true
+
+      - name: "Wait for chain deployment to complete"
+        run: |
+          counter=0; while [ $counter -lt 5 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack | grep -vi completed; do sleep 60 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
           rm -rf ~/.kube
 
       - name: "Connect to network from user input"
