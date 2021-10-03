@@ -1,9 +1,9 @@
 name: ci
 
 env:
-  tag: latest #master
-  zwallet_branch: 35dba9221ead55271095bd21a4dec241cd37358b #Cached master
-  zbox_branch: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
+  TAG: latest #master
+  ZWALLET_BRANCH: 35dba9221ead55271095bd21a4dec241cd37358b #Cached master
+  ZBOX_BRANCH: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
 
 on:
   push:
@@ -78,19 +78,20 @@ jobs:
       - name: "Deploy 0Chain"
         if: github.event_name != 'workflow_dispatch'
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.tag }} --set miner.minerImage.tag=${{ env.tag }} 0chain-helm/zchain
-          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=${{ env.tag }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=${{ env.tag }} --set validator.validatorImage.tag=${{ env.tag }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
-          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.tag }} --set block.host=devnet-0chain.net 0chain-helm/zblock
+          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.TAG }} --set miner.minerImage.tag=${{ env.TAG }} 0chain-helm/zchain
+          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=${{ env.TAG }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
+          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=${{ env.TAG }} --set validator.validatorImage.tag=${{ env.TAG }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
+          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.TAG }} --set block.host=devnet-0chain.net 0chain-helm/zblock
           helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
-          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.tag }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.tag }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
-          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.TAG }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
+          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.TAG }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
+          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.TAG }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
       - name: "Wait for chain deployment to complete"
         run: |
-          counter=0; while [ $counter -lt 5 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack | grep -vi completed; do sleep 60 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
+          sleep 60
+          counter=0; while [ $counter -lt 10 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack | grep -vi completed; do sleep 30 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
           rm -rf ~/.kube
 
       - name: "Connect to network from user input"
@@ -104,8 +105,6 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
           echo "NETWORK=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=${{ env.zwallet_branch }}" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=${{ env.zbox_branch }}" >> $GITHUB_ENV
 
       - name: "Checkout system tests"
         uses: actions/checkout@v2
