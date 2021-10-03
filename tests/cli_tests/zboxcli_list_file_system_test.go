@@ -412,9 +412,9 @@ func TestListFileSystem(t *testing.T) {
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
 			totalFiles := 4
-			totalFolders := 2
+			totalFolders := 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Len(t, listResults, expectedTotalEntries)
+			require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -573,6 +573,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 		filepath.Base(filename),
 	)
 	require.Equal(t, expected, output[1])
+	time.Sleep(5 * time.Second) //Allows write marker to be written to blobbers before performing any additional operations
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
