@@ -86,8 +86,18 @@ jobs:
           helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.tag }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
           helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.tag }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
           helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.tag }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
-          sleep 30
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
+          kubectl -n ${{ env.NETWORK }} get all -o wide
+          helm status blobber-stake
+          sleep 30
+          kubectl -n ${{ env.NETWORK }} get all -o wide
+          helm status blobber-stake
+          sleep 30
+          kubectl -n ${{ env.NETWORK }} get all -o wide
+          helm status blobber-stake
+          sleep 30
+          kubectl -n ${{ env.NETWORK }} get all -o wide
+          helm status blobber-stake
           rm -rf ~/.kube
 
       - name: "Connect to network from user input"

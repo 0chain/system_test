@@ -367,7 +367,7 @@ func TestListFileSystem(t *testing.T) {
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, "extract auth token failed")
+				require.Nil(t, err, "extract auth token failed", authTicket)
 				require.NotEqual(t, "", authTicket)
 
 				h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -385,7 +385,7 @@ func TestListFileSystem(t *testing.T) {
 				"lookuphash": lookupHash,
 				"json":       "",
 			}))
-			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+			require.Nil(t, err, "list files using auth ticket [%v] failed: [%v]", authTicket, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))

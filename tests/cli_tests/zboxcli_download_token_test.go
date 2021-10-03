@@ -195,19 +195,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 			require.True(t, finalReadPool[0].Locked)
 
-			var numBlobbersNotDeducted = 0
 			for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 				// amount deducted
-				if initialReadPool[0].Blobber[i].Balance == finalReadPool[0].Blobber[i].Balance {
-					numBlobbersNotDeducted++
-				} else {
-					require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
-				}
+				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
 			}
-			require.Equal(t, 1, numBlobbersNotDeducted, "Expected 1 blobber to not be deducted ZCN but got [%v]", numBlobbersNotDeducted)
 		})
 	})
 }
@@ -226,7 +220,7 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {
