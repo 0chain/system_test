@@ -242,7 +242,7 @@ func TestListFileSystem(t *testing.T) {
 
 			filesize := int64(2)
 			remotepath := "/"
-			numFiles := 10
+			numFiles := 3
 
 			// First Upload a file to the a directory
 			filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -394,10 +394,12 @@ func TestListFileSystem(t *testing.T) {
 		t.Run("List All Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
-			remotepaths := []string{"/", "/dir/"}
-			numFiles := 2
-
 			allocationID := setupAllocation(t, configPath)
+
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -409,11 +411,10 @@ func TestListFileSystem(t *testing.T) {
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-			// Calculation on the basis of total files and the directories created
-			totalFiles := numFiles * len(remotepaths)
-			totalFolders := len(remotepaths) - 1
+			totalFiles := 4
+			totalFolders := 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Len(t, listResults, expectedTotalEntries)
+			require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -572,6 +573,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 		filepath.Base(filename),
 	)
 	require.Equal(t, expected, output[1])
+	time.Sleep(5 * time.Second) //Allows write marker to be written to blobbers before performing any additional operations
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
