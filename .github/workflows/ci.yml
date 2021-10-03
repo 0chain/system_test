@@ -6,7 +6,7 @@ env:
   ZBOX_BRANCH: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
 
 on:
-  push:
+#  push:
   workflow_dispatch:
     inputs:
       network:
@@ -89,6 +89,7 @@ jobs:
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
       - name: "Wait for chain deployment to complete"
+        if: github.event_name != 'workflow_dispatch'
         run: |
           sleep 60
           counter=0; while [ $counter -lt 10 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stack | grep -vi completed; do sleep 30 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
