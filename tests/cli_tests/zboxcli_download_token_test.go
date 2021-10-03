@@ -116,6 +116,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				"lock":   balance,
 				"size":   10485760,
 				"expire": "1h",
+				"data":   "2",
+				"parity": "0", // Parity of 0 ensures we know which blobber was actually used to download the file for calculations
 			})
 			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -198,7 +200,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 				// amount deducted
-				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] is incorrect", i)
+				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
 			}
 		})
 	})
