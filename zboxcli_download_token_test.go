@@ -116,8 +116,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				"lock":   balance,
 				"size":   10485760,
 				"expire": "1h",
-				"data":   "2",
-				"parity": "1",
 			})
 			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -177,9 +175,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
 
-			//require.Len(t, output, 2)
-			//require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
-			t.Logf("DOWNLOAD OUTPUT: [%v}", strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Read pool before download
 			output, err = readPoolInfo(t, configPath, allocationID)
@@ -201,7 +198,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 				// amount deducted
-				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
+				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] is incorrect", i)
 			}
 		})
 	})
@@ -221,7 +218,7 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {

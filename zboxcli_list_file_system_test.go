@@ -1,11 +1,9 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -539,16 +537,17 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	nBig, _ := rand.Int(rand.Reader, big.NewInt(27))
-	return fmt.Sprintf("%s/%d_test.txt", path, nBig.Int64())
+	nBig := cliutils.RandomAlphaNumericString(10)
+	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
+	require.Nil(t, err, "Could not generate file of name [%v] and size [%v]", filename, size)
 
+	t.Logf("About to upload file of name [%v] and size [%v].", filename, size)
 	// Upload parameters
 	uploadWithParam(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
@@ -564,7 +563,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.True(t, ok)
 
 	output, err := uploadFile(t, cliConfigFilename, param)
-	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "Upload file [%v] failed. Output: [%v]", filename, strings.Join(output, "\n"))
 
 	require.Len(t, output, 2)
 
@@ -573,7 +572,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 		filepath.Base(filename),
 	)
 	require.Equal(t, expected, output[1])
-	time.Sleep(5 * time.Second) //Allows write marker to be written to blobbers before performing any additional operations
+	time.Sleep(5 * time.Second) // Allows write marker to be written to blobbers before performing any additional operations
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
