@@ -615,7 +615,7 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,
-		"size":   1000000,
+		"size":   10000,
 		"expire": "1h",
 	}
 	// Add additional parameters if available

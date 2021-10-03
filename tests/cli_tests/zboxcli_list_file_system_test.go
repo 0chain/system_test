@@ -1,11 +1,9 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
