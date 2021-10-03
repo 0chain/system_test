@@ -1,11 +1,9 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -367,7 +365,7 @@ func TestListFileSystem(t *testing.T) {
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, "extract auth token failed")
+				require.Nil(t, err, "extract auth token failed", authTicket)
 				require.NotEqual(t, "", authTicket)
 
 				h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -385,7 +383,7 @@ func TestListFileSystem(t *testing.T) {
 				"lookuphash": lookupHash,
 				"json":       "",
 			}))
-			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+			require.Nil(t, err, "list files using auth ticket [%v] failed: [%v]", authTicket, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -539,16 +537,17 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	nBig, _ := rand.Int(rand.Reader, big.NewInt(27))
-	return fmt.Sprintf("%s/%d_test.txt", path, nBig.Int64())
+	nBig := cliutils.RandomAlphaNumericString(10)
+	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
+	require.Nil(t, err, "Could not generate file of name [%v] and size [%v]", filename, size)
 
+	t.Logf("About to upload file of name [%v] and size [%v].", filename, size)
 	// Upload parameters
 	uploadWithParam(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
@@ -564,7 +563,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.True(t, ok)
 
 	output, err := uploadFile(t, cliConfigFilename, param)
-	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "Upload file [%v] failed. Output: [%v]", filename, strings.Join(output, "\n"))
 
 	require.Len(t, output, 2)
 
