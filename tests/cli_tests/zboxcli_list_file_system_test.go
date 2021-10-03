@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
@@ -80,11 +81,12 @@ func TestListFileSystem(t *testing.T) {
 			require.Equal(t, "", result.EncryptionKey)
 		})
 
+		//FIXME: POSSIBLE BUG: Encrypted file require much more space
 		t.Run("List Encrypted Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size": 100000,
+				"size": 10000,
 			})
 
 			// First Upload a file to the root directory
@@ -366,7 +368,7 @@ func TestListFileSystem(t *testing.T) {
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, "extract auth token failed")
+				require.Nil(t, err, "extract auth token failed", authTicket)
 				require.NotEqual(t, "", authTicket)
 
 				h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -384,7 +386,7 @@ func TestListFileSystem(t *testing.T) {
 				"lookuphash": lookupHash,
 				"json":       "",
 			}))
-			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+			require.Nil(t, err, "list files using auth ticket [%v] failed: [%v]", authTicket, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -395,14 +397,10 @@ func TestListFileSystem(t *testing.T) {
 
 			allocationID := setupAllocation(t, configPath)
 
-			remotepaths := []string{"/", "/dir/"}
-			numFiles := 2
-
-			for i := 0; i < numFiles; i++ {
-				for _, path := range remotepaths {
-					generateFileAndUpload(t, allocationID, path, 10)
-				}
-			}
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -414,11 +412,10 @@ func TestListFileSystem(t *testing.T) {
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-			// Calculation on the basis of total files and the directories created
-			totalFiles := numFiles * len(remotepaths)
-			totalFolders := len(remotepaths) - 1
+			totalFiles := 4
+			totalFolders := 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Len(t, listResults, expectedTotalEntries)
+			require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -543,8 +540,8 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	nBig, _ := rand.Int(rand.Reader, big.NewInt(27))
-	return fmt.Sprintf("%s/%d_test.txt", path, nBig.Int64())
+	nBig := cliutils.RandomAlphaNumericString(10)
+	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
@@ -558,6 +555,7 @@ func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]s
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -568,6 +566,7 @@ func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]str
 }
 
 func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
 		param,
