@@ -573,7 +573,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 		filepath.Base(filename),
 	)
 	require.Equal(t, expected, output[1])
-	time.Sleep(5 * time.Second) //Allows write marker to be written to blobbers before performing any additional operations
+	time.Sleep(5 * time.Second) // Allows write marker to be written to blobbers before performing any additional operations
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
