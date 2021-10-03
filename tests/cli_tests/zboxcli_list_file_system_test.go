@@ -1,16 +1,15 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -241,7 +240,7 @@ func TestListFileSystem(t *testing.T) {
 
 			filesize := int64(2)
 			remotepath := "/"
-			numFiles := 10
+			numFiles := 3
 
 			// First Upload a file to the a directory
 			filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -366,7 +365,7 @@ func TestListFileSystem(t *testing.T) {
 				require.Len(t, output, 1)
 
 				authTicket, err = extractAuthToken(output[0])
-				require.Nil(t, err, "extract auth token failed")
+				require.Nil(t, err, "extract auth token failed", authTicket)
 				require.NotEqual(t, "", authTicket)
 
 				h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -384,7 +383,7 @@ func TestListFileSystem(t *testing.T) {
 				"lookuphash": lookupHash,
 				"json":       "",
 			}))
-			require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+			require.Nil(t, err, "list files using auth ticket [%v] failed: [%v]", authTicket, strings.Join(output, "\n"))
 
 			require.Len(t, output, 1)
 			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -393,10 +392,12 @@ func TestListFileSystem(t *testing.T) {
 		t.Run("List All Files Should Work", func(t *testing.T) {
 			t.Parallel()
 
-			remotepaths := []string{"/", "/dir/"}
-			numFiles := 2
-
 			allocationID := setupAllocation(t, configPath)
+
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
+			generateFileAndUpload(t, allocationID, "/dir/", int64(10))
 
 			output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
@@ -408,11 +409,10 @@ func TestListFileSystem(t *testing.T) {
 			err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 			require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-			// Calculation on the basis of total files and the directories created
-			totalFiles := numFiles * len(remotepaths)
-			totalFolders := len(remotepaths) - 1
+			totalFiles := 4
+			totalFolders := 1
 			expectedTotalEntries := totalFolders + totalFiles
-			require.Len(t, listResults, expectedTotalEntries)
+			require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
 
 			var numFile, numFolder int
 			for _, lr := range listResults {
@@ -537,16 +537,17 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	nBig, _ := rand.Int(rand.Reader, big.NewInt(27))
-	return fmt.Sprintf("%s/%d_test.txt", path, nBig.Int64())
+	nBig := cliutils.RandomAlphaNumericString(10)
+	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
+	require.Nil(t, err, "Could not generate file of name [%v] and size [%v]", filename, size)
 
+	t.Logf("About to upload file of name [%v] and size [%v].", filename, size)
 	// Upload parameters
 	uploadWithParam(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
@@ -562,7 +563,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.True(t, ok)
 
 	output, err := uploadFile(t, cliConfigFilename, param)
-	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "Upload file [%v] failed. Output: [%v]", filename, strings.Join(output, "\n"))
 
 	require.Len(t, output, 2)
 
@@ -571,6 +572,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 		filepath.Base(filename),
 	)
 	require.Equal(t, expected, output[1])
+	time.Sleep(5 * time.Second) // Allows write marker to be written to blobbers before performing any additional operations
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -582,7 +584,7 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(cmd, 3)
+	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
@@ -596,6 +598,7 @@ func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]s
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -606,6 +609,7 @@ func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]str
 }
 
 func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
 		param,

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -283,7 +284,7 @@ func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]stri
 		params,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"), 3)
+		escapedTestName(t)+"_allocation.txt"), 3, time.Second*5)
 }
 
 func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {

@@ -27,7 +27,7 @@ func RunCommand(commandString string) ([]string, error) {
 	return sanitizeOutput(rawOutput), err
 }
 
-func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error) {
+func RunCommandWithRetry(commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	var count int
 	for {
 		count++
@@ -37,7 +37,7 @@ func RunCommandWithRetry(commandString string, maxAttempts int) ([]string, error
 			return output, nil
 		} else if count < maxAttempts {
 			Logger.Warnf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
-			time.Sleep(time.Second * 5)
+			time.Sleep(backoff)
 		} else {
 			Logger.Warnf("Command failed on final attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
 			return output, err
