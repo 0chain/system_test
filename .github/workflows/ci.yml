@@ -64,6 +64,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
+          helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
           helm repo update
           mkdir -p ~/.kube
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ~/.kube/config
@@ -73,7 +74,7 @@ jobs:
         run: |
           helm list --short -n ${{ env.NETWORK }} | xargs -L1 helm delete -n ${{ env.NETWORK }}
           sleep 30
-          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm/cleanDir
+          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm2/cleanDir
           kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NETWORK }}
 
       - name: "Deploy 0Chain"
