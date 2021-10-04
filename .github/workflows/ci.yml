@@ -81,21 +81,21 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
 
-          helm upgrade --install --wait  0chain --set sharder.image.tag=${{ env.TAG }} --set miner.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }} 0chain-helm/zchain
+          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=false --set miner.persistence.enabled=false --set sharder.image.tag=${{ env.TAG }} --set miner.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }} 0chain-helm/zchain
 
-          helm upgrade --install --wait  0dns --set zdns.image.tag=${{ env.TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/zdns
+          helm upgrade --install --wait  --set zdns.persistence.enabled=false 0dns --set zdns.image.tag=${{ env.TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/zdns
 
-          helm upgrade --install --wait  blobber --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/blobber
+          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=false --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/blobber
 
-          helm upgrade --install --wait  0block --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zblock
+          helm upgrade --install --wait  0block --set zblock.persistence.enabled=false --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zblock
 
-          helm upgrade --install --wait  explorer --set explorer.image.tag=${{ env.TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/explorer
+          helm upgrade --install --wait  explorer --set explorer.persistence.enabled=false --set explorer.image.tag=${{ env.TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/explorer
 
-          helm upgrade --install --wait  0proxy --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zproxy
+          helm upgrade --install --wait  0proxy --set zproxy.persistence.enabled=false --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zproxy
 
-          helm upgrade --install --wait  0box --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zbox
+          helm upgrade --install --wait  0box --set zbox.persistence.enabled=false --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zbox
 
-          helm upgrade --install --wait  0search --set zsearch.host=devnet-0chain.net  zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
+          helm upgrade --install --wait  0search --set zsearch.persistence.enabled=false --set zsearch.host=devnet-0chain.net  zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
 
           helm upgrade --install --wait  blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
