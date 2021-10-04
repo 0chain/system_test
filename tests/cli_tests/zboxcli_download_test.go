@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -12,11 +11,6 @@ import (
 	"strings"
 	"testing"
 )
-
-func pretty(data interface{}) {
-	bts, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(bts))
-}
 
 func TestDownload(t *testing.T) {
 	t.Parallel()
@@ -121,104 +115,6 @@ func TestDownload(t *testing.T) {
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
-	t.Run("Download Image File Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(10 * 1024 * 1024)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9.9,
-		})
-
-		// First upload the image
-		filename, err := filepath.Abs("../../internal/dummy_file/0.png")
-		require.Nil(t, err, filename)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  filename,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = image/png. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		// Delete the uploaded file from tmp folder if it exist,
-		// since we will be downloading it now
-		err = os.RemoveAll("tmp/" + filepath.Base(filename))
-		require.Nil(t, err)
-
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected = fmt.Sprintf(
-			"Status completed callback. Type = image/png. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
-	t.Run("Download Video File Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(100 * 1024 * 1024)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9.9,
-		})
-
-		// First upload the image
-		filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
-		require.Nil(t, err, filename)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  filename,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = video/mp4. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		// Delete the uploaded file from tmp folder if it exist,
-		// since we will be downloading it now
-		err = os.RemoveAll("tmp/" + filepath.Base(filename))
-		require.Nil(t, err)
-
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected = fmt.Sprintf(
-			"Status completed callback. Type = video/mp4. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -579,10 +475,10 @@ func TestDownload(t *testing.T) {
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := registerWallet(t, configPath)
-		require.Nil(t, nil)
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, nil, strings.Join(output, "\n"))
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
 			"allocation": "12334qe",
 			"remotepath": "/",
 			"localpath":  "tmp/",
@@ -665,16 +561,40 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + "hello.txt",
 			"localpath":  "tmp/",
 		}))
-		pretty(output)
 
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, nil, strings.Join(output, "\n"))
+
+		output, err = downloadWithParam(t, configPath, "")
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10000,
+			"tokens": 9.9,
+		})
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
 	t.Run("Download Shared File by Paying without Allocation Should Fail", func(t *testing.T) {
