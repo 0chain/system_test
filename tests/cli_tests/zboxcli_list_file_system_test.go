@@ -11,10 +11,11 @@ import (
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
@@ -240,7 +241,7 @@ func TestListFileSystem(t *testing.T) {
 
 			filesize := int64(2)
 			remotepath := "/"
-			numFiles := 3
+			numFiles := 2
 
 			// First Upload a file to the a directory
 			filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -539,52 +540,6 @@ func generateRandomTestFileName(t *testing.T) string {
 	// name here.
 	nBig := cliutils.RandomAlphaNumericString(10)
 	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
-}
-
-func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
-	filename := generateRandomTestFileName(t)
-
-	err := createFileWithSize(filename, size)
-	require.Nil(t, err, "Could not generate file of name [%v] and size [%v]", filename, size)
-
-	t.Logf("About to upload file of name [%v] and size [%v].", filename, size)
-	// Upload parameters
-	uploadWithParam(t, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  filename,
-		"remotepath": remotepath + filepath.Base(filename),
-	})
-
-	return filename
-}
-
-func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
-	filename, ok := param["localpath"].(string)
-	require.True(t, ok)
-
-	output, err := uploadFile(t, cliConfigFilename, param)
-	require.Nil(t, err, "Upload file [%v] failed. Output: [%v]", filename, strings.Join(output, "\n"))
-
-	require.Len(t, output, 2)
-
-	expected := fmt.Sprintf(
-		"Status completed callback. Type = application/octet-stream. Name = %s",
-		filepath.Base(filename),
-	)
-	require.Equal(t, expected, output[1])
-	time.Sleep(5 * time.Second) // Allows write marker to be written to blobbers before performing any additional operations
-}
-
-func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
