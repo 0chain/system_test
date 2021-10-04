@@ -14,16 +14,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	apr  = 0.1
+	year = time.Hour * 24 * 366
+)
+
 func TestLockAndUnlockInterest(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Lock and unlock tokens", func(t *testing.T) {
 			t.Parallel()
 
+			// lock 1 token for 1 min
+			// all interest are already earned after lock.
+			tokensToLock := float64(1)
+			lockDuration := time.Minute
+			wantInterestEarned := computeExpectedLockInterest(tokensToLock, lockDuration)
+			wantInterestEarnedAsBalance := balancePrint(wantInterestEarned)
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-			output, err = executeFaucetWithTokens(t, configPath, 1)
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
@@ -31,7 +43,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, 1, len(output))
 			require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-			// lock 1 token for 1 min
+			// lock tokens
 			output, err = lockInterest(t, configPath, true, 1, false, 0, true, 1)
 			require.Nil(t, err, "lock interest failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
@@ -46,7 +58,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,4} SAS \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// Get locked tokens BEFORE locked tokens expire.
 			output, err = getLockedTokens(t, configPath)
@@ -60,12 +72,12 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, statsBeforeExpire.Stats, 1)
 			require.NotEqual(t, "", statsBeforeExpire.Stats[0].ID)
 			require.True(t, statsBeforeExpire.Stats[0].Locked)
-			require.Equal(t, time.Minute, statsBeforeExpire.Stats[0].Duration)
-			require.LessOrEqual(t, statsBeforeExpire.Stats[0].TimeLeft, time.Minute)
+			require.Equal(t, lockDuration, statsBeforeExpire.Stats[0].Duration)
+			require.LessOrEqual(t, statsBeforeExpire.Stats[0].TimeLeft, lockDuration)
 			require.LessOrEqual(t, statsBeforeExpire.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, statsBeforeExpire.Stats[0].APR)
-			require.GreaterOrEqual(t, statsBeforeExpire.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(10_000_000_000), statsBeforeExpire.Stats[0].Balance)
+			require.Equal(t, apr, statsBeforeExpire.Stats[0].APR)
+			require.Equal(t, wantInterestEarned, statsBeforeExpire.Stats[0].TokensEarned)
+			require.Equal(t, int64(tokensToLock*1e10), statsBeforeExpire.Stats[0].Balance)
 
 			// Wait until lock expires.
 			<-lockTimer.C
@@ -74,9 +86,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,4} SAS \(\d*\.?\d+ USD\)$`), output[0])
-
-			balanceAfterLockExpires := output[0] // no addition earnings since lock has expired.
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// Get locked tokens AFTER locked tokens expire.
 			output, err = getLockedTokens(t, configPath)
@@ -90,12 +100,12 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, statsAfterExpire.Stats, 1)
 			require.NotEqual(t, "", statsAfterExpire.Stats[0].ID)
 			require.False(t, statsAfterExpire.Stats[0].Locked)
-			require.Equal(t, time.Minute, statsAfterExpire.Stats[0].Duration)
+			require.Equal(t, lockDuration, statsAfterExpire.Stats[0].Duration)
 			require.LessOrEqual(t, statsAfterExpire.Stats[0].TimeLeft, time.Duration(0)) // timeleft can be negative
 			require.Less(t, statsAfterExpire.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, statsAfterExpire.Stats[0].APR)
-			require.Greater(t, statsAfterExpire.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(10_000_000_000), statsAfterExpire.Stats[0].Balance)
+			require.Equal(t, apr, statsAfterExpire.Stats[0].APR)
+			require.Equal(t, wantInterestEarned, statsAfterExpire.Stats[0].TokensEarned)
+			require.Equal(t, int64(tokensToLock*1e10), statsAfterExpire.Stats[0].Balance)
 
 			time.Sleep(time.Second) // Sleep to let lock try to earn interest after has expired.
 
@@ -121,20 +131,27 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = refillFaucet(t, configPath, 1)
 			require.Nil(t, err, "refill faucet execution failed", err, strings.Join(output, "\n"))
 
-			// Check total interest gained - must be equal to after lock has expired.
+			// Check total interest.
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Equal(t, balanceAfterLockExpires, output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 		})
 
 		t.Run("Multiple lock tokens", func(t *testing.T) {
 			t.Parallel()
 
+			// first lock: 0.8 token for 100 min
+			// all interest are already earned after lock.
+			tokensToLock1 := float64(0.8)
+			lockDuration1 := time.Minute * 100
+			wantInterestEarnedFromLock1 := computeExpectedLockInterest(tokensToLock1, lockDuration1)
+			wantInterestEarnedFromLock1AsBalance := balancePrint(wantInterestEarnedFromLock1)
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-			output, err = executeFaucetWithTokens(t, configPath, 0.8)
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock1)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
@@ -155,15 +172,21 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,3}\.\d{1,3} uZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedFromLock1AsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
-			output, err = executeFaucetWithTokens(t, configPath, 0.5)
+			// first lock: 0.5 token for 100 min
+			tokensToLock2 := float64(0.5)
+			lockDuration2 := time.Hour * 5
+			wantInterestEarnedFromLock2 := computeExpectedLockInterest(tokensToLock2, lockDuration2)
+			wantInterestEarnedFromBothLocksAsBalance := balancePrint(wantInterestEarnedFromLock1 + wantInterestEarnedFromLock2)
+
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock2)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: 500.\d{1,3} mZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+balancePrint(wantInterestEarnedFromLock1+int64(tokensToLock2*1e10))+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// second lock 0.5 token for 5 hrs
 			output, err = lockInterest(t, configPath, false, 0, true, 5, true, 0.5)
@@ -178,7 +201,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,3}\.\d{1,3} uZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedFromBothLocksAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			output, err = getLockedTokens(t, configPath)
 			require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
@@ -192,32 +215,48 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 			// check locked tokens. Order retrieved can be different so search appropriate lock
 
-			wantDurationTokenPair := map[time.Duration]int64{
-				time.Minute * 100: 8_000_000_000,
-				time.Hour * 5:     5_000_000_000,
+			wantDurationTokenPair := map[time.Duration]struct {
+				tokensLocked   float64
+				interestEarned int64
+			}{
+				lockDuration1: {
+					tokensLocked:   tokensToLock1,
+					interestEarned: wantInterestEarnedFromLock1,
+				},
+				lockDuration2: {
+					tokensLocked:   tokensToLock2,
+					interestEarned: wantInterestEarnedFromLock2,
+				},
 			}
 
 			for _, stat := range stats.Stats {
-				wantToken, ok := wantDurationTokenPair[stat.Duration]
+				want, ok := wantDurationTokenPair[stat.Duration]
 				require.True(t, ok, "Lock duration got %s not expected", stat.Duration)
 
 				require.NotEqual(t, "", stat.ID)
 				require.True(t, stat.Locked)
 				require.LessOrEqual(t, stat.TimeLeft, stat.Duration)
 				require.LessOrEqual(t, stat.StartTime, time.Now().Unix())
-				require.Equal(t, 0.1, stat.APR)
-				require.GreaterOrEqual(t, stat.TokensEarned, int64(0))
-				require.Equal(t, wantToken, stat.Balance)
+				require.Equal(t, apr, stat.APR)
+				require.Equal(t, want.interestEarned, stat.TokensEarned)
+				require.Equal(t, int64(want.tokensLocked*1e10), stat.Balance)
 			}
 		})
 
-		t.Run("Lock with durationMin param", func(t *testing.T) {
+		t.Run("Lock with maximum durationMin param", func(t *testing.T) {
 			t.Parallel()
+
+			// lock 0.951123 token for 1 year
+			// all interest are already earned after lock.
+			tokensToLock := float64(0.951123)
+			lockDuration := year
+			wantInterestEarned := computeExpectedLockInterest(tokensToLock, lockDuration)
+			wantInterestEarnedAsBalance := balancePrint(wantInterestEarned)
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-			output, err = executeFaucetWithTokens(t, configPath, 0.951123)
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
@@ -226,7 +265,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Regexp(t, regexp.MustCompile(`Balance: 951.123 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 			// lock 0.951123 token for 200 minutes
-			output, err = lockInterest(t, configPath, true, 200, false, 0, true, 0.951123)
+			output, err = lockInterest(t, configPath, true, int64(lockDuration.Minutes()), false, 0, true, 0.951123)
 			require.Nil(t, err, "lock interest failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.951123) locked successfully", output[0])
@@ -238,7 +277,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,3}\.\d{1,3} uZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// Get locked tokens BEFORE locked tokens expire.
 			output, err = getLockedTokens(t, configPath)
@@ -252,21 +291,28 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, stats.Stats, 1)
 			require.NotEqual(t, "", stats.Stats[0].ID)
 			require.True(t, stats.Stats[0].Locked)
-			require.Equal(t, time.Minute*200, stats.Stats[0].Duration)
-			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Minute*200)
+			require.Equal(t, lockDuration, stats.Stats[0].Duration)
+			require.LessOrEqual(t, stats.Stats[0].TimeLeft, lockDuration)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
-			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(9_511_230_000), stats.Stats[0].Balance)
+			require.Equal(t, apr, stats.Stats[0].APR)
+			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, wantInterestEarned)
+			require.Equal(t, int64(tokensToLock*1e10), stats.Stats[0].Balance)
 		})
 
-		t.Run("Lock with durationHr param", func(t *testing.T) {
+		t.Run("Lock with maximum durationHr param", func(t *testing.T) {
 			t.Parallel()
+
+			// lock 0.75 token for 1 year
+			// all interest are already earned after lock.
+			tokensToLock := float64(0.75)
+			lockDuration := year
+			wantInterestEarned := computeExpectedLockInterest(tokensToLock, lockDuration)
+			wantInterestEarnedAsBalance := balancePrint(wantInterestEarned)
 
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-			output, err = executeFaucetWithTokens(t, configPath, 0.75)
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
@@ -275,7 +321,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 			// lock 0.75 token for 24 hours
-			output, err = lockInterest(t, configPath, false, 0, true, 24, true, 0.75)
+			output, err = lockInterest(t, configPath, false, 0, true, int64(lockDuration.Hours()), true, 0.75)
 			require.Nil(t, err, "lock interest failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.750000) locked successfully", output[0])
@@ -287,7 +333,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,3}\.\d{1,3} uZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// Get locked tokens BEFORE locked tokens expire.
 			output, err = getLockedTokens(t, configPath)
@@ -301,21 +347,30 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, stats.Stats, 1)
 			require.NotEqual(t, "", stats.Stats[0].ID)
 			require.True(t, stats.Stats[0].Locked)
-			require.Equal(t, time.Hour*24, stats.Stats[0].Duration)
-			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Hour*24)
+			require.Equal(t, lockDuration, stats.Stats[0].Duration)
+			require.LessOrEqual(t, stats.Stats[0].TimeLeft, lockDuration)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
-			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(7_500_000_000), stats.Stats[0].Balance)
+			require.Equal(t, apr, stats.Stats[0].APR)
+			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, wantInterestEarned)
+			require.Equal(t, int64(tokensToLock*1e10), stats.Stats[0].Balance)
 		})
 
 		t.Run("Lock with both durationMin and durationHr param", func(t *testing.T) {
 			t.Parallel()
 
+			// lock 0.25 token for 1hr and 30 mins
+			// all interest are already earned after lock.
+			tokensToLock := float64(0.25)
+			lockDurationHr := time.Hour
+			lockDurationMin := time.Minute
+			wantLockDuration := lockDurationHr + lockDurationMin
+			wantInterestEarned := computeExpectedLockInterest(tokensToLock, wantLockDuration)
+			wantInterestEarnedAsBalance := balancePrint(wantInterestEarned)
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-			output, err = executeFaucetWithTokens(t, configPath, 0.25)
+			output, err = executeFaucetWithTokens(t, configPath, tokensToLock)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 			output, err = getBalance(t, configPath)
@@ -323,8 +378,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, 1, len(output))
 			require.Regexp(t, regexp.MustCompile(`Balance: 250.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-			// lock 0.25 token for 1 hour and 30 mins
-			output, err = lockInterest(t, configPath, true, 30, true, 1, true, 0.25)
+			// lock
+			output, err = lockInterest(t, configPath, true, int64(lockDurationMin.Minutes()), true, int64(lockDurationHr.Hours()), true, tokensToLock)
 			require.Nil(t, err, "lock interest failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.250000) locked successfully", output[0])
@@ -336,7 +391,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			output, err = getBalance(t, configPath)
 			require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
 			require.Equal(t, 1, len(output))
-			require.Regexp(t, regexp.MustCompile(`Balance: \d{1,3}\.\d{1,3} uZCN \(\d*\.?\d+ USD\)$`), output[0])
+			require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
 
 			// Get locked tokens BEFORE locked tokens expire.
 			output, err = getLockedTokens(t, configPath)
@@ -350,20 +405,27 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, stats.Stats, 1)
 			require.NotEqual(t, "", stats.Stats[0].ID)
 			require.True(t, stats.Stats[0].Locked)
-			require.Equal(t, time.Hour+time.Minute*30, stats.Stats[0].Duration)
-			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Hour+time.Minute*30)
+			require.Equal(t, wantLockDuration, stats.Stats[0].Duration)
+			require.LessOrEqual(t, stats.Stats[0].TimeLeft, wantLockDuration)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
-			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(2_500_000_000), stats.Stats[0].Balance)
+			require.Equal(t, apr, stats.Stats[0].APR)
+			require.Equal(t, wantInterestEarned, stats.Stats[0].TokensEarned)
+			require.Equal(t, int64(tokensToLock*1e10), stats.Stats[0].Balance)
 		})
 
 		t.Run("Lock with minimum tokens allowed", func(t *testing.T) {
 			t.Parallel()
 
+			// lock 0.000_000_001 token for 1 year. Given APR is 10%, 1 year interest would be 0.000_000_000_1 (1 SAS).
+			// all interest are already earned after lock.
+			tokensToLock := float64(0.000_000_001)
+			lockDuration := year
+			wantInterestEarned := computeExpectedLockInterest(tokensToLock, lockDuration)
+
 			output, err := registerWallet(t, configPath)
 			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
+			// Get 0.100_000_001 token from faucet (as it does not allow just 10 SAS)
 			output, err = executeFaucetWithTokens(t, configPath, 0.100_000_001)
 			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
@@ -372,8 +434,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, 1, len(output))
 			require.Regexp(t, regexp.MustCompile(`Balance: 100.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-			// lock 0.000_000_001 token for 2 hours
-			output, err = lockInterest(t, configPath, false, 0, true, 2, true, 0.000_000_001)
+			// lock
+			output, err = lockInterest(t, configPath, false, 0, true, int64(lockDuration.Hours()), true, tokensToLock)
 			require.Nil(t, err, "lock interest failed", err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			// FIXME precision is lost - should say  `Tokens (0.000000001) locked successfully`
@@ -400,12 +462,27 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Len(t, stats.Stats, 1)
 			require.NotEqual(t, "", stats.Stats[0].ID)
 			require.True(t, stats.Stats[0].Locked)
-			require.Equal(t, time.Hour*2, stats.Stats[0].Duration)
-			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Hour*2)
+			require.Equal(t, lockDuration, stats.Stats[0].Duration)
+			require.LessOrEqual(t, stats.Stats[0].TimeLeft, lockDuration)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
-			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-			require.Equal(t, int64(10), stats.Stats[0].Balance)
+			require.Equal(t, apr, stats.Stats[0].APR)
+			require.Equal(t, wantInterestEarned, stats.Stats[0].TokensEarned)
+			require.Equal(t, int64(tokensToLock*1e10), stats.Stats[0].Balance)
+		})
+
+		t.Run("Lock attempt with tokens exceeding balance param should fail", func(t *testing.T) {
+			t.Parallel()
+
+			output, err := registerWallet(t, configPath)
+			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+			output, err = executeFaucetWithTokens(t, configPath, 1)
+			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+			output, err = lockInterest(t, configPath, true, 5, false, 0, true, 1.1)
+			require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
 		})
 
 		t.Run("Lock attempt with missing durationHr and durationMin params should fail", func(t *testing.T) {
@@ -451,6 +528,40 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Error: invalid duration", output[0])
+		})
+
+		t.Run("Lock attempt with durationMin over 1 year", func(t *testing.T) {
+			t.Parallel()
+
+			output, err := registerWallet(t, configPath)
+			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+			output, err = executeFaucetWithTokens(t, configPath, 1)
+			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+			over1YearMins := int64(year.Minutes()) + 1
+
+			output, err = lockInterest(t, configPath, true, int64(over1YearMins), false, 0, true, 1)
+			require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		})
+
+		t.Run("Lock attempt with durationHr over 1 year", func(t *testing.T) {
+			t.Parallel()
+
+			output, err := registerWallet(t, configPath)
+			require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+			output, err = executeFaucetWithTokens(t, configPath, 1)
+			require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+			over1YearHrs := int64(year.Hours()) + 1
+
+			output, err = lockInterest(t, configPath, false, 0, true, int64(over1YearHrs), true, 1)
+			require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
 		})
 
 		t.Run("Lock attempt with both 0 durationHr and 0 durationMin params should fail", func(t *testing.T) {
@@ -632,7 +743,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, time.Minute, stats.Stats[0].Duration)
 			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Minute)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
+			require.Equal(t, apr, stats.Stats[0].APR)
 			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
 			require.Equal(t, int64(10_000_000_000), stats.Stats[0].Balance)
 
@@ -689,7 +800,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			require.Equal(t, time.Minute, stats.Stats[0].Duration)
 			require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Minute)
 			require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-			require.Equal(t, 0.1, stats.Stats[0].APR)
+			require.Equal(t, apr, stats.Stats[0].APR)
 			require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
 			require.Equal(t, int64(10_000_000_000), stats.Stats[0].Balance)
 
@@ -748,4 +859,20 @@ func refillFaucet(t *testing.T, cliConfigFilename string, tokens float64) ([]str
 			escapedTestName(t),
 			cliConfigFilename,
 		))
+}
+
+func computeExpectedLockInterest(tokens float64, duration time.Duration) int64 {
+	return int64(tokens * 1e10 * apr * duration.Minutes() / year.Minutes())
+}
+
+func balancePrint(b int64) string {
+	switch {
+	case b/1e10 > 0:
+		return fmt.Sprintf("%.3f ZCN", float64(b)/1e10)
+	case b/1e7 > 0:
+		return fmt.Sprintf("%.3f mZCN", float64(b)/1e7)
+	case b/1e4 > 0:
+		return fmt.Sprintf("%.3f uZCN", float64(b)/1e4)
+	}
+	return fmt.Sprintf("%d SAS", b)
 }
