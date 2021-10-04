@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -178,10 +179,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 			defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
-
-			//require.Len(t, output, 2)
-			//require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
-			t.Logf("DOWNLOAD OUTPUT: [%v}", strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Read pool before download
 			time.Sleep(45 * time.Second) // TODO replace with poller
@@ -209,7 +208,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			}
 
 			time.Sleep(5 * time.Minute)
-			output, err = readPoolInfo(t, configPath, allocationID)
+			output, _ = readPoolInfo(t, configPath, allocationID)
 			t.Logf("Read pool after 5 minutes of waiitng: [%v]", output)
 		})
 	})
@@ -229,7 +228,7 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox download --silent --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {
