@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -92,6 +93,7 @@ func registerWalletForName(cliConfigFilename, name string) ([]string, error) {
 }
 
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(5 * time.Second)
 	return getBalanceForWallet(cliConfigFilename, escapedTestName(t))
 }
 
