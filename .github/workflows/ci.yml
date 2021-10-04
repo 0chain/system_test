@@ -1,7 +1,7 @@
 name: ci
 
 env:
-  TAG: latest #master
+  TAG: staging #master
   ZWALLET_BRANCH: 35dba9221ead55271095bd21a4dec241cd37358b #Cached master
   ZBOX_BRANCH: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
 
@@ -62,7 +62,7 @@ jobs:
       - name: "Configure helm & kubectl"
         if: github.event_name != 'workflow_dispatch'
         run: |
-          helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
+          helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
           helm repo update
           mkdir -p ~/.kube
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ~/.kube/config
@@ -78,14 +78,23 @@ jobs:
       - name: "Deploy 0Chain"
         if: github.event_name != 'workflow_dispatch'
         run: |
-          helm upgrade --install --wait --timeout 120s 0chain -n ${{ env.NETWORK }} --set sharder.sharderImage.tag=${{ env.TAG }} --set miner.minerImage.tag=${{ env.TAG }} 0chain-helm/zchain
-          helm upgrade --install --wait --timeout 120s 0dns -n ${{ env.NETWORK }} --set zdns.image.tag=${{ env.TAG }} --set zdns.host=devnet-0chain.net 0chain-helm/zdns
-          helm upgrade --install --wait --timeout 120s blobber -n ${{ env.NETWORK }} --set blobber.blobberImage.tag=${{ env.TAG }} --set validator.validatorImage.tag=${{ env.TAG }} --set blobber.host=devnet-0chain.net 0chain-helm/blobber
-          helm upgrade --install --wait --timeout 120s 0block -n ${{ env.NETWORK }} --set block.blockImage.tag=${{ env.TAG }} --set block.host=devnet-0chain.net 0chain-helm/zblock
-          helm upgrade --install --wait --timeout 120s explorer -n ${{ env.NETWORK }} --set explorer.explorerImage.tag=latest --set explorer.host=devnet-0chain.net 0chain-helm/blockExplorer
-          helm upgrade --install --wait --timeout 120s 0proxy -n ${{ env.NETWORK }} --set proxy.image.tag=${{ env.TAG }} --set proxy.host=devnet-0chain.net 0chain-helm/zproxy
-          helm upgrade --install --wait --timeout 120s 0box -n ${{ env.NETWORK }} --set zbox.zboxImage.tag=${{ env.TAG }}  --set zbox.host=devnet-0chain.net 0chain-helm/zbox
-          helm upgrade --install --wait --timeout 120s 0search -n ${{ env.NETWORK }} --set blockRecorder.blockRecorderImage.tag=${{ env.TAG }} --set blockRecorder.host=devnet-0chain.net 0chain-helm/zsearch
+
+          helm upgrade --install --wait --timeout 120s 0chain --set sharder.image.tag=${{ env.TAG }} --set miner.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }} 0chain-helm/zchain
+
+          helm upgrade --install --wait --timeout 120s 0dns --set zdns.image.tag=${{ env.TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/zdns
+
+          helm upgrade --install --wait --timeout 120s blobber --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/blobber
+
+          helm upgrade --install --wait --timeout 120s 0block --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zblock
+
+          helm upgrade --install --wait --timeout 120s explorer --set explorer.image.tag=${{ env.TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/explorer
+
+          helm upgrade --install --wait --timeout 120s 0proxy --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zproxy
+
+          helm upgrade --install --wait --timeout 120s 0box --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zbox
+
+          helm upgrade --install --wait --timeout 120s 0search --set zsearch.host=devnet-0chain.net  zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
+
           helm upgrade --install --wait --timeout 120s blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
       - name: "Wait for chain deployment to complete"
