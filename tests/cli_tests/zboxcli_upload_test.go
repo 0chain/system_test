@@ -399,7 +399,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		// Upload the file again to same directory
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -424,7 +424,7 @@ func TestUpload(t *testing.T) {
 		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": "ab12mn34as90",
 			"remotepath": "/",
 			"localpath":  filename,
@@ -476,7 +476,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		// Upload using otherAllocationID: should not work
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -498,7 +498,7 @@ func TestUpload(t *testing.T) {
 		})
 		filename := "non-existent-file.txt"
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  "non-existent-file.txt",
@@ -527,7 +527,7 @@ func TestUpload(t *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -544,7 +544,7 @@ func TestUpload(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = uploadFile(t, configPath, nil)
+		output, err = uploadFileWithoutRetry(t, configPath, nil)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -559,7 +559,7 @@ func TestUpload(t *testing.T) {
 			"size": 2048,
 		})
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 		})
 
@@ -597,6 +597,19 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	)
 
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+}
+
+func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	t.Logf("Uploading file...")
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+
+	return cliutils.RunCommand(cmd)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
