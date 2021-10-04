@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ func RunCommand(commandString string) ([]string, error) {
 	return sanitizeOutput(rawOutput), err
 }
 
-func RunCommandWithRetry(commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	var count int
 	for {
 		count++
@@ -36,10 +37,10 @@ func RunCommandWithRetry(commandString string, maxAttempts int, backoff time.Dur
 		if err == nil {
 			return output, nil
 		} else if count < maxAttempts {
-			Logger.Warnf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			t.Logf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
 			time.Sleep(backoff)
 		} else {
-			Logger.Warnf("Command failed on final attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			t.Logf("Command failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", commandString, count, maxAttempts, err, strings.Join(output, "\n"))
 			return output, err
 		}
 	}
