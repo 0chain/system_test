@@ -203,14 +203,17 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 	time.Sleep(15 * time.Second) // TODO replace with poller
+	t.Logf("Getting write pool info...")
 	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
+	t.Logf("Getting upload cost...")
 	return cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Getting challenge pool info...")
 	return cliutils.RunCommand("./zbox cp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 

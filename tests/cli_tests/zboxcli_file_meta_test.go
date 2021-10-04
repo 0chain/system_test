@@ -398,6 +398,7 @@ func TestFileMetadata(t *testing.T) {
 }
 
 func getFileMeta(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(
 		"./zbox meta %s --silent --wallet %s --configDir ./config --config %s",
 		param,
