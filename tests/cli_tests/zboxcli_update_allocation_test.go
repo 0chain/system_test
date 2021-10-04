@@ -698,7 +698,7 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	t.Logf("Cancelling allocation...")
+	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+
 			"--wallet %s --configDir ./config --config %s",
@@ -713,13 +713,12 @@ func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]s
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
 	t.Logf("Executing faucet...")
-	return cliutils.RunCommandWithRetry(
-		fmt.Sprintf("./zwallet faucet --methodName "+
-			"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
-			tokens,
-			escapedTestName(t),
-			cliConfigFilename,
-		), 3, time.Second*5)
+	return cliutils.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		escapedTestName(t),
+		cliConfigFilename,
+	), 3, time.Second*5)
 }
 
 func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {

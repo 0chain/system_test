@@ -280,7 +280,7 @@ func setupWallet(t *testing.T, configPath string) ([]string, error) {
 
 func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
-	return cliutils.RunCommandWithRetry(fmt.Sprintf(
+	return cliutils.RunCommandWithRetry(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",

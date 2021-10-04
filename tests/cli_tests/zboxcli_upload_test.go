@@ -596,7 +596,7 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
+	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
