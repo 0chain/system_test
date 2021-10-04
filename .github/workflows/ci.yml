@@ -6,7 +6,8 @@ env:
   ZBOX_BRANCH: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
 
 on:
-#  push:
+  push:
+    branches: [ master, staging, git-action-update ]
   workflow_dispatch:
     inputs:
       network:
