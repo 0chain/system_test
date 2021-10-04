@@ -95,7 +95,7 @@ jobs:
 
           helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zbox
 
-          helm upgrade --install --wait  0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net  zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
+          helm upgrade --install --wait  0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
 
           helm upgrade --install --wait  blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
