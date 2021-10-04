@@ -312,8 +312,6 @@ func TestUpload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[1])
 
-		pretty(output)
-
 		match := reCommitResponse.FindStringSubmatch(output[2])
 		require.Len(t, match, 2)
 
@@ -570,11 +568,6 @@ func TestUpload(t *testing.T) {
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
-}
-
-func pretty(data interface{}) {
-	bts, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(bts))
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {

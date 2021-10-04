@@ -130,6 +130,8 @@ type Collaborator struct {
 }
 
 type CommitResponse struct {
+	//FIXME: POSSIBLE ISSUE: json-tags are not available for commit response
+
 	TxnID    string `json:"TxnID"`
 	MetaData struct {
 		Name            string          `json:"Name"`
