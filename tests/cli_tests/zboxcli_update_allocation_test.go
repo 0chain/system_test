@@ -611,7 +611,7 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 8.0
+	faucetTokens := 1.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,

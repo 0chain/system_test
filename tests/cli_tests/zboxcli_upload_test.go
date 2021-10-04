@@ -236,7 +236,7 @@ func TestUpload(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
@@ -587,7 +587,6 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	time.Sleep(15 * time.Second) // TODO replace with poller
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
