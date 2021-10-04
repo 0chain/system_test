@@ -412,6 +412,7 @@ func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag boo
 }
 
 func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Listing all...")
 	return cliutils.RunCommand("./zbox list-all --silent --allocation " + allocationID +
 		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }

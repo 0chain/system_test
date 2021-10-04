@@ -530,11 +530,12 @@ func generateRandomTestFileName(t *testing.T) string {
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
-	nBig := cliutils.RandomAlphaNumericString(10)
-	return fmt.Sprintf("%s/%s_test.txt", path, nBig)
+	randomFilename := cliutils.RandomAlphaNumericString(10)
+	return fmt.Sprintf("%s/%s_test.txt", path, randomFilename)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	t.Logf("Sharing file/folder...")
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -546,6 +547,7 @@ func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]s
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	time.Sleep(15 * time.Second) // TODO replace with poller
+	t.Logf("Listing individual file in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -557,6 +559,7 @@ func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]str
 
 func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	time.Sleep(15 * time.Second) // TODO replace with poller
+	t.Logf("Listing all files in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
 		param,
