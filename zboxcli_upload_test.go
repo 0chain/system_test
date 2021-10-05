@@ -312,8 +312,6 @@ func TestUpload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[1])
 
-		pretty(output)
-
 		match := reCommitResponse.FindStringSubmatch(output[2])
 		require.Len(t, match, 2)
 
@@ -572,11 +570,6 @@ func TestUpload(t *testing.T) {
 	})
 }
 
-func pretty(data interface{}) {
-	bts, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(bts))
-}
-
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
@@ -594,6 +587,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
