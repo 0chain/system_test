@@ -290,6 +290,7 @@ func TestSendAndBalance(t *testing.T) {
 }
 
 func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string) ([]string, error) {
+	t.Logf("Sending ZCN...")
 	return cliutils.RunCommand("./zwallet send --silent --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
 		" --to_client_id " + toClientID +

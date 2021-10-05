@@ -154,6 +154,7 @@ func TestMultisigWallet(t *testing.T) {
 }
 
 func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, threshold int) ([]string, error) {
+	t.Logf("Creating multisig wallet...")
 	return cliutils.RunCommand(fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",
 		numSigners, threshold,
