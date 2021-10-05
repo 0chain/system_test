@@ -29,6 +29,10 @@ func RunCommand(commandString string) ([]string, error) {
 }
 
 func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+	reset := "\033[0m"
+	red := "\033[31m"
+	yellow := "\033[33m"
+
 	var count int
 	for {
 		count++
@@ -37,10 +41,10 @@ func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, ba
 		if err == nil {
 			return output, nil
 		} else if count < maxAttempts {
-			t.Errorf("Command failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", count, maxAttempts, err, strings.Join(output, "\n"))
+			t.Errorf("%sCommand failed on attempt [%v/%v] due to error [%v]. Output: [%v]%s\n", yellow, count, maxAttempts, err, strings.Join(output, "\n"), reset)
 			time.Sleep(backoff)
 		} else {
-			t.Errorf("Command failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", commandString, count, maxAttempts, err, strings.Join(output, "\n"))
+			t.Errorf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]%s\n", red, commandString, count, maxAttempts, err, strings.Join(output, "\n"), reset)
 			return output, err
 		}
 	}
