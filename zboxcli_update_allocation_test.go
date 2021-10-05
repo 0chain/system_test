@@ -687,6 +687,7 @@ func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string,
 }
 
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(5 * time.Second)
 	t.Logf("Listing allocations...")
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent "+

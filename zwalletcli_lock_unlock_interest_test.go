@@ -849,6 +849,7 @@ func unlockInterestForWallet(wallet, cliConfigFilename string, withPoolID bool, 
 }
 
 func getLockedTokens(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(5 * time.Second)
 	return cliutil.RunCommand("./zwallet getlockedtokens --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
