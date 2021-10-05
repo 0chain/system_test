@@ -97,7 +97,7 @@ jobs:
 
           helm upgrade --install --wait  0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zsearch
 
-          helm upgrade --install --wait  blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
+          # helm upgrade --install --wait  blobber-stake -n ${{ env.NETWORK }} --set blobberStack.blobberCount=6 --set blobberStack.host=devnet-0chain.net --set blobberStack.image.tag=latest 0chain-helm/blobberStake
 
       - name: "Wait for chain deployment to complete"
         if: github.event_name != 'workflow_dispatch'
