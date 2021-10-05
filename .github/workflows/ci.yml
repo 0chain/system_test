@@ -2,8 +2,8 @@ name: ci
 
 env:
   TAG: staging #master
-  ZWALLET_BRANCH: 35dba9221ead55271095bd21a4dec241cd37358b #Cached master
-  ZBOX_BRANCH: 4e6e7e344c144f50bd6556171be9e1c0d0e0ddaf #Cached master
+  ZWALLET_BRANCH: staging
+  ZBOX_BRANCH: staging
 
 on:
   push:
