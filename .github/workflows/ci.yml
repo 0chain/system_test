@@ -1,4 +1,4 @@
-name: ci
+name: "0Chain System Tests CI"
 
 env:
   TAG: staging #master
@@ -7,7 +7,6 @@ env:
 
 on:
   push:
-    branches: [ master, staging, git-action-update ]
   workflow_dispatch:
     inputs:
       network:
@@ -29,7 +28,7 @@ on:
 
 jobs:
   golangci:
-    name: lint
+    name: "lint"
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
@@ -39,7 +38,7 @@ jobs:
           version: v1.42
 
   system-tests:
-    name: System Tests
+    name: "System Tests"
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
@@ -198,16 +197,6 @@ jobs:
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
           exit $exit_code
 
-      - name: "Archive CLI Config & Console Output"
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: System-Test-${{ steps.time.outputs.time }}
-          path: |
-            ./tests/cli_tests/config
-            ./tests/cli_tests/cmdlog.log
-            ./tests/cli_tests/${{ env.BRANCH }}/${GITHUB_SHA}/index.html
-
       - name: "Deploy report page"
         if: always()
         uses: peaceiris/actions-gh-pages@v3
@@ -219,6 +208,16 @@ jobs:
           destination_dir: "./${{ env.BRANCH }}"
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
+
+      - name: "Archive CLI Config & Console Output"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: System-Test-${{ steps.time.outputs.time }}
+          path: |
+            ./tests/cli_tests/config
+            ./tests/cli_tests/cmdlog.log
+            ./tests/cli_tests/${{ env.BRANCH }}/${GITHUB_SHA}/index.html
 
       - name: "Wait for report deployment to complete"
         if: always()

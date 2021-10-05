@@ -10,8 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -118,8 +116,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				"lock":   balance,
 				"size":   10485760,
 				"expire": "1h",
-				"data":   "2",
-				"parity": "1",
 			})
 			output, err = createNewAllocation(t, configPath, allocParam)
 			require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -147,7 +143,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			// Read pool before download
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-			t.Logf("Initial read pool: [%v]", output)
 
 			initialReadPool := []climodel.ReadPoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &initialReadPool)
@@ -179,14 +174,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 			defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
+
 			require.Len(t, output, 2)
 			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
 			// Read pool before download
-			time.Sleep(45 * time.Second) // TODO replace with poller
 			output, err = readPoolInfo(t, configPath, allocationID)
 			require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-			t.Logf("Final read pool: [%v]", output)
 
 			finalReadPool := []climodel.ReadPoolInfo{}
 			err = json.Unmarshal([]byte(output[0]), &finalReadPool)
@@ -204,31 +198,31 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 				require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 				// amount deducted
-				assert.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] read pool is incorrect", i)
+				require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] is incorrect", i)
 			}
-
-			time.Sleep(5 * time.Minute)
-			output, _ = readPoolInfo(t, configPath, allocationID)
-			t.Logf("Read pool after 5 minutes of waiitng: [%v]", output)
 		})
 	})
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	time.Sleep(15 * time.Second) // TODO replace with poller
+	time.Sleep(5 * time.Second) // TODO replace with poller
+	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
+	t.Logf("Locking read tokens...")
 	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, escapedTestName(t), cliConfigFilename))
 }
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
+	t.Logf("Getting download cost...")
 	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	return cliutils.RunCommand("./zbox download --silent --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	t.Logf("Downloading file...")
+	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {

@@ -611,7 +611,7 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 8.0
+	faucetTokens := 1.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,
@@ -675,6 +675,7 @@ func createParams(params map[string]interface{}) string {
 }
 
 func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
 			"--configDir ./config --config %s",
@@ -686,6 +687,8 @@ func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string,
 }
 
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(5 * time.Second)
+	t.Logf("Listing allocations...")
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent "+
 			"--wallet %s --configDir ./config --config %s",
@@ -696,6 +699,7 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+
 			"--wallet %s --configDir ./config --config %s",
@@ -709,16 +713,17 @@ func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]s
 // executeFaucetWithTokens executes faucet command with given tokens.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
-	return cliutils.RunCommandWithRetry(
-		fmt.Sprintf("./zwallet faucet --methodName "+
-			"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
-			tokens,
-			escapedTestName(t),
-			cliConfigFilename,
-		), 3, time.Second*5)
+	t.Logf("Executing faucet...")
+	return cliutils.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		escapedTestName(t),
+		cliConfigFilename,
+	), 3, time.Second*5)
 }
 
 func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+
 			"--silent --wallet %s --configDir ./config --config %s",
