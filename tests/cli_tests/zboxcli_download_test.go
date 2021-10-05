@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestDownload(t *testing.T) {
@@ -622,11 +623,12 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 }
 
 func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	time.Sleep(15 * time.Second) // TODO replace with poller
 	cmd := fmt.Sprintf(
 		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
 }
