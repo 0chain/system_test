@@ -13,10 +13,10 @@ import (
 )
 
 func TestCommonUserFunctions(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("Create Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 
 			allocationID := setupAllocation(t, configPath)
 
@@ -65,6 +65,24 @@ func TestCommonUserFunctions(t *testing.T) {
 			lock := offer["lock"].(float64)
 
 			require.Equal(t, lock, float64(643), "Lock token interest must've been put in stack pool")
+
+			createAllocationTestTeardown(t, allocationID)
+		})
+
+		t.Run("Create Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
+			t.Parallel()
+
+			allocationID := setupAllocation(t, configPath)
+
+			output, err := getBalance(t, configPath)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Regexp(t, regexp.MustCompile(`Balance: [0-9.]+ (|m|µ)ZCN \([0-9.]+ USD\)$`), output[0])
+			r := regexp.MustCompile(`Balance: (?P<Balance>[0-9.]+ (|m|µ)ZCN) \([0-9.]+ USD\)$`)
+			matches := r.FindStringSubmatch(output[0])
+			userWalletBalance := matches[1]
+
+			require.Equal(t, userWalletBalance, "500.000 mZCN", "User wallet balance must be 0.5 ZCN", strings.Join(output, "\n"))
 
 			createAllocationTestTeardown(t, allocationID)
 		})
