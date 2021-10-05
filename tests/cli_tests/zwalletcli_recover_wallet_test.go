@@ -37,7 +37,7 @@ func TestRecoverWallet(t *testing.T) {
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
 		require.Equal(t, "No wallet in path"+
-			"  ./config/TestRecoverWallet-parallel-Recover_wallet_invalid_mnemonic_wallet.json found."+
+			"  ./config/TestRecoverWallet-Recover_wallet_invalid_mnemonic_wallet.json found."+
 			" Creating wallet...", output[0])
 		require.Equal(t, "ZCN wallet created!!", output[1])
 		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
@@ -54,7 +54,7 @@ func TestRecoverWallet(t *testing.T) {
 
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
-		require.Equal(t, "No wallet in path  ./config/TestRecoverWallet-parallel-Recover_wallet_no_mnemonic_wallet.json found. Creating wallet...", output[0])
+		require.Equal(t, "No wallet in path  ./config/TestRecoverWallet-Recover_wallet_no_mnemonic_wallet.json found. Creating wallet...", output[0])
 		require.Equal(t, "ZCN wallet created!!", output[1])
 		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 		require.Equal(t, "Read pool created successfully", output[3])
