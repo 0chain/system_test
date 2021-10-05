@@ -44,10 +44,10 @@ func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, ba
 			}
 			return output, nil
 		} else if count < maxAttempts {
-			t.Errorf("%sCommand failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", yellow, count, maxAttempts, err, strings.Join(output, "\n"))
+			t.Errorf("%sCommand failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", yellow, count, maxAttempts, err, strings.Join(output, " -<NEWLINE>- "))
 			time.Sleep(backoff)
 		} else {
-			t.Errorf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, "\n"))
+			t.Errorf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
 			return output, err
 		}
 	}
