@@ -89,7 +89,7 @@ jobs:
 
           helm upgrade --install --wait  0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zblock
 
-          helm upgrade --install --wait  explorer --set explorer.persistence.enabled=true --set explorer.image.tag=${{ env.TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/explorer
+          helm upgrade --install --wait  explorer --set explorer.persistence.enabled=true --set explorer.image.tag=master --set explorer.host=devnet-0chain.net -n ${{ env.NETWORK }}  0chain-helm/explorer
 
           helm upgrade --install --wait  0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.TAG }} -n ${{ env.NETWORK }}  0chain-helm/zproxy
 
@@ -125,8 +125,8 @@ jobs:
 
       - name: "Get CLI Cache Key"
         run: |
-          echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} || echo '{"object":{"sha": "${{ env.ZWALLET_BRANCH }}"}}' | jq --raw-output .object.sha) >> $GITHUB_ENV
-          echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  || echo '{"object":{"sha": "${{ env.ZBOX_BRANCH }}"}}' | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZWALLET_SHA=$((curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} || echo '{"object":{"sha": "${{ env.ZWALLET_BRANCH }}"}}') | jq --raw-output .object.sha) >> $GITHUB_ENV
+          echo ZBOX_SHA=$((curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  || echo '{"object":{"sha": "${{ env.ZBOX_BRANCH }}"}}') | jq --raw-output .object.sha) >> $GITHUB_ENV
 
       - name: "Cache CLI Binaries"
         id: cli-cache
