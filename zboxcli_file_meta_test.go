@@ -128,7 +128,7 @@ func TestFileMetadata(t *testing.T) {
 			})
 
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.Nil(t, err, err)
+			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
 			authTicket, err = extractAuthToken(output[0])
@@ -234,12 +234,12 @@ func TestFileMetadata(t *testing.T) {
 		err := createFileWithSize(filename, filesize)
 		require.Nil(t, err)
 
-		output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  filename,
 			"remotepath": remotepath,
 			"encrypt":    "",
-		}))
+		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -398,6 +398,7 @@ func TestFileMetadata(t *testing.T) {
 }
 
 func getFileMeta(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(
 		"./zbox meta %s --silent --wallet %s --configDir ./config --config %s",
 		param,

@@ -853,12 +853,11 @@ func getLockedTokens(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func refillFaucet(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
-	return cliutil.RunCommandWithRetry(
-		fmt.Sprintf("./zwallet faucet --methodName refill --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
-			tokens,
-			escapedTestName(t),
-			cliConfigFilename,
-		), 3, time.Second*20)
+	return cliutil.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName refill --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		escapedTestName(t),
+		cliConfigFilename,
+	), 3, time.Second*20)
 }
 
 func computeExpectedLockInterest(tokens float64, duration time.Duration) int64 {
