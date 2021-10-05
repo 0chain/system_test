@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0chain/gosdk/core/conf"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
@@ -35,4 +37,18 @@ func TestMain(m *testing.M) {
 
 	exitRun := m.Run()
 	os.Exit(exitRun)
+}
+
+func GetConfig(t *testing.T) conf.Config {
+	t.Helper()
+	if configPath == "" {
+		t.Fatal("configPath is empty, TestMain not called")
+	}
+
+	config, err := conf.LoadConfigFile(configPath)
+	if err != nil {
+		t.Fatalf("failed to fetch configuration from the ConfigPath: %v", err)
+	}
+
+	return config
 }

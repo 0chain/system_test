@@ -128,7 +128,7 @@ func TestFileMetadata(t *testing.T) {
 			})
 
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Nil(t, err, err)
 			require.Len(t, output, 1)
 
 			authTicket, err = extractAuthToken(output[0])
@@ -234,12 +234,12 @@ func TestFileMetadata(t *testing.T) {
 		err := createFileWithSize(filename, filesize)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFileInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  filename,
 			"remotepath": remotepath,
 			"encrypt":    "",
-		})
+		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
