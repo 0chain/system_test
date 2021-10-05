@@ -17,8 +17,8 @@ import (
 
 func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Parallel()
-	balance := 0.4 // 400.000 mZCN
 
+	balance := 0.4 // 400.000 mZCN
 	t.Run("Read pool must have no tokens locked for a newly created allocation", func(t *testing.T) {
 		t.Parallel()
 
@@ -78,7 +78,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		time.Sleep(30 * time.Second)
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -87,7 +86,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon)
+		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon, "Read pool balance did not match amount locked")
 		require.IsType(t, int64(1), readPool[0].ExpireAt)
 		require.Equal(t, allocationID, readPool[0].AllocationId)
 		require.Less(t, 0, len(readPool[0].Blobber))
@@ -100,7 +99,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
 		}
 
-		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Error should be within epsilon")
+		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers did not match balance in read pool")
 	})
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
@@ -141,7 +140,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		time.Sleep(30 * time.Second)
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -150,7 +148,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(initialReadPool[0].Balance), epsilon)
+		require.InEpsilon(t, 0.4, intToZCN(initialReadPool[0].Balance), epsilon, "read pool balance did not match expected")
 		require.IsType(t, int64(1), initialReadPool[0].ExpireAt)
 		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
 		require.Less(t, 0, len(initialReadPool[0].Blobber))
@@ -179,9 +177,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
 
-		// Necessary for rp-info to update
-		time.Sleep(30 * time.Second) // TODO replace with poller
-
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
@@ -202,24 +197,29 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 			// amount deducted
-			require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon)
+			require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] is incorrect", i)
 		}
 	})
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	time.Sleep(5 * time.Second) // TODO replace with poller
+	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
+	t.Logf("Locking read tokens...")
 	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, escapedTestName(t), cliConfigFilename))
 }
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
+	t.Logf("Getting download cost...")
 	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
+	t.Logf("Downloading file...")
 	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 

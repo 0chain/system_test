@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -411,6 +412,8 @@ func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag boo
 }
 
 func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	time.Sleep(5 * time.Second)
+	t.Logf("Listing all...")
 	return cliutils.RunCommand("./zbox list-all --silent --allocation " + allocationID +
 		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }

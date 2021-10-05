@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -79,7 +81,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
-		size := int64(512)
+		size := int64(2048)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -606,26 +608,33 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	// First create a wallet and run faucet command
-	output, err := registerWallet(t, cliConfigFilename)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-
-	output, err = executeFaucetWithTokens(t, cliConfigFilename, 1)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
-
+	faucetTokens := 1.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
 		"lock":   0.5,
-		"size":   1000000,
+		"size":   10000,
 		"expire": "1h",
 	}
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
 	for _, params := range extraParams {
+		// Extract parameters unrelated to upload
+		if tokenStr, ok := params["tokens"]; ok {
+			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tokenStr), 64)
+			require.Nil(t, err)
+			faucetTokens = token
+			delete(params, "tokens")
+		}
 		for k, v := range params {
 			allocParam[k] = v
 		}
 	}
+	// First create a wallet and run faucet command
+	output, err := registerWallet(t, cliConfigFilename)
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+	output, err = executeFaucetWithTokens(t, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 	output, err = createNewAllocation(t, cliConfigFilename, createParams(allocParam))
 	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
@@ -663,6 +672,7 @@ func createParams(params map[string]interface{}) string {
 }
 
 func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
 			"--configDir ./config --config %s",
@@ -674,6 +684,8 @@ func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string,
 }
 
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
+	time.Sleep(5 * time.Second)
+	t.Logf("Listing allocations...")
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent "+
 			"--wallet %s --configDir ./config --config %s",
@@ -684,6 +696,7 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+
 			"--wallet %s --configDir ./config --config %s",
@@ -697,16 +710,17 @@ func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]s
 // executeFaucetWithTokens executes faucet command with given tokens.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
-	return cliutils.RunCommand(
-		fmt.Sprintf("./zwallet faucet --methodName "+
-			"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
-			tokens,
-			escapedTestName(t),
-			cliConfigFilename,
-		))
+	t.Logf("Executing faucet...")
+	return cliutils.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		escapedTestName(t),
+		cliConfigFilename,
+	), 3, time.Second*5)
 }
 
 func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+
 			"--silent --wallet %s --configDir ./config --config %s",
