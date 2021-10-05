@@ -1,13 +1,13 @@
-name: "0Chain System Tests CI"
+name: "0Chain System Tests"
 
 env:
-  TAG: staging #master
+  TAG: staging
   ZWALLET_BRANCH: staging
   ZBOX_BRANCH: staging
 
 on:
   push:
-  workflow_dispatch:
+  workflow_dispatch: # Workflow dispatch will simply test against a given network and will not deploy one out
     inputs:
       network:
         description: 'network'
@@ -102,7 +102,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
           sleep 60
-          counter=0; while [ $counter -lt 10 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stake | grep -vi completed; do sleep 30 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
+          counter=0; while [ $counter -lt 30 ] && kubectl -n ${{ env.NETWORK }} get pods | grep blobber-stake | grep -vi completed; do sleep 10 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
           rm -rf ~/.kube
 
       - name: "Connect to network from user input"
