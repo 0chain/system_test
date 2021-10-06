@@ -2,15 +2,16 @@ package cli_tests
 
 import (
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 func TestDownload(t *testing.T) {
@@ -477,7 +478,7 @@ func TestDownload(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, nil, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
 			"allocation": "12334qe",
@@ -572,7 +573,7 @@ func TestDownload(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, nil, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadWithParam(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
