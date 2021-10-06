@@ -113,8 +113,6 @@ jobs:
             exit 1
           fi
 
-          rm -rf ./kube
-
       - name: "Connect to network from user input"
         if: github.event_name == 'workflow_dispatch'
         run: |
