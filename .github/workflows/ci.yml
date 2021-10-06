@@ -76,7 +76,7 @@ jobs:
           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NETWORK }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NETWORK }}-config
           kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NETWORK }} --kubeconfig ./kube/${{ env.NETWORK }}-config
 
-      - name: "Deploy 0Chain"
+      - name: "Deploy 0Chain Network"
         if: github.event_name != 'workflow_dispatch'
         run: |
 
