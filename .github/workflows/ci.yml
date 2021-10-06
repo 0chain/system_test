@@ -247,3 +247,10 @@ jobs:
       - name: "Report Link"
         if: always()
         run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
+
+      - name: "Tear Down 0Chain Network"
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          helm list --short -n dev-${RUNNER_NAME:(-1)} | xargs -L1 helm delete -n dev-${RUNNER_NAME:(-1)} || true
+          sleep 30
+          helm upgrade --install cleanup -n $dev-${RUNNER_NAME:(-1)} 0chain-helm/cleanDir || true
