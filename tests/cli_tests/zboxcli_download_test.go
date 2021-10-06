@@ -597,9 +597,6 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
-
-	t.Run("Download Shared File by Paying without Allocation Should Fail", func(t *testing.T) {
-	})
 }
 
 func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraParam map[string]interface{}) string {
@@ -623,12 +620,13 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 }
 
 func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string, error) {
-	time.Sleep(15 * time.Second) // TODO replace with poller
+	t.Logf("Downloading file...")
+	time.Sleep(15 * time.Second) // TODO replace with pollers
 	cmd := fmt.Sprintf(
 		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommandWithRetry(cmd, 3, time.Second*20)
+	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
