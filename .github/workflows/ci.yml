@@ -102,8 +102,17 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         run: |
           sleep 60
-          counter=0; while [ $counter -lt 30 ] && kubectl -n ${{ env.NETWORK }} get pods --kubeconfig ./kube/${{ env.NETWORK }}-config | grep blobber-stake | grep -vi completed; do sleep 10 && echo "Waiting Chain deployment to finish." && ((counter=counter+1)); done
-          rm -rf ~/.kube
+          counter=0;
+          while [ $counter -lt 30 ] && kubectl -n ${{ env.NETWORK }} get pods --kubeconfig ./kube/${{ env.NETWORK }}-config | grep blobber-stake | grep -vi FUDGED; do
+            echo "Waiting Chain deployment to finish." && ((counter=counter+1));
+          done
+
+          if [ $counter -eq 30 ]; then
+            echo "Chain setup did not complete as expected"
+            exit 1
+          fi
+
+          rm -rf ./kube
 
       - name: "Connect to network from user input"
         if: github.event_name == 'workflow_dispatch'
