@@ -124,8 +124,19 @@ jobs:
 
       - name: "Get CLI Cache Key"
         run: |
-          echo ZWALLET_SHA=$((curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} || echo '{"object":{"sha": "${{ env.ZWALLET_BRANCH }}"}}') | jq --raw-output .object.sha) >> $GITHUB_ENV
-          echo ZBOX_SHA=$((curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  || echo '{"object":{"sha": "${{ env.ZBOX_BRANCH }}"}}') | jq --raw-output .object.sha) >> $GITHUB_ENV
+          if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZWALLET_SHA=${{ env.ZWALLET_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ env.ZBOX_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZBOX_SHA=${{ env.ZBOX_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
 
       - name: "Cache CLI Binaries"
         id: cli-cache
