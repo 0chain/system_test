@@ -103,8 +103,8 @@ jobs:
         run: |
           sleep 60
           counter=0;
-          while [ $counter -lt 30 ] && kubectl -n ${{ env.NETWORK }} get pods --kubeconfig ./kube/${{ env.NETWORK }}-config | grep blobber-stake | grep -vi FUDGED; do
-            sleep 30
+          while [ $counter -lt 30 ] && kubectl -n ${{ env.NETWORK }} get pods --kubeconfig ./kube/${{ env.NETWORK }}-config | grep blobber-stake | grep -vi Completed; do
+            sleep 10
             echo "Waiting Chain deployment to finish." && ((counter=counter+1));
           done
 
