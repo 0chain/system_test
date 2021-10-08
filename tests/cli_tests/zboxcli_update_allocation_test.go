@@ -461,10 +461,9 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Get Other Allocation ID", func(t *testing.T) {
 			otherAllocationID = setupAllocation(t, configPath)
 		})
-		myAllocationID := setupAllocation(t, configPath)
 
 		// otherAllocationID should not be cancelable from this level
-		output, err = cancelAllocation(t, configPath, otherAllocationID)
+		output, err := cancelAllocation(t, configPath, otherAllocationID)
 
 		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
