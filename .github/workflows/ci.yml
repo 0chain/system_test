@@ -1,5 +1,10 @@
 name: "0Chain System Tests"
 
+env:
+  DEFAULT_TAG: staging
+  DEFAULT_ZWALLET_BRANCH: staging
+  DEFAULT_ZBOX_BRANCH: staging
+
 on:
   push:
   workflow_dispatch: # Workflow dispatch will simply test against a given network and will not deploy one out
@@ -9,41 +14,41 @@ on:
         default: ''
         required: false
       zbox_cli_branch:
-        description: 'zbox branch'
-        default: 'The 0Box CLI branch or commit SHA the tests should use'
+        description: 'The 0Box CLI branch or commit SHA the tests should use'
+        default: env.DEFAULT_ZBOX_BRANCH
         required: true
       zwallet_cli_branch:
         description: 'The 0Wallet CLI branch or commit SHA the tests should use'
-        default: 'staging'
+        default: env.DEFAULT_ZWALLET_BRANCH
         required: true
       miner_image:
         description: 'miner image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       sharder_image:
         description: 'sharder image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       blobber_image:
         description: 'blobber image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       zbox_image:
         description: '0box image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       zdns_image:
         description: '0dns image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       zblock_image:
         description: '0block image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
       zsearch_image:
         description: '0search image (overridden by "existing_network")'
-        default: 'staging'
-        required: true
+        default: env.DEFAULT_TAG
+        required: false
 
 jobs:
   golangci:
@@ -61,6 +66,30 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
+
+      - name: "Connect to existing 0Chain network"
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+       run: |
+        echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+        echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
+        echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+
+      - name: "Connect to newly deployed 0Chain network"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          echo "NETWORK_URL=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_branch}}')) >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_branch}}')) >> $GITHUB_ENV
+
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}')) >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}')) >> $GITHUB_ENV
+          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_tag}}')) >> $GITHUB_ENV
+          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_tag}}')) >> $GITHUB_ENV
+          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_tag}}')) >> $GITHUB_ENV
+          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}')) >> $GITHUB_ENV
+          echo "ZSEARCH_TAG=$(echo $(([ -z '${{github.event.inputs.zsearch_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zsearch_tag}}')) >> $GITHUB_ENV
+
+
       - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-helm@v1
@@ -98,14 +127,14 @@ jobs:
       - name: "Deploy 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag= ${{ github.event.inputs.sharder_image }} --set miner.image.tag=${{ github.event.inputs.miner_image }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ github.event.inputs.zdns_image }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ github.event.inputs.blobber_image }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ github.event.inputs.zblock_image }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag= ${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=latest --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=staging -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ github.event.inputs.zbox_image }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ github.event.inputs.zsearch_image }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=latest 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Wait for 0Chain network deployment to complete"
@@ -122,20 +151,6 @@ jobs:
             echo "Chain setup did not complete as expected"
             exit 1
           fi
-
-      - name: "Connect to existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
-        run: |
-          echo "NETWORK=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
-
-      - name: "Connect to newly deployed 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        run: |
-          echo "NETWORK=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
       - name: "Checkout system tests"
         uses: actions/checkout@v2
@@ -213,7 +228,7 @@ jobs:
           go get github.com/vakenbolt/go-test-report
           cd tests/cli_tests
           mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}
-          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
+          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK_URL }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
@@ -224,7 +239,7 @@ jobs:
           cd tests/cli_tests
           exit_code=0
           ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh || exit_code=$?
-          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK }}] at [${{ steps.time.outputs.time }}]"
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ steps.time.outputs.time }}]"
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
           exit $exit_code
 
