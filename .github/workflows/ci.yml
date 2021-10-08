@@ -78,16 +78,16 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_branch}}')) >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_branch}}')) >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_branch}}'))" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_branch}}'))" >> $GITHUB_ENV
 
-          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}')) >> $GITHUB_ENV
-          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}')) >> $GITHUB_ENV
-          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_tag}}')) >> $GITHUB_ENV
-          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_tag}}')) >> $GITHUB_ENV
-          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_tag}}')) >> $GITHUB_ENV
-          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}')) >> $GITHUB_ENV
-          echo "ZSEARCH_TAG=$(echo $(([ -z '${{github.event.inputs.zsearch_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zsearch_tag}}')) >> $GITHUB_ENV
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}'))" >> $GITHUB_ENV
+          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_tag}}'))" >> $GITHUB_ENV
+          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_tag}}'))" >> $GITHUB_ENV
+          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_tag}}'))" >> $GITHUB_ENV
+          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}'))" >> $GITHUB_ENV
+          echo "ZSEARCH_TAG=$(echo $(([ -z '${{github.event.inputs.zsearch_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zsearch_tag}}'))" >> $GITHUB_ENV
 
 
       - name: "Install helm"
