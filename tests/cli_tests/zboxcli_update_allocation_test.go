@@ -179,7 +179,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel Allocation Should Work fail when blobber passes challenges", func(t *testing.T) {
+	t.Run("Cancel Allocation Should fail when blobber passes challenges", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
