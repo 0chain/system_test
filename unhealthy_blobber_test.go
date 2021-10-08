@@ -13,7 +13,7 @@ Tests in here are skipped until we set up a byzantime chain/investigate conducto
 */
 func TestUnhealthyBlobberScenarios(t *testing.T) {
 	t.Run("Cancel Allocation Should Work when blobber fails challenges", func(t *testing.T) {
-		t.Skip("allocations can only be cancelled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
+		t.Skip("allocations can only be canceled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -26,7 +26,7 @@ func TestUnhealthyBlobberScenarios(t *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-		t.Skip("allocations can only be cancelled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
+		t.Skip("allocations can only be canceled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
 		t.Parallel()
 
 		var otherAllocationID string
