@@ -15,39 +15,39 @@ on:
         required: false
       zbox_cli_branch:
         description: 'The 0Box CLI branch or commit SHA the tests should use'
-        default: env.DEFAULT_ZBOX_BRANCH
+        default: 'staging'
         required: true
       zwallet_cli_branch:
         description: 'The 0Wallet CLI branch or commit SHA the tests should use'
-        default: env.DEFAULT_ZWALLET_BRANCH
+        default: 'staging'
         required: true
       miner_image:
         description: 'miner image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       sharder_image:
         description: 'sharder image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       blobber_image:
         description: 'blobber image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       zbox_image:
         description: '0box image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       zdns_image:
         description: '0dns image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       zblock_image:
         description: '0block image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
       zsearch_image:
         description: '0search image (overridden by "existing_network")'
-        default: env.DEFAULT_TAG
+        default: 'staging'
         required: false
 
 jobs:
@@ -67,14 +67,14 @@ jobs:
     timeout-minutes: 20
     steps:
 
-      - name: "Configure tests to run against existing 0Chain network"
+      - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "Configure tests to deploy new 0Chain network"
+      - name: "Config: Deploy then run tests against new 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
@@ -91,7 +91,6 @@ jobs:
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-
 
       - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
