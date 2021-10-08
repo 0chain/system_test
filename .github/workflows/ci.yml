@@ -89,6 +89,9 @@ jobs:
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}'))" >> $GITHUB_ENV
           echo "ZSEARCH_TAG=$(echo $(([ -z '${{github.event.inputs.zsearch_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zsearch_tag}}'))" >> $GITHUB_ENV
 
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+          echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+
 
       - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -100,12 +103,6 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-kubectl@v1
         id: install
-
-      - name: "Get target k8s cluster details"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        run: |
-          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Configure helm & kubectl"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
