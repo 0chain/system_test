@@ -452,25 +452,6 @@ func TestUpdateAllocation(t *testing.T) {
 			"got 0/2 sharders", output[0])
 	})
 
-	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
-		var otherAllocationID string
-		// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
-			otherAllocationID = setupAllocation(t, configPath)
-		})
-
-		// otherAllocationID should not be cancelable from this level
-		output, err := cancelAllocation(t, configPath, otherAllocationID)
-
-		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[0])
-	})
-
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
 	t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
