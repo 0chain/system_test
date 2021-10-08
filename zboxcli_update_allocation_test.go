@@ -19,6 +19,7 @@ import (
 var (
 	reCreateAllocation = regexp.MustCompile(`^Allocation created: (.+)$`)
 	reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+	reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
 )
 
 func TestUpdateAllocation(t *testing.T) {
@@ -179,17 +180,16 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel Allocation Should Work fail when blobber passes challenges", func(t *testing.T) {
+	t.Run("Cancel Allocation Should Work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := cancelAllocation(t, configPath, allocationID)
 
-		require.NotNil(t, err, "expected error when cancelling allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too less sharders to "+
-			"confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
 	})
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
@@ -463,6 +463,39 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:[txn] too "+
 			"less sharders to confirm it: min_confirmation is 50%, but "+
 			"got 0/2 sharders", output[0])
+	})
+
+	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		var otherAllocationID string
+		// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
+		t.Run("Get Other Allocation ID", func(t *testing.T) {
+			otherAllocationID = setupAllocation(t, configPath)
+		})
+		myAllocationID := setupAllocation(t, configPath)
+
+		// otherAllocationID should not be cancelable from this level
+
+		// First try canceling with myAllocationID: should work
+
+		output, err := cancelAllocation(t, configPath, myAllocationID)
+		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
+
+		// Then try canceling with otherAllocationID: should not work
+		output, err = cancelAllocation(t, configPath, otherAllocationID)
+
+		require.NotNil(t, err, "expected error canceling "+
+			"allocation", strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output "+
+			"length be at least 1", strings.Join(output, "\n"))
+		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
+		require.Equal(t, "Error creating allocation:[txn] too less s"+
+			"harders to confirm it: min_confirmation is 50%, "+
+			"but got 0/2 sharders", output[0])
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
