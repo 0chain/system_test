@@ -62,24 +62,24 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: "Install helm"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-helm@v1
         with:
           version: 'v3.2.2'
 
       - name: "Install kubectl"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-kubectl@v1
         id: install
 
       - name: "Get target k8s cluster details"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Configure helm & kubectl"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
           helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
@@ -88,7 +88,7 @@ jobs:
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Remove existing 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
           sleep 30
@@ -96,7 +96,7 @@ jobs:
           kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Deploy 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag= ${{ github.event.inputs.sharder_image }} --set miner.image.tag=${{ github.event.inputs.miner_image }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ github.event.inputs.zdns_image }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
@@ -109,7 +109,7 @@ jobs:
           helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=latest 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Wait for 0Chain network deployment to complete"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           sleep 60
           counter=0;
@@ -124,14 +124,14 @@ jobs:
           fi
 
       - name: "Connect to existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ""
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
       - name: "Connect to newly deployed 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
@@ -259,7 +259,7 @@ jobs:
         run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
 
       - name: "Tear Down 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ""
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm list --short -n ${{ env.NAMESPACE }} | xargs -L1 helm delete -n ${{ env.NAMESPACE }} || true
           sleep 30
