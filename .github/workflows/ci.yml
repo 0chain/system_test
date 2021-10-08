@@ -33,6 +33,10 @@ on:
         description: 'blobber image (overridden by "existing_network")'
         default: 'staging'
         required: false
+      validator_image:
+        description: 'validator image (overridden by "existing_network")'
+        default: 'staging'
+        required: false
       zbox_image:
         description: '0box image (overridden by "existing_network")'
         default: 'staging'
@@ -43,10 +47,6 @@ on:
         required: false
       zblock_image:
         description: '0block image (overridden by "existing_network")'
-        default: 'staging'
-        required: false
-      zsearch_image:
-        description: '0search image (overridden by "existing_network")'
         default: 'staging'
         required: false
 
@@ -84,10 +84,10 @@ jobs:
           echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}'))" >> $GITHUB_ENV
           echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_tag}}'))" >> $GITHUB_ENV
+          echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.validator_tag}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_tag}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_tag}}'))" >> $GITHUB_ENV
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}'))" >> $GITHUB_ENV
-          echo "ZSEARCH_TAG=$(echo $(([ -z '${{github.event.inputs.zsearch_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zsearch_tag}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
@@ -125,12 +125,12 @@ jobs:
         run: |
           helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=latest --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=staging -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.DEFAULT_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.DEFAULT_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=latest 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Wait for 0Chain network deployment to complete"
