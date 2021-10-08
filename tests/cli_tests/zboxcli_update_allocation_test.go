@@ -19,7 +19,6 @@ import (
 var (
 	reCreateAllocation = regexp.MustCompile(`^Allocation created: (.+)$`)
 	reUpdateAllocation = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
-	reCancelAllocation = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
 )
 
 func TestUpdateAllocation(t *testing.T) {

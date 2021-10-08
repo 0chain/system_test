@@ -1,9 +1,11 @@
 package cli_tests
 
 import (
-	"github.com/stretchr/testify/require"
+	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnhealthyBlobberScenarios(t *testing.T) {
@@ -17,6 +19,6 @@ func TestUnhealthyBlobberScenarios(t *testing.T) {
 
 		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
+		assertOutputMatchesAllocationRegex(t, regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`), output[0])
 	})
 }
