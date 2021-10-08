@@ -7,12 +7,8 @@ env:
 
 on:
   push:
-  workflow_dispatch: # Workflow dispatch will simply test against a given network and will not deploy one out
+  workflow_dispatch:
     inputs:
-      existing_network:
-        description: 'Input an existing network url here to run system tests against that network instead of deploying a new network. eg. dev.0chain.net'
-        default: ''
-        required: false
       zbox_cli_branch:
         description: 'The 0Box CLI branch or commit SHA the tests should use'
         default: 'staging'
@@ -21,6 +17,10 @@ on:
         description: 'The 0Wallet CLI branch or commit SHA the tests should use'
         default: 'staging'
         required: true
+      existing_network:
+        description: '(OPTIONAL): Input an EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [eg. dev.0chain.net]'
+        default: ''
+        required: false
       miner_image:
         description: 'miner image (overridden by "existing_network")'
         default: 'staging'
@@ -52,6 +52,7 @@ on:
 
 jobs:
   golangci:
+    if: github.event_name == 'push'
     name: "lint"
     runs-on: self-hosted
     steps:
@@ -77,7 +78,7 @@ jobs:
       - name: "Config: Deploy then run tests against new 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          echo "NETWORK_URL=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "NETWORK_URL=$(echo ${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_branch}}'))" >> $GITHUB_ENV
 
