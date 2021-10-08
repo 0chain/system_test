@@ -1,8 +1,8 @@
 name: Mirror repo to S3
 on:
   schedule:
-    # Runs everyday at 12 am
-    - cron: '50 1 * * * '
+    # Runs everyday at 4:10 am
+    - cron: '10 4 * * * '
   workflow_dispatch:
 jobs:
   s3Backup:
