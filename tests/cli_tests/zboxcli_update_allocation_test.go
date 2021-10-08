@@ -180,18 +180,6 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel Allocation Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-
-		output, err := cancelAllocation(t, configPath, allocationID)
-
-		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
-	})
-
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *testing.T) {
 		t.Parallel()
@@ -473,28 +461,14 @@ func TestUpdateAllocation(t *testing.T) {
 		t.Run("Get Other Allocation ID", func(t *testing.T) {
 			otherAllocationID = setupAllocation(t, configPath)
 		})
-		myAllocationID := setupAllocation(t, configPath)
 
 		// otherAllocationID should not be cancelable from this level
+		output, err := cancelAllocation(t, configPath, otherAllocationID)
 
-		// First try canceling with myAllocationID: should work
-
-		output, err := cancelAllocation(t, configPath, myAllocationID)
-		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		assertOutputMatchesAllocationRegex(t, reCancelAllocation, output[0])
-
-		// Then try canceling with otherAllocationID: should not work
-		output, err = cancelAllocation(t, configPath, otherAllocationID)
-
-		require.NotNil(t, err, "expected error canceling "+
-			"allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output "+
-			"length be at least 1", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-		require.Equal(t, "Error creating allocation:[txn] too less s"+
-			"harders to confirm it: min_confirmation is 50%, "+
+		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, "+
 			"but got 0/2 sharders", output[0])
 	})
 
