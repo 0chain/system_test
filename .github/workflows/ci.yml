@@ -67,14 +67,14 @@ jobs:
     timeout-minutes: 20
     steps:
 
-      - name: "Connect to existing 0Chain network"
+      - name: "Configure tests to run against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "Connect to newly deployed 0Chain network"
+      - name: "Configure tests to deploy new 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo ${{ env.NAMESPACE }}.devnet-0chain.net)" >> $GITHUB_ENV
@@ -124,7 +124,7 @@ jobs:
       - name: "Deploy 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag= ${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
