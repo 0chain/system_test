@@ -239,7 +239,11 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
+		randomFilename := fmt.Sprintf("./tmp/%s_test.mp4", cliutils.RandomAlphaNumericString(10))
+		err := createFileWithSize(randomFilename, 1024*5)
+		require.Nil(t, err)
+
+		filename, err := filepath.Abs(randomFilename)
 		require.Nil(t, err, filename)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
