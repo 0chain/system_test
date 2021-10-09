@@ -92,9 +92,10 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		totalBalanceInBlobbers := float64(0)
 		for _, blobber := range writePool[0].Blobber {
+			t.Logf("Blobber [%v] balance is [%v]", blobber.BlobberID, intToZCN(blobber.Balance))
 			totalBalanceInBlobbers += intToZCN(blobber.Balance)
 		}
-		require.InDelta(t, 0.8, totalBalanceInBlobbers, epsilon, "Sum of balances should be within epsilon.")
+		require.InDelta(t, 0.8, totalBalanceInBlobbers, epsilon, "Sum of balances should be [%v] but was [%v]", 0.8, totalBalanceInBlobbers)
 	})
 
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
@@ -200,8 +201,8 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			totalChangeInWritePool += diff
 		}
 
-		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon)
-		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon)
+		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 }
 
