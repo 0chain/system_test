@@ -72,15 +72,15 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_branch}}'))" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_branch}}'))" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
           echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}'))" >> $GITHUB_ENV
           echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}'))" >> $GITHUB_ENV
