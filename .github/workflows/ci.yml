@@ -10,43 +10,43 @@ on:
   workflow_dispatch:
     inputs:
       zbox_cli_branch:
-        description: 'The 0Box CLI branch or commit SHA the tests should use'
+        description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
         required: true
       zwallet_cli_branch:
-        description: 'The 0Wallet CLI branch or commit SHA the tests should use'
+        description: '0Wallet CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
         required: true
       existing_network:
-        description: '(OPTIONAL): Input an EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [eg. dev.0chain.net]'
+        description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
         default: ''
         required: false
       miner_image:
-        description: 'miner image (ignored if "existing_network" supplied)'
+        description: 'miner image to deploy'
         default: 'staging'
         required: false
       sharder_image:
-        description: 'sharder image (ignored if "existing_network" supplied)'
+        description: 'sharder image to deploy'
         default: 'staging'
         required: false
       blobber_image:
-        description: 'blobber image (ignored if "existing_network" supplied)'
+        description: 'blobber image to deploy'
         default: 'staging'
         required: false
       validator_image:
-        description: 'validator image (ignored if "existing_network" supplied)'
+        description: 'validator image to deploy'
         default: 'staging'
         required: false
       zbox_image:
-        description: '0box image (ignored if "existing_network" supplied)'
+        description: '0box image to deploy'
         default: 'staging'
         required: false
       zdns_image:
-        description: '0dns image (ignored if "existing_network" supplied)'
+        description: '0dns image to deploy'
         default: 'staging'
         required: false
       zblock_image:
-        description: '0block image (ignored if "existing_network" supplied)'
+        description: '0block image to deploy'
         default: 'staging'
         required: false
 
