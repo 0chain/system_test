@@ -87,7 +87,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon, "Read pool balance did not match amount locked")
+		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon, "Read pool balance [%v] did not match amount locked [%v]", intToZCN(readPool[0].Balance), 0.4)
 		require.IsType(t, int64(1), readPool[0].ExpireAt)
 		require.Equal(t, allocationID, readPool[0].AllocationId)
 		require.Less(t, 0, len(readPool[0].Blobber))
@@ -97,10 +97,11 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		for i := 0; i < len(readPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
 			require.IsType(t, int64(1), readPool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] read pool balance is [%v]", i, intToZCN(readPool[0].Blobber[i].Balance))
 			balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
 		}
 
-		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers did not match balance in read pool")
+		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers [%v] did not match expected [%v]", balanceInTotal, 0.4)
 	})
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
@@ -166,6 +167,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
 			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
 		}
 
 		output, err = getDownloadCostInUnit(t, configPath, allocationID, "/"+filename)
@@ -207,7 +209,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 			// amount deducted
 			diff := intToZCN(initialReadPool[0].Blobber[i].Balance) - intToZCN(finalReadPool[0].Blobber[i].Balance)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "amount deducted from blobber [%v] read pool [%v] is not within tolerance", i, diff)
+			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
+			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
 		}
 	})
 }
