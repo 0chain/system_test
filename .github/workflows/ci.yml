@@ -195,8 +195,10 @@ jobs:
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          ATTEMPT_BROKEN_TESTS=$(echo $(([[ $BRANCH == 'marster' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
+          ATTEMPT_BROKEN_TESTS=$(echo $(([[ $BRANCH == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          cat TEST_RUNNER_COMMAND.sh
+
       - name: "Run CLI System Tests"
         shell: 'script --return --quiet --command "bash {0}"'
         run: |

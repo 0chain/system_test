@@ -19,6 +19,12 @@ import (
 Tests in here are skipped until the feature has been fixed
 */
 func TestBrokenScenarios(t *testing.T) {
+	balance := 0.8 // 800.000 mZCN
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
+	t.Parallel()
+
 	t.Run("Send with description", func(t *testing.T) {
 		if testing.Short() {
 			t.Skip("Send ZCN with description is temporarily broken due to json object enforcement")
@@ -47,7 +53,6 @@ func TestBrokenScenarios(t *testing.T) {
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
-	balance := 0.8 // 800.000 mZCN
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
 		if testing.Short() {
 			t.Skip("Blobber write pool balance is not being updated correctly")
