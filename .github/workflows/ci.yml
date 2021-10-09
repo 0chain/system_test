@@ -149,11 +149,6 @@ jobs:
             exit 1
           fi
 
-      - name: "Checkout system tests"
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-
       - name: "Get CLI Cache Key"
         run: |
           if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
@@ -212,12 +207,6 @@ jobs:
           make install
           mv zbox ../tests/cli_tests
 
-      - name: "Get Time"
-        id: time
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: YYYY-MM-DD_HH.mm.ss
-
       - name: "Set up system tests"
         run: |
           echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')" >> $GITHUB_ENV
@@ -229,6 +218,7 @@ jobs:
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          echo "TEST_TIME=$(date '+%Y-%m-%d_%H.%M.%S')" >> $GITHUB_ENV
 
       - name: "Run CLI System Tests"
         shell: 'script --return --quiet --command "bash {0}"'
@@ -236,7 +226,7 @@ jobs:
           cd tests/cli_tests
           exit_code=0
           ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh || exit_code=$?
-          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ steps.time.outputs.time }}]"
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ env.TEST_TIME }}]"
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
           exit $exit_code
 
@@ -256,7 +246,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: System-Test-${{ steps.time.outputs.time }}
+          name: System-Test-${{ env.TEST_TIME }}
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
