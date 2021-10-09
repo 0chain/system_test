@@ -22,31 +22,31 @@ on:
         default: ''
         required: false
       miner_image:
-        description: 'miner image (overridden by "existing_network")'
+        description: 'miner image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       sharder_image:
-        description: 'sharder image (overridden by "existing_network")'
+        description: 'sharder image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       blobber_image:
-        description: 'blobber image (overridden by "existing_network")'
+        description: 'blobber image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       validator_image:
-        description: 'validator image (overridden by "existing_network")'
+        description: 'validator image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       zbox_image:
-        description: '0box image (overridden by "existing_network")'
+        description: '0box image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       zdns_image:
-        description: '0dns image (overridden by "existing_network")'
+        description: '0dns image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
       zblock_image:
-        description: '0block image (overridden by "existing_network")'
+        description: '0block image (ignored if "existing_network" supplied)'
         default: 'staging'
         required: false
 
@@ -75,7 +75,7 @@ jobs:
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "Config: Deploy then run tests against new 0Chain network"
+      - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
