@@ -162,7 +162,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, "/five_MB_test_file")
+		output, err = getDownloadCostInUnit(t, configPath, allocationID, "/"+filename)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
