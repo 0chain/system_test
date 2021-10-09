@@ -125,14 +125,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		// copy dummy file to avoid filesystem resource contention
-		_, err = cliutils.RunCommand("cp ../../internal/dummy_file/five_MB_test_file ./five_MB_test_file_download_cost_test")
-		require.Nil(t, err)
-
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  "./five_MB_test_file_download_cost_test",
+			"localpath":  "../../internal/dummy_file/five_MB_test_file",
 			"remotepath": "/",
 		})
 

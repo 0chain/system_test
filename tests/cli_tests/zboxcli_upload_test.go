@@ -179,11 +179,7 @@ func TestUpload(t *testing.T) {
 			"size": allocSize,
 		})
 
-		// copy file to avoid filesystem resource contention
-		_, err := cliutils.RunCommand("cp ../../internal/dummy_file/0.png ./0_thumbnail_upload_test.png")
-		require.Nil(t, err)
-
-		thumbnail, err := filepath.Abs("./0_thumbnail_upload_test")
+		thumbnail, err := filepath.Abs("../../internal/dummy_file/0.png")
 		require.Nil(t, err, thumbnail)
 
 		filename := generateRandomTestFileName(t)
@@ -215,11 +211,7 @@ func TestUpload(t *testing.T) {
 			"size": allocSize,
 		})
 
-		// copy file to avoid filesystem resource contention
-		_, err := cliutils.RunCommand("cp ../../internal/dummy_file/0png ./0_upload_image_test.png")
-		require.Nil(t, err)
-
-		filename, err := filepath.Abs("./0_upload_image_test.png")
+		filename, err := filepath.Abs("../../internal/dummy_file/0.png")
 		require.Nil(t, err, filename)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
@@ -247,11 +239,7 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		// copy file to avoid filesystem resource contention
-		_, err := cliutils.RunCommand("cp ../../internal/dummy_file/0Chain.mp4 ./0Chain_upload_video_test.mp4")
-		require.Nil(t, err)
-
-		filename, err := filepath.Abs("./0Chain_upload_video_test.mp4")
+		filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
 		require.Nil(t, err, filename)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{

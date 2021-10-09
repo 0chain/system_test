@@ -148,14 +148,10 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / ((2 + 2) * 720))
 
-		// copy dummy file to avoid filesystem resource contention
-		_, err = cliutils.RunCommand("cp ../../internal/dummy_file/five_MB_test_file ./five_MB_test_file_upload_cost_test")
-		require.Nil(t, err)
-
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  "./five_MB_test_file_upload_cost_test",
+			"localpath":  "../../internal/dummy_file/five_MB_test_file",
 			"remotepath": "/",
 		})
 

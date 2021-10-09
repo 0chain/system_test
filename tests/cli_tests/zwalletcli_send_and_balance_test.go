@@ -172,7 +172,7 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "negative token")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
