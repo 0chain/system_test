@@ -82,13 +82,13 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_tag}}'))" >> $GITHUB_ENV
-          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_tag}}'))" >> $GITHUB_ENV
-          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_tag}}'))" >> $GITHUB_ENV
-          echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.validator_tag}}'))" >> $GITHUB_ENV
-          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_tag}}'))" >> $GITHUB_ENV
-          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_tag}}'))" >> $GITHUB_ENV
-          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_tag}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_tag}}'))" >> $GITHUB_ENV
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
+          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
+          echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
+          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
+          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
+          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
