@@ -100,7 +100,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers [%v] did not match expected [%v]", balanceInTotal, 0.4)
 	})
-
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
