@@ -136,6 +136,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		filename := generateRandomTestFileName(t)
 		err = createFileWithSize(filename, 1024*5)
+		require.Nil(t, err, "error while generating file: ", err)
 
 		// Get expected upload cost
 		output, err = getUploadCostInUnit(t, configPath, allocationID, filename)

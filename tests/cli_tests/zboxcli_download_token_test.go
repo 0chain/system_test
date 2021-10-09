@@ -132,6 +132,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		filename := cliutils.RandomAlphaNumericString(10) + "_test.txt"
 		fullPath := fmt.Sprintf("%s/%s", path, filename)
 		err = createFileWithSize(fullPath, 1024*5)
+		require.Nil(t, err, "error while generating file: ", err)
 
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
