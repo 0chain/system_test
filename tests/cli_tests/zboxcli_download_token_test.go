@@ -177,13 +177,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
 
 		// Download the file
-		output, err = downloadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file_dowloaded", "/five_MB_test_file")
+		output, err = downloadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file_dowloaded", "/"+filename)
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
 
 		require.Len(t, output, 2)
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = five_MB_test_file", output[1])
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
 
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
