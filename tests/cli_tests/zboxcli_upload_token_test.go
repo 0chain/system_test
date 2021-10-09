@@ -195,7 +195,9 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
 
 			// deduce tokens
-			totalChangeInWritePool += intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
+			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload", i, diff)
+			totalChangeInWritePool += diff
 		}
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon)

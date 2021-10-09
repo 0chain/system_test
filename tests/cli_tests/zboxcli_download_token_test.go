@@ -206,7 +206,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
 
 			// amount deducted
-			require.InEpsilon(t, expectedDownloadCostInZCN, intToZCN(initialReadPool[0].Blobber[i].Balance)-intToZCN(finalReadPool[0].Blobber[i].Balance), epsilon, "amount deducted from blobber [%v] is incorrect", i)
+			diff := intToZCN(initialReadPool[0].Blobber[i].Balance) - intToZCN(finalReadPool[0].Blobber[i].Balance)
+			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "amount deducted from blobber [%v] read pool [%v] is not within tolerance", i, diff)
 		}
 	})
 }
