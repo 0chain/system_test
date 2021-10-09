@@ -263,6 +263,6 @@ jobs:
       - name: "Tear Down 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          helm list --short -n ${{ env.NAMESPACE }} | xargs -L1 helm delete -n ${{ env.NAMESPACE }} || true
+          helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" || true
           sleep 30
-          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir || true
+          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config || true
