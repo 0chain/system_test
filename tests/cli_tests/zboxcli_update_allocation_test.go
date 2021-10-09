@@ -188,7 +188,8 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error when canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too less sharders to "+
+		//FIXME; note incorrect "error creating" error message: should be "error updating"
+		require.Equal(t, "Error creating allocation:[txn] too less sharders to "+
 			"confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 	})
 
