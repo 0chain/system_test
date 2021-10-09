@@ -129,8 +129,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		path, err := filepath.Abs("tmp")
 		require.Nil(t, err)
 
-		filename := cliutils.RandomAlphaNumericString(10)
-		fullPath := fmt.Sprintf("%s/%s_test.txt", path, filename)
+		filename := cliutils.RandomAlphaNumericString(10) + "_test.txt"
+		fullPath := fmt.Sprintf("%s/%s", path, filename)
 		err = createFileWithSize(fullPath, 1024*5)
 
 		// upload a dummy 5 MB file
