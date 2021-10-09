@@ -134,8 +134,11 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		require.Less(t, 0, len(initialWritePool[0].Blobber))
 		require.Equal(t, true, initialWritePool[0].Locked)
 
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 1024*5)
+
 		// Get expected upload cost
-		output, err = getUploadCostInUnit(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file")
+		output, err = getUploadCostInUnit(t, configPath, allocationID, filename)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -151,7 +154,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  "../../internal/dummy_file/five_MB_test_file",
+			"localpath":  filename,
 			"remotepath": "/",
 		})
 

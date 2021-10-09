@@ -125,10 +125,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 1024*5)
+
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  "../../internal/dummy_file/five_MB_test_file",
+			"localpath":  filename,
 			"remotepath": "/",
 		})
 
