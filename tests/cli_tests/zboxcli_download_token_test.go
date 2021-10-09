@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -125,13 +126,17 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 1024*5)
+		path, err := filepath.Abs("tmp")
+		require.Nil(t, err)
+
+		filename := cliutils.RandomAlphaNumericString(10)
+		fullPath := fmt.Sprintf("%s/%s_test.txt", path, filename)
+		err = createFileWithSize(fullPath, 1024*5)
 
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  filename,
+			"localpath":  fullPath,
 			"remotepath": "/",
 		})
 
