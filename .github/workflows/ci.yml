@@ -250,7 +250,7 @@ jobs:
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
-            ./tests/cli_tests/${{ env.BRANCH }}/${GITHUB_SHA}/index.html
+            ./tests/cli_tests/${{ env.BRANCH }}/latest/index.html
 
       - name: "Wait for report deployment to complete"
         if: always()
