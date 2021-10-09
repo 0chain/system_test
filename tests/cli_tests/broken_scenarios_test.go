@@ -17,7 +17,7 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
-func BrokenTests(t *testing.T) {
+func TestBrokenScenarios(t *testing.T) {
 	t.Run("Send with description", func(t *testing.T) {
 		if testing.Short() {
 			t.Skip("Send ZCN with description is temporarily broken due to json object enforcement")
