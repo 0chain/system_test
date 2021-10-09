@@ -239,24 +239,19 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		randomFilename := fmt.Sprintf("./tmp/%s_test.mp4", cliutils.RandomAlphaNumericString(10))
-		err := createFileWithSize(randomFilename, 1024*5)
-		require.Nil(t, err)
+		output, err := cliutils.RunCommand("wget 'https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf' -O test_video.mp4")
+		require.Nil(t, err, "Failed to download test video file")
 
-		filename, err := filepath.Abs(randomFilename)
-		require.Nil(t, err, filename)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
-			"localpath":  filename,
+			"localpath":  "./test_video.mp4",
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = video/mp4. Name = %s",
-			filepath.Base(filename),
+			"Status completed callback. Type = video/mp4. Name = test_video.mp4",
 		)
 		require.Equal(t, expected, output[1])
 	})

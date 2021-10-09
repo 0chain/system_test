@@ -218,7 +218,7 @@ func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens f
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
 	t.Logf("Getting download cost...")
-	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommandWithRetry(t, "./zbox get-download-cost --allocation "+allocationID+" --remotepath "+remotepath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, 5)
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
