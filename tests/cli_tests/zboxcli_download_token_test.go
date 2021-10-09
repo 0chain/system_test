@@ -167,7 +167,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
 			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] balance is [%v]", i, intToZCN(initialReadPool[0].Blobber[i].Balance))
 		}
 
 		output, err = getDownloadCostInUnit(t, configPath, allocationID, "/"+filename)
@@ -188,7 +188,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
 
-		// Read pool before download
+		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -216,7 +216,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	time.Sleep(5 * time.Second) // TODO replace with poller
+	time.Sleep(30 * time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
@@ -228,7 +228,7 @@ func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens f
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
 	t.Logf("Getting download cost...")
-	return cliutils.RunCommandWithRetry(t, "./zbox get-download-cost --allocation "+allocationID+" --remotepath "+remotepath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, 5)
+	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config ")
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
