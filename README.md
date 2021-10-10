@@ -29,7 +29,7 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 
 In this mode, the docker image input fields will be ignored  
 
-The network URL is address of the 0Chain network you wish to test, without a URL scheme or subdomain.  
+The network URL is the address of the 0Chain network you wish to test, without a URL scheme or subdomain.  
 eg. beta.0chain.net
 
 ### Report
@@ -62,7 +62,9 @@ Include tests for broken features as part of your test run by removing the '-sho
 ```bash
 go test ./... -v
 ```
-PS: Output when running tests locally will be less clear vs running via the system tests pipeline, so we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
+PS: Test suite execution may be slower when running locally vs the system tests pipeline.   
+Output will also be less clear vs the system tests pipeline.   
+Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
 ## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
