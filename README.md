@@ -14,8 +14,9 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 <img width="322" alt="ci-deploy" src="https://user-images.githubusercontent.com/18306778/136713487-db7ef096-cb11-4a33-9b29-302ffb5470df.png">  
 </details>
 
-When the network URL is blank, 0Chain will automatically be deployed to a free test slot at ```dev-[1-5].dev-0chain.net```.  
-This network will stay available for debugging purposes if tests fail, but uptime is not guaranteed and the network may be overridden by another test run.
+In this mode, keep the network url field blank  
+0Chain will automatically be deployed to a free test slot at ```dev-[1-5].dev-0chain.net```.  
+If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
 
 ### Running tests against an existing 0Chain network
 
@@ -25,9 +26,9 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 <img width="347" alt="ci-predeployed" src="https://user-images.githubusercontent.com/18306778/136713492-fbeadfb0-51d7-4f59-90a0-34e72e9eafcb.png">  
 </details>
 
-Ensure that the network URL is the hostname of the 0Chain network you wish to use, without a URL scheme or subdomain.  
-eg. beta.0chain.net  
-In this mode, the docker image input fields will be ignored 
+In this mode, the docker image input fields will be ignored  
+The network URL is address of the 0Chain network you wish to test, without a URL scheme or subdomain.  
+eg. beta.0chain.net
 
 ### Report
 
@@ -38,9 +39,8 @@ In this report you can view logs from any test and see failures at a glance.
 
 
 ### Running tests locally
-Build or download the [zbox](https://github.com/0chain/zboxcli/tags) and [zwallet](https://github.com/0chain/zwalletcli/tags) CLIs for your system, ensuring they are compatible with the network you wish to test.  
-Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.yaml```
-to point to the network you wish to test.   
+Build or download the [zbox](https://github.com/0chain/zboxcli/tags) and [zwallet](https://github.com/0chain/zwalletcli/tags) CLIs, ensuring they are compatible with the network you wish to test.  
+Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.yaml``` to point to the network.   
 The URL should be in the same format as the one accepted by the pipeline.   
 
 To run the entire test suite (minus tests for known broken features) run:
