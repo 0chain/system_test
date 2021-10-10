@@ -193,9 +193,11 @@ jobs:
           cd tests/cli_tests
           mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
+          ATTEMPT_BROKEN_TESTS_FLAG=$(echo $(([[ ${GITHUB_REF#refs/heads/} == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          cat TEST_RUNNER_COMMAND.sh
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
 
       - name: "Run CLI System Tests"
         shell: 'script --return --quiet --command "bash {0}"'
@@ -227,7 +229,7 @@ jobs:
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
-            ./tests/cli_tests/${{ env.BRANCH }}/${GITHUB_SHA}/index.html
+            ./tests/cli_tests/${{ env.BRANCH }}/latest/index.html
 
       - name: "Wait for report deployment to complete"
         if: always()
@@ -240,6 +242,6 @@ jobs:
       - name: "Tear Down 0Chain network"
         if: github.event_name != 'workflow_dispatch'
         run: |
-          helm list --short -n ${{ env.NAMESPACE }} | xargs -L1 helm delete -n ${{ env.NAMESPACE }} || true
+          helm list --short -n ${{ env.NAMESPACE }} | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config || true
           sleep 30
-          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir || true
+          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config || true
