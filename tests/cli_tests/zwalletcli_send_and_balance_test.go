@@ -46,7 +46,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Equal(t, "Failed to get balance:", output[0])
 
 		// Transfer ZCN from sender to target wallet
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "transfer")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -64,31 +64,6 @@ func TestSendAndBalance(t *testing.T) {
 
 		require.Len(t, output, 1)
 		require.Regexp(t, successfulBalanceOutputRegex, output[0])
-	})
-
-	t.Run("Send with description", func(t *testing.T) {
-		t.Parallel()
-
-		targetWallet := escapedTestName(t) + "_TARGET"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		target, err := getWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description")
-		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "Send tokens success", output[0])
-		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
 	t.Run("Send without description should fail", func(t *testing.T) {
@@ -124,7 +99,7 @@ func TestSendAndBalance(t *testing.T) {
 
 		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -144,7 +119,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}"
 
-		output, err = sendZCN(t, configPath, invalidClientID, "1", "invalid_address")
+		output, err = sendZCN(t, configPath, invalidClientID, "1", "{}")
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -172,7 +147,7 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "negative token")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -198,7 +173,7 @@ func TestSendAndBalance(t *testing.T) {
 
 		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "exceed bal")
+		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "{}")
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -225,7 +200,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (value must be greater than or equal to zero)\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "-1", "negative token")
+		output, err = sendZCN(t, configPath, target.ClientID, "-1", "{}")
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -280,7 +255,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}"
 
-		output, err = sendZCN(t, configPath, wallet.ClientID, "1", "send self")
+		output, err = sendZCN(t, configPath, wallet.ClientID, "1", "{}")
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
