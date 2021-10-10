@@ -14,9 +14,9 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 <img width="322" alt="ci-deploy" src="https://user-images.githubusercontent.com/18306778/136713487-db7ef096-cb11-4a33-9b29-302ffb5470df.png">  
 </details>
 
-In this mode, keep the network url field blank  
+**In this mode, keep the network URL field blank**  
 
-0Chain will automatically be deployed to a free test slot at ```dev-[1-5].dev-0chain.net```.  
+0Chain will automatically be deployed to a free test slot at ```dev-[1-5].devnet-0chain.net```.  
 If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
 
 ### Run tests against an existing 0Chain network with the system tests pipeline
@@ -27,9 +27,9 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 <img width="347" alt="ci-predeployed" src="https://user-images.githubusercontent.com/18306778/136713492-fbeadfb0-51d7-4f59-90a0-34e72e9eafcb.png">  
 </details>
 
-In this mode, the docker image input fields will be ignored  
+**In this mode, the docker image input fields will be ignored**  
 
-The network URL is the address of the 0Chain network you wish to test, without a URL scheme or subdomain.  
+Set the network URL field to the 0Chain network you wish to test, without the URL scheme or subdomain.  
 eg. beta.0chain.net
 
 ### Report
