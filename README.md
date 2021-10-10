@@ -6,7 +6,7 @@ A black/grey box suite that tests the functionality of the 0Chain network as an 
 
 The tests require a full 0Chain network to be deployed and running in a healthy state.
 
-### Deploying a new 0Chain network and running tests
+### Deploying a new 0Chain network and running tests via the System tests pipeline (RECOMMENDED)
 
 The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can deploy a new 0Chain network with a custom set of docker images then run tests:    
 <details>
@@ -19,7 +19,7 @@ In this mode, keep the network url field blank
 0Chain will automatically be deployed to a free test slot at ```dev-[1-5].dev-0chain.net```.  
 If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
 
-### Running tests against an existing 0Chain network
+### Running tests against an existing 0Chain network via the system tests pipeline
 
 The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can also run tests against an existing 0Chain network  
 <details>
@@ -40,8 +40,8 @@ In this report you can view logs from any test and see failures at a glance.
 <img width="900" alt="report-link" src="https://user-images.githubusercontent.com/18306778/136713954-911ddb21-64b0-4180-88f7-3724a4d24de8.png">
 
 
-### Running tests locally
-Requires BASH shell (UNIX, macOS, WSL)  
+### Running tests against an existing network locally
+Requires BASH shell (UNIX, macOS, WSL) and [go](https://golang.org/dl/)  
 
 Build or download the [zbox](https://github.com/0chain/zboxcli/tags) and [zwallet](https://github.com/0chain/zwalletcli/tags) CLIs, ensuring they are compatible with the network you wish to test.  
 Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.yaml``` to point to the network.   
@@ -49,8 +49,8 @@ Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.y
 To run the entire test suite (minus tests for known broken features) run:
 
 ```bash
-cp ./zbox ./tests/cli_tests/ # Copy zbox CLI to test folder
-cp ./zwallet ./tests/cli_tests/ # Copy zwallet CLI to test folder
+cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
+cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
 cd ./tests/cli_tests/
 go test ./... -v -short
 ```
@@ -62,8 +62,9 @@ Include tests for broken features as part of your test run by removing the '-sho
 ```bash
 go test ./... -v
 ```
+NB: Output when running tests locally will be less clear vs running via the system tests pipeline, so we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run tests locally
 
-## Reporting Failures
+## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
 If some tests fail, it is likely that a code issue has been introduced.  
 Try running the same tests against another network to rule out environmental issues.  
