@@ -40,7 +40,7 @@ In this report you can view logs from any test and see failures at a glance.
 <img width="900" alt="report-link" src="https://user-images.githubusercontent.com/18306778/136713954-911ddb21-64b0-4180-88f7-3724a4d24de8.png">
 
 
-### Run tests against an existing network locally
+### Run tests against an existing 0Chain network locally
 Requires BASH shell (UNIX, macOS, WSL) and [go](https://golang.org/dl/)  
 
 Build or download the [zbox](https://github.com/0chain/zboxcli/tags) and [zwallet](https://github.com/0chain/zwalletcli/tags) CLIs, ensuring they are compatible with the network you wish to test.  
