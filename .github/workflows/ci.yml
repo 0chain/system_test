@@ -67,6 +67,8 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
+      - name: "Checkout System Tests"
+        uses: actions/checkout@v2
 
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
