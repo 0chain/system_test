@@ -9,18 +9,22 @@ The tests run against a full 0Chain network.
 ### Deploying a new 0Chain network and running tests
 
 The [CI pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can deploy a new instance of 0Chain for you with a custom set of docker images:    
-
+<details>
+  <summary><b>[Click to show screenshot]</b></summary>
 <img width="322" alt="ci-deploy" src="https://user-images.githubusercontent.com/18306778/136713487-db7ef096-cb11-4a33-9b29-302ffb5470df.png">  
+</details>
 
-Ensure that the network URL is blank, and 0Chain will automatically be deployed to dev-**n**.dev-0chain.net where **n** is a free test slot.  
-This network will stay available for debugging purposes if tests fail, but it's uptime is not guaranteed as it may be redeployed to by a future test run.  
-The network will be torn down when tests pass, or failing that on a nightly basis.
+Ensure that the network URL is blank, and 0Chain will automatically be deployed to a free test slot at dev-[**n**].dev-0chain.net.  
+This network will stay available for debugging purposes if tests fail, but uptime is not guaranteed as it may be redeployed to by another test run.  
+The network will be torn down when tests pass or on a nightly basis, whichever comes first.
 
 ### Running tests against an existing 0Chain network
 
 The [CI pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can also run tests against an existing 0Chain instance  
-
+<details>
+  <summary><b>[Click to show screenshot]</b></summary>
 <img width="347" alt="ci-predeployed" src="https://user-images.githubusercontent.com/18306778/136713492-fbeadfb0-51d7-4f59-90a0-34e72e9eafcb.png">  
+</details>
 
 Ensure that the network URL is the hostname of the 0Chain network you wish to use, without a URL scheme or subdomain.
 
