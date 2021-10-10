@@ -5,9 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -146,7 +145,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "expire": "1h"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -159,7 +158,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "expire": "1h"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -172,7 +171,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"data": "79", "parity": "20", "lock": "0.5", "size": 1024, "expire": "1h"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -185,7 +184,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "expire": "1h"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -198,7 +197,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"size": 256, "lock": "0.5"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -211,7 +210,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"expire": "3m", "lock": "0.5", "size": 1024}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -224,7 +223,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
@@ -237,7 +236,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"expire": "-1", "lock": "0.5"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "invalid argument \"-1\" for \"--expire\" flag: time: missing unit in duration \"-1\"", output[len(output)-1])
@@ -250,7 +249,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		options := map[string]interface{}{"expire": "1hour", "lock": "0.5"}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "invalid argument \"1hour\" for \"--expire\" flag: time: unknown unit \"hour\" in duration \"1hour\"", output[len(output)-1])
@@ -260,18 +259,18 @@ func TestCreateAllocation(t *testing.T) {
 func setupWallet(t *testing.T, configPath string) ([]string, error) {
 	output, err := registerWallet(t, configPath)
 	if err != nil {
-		cliutils.Logger.Errorf(err.Error())
+		cli_utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
 	_, err = executeFaucetWithTokens(t, configPath, 1)
 	if err != nil {
-		cliutils.Logger.Errorf(err.Error())
+		cli_utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	_, err = getBalance(t, configPath)
 	if err != nil {
-		cliutils.Logger.Errorf(err.Error())
+		cli_utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
@@ -279,17 +278,7 @@ func setupWallet(t *testing.T, configPath string) ([]string, error) {
 }
 
 func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Creating new allocation...")
-	return cliutils.RunCommandWithRetry(t, fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
-		params,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"), 3, time.Second*5)
-}
-
-func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommand(fmt.Sprintf(
+	return cli_utils.RunCommand(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",
