@@ -62,7 +62,7 @@ Include tests for broken features as part of your test run by removing the '-sho
 ```bash
 go test ./... -v
 ```
-NB: Output when running tests locally will be less clear vs running via the system tests pipeline, so we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run tests locally
+PS: Output when running tests locally will be less clear vs running via the system tests pipeline, so we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
 ## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
