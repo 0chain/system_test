@@ -2,12 +2,14 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,11 +25,6 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		// Wallet balance before lock should be 2.0 ZCN
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"expire": "5m",
@@ -41,11 +38,16 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
+		// Wallet balance before lock should be 1.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+
 		// Lock 1 token in read pool distributed amongst all blobbers
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     1,
-			"duration":   "5m",
+			"duration":   "1m",
 		})
 		output, err = readPoolLock(t, configPath, params)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -53,7 +55,9 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		// Wallet balance should decrement from 2 to 0.5 ZCN
+		lockTimer := time.NewTimer(time.Minute)
+
+		// Wallet balance should decrement from 1.5 to 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
@@ -77,6 +81,23 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
 			require.InEpsilon(t, 1.0/float64(len(readPool[0].Blobber)), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
 		}
+
+		// Wait until timer expirted
+		<-lockTimer.C
+
+		params = createParams(map[string]interface{}{
+			"pool_id": readPool[0].Id,
+		})
+		output, err = readPoolUnlock(t, configPath, params)
+		require.Nil(t, err, "Unable to unlock tokesn", strings.Join(output, "\n"))
+
+		require.Equal(t, "unlocked", output[0])
+
+		// Wallet balance should increment from 0.5 to 1.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+
 	})
 
 	t.Run("Should not be able to lock more tokens than wallet balance", func(t *testing.T) {
@@ -296,4 +317,9 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
+}
+
+func readPoolUnlock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	t.Logf("Unlocking read tokens...")
+	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
 }
