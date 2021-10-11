@@ -97,7 +97,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"pool_id": readPool[0].Id,
 		})
 		output, err = readPoolUnlock(t, configPath, params)
-		require.Nil(t, err, "Unable to unlock tokesn", strings.Join(output, "\n"))
+		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		require.Equal(t, "unlocked", output[0])
 
