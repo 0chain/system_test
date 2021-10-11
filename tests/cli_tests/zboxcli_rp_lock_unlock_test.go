@@ -406,7 +406,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     1,
-			"duration":   "1m",
+			"duration":   "10m",
 		})
 		output, err = readPoolLock(t, configPath, params)
 		// TODO: change if FIXME is implemented
