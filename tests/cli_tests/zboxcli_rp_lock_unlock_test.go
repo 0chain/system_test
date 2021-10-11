@@ -105,7 +105,6 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-
 	})
 
 	t.Run("Should not be able to lock more tokens than wallet balance", func(t *testing.T) {
