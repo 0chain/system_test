@@ -601,7 +601,6 @@ func TestDownload(t *testing.T) {
 }
 
 func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraParam map[string]interface{}) string {
-
 	tokens := float64(1)
 	if tok, ok := extraParam["tokens"]; ok {
 		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
