@@ -43,6 +43,13 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
+		// There should be no read pool before lock
+		output, err = readPoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Equal(t, "no tokens locked", output[0])
+
 		// Lock 1 token in read pool distributed amongst all blobbers
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -62,6 +69,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
+		// Read pool balance should increment to 1
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
