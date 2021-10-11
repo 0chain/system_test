@@ -157,7 +157,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"duration":   "5m",
 		})
 		output, err = readPoolLock(t, configPath, params)
-		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
+		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
 
@@ -201,9 +201,52 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"duration":   "5m",
 		})
 		output, err = readPoolLock(t, configPath, params)
-		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
+		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+
+		// Wallet balance should remain same
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+	})
+
+	t.Run("Missing tokens flag should result in error", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"expire": "5m",
+			"size":   "1024",
+			"lock":   "0.5",
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		// Wallet balance before lock should be 0.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+
+		// Not specifying amount to lock should not succeed
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"duration":   "5m",
+		})
+		output, err = readPoolLock(t, configPath, params)
+		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "missing required 'tokens' flag", output[0])
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
