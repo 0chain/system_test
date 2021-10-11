@@ -177,14 +177,15 @@ func TestUpload(t *testing.T) {
 			"size": allocSize,
 		})
 
-		thumbnail, err := filepath.Abs("../../internal/dummy_file/0.png")
-		require.Nil(t, err, thumbnail)
+		thumbnail := "upload_thumbnail_test.png"
+		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 		filename := generateRandomTestFileName(t)
 		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":    allocationID,
 			"remotepath":    "/",
 			"localpath":     filename,
@@ -209,10 +210,11 @@ func TestUpload(t *testing.T) {
 			"size": allocSize,
 		})
 
-		filename, err := filepath.Abs("../../internal/dummy_file/0.png")
-		require.Nil(t, err, filename)
+		filename := "upload_image_test.png"
+		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
+		require.Nil(t, err, "Failed to download png file: ", strings.Join(output, "\n"))
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -237,21 +239,18 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		filename, err := filepath.Abs("../../internal/dummy_file/0Chain.mp4")
-		require.Nil(t, err, filename)
+		output, err := cliutils.RunCommand("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
+		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
-			"localpath":  filename,
+			"localpath":  "./test_video.mp4",
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = video/mp4. Name = %s",
-			filepath.Base(filename),
-		)
+		expected := "Status completed callback. Type = video/mp4. Name = test_video.mp4"
 		require.Equal(t, expected, output[1])
 	})
 
