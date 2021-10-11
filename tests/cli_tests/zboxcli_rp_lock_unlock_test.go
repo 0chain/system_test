@@ -23,6 +23,11 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
+		// Wallet balance before lock should be 2.0 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+
 		allocParams := createParams(map[string]interface{}{
 			"expire": "5m",
 			"size":   "1024",
@@ -46,6 +51,11 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
+		// Wallet balance should decrement from 2 to 0.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -60,6 +70,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Less(t, 0, len(readPool[0].Blobber))
 		require.Equal(t, true, readPool[0].Locked)
 
+		// Blobber read pool balance should be 0.25 ZCN each
 		for i := 0; i < len(readPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
 			require.InEpsilon(t, 0.25, intToZCN(readPool[0].Blobber[i].Balance), epsilon)
