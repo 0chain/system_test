@@ -104,7 +104,9 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = dir"
+		expected := fmt.Sprint(
+			"Status completed callback. Type = application/octet-stream. Name = dir",
+		)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -250,7 +252,9 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = video/mp4. Name = test_video.mp4"
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = video/mp4. Name = test_video.mp4",
+		)
 		require.Equal(t, expected, output[1])
 	})
 
@@ -429,7 +433,9 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expected := "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders"
+		expected := fmt.Sprint(
+			"Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders",
+		)
 		require.Equal(t, expected, output[0])
 	})
 

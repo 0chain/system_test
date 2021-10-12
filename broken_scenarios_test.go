@@ -205,11 +205,7 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Lock read pool tokens
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, allocationID, 0.4)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
