@@ -92,6 +92,10 @@ jobs:
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
+          echo "EXPLORER_TAG=latest" >> $GITHUB_DEV
+          echo "BLOBBER_STAKE_TAG=latest" >> $GITHUB_DEV
+          echo "ZPROXY_TAG=staging" >> $GITHUB_DEV
+          echo "ZSEARCH_TAG=staging" >> $GITHUB_DEV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
@@ -99,7 +103,7 @@ jobs:
       - name: "VIEW TEST CONFIGURATION"
         run: |
          echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
-         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
+         echo "0Chain network URL:      [${{ env.NETWORK_URL }}]"
           echo "0box CLI branch:        [${{ env.ZWALLET_BRANCH }}]"
           echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
           echo "Miner docker image:     [${{ env.MINER_TAG }}]"
@@ -109,6 +113,10 @@ jobs:
           echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
           echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
           echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
+          echo "0Proxy docker image:    [${{ env.ZPROXY_TAG }}]"
+          echo "0Search docker image:   [${{ env.ZSEARCH_TAG }}]"
+          echo "Explorer docker image:  [${{ env.EXPLORER_TAG }}]"
+          echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
 
       - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -145,11 +153,11 @@ jobs:
           helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=latest --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.DEFAULT_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=${{ env.EXPLORER_TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.ZPROXY_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.DEFAULT_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=latest 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=${{ env.BLOBBER_STAKE_TAG }} 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Wait for 0Chain network deployment to complete"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
