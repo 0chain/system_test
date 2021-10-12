@@ -14,7 +14,7 @@ The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workfl
 <img width="322" alt="ci-deploy" src="https://user-images.githubusercontent.com/18306778/136713487-db7ef096-cb11-4a33-9b29-302ffb5470df.png">  
 </details>
 
-**In this mode, do not supply the network URL. Supply the docker you wish to deploy**  
+**In this mode, do not supply the network URL. Supply the docker images you wish to deploy**  
 
 You can view a list available 0chain docker images at [Docker Hub](https://hub.docker.com/search?q=0chain&type=image), or build your own by running the docker build pipeline in the repo of your feature branch.  
 
