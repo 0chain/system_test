@@ -20,6 +20,10 @@ You can view a list available 0chain docker images at [Docker Hub](https://hub.d
 
 0Chain will automatically be deployed to a free test slot at ```dev-[1-5].devnet-0chain.net```.  
 You can view the network URL of deployment by checking the "VIEW TEST CONFIGURATION" step of the pipeline.   
+<details>
+  <summary><b>[Click to show screenshot]</b></summary>
+<img width="1200" alt="ci-config" src="https://user-images.githubusercontent.com/18306778/137035204-4feffd1e-1692-4021-bc06-e97b7925f5a9.png">  
+</details>
 
 If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
 
