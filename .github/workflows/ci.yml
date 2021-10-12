@@ -22,31 +22,31 @@ on:
         default: ''
         required: false
       miner_image:
-        description: 'miner image to deploy'
+        description: 'miner DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       sharder_image:
-        description: 'sharder image to deploy'
+        description: 'sharder DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
-        description: 'blobber image to deploy'
+        description: 'blobber DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       validator_image:
-        description: 'validator image to deploy'
+        description: 'validator DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zbox_image:
-        description: '0box image to deploy'
+        description: '0box DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zdns_image:
-        description: '0dns image to deploy'
+        description: '0dns DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zblock_image:
-        description: '0block image to deploy'
+        description: '0block DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
 
@@ -67,6 +67,7 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
+
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
 
@@ -95,7 +96,21 @@ jobs:
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      - name: "Install helm"
+       - name: "VIEW TEST CONFIGURATION"
+        run: |
+          echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
+          echo "0Chain network URL:     [${{ env.ZWALLET_BRANCH }}]"
+          echo "0box CLI branch:        [${{ env.NETWORK_URL }}]"
+          echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
+          echo "Miner docker image:     [${{ env.MINER_TAG }}]"
+          echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
+          echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
+          echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
+          echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
+          echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
+          echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
+
+        - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-helm@v1
         with:
