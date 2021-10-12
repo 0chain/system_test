@@ -99,8 +99,8 @@ jobs:
       - name: "VIEW TEST CONFIGURATION"
         run: |
          echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
-         echo "0Chain network URL:     [${{ env.ZWALLET_BRANCH }}]"
-          echo "0box CLI branch:        [${{ env.NETWORK_URL }}]"
+         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
+          echo "0box CLI branch:        [${{ env.ZWALLET_BRANCH }}]"
           echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
           echo "Miner docker image:     [${{ env.MINER_TAG }}]"
           echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
