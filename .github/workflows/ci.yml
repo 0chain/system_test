@@ -92,10 +92,10 @@ jobs:
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
-          echo "EXPLORER_TAG=latest" >> $GITHUB_DEV
-          echo "BLOBBER_STAKE_TAG=latest" >> $GITHUB_DEV
-          echo "ZPROXY_TAG=staging" >> $GITHUB_DEV
-          echo "ZSEARCH_TAG=staging" >> $GITHUB_DEV
+          echo "EXPLORER_TAG=latest" >> $GITHUB_ENV
+          echo "BLOBBER_STAKE_TAG=latest" >> $GITHUB_ENV
+          echo "ZPROXY_TAG=staging" >> $GITHUB_ENV
+          echo "ZSEARCH_TAG=staging" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
