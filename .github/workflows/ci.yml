@@ -97,18 +97,18 @@ jobs:
           echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
        - name: "VIEW TEST CONFIGURATION"
-        run: |
-          echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
-          echo "0Chain network URL:     [${{ env.ZWALLET_BRANCH }}]"
-          echo "0box CLI branch:        [${{ env.NETWORK_URL }}]"
-          echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
-          echo "Miner docker image:     [${{ env.MINER_TAG }}]"
-          echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
-          echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
-          echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
-          echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
-          echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
-          echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
+         run: |
+           echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
+           echo "0Chain network URL:     [${{ env.ZWALLET_BRANCH }}]"
+           echo "0box CLI branch:        [${{ env.NETWORK_URL }}]"
+           echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
+           echo "Miner docker image:     [${{ env.MINER_TAG }}]"
+           echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
+           echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
+           echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
+           echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
+           echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
+           echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
 
         - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
