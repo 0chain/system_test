@@ -24,10 +24,10 @@ const (
 )
 
 func TestCommonUserFunctions(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
 		t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 
 			allocationSize := int64(1 * MB)
 			fileSize := int64(math.Floor(512 * KB))
@@ -78,8 +78,6 @@ func TestCommonUserFunctions(t *testing.T) {
 			createAllocationTestTeardown(t, allocationID)
 		})
 
-		return
-		fmt.Print()
 		t.Run("Update Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
 			t.Parallel()
 
