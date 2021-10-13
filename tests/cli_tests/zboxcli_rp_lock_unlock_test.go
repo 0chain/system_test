@@ -10,6 +10,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,9 +87,12 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		// Blobber read pool balance should be 1/num(blobbers) ZCN in each
 		for i := 0; i < len(readPool[0].Blobber); i++ {
-			t.Logf("Blobber [%v] balance is [%v]", readPool[0].Blobber[i].BlobberID, readPool[0].Blobber[i].Balance)
+			t.Log("For Blobber ID ", readPool[0].Blobber[i].BlobberID, ": ")
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
-			require.InEpsilon(t, 1.0/float64(len(readPool[0].Blobber)), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
+
+			t.Log("\tActual blobber read pool balance: ", intToZCN(readPool[0].Blobber[i].Balance))
+			t.Log("\tExpected blobber read pool balance")
+			assert.InEpsilon(t, 1.0/float64(len(readPool[0].Blobber)), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
 		}
 
 		// Wait until timer expirted
