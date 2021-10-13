@@ -108,7 +108,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock more tokens than wallet balance", func(t *testing.T) {
+	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -152,7 +152,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock negative tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock negative read tokens", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -196,7 +196,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock zero tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock zero read tokens", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -326,7 +326,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to unlock unexpired tokens", func(t *testing.T) {
+	t.Run("Should not be able to unlock unexpired read tokens", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -380,7 +380,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 	// Possible FIXME: Locking read tokens for duration more than allocation's duration
 	// is possible but shouldn't be/should warn the user
-	t.Run("Locking tokens for duration more than allocation's expiration should fail/should warn the user", func(t *testing.T) {
+	t.Run("Locking read tokens for duration more than allocation's expiration should fail/should warn the user", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
