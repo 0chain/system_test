@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,16 +24,17 @@ const (
 )
 
 func TestCommonUserFunctions(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
-		t.Run("File Update - users should not be charged for updating a file ", func(t *testing.T) {
-			t.Parallel()
+		t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
+			//t.Parallel()
 
-			allocationSize := int64(10 * MB)
-			fileSize := int64(5 * MB)
+			allocationSize := int64(1 * MB)
+			fileSize := int64(math.Floor(512 * KB))
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
+			time.Sleep(10 * time.Second)
 			wp := getWritePool(t, configPath)
 			require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
 
@@ -42,7 +44,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			uploadCost = (uploadCost / (2 + 2))
 			expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
 
-			time.Sleep(10 * time.Second)
+			time.Sleep(15 * time.Second)
 			wp = getWritePool(t, configPath)
 			require.Equal(t, 1, len(wp), "Write pool expeted to be found")
 
@@ -76,6 +78,8 @@ func TestCommonUserFunctions(t *testing.T) {
 			createAllocationTestTeardown(t, allocationID)
 		})
 
+		return
+		fmt.Print()
 		t.Run("Update Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
 			t.Parallel()
 
