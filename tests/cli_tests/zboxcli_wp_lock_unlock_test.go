@@ -126,6 +126,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		output, err = writePoolUnlock(t, configPath, params)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
+		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
 		// Wallet balance should increment from 0.5 to 1.5 ZCN
