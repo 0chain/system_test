@@ -9,11 +9,40 @@ type Wallet struct {
 }
 
 type Allocation struct {
-	ID             string `json:"id"`
-	ExpirationDate int64  `json:"expiration_date"`
-	DataShards     int    `json:"data_shards"`
-	ParityShards   int    `json:"parity_shards"`
-	Size           int64  `json:"size"`
+	ID             string    `json:"id"`
+	Tx             string    `json:"tx"`
+	ExpirationDate int64     `json:"expiration_date"`
+	DataShards     int       `json:"data_shards"`
+	ParityShards   int       `json:"parity_shards"`
+	Size           int64     `json:"size"`
+	Owner          string    `json:"owner_id"`
+	OwnerPublicKey string    `json:"owner_public_key"`
+	Payer          string    `json:"payer_id"`
+	Blobbers       []Blobber `json:"blobbers"`
+	//Stats          *AllocationStats          `json:"stats"`
+	TimeUnit    time.Duration `json:"time_unit"`
+	IsImmutable bool          `json:"is_immutable"`
+
+	// BlobberDetails contains real terms used for the allocation.
+	// If the allocation has updated, then terms calculated using
+	// weighted average values.
+	BlobberDetails []*BlobberAllocation `json:"blobber_details"`
+
+	// ReadPriceRange is requested reading prices range.
+	ReadPriceRange PriceRange `json:"read_price_range"`
+
+	// WritePriceRange is requested writing prices range.
+	WritePriceRange PriceRange `json:"write_price_range"`
+
+	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+
+	StartTime         int64    `json:"start_time"`
+	Finalized         bool     `json:"finalized,omitempty"`
+	Canceled          bool     `json:"canceled,omitempty"`
+	MovedToChallenge  int64    `json:"moved_to_challenge,omitempty"`
+	MovedBack         int64    `json:"moved_back,omitempty"`
+	MovedToValidators int64    `json:"moved_to_validators,omitempty"`
+	Curators          []string `json:"curators"`
 }
 
 type AllocationFile struct {
@@ -68,8 +97,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price                int64   `json:"read_price"`
-	Write_price               int64   `json:"write_price"`
+	Read_price                float64 `json:"read_price"`
+	Write_price               float64 `json:"write_price"`
 	Min_lock_demand           float64 `json:"min_lock_demand"`
 	Max_offer_duration        int64   `json:"max_offer_duration"`
 	Challenge_completion_time int64   `json:"challenge_completion_time"`
@@ -94,11 +123,11 @@ type BlobberInfo struct {
 }
 
 type ChallengePoolInfo struct {
-	Id         string `json:"id"`
-	Balance    int64  `json:"balance"`
-	StartTime  int64  `json:"start_time"`
-	Expiration int64  `json:"expiration"`
-	Finalized  bool   `json:"finalized"`
+	Id         string  `json:"id"`
+	Balance    float64 `json:"balance"`
+	StartTime  int64   `json:"start_time"`
+	Expiration int64   `json:"expiration"`
+	Finalized  bool    `json:"finalized"`
 }
 
 type FileMetaResult struct {
@@ -163,4 +192,83 @@ type LockedInterestPoolStat struct {
 	APR          float64       `json:"apr"`
 	TokensEarned int64         `json:"tokens_earned"`
 	Balance      int64         `json:"balance"`
+}
+
+type PriceRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+type BlobberAllocation struct {
+	BlobberID       string `json:"blobber_id"`
+	Size            int64  `json:"size"`
+	Terms           Terms  `json:"terms"`
+	MinLockDemand   int64  `json:"min_lock_demand"`
+	Spent           int64  `json:"spent"`
+	Penalty         int64  `json:"penalty"`
+	ReadReward      int64  `json:"read_reward"`
+	Returned        int64  `json:"returned"`
+	ChallengeReward int64  `json:"challenge_reward"`
+	FinalReward     int64  `json:"final_reward"`
+}
+
+type StakePoolInfo struct {
+	ID      string  `json:"pool_id"` // blobber ID
+	Balance float64 `json:"balance"` // total stake
+	Unstake float64 `json:"unstake"` // total unstake amount
+
+	Free       int64   `json:"free"`        // free staked space
+	Capacity   int64   `json:"capacity"`    // blobber bid
+	WritePrice float64 `json:"write_price"` // its write price
+
+	Offers      []*StakePoolOfferInfo `json:"offers"`       //
+	OffersTotal float64               `json:"offers_total"` //
+	// delegate pools
+	Delegate []*StakePoolDelegatePoolInfo `json:"delegate"`
+	Earnings float64                      `json:"interests"` // total for all
+	Penalty  float64                      `json:"penalty"`   // total for all
+	// rewards
+	Rewards StakePoolRewardsInfo `json:"rewards"`
+	// settings
+	Settings StakePoolSettings `json:"settings"`
+}
+
+type StakePoolOfferInfo struct {
+	Lock         float64 `json:"lock"`
+	Expire       int64   `json:"expire"`
+	AllocationID string  `json:"allocation_id"`
+	IsExpired    bool    `json:"is_expired"`
+}
+
+// StakePoolRewardsInfo represents stake pool rewards.
+type StakePoolRewardsInfo struct {
+	Charge    float64 `json:"charge"`    // total for all time
+	Blobber   float64 `json:"blobber"`   // total for all time
+	Validator float64 `json:"validator"` // total for all time
+}
+
+type StakePoolDelegatePoolInfo struct {
+	ID               string  `json:"id"`                // pool ID
+	Balance          float64 `json:"balance"`           // current balance
+	DelegateID       string  `json:"delegate_id"`       // wallet
+	Rewards          float64 `json:"rewards"`           // total for all time
+	Interests        float64 `json:"interests"`         // total for all time
+	Penalty          float64 `json:"penalty"`           // total for all time
+	PendingInterests float64 `json:"pending_interests"` // total for all time
+	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
+	// time it can't be unstaked.
+	Unstake int64 `json:"unstake"`
+}
+
+type StakePoolSettings struct {
+	// DelegateWallet for pool owner.
+	DelegateWallet string `json:"delegate_wallet"`
+	// MinStake allowed.
+	MinStake float64 `json:"min_stake"`
+	// MaxStake allowed.
+	MaxStake float64 `json:"max_stake"`
+	// NumDelegates maximum allowed.
+	NumDelegates int `json:"num_delegates"`
+	// ServiceCharge is blobber service charge.
+	ServiceCharge float64 `json:"service_charge"`
 }

@@ -196,13 +196,13 @@ func TestFileUploadTokenMovement(t *testing.T) {
 			}
 
 			require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon)
-			require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon)
+			require.InEpsilon(t, totalChangeInWritePool, intToZCN(int64(challengePool.Balance)), epsilon)
 		})
 	})
 }
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second) // TODO replace with poller
+	time.Sleep(10 * time.Second) // TODO replace with poller
 	t.Logf("Getting write pool info...")
 	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
