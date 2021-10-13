@@ -86,6 +86,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		// Blobber read pool balance should be 1/num(blobbers) ZCN in each
 		for i := 0; i < len(readPool[0].Blobber); i++ {
+			t.Logf("Blobber [%v] balance is [%v]", readPool[0].Blobber[i].BlobberID, readPool[0].Blobber[i].Balance)
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
 			require.InEpsilon(t, 1.0/float64(len(readPool[0].Blobber)), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
 		}
