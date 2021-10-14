@@ -1,7 +1,11 @@
 package cli_tests
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -32,7 +36,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -65,7 +69,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -98,7 +102,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -122,7 +126,7 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download encrypted file as owner
+	//FIXME: POSSIBLE BUG: Can't download encrypted file
 	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -132,7 +136,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -174,7 +178,7 @@ func TestDownload(t *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 9.9,
+				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -217,6 +221,59 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
+	//FIXME: POSSIBLE BUG: Can't download shared encrypted file
+	t.Run("Download Shared Encrypted File Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		var authTicket, filename string
+
+		filesize := int64(10)
+		remotepath := "/"
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share File from Another Wallet", func(t *testing.T) {
+			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"size":   10 * 1024,
+				"tokens": 1,
+			})
+			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+				"encrypt": "",
+			})
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err := os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotepath + filepath.Base(filename),
+			})
+
+			output, err := shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		// Just register a wallet so that we can work further
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err)
+
+		// Download file using auth-ticket: should work
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"localpath":  "tmp/",
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+	})
+
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -229,7 +286,7 @@ func TestDownload(t *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 9.9,
+				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -285,7 +342,7 @@ func TestDownload(t *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 9.9,
+				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -345,7 +402,7 @@ func TestDownload(t *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 9.9,
+				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -401,7 +458,7 @@ func TestDownload(t *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 9.9,
+				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -427,7 +484,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * 1024,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		// Download file using auth-ticket: should work
@@ -443,6 +500,246 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
 	})
 
+	t.Run("Downloaded File and Uploaded File Should Match", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		f, err := os.Open(filename)
+		require.Nil(t, err)
+		bts, err := ioutil.ReadAll(f)
+		require.Nil(t, err)
+		originalHash := sha256.New()
+		originalHash.Write(bts)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		f, err = os.Open(filename)
+		require.Nil(t, err)
+		bts, err = ioutil.ReadAll(f)
+		require.Nil(t, err)
+		finalHash := sha256.New()
+		finalHash.Write(bts)
+
+		require.Equal(t, originalHash.Sum(nil), finalHash.Sum(nil))
+	})
+
+	//FIXME: POSSIBLE BUG: Can't download thumbnail of file
+	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		thumbnail := "upload_thumbnail_test.png"
+		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
+
+		defer func() {
+			// Delete the downloaded thumbnail file
+			err = os.Remove(thumbnail)
+			require.Nil(t, err)
+		}()
+
+		filename := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+			"thumbnailpath": thumbnail,
+		})
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"thumbnail":  "",
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+	})
+
+	t.Run("Download to Non-Existent Path Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/tmp2/",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"startblock": 0,
+			"endblock":   1,
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = . Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"commit":     "",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		match := reCommitResponse.FindStringSubmatch(output[2])
+		require.Len(t, match, 2)
+
+		var commitResp climodel.CommitResponse
+		err = json.Unmarshal([]byte(match[1]), &commitResp)
+		require.Nil(t, err)
+
+		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
+		require.Equal(t, filesize, commitResp.MetaData.Size)
+		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
+		require.Equal(t, remotepath+filepath.Base(filename), commitResp.MetaData.Path)
+		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
+	})
+
+	t.Run("Download File With blockspermarker Flag Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation":      allocationID,
+			"remotepath":      remotepath + filepath.Base(filename),
+			"localpath":       "tmp/",
+			"blockspermarker": 1,
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
 	// Failure Scenarios
 
 	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
@@ -454,7 +751,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -500,12 +797,6 @@ func TestDownload(t *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
 		t.Run("Get Other Allocation ID", func(t *testing.T) {
 			otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
 				"size": allocSize,
@@ -514,38 +805,19 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
-		require.Nil(t, err)
-
-		// Download using allocationID: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(otherFilename)
 		require.Nil(t, err)
 
 		// Download using otherAllocationID: should not work
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remotepath + filepath.Base(otherFilename),
 			"localpath":  "tmp/",
 		}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 1)
 
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *testing.T) {
@@ -555,7 +827,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10000,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
@@ -587,7 +859,7 @@ func TestDownload(t *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10000,
-			"tokens": 9.9,
+			"tokens": 1,
 		})
 
 		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
@@ -597,6 +869,69 @@ func TestDownload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
+	})
+
+	t.Run("Download File Without read-lock Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+	})
+
+	t.Run("Download File using Expired Allocation Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+			"expire": "1h",
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     "-1h",
+		})
+		output, err := updateAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 }
 
@@ -611,7 +946,11 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 	allocationID := setupAllocation(t, cliConfigFilename, extraParam)
 
 	// Lock half the tokens for read pool
-	output, err := readPoolLock(t, cliConfigFilename, allocationID, tokens/2)
+	output, err := readPoolLock(t, cliConfigFilename, createParams(map[string]interface{}{
+		"allocation": allocationID,
+		"tokens":     tokens / 2,
+		"duration":   "10m",
+	}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, "locked", output[0])
@@ -629,19 +968,4 @@ func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string,
 		cliConfigFilename,
 	)
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
-}
-
-func createFileWithContent(name string, content string) error {
-	f, err := os.Create(name)
-	if err != nil {
-		return err
-	}
-
-	_, err = f.WriteString(content)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
