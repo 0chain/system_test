@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -616,6 +617,25 @@ func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size i
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	// Upload parameters
+	uploadWithParam(t, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"localpath":  filename,
+		"remotepath": remotepath + filepath.Base(filename),
+	})
+
+	return filename
+}
+
+func generateFileWithContentAndUpload(t *testing.T, allocationID, remotepath, content string) string {
+	filename := generateRandomTestFileName(t)
+
+	f, err := os.Create(filename)
+	require.Nil(t, err)
+
+	_, err = f.WriteString(content)
 	require.Nil(t, err)
 
 	// Upload parameters

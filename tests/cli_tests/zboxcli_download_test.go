@@ -630,3 +630,18 @@ func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string,
 	)
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
+
+func createFileWithContent(name string, content string) error {
+	f, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.WriteString(content)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
