@@ -621,7 +621,6 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -642,9 +641,6 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
@@ -811,9 +807,9 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 		}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.True(t, len(output) > 0)
 
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[len(output)-1])
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *testing.T) {
