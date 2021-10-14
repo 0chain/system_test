@@ -593,7 +593,7 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/tmp2/",
+			"localpath":  "tmp/tmp2/" + filepath.Base(filename),
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
