@@ -585,7 +585,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-			"thumbnail":  "",
+			"thumbnail":  nil,
 		}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
