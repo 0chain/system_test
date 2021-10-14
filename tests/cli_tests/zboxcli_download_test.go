@@ -46,7 +46,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -79,7 +79,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -112,7 +112,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -157,7 +157,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -208,7 +208,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}))
@@ -266,7 +266,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}))
@@ -316,7 +316,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"remotepath": remotepath + filepath.Base(filename),
@@ -376,7 +376,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"lookuphash": lookuphash,
@@ -432,7 +432,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}))
@@ -489,7 +489,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Download file using auth-ticket: should work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"authticket": authTicket,
 			"localpath":  "tmp/",
@@ -526,7 +526,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -581,7 +581,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -610,7 +610,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/tmp2/",
@@ -643,7 +643,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -678,7 +678,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -725,7 +725,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation":      allocationID,
 			"remotepath":      remotepath + filepath.Base(filename),
 			"localpath":       "tmp/",
@@ -757,7 +757,7 @@ func TestDownload(t *testing.T) {
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -778,7 +778,7 @@ func TestDownload(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": "12334qe",
 			"remotepath": "/",
 			"localpath":  "tmp/",
@@ -810,7 +810,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		// Download using otherAllocationID: should not work
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remotepath + filepath.Base(otherFilename),
 			"localpath":  "tmp/",
@@ -831,7 +831,7 @@ func TestDownload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + "hello.txt",
 			"localpath":  "tmp/",
@@ -848,7 +848,7 @@ func TestDownload(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = downloadWithParam(t, configPath, "")
+		output, err = downloadFile(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -863,7 +863,7 @@ func TestDownload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
 
@@ -889,7 +889,7 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -925,7 +925,7 @@ func TestDownload(t *testing.T) {
 		output, err := updateAllocation(t, configPath, params)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = downloadWithParam(t, configPath, createParams(map[string]interface{}{
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
@@ -959,7 +959,7 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 	return allocationID
 }
 
-func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+func downloadFile(t *testing.T, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Downloading file...")
 	time.Sleep(15 * time.Second) // TODO replace with pollers
 	cmd := fmt.Sprintf(
@@ -968,5 +968,5 @@ func downloadWithParam(t *testing.T, cliConfigFilename, param string) ([]string,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(cmd)
 }
