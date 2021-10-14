@@ -1,31 +1,60 @@
-name: "0Chain System Tests CI"
+name: "0Chain System Tests"
+
+env:
+  DEFAULT_TAG: staging
+  DEFAULT_ZWALLET_BRANCH: staging
+  DEFAULT_ZBOX_BRANCH: staging
 
 on:
+  push:
   workflow_dispatch:
     inputs:
-      network:
-        description: 'network'
-        default: 'dev.0chain.net'
-        required: true
-      zbox_branch:
-        description: 'zbox branch'
+      zbox_cli_branch:
+        description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
         required: true
-      zwallet_branch:
-        description: 'zwallet branch'
+      zwallet_cli_branch:
+        description: '0Wallet CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
         required: true
-
-  push:
-env:
-  NETWORK: dev.0chain.net
-  ZWALLET_BRANCH: staging
-  ZBOX_BRANCH: staging
+      existing_network:
+        description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
+        default: ''
+        required: false
+      miner_image:
+        description: 'miner DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      sharder_image:
+        description: 'sharder DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      blobber_image:
+        description: 'blobber DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      validator_image:
+        description: 'validator DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zbox_image:
+        description: '0box DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zdns_image:
+        description: '0dns DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zblock_image:
+        description: '0block DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
 
 jobs:
   golangci:
+    if: github.event_name == 'push'
     name: "lint"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
@@ -35,33 +64,131 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [self-hosted, tests-suite]
+    runs-on: [ tests-suite ]
     timeout-minutes: 20
     steps:
-      - name: "Use params from user input"
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "NETWORK=$(echo ${{github.event.inputs.network}})" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_branch}})" >> $GITHUB_ENV
 
-      - name: "Force Install GIT latest"
-        run: |
-          apt-get install -y software-properties-common \
-          && apt-get update \
-          && add-apt-repository -y ppa:git-core/ppa \
-          && apt-get update \
-          && apt-get install -y git
-
-      - name: "Checkout system tests"
+      - name: "Checkout System Tests"
         uses: actions/checkout@v2
+
+      - name: "Config: Run tests against existing 0Chain network"
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        run: |
+          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
+
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
+          echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
+          echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
+          echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
+          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
+          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
+          echo "EXPLORER_TAG=latest" >> $GITHUB_ENV
+          echo "BLOBBER_STAKE_TAG=latest" >> $GITHUB_ENV
+          echo "ZPROXY_TAG=staging" >> $GITHUB_ENV
+          echo "ZSEARCH_TAG=staging" >> $GITHUB_ENV
+
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+          echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+
+      - name: "VIEW TEST CONFIGURATION"
+        run: |
+          echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
+          echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
+          echo "0box CLI branch:        [${{ env.ZWALLET_BRANCH }}]"
+          echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
+          echo "Miner docker image:     [${{ env.MINER_TAG }}]"
+          echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
+          echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
+          echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
+          echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
+          echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
+          echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
+          echo "0Proxy docker image:    [${{ env.ZPROXY_TAG }}]"
+          echo "0Search docker image:   [${{ env.ZSEARCH_TAG }}]"
+          echo "Explorer docker image:  [${{ env.EXPLORER_TAG }}]"
+          echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
+
+      - name: "Install helm"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: azure/setup-helm@v1
         with:
-          fetch-depth: 1
+          version: 'v3.2.2'
+
+      - name: "Install kubectl"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: azure/setup-kubectl@v1
+        id: install
+
+      - name: "Configure helm & kubectl"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
+          helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
+          helm repo update
+          mkdir -p ./kube
+          echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
+
+      - name: "Remove existing 0Chain network"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+          sleep 30
+          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+
+      - name: "Deploy 0Chain network"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=${{ env.EXPLORER_TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.ZPROXY_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=${{ env.BLOBBER_STAKE_TAG }} 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+
+      - name: "Wait for 0Chain network deployment to complete"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          sleep 60
+          counter=0;
+          while [ $counter -lt 30 ] && kubectl -n ${{ env.NAMESPACE }} get pods --kubeconfig ./kube/${{ env.NAMESPACE }}-config | grep blobber-stake | grep -vi Completed; do
+            sleep 10
+            echo "Waiting Chain deployment to finish." && ((counter=counter+1));
+          done
+
+          if [ $counter -eq 30 ]; then
+            echo "Chain setup did not complete as expected"
+            exit 1
+          fi
 
       - name: "Get CLI Cache Key"
         run: |
-          echo ZWALLET_SHA=$(curl --silent https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
-          echo ZBOX_SHA=$(curl --silent https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }}  | jq --raw-output .object.sha) >> $GITHUB_ENV
+          if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZWALLET_SHA=${{ env.ZWALLET_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ env.ZBOX_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZBOX_SHA=${{ env.ZBOX_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
 
       - name: "Cache CLI Binaries"
         id: cli-cache
@@ -70,7 +197,7 @@ jobs:
           path: |
             tests/cli_tests/zbox
             tests/cli_tests/zwallet
-          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}
+          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}-v2
 
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
@@ -105,23 +232,19 @@ jobs:
           make install
           mv zbox ../tests/cli_tests
 
-      - name: "Get Time"
-        id: time
-        uses: nanzm/get-time-action@v1.1
-        with:
-          format: YYYY-MM-DD_HH.mm.ss
-
       - name: "Set up system tests"
         run: |
           echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "TEST_TIME=$(date '+%Y-%m-%d_%H.%M.%S')" >> $GITHUB_ENV
           go get gotest.tools/gotestsum
           go get github.com/vakenbolt/go-test-report
           cd tests/cli_tests
           mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}
-          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK }}/dns," -i ./config/zbox_config.yaml
+          sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK_URL }}/dns," -i ./config/zbox_config.yaml
+          ATTEMPT_BROKEN_TESTS_FLAG=$(echo $(([[ ${GITHUB_REF#refs/heads/} == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
-          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test ./... -json -count=1 | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
 
       - name: "Run CLI System Tests"
         shell: 'script --return --quiet --command "bash {0}"'
@@ -129,7 +252,7 @@ jobs:
           cd tests/cli_tests
           exit_code=0
           ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./TEST_RUNNER_COMMAND.sh || exit_code=$?
-          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK }}] at [${{ steps.time.outputs.time }}]"
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/index.html --title "0Chain System test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ env.TEST_TIME }}]"
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
           exit $exit_code
 
@@ -149,11 +272,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: System-Test-${{ steps.time.outputs.time }}
+          name: System-Test-${{ env.TEST_TIME }}
           path: |
             ./tests/cli_tests/config
             ./tests/cli_tests/cmdlog.log
-            ./tests/cli_tests/${{ env.BRANCH }}/${GITHUB_SHA}/index.html
+            ./tests/cli_tests/${{ env.BRANCH }}/latest/index.html
 
       - name: "Wait for report deployment to complete"
         if: always()
@@ -162,3 +285,10 @@ jobs:
       - name: "Report Link"
         if: always()
         run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
+
+      - name: "Tear Down 0Chain network"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" || true
+          sleep 30
+          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config || true
