@@ -1,12 +1,11 @@
 package cli_tests
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -41,6 +40,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -59,6 +59,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File from a Directory Should Work", func(t *testing.T) {
@@ -74,6 +77,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -92,6 +96,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File from Nested Directory Should Work", func(t *testing.T) {
@@ -107,6 +114,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -125,6 +133,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	//FIXME: POSSIBLE BUG: Can't download encrypted file
@@ -170,7 +181,7 @@ func TestDownload(t *testing.T) {
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename string
+		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
 		remotepath := "/"
@@ -182,6 +193,8 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			originalFileChecksum = generateChecksum(t, filename)
+
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -220,6 +233,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	//FIXME: POSSIBLE BUG: Can't download shared encrypted file
@@ -278,7 +294,7 @@ func TestDownload(t *testing.T) {
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename string
+		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
 		remotepath := "/dir/"
@@ -290,6 +306,7 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			originalFileChecksum = generateChecksum(t, filename)
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -329,12 +346,15 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, lookuphash, filename string
+		var authTicket, lookuphash, filename, originalFileChecksum string
 
 		filesize := int64(10)
 		remotepath := "/dir/"
@@ -346,6 +366,7 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			originalFileChecksum = generateChecksum(t, filename)
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -389,12 +410,15 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download Shared File without Paying Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename string
+		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
 		remotepath := "/"
@@ -406,6 +430,7 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			originalFileChecksum = generateChecksum(t, filename)
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -444,6 +469,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	//FIXME: POSSIBLE BUG: Can't download by self-paying for shared file (rx-pay)
@@ -501,55 +529,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
 	})
 
-	t.Run("Downloaded File and Uploaded File Should Match", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		f, err := os.Open(filename)
-		require.Nil(t, err)
-		bts, err := ioutil.ReadAll(f)
-		require.Nil(t, err)
-		originalHash := sha256.New()
-		originalHash.Write(bts)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		f, err = os.Open(filename)
-		require.Nil(t, err)
-		bts, err = ioutil.ReadAll(f)
-		require.Nil(t, err)
-		finalHash := sha256.New()
-		finalHash.Write(bts)
-
-		require.Equal(t, originalHash.Sum(nil), finalHash.Sum(nil))
-	})
-
 	//FIXME: POSSIBLE BUG: Can't download thumbnail of file
 	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
 		t.Parallel()
@@ -605,6 +584,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -623,6 +603,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/tmp2/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
@@ -638,6 +621,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -658,6 +642,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
@@ -673,6 +660,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -705,6 +693,9 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
 		require.Equal(t, remotepath+filepath.Base(filename), commitResp.MetaData.Path)
 		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *testing.T) {
@@ -720,6 +711,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -739,6 +731,9 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	// Failure Scenarios
@@ -969,4 +964,16 @@ func downloadFile(t *testing.T, cliConfigFilename, param string) ([]string, erro
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(cmd)
+}
+
+func generateChecksum(t *testing.T, filePath string) string {
+	t.Logf("Generating checksum for file [%v]...", filePath)
+
+	output, err := cliutils.RunCommand("shasum -a 256 " + filePath)
+	require.Nil(t, err, "Checksum generation for file %v failed", filePath, strings.Join(output, "\n"))
+
+	matcher := regexp.MustCompile("(.*) " + filePath + "$")
+	require.Regexp(t, matcher, output[0], "Checksum execution output did not match expected", strings.Join(output, "\n"))
+
+	return matcher.FindAllStringSubmatch(output[0], 1)[0][1]
 }
