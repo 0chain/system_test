@@ -27,7 +27,7 @@ const (
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Parallel()
 
-	t.Run("Miner rewards", func(t *testing.T) {
+	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -176,7 +176,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			totalRewardsAndFees += int64(generatorRewardServiceCharge)
 			totalRewardsAndFees += int64(generatorFeeServiceCharge)
 
-			// if none staked at node, node gets all rewards
+			// if none staked at node, node gets all rewards.
+			// otherwise, then remaining are distributed to stake holders.
 			if miner.TotalStake == 0 {
 				totalRewardsAndFees += int64(generatorRewardsRemaining)
 				totalRewardsAndFees += int64(generatorFeeRemaining)
@@ -189,7 +190,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, acceptableRoundingEpsilon, "expected total rewards and fees not matching: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
 
-	t.Run("Sharder rewards", func(t *testing.T) {
+	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -336,6 +337,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			totalRewardsAndFees += int64(sharderFeeServiceCharge)
 
 			// if none staked at node, node gets all rewards
+			// otherwise, then remaining are distributed to stake holders.
 			if sharder.TotalStake == 0 {
 				totalRewardsAndFees += int64(sharderRewardsRemaining)
 				totalRewardsAndFees += int64(sharderFeeRemaining)
