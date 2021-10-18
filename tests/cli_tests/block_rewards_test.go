@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -60,11 +61,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
 		// Use first miner
-		var miner climodel.Node
-		for _, m := range miners.Nodes[0] {
-			miner = m
-			break
-		}
+		miner := miners.Nodes[0].SimpleNode
 
 		// Get sharder list.
 		output, err = getSharders(t, configPath)
@@ -93,12 +90,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		bt, err := ioutil.ReadAll(res.Body)
+		resBody, err := ioutil.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
-		err = json.Unmarshal(bt, &startBalance)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+		err = json.Unmarshal(resBody, &startBalance)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+		require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
+		require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
+		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
 		for i := 0; i < 5; i++ {
@@ -114,12 +114,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		bt, err = ioutil.ReadAll(res.Body)
+		resBody, err = ioutil.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
-		err = json.Unmarshal(bt, &endBalance)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+		err = json.Unmarshal(resBody, &endBalance)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+		require.NotEmpty(t, endBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 
 		totalRewardsAndFees := int64(0)
 		// Calculate the total rewards and fees for this miner.
@@ -130,12 +133,12 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			bt, err = ioutil.ReadAll(res.Body)
+			resBody, err = ioutil.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
-			err = json.Unmarshal(bt, &block)
-			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+			err = json.Unmarshal(resBody, &block)
+			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 
 			// No expected rewards for this miner if not the generator of block.
 			if block.Block.MinerId != miner.ID {
@@ -186,8 +189,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		wantBalanceDiff := totalRewardsAndFees
 		gotBalanceDiff := endBalance.Balance - startBalance.Balance
-		acceptableRoundingEpsilon := 100.0
-		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, acceptableRoundingEpsilon, "expected total rewards and fees not matching: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
+		acceptableDiscrepancyDueToRound := 50.0
+		assert.Less(t, math.Abs(float64(wantBalanceDiff-gotBalanceDiff)), acceptableDiscrepancyDueToRound, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -234,12 +237,12 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "get node %s failed", selectedSharder.ID, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var nodeRes map[string]climodel.Node
+		var nodeRes map[string]climodel.SimpleNode
 		err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
 
-		var sharder climodel.Node
+		var sharder climodel.SimpleNode
 		for _, n := range nodeRes {
 			sharder = n
 			break
@@ -254,12 +257,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		bt, err := ioutil.ReadAll(res.Body)
+		resBody, err := ioutil.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
-		err = json.Unmarshal(bt, &startBalance)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+		err = json.Unmarshal(resBody, &startBalance)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+		require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
+		require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
+		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
 		for i := 0; i < 5; i++ {
@@ -275,12 +281,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		bt, err = ioutil.ReadAll(res.Body)
+		resBody, err = ioutil.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
-		err = json.Unmarshal(bt, &endBalance)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+		err = json.Unmarshal(resBody, &endBalance)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+		require.NotEmpty(t, endBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 
 		totalRewardsAndFees := int64(0)
 		// Calculate the total rewards and fees for this sharder.
@@ -291,12 +300,12 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			bt, err = ioutil.ReadAll(res.Body)
+			resBody, err = ioutil.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
-			err = json.Unmarshal(bt, &block)
-			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(bt), err)
+			err = json.Unmarshal(resBody, &block)
+			require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 
 			// Get total block fees
 			blockFees := int64(0)
@@ -346,8 +355,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		wantBalanceDiff := totalRewardsAndFees
 		gotBalanceDiff := endBalance.Balance - startBalance.Balance
-		acceptableRoundingEpsilon := 100.0
-		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, acceptableRoundingEpsilon, "expected total rewards and fees not matching: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
+		acceptableDiscrepancyDueToRound := 50.0
+		assert.Less(t, math.Abs(float64(wantBalanceDiff-gotBalanceDiff)), acceptableDiscrepancyDueToRound, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
 }
 

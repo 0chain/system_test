@@ -166,10 +166,14 @@ type LockedInterestPoolStat struct {
 }
 
 type NodeList struct {
-	Nodes []map[string]Node `json:"Nodes"`
+	Nodes []Node `json:"Nodes"`
 }
 
 type Node struct {
+	SimpleNode `json:"simple_miner"`
+}
+
+type SimpleNode struct {
 	ID                string      `json:"id"`
 	N2NHost           string      `json:"n2n_host"`
 	Host              string      `json:"host"`
