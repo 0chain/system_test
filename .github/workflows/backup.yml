@@ -1,4 +1,4 @@
-name: Mirror repo to S3
+name: 0Chain System Tests Nightly
 on:
   schedule:
     # Runs everyday at 4:10 am
@@ -6,16 +6,19 @@ on:
   workflow_dispatch:
 jobs:
   network-liveness-check:
+    strategy:
+      matrix:
+        network: [ "beta.0chain.net", "test.0chain.net" ]
     runs-on: docker-builds
     steps:
       - name: "Check 0Proxy Liveness"
         uses: wei/curl@master
         with:
-          args: https://beta.0chain.net/dns
+          args: --max-time 10 https://${{ matrix.network }}/dns
       - name: "Check Explorer Liveness"
         uses: wei/curl@master
         with:
-          args: https://beta.0chain.net
+          args: --max-time 10 https://${{ matrix.network }}
 #  s3Backup:
 #    runs-on: docker-builds
 #    steps:
