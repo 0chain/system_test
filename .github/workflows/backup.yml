@@ -8,8 +8,8 @@ jobs:
   network-liveness-check:
     strategy:
       matrix:
-        network: [ "beta.0chain.net", "test.0chain.net" ]
-    runs-on: docker-builds
+        network: [ "beta.0chain.net", "dev.0chain.net", "test.0chain.net" ]
+    runs-on: self-hosted
     steps:
       - name: "Check 0Proxy Liveness"
         uses: wei/curl@master
