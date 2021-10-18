@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -61,7 +62,19 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
 		// Use first miner
-		miner := miners.Nodes[0].SimpleNode
+		selectedMiner := miners.Nodes[0].SimpleNode
+
+		// Get miner's node details (this has the total_stake and pools populated).
+		output, err = getNode(t, configPath, selectedMiner.ID)
+		require.Nil(t, err, "get node %s failed", selectedMiner.ID, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var nodeRes climodel.Node
+		err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
+
+		miner := nodeRes.SimpleNode
 
 		// Get sharder list.
 		output, err = getSharders(t, configPath)
@@ -74,12 +87,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
-		// Use first sharder.
-		var sharder climodel.Sharder
-		for _, s := range sharders {
-			sharder = s
-			break
-		}
+		// Use first sharder from map.
+		sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -151,13 +160,10 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 				blockFees += txn.TransactionFee
 			}
 
-			rewardRate := mconfig[rewardRateConfigKey]
-
+			// reward rate declines per epoch
+			// new reward ratio = current reward rate * (1.0 - reward decline rate)
 			epochs := round / int64(mconfig[epochConfigKey])
-			for i := int64(0); i < epochs; i++ {
-				// new reward ratio = current reward rate * (1.0 - reward decline rate)
-				rewardRate *= 1.0 - mconfig[rewardDeclineRateConfigKey]
-			}
+			rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
 
 			// block reward (mint) = block reward (configured) * reward rate
 			blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
@@ -189,8 +195,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		wantBalanceDiff := totalRewardsAndFees
 		gotBalanceDiff := endBalance.Balance - startBalance.Balance
-		acceptableDiscrepancyDueToRound := 50.0
-		assert.Less(t, math.Abs(float64(wantBalanceDiff-gotBalanceDiff)), acceptableDiscrepancyDueToRound, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
+		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, 0.0000001, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -226,27 +231,20 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
-		// Use first sharder.
-		var selectedSharder climodel.Sharder
-		for _, s := range sharders {
-			selectedSharder = s
-			break
-		}
+		// Use first sharder from map.
+		selectedSharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
+		// Get sharder's node details (this has the total_stake and pools populated).
 		output, err = getNode(t, configPath, selectedSharder.ID)
 		require.Nil(t, err, "get node %s failed", selectedSharder.ID, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var nodeRes map[string]climodel.SimpleNode
+		var nodeRes climodel.Node
 		err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
 
-		var sharder climodel.SimpleNode
-		for _, n := range nodeRes {
-			sharder = n
-			break
-		}
+		sharder := nodeRes.SimpleNode
 
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -313,13 +311,10 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 				blockFees += txn.TransactionFee
 			}
 
-			rewardRate := mconfig[rewardRateConfigKey]
-
+			// reward rate declines per epoch
+			// new reward ratio = current reward rate * (1.0 - reward decline rate)
 			epochs := round / int64(mconfig[epochConfigKey])
-			for i := int64(0); i < epochs; i++ {
-				// new reward rate = current reward rate * (1.0 - reward decline rate)
-				rewardRate *= 1.0 - mconfig[rewardDeclineRateConfigKey]
-			}
+			rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
 
 			// block reward (mint) = block reward (configured) * reward rate
 			blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
@@ -355,8 +350,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		wantBalanceDiff := totalRewardsAndFees
 		gotBalanceDiff := endBalance.Balance - startBalance.Balance
-		acceptableDiscrepancyDueToRound := 50.0
-		assert.Less(t, math.Abs(float64(wantBalanceDiff-gotBalanceDiff)), acceptableDiscrepancyDueToRound, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
+		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, 0.0000001, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
 }
 
