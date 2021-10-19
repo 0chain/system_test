@@ -28,6 +28,21 @@ func RunCommand(commandString string) ([]string, error) {
 	return sanitizeOutput(rawOutput), err
 }
 
+func RunCommandWithRawOutput(commandString string) ([]string, error) {
+	command := parseCommand(commandString)
+	commandName := command[0]
+	args := command[1:]
+
+	sanitizedArgs := sanitizeArgs(args)
+	rawOutput, err := executeCommand(commandName, sanitizedArgs)
+
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
+
+	output := strings.Split(string(rawOutput), "\n")
+
+	return output, err
+}
+
 func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	red := "\033[31m"
 	yellow := "\033[33m"
