@@ -12,6 +12,9 @@ jobs:
         network: [ "beta.0chain.net", "dev.0chain.net", "test.0chain.net" ]
       fail-fast: false
     steps:
+      - name: "Checkout System Tests"
+        uses: actions/checkout@v2
+        
       - name: "Check 0Proxy Liveness"
         run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}/dns
 
