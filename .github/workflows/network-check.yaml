@@ -6,10 +6,11 @@ on:
   workflow_dispatch:
 jobs:
   network-liveness-check:
+    runs-on: self-hosted
     strategy:
       matrix:
         network: [ "beta.0chain.net", "dev.0chain.net", "test.0chain.net" ]
-    runs-on: self-hosted
+      fail-fast: false
     steps:
       - name: "Check 0Proxy Liveness"
         run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}/dns
