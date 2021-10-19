@@ -1,6 +1,8 @@
 package climodel
 
-import "time"
+import (
+	"time"
+)
 
 type Wallet struct {
 	ClientID            string `json:"client_id"`
@@ -163,4 +165,52 @@ type LockedInterestPoolStat struct {
 	APR          float64       `json:"apr"`
 	TokensEarned int64         `json:"tokens_earned"`
 	Balance      int64         `json:"balance"`
+}
+
+type StakePoolOfferInfo struct {
+	Lock         int64  `json:"lock"`
+	Expire       int64  `json:"expire"`
+	AllocationID string `json:"allocation_id"`
+	IsExpired    bool   `json:"is_expired"`
+}
+
+type StakePoolRewardsInfo struct {
+	Charge    int64 `json:"charge"`
+	Blobber   int64 `json:"blobber"`
+	Validator int64 `json:"validator"`
+}
+
+type StakePoolDelegatePoolInfo struct {
+	ID               string `json:"id"`
+	Balance          int64  `json:"balance"`
+	DelegateID       string `json:"delegate_id"`
+	Rewards          int64  `json:"rewards"`
+	Interests        int64  `json:"interests"`
+	Penalty          int64  `json:"penalty"`
+	PendingInterests int64  `json:"pending_interests"`
+	Unstake          int64  `json:"unstake"`
+}
+
+type StakePoolSettings struct {
+	DelegateWallet string  `json:"delegate_wallet"`
+	MinStake       int64   `json:"min_stake"`
+	MaxStake       int64   `json:"max_stake"`
+	NumDelegates   int     `json:"num_delegates"`
+	ServiceCharge  float64 `json:"service_charge"`
+}
+
+type StakePoolInfo struct {
+	ID          string                       `json:"pool_id"`
+	Balance     int64                        `json:"balance"`
+	Unstake     int64                        `json:"unstake"`
+	Free        int64                        `json:"free"`
+	Capacity    int64                        `json:"capacity"`
+	WritePrice  int64                        `json:"write_price"`
+	Offers      []*StakePoolOfferInfo        `json:"offers"`
+	OffersTotal int64                        `json:"offers_total"`
+	Delegate    []*StakePoolDelegatePoolInfo `json:"delegate"`
+	Earnings    int64                        `json:"interests"`
+	Penalty     int64                        `json:"penalty"`
+	Rewards     StakePoolRewardsInfo         `json:"rewards"`
+	Settings    StakePoolSettings            `json:"settings"`
 }
