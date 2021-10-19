@@ -22,6 +22,11 @@ jobs:
         with:
           node-version: '12.x'
 
+      - name: "Configure node"
+        run: |
+          npm config set user 0
+          npm config set unsafe-perm true
+
       - name: "Install Newman"
         run: |
           npm install -g newman
