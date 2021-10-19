@@ -110,7 +110,12 @@ func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]strin
 
 func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
 	t.Logf("Locking read tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, escapedTestName(t), cliConfigFilename))
+	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, tokens)
+}
+
+func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
+	t.Logf("Locking read tokens...")
+	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, wallet, cliConfigFilename))
 }
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
@@ -119,8 +124,25 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
+	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, allocation, localpath, remotepath)
+}
+
+func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
 	t.Logf("Downloading file...")
-	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+}
+
+func downloadFileWithParams(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	t.Logf("Share file...")
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+
+	return cliutils.RunCommand(cmd)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {
