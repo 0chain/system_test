@@ -35,7 +35,7 @@ jobs:
       - name: "Run Smoke Tests"
         run: |
           cd tests/api_tests
-          custom_network=$(echo ${{ matrix.network }} | xargs | sed -E 's/^\s*.*:\/\///g' | sed 's:/*$::') && sed -i "0,/REPLACE/s//$custom_network/" './Postman Collections/Environments/custom.postman_environment.json')
+          custom_network=$(echo ${{ matrix.network }} | xargs | sed -E 's/^\s*.*:\/\///g' | sed 's:/*$::') && sed -i "0,/REPLACE/s//$custom_network/" './Postman Collections/Environments/custom.postman_environment.json'
           newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on
   s3Backup:
     runs-on: docker-builds
