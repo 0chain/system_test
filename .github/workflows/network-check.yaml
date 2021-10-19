@@ -1,11 +1,11 @@
-name: 0Chain Nightly Network Check
+name: 0Chain Network Health Check
 on:
   schedule:
     # Runs everyday at 4:10 am
     - cron: '10 4 * * * '
   workflow_dispatch:
 jobs:
-  network-liveness-check:
+  network-health-check:
     runs-on: self-hosted
     strategy:
       matrix:
