@@ -631,10 +631,9 @@ func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 
 	for k, v := range params {
-		if v == nil {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
-		} else {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		_, err := builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		if err != nil {
+			return ""
 		}
 	}
 	return strings.TrimSpace(builder.String())
