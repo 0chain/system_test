@@ -40,4 +40,4 @@ jobs:
         run: |
           cd tests/api_tests
           custom_network=$(echo ${{ matrix.network }} | xargs | sed -E 's/^\s*.*:\/\///g' | sed 's:/*$::') && sed -i "0,/REPLACE/s//$custom_network/" './Environments/custom.postman_environment.json'
-          newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on
+          newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on || (echo "RETRYING..." && sleep 30 && newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on)
