@@ -271,6 +271,8 @@ type StakePoolSettings struct {
 	NumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
 	ServiceCharge float64 `json:"service_charge"`
+}
+
 type NodeList struct {
 	Nodes []Node `json:"Nodes"`
 }
