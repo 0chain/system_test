@@ -1,8 +1,8 @@
 name: 0Chain Network Health Check
 on:
   schedule:
-    # Runs every 4 hours
-    - cron: '0 */4 * * *'
+    # Runs every 2 hours
+    - cron: '0 */2 * * *'
   workflow_dispatch:
 jobs:
   network-health-check:
@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
-        
+
       - name: "Check 0Proxy Liveness"
         run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}/dns
 
@@ -45,12 +45,13 @@ jobs:
           exit_code=1;
           while [ $counter -lt 6 ] && [ $exit_code -eq 1 ]
           do
-            echo "Executing smoke tests attempt [$counter/5]" && ((counter=counter+1));
+            echo "Executing smoke tests attempt [$counter/5]"
             exit_code=0
-            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on || { echo "Sleeping for 30s" && sleep 30 && exit_code=1; }
+            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on || { echo "Sleeping for 30s" && sleep 30 && exit_code=1 && ((counter=counter+1)); }
           done
 
           if [ $counter -eq 6 ]; then
             echo "Smoke tests failed for network [${{ matrix.network }}]"
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"Network [${{ matrix.network }}] seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
             exit 1
           fi
