@@ -26,6 +26,49 @@ const (
 func TestCommonUserFunctions(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
+
+		// Test is failing.
+		t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
+			t.Parallel()
+
+			allocationSize := int64(2 * MB)
+			fileSize := int64(1 * MB)
+
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
+
+			blobber_details := getAllocationBlobberDetails(t, allocationID)
+
+			var stackPoolBalance float64 = 0
+			for _, b := range blobber_details {
+				stackPoolBalance += getBlobberStackPoolBalance(t, b.BlobberID)
+			}
+
+			filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+
+			wait(t, 60*time.Second)
+			blobber_details = getAllocationBlobberDetails(t, allocationID)
+
+			var stackPoolBalance_AfterUpload float64 = 0
+			for _, b := range blobber_details {
+				stackPoolBalance_AfterUpload += getBlobberStackPoolBalance(t, b.BlobberID)
+			}
+
+			require.Greater(t, stackPoolBalance, stackPoolBalance_AfterUpload, "Blobber Has to pay to redeem write markers")
+
+			updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
+
+			wait(t, 60*time.Second)
+
+			var stackPoolBalance_AfterOperation float64 = 0
+			for _, b := range blobber_details {
+				stackPoolBalance_AfterOperation += getBlobberStackPoolBalance(t, b.BlobberID)
+			}
+
+			require.Greater(t, stackPoolBalance_AfterUpload, stackPoolBalance_AfterOperation, "Blobber Has to pay to redeem write markers")
+
+			createAllocationTestTeardown(t, allocationID)
+		})
+
 		t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
 			t.Parallel()
 
@@ -34,7 +77,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-			time.Sleep(10 * time.Second)
+			wait(t, 10*time.Second)
 			wp := getWritePool(t, configPath)
 			require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
 
@@ -44,7 +87,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			uploadCost = (uploadCost / (2 + 2))
 			expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
 
-			time.Sleep(15 * time.Second)
+			wait(t, 15*time.Second)
 			wp = getWritePool(t, configPath)
 			require.Equal(t, 1, len(wp), "Write pool expeted to be found")
 
@@ -56,7 +99,7 @@ func TestCommonUserFunctions(t *testing.T) {
 				t.Log("WARNING: difference in amount taken from Write Pool with the upload cost: ", wp[0].Balance-expected_wp_balance, " SAS")
 			}
 
-			cp_balance := getChallengePoolBalance(t, configPath, allocationID)
+			cp_balance := getChallengePoolBalance(t, allocationID)
 			require.Equal(t, int64(5000000000)-wp[0].Balance, int64(cp_balance), "Tokens must be transfered from Write Pool to Chanllenge Pool")
 
 			blobber := getOneOfAllocationBlobbers(t, allocationID)
@@ -72,7 +115,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			new_wp := getWritePool(t, configPath)
 			require.Equal(t, wp[0].Balance, new_wp[0].Balance, "The write pool is expected to not be changed after update file", "difference:", wp[0].Balance-new_wp[0].Balance)
 
-			new_cp_balance := getChallengePoolBalance(t, configPath, allocationID)
+			new_cp_balance := getChallengePoolBalance(t, allocationID)
 			require.Equal(t, int64(cp_balance), int64(new_cp_balance), "Challenge pool blance shouldn't be changed after update file")
 
 			createAllocationTestTeardown(t, allocationID)
@@ -159,27 +202,18 @@ func TestCommonUserFunctions(t *testing.T) {
 
 			createAllocationTestTeardown(t, allocationID)
 		})
-
-		// t.Run("File update - user wallets are not charged but blobber should pay to write the marker to the blockchain", func(t *testing.T) {
-		// 	//t.Parallel()
-
-		// 	allocationID := setupAllocation(t, configPath)
-
-		// 	output, err := getBalance(t, configPath)
-		// 	require.Nil(t, err, strings.Join(output, "\n"))
-		// 	require.Len(t, output, 1)
-		// 	require.Regexp(t, regexp.MustCompile(`Balance: [0-9.]+ (|m|µ)ZCN \([0-9.]+ USD\)$`), output[0])
-		// 	r := regexp.MustCompile(`Balance: (?P<Balance>[0-9.]+ (|m|µ)ZCN) \([0-9.]+ USD\)$`)
-		// 	matches := r.FindStringSubmatch(output[0])
-		// 	userWalletBalance := matches[1]
-		// 	fmt.Println(userWalletBalance)
-
-		// 	allocation := getAllocationWithoutRetry(t, configPath, allocationID)
-		// 	fmt.Println(allocation)
-		// 	createAllocationTestTeardown(t, allocationID)
-		// })
 	})
 
+}
+
+func getAllocationBlobberDetails(t *testing.T, allocation_id string) []*climodel.BlobberAllocation {
+	allocation := getAllocation(t, allocation_id)
+	return allocation.BlobberDetails
+}
+
+func getBlobberStackPoolBalanceForAllocation(t *testing.T, blobber_id, allocation_id string) float64 {
+	offer := getAllocationOfferFromBlobberStackPool(t, blobber_id, allocation_id)
+	return offer.Lock
 }
 
 func getWritePool(t *testing.T, cliConfigFilename string) []climodel.WritePoolInfo {
@@ -192,21 +226,13 @@ func getWritePool(t *testing.T, cliConfigFilename string) []climodel.WritePoolIn
 	return initialWritePool
 }
 
-func getChallengePoolBalance(t *testing.T, cliConfigFilename, allocationID string) float64 {
-	cp := getChallengePoolInfo(t, cliConfigFilename, allocationID)
-	balance := cp.Balance
-	return balance
-}
-
-func assertLockInRewardPoolIs(t *testing.T, expectedLock int64, cliConfigFilename, allocationID, blobber_id string) {
-	offer := getAllocationOfferFromBlobberStackPool(t, blobber_id, allocationID)
-
-	lock := offer.Lock
-	require.Equal(t, expectedLock, lock, "Lock token interest must've been put in stack pool")
+func getChallengePoolBalance(t *testing.T, allocationID string) float64 {
+	cp := getChallengePoolInfo(t, configPath, allocationID)
+	return cp.Balance
 }
 
 func getOneOfAllocationBlobbers(t *testing.T, allocationID string) *climodel.BlobberAllocation {
-	allocation := getAllocation(t, configPath, allocationID)
+	allocation := getAllocation(t, allocationID)
 
 	require.GreaterOrEqual(t, len(allocation.BlobberDetails), 1, "Allocation must've been stored at least on one blobber")
 
@@ -270,6 +296,12 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
 
+func getBlobberStackPoolBalance(t *testing.T, blobber_id string) float64 {
+	sp_info := getStackPoolInfo(t, configPath, blobber_id)
+	require.GreaterOrEqual(t, len(sp_info.Offers), 1, "Blobbers offers must not be empty")
+	return sp_info.Balance
+}
+
 func getAllocationOfferFromBlobberStackPool(t *testing.T, blobber_id, allocationID string) *climodel.StakePoolOfferInfo {
 	sp_info := getStackPoolInfo(t, configPath, blobber_id)
 
@@ -304,8 +336,8 @@ func getWalletBalance(t *testing.T, cliConfigFilename string) string {
 	return userWalletBalance
 }
 
-func getAllocation(t *testing.T, cliConfigFilename, allocationID string) *climodel.Allocation {
-	return getAllocationWithRetry(t, cliConfigFilename, allocationID, 1)
+func getAllocation(t *testing.T, allocationID string) *climodel.Allocation {
+	return getAllocationWithRetry(t, configPath, allocationID, 1)
 }
 
 func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) *climodel.Allocation {
@@ -417,4 +449,9 @@ func getUploadCost(t *testing.T, cliConfigFilename, params string) ([]string, er
 		params,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename))
+}
+
+func wait(t *testing.T, duration time.Duration) {
+	t.Logf("Waiting %s", duration)
+	time.Sleep(duration)
 }
