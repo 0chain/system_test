@@ -22,37 +22,6 @@ func TestUpload(t *testing.T) {
 
 	// Success Scenarios
 
-	t.Run("Upload File With half Size of the Allocation Should Work ", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(1 * MB)
-		fileSize := int64(512 * KB)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"parity": 1,
-			"data":   1,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -650,6 +619,28 @@ func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size i
 		"localpath":  filename,
 		"remotepath": remotepath + filepath.Base(filename),
 	})
+
+	return filename
+}
+
+func generateFileAndUploadWithParam(t *testing.T, allocationID, remotepath string, size int64, params map[string]interface{}) string {
+	filename := generateRandomTestFileName(t)
+
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	p := map[string]interface{}{
+		"allocation": allocationID,
+		"localpath":  filename,
+		"remotepath": remotepath + filepath.Base(filename),
+	}
+
+	for k, v := range params {
+		p[k] = v
+	}
+
+	// Upload parameters
+	uploadWithParam(t, configPath, p)
 
 	return filename
 }

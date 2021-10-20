@@ -160,7 +160,7 @@ func TestBrokenScenarios(t *testing.T) {
 		}
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
-		require.InEpsilon(t, totalChangeInWritePool, intToZCN(int64(challengePool.Balance)), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(int64(challengePool.Balance)))
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
@@ -246,7 +246,12 @@ func TestBrokenScenarios(t *testing.T) {
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
 
 		// Download the file
-		output, err = downloadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file_dowloaded", "/"+filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filename,
+			"localpath":  "../../internal/dummy_file/five_MB_test_file_dowloaded",
+		}))
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
