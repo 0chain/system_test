@@ -52,6 +52,10 @@ jobs:
 
           if [ $counter -eq 6 ]; then
             echo "Smoke tests failed for network [${{ matrix.network }}]"
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"Network [${{ matrix.network }}] seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
             exit 1
           fi
+
+      - name: "Notify Slack"
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Network [${{ matrix.network }}] seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
