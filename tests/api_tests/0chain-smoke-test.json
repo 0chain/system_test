@@ -1,0 +1,969 @@
+{
+	"info": {
+		"_postman_id": "e85fd23c-3a49-4334-bb39-490bb81beeda",
+		"name": "API Smoke test",
+		"description": "The following is a set of API system / regression / user acceptance tests.\n\nTODO:   \nCOLLAB UPDATE   (CURRENTLY BROKEN)    \nAUTH TICKET    \nALLOCATION RESIZE (CURRENTLY BROKEN)   \nALLOCATION DELETION (CURRENTLY BROKEN)   \nALLOCATION FINALIZATION (CURRENTLY BROKEN)   \nTOKEN STAKE/UNSTAKE   (CURRENTLY BROKEN)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Regressions setup",
+			"item": [
+				{
+					"name": "1. Connect to the network",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"async function main(){",
+									"const interval = setTimeout(() => {}, 60000);",
+									"console.log(\"Checkng that crypto example api is running. If not running it should be started within 60s of this call....\")",
+									"blsApiHealthcheck()",
+									"clearTimeout(interval)",
+									"",
+									"async function blsApiHealthcheck(){",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"    pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/health\") , function (err, response){",
+									"    resolve()",
+									"});",
+									" }).then(function(finalResult) {",
+									"     return finalResult;",
+									" })",
+									"}",
+									"",
+									"}",
+									"",
+									"main()",
+									"utils.delayTestUntilHttpCodeReceived(pm, 200)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is 200\", function () {",
+									"     if(pm.response.code != 200) {",
+									"        postman.setNextRequest(null)",
+									"    }",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.globals.set(\"miners\", response.miners);",
+									"    pm.globals.set(\"sharders\", response.sharders);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{network}}/dns/network",
+							"protocol": "https",
+							"host": [
+								"{{network}}"
+							],
+							"path": [
+								"dns",
+								"network"
+							]
+						},
+						"description": "Call 0Dns, get a list of miners/sharders needed for the rest of the test cases"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Check miner/sharder status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Valid miner found\", function () {",
+									"    if(pm.variables.get(\"test_case_miner\") == undefined){",
+									"        postman.setNextRequest(null)",
+									"    }",
+									"    pm.expect(pm.variables.get(\"test_case_miner\")).not.eq(undefined);",
+									"});",
+									"",
+									"pm.test(\"Valid sharder found\", function () {",
+									"     if(pm.variables.get(\"test_case_sharder\") == undefined){",
+									"        postman.setNextRequest(null)",
+									"    }",
+									"    pm.expect(pm.variables.get(\"test_case_sharder\")).not.eq(undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"async function main(){",
+									"const interval = setTimeout(() => {}, 60000);",
+									"",
+									"miners = pm.variables.get(\"miners\")",
+									"for(i = 0; i < miners.length; i ++){",
+									"    miner = miners[i]",
+									"    if(await isServiceUp(miner)){",
+									"        console.log(\"miner [\" + miner + \"] is up.\")",
+									"        pm.globals.set(\"test_case_miner\", miner);",
+									"        break;",
+									"    } else {",
+									"        console.log(\"miner [\" + miner + \"] is NOT up. Trying next miner...\")",
+									"    }",
+									"}",
+									"",
+									"sharders = pm.variables.get(\"sharders\")",
+									"",
+									"for(i = 0; i < sharders.length; i ++){",
+									"    sharder = sharders[i]",
+									"    if(await isServiceUp(sharder)){",
+									"        console.log(\"sharder [\" + sharder + \"] is up.\")",
+									"        pm.globals.set(\"test_case_sharder\", sharder);",
+									"        break;",
+									"    } else {",
+									"        console.log(\"sharder [\" + sharder + \"] is NOT up. Trying next sharder...\")",
+									"    }",
+									"}",
+									"",
+									"clearTimeout(interval)",
+									"",
+									"/*",
+									"Ensures the Example API required for inline functions such as encrypton and BLS is running",
+									"If this call fails or reaches a timeout, the example API server may be overloaded.",
+									"Please try again in a few minutes",
+									"*/",
+									"async function isServiceUp(endpoint){",
+									"    return await new Promise((resolve, reject) => {",
+									"    pm.sendRequest(endpoint + \"/health\" , function (err, response){",
+									"    resolve(response.code)",
+									"});",
+									" }).then(function(code) {",
+									"     console.log(\"response code for \" + endpoint + \" is \" + code)",
+									"   return (code == 200);",
+									" })",
+									"}",
+									"",
+									"",
+									"}",
+									"main();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "https://{{network}}/dns/network?m=\"Postman requires this URL to be present in order to run the pre-request script, we don't care about the response\"",
+							"protocol": "https",
+							"host": [
+								"{{network}}"
+							],
+							"path": [
+								"dns",
+								"network"
+							],
+							"query": [
+								{
+									"key": "m",
+									"value": "\"Postman requires this URL to be present in order to run the pre-request script, we don't care about the response\""
+								}
+							]
+						},
+						"description": "This does not test the network itself, rather sets up subsequent tests.  \nIterate through list of miners/sharders from 0dns, select a pair that are currently returning a 200. These will be used for the remaining tests."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Generate Mnemonic",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var mnemonic = \"\";",
+									"for(i = 0; i < 24; i++){",
+									"    mnemonic += pm.variables.replaceIn('{{$randomLoremWord}} ');",
+									"}",
+									"mnemonic = mnemonic.trim();",
+									"",
+									"pm.environment.set(\"mnemonic\", mnemonic);",
+									"console.log(\"generated mnemonic is [\" + mnemonic + \"]\")"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Mnemonic generated\", function () {",
+									"    pm.expect(pm.variables.get(\"mnemonic\")).not.eq(undefined);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "https://{{network}}/dns/network?m=\"Postman requires this URL to be present in order to run the pre-request script, we don't care about the response\"",
+							"protocol": "https",
+							"host": [
+								"{{network}}"
+							],
+							"path": [
+								"dns",
+								"network"
+							],
+							"query": [
+								{
+									"key": "m",
+									"value": "\"Postman requires this URL to be present in order to run the pre-request script, we don't care about the response\""
+								}
+							]
+						},
+						"description": "This does not test the network itself, rather sets up subsequent tests.  \nGenerates a random 24-word mnemonic to be used for the rest of the tests"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create Wallet",
+			"item": [
+				{
+					"name": "1. Create/Restore existing wallet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is 200\", function () {",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Wallet id matches expected\", function () {",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.expect(response.id).to.eql(pm.variables.get(\"wallet_id\"));",
+									"});",
+									"",
+									"pm.test(\"public key matches expected\", function () {",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.expect(response.public_key).to.eql(pm.variables.get(\"public_key\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"async function main() {",
+									"    //postman boilerplate",
+									"    const interval = setTimeout(() => {}, 30000);",
+									"",
+									"    var public_key = await getPublicKey(pm.variables.get(\"mnemonic\"), \"0chain-client-split-key\")",
+									"    var publicKeyHexDump = toByteArray(public_key)",
+									"    pm.globals.set(\"public_key\", public_key);",
+									"    pm.globals.set(\"wallet_id\", await sha3256_Of_HexDump(publicKeyHexDump))",
+									"",
+									"    clearTimeout(interval)",
+									"}",
+									"",
+									"main()",
+									"",
+									"async function getPublicKey(mnemonics, passphrase) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/publicKey?mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.hexString)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}",
+									"",
+									"/*",
+									"    Gets an 8-bit hex dump of the public key hex string",
+									"*/",
+									"function toByteArray(hexString) {",
+									"    var result = [];",
+									"    for (var i = 0; i < hexString.length; i += 2) {",
+									"        result.push(parseInt(hexString.substr(i, 2), 16));",
+									"    }",
+									"    return result;",
+									"}",
+									"",
+									"/*",
+									"    Ensure your SHA3-256 impl uses is standard, not keccak-256 (which is what CryptoJS uses)",
+									"    Calling a custom API here as the hashify API does not support hex dump byte arrays, but this is widely supported by hashing libraries",
+									"*/",
+									"async function sha3256_Of_HexDump(data) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sha3256Hash?data=\" + data), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.hexString)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{wallet_id}}\",\n    \"version\": \"null\",\n    \"creation_date\": null,\n    \"public_key\": \"{{public_key}}\"\n}"
+						},
+						"url": {
+							"raw": "{{test_case_miner}}/v1/client/put",
+							"host": [
+								"{{test_case_miner}}"
+							],
+							"path": [
+								"v1",
+								"client",
+								"put"
+							]
+						},
+						"description": "Create new wallet with mnemonic"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Execute Faucet",
+			"item": [
+				{
+					"name": "1. Execute Faucet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is 200\", function () {",
+									"    pm.globals.set(\"execute_faucet_txn_sent\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"    var response = JSON.parse(responseBody);",
+									"",
+									"    pm.globals.set(\"faucet_txn_hash\", response.entity.hash);",
+									"",
+									"    pm.test(\"Wallet id matches expected\", function () {",
+									"        pm.expect(response.entity.client_id).to.eql(pm.variables.get(\"wallet_id\"));",
+									"    });",
+									"",
+									"    pm.test(\"to_client_id matches expected\", function () {",
+									"        pm.expect(response.entity.to_client_id).to.eql(pm.variables.get(\"faucet_smart_contract_address\"));",
+									"    });",
+									"",
+									"    pm.test(\"signature matches expected\", function () {",
+									"     pm.expect(response.entity.signature).to.eql(pm.variables.get(\"signature\"));",
+									"    });",
+									"});    "
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var Property = require('postman-collection').Property;",
+									"",
+									"async function main() {",
+									"    // postman boilerplate     ",
+									"    const interval = setTimeout(() => {}, 30000);",
+									"",
+									"    // timestamp is in the unix epoch (seconds) format",
+									"    pm.globals.set(\"current_timestamp\", Math.round(Date.now() / 1000));",
+									"",
+									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
+									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
+									"    var creationDate = requestBody.creation_date",
+									"    var clientId = requestBody.client_id;",
+									"    var toClientId = requestBody.to_client_id;",
+									"    var transactionValue = requestBody.transaction_value;",
+									"",
+									"    var transactionDataHash = await sha3256(requestBody.transaction_data)",
+									"",
+									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
+									"    var overallHashData = (",
+									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
+									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
+									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
+									"        transactionDataHash",
+									"    )",
+									"    var overallHash = await sha3256(overallHashData)",
+									"",
+									"    pm.globals.set(\"hash_of_request_data\", overallHash);",
+									"",
+									"    var mnemonic = pm.variables.get(\"mnemonic\")",
+									"    pm.globals.set(\"signature\", await sign(overallHash, mnemonic, \"0chain-client-split-key\"))",
+									"",
+									"    clearTimeout(interval)",
+									"}",
+									"main()",
+									"",
+									"/*",
+									"Ensure your SHA3-256 impl uses the SHA3 standard, not keccak-256 (which is what CryptoJS uses)",
+									"*/",
+									"async function sha3256(data) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://api.hashify.net/hash/SHA3-256/hex?value=\" + data), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.Digest)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}",
+									"",
+									"async function sign(data, mnemonics, passphrase) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sign?data=\" + data + \"&mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.hexString)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json; charset=utf-8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{faucet_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 10000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{test_case_miner}}/v1/transaction/put",
+							"host": [
+								"{{test_case_miner}}"
+							],
+							"path": [
+								"v1",
+								"transaction",
+								"put"
+							]
+						},
+						"description": "Execute faucet so the new wallet has tokens for the remaining tests"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Confirm Faucet execution",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"execute_faucet_txn_sent\", \"Response code is 200\", function () {",
+									"    pm.globals.set(\"faucet_executed\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if(utils.isFlagSet(\"execute_faucet_txn_sent\")){",
+									"    utils.delayTestUntilHttpCodeReceived(pm, 200)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{test_case_sharder}}/v1/transaction/get/confirmation?hash={{faucet_txn_hash}}",
+							"host": [
+								"{{test_case_sharder}}"
+							],
+							"path": [
+								"v1",
+								"transaction",
+								"get",
+								"confirmation"
+							],
+							"query": [
+								{
+									"key": "hash",
+									"value": "{{faucet_txn_hash}}",
+									"description": "The hash of the faucet transaction"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Balance (Tokens Present)",
+			"item": [
+				{
+					"name": "1. Get Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"});",
+									"",
+									"utils.test.runConditionally(\"faucet_executed\",\"Balance matches expected\", function () {",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.expect(response.balance).to.eql(10000000000);",
+									"});",
+									"",
+									"utils.test.runConditionally(\"faucet_executed\", \"txn matches faucet txn hash\", function () {",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.expect(response.txn).to.eql(pm.variables.get(\"faucet_txn_hash\"));",
+									"});",
+									"",
+									"utils.test.runConditionally(\"faucet_executed\", \"Round present\", function () {",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.expect(response.round).to.not.equal(null);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{test_case_sharder}}/v1/client/get/balance?client_id={{wallet_id}}",
+							"host": [
+								"{{test_case_sharder}}"
+							],
+							"path": [
+								"v1",
+								"client",
+								"get",
+								"balance"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{wallet_id}}"
+								}
+							]
+						},
+						"description": "Get wallet balance post-faucet"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create Allocation",
+			"item": [
+				{
+					"name": "1. Create storage allocation with 60 min expiry",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var Property = require('postman-collection').Property;",
+									"",
+									"async function main() {",
+									"    // postman boilerplate     ",
+									"    const interval = setTimeout(() => {}, 30000);",
+									"",
+									"    // timestamp is in the unix epoch (seconds) format",
+									"    var now = Math.round(Date.now() / 1000);",
+									"    pm.globals.set(\"current_timestamp\", now);",
+									"    pm.globals.set(\"expire_10_hours_from_now\", now + 36000);",
+									"",
+									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
+									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
+									"    var creationDate = requestBody.creation_date",
+									"    var clientId = requestBody.client_id;",
+									"    var toClientId = requestBody.to_client_id;",
+									"    var transactionValue = requestBody.transaction_value;",
+									"",
+									"    var transactionDataHash = await sha3256(requestBody.transaction_data)",
+									"",
+									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
+									"    var overallHashData = (",
+									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
+									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
+									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
+									"        transactionDataHash",
+									"    )",
+									"    var overallHash = await sha3256(overallHashData)",
+									"",
+									"    pm.globals.set(\"hash_of_request_data\", overallHash);",
+									"",
+									"    var mnemonic = pm.variables.get(\"mnemonic\")",
+									"    pm.globals.set(\"signature\", await sign(overallHash, mnemonic, \"0chain-client-split-key\"))",
+									"",
+									"    clearTimeout(interval)",
+									"}",
+									"main()",
+									"",
+									"/*",
+									"Ensure your SHA3-256 impl uses the SHA3 standard, not keccak-256 (which is what CryptoJS uses)",
+									"*/",
+									"async function sha3256(data) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://api.hashify.net/hash/SHA3-256/hex?value=\" + data), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.Digest)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}",
+									"",
+									"async function sign(data, mnemonics, passphrase) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sign?data=\" + data + \"&mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.hexString)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"    pm.globals.set(\"create_allocation_txn_sent\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"",
+									"    pm.globals.unset(\"current_timestamp\");",
+									"    pm.globals.unset(\"hash_of_request_data\");",
+									"    pm.globals.unset(\"current_timestamp\");",
+									"    pm.globals.unset(\"expire_60_mins_from_now\");",
+									"    pm.globals.unset(\"signature\");",
+									"",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.globals.set(\"allocation_create_txn_id\", response.entity.hash);",
+									"});    "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_10_hours_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{test_case_miner}}/v1/transaction/put",
+							"host": [
+								"{{test_case_miner}}"
+							],
+							"path": [
+								"v1",
+								"transaction",
+								"put"
+							]
+						},
+						"description": "Create a storage allocation, used in the remaining storage SC tests"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Confirm allocation creation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"create_allocation_txn_sent\", \"Response code is 200\", function () {",
+									"    pm.globals.set(\"create_allocation_confirmed\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"    var response = JSON.parse(responseBody);",
+									"    var txn_output = JSON.parse(response.txn.transaction_output)",
+									"    pm.globals.set(\"allocation_id\", txn_output.id);",
+									"});   ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if(utils.isFlagSet(\"create_allocation_txn_sent\")){",
+									"    utils.delayTestUntilHttpCodeReceived(pm, 200)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{test_case_sharder}}/v1/transaction/get/confirmation?hash={{allocation_create_txn_id}}",
+							"host": [
+								"{{test_case_sharder}}"
+							],
+							"path": [
+								"v1",
+								"transaction",
+								"get",
+								"confirmation"
+							],
+							"query": [
+								{
+									"key": "hash",
+									"value": "{{allocation_create_txn_id}}",
+									"description": "The hash of the allocation that we have requested be created "
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"utils = {",
+					"    delayTestUntilHttpCodeReceived: async function(pm, expectedResponse) {",
+					"        const startTime = new Date().getTime()",
+					"        console.log(\"Polling API for expected HTTP [\" + expectedResponse + \"] response before postman calls it and test cases execute...\")",
+					"        var Property = require('postman-collection').Property;",
+					"        var uri = Property.replaceSubstitutions(pm.request.url.toString(), pm.variables.toObject());",
+					"        await attemptRequest(uri, expectedResponse)",
+					"",
+					"        async function attemptRequest(uri, expectedResponse, attempt = 1) {",
+					"            const MAX_ATTEMPTS = 30;",
+					"            if (attempt > MAX_ATTEMPTS) {",
+					"                console.error(\"All polling attempts have been exhaused before an HTTP [\" + expectedResponse + \"] was received. Postman will now call the endpoint and therefore tests may fail.\")",
+					"            } else {",
+					"                pm.sendRequest(uri, async function(err, response) {",
+					"                    if (err != null && response.code == null) {",
+					"                        console.warn(\"[\" + attempt + \"/\" + MAX_ATTEMPTS + \"] - Received an error [\" + err.code + \"] rather than the expected HTTP [\" + expectedResponse + \"]\")",
+					"                        utils.sleep(1000)",
+					"                        await attemptRequest(uri, expectedResponse, ++attempt)",
+					"                    } else if (response.code != expectedResponse) {",
+					"                        console.warn(\"[\" + attempt + \"/\" + MAX_ATTEMPTS + \"] - Received an HTTP [\" + response.code + \"] rather than the expected [\" + expectedResponse + \"]\")",
+					"                        utils.sleep(1000)",
+					"                        await attemptRequest(uri, expectedResponse, ++attempt)",
+					"                    } else {",
+					"                        const elapsedTime = new Date().getTime() - startTime",
+					"                        console.info(\"[\" + attempt + \"/\" + MAX_ATTEMPTS + \"] - Received an HTTP [\" + response.code + \"] as expected after [\" + elapsedTime + \"]ms\")",
+					"                    }",
+					"                });",
+					"            }",
+					"        }",
+					"    },",
+					"    delayTestUntil: async function(pm, shouldRetry) {",
+					"        const startTime = new Date().getTime()",
+					"        console.log(\"Polling API for expected response before postman calls it and test cases execute...\")",
+					"        var Property = require('postman-collection').Property;",
+					"        var uri = Property.replaceSubstitutions(pm.request.url.toString(), pm.variables.toObject());",
+					"        await attemptRequest(uri, shouldRetry)",
+					"",
+					"        async function attemptRequest(uri, expectedResponse, attempt = 1) {",
+					"            const MAX_ATTEMPTS = 30;",
+					"            if (attempt > MAX_ATTEMPTS) {",
+					"                console.error(\"All polling attempts have been exhaused before expected response was received. Postman will now call the endpoint and therefore tests may fail.\")",
+					"            } else {",
+					"                pm.sendRequest(uri, async function(err, response) {",
+					"                    if (expectedResponse(response)) {",
+					"                        const elapsedTime = new Date().getTime() - startTime",
+					"                        console.info(\"[\" + attempt + \"/\" + MAX_ATTEMPTS + \"] - Received expected response after [\" + elapsedTime + \"]ms\")",
+					"                    } else {",
+					"                         console.warn(\"[\" + attempt + \"/\" + MAX_ATTEMPTS + \"] - Response did not match expected\")",
+					"                        utils.sleep(1000)",
+					"                        await attemptRequest(uri, expectedResponse, ++attempt)",
+					"                    }",
+					"                });",
+					"            }",
+					"        }",
+					"    },",
+					"    sleep: function(millis) {",
+					"        var waitUntil = new Date().getTime() + millis;",
+					"        while (new Date().getTime() < waitUntil) {}",
+					"    },",
+					"    isFlagSet: function(flagName){",
+					"        var isSet = (String(pm.variables.get(flagName)).toLowerCase()  == \"true\")",
+					"        var forceRunTests = (String(pm.variables.get(\"force_run_tests\")).toLowerCase()  == \"true\")",
+					"",
+					"        if(forceRunTests){",
+					"            console.info(\"Flag [\" + flagName + \"] status will be ignored as forceRunTests is true\")",
+					"        } else if(!isSet){",
+					"            console.warn(\"Flag [\" + flagName + \"] was NOT set\")",
+					"        } else {",
+					"            console.info(\"Flag [\" + flagName + \"] was set\")",
+					"        }",
+					"",
+					"        return forceRunTests|| isSet",
+					"    },",
+					"",
+					"    isFlagUnset: function(flagName){",
+					"        var isSet = (String(pm.variables.get(flagName)).toLowerCase()  == \"true\")",
+					"",
+					"",
+					"        if(!isSet){",
+					"            console.info(\"Flag [\" + flagName + \"] was not set\")",
+					"        } else {",
+					"            console.warn(\"Flag [\" + flagName + \"] WAS set\")",
+					"        }",
+					"",
+					"        return !isSet",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"utils = {",
+					"    test : {",
+					"        runConditionally: function (runCondition, testName, test){",
+					"",
+					"           var runConditionValue = (typeof runCondition === \"boolean\") ? runCondition : (String(pm.variables.get(runCondition)).toLowerCase()  == \"true\")",
+					"",
+					"           var forceRunTests = (String(pm.variables.get(\"force_run_tests\")).toLowerCase()  == \"true\")",
+					"        ",
+					"            if(forceRunTests || runConditionValue){",
+					"                pm.test(testName, test)",
+					"            } else {",
+					"                pm.test.skip(testName + \" - skipped as test setup condition [\" + runCondition + \"] failed\")",
+					"            }",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "upload-metadata",
+			"value": "{ \"attributes\": {}, \"filename\": \"{{filename}}\", \"filepath\": \"{{remote_filepath}}\", \"actual_hash\": \"{{fileHash}}\", \"actual_size\": {{fileSize}}, \"connection_id\": \"{{connection_id_for_current_blobber}}\" }"
+		},
+		{
+			"key": "upload-request",
+			"value": "--Xform_data_boundary_exampleX\nContent-Disposition: form-data; name=\"uploadFile\"; filename=\"{{filename}}\"\n\n{{current_ec_shard}}\n--Xform_data_boundary_exampleX\nContent-Disposition: form-data; name=\"connection_id\"\n\n{{connection_id_for_current_blobber}}\n--Xform_data_boundary_exampleX\nContent-Disposition: form-data; name=\"{{upload-operation}}Meta\"\n\n{{upload-metadata}}\n--Xform_data_boundary_exampleX--"
+		}
+	]
+}
