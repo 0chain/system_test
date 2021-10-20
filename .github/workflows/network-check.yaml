@@ -46,7 +46,7 @@ jobs:
           while [ $counter -lt 6 ] && [ $exit_code -eq 1 ]; do
             echo "Executing smoke tests attempt [$counter/5]" && ((counter=counter+1));
             exit_code=0
-            echo || { [ $counter -lt 6 ] && echo "Sleeping for 30s" && sleep 30 && exit_code=1 }
+            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on || { [ $counter -lt 6 ] && echo "Sleeping for 30s" && sleep 30 && exit_code=1 };
           done
 
           if [ $counter -eq 6 ]; then
