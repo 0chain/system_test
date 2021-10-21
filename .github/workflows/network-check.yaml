@@ -1,8 +1,8 @@
 name: 0Chain Network Health Check
 on:
   schedule:
-    # Runs every 2 hours
-    - cron: '0 */2 * * *'
+    # Runs every 3 hours
+    - cron: '0 */3 * * *'
   workflow_dispatch:
 jobs:
   network-health-check:
@@ -58,4 +58,4 @@ jobs:
       - name: "Notify Slack"
         if: failure()
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Network [${{ matrix.network }}] seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> [${{ matrix.network }}] network seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
