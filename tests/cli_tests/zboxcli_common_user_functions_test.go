@@ -24,194 +24,191 @@ const (
 )
 
 func TestCommonUserFunctions(t *testing.T) {
-	//t.Parallel()
-	t.Run("parallel", func(t *testing.T) {
+	t.Parallel()
 
-		// Test is failing.
-		t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
-			//t.Parallel()
+	// Test is failing.
+	t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
+		//t.Parallel()
 
-			allocationSize := int64(2 * MB)
-			fileSize := int64(1 * MB)
+		allocationSize := int64(2 * MB)
+		fileSize := int64(1 * MB)
 
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-			// blobber_details := getAllocationBlobberDetails(t, allocationID)
+		// blobber_details := getAllocationBlobberDetails(t, allocationID)
 
-			// var stackPoolBalance float64 = 0
-			// for _, b := range blobber_details {
-			// 	stackPoolBalance += getBlobberStackPoolBalance(t, b.BlobberID)
-			// }
+		// var stackPoolBalance float64 = 0
+		// for _, b := range blobber_details {
+		// 	stackPoolBalance += getBlobberStackPoolBalance(t, b.BlobberID)
+		// }
 
-			offers := getAllocationOffers(t, allocationID)
-			fmt.Print(offers)
+		offers := getAllocationOffers(t, allocationID)
+		fmt.Print(offers)
 
-			filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-			wait(t, 60*time.Second)
-			// blobber_details = getAllocationBlobberDetails(t, allocationID)
+		wait(t, 60*time.Second)
+		// blobber_details = getAllocationBlobberDetails(t, allocationID)
 
-			// var stackPoolBalance_AfterUpload float64 = 0
-			// for _, b := range blobber_details {
-			// 	stackPoolBalance_AfterUpload += getBlobberStackPoolBalance(t, b.BlobberID)
-			// }
+		// var stackPoolBalance_AfterUpload float64 = 0
+		// for _, b := range blobber_details {
+		// 	stackPoolBalance_AfterUpload += getBlobberStackPoolBalance(t, b.BlobberID)
+		// }
 
-			offers = getAllocationOffers(t, allocationID)
-			fmt.Print(offers)
+		offers = getAllocationOffers(t, allocationID)
+		fmt.Print(offers)
 
-			// require.Greater(t, stackPoolBalance, stackPoolBalance_AfterUpload, "Blobber Has to pay to redeem write markers")
+		// require.Greater(t, stackPoolBalance, stackPoolBalance_AfterUpload, "Blobber Has to pay to redeem write markers")
 
-			updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
+		updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
 
-			wait(t, 60*time.Second)
+		wait(t, 60*time.Second)
 
-			// var stackPoolBalance_AfterOperation float64 = 0
-			// for _, b := range blobber_details {
-			// 	stackPoolBalance_AfterOperation += getBlobberStackPoolBalance(t, b.BlobberID)
-			// }
+		// var stackPoolBalance_AfterOperation float64 = 0
+		// for _, b := range blobber_details {
+		// 	stackPoolBalance_AfterOperation += getBlobberStackPoolBalance(t, b.BlobberID)
+		// }
 
-			// require.Greater(t, stackPoolBalance_AfterUpload, stackPoolBalance_AfterOperation, "Blobber Has to pay to redeem write markers")
+		// require.Greater(t, stackPoolBalance_AfterUpload, stackPoolBalance_AfterOperation, "Blobber Has to pay to redeem write markers")
 
-			createAllocationTestTeardown(t, allocationID)
-		})
-
-		return
-		fmt.Print()
-		t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
-			t.Parallel()
-
-			allocationSize := int64(1 * MB)
-			fileSize := int64(math.Floor(512 * KB))
-
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
-
-			wait(t, 10*time.Second)
-			wp := getWritePool(t, configPath)
-			require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
-
-			filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
-
-			// uploadCost takes into account data+parity, so we divide by that
-			uploadCost = (uploadCost / (2 + 2))
-			expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
-
-			wait(t, 15*time.Second)
-			wp = getWritePool(t, configPath)
-			require.Equal(t, 1, len(wp), "Write pool expeted to be found")
-
-			// There is a small difference in the expected and actual balance.
-			// The reason needs to be investigated. For now we consider it to be
-			// in a range close to expexted value. (range = 100 SAS)
-			require.InDelta(t, expected_wp_balance, wp[0].Balance, 100, "Tokens must be transfered Reward Pool to Write Pool", "difference:", wp[0].Balance-expected_wp_balance)
-			if wp[0].Balance-expected_wp_balance != 0 {
-				t.Log("WARNING: difference in amount taken from Write Pool with the upload cost: ", wp[0].Balance-expected_wp_balance, " SAS")
-			}
-
-			cp_balance := getChallengePoolBalance(t, allocationID)
-			require.Equal(t, int64(5000000000)-wp[0].Balance, int64(cp_balance), "Tokens must be transfered from Write Pool to Chanllenge Pool")
-
-			blobber := getOneOfAllocationBlobbers(t, allocationID)
-
-			offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
-
-			expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-			require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
-
-			updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
-
-			time.Sleep(10 * time.Second)
-			new_wp := getWritePool(t, configPath)
-			require.Equal(t, wp[0].Balance, new_wp[0].Balance, "The write pool is expected to not be changed after update file", "difference:", wp[0].Balance-new_wp[0].Balance)
-
-			new_cp_balance := getChallengePoolBalance(t, allocationID)
-			require.Equal(t, int64(cp_balance), int64(new_cp_balance), "Challenge pool blance shouldn't be changed after update file")
-
-			createAllocationTestTeardown(t, allocationID)
-		})
-
-		t.Run("Update Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
-			t.Parallel()
-
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
-
-			assertBalanceIs(t, "500.000 mZCN")
-
-			blobber := getOneOfAllocationBlobbers(t, allocationID)
-
-			offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
-
-			expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-			require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
-
-			params := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"expiry":     "30m",
-				"size":       20 * MB,
-				"lock":       0.2,
-			})
-			output, err := updateAllocation(t, configPath, params)
-			require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
-
-			assertBalanceIs(t, "300.000 mZCN")
-
-			blobber = getOneOfAllocationBlobbers(t, allocationID)
-
-			offer = getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
-
-			expectedLock = sizeInGB(blobber.Size) * blobber.Terms.Write_price
-			require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
-
-			createAllocationTestTeardown(t, allocationID)
-		})
-
-		t.Run("Update Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
-			t.Parallel()
-
-			allocationID := setupAllocation(t, configPath)
-
-			assertBalanceIs(t, "500.000 mZCN")
-
-			params := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"expiry":     "30m",
-				"lock":       0.2,
-			})
-			output, err := updateAllocation(t, configPath, params)
-			require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
-
-			assertBalanceIs(t, "300.000 mZCN")
-
-			createAllocationTestTeardown(t, allocationID)
-		})
-
-		t.Run("Create Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
-			t.Parallel()
-
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
-
-			assertBalanceIs(t, "500.000 mZCN")
-
-			blobber := getOneOfAllocationBlobbers(t, allocationID)
-
-			offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
-
-			expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-			require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
-
-			createAllocationTestTeardown(t, allocationID)
-		})
-
-		t.Run("Create Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
-			t.Parallel()
-
-			allocationID := setupAllocation(t, configPath)
-
-			assertBalanceIs(t, "500.000 mZCN")
-
-			createAllocationTestTeardown(t, allocationID)
-		})
+		createAllocationTestTeardown(t, allocationID)
 	})
 
+	return
+	fmt.Print()
+	t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
+		t.Parallel()
+
+		allocationSize := int64(1 * MB)
+		fileSize := int64(math.Floor(512 * KB))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
+
+		wait(t, 10*time.Second)
+		wp := getWritePool(t, configPath)
+		require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
+
+		filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+
+		// uploadCost takes into account data+parity, so we divide by that
+		uploadCost = (uploadCost / (2 + 2))
+		expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
+
+		wait(t, 15*time.Second)
+		wp = getWritePool(t, configPath)
+		require.Equal(t, 1, len(wp), "Write pool expeted to be found")
+
+		// There is a small difference in the expected and actual balance.
+		// The reason needs to be investigated. For now we consider it to be
+		// in a range close to expexted value. (range = 100 SAS)
+		require.InDelta(t, expected_wp_balance, wp[0].Balance, 100, "Tokens must be transfered Reward Pool to Write Pool", "difference:", wp[0].Balance-expected_wp_balance)
+		if wp[0].Balance-expected_wp_balance != 0 {
+			t.Log("WARNING: difference in amount taken from Write Pool with the upload cost: ", wp[0].Balance-expected_wp_balance, " SAS")
+		}
+
+		cp_balance := getChallengePoolBalance(t, allocationID)
+		require.Equal(t, int64(5000000000)-wp[0].Balance, int64(cp_balance), "Tokens must be transfered from Write Pool to Chanllenge Pool")
+
+		blobber := getOneOfAllocationBlobbers(t, allocationID)
+
+		offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+
+		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+
+		updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
+
+		time.Sleep(10 * time.Second)
+		new_wp := getWritePool(t, configPath)
+		require.Equal(t, wp[0].Balance, new_wp[0].Balance, "The write pool is expected to not be changed after update file", "difference:", wp[0].Balance-new_wp[0].Balance)
+
+		new_cp_balance := getChallengePoolBalance(t, allocationID)
+		require.Equal(t, int64(cp_balance), int64(new_cp_balance), "Challenge pool blance shouldn't be changed after update file")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Update Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+
+		assertBalanceIs(t, "500.000 mZCN")
+
+		blobber := getOneOfAllocationBlobbers(t, allocationID)
+
+		offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+
+		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     "30m",
+			"size":       20 * MB,
+			"lock":       0.2,
+		})
+		output, err := updateAllocation(t, configPath, params)
+		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
+
+		assertBalanceIs(t, "300.000 mZCN")
+
+		blobber = getOneOfAllocationBlobbers(t, allocationID)
+
+		offer = getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+
+		expectedLock = sizeInGB(blobber.Size) * blobber.Terms.Write_price
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Update Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		assertBalanceIs(t, "500.000 mZCN")
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry":     "30m",
+			"lock":       0.2,
+		})
+		output, err := updateAllocation(t, configPath, params)
+		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
+
+		assertBalanceIs(t, "300.000 mZCN")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+
+		assertBalanceIs(t, "500.000 mZCN")
+
+		blobber := getOneOfAllocationBlobbers(t, allocationID)
+
+		offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+
+		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		assertBalanceIs(t, "500.000 mZCN")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
 }
 
 func getAllocationOffers(t *testing.T, allocation_id string) []*climodel.StakePoolOfferInfo {
