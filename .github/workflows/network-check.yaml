@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: "Configure node"
+      - name: "Configure Node"
         run: |
           npm config set user 0
           npm config set unsafe-perm true
