@@ -15,7 +15,7 @@ jobs:
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
 
-      - name: "Check 0Dns Liveness"
+      - name: "Check 0dns Liveness"
         run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}/dns
 
       - name: "Check Explorer Liveness"
