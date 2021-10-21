@@ -99,7 +99,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 }
 
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second) // TODO replace with poller
+	time.Sleep(10 * time.Second) // TODO replace with poller
 	t.Logf("Getting write pool info...")
 	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }

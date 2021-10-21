@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -26,6 +29,82 @@ const (
 func TestCommonUserFunctions(t *testing.T) {
 	t.Parallel()
 	t.Run("parallel", func(t *testing.T) {
+		t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
+			t.Parallel()
+
+			targetWallet := setupTransferWallets(t)
+
+			mconfig := getMinerSCConfiguration(t)
+
+			miners := getMinersList(t)
+			minerNode := miners.Nodes[0].SimpleNode
+			miner := getMinersDetail(t, minerNode.ID).SimpleNode
+
+			startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+			output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", 0)
+			require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
+
+			wait(t, 60*time.Second)
+			endBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+			require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+			require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+
+			totalRewardsAndFees := int64(0)
+			// Calculate the total rewards and fees for this miner.
+			for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
+				block := getRoundBlockFromASharder(t, round)
+
+				// No expected rewards for this miner if not the generator of block.
+				if block.Block.MinerId != miner.ID {
+					continue
+				}
+
+				// Get total block fees
+				blockFees := int64(0)
+				for _, txn := range block.Block.Transactions {
+					blockFees += txn.TransactionFee
+				}
+
+				// reward rate declines per epoch
+				// new reward ratio = current reward rate * (1.0 - reward decline rate)
+				epochs := round / int64(mconfig[epochConfigKey])
+				rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
+
+				// block reward (mint) = block reward (configured) * reward rate
+				blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
+
+				// generator rewards = block reward * share ratio
+				generatorRewards := blockRewardMint * mconfig[shareRatioConfigKey]
+
+				// generator reward service charge = generator rewards * service charge
+				generatorRewardServiceCharge := generatorRewards * miner.ServiceCharge
+				generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
+
+				// generator fees = block fees * share ratio
+				generatorFees := float64(blockFees) * mconfig[shareRatioConfigKey]
+
+				// generator fee service charge = generator fees * service charge
+				generatorFeeServiceCharge := generatorFees * miner.ServiceCharge
+				generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
+
+				totalRewardsAndFees += int64(generatorRewardServiceCharge)
+				totalRewardsAndFees += int64(generatorFeeServiceCharge)
+
+				// if none staked at node, node gets all rewards.
+				// otherwise, then remaining are distributed to stake holders.
+				if miner.TotalStake == 0 {
+					totalRewardsAndFees += int64(generatorRewardsRemaining)
+					totalRewardsAndFees += int64(generatorFeeRemaining)
+				}
+			}
+
+			wantBalanceDiff := totalRewardsAndFees
+			gotBalanceDiff := endBalance.Balance - startBalance.Balance
+			require.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, 0.0000001, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
+
+		})
 
 		// Test is failing.
 		t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
@@ -43,15 +122,21 @@ func TestCommonUserFunctions(t *testing.T) {
 				stackPoolBalance += getBlobberStackPoolBalance(t, b.BlobberID)
 			}
 
+			offers := getAllocationOffers(t, allocationID)
+			fmt.Print(offers)
+
 			filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-			wait(t, 60*time.Second)
+			wait(t, 3*time.Minute)
 			blobber_details = getAllocationBlobberDetails(t, allocationID)
 
 			var stackPoolBalance_AfterUpload float64 = 0
 			for _, b := range blobber_details {
 				stackPoolBalance_AfterUpload += getBlobberStackPoolBalance(t, b.BlobberID)
 			}
+
+			offers = getAllocationOffers(t, allocationID)
+			fmt.Print(offers)
 
 			require.Greater(t, stackPoolBalance, stackPoolBalance_AfterUpload, "Blobber Has to pay to redeem write markers")
 
@@ -204,6 +289,132 @@ func TestCommonUserFunctions(t *testing.T) {
 		})
 	})
 
+}
+
+func getRoundBlockFromASharder(t *testing.T, round int64) apimodel.Block {
+	sharders := getShardersList(t)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+
+	// Get round details
+	res, err := apiGetBlock(sharderBaseUrl, round)
+	require.Nil(t, err, "Error retrieving block %d", round)
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
+	require.NotNil(t, res.Body, "Balance API response must not be nil")
+
+	resBody, err := ioutil.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body: %v", err)
+
+	var block apimodel.Block
+	err = json.Unmarshal(resBody, &block)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+	return block
+}
+
+func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balance {
+	sharders := getShardersList(t)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+	// Get the starting balance for miner's delegate wallet.
+	res, err := apiGetBalance(sharderBaseUrl, client_id)
+	require.Nil(t, err, "Error retrieving client %s balance", client_id)
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
+	require.NotNil(t, res.Body, "Balance API response must not be nil")
+
+	resBody, err := ioutil.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var startBalance apimodel.Balance
+	err = json.Unmarshal(resBody, &startBalance)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+	require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
+	require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
+	require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
+	return &startBalance
+}
+
+func getShardersList(t *testing.T) map[string]climodel.Sharder {
+	// Get sharder list.
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	return sharders
+}
+
+func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
+	// Get miner's node details (this has the total_stake and pools populated).
+	output, err := getNode(t, configPath, miner_id)
+	require.Nil(t, err, "get node %s failed", miner_id, strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	var nodeRes climodel.Node
+	err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+	require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
+	return &nodeRes
+}
+
+func getMinersList(t *testing.T) *climodel.NodeList {
+	// Get miner list.
+	output, err := getMiners(t, configPath)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+	return &miners
+}
+
+func getMinerSCConfiguration(t *testing.T) map[string]float64 {
+	// Get MinerSC Global Config
+	output, err := getMinerSCConfig(t, configPath)
+	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0)
+
+	mconfig := map[string]float64{}
+	for _, o := range output {
+		configPair := strings.Split(o, "\t")
+		val, err := strconv.ParseFloat(strings.TrimSpace(configPair[1]), 64)
+		require.Nil(t, err, "config val %s for %s is unexpected not float64: %s", configPair[1], configPair[0], strings.Join(output, "\n"))
+		mconfig[strings.TrimSpace(configPair[0])] = val
+	}
+	return mconfig
+}
+
+func setupTransferWallets(t *testing.T) *climodel.Wallet {
+	targetWallet := escapedTestName(t) + "_TARGET"
+
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+	output, err = registerWalletForName(configPath, targetWallet)
+	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+	target, err := getWalletForName(t, configPath, targetWallet)
+	require.Nil(t, err, "Error occurred when retrieving target wallet")
+
+	output, err = executeFaucetWithTokens(t, configPath, 1)
+	require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+
+	return target
+}
+
+func getAllocationOffers(t *testing.T, allocation_id string) []*climodel.StakePoolOfferInfo {
+	var allocation = getAllocation(t, allocation_id)
+	offers := make([]*climodel.StakePoolOfferInfo, len(allocation.Blobbers))
+	for i, b := range allocation.BlobberDetails {
+		offers[i] = getAllocationOfferFromBlobberStackPool(t, b.BlobberID, allocation_id)
+	}
+	return offers
 }
 
 func getAllocationBlobberDetails(t *testing.T, allocation_id string) []*climodel.BlobberAllocation {
@@ -454,4 +665,16 @@ func getUploadCost(t *testing.T, cliConfigFilename, params string) ([]string, er
 func wait(t *testing.T, duration time.Duration) {
 	t.Logf("Waiting %s", duration)
 	time.Sleep(duration)
+}
+
+func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
+	t.Logf("Sending ZCN...")
+	cmd := fmt.Sprintf("./zwallet send --silent --tokens %v --desc \"%s\" --to_client_id %s ", tokens, desc, toClientID)
+
+	if fee > 0 {
+		cmd += fmt.Sprintf(" --fee %v ", fee)
+	}
+
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", cliConfigFilename)
+	return cliutils.RunCommand(cmd)
 }
