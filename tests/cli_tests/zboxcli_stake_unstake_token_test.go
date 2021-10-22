@@ -72,9 +72,11 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		found := false
 		for _, delegate := range delegates {
 			if delegate.ID == stakePoolID {
+				t.Log("Pool ID returned by sp-lock found in stake pool info...")
 				found = true
-				require.Equal(t, int64(5000000000), delegate.Balance)
-				require.Equal(t, wallet.ClientID, delegate.DelegateID)
+				require.Equal(t, int64(5000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
+				require.Equal(t, wallet.ClientID, delegate.DelegateID, "Delegate ID of pool created by sp-lock is not equal to the wallet ID of User.",
+					"Delegate ID: ", delegate.DelegateID, "Wallet ID: ", wallet.ClientID)
 			}
 		}
 		require.True(t, found, "Pool id returned by sp-lock not found in blobber's sp-info", strings.Join(output, "\n"))
@@ -105,10 +107,11 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		delegates = stakePool.Delegate
 
-		// Pool Id returned by sp-lock should be found in sp-info with correct balance
+		// Pool Id returned by sp-lock should be deleted from sp-info
 		found = false
 		for _, delegate := range delegates {
 			if delegate.ID == stakePoolID {
+				t.Log("Delegate ID found in stake pool information but it should have been deleted after unlocking staked tokens...")
 				found = true
 			}
 		}
