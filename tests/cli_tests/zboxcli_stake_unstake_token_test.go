@@ -129,6 +129,23 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
+
+	t.Run("Staking tokens without specifying blobber lead to consensus failed on sharders", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"tokens": 1.0,
+		}))
+		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1)
+		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
 }
 
 func listBlobbers(t *testing.T, cliConfigFilename, params string) ([]string, error) {
