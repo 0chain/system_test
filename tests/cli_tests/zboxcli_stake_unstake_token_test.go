@@ -188,6 +188,8 @@ func TestStakeUnstakeTokens(t *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens should fail", func(t *testing.T) {
+		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -216,6 +218,46 @@ func TestStakeUnstakeTokens(t *testing.T) {
 			"tokens":     0.0,
 		}))
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1)
+		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+
+		// Wallet balance after staking tokens
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+	})
+
+	t.Run("Staking negative tokens should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Wallet balance before staking tokens
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+
+		blobbers := []climodel.BlobberInfo{}
+		output, err = listBlobbers(t, configPath, "--json")
+		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+
+		err = json.Unmarshal([]byte(output[0]), &blobbers)
+		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
+
+		// Pick a random blobber
+		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
+
+		// Stake tokens against this blobber
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobber.Id,
+			"tokens":     -1.0,
+		}))
+		require.NotNil(t, err, "Expected error when staking negative tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
 		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 
