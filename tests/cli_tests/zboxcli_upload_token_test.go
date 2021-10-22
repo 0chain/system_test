@@ -50,7 +50,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		require.IsType(t, int64(0), challengePool.StartTime)
 		require.IsType(t, int64(0), challengePool.Expiration)
 		require.False(t, challengePool.Finalized)
-		require.Equal(t, int64(0), challengePool.Balance)
+		require.Equal(t, float64(0), float64(challengePool.Balance))
 	})
 
 	t.Run("Total balance in blobber pool equals locked tokens", func(t *testing.T) {
