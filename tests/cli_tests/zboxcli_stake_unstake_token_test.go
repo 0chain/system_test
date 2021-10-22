@@ -117,6 +117,18 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}
 		require.False(t, found, "Pool id found in blobber's sp-info even after unlocking tokens", strings.Join(output, "\n"))
 	})
+
+	t.Run("Staking tokens without specifying amout of tokens to lock should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = stakeTokens(t, configPath, "")
+		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "missing required 'tokens' flag", output[0])
+	})
 }
 
 func listBlobbers(t *testing.T, cliConfigFilename, params string) ([]string, error) {
