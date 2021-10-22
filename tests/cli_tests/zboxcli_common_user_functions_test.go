@@ -26,56 +26,96 @@ const (
 func TestCommonUserFunctions(t *testing.T) {
 	t.Parallel()
 
-	// Test is failing.
 	t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
-		allocationSize := int64(2 * MB)
-		fileSize := int64(1 * MB)
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		// blobber_details := getAllocationBlobberDetails(t, allocationID)
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-		// var stackPoolBalance float64 = 0
-		// for _, b := range blobber_details {
-		// 	stackPoolBalance += getBlobberStackPoolBalance(t, b.BlobberID)
-		// }
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
 
-		offers := getAllocationOffers(t, allocationID)
-		fmt.Print(offers)
-
+		fileSize := int64(1 * KB)
 		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		time.Sleep(time.Minute)
 
-		wait(t, 60*time.Second)
-		// blobber_details = getAllocationBlobberDetails(t, allocationID)
+		// Get write pool info before file update
+		output, err = writePoolInfo(t, configPath)
+		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
-		// var stackPoolBalance_AfterUpload float64 = 0
-		// for _, b := range blobber_details {
-		// 	stackPoolBalance_AfterUpload += getBlobberStackPoolBalance(t, b.BlobberID)
-		// }
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
-		offers = getAllocationOffers(t, allocationID)
-		fmt.Print(offers)
+		require.Equal(t, allocationID, initialWritePool[0].Id)
+		require.InEpsilon(t, 0.5, intToZCN(initialWritePool[0].Balance), epsilon)
+		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId)
+		require.Less(t, 0, len(initialWritePool[0].Blobber))
+		require.Equal(t, true, initialWritePool[0].Locked)
 
-		// require.Greater(t, stackPoolBalance, stackPoolBalance_AfterUpload, "Blobber Has to pay to redeem write markers")
+		filepath := updateFileWithRandomlyGeneratedData(t, allocationID, filename, int64(5*MB))
 
-		updateFileWithRandomlyGeneratedData(t, allocationID, filename, fileSize)
+		// Get expected upload cost
+		output, err = getUploadCostInUnit(t, configPath, allocationID, filepath)
+		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
 
-		wait(t, 60*time.Second)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
-		// var stackPoolBalance_AfterOperation float64 = 0
-		// for _, b := range blobber_details {
-		// 	stackPoolBalance_AfterOperation += getBlobberStackPoolBalance(t, b.BlobberID)
-		// }
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
-		// require.Greater(t, stackPoolBalance_AfterUpload, stackPoolBalance_AfterOperation, "Blobber Has to pay to redeem write markers")
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
+		// Wait before fetching final write pool
+		time.Sleep(time.Minute)
+
+		// Get the new Write-Pool info after upload
+		output, err = writePoolInfo(t, configPath)
+		require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
+
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		require.Equal(t, allocationID, finalWritePool[0].Id)
+		require.InEpsilon(t, (0.5 - actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon)
+		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
+		require.Equal(t, allocationID, finalWritePool[0].AllocationId)
+		require.Less(t, 0, len(finalWritePool[0].Blobber))
+		require.Equal(t, true, finalWritePool[0].Locked)
+
+		// Blobber pool balance should reduce by (write price*filesize) for each blobber
+		totalChangeInWritePool := float64(0)
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
+
+			// deduce tokens
+			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
+			require.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon)
+			totalChangeInWritePool += diff
+		}
+
+		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	return
-	fmt.Print()
 	t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
 		t.Parallel()
 
