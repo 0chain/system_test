@@ -113,15 +113,12 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-		filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 		wait(t, 50*time.Second)
 
 		initialWritePool := getWritePool(t, configPath)
 
 		updateFileWithRandomlyGeneratedData(t, allocationID, filename, int64(5*MB))
-
-		// Expected cost takes into account data+parity, so we divide by that
-		uploadCost = uploadCost / (2 + 2)
 
 		// Wait before fetching final write pool
 		wait(t, 50*time.Second)
@@ -139,8 +136,6 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Negative(t, totalChangeInWritePool, "Blobbers has to pay some of their token to redeem write markers")
 		createAllocationTestTeardown(t, allocationID)
 	})
-
-	return
 
 	t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
 		t.Parallel()
