@@ -259,7 +259,6 @@ func TestFileMove(t *testing.T) {
 			"size": allocSize,
 		})
 
-		// upload file to move
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -311,12 +310,12 @@ func TestFileMove(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 3)
 
-		// check if both files are there
-		found := false
+		// check if both existing files are there
+		foundAtSource := false
 		foundAtTarget := false
 		for _, f := range files {
 			if f.Path == remotePath {
-				found = true
+				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
@@ -330,7 +329,7 @@ func TestFileMove(t *testing.T) {
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, found && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file with commit param", func(t *testing.T) {
@@ -377,7 +376,6 @@ func TestFileMove(t *testing.T) {
 		require.Len(t, output, 3)
 
 		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
-		require.Equal(t, "Commiting changes to blockchain ...", output[1])
 
 		match := reCommitResponse.FindStringSubmatch(output[2])
 		require.Len(t, match, 2)
