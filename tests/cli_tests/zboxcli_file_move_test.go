@@ -14,17 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-//move an object to another folder on blobbers
-//
-//Usage:
-//  zbox move [flags]
-//
-//Flags:
-//      --allocation string   Allocation ID
-//      --commit              pass this option to commit the metadata transaction
-//      --destpath string     Destination path for the object. Existing directory the object should be copied to
-//  -h, --help                help for move
-//      --remotepath string   Remote path of object to move
 func TestFileMove(t *testing.T) {
 	t.Parallel()
 
@@ -82,19 +71,23 @@ func TestFileMove(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 2)
 
-		// check if expected file has moved
-		found := false
-		wantNewFilePath := destpath + filename
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
 		for _, f := range files {
-			if f.Path == wantNewFilePath {
-				found = true
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, found, "moved file not found: ", strings.Join(output, "\n"))
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file to non-existing directory should fail", func(t *testing.T) {
@@ -152,18 +145,23 @@ func TestFileMove(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 1)
 
-		// check if expected file did not move
-		found := false
+		// check if expected file was not renamed
+		foundAtSource := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
-				found = true
+				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+			}
 		}
-		require.True(t, found, "file at old location is not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file to same directory (no change) should fail", func(t *testing.T) {
@@ -312,7 +310,7 @@ func TestFileMove(t *testing.T) {
 
 		// check if both existing files are there
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -321,15 +319,16 @@ func TestFileMove(t *testing.T) {
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
-			if f.Path == remotePathAtDest {
-				foundAtTarget = true
+			if f.Path == destpath+filename {
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, foundAtSource && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file with commit param", func(t *testing.T) {
@@ -400,19 +399,23 @@ func TestFileMove(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 2)
 
-		// check if expected file has moved
-		found := false
-		wantNewFilePath := destpath + filename
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
 		for _, f := range files {
-			if f.Path == wantNewFilePath {
-				found = true
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, found, "moved file not found: ", strings.Join(output, "\n"))
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move non-existing file should fail", func(t *testing.T) {
@@ -475,7 +478,7 @@ func TestFileMove(t *testing.T) {
 		)
 		require.Equal(t, expected, output[1])
 
-		// move file
+		// try to move file
 		output, err = moveFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -497,18 +500,23 @@ func TestFileMove(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 2)
 
-		// check if expected file did not move
-		found := false
+		// check if expected file was not renamed
+		foundAtSource := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
-				found = true
+				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+			}
 		}
-		require.True(t, found, "file at old location is not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file with no allocation param should fail", func(t *testing.T) {
@@ -660,9 +668,6 @@ func moveFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map
 		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
-
-	// TODO delete
-	fmt.Println(cmd)
 
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }

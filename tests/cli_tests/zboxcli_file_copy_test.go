@@ -13,17 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// copy an object to another folder on blobbers
-//
-//Usage:
-//  zbox copy [flags]
-//
-//Flags:
-//      --allocation string   Allocation ID
-//      --commit              pass this option to commit the metadata transaction
-//      --destpath string     Destination path for the object. Existing directory the object should be copied to
-//  -h, --help                help for copy
-//      --remotepath string   Remote path of object to copy
 func TestFileCopy(t *testing.T) {
 	t.Parallel()
 
@@ -81,9 +70,9 @@ func TestFileCopy(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 3)
 
-		// check if expected file has been copied. both files are there
+		// check if expected file has been copied. both files should be there
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -93,14 +82,15 @@ func TestFileCopy(t *testing.T) {
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
-				foundAtTarget = true
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, foundAtSource && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file to non-existing directory should fail", func(t *testing.T) {
@@ -158,7 +148,7 @@ func TestFileCopy(t *testing.T) {
 
 		// check if file was not copied
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -168,11 +158,11 @@ func TestFileCopy(t *testing.T) {
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
-				foundAtTarget = true
+				foundAtDest = true
 			}
 		}
-		require.True(t, foundAtSource, "file at old location is not found: ", strings.Join(output, "\n"))
-		require.False(t, foundAtTarget, "file was unexpectedly copied to new location: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file to same directory should fail", func(t *testing.T) {
@@ -259,7 +249,6 @@ func TestFileCopy(t *testing.T) {
 		filename := filepath.Base(file)
 
 		remotePath := "/" + filename
-		remotePathAtDest := "/target/" + filename
 		destpath := "/target/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -283,7 +272,7 @@ func TestFileCopy(t *testing.T) {
 		// upload file to another directory with same name.
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotePathAtDest,
+			"remotepath": destpath + filename,
 			"localpath":  file,
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -317,7 +306,7 @@ func TestFileCopy(t *testing.T) {
 
 		// check if both existing files are there
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -326,15 +315,16 @@ func TestFileCopy(t *testing.T) {
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
-			if f.Path == remotePathAtDest {
-				foundAtTarget = true
+			if f.Path == destpath+filename {
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, foundAtSource && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file with commit param", func(t *testing.T) {
@@ -405,9 +395,9 @@ func TestFileCopy(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 3)
 
-		// check if expected file has been copied. both files are there
+		// check if expected file has been copied. both files should be there
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -417,14 +407,15 @@ func TestFileCopy(t *testing.T) {
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
-				foundAtTarget = true
+				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, foundAtSource && foundAtTarget, "both files are not found: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy non-existing file should fail", func(t *testing.T) {
@@ -507,7 +498,7 @@ func TestFileCopy(t *testing.T) {
 
 		// check if file was not copied
 		foundAtSource := false
-		foundAtTarget := false
+		foundAtDest := false
 		for _, f := range files {
 			if f.Path == remotePath {
 				foundAtSource = true
@@ -517,11 +508,11 @@ func TestFileCopy(t *testing.T) {
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
-				foundAtTarget = true
+				foundAtDest = true
 			}
 		}
-		require.True(t, foundAtSource, "file at old location is not found: ", strings.Join(output, "\n"))
-		require.False(t, foundAtTarget, "file was unexpectedly copied to new location: ", strings.Join(output, "\n"))
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file with no allocation param should fail", func(t *testing.T) {
@@ -673,9 +664,6 @@ func copyFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map
 		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
-
-	// TODO delete
-	fmt.Println(cmd)
 
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
