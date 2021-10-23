@@ -28,7 +28,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "new_" + filename
 		destPath := "/child/" + destName
@@ -51,7 +50,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -59,7 +57,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
@@ -102,7 +99,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := filename
 
@@ -124,7 +120,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -132,7 +127,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
@@ -170,7 +164,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 
 		b := make([]rune, 21)
@@ -206,7 +199,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
@@ -249,7 +241,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 
 		b := make([]rune, 146)
@@ -277,7 +268,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -328,7 +318,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "!@#$%^&*()<>{}[]:;'?,." + filename
 		destPath := "/child/" + destName
@@ -359,7 +348,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
@@ -402,7 +390,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "new_" + filename
 		destPath := "/child/" + destName
@@ -425,7 +412,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -434,7 +420,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
-
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		match := reCommitResponse.FindStringSubmatch(output[2])
@@ -515,7 +500,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "new_" + filename
 		destPath := "/child/" + destName
@@ -538,7 +522,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// try to rename file
 		output, err = renameFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -588,7 +571,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "new_" + filename
 
@@ -610,7 +592,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// try to rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"remotepath": remotePath,
 			"destname":   destName,
@@ -632,7 +613,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 		destName := "new_" + filename
 
@@ -654,14 +634,12 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// try to rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"destname":   destName,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
@@ -676,7 +654,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
-
 		remotePath := "/child/" + filename
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -697,14 +674,12 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		// try to rename file
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		require.Equal(t, "Error: destname flag is missing", output[0])
 	})
 
