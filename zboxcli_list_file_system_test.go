@@ -524,21 +524,13 @@ func createFileWithSize(name string, size int64) error {
 }
 
 func generateRandomTestFileName(t *testing.T) string {
-	path, err := filepath.Abs("tmp")
-	require.Nil(t, err)
-
-	// Create the directory if it does not exist
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			os.Mkdir(path, 0755)
-		}
-	}
+	path := os.TempDir()
 
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
 	randomFilename := cliutils.RandomAlphaNumericString(10)
-	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
+	return fmt.Sprintf("%s/%s_test.txt", path, randomFilename)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
