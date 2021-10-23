@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"math/rand"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -32,9 +33,13 @@ func TestCommonUserFunctions(t *testing.T) {
 		t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
 			t.Parallel()
 
-			targetWallet := setupTransferWallets(t)
+			s := rand.NewSource(time.Now().UnixNano())
+
+			_, targetWallet := setupTransferWallets(t)
 
 			mconfig := getMinerSCConfiguration(t)
+			minerShare := mconfig["share_ratio"]
+			// minerServiceCharge := mconfig["service_charge"]
 
 			miners := getMinersList(t)
 			minerNode := miners.Nodes[0].SimpleNode
@@ -42,7 +47,10 @@ func TestCommonUserFunctions(t *testing.T) {
 
 			startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
-			output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", 0)
+			// Set a random fee in range [0.01, 0.02)
+			send_fee := 0.01 + rand.New(s).Float64()*0.01
+
+			output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 			require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 			wait(t, 60*time.Second)
@@ -51,59 +59,50 @@ func TestCommonUserFunctions(t *testing.T) {
 			require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 			require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 
-			totalRewardsAndFees := int64(0)
-			// Calculate the total rewards and fees for this miner.
+			var block_miner *climodel.Node
+			var block_miner_id string
+			var feeTransfer apimodel.Transfer
+			var transactionRound int64
+
+			// Expected miner fee is calculating using this formula:
+			// Fee * minerShare * miner.ServiceCharge
+			var expected_miner_fee int64
+
+			// Find the miner who has processed the transaction,
+			// After finding the miner id, search for the fee payment to that miner in "payFee" transaction output
+		out:
 			for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
 				block := getRoundBlockFromASharder(t, round)
 
-				// No expected rewards for this miner if not the generator of block.
-				if block.Block.MinerId != miner.ID {
-					continue
-				}
-
-				// Get total block fees
-				blockFees := int64(0)
 				for _, txn := range block.Block.Transactions {
-					blockFees += txn.TransactionFee
-				}
+					if len(block_miner_id) == 0 {
+						if txn.ToClientId == targetWallet.ClientID {
+							// transaction = *txn
+							block_miner_id = block.Block.MinerId
+							transactionRound = block.Block.Round
+							block_miner = getMinersDetail(t, minerNode.ID)
+							expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
+						}
+					} else {
+						data := fmt.Sprintf("{\"name\":\"payFees\",\"input\":{\"round\":%d}}", transactionRound)
+						if txn.TransactionData == data {
+							var transfers []apimodel.Transfer
 
-				// reward rate declines per epoch
-				// new reward ratio = current reward rate * (1.0 - reward decline rate)
-				epochs := round / int64(mconfig[epochConfigKey])
-				rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
+							err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+							require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
-				// block reward (mint) = block reward (configured) * reward rate
-				blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
-
-				// generator rewards = block reward * share ratio
-				generatorRewards := blockRewardMint * mconfig[shareRatioConfigKey]
-
-				// generator reward service charge = generator rewards * service charge
-				generatorRewardServiceCharge := generatorRewards * miner.ServiceCharge
-				generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
-
-				// generator fees = block fees * share ratio
-				generatorFees := float64(blockFees) * mconfig[shareRatioConfigKey]
-
-				// generator fee service charge = generator fees * service charge
-				generatorFeeServiceCharge := generatorFees * miner.ServiceCharge
-				generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
-
-				totalRewardsAndFees += int64(generatorRewardServiceCharge)
-				totalRewardsAndFees += int64(generatorFeeServiceCharge)
-
-				// if none staked at node, node gets all rewards.
-				// otherwise, then remaining are distributed to stake holders.
-				if miner.TotalStake == 0 {
-					totalRewardsAndFees += int64(generatorRewardsRemaining)
-					totalRewardsAndFees += int64(generatorFeeRemaining)
+							for _, tr := range transfers {
+								if tr.To == block_miner_id && tr.Amount == int64(expected_miner_fee) {
+									feeTransfer = tr
+									break out
+								}
+							}
+						}
+					}
 				}
 			}
 
-			wantBalanceDiff := totalRewardsAndFees
-			gotBalanceDiff := endBalance.Balance - startBalance.Balance
-			require.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, 0.0000001, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
-
+			require.Equal(t, expected_miner_fee, feeTransfer.Amount, "Transfer fee must be equal to miner fee")
 		})
 
 		// Test is failing.
@@ -390,7 +389,7 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	return mconfig
 }
 
-func setupTransferWallets(t *testing.T) *climodel.Wallet {
+func setupTransferWallets(t *testing.T) (*climodel.Wallet, *climodel.Wallet) {
 	targetWallet := escapedTestName(t) + "_TARGET"
 
 	output, err := registerWallet(t, configPath)
@@ -399,13 +398,16 @@ func setupTransferWallets(t *testing.T) *climodel.Wallet {
 	output, err = registerWalletForName(configPath, targetWallet)
 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
+	client, err := getWalletForName(t, configPath, escapedTestName(t))
+	require.Nil(t, err, "Error occurred when retrieving client wallet")
+
 	target, err := getWalletForName(t, configPath, targetWallet)
 	require.Nil(t, err, "Error occurred when retrieving target wallet")
 
 	output, err = executeFaucetWithTokens(t, configPath, 1)
 	require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-	return target
+	return client, target
 }
 
 func getAllocationOffers(t *testing.T, allocation_id string) []*climodel.StakePoolOfferInfo {
