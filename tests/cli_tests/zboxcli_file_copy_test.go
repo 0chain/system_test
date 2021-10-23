@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileCopy(t *testing.T) {
+func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Parallel()
 
 	t.Run("copy file to existing directory", func(t *testing.T) {
@@ -221,7 +221,7 @@ func TestFileCopy(t *testing.T) {
 		// check if file is still there
 		found := false
 		for _, f := range files {
-			if f.Path == remotePath {
+			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
 				found = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
 				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
