@@ -17,7 +17,7 @@ import (
 func TestFileUpdateAttributes(t *testing.T) {
 	t.Parallel()
 
-	t.Run("update file attribtes of existing file", func(t *testing.T) {
+	t.Run("update file attributes of existing file", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -57,6 +57,20 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "attributes updated", output[0])
+
+		// check if file attributes was updated
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"json":       "",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, 1, meta.Attribute.WhoPaysForReads) // 3rd party
 	})
 
 	t.Run("update attributes of existing file (no change)", func(t *testing.T) {
@@ -99,6 +113,20 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "no changes", output[0])
+
+		// check if file attributes was not changed
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"json":       "",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, 0, meta.Attribute.WhoPaysForReads) // owner
 	})
 
 	t.Run("update file attributes with commit param", func(t *testing.T) {
@@ -155,6 +183,20 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
 		require.Equal(t, remotePath, commitResp.MetaData.Path)
 		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
+
+		// check if file attributes was updated
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"json":       "",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, 1, meta.Attribute.WhoPaysForReads) // 3rd party
 	})
 
 	t.Run("update attributes of non-existing file should fail", func(t *testing.T) {
@@ -221,6 +263,20 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "fetching the metadata: file_meta_error: Error getting the file meta data from blobbers", output[0])
+
+		// check if file attributes was not updated
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"json":       "",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, 0, meta.Attribute.WhoPaysForReads) // owner
 	})
 
 	t.Run("update file attributes with no allocation param should fail", func(t *testing.T) {
@@ -342,9 +398,6 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "no changes", output[0])
 	})
-
-	// curator scenarios?
-	// collaborator scenarios?
 }
 
 func updateFileAttributes(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {

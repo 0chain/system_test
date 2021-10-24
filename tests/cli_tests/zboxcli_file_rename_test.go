@@ -682,10 +682,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destname flag is missing", output[0])
 	})
-
-	// TODO
-	// curator scenarios?
-	// collaborator scenarios?
 }
 
 func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
