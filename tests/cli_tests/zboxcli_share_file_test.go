@@ -25,7 +25,6 @@ func TestShareFile(t *testing.T) {
 
 	t.Run("Share file with another wallet", func(t *testing.T) {
 		t.Parallel()
-
 		var output []string
 		var err error
 
@@ -34,23 +33,24 @@ func TestShareFile(t *testing.T) {
 
 		// upload file
 		filename := generateRandomTestFileName(t)
-		uploadFileForShare(t, allocationID, walletOwner, filename)
+		uploadFileForShare(t, allocationID, walletOwner, filename, filename)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
 
-		enc_key := walletReceiver.EncryptionPublicKey
+		encKey := walletReceiver.EncryptionPublicKey
 		clientId := walletReceiver.ClientID
 
 		share_params := map[string]interface{}{
-			"allocation":          allocationReceiver,
+			"allocation":          allocationID,
 			"clientid":            clientId,
-			"encryptionpublickey": enc_key,
+			"encryptionpublickey": encKey,
+			"remotepath":          filename,
 		}
 
-		output, err = shareFile(t, configPath, share_params)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Nil(t, err)
 
 		authTicket, err := extractAuthToken(output[0])
@@ -58,16 +58,16 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "../../internal/dummy_file/five_MB_test_file_dowloaded"
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
 		download_params := map[string]interface{}{
 			"allocation": allocationReceiver,
 			"localpath":  dummyFilePath,
-			"remotepath": "/" + filename,
 			"authticket": authTicket,
+			"remotepath": filename,
 		}
 		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
-		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
+		require.Nil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		defer os.Remove(dummyFilePath)
 
 		require.Len(t, output, 2)
@@ -85,23 +85,24 @@ func TestShareFile(t *testing.T) {
 
 		// upload file
 		filename := generateRandomTestFileName(t)
-		uploadFileForShare(t, allocationID, walletOwner, filename)
+		uploadFileForShare(t, allocationID, walletOwner, filename, filename)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
 
-		enc_key := walletReceiver.EncryptionPublicKey
+		encKey := walletReceiver.EncryptionPublicKey
 		clientId := walletReceiver.ClientID
 
 		share_params := map[string]interface{}{
 			"allocation":          allocationReceiver,
 			"clientid":            clientId,
-			"encryptionpublickey": enc_key,
+			"encryptionpublickey": encKey,
+			"remotepath":          filename,
 		}
 
-		output, err = shareFile(t, configPath, share_params)
-		require.Nil(t, err, "Error sharing file", strings.Join(output, "\n"))
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Nil(t, err)
 
 		authTicket, err := extractAuthToken(output[0])
@@ -110,26 +111,27 @@ func TestShareFile(t *testing.T) {
 
 		// revoke file
 		share_params = map[string]interface{}{
-			"allocation":          allocationReceiver,
+			"allocation":          allocationID,
 			"clientid":            clientId,
-			"encryptionpublickey": enc_key,
+			"encryptionpublickey": encKey,
+			"remotepath":          filename,
 			"--revoke":            "",
 		}
-		output, err = shareFile(t, configPath, share_params)
-		require.Nil(t, err, "Error sharing file", strings.Join(output, "\n"))
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Nil(t, err)
 
 		// Download the file
-		dummyFilePath := "../../internal/dummy_file/five_MB_test_file_dowloaded"
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
 		download_params := map[string]interface{}{
 			"allocation": allocationReceiver,
 			"localpath":  dummyFilePath,
-			"remotepath": "/" + filename,
 			"authticket": authTicket,
+			"remotepath": filename,
 		}
 		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
-		require.NotNil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
+		require.NotNil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		defer os.Remove(dummyFilePath)
 	})
 
@@ -144,24 +146,25 @@ func TestShareFile(t *testing.T) {
 
 		// upload file
 		filename := generateRandomTestFileName(t)
-		uploadFileForShare(t, allocationID, walletOwner, filename)
+		uploadFileForShare(t, allocationID, walletOwner, filename, filename)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
 
-		enc_key := walletReceiver.EncryptionPublicKey
+		encKey := walletReceiver.EncryptionPublicKey
 		clientId := walletReceiver.ClientID
 
 		share_params := map[string]interface{}{
-			"allocation":           allocationReceiver,
+			"allocation":           allocationID,
 			"clientid":             clientId,
-			"encryptionpublickey":  enc_key,
+			"encryptionpublickey":  encKey,
+			"remotepath":           filename,
 			"--expiration-seconds": 1,
 		}
 
-		output, err = shareFile(t, configPath, share_params)
-		require.Nil(t, err, "Error sharing file", strings.Join(output, "\n"))
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Nil(t, err)
 
 		authTicket, err := extractAuthToken(output[0])
@@ -169,16 +172,16 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "../../internal/dummy_file/five_MB_test_file_dowloaded"
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
 		download_params := map[string]interface{}{
 			"allocation": allocationReceiver,
 			"localpath":  dummyFilePath,
-			"remotepath": "/" + filename,
 			"authticket": authTicket,
+			"remotepath": filename,
 		}
 		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
-		require.NotNil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
+		require.NotNil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		defer os.Remove(dummyFilePath)
 	})
 
@@ -193,24 +196,74 @@ func TestShareFile(t *testing.T) {
 
 		// upload file
 		filename := generateRandomTestFileName(t)
-		uploadFileForShare(t, allocationID, walletOwner, filename)
+		uploadFileForShare(t, allocationID, walletOwner, filename, filename)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
 
-		enc_key := walletReceiver.EncryptionPublicKey
-		clientId := walletReceiver.ClientID + "1" // make it wrong
+		encKey := walletReceiver.EncryptionPublicKey
+
+		walletOwnerModel, err := getWalletForName(t, configPath, walletOwner)
+		require.Nil(t, err)
 
 		share_params := map[string]interface{}{
-			"allocation":           allocationReceiver,
-			"clientid":             clientId,
-			"encryptionpublickey":  enc_key,
-			"--expiration-seconds": 1,
+			"allocation":          allocationID,
+			"clientid":            walletOwnerModel.ClientID,
+			"encryptionpublickey": encKey,
+			"remotepath":          filename,
 		}
 
-		output, err = shareFile(t, configPath, share_params)
-		require.Nil(t, err, "Error sharing file", strings.Join(output, "\n"))
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
+		require.Nil(t, err)
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, err)
+		require.NotEqual(t, "", authTicket)
+
+		// Download the file
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
+		download_params := map[string]interface{}{
+			"allocation": allocationReceiver,
+			"localpath":  dummyFilePath,
+			"authticket": authTicket,
+			"remotepath": filename,
+		}
+		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
+		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
+
+		defer os.Remove(dummyFilePath)
+	})
+
+	t.Run("Share folder with another wallet", func(t *testing.T) {
+
+		var output []string
+		var err error
+
+		walletOwner := escapedTestName(t)
+		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+
+		// upload file
+		filename := generateRandomTestFileName(t)
+		remoteOwnerPath := "/subfolder1/subfolder2/test_file.txt"
+		uploadFileForShare(t, allocationID, walletOwner, filename, remoteOwnerPath)
+
+		// receiver wallet operations
+		receiverWallet := escapedTestName(t) + "_second"
+		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
+
+		encKey := walletReceiver.EncryptionPublicKey
+		clientId := walletReceiver.ClientID
+
+		share_params := map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            clientId,
+			"encryptionpublickey": encKey,
+			"remotepath":          "/subfolder1",
+		}
+
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Nil(t, err)
 
 		authTicket, err := extractAuthToken(output[0])
@@ -218,21 +271,76 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "../../internal/dummy_file/five_MB_test_file_dowloaded"
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
 		download_params := map[string]interface{}{
 			"allocation": allocationReceiver,
 			"localpath":  dummyFilePath,
-			"remotepath": "/" + filename,
 			"authticket": authTicket,
+			"remotepath": remoteOwnerPath,
 		}
 		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
-		require.NotNil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
+		require.Nil(t, err, "Error in file operation", strings.Join(output, "\n"))
+		defer os.Remove(dummyFilePath)
+
+		require.Len(t, output, 2)
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
+	})
+
+	t.Run("Share folder with another wallet wrong download", func(t *testing.T) {
+
+		var output []string
+		var err error
+
+		walletOwner := escapedTestName(t)
+		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+
+		// upload file
+		filename := generateRandomTestFileName(t)
+		remoteOwnerPath := "/subfolder1/subfolder2/test_file.txt"
+		uploadFileForShare(t, allocationID, walletOwner, filename, remoteOwnerPath)
+
+		remoteOwnerPathSubfolder := "/subfolder2/subfolder3/test_file.txt"
+		uploadFileForShare(t, allocationID, walletOwner, filename, remoteOwnerPathSubfolder)
+
+		// receiver wallet operations
+		receiverWallet := escapedTestName(t) + "_second"
+		allocationReceiver, walletReceiver := registerAndCreateAllocation(t, configPath, receiverWallet)
+
+		encKey := walletReceiver.EncryptionPublicKey
+		clientId := walletReceiver.ClientID
+
+		share_params := map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            clientId,
+			"encryptionpublickey": encKey,
+			"remotepath":          "/subfolder2",
+		}
+
+		output, err = shareFile(t, walletOwner, configPath, share_params)
+		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
+		require.Nil(t, err)
+
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, err)
+		require.NotEqual(t, "", authTicket)
+
+		// Download the file
+		dummyFilePath := os.TempDir() + escapedTestName(t) + ".txt"
+		download_params := map[string]interface{}{
+			"allocation": allocationReceiver,
+			"localpath":  dummyFilePath,
+			"authticket": authTicket,
+			"remotepath": remoteOwnerPath,
+		}
+		output, err = downloadFileWithParams(t, receiverWallet, configPath, download_params)
+
+		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
 		defer os.Remove(dummyFilePath)
 	})
 }
 
-func uploadFileForShare(t *testing.T, allocationID, wallet, filename string) {
+func uploadFileForShare(t *testing.T, allocationID, wallet, localpath, filename string) {
 	var output []string
 
 	// upload file
@@ -242,7 +350,7 @@ func uploadFileForShare(t *testing.T, allocationID, wallet, filename string) {
 
 	output, err = uploadFileForWallet(t, wallet, configPath, map[string]interface{}{
 		"allocation": allocationID,
-		"remotepath": "/" + filename,
+		"remotepath": filename,
 		"localpath":  filename,
 		"encrypt":    "",
 	})
@@ -256,13 +364,13 @@ func uploadFileForShare(t *testing.T, allocationID, wallet, filename string) {
 	require.Equal(t, expected, output[1])
 }
 
-func shareFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func shareFile(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Share file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
+		"./zbox share %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		p,
-		escapedTestName(t)+"_wallet.json",
+		wallet,
 		cliConfigFilename,
 	)
 
@@ -285,13 +393,13 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	registerWalletAndFaucet(t, configPath, wallet)
 
 	allocParam := createParams(map[string]interface{}{
-		"lock":   1,
+		"lock":   0.5,
 		"size":   10485760,
 		"expire": "1h",
 		"parity": 1,
 		"data":   1,
 	})
-	output, err := createNewAllocation(t, configPath, allocParam)
+	output, err := createNewAllocationForWallet(t, wallet+"_wallet.json", configPath, allocParam)
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)
