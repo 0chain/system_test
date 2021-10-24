@@ -236,7 +236,7 @@ func TestShareFile(t *testing.T) {
 	})
 
 	t.Run("Share folder with another wallet", func(t *testing.T) {
-
+		t.Parallel()
 		var output []string
 		var err error
 
@@ -288,6 +288,7 @@ func TestShareFile(t *testing.T) {
 	})
 
 	t.Run("Share folder with another wallet wrong download", func(t *testing.T) {
+		t.Parallel()
 
 		var output []string
 		var err error
@@ -390,7 +391,8 @@ func registerWalletAndFaucet(t *testing.T, configPath, wallet string) error {
 }
 
 func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
-	registerWalletAndFaucet(t, configPath, wallet)
+	err := registerWalletAndFaucet(t, configPath, wallet)
+	require.Nil(t, err)
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,
