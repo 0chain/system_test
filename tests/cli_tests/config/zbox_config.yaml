@@ -1,8 +1,23 @@
+version: 1.0
+
 block_worker: https://dev.0chain.net/dns
-# block_worker: https://test.0chain.net/dns
 signature_scheme: bls0chain
 min_submit: 50 # in percentage
 min_confirmation: 50 # in percentage
 confirmation_chain_length: 3
 max_txn_query: 15
 query_sleep_time: 2
+
+logging:
+    level: "info"
+    console: true # printing log to console is only supported in development mode
+
+handlers:
+    rate_limit: 10 # 10 per second
+
+server_chain:
+    id: "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
+    owner: "edb90b850f2e7e7cbd0a1fa370fdcc5cd378ffbec95363a7bc0e5a98b8ba5759"
+    genesis_block:
+        id: "ed79cae70d439c11258236da1dfa6fc550f7cc569768304623e8fbd7d70efae4"
+    signature_scheme: "bls0chain"
