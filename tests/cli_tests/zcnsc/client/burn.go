@@ -6,7 +6,7 @@ import (
 )
 
 func Burn(amount float64, nonce int64) zcncore.TransactionScheme {
-	payload := BurnPayload {
+	payload := BurnPayload{
 		TxnID:           "", // Filled in the SC
 		Nonce:           nonce,
 		Amount:          zcncore.ConvertToValue(amount),

@@ -1,7 +1,7 @@
 package zcnsc
 
 import (
-	"github.com/0chain/system_test/internal/cli/client"
+	client2 "github.com/0chain/system_test/tests/cli_tests/zcnsc/client"
 )
 
 // ToWzcn converts from ZCN to WZNC
@@ -11,11 +11,11 @@ import (
 // 3. User gathers tickets from authorizers
 // 4. User sends tickets to ETH bridge
 func ToWzcn(amount float64, nonce int64) {
-	transaction := client.Burn(amount, nonce)
-	client.CheckBalance()
+	transaction := client2.Burn(amount, nonce)
+	client2.CheckBalance()
 
-	authorizersFromChain := client.GetAuthorizersFromChain()
+	authorizersFromChain := client2.GetAuthorizersFromChain()
 
-	client.GetBurnProofTickets(authorizersFromChain, transaction.GetTransactionHash())
-	client.SendTicketsToEthereumBridge()
+	client2.GetBurnProofTickets(authorizersFromChain, transaction.GetTransactionHash())
+	client2.SendTicketsToEthereumBridge()
 }

@@ -1,8 +1,8 @@
 package cli_tests
 
 import (
-	"github.com/0chain/system_test/internal/cli/client"
 	"github.com/0chain/system_test/tests/cli_tests/zcnsc"
+	"github.com/0chain/system_test/tests/cli_tests/zcnsc/client"
 	"testing"
 )
 
