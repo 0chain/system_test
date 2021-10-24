@@ -104,7 +104,9 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = dir"
+		expected := fmt.Sprint(
+			"Status completed callback. Type = application/octet-stream. Name = dir",
+		)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -250,7 +252,9 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = video/mp4. Name = test_video.mp4"
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = video/mp4. Name = test_video.mp4",
+		)
 		require.Equal(t, expected, output[1])
 	})
 
@@ -429,7 +433,9 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expected := "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders"
+		expected := fmt.Sprint(
+			"Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders",
+		)
 		require.Equal(t, expected, output[0])
 	})
 
@@ -583,11 +589,16 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Uploading file...")
+	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	t.Logf("Uploading file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		"./zbox upload %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		p,
-		escapedTestName(t)+"_wallet.json",
+		wallet,
 		cliConfigFilename,
 	)
 
@@ -619,28 +630,6 @@ func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size i
 		"localpath":  filename,
 		"remotepath": remotepath + filepath.Base(filename),
 	})
-
-	return filename
-}
-
-func generateFileAndUploadWithParam(t *testing.T, allocationID, remotepath string, size int64, params map[string]interface{}) string {
-	filename := generateRandomTestFileName(t)
-
-	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
-
-	p := map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  filename,
-		"remotepath": remotepath + filepath.Base(filename),
-	}
-
-	for k, v := range params {
-		p[k] = v
-	}
-
-	// Upload parameters
-	uploadWithParam(t, configPath, p)
 
 	return filename
 }

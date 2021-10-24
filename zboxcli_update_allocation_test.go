@@ -631,10 +631,9 @@ func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 
 	for k, v := range params {
-		if v == nil {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
-		} else {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		_, err := builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		if err != nil {
+			return ""
 		}
 	}
 	return strings.TrimSpace(builder.String())
@@ -679,11 +678,17 @@ func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]s
 // executeFaucetWithTokens executes faucet command with given tokens.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
+	return executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+}
+
+// executeFaucetWithTokensForWallet executes faucet command with given tokens and wallet.
+// Tokens greater than or equal to 10 are considered to be 1 token by the system.
+func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
 	t.Logf("Executing faucet...")
 	return cliutils.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName "+
 		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		tokens,
-		escapedTestName(t),
+		wallet,
 		cliConfigFilename,
 	), 3, time.Second*5)
 }

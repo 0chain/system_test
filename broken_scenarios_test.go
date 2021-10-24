@@ -205,11 +205,7 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Lock read pool tokens
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, allocationID, 0.4)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -246,12 +242,7 @@ func TestBrokenScenarios(t *testing.T) {
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
 
 		// Download the file
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filename,
-			"localpath":  "../../internal/dummy_file/five_MB_test_file_dowloaded",
-		}))
+		output, err = downloadFile(t, configPath, allocationID, "../../internal/dummy_file/five_MB_test_file_dowloaded", "/"+filename)
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
