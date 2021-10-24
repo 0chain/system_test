@@ -1,6 +1,8 @@
 package climodel
 
-import "time"
+import (
+	"time"
+)
 
 type Wallet struct {
 	ClientID            string `json:"client_id"`

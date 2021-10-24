@@ -138,14 +138,18 @@ jobs:
           mkdir -p ./kube
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
 
-      - name: "Remove existing 0Chain network"
+      - name: "Remove existing 0Chain network and data"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
-          sleep 30
-          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-          kubectl delete all --all -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
+          if [ $output -gt 1 ]; then
+              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+              sleep 30
+          fi
+              helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+              kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+              kubectl delete all --all -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+
 
       - name: "Deploy 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -290,6 +294,9 @@ jobs:
       - name: "Tear Down 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" || true
-          sleep 30
-          helm upgrade --install cleanup -n ${{ env.NAMESPACE }} 0chain-helm/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config || true
+          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
+          if [ $output -gt 1 ]; then
+              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+              sleep 30
+          fi
+              helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
