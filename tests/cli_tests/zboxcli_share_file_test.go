@@ -224,7 +224,6 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
 		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
-
 	})
 
 	t.Run("Share folder with another wallet", func(t *testing.T) {
@@ -321,7 +320,6 @@ func TestShareFile(t *testing.T) {
 		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
-
 }
 
 func uploadFileForShare(t *testing.T, allocationID, wallet, localpath, remotepath string) {

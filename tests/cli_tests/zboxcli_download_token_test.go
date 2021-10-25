@@ -127,29 +127,6 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-//func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-//	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, allocation, localpath, remotepath)
-//}
-
-//func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-//	t.Logf("Downloading file...")
-//	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-//}
-
-/*
-func downloadFileWithParams(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	t.Logf("Share file...")
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	return cliutils.RunCommand(cmd)
-}*/
-
 func unitToZCN(unitCost float64, unit string) float64 {
 	switch unit {
 	case "SAS", "sas":
