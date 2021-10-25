@@ -70,7 +70,12 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = readPoolLock(t, configPath, allocationID, 0.4)
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"tokens":     0.4,
+			"duration":   "900s",
+		})
+		output, err = readPoolLock(t, configPath, params)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -108,14 +113,15 @@ func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]strin
 	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func readPoolLock(t *testing.T, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
+func readPoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Locking read tokens...")
-	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, tokens)
+	//return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, tokens)
+	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params)
 }
 
-func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, tokens float64) ([]string, error) {
+func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Locking read tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock --allocation %s --tokens %v --duration 900s --silent --wallet %s_wallet.json --configDir ./config --config %s", allocationID, tokens, wallet, cliConfigFilename))
+	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
 }
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
@@ -123,15 +129,16 @@ func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remote
 	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }
 
-func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, allocation, localpath, remotepath)
-}
+//func downloadFile(t *testing.T, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
+//	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, allocation, localpath, remotepath)
+//}
 
-func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
-	t.Logf("Downloading file...")
-	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-}
+//func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, allocation, localpath, remotepath string) ([]string, error) {
+//	t.Logf("Downloading file...")
+//	return cliutils.RunCommand("./zbox download --allocation " + allocation + " --localpath " + localpath + " --remotepath " + remotepath + " --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+//}
 
+/*
 func downloadFileWithParams(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Share file...")
 	p := createParams(param)
@@ -143,7 +150,7 @@ func downloadFileWithParams(t *testing.T, wallet, cliConfigFilename string, para
 	)
 
 	return cliutils.RunCommand(cmd)
-}
+}*/
 
 func unitToZCN(unitCost float64, unit string) float64 {
 	switch unit {
