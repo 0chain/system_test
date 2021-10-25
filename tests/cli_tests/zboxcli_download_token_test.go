@@ -114,8 +114,6 @@ func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]strin
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Locking read tokens...")
-	//return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, tokens)
 	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params)
 }
 
