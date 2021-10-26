@@ -478,27 +478,6 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
 
-func getAllocationOfferFromBlobberStakePool(t *testing.T, blobber_id, allocationID string) *climodel.StakePoolOfferInfo {
-	sp_info := getStakePoolInfo(t, configPath, blobber_id)
-
-	require.GreaterOrEqual(t, len(sp_info.Offers), 1, "Blobbers offers must not be empty")
-
-	// Find the offer related to this allocation
-	offers := make([]climodel.StakePoolOfferInfo, len(sp_info.Offers))
-	n := 0
-	for _, o := range sp_info.Offers {
-		if o.AllocationID == allocationID {
-			offers[n] = *o
-			n++
-		}
-	}
-
-	require.GreaterOrEqual(t, n, 1, "The allocation offer expected to be found on blobber stake pool information")
-
-	offer := offers[0]
-	return &offer
-}
-
 func getWalletBalance(t *testing.T, cliConfigFilename string) string {
 	t.Logf("Get Wallet Balance...")
 	output, err := getBalance(t, configPath)
@@ -524,21 +503,6 @@ func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename), retry, time.Second*5)
 	return output, err
-}
-
-func getStakePoolInfo(t *testing.T, cliConfigFilename, blobberId string) *climodel.StakePoolInfo {
-	t.Logf("Get Stake Pool...")
-	output, err := cliutils.RunCommand(fmt.Sprintf(
-		"./zbox sp-info --blobber_id %s --json --silent --wallet %s --configDir ./config --config %s",
-		blobberId,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename))
-	require.Nil(t, err, "Failed to get blobber stake pool information", strings.Join(output, "\n"))
-	sp := new(climodel.StakePoolInfo)
-	err = json.Unmarshal([]byte(output[0]), &sp)
-	require.Nil(t, err, "Error unmarshalling blobber stake information", strings.Join(output, "\n"))
-
-	return sp
 }
 
 // size in gigabytes
