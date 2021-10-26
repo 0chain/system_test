@@ -65,8 +65,9 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
 			block := getRoundBlockFromASharder(t, round)
 
-			for _, txn := range block.Block.Transactions {
-				if len(block_miner_id) == 0 {
+			for i := range block.Block.Transactions {
+				txn := block.Block.Transactions[i]
+				if block_miner_id == "" {
 					if txn.ToClientId == targetWallet.ClientID {
 						block_miner_id = block.Block.MinerId
 						transactionRound = block.Block.Round
@@ -76,10 +77,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						t.Logf("Found after: %d rounds", block.Block.Round-startBalance.Round)
 					}
 				} else {
-					data := fmt.Sprintf(`{"name":"payFees","input":{"round":%d}}`, transactionRound)
-					t.Logf("txn.TransactionData1: %s", txn.TransactionData)
-					t.Logf("txn.TransactionData2: %s", data)
-					if txn.TransactionData == data {
+					if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
 						var transfers []apimodel.Transfer
 
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
