@@ -13,6 +13,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -298,31 +299,6 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		assertBalanceIs(t, "500.000 mZCN")
 
-		blobber := getOneOfAllocationBlobbers(t, allocationID)
-
-		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
-
-		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "30m",
-			"size":       20 * MB,
-			"lock":       0.2,
-		})
-		output, err := updateAllocation(t, configPath, params)
-		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
-
-		assertBalanceIs(t, "300.000 mZCN")
-
-		blobber = getOneOfAllocationBlobbers(t, allocationID)
-
-		offer = getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
-
-		expectedLock = sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
-
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -349,17 +325,53 @@ func TestCommonUserFunctions(t *testing.T) {
 	t.Run("Create Allocation - Lock token interest must've been put in stake pool", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		assertBalanceIs(t, "500.000 mZCN")
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobber := getOneOfAllocationBlobbers(t, allocationID)
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 1 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
 
-		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
+		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
+		output, err = getAllocation(t, allocationID)
+		require.Nil(t, err, "error fetching allocation")
 
+		allocation := climodel.Allocation{}
+		err = json.Unmarshal([]byte(output[0]), &allocation)
+		require.Nil(t, err, "error unmarshalling allocation json")
+
+		for _, blobber_detail := range allocation.BlobberDetails {
+			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id": blobber_detail.BlobberID,
+				"json":       "",
+			}))
+			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			stakePool := climodel.StakePoolInfo{}
+			err = json.Unmarshal([]byte(output[0]), &stakePool)
+			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			allocationOffer := climodel.StakePoolOfferInfo{}
+			for _, offer := range stakePool.Offers {
+				if offer.AllocationID == allocationID {
+					allocationOffer = *offer
+				}
+			}
+
+			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*blobber_detail.Terms.Write_price), int64(allocationOffer.Lock))
+		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -372,17 +384,6 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-}
-
-func getOneOfAllocationBlobbers(t *testing.T, allocationID string) *climodel.BlobberAllocation {
-	allocation := getAllocation(t, allocationID)
-
-	require.GreaterOrEqual(t, len(allocation.BlobberDetails), 1, "Allocation must've been stored at least on one blobber")
-
-	// We can also select a blobber randomly or select the first one
-	blobber := allocation.BlobberDetails[0]
-
-	return blobber
 }
 
 func assertBalanceIs(t *testing.T, balance string) {
@@ -511,23 +512,18 @@ func getWalletBalance(t *testing.T, cliConfigFilename string) string {
 	return userWalletBalance
 }
 
-func getAllocation(t *testing.T, allocationID string) *climodel.Allocation {
+func getAllocation(t *testing.T, allocationID string) ([]string, error) {
 	return getAllocationWithRetry(t, configPath, allocationID, 1)
 }
 
-func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) *climodel.Allocation {
+func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) ([]string, error) {
 	t.Logf("Get Allocation...")
 	output, err := cliutils.RunCommandWithRetry(t, fmt.Sprintf(
 		"./zbox get --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
 		allocationID,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename), retry, time.Second*5)
-	require.Nil(t, err, "Failed to get allocation", strings.Join(output, "\n"))
-	alloc := &climodel.Allocation{}
-	err = json.Unmarshal([]byte(output[0]), &alloc)
-	require.Nil(t, err, "Error unmarshalling allocation", strings.Join(output, "\n"))
-
-	return alloc
+	return output, err
 }
 
 func getStakePoolInfo(t *testing.T, cliConfigFilename, blobberId string) *climodel.StakePoolInfo {
