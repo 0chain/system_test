@@ -401,38 +401,6 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
-		//t.Parallel()
-
-		allocationSize := int64(1 * MB)
-		fileSize := int64(math.Floor(512 * KB))
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
-
-		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
-		wait(t, 50*time.Second)
-
-		initialWritePool := getWritePool(t, configPath)
-
-		updateFileWithRandomlyGeneratedData(t, allocationID, filename, int64(5*MB))
-
-		// Wait before fetching final write pool
-		wait(t, 50*time.Second)
-
-		finalWritePool := getWritePool(t, configPath)
-
-		// Blobber pool balance should have been reduced
-		totalChangeInWritePool := int64(0)
-		for i := range finalWritePool[0].Blobber {
-			diff := finalWritePool[0].Blobber[i].Balance - initialWritePool[0].Blobber[i].Balance
-			t.Logf("Blobber [%v] balance in write pool has decreased by [%v] tokens after update", i, -diff)
-			require.Negative(t, diff, "Blobber has to pay some of its token to write marker")
-			totalChangeInWritePool += diff
-		}
-		require.Negative(t, totalChangeInWritePool, "Blobbers has to pay some of their token to redeem write markers")
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("File Update - Users should not be charged for updating a file ", func(t *testing.T) {
 		//t.Parallel()
 
