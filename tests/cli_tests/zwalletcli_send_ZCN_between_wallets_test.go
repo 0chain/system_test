@@ -20,7 +20,7 @@ import (
 
 func TestSendZCNBetweenWallets(t *testing.T) {
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		_, targetWallet := setupTransferWallets(t)
 
@@ -44,7 +44,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
-		wait(t, 120*time.Second)
+		wait(t, 60*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		for endBalance.Round == startBalance.Round {
 			time.Sleep(10 * time.Second)
@@ -70,12 +70,14 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 			block := getRoundBlockFromASharder(t, round)
 
 			for _, txn := range block.Block.Transactions {
-				if block_miner_id == "" {
+				if len(block_miner_id) == 0 {
 					if txn.ToClientId == targetWallet.ClientID {
 						block_miner_id = block.Block.MinerId
 						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
 						expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
+						t.Logf("Transaction Roud: %d", block.Block.Round)
+						t.Logf("Found after: %d rounds", block.Block.Round-startBalance.Round)
 					}
 				} else {
 					data := fmt.Sprintf("{\"name\":\"payFees\",\"input\":{\"round\":%d}}", transactionRound)
@@ -86,8 +88,9 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
 						for _, tr := range transfers {
-							if tr.To == block_miner_id && tr.Amount == int64(expected_miner_fee) {
+							if tr.To == block_miner_id && tr.Amount == expected_miner_fee {
 								feeTransfer = tr
+								t.Logf("Roud: %d", block.Block.Round)
 								break out
 							}
 						}
