@@ -369,7 +369,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			}
 
 			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
-			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*blobber_detail.Terms.Write_price), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
 		}
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -432,7 +432,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			}
 
 			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
-			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*blobber_detail.Terms.Write_price), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
 		}
 
 		createAllocationTestTeardown(t, allocationID)

@@ -99,8 +99,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price                float64 `json:"read_price"`
-	Write_price               float64 `json:"write_price"`
+	Read_price                int64   `json:"read_price"`
+	Write_price               int64   `json:"write_price"`
 	Min_lock_demand           float64 `json:"min_lock_demand"`
 	Max_offer_duration        int64   `json:"max_offer_duration"`
 	Challenge_completion_time int64   `json:"challenge_completion_time"`
@@ -125,11 +125,11 @@ type BlobberInfo struct {
 }
 
 type ChallengePoolInfo struct {
-	Id         string  `json:"id"`
-	Balance    float64 `json:"balance"`
-	StartTime  int64   `json:"start_time"`
-	Expiration int64   `json:"expiration"`
-	Finalized  bool    `json:"finalized"`
+	Id         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	StartTime  int64  `json:"start_time"`
+	Expiration int64  `json:"expiration"`
+	Finalized  bool   `json:"finalized"`
 }
 
 type FileMetaResult struct {

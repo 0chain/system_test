@@ -160,7 +160,7 @@ func TestBrokenScenarios(t *testing.T) {
 		}
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
-		require.InEpsilon(t, totalChangeInWritePool, intToZCN(int64(challengePool.Balance)), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(int64(challengePool.Balance)))
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(int64(challengePool.Balance)))
 	})
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
