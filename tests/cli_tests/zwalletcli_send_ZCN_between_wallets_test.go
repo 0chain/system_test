@@ -207,7 +207,7 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	return mconfig
 }
 
-func setupTransferWallets(t *testing.T) (client *climodel.Wallet, wallet *climodel.Wallet) {
+func setupTransferWallets(t *testing.T) (client, wallet *climodel.Wallet) {
 	targetWallet := escapedTestName(t) + "_TARGET"
 
 	output, err := registerWallet(t, configPath)

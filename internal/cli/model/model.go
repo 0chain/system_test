@@ -21,7 +21,7 @@ type Allocation struct {
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
 	Blobbers       []Blobber `json:"blobbers"`
-	//Stats          *AllocationStats          `json:"stats"`
+	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
 

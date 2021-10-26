@@ -562,14 +562,14 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 	require.Nil(t, err, "list allocations failed", err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	var allocations []climodel.Allocation
+	var allocations []*climodel.Allocation
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocations)
 	require.Nil(t, err, "error deserializing JSON", err)
 
 	allocationMap := make(map[string]climodel.Allocation)
 
 	for _, ac := range allocations {
-		allocationMap[ac.ID] = ac
+		allocationMap[ac.ID] = *ac
 	}
 
 	return allocationMap

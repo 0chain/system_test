@@ -530,7 +530,8 @@ func generateRandomTestFileName(t *testing.T) string {
 	// Create the directory if it does not exist
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
-			os.Mkdir(path, 0755)
+			err = os.Mkdir(path, 0755)
+			require.Nil(t, err, "error making tmp directory")
 		}
 	}
 
