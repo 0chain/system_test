@@ -216,16 +216,16 @@ type BlobberAllocation struct {
 
 type StakePoolInfo struct {
 	ID          string                       `json:"pool_id"`
-	Balance     int64                      `json:"balance"`
-	Unstake     int64                      `json:"unstake"`
+	Balance     int64                        `json:"balance"`
+	Unstake     int64                        `json:"unstake"`
 	Free        int64                        `json:"free"`
 	Capacity    int64                        `json:"capacity"`
-	WritePrice  int64                      `json:"write_price"`
+	WritePrice  int64                        `json:"write_price"`
 	Offers      []*StakePoolOfferInfo        `json:"offers"`
-	OffersTotal int64                      `json:"offers_total"`
+	OffersTotal int64                        `json:"offers_total"`
 	Delegate    []*StakePoolDelegatePoolInfo `json:"delegate"`
-	Earnings    int64                      `json:"interests"`
-	Penalty     int64                      `json:"penalty"`
+	Earnings    int64                        `json:"interests"`
+	Penalty     int64                        `json:"penalty"`
 	Rewards     StakePoolRewardsInfo         `json:"rewards"`
 	Settings    StakePoolSettings            `json:"settings"`
 }
