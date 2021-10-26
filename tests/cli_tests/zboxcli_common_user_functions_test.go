@@ -150,7 +150,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-		wait(t, 10*time.Second)
+		wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath)
 		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
@@ -162,7 +162,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
-		wait(t, 10*time.Second)
+		wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath)
 		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
@@ -206,7 +206,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
 		// Get initial write pool
-		wait(t, 10*time.Second)
+		wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath)
 		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
@@ -218,7 +218,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
-		wait(t, 10*time.Second)
+		wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath)
 		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
 
