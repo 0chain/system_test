@@ -56,6 +56,6 @@ jobs:
           fi
 
       - name: "Notify Slack"
-        if: failure()
+        if: failure() && ${{ secrets.SEND_SLACK_NOTIFICATION == 'true' }}
         run: |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> [${{ matrix.network }}] network seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
