@@ -478,11 +478,6 @@ func TestCommonUserFunctions(t *testing.T) {
 	})
 }
 
-func assertBalanceIs(t *testing.T, balance string) {
-	userWalletBalance := getWalletBalance(t, configPath)
-	require.Equal(t, balance, userWalletBalance, "User wallet balance mismatch")
-}
-
 func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
@@ -568,19 +563,6 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	)
 
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
-}
-
-func getWalletBalance(t *testing.T, cliConfigFilename string) string {
-	t.Logf("Get Wallet Balance...")
-	output, err := getBalance(t, configPath)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Regexp(t, regexp.MustCompile(`Balance: [0-9.]+ (|m|µ)ZCN \([0-9.]+ USD\)$`), output[0])
-	r := regexp.MustCompile(`Balance: (?P<Balance>[0-9.]+ (|m|µ)ZCN) \([0-9.]+ USD\)$`)
-	matches := r.FindStringSubmatch(output[0])
-	userWalletBalance := matches[1]
-	t.Logf(userWalletBalance)
-	return userWalletBalance
 }
 
 func getAllocation(t *testing.T, allocationID string) ([]string, error) {
