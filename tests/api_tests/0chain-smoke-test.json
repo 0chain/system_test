@@ -51,8 +51,8 @@
 									"    }",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"    var response = JSON.parse(responseBody);",
-									"    pm.globals.set(\"miners\", response.miners);",
-									"    pm.globals.set(\"sharders\", response.sharders);",
+									"    pm.globals.set(\"miners\", response.miners.sort());",
+									"    pm.globals.set(\"sharders\", response.sharders.sort());",
 									"});",
 									""
 								],
