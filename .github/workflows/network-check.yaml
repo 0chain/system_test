@@ -56,7 +56,7 @@ jobs:
           fi
 
       - name: "Check if should send slack notification"
-        if: always()
+        if: failure()
         id: send-slack-notification
         uses: peter-murray/value-as-flag-action@0.0.1
         with:
