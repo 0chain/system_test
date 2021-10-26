@@ -1,10 +1,11 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
@@ -21,13 +22,10 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
 		t.Parallel()
 
-		s := rand.NewSource(time.Now().UnixNano())
-
 		_, targetWallet := setupTransferWallets(t)
 
 		mconfig := getMinerSCConfiguration(t)
 		minerShare := mconfig["share_ratio"]
-		// minerServiceCharge := mconfig["service_charge"]
 
 		miners := getMinersList(t)
 		minerNode := miners.Nodes[0].SimpleNode
@@ -35,8 +33,13 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 
 		startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
-		// Set a random fee in range [0.01, 0.02)
-		send_fee := 0.01 + rand.New(s).Float64()*0.01
+		// Set a random fee in range [0.01, 0.02) (crypto/rand used for linting fix)
+		random, err := rand.Int(rand.Reader, big.NewInt(1))
+		var randomF big.Float
+		randomBigFloat := *randomF.SetInt(random)
+		randomFloat, _ := randomBigFloat.Float64()
+		require.Nil(t, err, "error generating random number from crypto/rand")
+		send_fee := 0.01 + randomFloat*0.01
 
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
@@ -63,9 +66,8 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 			block := getRoundBlockFromASharder(t, round)
 
 			for _, txn := range block.Block.Transactions {
-				if len(block_miner_id) == 0 {
+				if block_miner_id == "" {
 					if txn.ToClientId == targetWallet.ClientID {
-						// transaction = *txn
 						block_miner_id = block.Block.MinerId
 						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
@@ -205,7 +207,7 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	return mconfig
 }
 
-func setupTransferWallets(t *testing.T) (*climodel.Wallet, *climodel.Wallet) {
+func setupTransferWallets(t *testing.T) (client *climodel.Wallet, wallet *climodel.Wallet) {
 	targetWallet := escapedTestName(t) + "_TARGET"
 
 	output, err := registerWallet(t, configPath)
@@ -214,7 +216,7 @@ func setupTransferWallets(t *testing.T) (*climodel.Wallet, *climodel.Wallet) {
 	output, err = registerWalletForName(configPath, targetWallet)
 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-	client, err := getWalletForName(t, configPath, escapedTestName(t))
+	client, err = getWalletForName(t, configPath, escapedTestName(t))
 	require.Nil(t, err, "Error occurred when retrieving client wallet")
 
 	target, err := getWalletForName(t, configPath, targetWallet)
