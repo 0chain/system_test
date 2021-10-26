@@ -300,7 +300,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		blobber := getOneOfAllocationBlobbers(t, allocationID)
 
-		offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
 		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
@@ -318,7 +318,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		blobber = getOneOfAllocationBlobbers(t, allocationID)
 
-		offer = getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+		offer = getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock = sizeInGB(blobber.Size) * blobber.Terms.Write_price
 		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
@@ -346,7 +346,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
+	t.Run("Create Allocation - Lock token interest must've been put in stake pool", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
@@ -355,7 +355,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		blobber := getOneOfAllocationBlobbers(t, allocationID)
 
-		offer := getAllocationOfferFromBlobberStackPool(t, blobber.BlobberID, allocationID)
+		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
 		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
@@ -477,7 +477,7 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
 
-func getAllocationOfferFromBlobberStackPool(t *testing.T, blobber_id, allocationID string) *climodel.StakePoolOfferInfo {
+func getAllocationOfferFromBlobberStakePool(t *testing.T, blobber_id, allocationID string) *climodel.StakePoolOfferInfo {
 	sp_info := getStackPoolInfo(t, configPath, blobber_id)
 
 	require.GreaterOrEqual(t, len(sp_info.Offers), 1, "Blobbers offers must not be empty")
