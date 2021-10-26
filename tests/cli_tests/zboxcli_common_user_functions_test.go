@@ -292,7 +292,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create Allocation - Lock amount must've been withdrawn from user wallet", func(t *testing.T) {
+	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -321,7 +321,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create Allocation - Lock token interest must've been put in stake pool", func(t *testing.T) {
+	t.Run("Create Allocation - Blobbers' must lock appropriate amount of tokens in stake pool", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -374,32 +374,105 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Update Allocation - Lock token interest must've been put in stake pool", func(t *testing.T) {
+	t.Run("Update Allocation - Blobbers' lock in stake pool must increase according to updated size", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		assertBalanceIs(t, "500.000 mZCN")
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 1 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		// Updated allocation params
+		allocParams = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       2 * MB,
+		})
+		output, err = updateAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
+
+		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
+		output, err = getAllocation(t, allocationID)
+		require.Nil(t, err, "error fetching allocation")
+
+		allocation := climodel.Allocation{}
+		err = json.Unmarshal([]byte(output[0]), &allocation)
+		require.Nil(t, err, "error unmarshalling allocation json")
+
+		for _, blobber_detail := range allocation.BlobberDetails {
+			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id": blobber_detail.BlobberID,
+				"json":       "",
+			}))
+			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			stakePool := climodel.StakePoolInfo{}
+			err = json.Unmarshal([]byte(output[0]), &stakePool)
+			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			allocationOffer := climodel.StakePoolOfferInfo{}
+			for _, offer := range stakePool.Offers {
+				if offer.AllocationID == allocationID {
+					allocationOffer = *offer
+				}
+			}
+
+			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*blobber_detail.Terms.Write_price), int64(allocationOffer.Lock))
+		}
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Update Allocation - Lock amount must've been withdrown from user wallet", func(t *testing.T) {
+	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath)
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		assertBalanceIs(t, "500.000 mZCN")
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 1 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "30m",
 			"lock":       0.2,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params)
 		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
 
-		assertBalanceIs(t, "300.000 mZCN")
+		// Wallet balance should decrease by locked amount
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 300.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
 	})
