@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math"
 	"math/rand"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -30,8 +31,12 @@ const (
 func TestCommonUserFunctions(t *testing.T) {
 	t.Parallel()
 
-	t.Run("File Update - Blobbers should pay to write the marker to the blockchain ", func(t *testing.T) {
+	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
 		t.Parallel()
+
+		// Logic: Upload a 2 MB file and get the upload cost. Update the 2 MB file with a 4 MB file
+		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
+		// 2 MBs.
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -42,6 +47,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "0.5",
+			"size": 10 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -50,8 +56,21 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		fileSize := int64(3 * MB)
-		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		fileSize := int64(2 * MB)
+
+		// Get expected upload cost for 2 MB
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		output, err = getUploadCostInUnit(t, configPath, allocationID, localpath)
+		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+
+		// Wait for write pool blobber balances to be deduced for 2 MB
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
@@ -69,26 +88,13 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Less(t, 0, len(initialWritePool[0].Blobber))
 		require.Equal(t, true, initialWritePool[0].Locked)
 
-		filepath := updateFileWithRandomlyGeneratedData(t, allocationID, filename, int64(5*MB))
-
-		// Get expected upload cost
-		output, err = getUploadCostInUnit(t, configPath, allocationID, filepath)
-		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
-
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+		remotepath := filepath.Base(localpath)
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(4*MB))
 
 		// Wait before fetching final write pool
 		wait(t, time.Minute)
 
-		// Get the new Write-Pool info after upload
+		// Get the new Write-Pool info after upload, should be deduced by cost of uploading 2 MBs
 		output, err = writePoolInfo(t, configPath)
 		require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
 
@@ -204,7 +210,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 		wait(t, 50*time.Second)
 
 		initialWritePool := getWritePool(t, configPath)
@@ -246,11 +252,19 @@ func TestCommonUserFunctions(t *testing.T) {
 		wp := getWritePool(t, configPath)
 		require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
 
-		filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-		// uploadCost takes into account data+parity, so we divide by that
-		uploadCost = (uploadCost / (2 + 2))
-		expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
+		// Get expected upload cost
+		output, err := getUploadCostInUnit(t, configPath, allocationID, filename)
+		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+		expected_wp_balance := int64(float64(5000000000) - (actualExpectedUploadCostInZCN * tokenUnit))
 
 		wait(t, 15*time.Second)
 		wp = getWritePool(t, configPath)
@@ -295,7 +309,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 		wait(t, 50*time.Second)
 
 		initialWritePool := getWritePool(t, configPath)
@@ -338,11 +352,20 @@ func TestCommonUserFunctions(t *testing.T) {
 		wp := getWritePool(t, configPath)
 		require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
 
-		filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-		// uploadCost takes into account data+parity, so we divide by that
-		uploadCost = (uploadCost / (2 + 2))
-		expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
+		// Get expected upload cost for 2 MB
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		output, err := getUploadCostInUnit(t, configPath, allocationID, localpath)
+		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+		expected_wp_balance := int64(float64(5000000000) - float64(actualExpectedUploadCostInZCN*tokenUnit))
 
 		wait(t, 15*time.Second)
 		wp = getWritePool(t, configPath)
@@ -386,7 +409,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": allocationSize})
 
-		filename, _ := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 		wait(t, 50*time.Second)
 
 		initialWritePool := getWritePool(t, configPath)
@@ -422,11 +445,20 @@ func TestCommonUserFunctions(t *testing.T) {
 		wp := getWritePool(t, configPath)
 		require.Equal(t, int64(5000000000), wp[0].Balance, "Write pool balance expected to be equal to locked amount")
 
-		filename, uploadCost := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		filename := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
-		// uploadCost takes into account data+parity, so we divide by that
-		uploadCost = (uploadCost / (2 + 2))
-		expected_wp_balance := int64(float64(5000000000) - float64(uploadCost))
+		// Get expected upload cost for 2 MB
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		output, err := getUploadCostInUnit(t, configPath, allocationID, localpath)
+		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+		expected_wp_balance := int64(float64(5000000000) - float64(actualExpectedUploadCostInZCN*tokenUnit))
 
 		wait(t, 15*time.Second)
 		wp = getWritePool(t, configPath)
@@ -696,13 +728,10 @@ func assertBalanceIs(t *testing.T, balance string) {
 	require.Equal(t, balance, userWalletBalance, "User wallet balance mismatch")
 }
 
-func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) (string, int64) {
+func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
-
-	// Get expected upload cost
-	uploadCost := getUploadCostValue(t, allocationID, filename, map[string]interface{}{"duration": "1h"})
 
 	output, err := uploadFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
@@ -712,10 +741,7 @@ func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Equal(t, 2, len(output))
 	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
-	r := regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`)
-	matches := r.FindStringSubmatch(output[1])
-	filename = matches[1]
-	return filename, uploadCost
+	return filename
 }
 
 func moveAllocationFile(t *testing.T, allocationID, remotepath, destination string) {
