@@ -225,13 +225,3 @@ func setupTransferWallets(t *testing.T) (*climodel.Wallet, *climodel.Wallet) {
 
 	return client, target
 }
-
-func getWritePool(t *testing.T, cliConfigFilename string) []climodel.WritePoolInfo {
-	output, err := writePoolInfo(t, configPath)
-	require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
-
-	initialWritePool := []climodel.WritePoolInfo{}
-	err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-	require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-	return initialWritePool
-}

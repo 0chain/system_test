@@ -291,7 +291,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Update Allocation - Lock token interest must've been put in stack pool", func(t *testing.T) {
+	t.Run("Update Allocation - Lock token interest must've been put in stake pool", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
@@ -303,7 +303,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -321,7 +321,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		offer = getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock = sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -358,7 +358,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		offer := getAllocationOfferFromBlobberStakePool(t, blobber.BlobberID, allocationID)
 
 		expectedLock := sizeInGB(blobber.Size) * blobber.Terms.Write_price
-		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stack pool")
+		require.Equal(t, int64(expectedLock), int64(offer.Lock), "Lock token interest must've been put in stake pool")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -478,7 +478,7 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 }
 
 func getAllocationOfferFromBlobberStakePool(t *testing.T, blobber_id, allocationID string) *climodel.StakePoolOfferInfo {
-	sp_info := getStackPoolInfo(t, configPath, blobber_id)
+	sp_info := getStakePoolInfo(t, configPath, blobber_id)
 
 	require.GreaterOrEqual(t, len(sp_info.Offers), 1, "Blobbers offers must not be empty")
 
@@ -492,7 +492,7 @@ func getAllocationOfferFromBlobberStakePool(t *testing.T, blobber_id, allocation
 		}
 	}
 
-	require.GreaterOrEqual(t, n, 1, "The allocation offer expected to be found on blobber stack pool information")
+	require.GreaterOrEqual(t, n, 1, "The allocation offer expected to be found on blobber stake pool information")
 
 	offer := offers[0]
 	return &offer
@@ -530,34 +530,19 @@ func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string
 	return alloc
 }
 
-func getStackPoolInfo(t *testing.T, cliConfigFilename, blobberId string) *climodel.StakePoolInfo {
-	t.Logf("Get Stack Pool...")
+func getStakePoolInfo(t *testing.T, cliConfigFilename, blobberId string) *climodel.StakePoolInfo {
+	t.Logf("Get Stake Pool...")
 	output, err := cliutils.RunCommand(fmt.Sprintf(
 		"./zbox sp-info --blobber_id %s --json --silent --wallet %s --configDir ./config --config %s",
 		blobberId,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename))
-	require.Nil(t, err, "Failed to get blobber stack pool information", strings.Join(output, "\n"))
+	require.Nil(t, err, "Failed to get blobber stake pool information", strings.Join(output, "\n"))
 	sp := new(climodel.StakePoolInfo)
 	err = json.Unmarshal([]byte(output[0]), &sp)
-	require.Nil(t, err, "Error unmarshalling blobber stack information", strings.Join(output, "\n"))
+	require.Nil(t, err, "Error unmarshalling blobber stake information", strings.Join(output, "\n"))
 
 	return sp
-}
-
-func getChallengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) *climodel.ChallengePoolInfo {
-	t.Logf("Get Challenge Pool...")
-	output, err := cliutils.RunCommand(fmt.Sprintf(
-		"./zbox cp-info --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
-		allocationID,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename))
-	require.Nil(t, err, "Failed to get blobber stack pool information", strings.Join(output, "\n"))
-	cp := &climodel.ChallengePoolInfo{}
-	err = json.Unmarshal([]byte(output[0]), &cp)
-	require.Nil(t, err, "Error unmarshalling blobber stack information", strings.Join(output, "\n"))
-
-	return cp
 }
 
 // size in gigabytes
