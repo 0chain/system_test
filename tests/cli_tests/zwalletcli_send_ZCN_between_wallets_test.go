@@ -1,10 +1,12 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"math"
+	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
@@ -19,7 +21,7 @@ import (
 
 func TestSendZCNBetweenWallets(t *testing.T) {
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
 		_, targetWallet := setupTransferWallets(t)
 
@@ -33,15 +35,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		// Set a random fee in range [0.01, 0.02) (crypto/rand used for linting fix)
-		s := rand.NewSource(time.Now().UnixNano())
-		send_fee := 0.01 + rand.New(s).Float64()*0.01
-
-		// random, err := rand.Int(rand.Reader, big.NewInt(1))
-		// var randomF big.Float
-		// randomBigFloat := *randomF.SetInt(random)
-		// randomFloat, _ := randomBigFloat.Float64()
-		// require.Nil(t, err, "error generating random number from crypto/rand")
-		// send_fee := 0.01 + randomFloat*0.01
+		send_fee := 0.01 + getRandomUniformFloat64(t)*0.01
 
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
@@ -58,7 +52,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 
 		var block_miner *climodel.Node
 		var block_miner_id string
-		var feeTransfer apimodel.Transfer
+		var feeTransfer *apimodel.Transfer
 		var transactionRound int64
 
 		// Expected miner fee is calculating using this formula:
@@ -82,8 +76,9 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						t.Logf("Found after: %d rounds", block.Block.Round-startBalance.Round)
 					}
 				} else {
-					data := fmt.Sprintf("{\"name\":\"payFees\",\"input\":{\"round\":%d}}", transactionRound)
-					t.Logf("txn.TransactionData: %s", txn.TransactionData)
+					data := fmt.Sprintf(`{"name":"payFees","input":{"round":%d}}`, transactionRound)
+					t.Logf("txn.TransactionData1: %s", txn.TransactionData)
+					t.Logf("txn.TransactionData2: %s", data)
 					if txn.TransactionData == data {
 						var transfers []apimodel.Transfer
 
@@ -92,7 +87,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 
 						for _, tr := range transfers {
 							if tr.To == block_miner_id && tr.Amount == expected_miner_fee {
-								feeTransfer = tr
+								feeTransfer = &tr
 								t.Logf("Roud: %d", block.Block.Round)
 								break out
 							}
@@ -105,6 +100,16 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
 		require.Equal(t, expected_miner_fee, feeTransfer.Amount, "Transfer fee must be equal to miner fee")
 	})
+}
+
+func getRandomUniformFloat64(t *testing.T) float64 {
+	random, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+	var randomF big.Float
+	randomBigFloat := *randomF.SetInt(random)
+	randomFloat, _ := randomBigFloat.Float64()
+	randomFloat /= float64(math.MaxInt64)
+	require.Nil(t, err, "error generating random number from crypto/rand")
+	return randomFloat
 }
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
