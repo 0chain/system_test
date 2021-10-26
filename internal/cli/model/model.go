@@ -215,48 +215,43 @@ type BlobberAllocation struct {
 }
 
 type StakePoolInfo struct {
-	ID      string  `json:"pool_id"` // blobber ID
-	Balance float64 `json:"balance"` // total stake
-	Unstake float64 `json:"unstake"` // total unstake amount
-
-	Free       int64   `json:"free"`        // free staked space
-	Capacity   int64   `json:"capacity"`    // blobber bid
-	WritePrice float64 `json:"write_price"` // its write price
-
-	Offers      []*StakePoolOfferInfo `json:"offers"`       //
-	OffersTotal float64               `json:"offers_total"` //
-	// delegate pools
-	Delegate []*StakePoolDelegatePoolInfo `json:"delegate"`
-	Earnings float64                      `json:"interests"` // total for all
-	Penalty  float64                      `json:"penalty"`   // total for all
-	// rewards
-	Rewards StakePoolRewardsInfo `json:"rewards"`
-	// settings
-	Settings StakePoolSettings `json:"settings"`
+	ID          string                       `json:"pool_id"`
+	Balance     int64                        `json:"balance"`
+	Unstake     int64                        `json:"unstake"`
+	Free        int64                        `json:"free"`
+	Capacity    int64                        `json:"capacity"`
+	WritePrice  int64                        `json:"write_price"`
+	Offers      []*StakePoolOfferInfo        `json:"offers"`
+	OffersTotal int64                        `json:"offers_total"`
+	Delegate    []*StakePoolDelegatePoolInfo `json:"delegate"`
+	Earnings    int64                        `json:"interests"`
+	Penalty     int64                        `json:"penalty"`
+	Rewards     StakePoolRewardsInfo         `json:"rewards"`
+	Settings    StakePoolSettings            `json:"settings"`
 }
 
 type StakePoolOfferInfo struct {
-	Lock         float64 `json:"lock"`
-	Expire       int64   `json:"expire"`
-	AllocationID string  `json:"allocation_id"`
-	IsExpired    bool    `json:"is_expired"`
+	Lock         int64  `json:"lock"`
+	Expire       int64  `json:"expire"`
+	AllocationID string `json:"allocation_id"`
+	IsExpired    bool   `json:"is_expired"`
 }
 
 // StakePoolRewardsInfo represents stake pool rewards.
 type StakePoolRewardsInfo struct {
-	Charge    float64 `json:"charge"`    // total for all time
-	Blobber   float64 `json:"blobber"`   // total for all time
-	Validator float64 `json:"validator"` // total for all time
+	Charge    int64 `json:"charge"`    // total for all time
+	Blobber   int64 `json:"blobber"`   // total for all time
+	Validator int64 `json:"validator"` // total for all time
 }
 
 type StakePoolDelegatePoolInfo struct {
-	ID               string  `json:"id"`                // pool ID
-	Balance          float64 `json:"balance"`           // current balance
-	DelegateID       string  `json:"delegate_id"`       // wallet
-	Rewards          float64 `json:"rewards"`           // total for all time
-	Interests        float64 `json:"interests"`         // total for all time
-	Penalty          float64 `json:"penalty"`           // total for all time
-	PendingInterests float64 `json:"pending_interests"` // total for all time
+	ID               string `json:"id"`                // pool ID
+	Balance          int64  `json:"balance"`           // current balance
+	DelegateID       string `json:"delegate_id"`       // wallet
+	Rewards          int64  `json:"rewards"`           // total for all time
+	Interests        int64  `json:"interests"`         // total for all time
+	Penalty          int64  `json:"penalty"`           // total for all time
+	PendingInterests int64  `json:"pending_interests"` // total for all time
 	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
 	// time it can't be unstaked.
 	Unstake int64 `json:"unstake"`
@@ -266,9 +261,9 @@ type StakePoolSettings struct {
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
 	// MinStake allowed.
-	MinStake float64 `json:"min_stake"`
+	MinStake int64 `json:"min_stake"`
 	// MaxStake allowed.
-	MaxStake float64 `json:"max_stake"`
+	MaxStake int64 `json:"max_stake"`
 	// NumDelegates maximum allowed.
 	NumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.

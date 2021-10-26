@@ -46,9 +46,13 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 
 		wait(t, 120*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		for endBalance.Round == startBalance.Round {
+			time.Sleep(10 * time.Second)
+			endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		}
 
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		var block_miner *climodel.Node
 		var block_miner_id string
