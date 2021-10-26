@@ -1,11 +1,10 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/big"
+	"math/rand"
 	"reflect"
 	"strconv"
 	"strings"
@@ -34,12 +33,15 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		// Set a random fee in range [0.01, 0.02) (crypto/rand used for linting fix)
-		random, err := rand.Int(rand.Reader, big.NewInt(1))
-		var randomF big.Float
-		randomBigFloat := *randomF.SetInt(random)
-		randomFloat, _ := randomBigFloat.Float64()
-		require.Nil(t, err, "error generating random number from crypto/rand")
-		send_fee := 0.01 + randomFloat*0.01
+		s := rand.NewSource(time.Now().UnixNano())
+		send_fee := 0.01 + rand.New(s).Float64()*0.01
+
+		// random, err := rand.Int(rand.Reader, big.NewInt(1))
+		// var randomF big.Float
+		// randomBigFloat := *randomF.SetInt(random)
+		// randomFloat, _ := randomBigFloat.Float64()
+		// require.Nil(t, err, "error generating random number from crypto/rand")
+		// send_fee := 0.01 + randomFloat*0.01
 
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
@@ -81,6 +83,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 					}
 				} else {
 					data := fmt.Sprintf("{\"name\":\"payFees\",\"input\":{\"round\":%d}}", transactionRound)
+					t.Logf("txn.TransactionData: %s", txn.TransactionData)
 					if txn.TransactionData == data {
 						var transfers []apimodel.Transfer
 
