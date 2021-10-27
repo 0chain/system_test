@@ -19,6 +19,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// address of minersc
+const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+
 func TestSendZCNBetweenWallets(t *testing.T) {
 	t.Parallel()
 
@@ -79,15 +82,14 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						t.Logf("Miner ID: %v", block_miner_id)
 					}
 				} else {
-					if strings.ContainsAny(strings.ToLower(txn.TransactionData), "payfees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
 						var transfers []apimodel.Transfer
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
 						for j := range transfers {
 							tr := transfers[j]
-							t.Logf("Trnasfer From: %s  To: %s  Amount: %v", tr.From, tr.To, tr.Amount)
-							if tr.To == block_miner_id && tr.Amount == expected_miner_fee {
+							if tr.From == MINER_SC_ADDRESS && tr.To == block_miner_id {
 								feeTransfer = &tr
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								break out
