@@ -951,12 +951,16 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 }
 
 func downloadFile(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Downloading file...")
 	time.Sleep(15 * time.Second) // TODO replace with pollers
 	cmd := fmt.Sprintf(
 		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(cmd)
