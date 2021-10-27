@@ -20,6 +20,8 @@ import (
 )
 
 func TestSendZCNBetweenWallets(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
 		t.Parallel()
 
@@ -73,19 +75,21 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
 						expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
+						t.Logf("Expected miner fee: %v", expected_miner_fee)
+						t.Logf("Miner ID: %v", block_miner_id)
 					}
 				} else {
 					if strings.ContainsAny(strings.ToLower(txn.TransactionData), "payfees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						t.Log("Finding transfer to miner...")
 						var transfers []apimodel.Transfer
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
 						for j := range transfers {
 							tr := transfers[j]
+							t.Logf("Trnasfer From: %s  To: %s  Amount: %v", tr.From, tr.To, tr.Amount)
 							if tr.To == block_miner_id && tr.Amount == expected_miner_fee {
 								feeTransfer = &tr
-								t.Logf("Roud: %d", block.Block.Round)
+								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								break out
 							}
 						}
