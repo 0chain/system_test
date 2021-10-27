@@ -374,6 +374,12 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, remotePath, commitResp.MetaData.Path)
 		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
 
+		// verify commit txn
+		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
+		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Transaction verification success", output[0])
+
 		// list-all
 		output, err = listAll(t, configPath, allocationID)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
