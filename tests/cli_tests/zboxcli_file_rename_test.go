@@ -166,7 +166,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 90-4) // substract chars for extension
+		b := make([]rune, 90-4) // subtract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
@@ -243,7 +243,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 110-4) // substract chars for extension
+		b := make([]rune, 110-4) // subtract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
