@@ -21,7 +21,7 @@ import (
 
 func TestSendZCNBetweenWallets(t *testing.T) {
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
-		// t.Parallel()
+		t.Parallel()
 
 		_, targetWallet := setupTransferWallets(t)
 
@@ -53,7 +53,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		var block_miner *climodel.Node
 		var block_miner_id string
 		var feeTransfer *apimodel.Transfer
-		// var transactionRound int64
+		var transactionRound int64
 
 		// Expected miner fee is calculating using this formula:
 		// Fee * minerShare * miner.ServiceCharge
@@ -70,16 +70,14 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 				if block_miner_id == "" {
 					if txn.ToClientId == targetWallet.ClientID {
 						block_miner_id = block.Block.MinerId
-						// transactionRound = block.Block.Round
+						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
 						expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
-						t.Logf("Transaction Roud: %d", block.Block.Round)
-						t.Logf("Found after: %d rounds", block.Block.Round-startBalance.Round)
 					}
 				} else {
-					if txn.TransactionType == 1000 {
+					if strings.ContainsAny(strings.ToLower(txn.TransactionData), "payfees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+						t.Log("Finding transfer to miner...")
 						var transfers []apimodel.Transfer
-
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
