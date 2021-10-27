@@ -153,7 +153,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 50-char", func(t *testing.T) {
+	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -166,7 +166,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 21)
+		b := make([]rune, 90-4) // substract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
@@ -230,7 +230,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 150-char should fail", func(t *testing.T) {
+	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -243,7 +243,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 146)
+		b := make([]rune, 110-4) // substract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
