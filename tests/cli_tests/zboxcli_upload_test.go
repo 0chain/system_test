@@ -614,11 +614,16 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Uploading file...")
+	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	t.Logf("Uploading file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		"./zbox upload %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		p,
-		escapedTestName(t)+"_wallet.json",
+		wallet,
 		cliConfigFilename,
 	)
 
