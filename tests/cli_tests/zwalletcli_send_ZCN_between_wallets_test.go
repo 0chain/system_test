@@ -53,7 +53,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		var block_miner *climodel.Node
 		var block_miner_id string
 		var feeTransfer *apimodel.Transfer
-		var transactionRound int64
+		// var transactionRound int64
 
 		// Expected miner fee is calculating using this formula:
 		// Fee * minerShare * miner.ServiceCharge
@@ -70,21 +70,21 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 				if block_miner_id == "" {
 					if txn.ToClientId == targetWallet.ClientID {
 						block_miner_id = block.Block.MinerId
-						transactionRound = block.Block.Round
+						// transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
 						expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
 						t.Logf("Transaction Roud: %d", block.Block.Round)
 						t.Logf("Found after: %d rounds", block.Block.Round-startBalance.Round)
 					}
 				} else {
-					t.Logf("---%s---", txn.TransactionData)
-					if strings.ContainsAny(strings.ToLower(txn.TransactionData), "payfees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+					if txn.TransactionType == 1000 {
 						var transfers []apimodel.Transfer
 
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
-						for _, tr := range transfers {
+						for j := range transfers {
+							tr := transfers[j]
 							if tr.To == block_miner_id && tr.Amount == expected_miner_fee {
 								feeTransfer = &tr
 								t.Logf("Roud: %d", block.Block.Round)
@@ -213,8 +213,8 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	require.Greater(t, len(output), 0)
 
 	mconfig := map[string]float64{}
-	for _, o := range output {
-		configPair := strings.Split(o, "\t")
+	for i := range output {
+		configPair := strings.Split(output[i], "\t")
 		val, err := strconv.ParseFloat(strings.TrimSpace(configPair[1]), 64)
 		require.Nil(t, err, "config val %s for %s is unexpected not float64: %s", configPair[1], configPair[0], strings.Join(output, "\n"))
 		mconfig[strings.TrimSpace(configPair[0])] = val
