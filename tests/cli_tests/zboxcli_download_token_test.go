@@ -114,6 +114,10 @@ func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]strin
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params)
+}
+
+func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Locking read tokens...")
 	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
 }

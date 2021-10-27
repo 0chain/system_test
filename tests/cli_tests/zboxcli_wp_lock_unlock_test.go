@@ -429,8 +429,12 @@ func TestWritePoolLockUnlock(t *testing.T) {
 }
 
 func writePoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return writePoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params)
+}
+
+func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Locking write tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 }
 
 func writePoolUnlock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
