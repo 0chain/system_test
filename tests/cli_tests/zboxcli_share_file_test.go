@@ -19,11 +19,6 @@ func TestShareFile(t *testing.T) {
 	t.Parallel()
 	configPath := os.Getenv("CONFIG_PATH")
 
-	if configPath == "" {
-		configPath = "./zbox_config.yaml"
-		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
-	}
-
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
