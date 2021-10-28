@@ -662,7 +662,7 @@
 									"    // timestamp is in the unix epoch (seconds) format",
 									"    var now = Math.round(Date.now() / 1000);",
 									"    pm.globals.set(\"current_timestamp\", now);",
-									"    pm.globals.set(\"expire_10_hours_from_now\", now + 36000);",
+									"    pm.globals.set(\"expire_5_mins_from_now\", now + 300);",
 									"",
 									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
 									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
@@ -757,7 +757,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_10_hours_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_5_mins_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -832,6 +832,136 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Expire storage allocation",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var Property = require('postman-collection').Property;",
+									"",
+									"async function main() {",
+									"    // postman boilerplate     ",
+									"    const interval = setTimeout(() => {}, 30000);",
+									"",
+									"    // timestamp is in the unix epoch (seconds) format",
+									"    var now = Math.round(Date.now() / 1000);",
+									"    pm.globals.set(\"current_timestamp\", now);",
+									"    pm.globals.set(\"expire_60_secs_from_now\", now + 60);",
+									"",
+									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
+									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
+									"    var creationDate = requestBody.creation_date",
+									"    var clientId = requestBody.client_id;",
+									"    var toClientId = requestBody.to_client_id;",
+									"    var transactionValue = requestBody.transaction_value;",
+									"",
+									"    var transactionDataHash = await sha3256(requestBody.transaction_data)",
+									"",
+									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
+									"    var overallHashData = (",
+									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
+									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
+									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
+									"        transactionDataHash",
+									"    )",
+									"    var overallHash = await sha3256(overallHashData)",
+									"",
+									"    pm.globals.set(\"hash_of_request_data\", overallHash);",
+									"",
+									"    var mnemonic = pm.variables.get(\"mnemonic\")",
+									"    pm.globals.set(\"signature\", await sign(overallHash, mnemonic, \"0chain-client-split-key\"))",
+									"",
+									"    clearTimeout(interval)",
+									"}",
+									"main()",
+									"",
+									"/*",
+									"Ensure your SHA3-256 impl uses the SHA3 standard, not keccak-256 (which is what CryptoJS uses)",
+									"*/",
+									"async function sha3256(data) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://api.hashify.net/hash/SHA3-256/hex?value=\" + data), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.Digest)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}",
+									"",
+									"async function sign(data, mnemonics, passphrase) {",
+									"    return await new Promise((resolve, reject) => {",
+									"",
+									"        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sign?data=\" + data + \"&mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
+									"",
+									"            var hashResponse = JSON.parse(response.text())",
+									"            resolve(hashResponse.hexString)",
+									"        });",
+									"    }).then(function(finalResult) {",
+									"        return finalResult;",
+									"    })",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"create_allocation_confirmed\", \"Response code is 200\", function () {",
+									"    pm.globals.set(\"update_allocation_txn_sent\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"    var response = JSON.parse(responseBody);",
+									"    pm.globals.set(\"update_allocation_txn_id\", response.entity.hash);",
+									"    ",
+									"    pm.globals.unset(\"hash_of_request_data\");",
+									"    pm.globals.unset(\"signature\");",
+									"    pm.globals.unset(\"current_timestamp\");",
+									"});    "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"public_key\": \"{{public_key}}\",\n    \"signature\": \"{{signature}}\",\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"update_allocation_request\\\",\\\"input\\\":{\\\"expiration_date\\\":0,\\\"id\\\":\\\"{{allocation_id}}\\\",\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"size\\\":30}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 0,\n    \"txn_output_hash\": \"\",\n    \"version\": \"1.0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{test_case_miner}}/v1/transaction/put",
+							"host": [
+								"{{test_case_miner}}"
+							],
+							"path": [
+								"v1",
+								"transaction",
+								"put"
+							]
+						},
+						"description": "Update storage allocation, adding size.  \nNB there is currently a known BUG with updating expiry to be in the future. This test case should be update when the bug is fixed."
 					},
 					"response": []
 				}
