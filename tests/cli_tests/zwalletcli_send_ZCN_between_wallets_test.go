@@ -45,7 +45,6 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
-		wait(t, 60*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		for endBalance.Round == startBalance.Round {
 			time.Sleep(10 * time.Second)
@@ -62,7 +61,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 
 		// Expected miner fee is calculating using this formula:
 		// Fee * minerShare * miner.ServiceCharge
-		var expected_miner_fee int64
+		var expectedMinerFee int64
 
 		// Find the miner who has processed the transaction,
 		// After finding the miner id, search for the fee payment to that miner in "payFee" transaction output
@@ -77,8 +76,18 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 						block_miner_id = block.Block.MinerId
 						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
-						expected_miner_fee = ConvertToValue(send_fee * minerShare * block_miner.SimpleNode.ServiceCharge)
-						t.Logf("Expected miner fee: %v", expected_miner_fee)
+						minerFee := ConvertToValue(send_fee * minerShare)
+						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
+						expectedMinerFee = minerServiceCharge
+						minerFeeRemaining := minerFee - minerServiceCharge
+
+						// If there is no stake, the miner gets entire fee.
+						// Else "Remaining" portion would be distributed to stake holders
+						// And hence not go the miner
+						if miner.TotalStake == 0 {
+							expectedMinerFee += minerFeeRemaining
+						}
+						t.Logf("Expected miner fee: %v", expectedMinerFee)
 						t.Logf("Miner ID: %v", block_miner_id)
 					}
 				} else {
@@ -101,7 +110,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		}
 
 		require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
-		require.Equal(t, expected_miner_fee, feeTransfer.Amount, "Transfer fee must be equal to miner fee")
+		require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 	})
 }
 
