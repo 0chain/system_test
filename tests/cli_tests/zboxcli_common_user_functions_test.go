@@ -52,7 +52,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		fileSize := int64(2 * MB)
+		fileSize := int64(1 * MB)
 
 		// Get expected upload cost for 2 MB
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
@@ -85,7 +85,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Equal(t, true, initialWritePool[0].Locked)
 
 		remotepath := filepath.Base(localpath)
-		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(4*MB))
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(2*MB))
 
 		// Wait before fetching final write pool
 		wait(t, time.Minute)
