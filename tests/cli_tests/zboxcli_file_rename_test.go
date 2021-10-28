@@ -569,38 +569,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	t.Run("rename file with no allocation param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destName := "new_" + filename
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on rename
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = renameFile(t, configPath, map[string]interface{}{
-			"remotepath": remotePath,
-			"destname":   destName,
+			"remotepath": "/abc.txt",
+			"destname":   "def.txt",
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -611,38 +586,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	t.Run("rename file with no remotepath param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destName := "new_" + filename
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on rename
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = renameFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"destname":   destName,
+			"allocation": "abcdef",
+			"destname":   "def.txt",
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -652,37 +602,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	t.Run("rename file with no destname param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on rename
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = renameFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
+			"allocation": "abcdef",
+			"remotepath": "/abc.txt",
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)

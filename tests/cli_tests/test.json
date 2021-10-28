@@ -1,0 +1,68 @@
+[
+  {
+    "id": "8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+    "balance": 10000000000,
+    "expire_at": 1635344623,
+    "allocation_id": "8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+    "blobbers": [
+      {
+        "blobber_id": "12b820dea88831a1d2711f2705e2b239d01b58a030c36c5facea1c32600271dd",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "58ef59871279dc710a86ff75999d99426c6a0606340fde3e0145dc6e067c64fb",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "5d2cc1ecafc9f828b5da8bed28fe3f15a786cc5429b9fd85adb0815ba13e2c8f",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "a91ea8d3b7f50e8d6e2b5e96aee1ee4d6e7042757593d976cb481f586cffd526",
+        "balance": 2500000000
+      }
+    ],
+    "locked": true
+  }
+]
+{
+  "id": "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7:challengepool:8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+  "balance": 0,
+  "start_time": 1635340903,
+  "expiration": 1635344623,
+  "finalized": false
+}
+[
+  {
+    "id": "8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+    "balance": 10000000000,
+    "expire_at": 1635344623,
+    "allocation_id": "8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+    "blobbers": [
+      {
+        "blobber_id": "12b820dea88831a1d2711f2705e2b239d01b58a030c36c5facea1c32600271dd",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "58ef59871279dc710a86ff75999d99426c6a0606340fde3e0145dc6e067c64fb",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "5d2cc1ecafc9f828b5da8bed28fe3f15a786cc5429b9fd85adb0815ba13e2c8f",
+        "balance": 2500000000
+      },
+      {
+        "blobber_id": "a91ea8d3b7f50e8d6e2b5e96aee1ee4d6e7042757593d976cb481f586cffd526",
+        "balance": 2500000000
+      }
+    ],
+    "locked": true
+  }
+]
+{
+  "id": "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7:challengepool:8bd24a1b39c56b76b37f68650edc1ce75a6642253a08b68d7539c94001019346",
+  "balance": 0,
+  "start_time": 1635340903,
+  "expiration": 1635344623,
+  "finalized": false
+}

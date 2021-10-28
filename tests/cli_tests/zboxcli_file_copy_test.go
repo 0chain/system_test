@@ -511,38 +511,13 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	t.Run("copy file with no allocation param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destpath := "/"
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on copy
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
-			"remotepath": remotePath,
-			"destpath":   destpath,
+			"remotepath": "/abc.txt",
+			"destpath":   "/",
 		})
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
 		require.Len(t, output, 1)
@@ -552,38 +527,13 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	t.Run("copy file with no remotepath param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destpath := "/"
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on copy
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"destpath":   destpath,
+			"allocation": "abcdef",
+			"destpath":   "/",
 		})
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
 		require.Len(t, output, 1)
@@ -593,37 +543,13 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	t.Run("copy file with no destpath param should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
+		// unused wallet, just added to avoid having the creating new wallet outputs on copy
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
+			"allocation": "abcdef",
+			"remotepath": "/abc.txt",
 		})
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
 		require.Len(t, output, 1)
