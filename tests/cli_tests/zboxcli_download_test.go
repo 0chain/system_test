@@ -758,7 +758,7 @@ func TestDownload(t *testing.T) {
 
 		expected := fmt.Sprintf(
 			"Download failed. Local file already exists '%s'",
-			os.TempDir()+filepath.Base(filename),
+			filepath.Dir(os.TempDir())+"/"+filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[0])
 	})
