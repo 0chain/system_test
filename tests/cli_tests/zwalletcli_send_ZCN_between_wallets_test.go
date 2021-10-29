@@ -45,11 +45,8 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
+		wait(t, time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		for endBalance.Round == startBalance.Round {
-			time.Sleep(10 * time.Second)
-			endBalance = getNodeBalanceFromASharder(t, miner.ID)
-		}
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
@@ -110,7 +107,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		}
 
 		require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
-		require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+		require.Equal(t, expectedMinerFee, feeTransfer.Amount, "Transfer fee must be equal to miner fee")
 	})
 }
 
