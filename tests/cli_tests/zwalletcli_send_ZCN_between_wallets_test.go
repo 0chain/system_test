@@ -107,7 +107,7 @@ func TestSendZCNBetweenWallets(t *testing.T) {
 		}
 
 		require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
-		require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 1, "Transfer fee must be equal to miner fee")
+		require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 	})
 }
 
