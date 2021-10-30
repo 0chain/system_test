@@ -31,6 +31,12 @@ func TestMain(m *testing.M) {
 				_ = os.Remove(f)
 			}
 		}
+
+		if files, err := filepath.Glob("./tmp/*.txt"); err == nil {
+			for _, f := range files {
+				_ = os.Remove(f)
+			}
+		}
 	}
 
 	exitRun := m.Run()
