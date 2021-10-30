@@ -106,7 +106,10 @@ func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
-	return cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	require.Len(t, output, 1)
+	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
+	return output, err
 }
 
 func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {

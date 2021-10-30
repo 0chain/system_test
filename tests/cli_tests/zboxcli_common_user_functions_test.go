@@ -58,8 +58,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get expected upload cost for 0.5 MB
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
-		output, err = getUploadCostInUnit(t, configPath, allocationID, localpath)
-		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 		unit := strings.Fields(output[0])[1]

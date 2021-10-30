@@ -98,8 +98,7 @@ func TestBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "error while generating file: ", err)
 
 		// Get expected upload cost
-		output, err = getUploadCostInUnit(t, configPath, allocationID, filename)
-		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, filename)
 
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
