@@ -30,9 +30,9 @@ func TestCommonUserFunctions(t *testing.T) {
 	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
 		t.Parallel()
 
-		// Logic: Upload a 2 MB file and get the upload cost. Update the 2 MB file with a 4 MB file
+		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
-		// 2 MBs.
+		// 0.5 MBs.
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -54,7 +54,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		fileSize := int64(0.5 * MB)
 
-		// Get expected upload cost for 2 MB
+		// Get expected upload cost for 0.5 MB
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 		output, err = getUploadCostInUnit(t, configPath, allocationID, localpath)
 		require.Nil(t, err, "Could not get upload cost", strings.Join(output, "\n"))
@@ -66,7 +66,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
-		// Wait for write pool blobber balances to be deduced for 2 MB
+		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
@@ -105,7 +105,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Less(t, 0, len(finalWritePool[0].Blobber))
 		require.Equal(t, true, finalWritePool[0].Locked)
 
-		// Blobber pool balance should reduce by expected cost of 2 MB for each blobber
+		// Blobber pool balance should reduce by expected cost of 0.5 MB for each blobber
 		totalChangeInWritePool := float64(0)
 		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
