@@ -42,8 +42,10 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 10 * MB,
+			"lock":   "0.5",
+			"size":   10 * MB,
+			"data":   2,
+			"parity": 2,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
