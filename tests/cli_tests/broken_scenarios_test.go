@@ -79,8 +79,7 @@ func TestBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -118,8 +117,7 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Get the new Write-Pool info after upload
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		finalWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalWritePool)

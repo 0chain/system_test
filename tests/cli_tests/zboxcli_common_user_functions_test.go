@@ -71,8 +71,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -92,8 +91,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		finalWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
@@ -152,8 +150,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -164,8 +161,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		// Get final write pool, no deduction should have been made
 		finalWritePool := []climodel.WritePoolInfo{}
@@ -208,8 +204,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -220,8 +215,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		// Get final write pool, no deduction should have been done
 		finalWritePool := []climodel.WritePoolInfo{}
@@ -264,8 +258,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -276,8 +269,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool", strings.Join(output, "\n"))
+		output, _ = writePoolInfo(t, configPath)
 
 		// Get final write pool, no deduction should have been done
 		finalWritePool := []climodel.WritePoolInfo{}
