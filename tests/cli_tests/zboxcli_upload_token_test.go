@@ -101,7 +101,7 @@ func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 	time.Sleep(10 * time.Second) // TODO replace with poller
 	t.Logf("Getting write pool info...")
 	output, err := cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-	require.Len(t, output, 1)
+	require.True(t, len(output) > 0, strings.Join(output, "\n"))
 	require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 	return output, err
 }
