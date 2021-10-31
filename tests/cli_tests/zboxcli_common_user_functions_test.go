@@ -78,11 +78,12 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		require.Equal(t, allocationID, initialWritePool[0].Id)
-		require.InEpsilon(t, 0.5, intToZCN(initialWritePool[0].Balance), epsilon)
+		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
+		require.InEpsilonf(t, 0.5, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId)
-		require.Less(t, 0, len(initialWritePool[0].Blobber))
-		require.Equal(t, true, initialWritePool[0].Locked)
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
+		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
+		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
 		remotepath := filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
@@ -98,11 +99,12 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		require.Equal(t, allocationID, finalWritePool[0].Id)
-		require.InEpsilon(t, (0.5 - actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon)
+		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
+		require.InEpsilon(t, (0.5 - actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, finalWritePool[0].AllocationId)
-		require.Less(t, 0, len(finalWritePool[0].Blobber))
-		require.Equal(t, true, finalWritePool[0].Locked)
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
+		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
+		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
 		// Blobber pool balance should reduce by expected cost of 0.5 MB for each blobber
 		totalChangeInWritePool := float64(0)
@@ -113,7 +115,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			// deduce tokens
 			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
 			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
-			require.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon)
+			require.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
 			totalChangeInWritePool += diff
 		}
 
