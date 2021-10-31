@@ -83,7 +83,19 @@ func TestSendAndBalance(t *testing.T) {
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
 		t.Parallel()
 
-		_, targetWallet := setupTransferWallets(t)
+		targetWalletName := escapedTestName(t) + "_TARGET"
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(configPath, targetWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "Error occurred when retrieving target wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		mconfig := getMinerSCConfiguration(t)
 		minerShare := mconfig["share_ratio"]
@@ -97,7 +109,7 @@ func TestSendAndBalance(t *testing.T) {
 		// Set a random fee in range [0.01, 0.02) (crypto/rand used for linting fix)
 		send_fee := 0.01 + getRandomUniformFloat64(t)*0.01
 
-		output, err := sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
+		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
@@ -494,23 +506,23 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	return mconfig
 }
 
-func setupTransferWallets(t *testing.T) (client, wallet *climodel.Wallet) {
-	targetWallet := escapedTestName(t) + "_TARGET"
+// func setupTransferWallets(t *testing.T) (client, wallet *climodel.Wallet) {
+// 	targetWallet := escapedTestName(t) + "_TARGET"
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+// 	output, err := registerWallet(t, configPath)
+// 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-	output, err = registerWalletForName(configPath, targetWallet)
-	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+// 	output, err = registerWalletForName(configPath, targetWallet)
+// 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-	client, err = getWalletForName(t, configPath, escapedTestName(t))
-	require.Nil(t, err, "Error occurred when retrieving client wallet")
+// 	client, err = getWalletForName(t, configPath, escapedTestName(t))
+// 	require.Nil(t, err, "Error occurred when retrieving client wallet")
 
-	target, err := getWalletForName(t, configPath, targetWallet)
-	require.Nil(t, err, "Error occurred when retrieving target wallet")
+// 	target, err := getWalletForName(t, configPath, targetWallet)
+// 	require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-	output, err = executeFaucetWithTokens(t, configPath, 1)
-	require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+// 	output, err = executeFaucetWithTokens(t, configPath, 1)
+// 	require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-	return client, target
-}
+// 	return client, target
+// }
