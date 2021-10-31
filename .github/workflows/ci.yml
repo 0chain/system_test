@@ -68,7 +68,7 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
 
       - name: "Checkout System Tests"
@@ -250,7 +250,7 @@ jobs:
           mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK_URL }}/dns," -i ./config/zbox_config.yaml
           ATTEMPT_BROKEN_TESTS_FLAG=$(echo $(([[ ${GITHUB_REF#refs/heads/} == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
-          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=20m ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
 
@@ -266,7 +266,7 @@ jobs:
           exit $exit_code
 
       - name: "Deploy report page"
-        if: always() && ${{ env.TESTS_RAN == 'true' }}
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           publish_branch: test_reports
@@ -278,7 +278,7 @@ jobs:
           user_email: "github-actions[bot]@users.noreply.github.com"
 
       - name: "Archive CLI Config & Console Output"
-        if: always() && ${{ env.TESTS_RAN == 'true' }}
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
         uses: actions/upload-artifact@v2
         with:
           name: System-Test-${{ env.TEST_TIME }}
@@ -288,11 +288,11 @@ jobs:
             ./tests/cli_tests/${{ env.BRANCH }}/latest/index.html
 
       - name: "Wait for report deployment to complete"
-        if: always() && ${{ env.TESTS_RAN == 'true' }}
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
         run: counter=0; while [ $counter -lt 5 ] && curl -o /dev/null -Isw '%{http_code}\n' "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html?t=$(date +%s)" | grep -v 200 > /dev/null; do sleep 10 && echo "Waiting for report page to deploy..." && ((counter=counter+1)); done
 
       - name: "Report Link"
-        if: always() && ${{ env.TESTS_RAN == 'true' }}
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
         run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
 
       - name: "Tear Down 0Chain network"

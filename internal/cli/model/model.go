@@ -315,3 +315,20 @@ type Sharder struct {
 		AvgBlockTxns            int    `json:"avg_block_txns"`
 	} `json:"info"`
 }
+
+type FileStats struct {
+	Name                string    `json:"name"`
+	Size                int64     `json:"size"`
+	PathHash            string    `json:"path_hash"`
+	Path                string    `json:"path"`
+	NumOfBlocks         int64     `json:"num_of_blocks"`
+	NumOfUpdates        int64     `json:"num_of_updates"`
+	NumOfBlockDownloads int64     `json:"num_of_block_downloads"`
+	NumOfChallenges     int64     `json:"num_of_failed_challenges"`
+	LastChallengeTxn    string    `json:"last_challenge_txn"`
+	WriteMarkerTxn      string    `json:"write_marker_txn"`
+	BlobberID           string    `json:"blobber_id"`
+	BlobberURL          string    `json:"blobber_url"`
+	BlockchainAware     bool      `json:"blockchain_aware"`
+	CreatedAt           time.Time `json:"CreatedAt"`
+}
