@@ -17,10 +17,6 @@ import (
 
 func TestShareFile(t *testing.T) {
 	t.Parallel()
-	configPath := os.Getenv("CONFIG_PATH")
-
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
 
 	t.Run("Share file with another wallet", func(t *testing.T) {
 		t.Parallel()
@@ -54,8 +50,8 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
@@ -113,8 +109,8 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Share revoked for client "+clientId, strings.Join(output, "\n"))
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
@@ -162,8 +158,8 @@ func TestShareFile(t *testing.T) {
 		time.Sleep(10 * time.Second)
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
@@ -209,8 +205,8 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
@@ -254,8 +250,8 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
@@ -302,8 +298,8 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Download the file
-		dummyFilePath := "/tmp/" + filepath.Base(filename)
-		defer os.Remove(dummyFilePath)
+		dummyFilePath := strings.TrimSuffix(os.TempDir(), "/") + "/" + filepath.Base(filename)
+		os.Remove(dummyFilePath)
 
 		download_params := createParams(map[string]interface{}{
 			"localpath":  dummyFilePath,
