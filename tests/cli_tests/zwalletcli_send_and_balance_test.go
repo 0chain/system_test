@@ -112,18 +112,14 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
+		wait(t, time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		for endBalance.Round == startBalance.Round {
-			time.Sleep(10 * time.Second)
-			endBalance = getNodeBalanceFromASharder(t, miner.ID)
-		}
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		var block_miner *climodel.Node
 		var block_miner_id string
-		var feeTransfer *apimodel.Transfer
 		var transactionRound int64
 
 		var expectedMinerFee int64
@@ -173,7 +169,7 @@ func TestSendAndBalance(t *testing.T) {
 								continue
 							} else {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
+								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								return // test passed
