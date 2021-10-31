@@ -126,23 +126,26 @@ func TestSendAndBalance(t *testing.T) {
 		var feeTransfer *apimodel.Transfer
 		var transactionRound int64
 
-		// Expected miner fee is calculating using this formula:
-		// Fee * minerShare * miner.ServiceCharge
 		var expectedMinerFee int64
 
-		// Find the miner who has processed the transaction,
-		// After finding the miner id, search for the fee payment to that miner in "payFee" transaction output
-	out:
 		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
 			block := getRoundBlockFromASharder(t, round)
 
 			for i := range block.Block.Transactions {
 				txn := block.Block.Transactions[i]
+				// Find the generator miner of the block on which this transaction was recorded
 				if block_miner_id == "" {
 					if txn.ToClientId == targetWallet.ClientID {
-						block_miner_id = block.Block.MinerId
+						block_miner_id = block.Block.MinerId // Generator miner
 						transactionRound = block.Block.Round
 						block_miner = getMinersDetail(t, minerNode.ID)
+
+						// Expected miner fee is calculating using this formula:
+						// Fee * minerShare * miner.ServiceCharge
+						// Stakeholders' reward is:
+						// Fee * minerShare * (1 - miner.ServiceCharge)
+						// In case of no stakeholders, miner gets:
+						// Fee * minerShare
 						minerFee := ConvertToValue(send_fee * minerShare)
 						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
 						expectedMinerFee = minerServiceCharge
@@ -158,26 +161,29 @@ func TestSendAndBalance(t *testing.T) {
 						t.Logf("Miner ID: %v", block_miner_id)
 					}
 				} else {
+					// Search for the fee payment to generator miner in "payFee" transaction output
 					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
 						var transfers []apimodel.Transfer
 						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
 
-						for j := range transfers {
-							tr := transfers[j]
-							if tr.From == MINER_SC_ADDRESS && tr.To == block_miner_id {
-								feeTransfer = &tr
+						for _, transfer := range transfers {
+							// Transfer needs to be from Miner Smart contract to Generator miner
+							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
+								continue
+							} else {
+								feeTransfer = &transfer
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								break out
+								require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
+								// Transfer fee must be equal to miner fee
+								require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+								return // test passed
 							}
 						}
 					}
 				}
 			}
 		}
-
-		require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
-		require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 	})
 
 	t.Run("Send without description should fail", func(t *testing.T) {
@@ -397,7 +403,7 @@ func getRandomUniformFloat64(t *testing.T) float64 {
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
 	t.Logf("Sending ZCN...")
-	cmd := fmt.Sprintf("./zwallet send --silent --tokens %v --desc \"%s\" --to_client_id %s ", tokens, desc, toClientID)
+	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc "%s" --to_client_id %s `, tokens, desc, toClientID)
 
 	if fee > 0 {
 		cmd += fmt.Sprintf(" --fee %v ", fee)
@@ -505,24 +511,3 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	}
 	return mconfig
 }
-
-// func setupTransferWallets(t *testing.T) (client, wallet *climodel.Wallet) {
-// 	targetWallet := escapedTestName(t) + "_TARGET"
-
-// 	output, err := registerWallet(t, configPath)
-// 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-// 	output, err = registerWalletForName(configPath, targetWallet)
-// 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-// 	client, err = getWalletForName(t, configPath, escapedTestName(t))
-// 	require.Nil(t, err, "Error occurred when retrieving client wallet")
-
-// 	target, err := getWalletForName(t, configPath, targetWallet)
-// 	require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-// 	output, err = executeFaucetWithTokens(t, configPath, 1)
-// 	require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-// 	return client, target
-// }
