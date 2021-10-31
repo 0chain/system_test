@@ -115,7 +115,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			// deduce tokens
 			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
 			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
-			require.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
+			assert.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
 			totalChangeInWritePool += diff
 		}
 
