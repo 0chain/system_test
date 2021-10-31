@@ -72,7 +72,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get write pool info before file update
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
@@ -95,7 +95,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get the new Write Pool info after update
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		finalWritePool := []climodel.WritePoolInfo{}
@@ -157,7 +157,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		wait(t, 30*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
@@ -170,7 +170,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		wait(t, 30*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		// Get final write pool, no deduction should have been made
@@ -215,7 +215,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Get initial write pool
 		wait(t, 30*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
@@ -228,7 +228,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		wait(t, 30*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		// Get final write pool, no deduction should have been done
@@ -273,7 +273,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Get initial write pool
 		wait(t, 10*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
@@ -286,7 +286,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		wait(t, 10*time.Second)
 		output, _ = writePoolInfo(t, configPath)
-		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		// Get final write pool, no deduction should have been done
