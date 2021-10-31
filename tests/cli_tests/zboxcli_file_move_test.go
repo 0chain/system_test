@@ -556,10 +556,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 }
 
-func moveFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	return moveFileForWallet(t, cliConfigFilename, escapedTestName(t), param)
-}
-
 func moveFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Moving file...")
 	p := createParams(param)

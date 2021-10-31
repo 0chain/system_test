@@ -616,10 +616,6 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 }
 
-func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	return renameFileForWallet(t, cliConfigFilename, escapedTestName(t), param)
-}
-
 func renameFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
