@@ -67,7 +67,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite, tests-suite-01, tests-suite-03 ]
+    runs-on: [ tests-suite ]
     timeout-minutes: 40
     steps:
 
