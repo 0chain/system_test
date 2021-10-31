@@ -751,14 +751,14 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
+			"localpath":  os.TempDir(),
 		}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		expected := fmt.Sprintf(
 			"Download failed. Local file already exists '%s'",
-			"tmp/"+filepath.Base(filename),
+			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[0])
 	})
