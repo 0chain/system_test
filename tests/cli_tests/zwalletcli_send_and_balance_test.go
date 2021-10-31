@@ -172,11 +172,10 @@ func TestSendAndBalance(t *testing.T) {
 							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
 								continue
 							} else {
-								feeTransfer = &transfer
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, feeTransfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								require.InEpsilon(t, expectedMinerFee, feeTransfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								return // test passed
 							}
 						}
