@@ -524,8 +524,7 @@ func createFileWithSize(name string, size int64) error {
 }
 
 func generateRandomTestFileName(t *testing.T) string {
-	path, err := filepath.Abs("tmp")
-	require.Nil(t, err)
+	path := os.TempDir()
 
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
