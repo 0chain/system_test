@@ -179,18 +179,14 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel Allocation Should fail when blobber passes challenges", func(t *testing.T) {
+	t.Run("Cancel_allocation_immediately_should_succeed", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := cancelAllocation(t, configPath, allocationID)
 
-		require.NotNil(t, err, "expected error when canceling allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		// FIXME; note incorrect "error creating" error message: should be "error updating"
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to "+
-			"confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Nil(t, err, "no error when canceling allocation immediately", strings.Join(output, "\n"))
 	})
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
