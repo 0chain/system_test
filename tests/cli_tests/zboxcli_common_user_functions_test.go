@@ -353,14 +353,9 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
+		allocation := getAllocation(t, allocationID)
+
 		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
-		output, err = getAllocation(t, allocationID)
-		require.Nil(t, err, "error fetching allocation")
-
-		allocation := climodel.Allocation{}
-		err = json.Unmarshal([]byte(output[0]), &allocation)
-		require.Nil(t, err, "error unmarshalling allocation json")
-
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -416,14 +411,9 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
 
+		allocation := getAllocation(t, allocationID)
+
 		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
-		output, err = getAllocation(t, allocationID)
-		require.Nil(t, err, "error fetching allocation")
-
-		allocation := climodel.Allocation{}
-		err = json.Unmarshal([]byte(output[0]), &allocation)
-		require.Nil(t, err, "error unmarshalling allocation json")
-
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -576,8 +566,13 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
 }
 
-func getAllocation(t *testing.T, allocationID string) ([]string, error) {
-	return getAllocationWithRetry(t, configPath, allocationID, 1)
+func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
+	output, err := getAllocationWithRetry(t, configPath, allocationID, 1)
+	require.Nil(t, err, "error fetching allocation")
+	require.GreaterOrEqual(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+	err = json.Unmarshal([]byte(output[0]), &allocation)
+	require.Nil(t, err, "error unmarshalling allocation json")
+	return
 }
 
 func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) ([]string, error) {
