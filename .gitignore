@@ -21,12 +21,16 @@ vendor/
 # Temp test output
 tests/cli_tests/config/*wallet.json
 tests/cli_tests/config/*allocation.txt
+tests/cli_tests/tmp/
 **/cmdlog.log
 **/zbox
 **/zwallet
+**/allocation.txt
 
 .DS_STORE
 .idea
+.vscode
+tests/cli_tests/__debug_bin
 
 # bandwidth-markeplace
 

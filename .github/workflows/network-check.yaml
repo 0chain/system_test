@@ -1,0 +1,69 @@
+name: 0Chain Network Health Check
+on:
+  schedule:
+    # Runs every 3 hours
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+jobs:
+  network-health-check:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        network: [ "beta.0chain.net", "demo.0chain.net", "dev.0chain.net", "huawei.0chain.net", "polygon.0chain.net", "test.0chain.net" ]
+      fail-fast: false
+    steps:
+      - name: "Checkout System Tests"
+        uses: actions/checkout@v2
+
+      - name: "Check 0dns Liveness"
+        run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}/dns
+
+      - name: "Check Explorer Liveness"
+        run: curl --silent --show-error --fail --max-time 10 https://${{ matrix.network }}
+
+      - name: "Install Node"
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: "Configure Node"
+        run: |
+          npm config set user 0
+          npm config set unsafe-perm true
+
+      - name: "Install Newman"
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      - name: "Run Smoke Tests"
+        run: |
+          cd tests/api_tests
+          custom_network=$(echo ${{ matrix.network }} | xargs | sed -E 's/^\s*.*:\/\///g' | sed 's:/*$::') && sed -i "0,/REPLACE/s//$custom_network/" './Environments/custom.postman_environment.json'
+
+          counter=1;
+          exit_code=1;
+          while [ $counter -lt 6 ] && [ $exit_code -eq 1 ]
+          do
+            echo "Executing smoke tests attempt [$counter/5]"
+            exit_code=0
+            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on --global-var "ITERATION=$counter" || { ((counter=counter+1)) && exit_code=1 && [ $counter -lt 6 ] && echo "TEST ATTEMPT FAILED. Sleeping for 30s" && sleep 30; }
+          done
+
+          if [ $counter -eq 6 ]; then
+            echo "Smoke tests failed for network [${{ matrix.network }}]"
+            exit 1
+          fi
+
+      - name: "Check if should send slack notification"
+        if: failure()
+        id: send-slack-notification
+        uses: peter-murray/value-as-flag-action@0.0.1
+        with:
+          value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
+          default: false
+
+      - name: "Notify Slack"
+        if: failure() && steps.send-slack-notification.outputs.value == 'true'
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> [${{ matrix.network }}] network seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
