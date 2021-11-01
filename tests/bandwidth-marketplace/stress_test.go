@@ -6,8 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/zmagmacore/magmasc"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/0chain/system_test/internal/bandwidth-marketplace/ap"
 	"github.com/0chain/system_test/internal/bandwidth-marketplace/log"
 	"github.com/0chain/system_test/internal/bandwidth-marketplace/magma"
 )
@@ -16,9 +19,17 @@ func TestStressUsing(t *testing.T) {
 	if !testCfg.Cases.Stress.Enable {
 		t.Skip()
 	}
+	var (
+		accessPoint *magmasc.AccessPoint
+		err         error
+	)
+	accessPoint, err = ap.RegisterAndStake(testCfg.AccessPoint.KeysFile, testCfg.AccessPoint.NodeDir, testCfg)
+	require.NoError(t, err)
 
 	// pouring consumer wallet if configured.
 	pourConsumerWallet(t)
+
+	pourProviderWalletAndStake(t)
 
 	results := make(chan stressReport)
 
@@ -27,7 +38,7 @@ func TestStressUsing(t *testing.T) {
 		go func() {
 			userID := "User_" + strconv.Itoa(i)
 			sessionID := "test_session_id_" + strconv.Itoa(time.Now().Nanosecond())
-			err := stressUsing(userID, sessionID)
+			err := stressUsing(userID, sessionID, accessPoint.Id)
 			if err != nil {
 				results <- stressReport{err: err, sessionID: sessionID}
 				return
@@ -54,13 +65,12 @@ type stressReport struct {
 	sessionID string
 }
 
-func stressUsing(userID, sessionID string) error {
+func stressUsing(userID, sessionID, apID string) error {
 	var (
-		userIMSI     = userID
-		providerAPID = "access-point-id-1"
+		userIMSI = userID
 	)
 
-	err := magma.SessionStart(userIMSI, providerAPID, sessionID, testCfg)
+	err := magma.SessionStart(userIMSI, apID, sessionID, testCfg)
 	if err != nil {
 		return err
 	}
@@ -77,7 +87,7 @@ func stressUsing(userID, sessionID string) error {
 		sessTime = uint32(time.Since(sessionStartTime).Seconds())
 
 		err = magma.SessionUpdate(userIMSI,
-			providerAPID,
+			apID,
 			sessionID,
 			sessTime,
 			octetsIn,
@@ -91,7 +101,7 @@ func stressUsing(userID, sessionID string) error {
 
 	err = magma.SessionStop(
 		userIMSI,
-		providerAPID,
+		apID,
 		sessionID,
 		sessTime,
 		octetsIn,

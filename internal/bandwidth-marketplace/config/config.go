@@ -12,16 +12,17 @@ type (
 	Config struct {
 		ServerChain ServerChain `yaml:"server_chain"`
 
-		BuildingWaitTime       int `yaml:"building_wait_time"`        // in seconds
-		DefaultUserGRPCTimeout int `yaml:"default_user_grpc_timeout"` // in seconds
+		BuildingWaitTime       time.Duration `yaml:"building_wait_time"`
+		DefaultUserGRPCTimeout time.Duration `yaml:"default_user_grpc_timeout"`
 
 		Cases Cases `yaml:"cases"`
 
 		Log Log `yaml:"log"`
 
-		Consumer *Node `yaml:"consumer"`
-		Provider *Node `yaml:"provider"`
-		Magma    *Node `yaml:"magma"`
+		Consumer    Node `yaml:"consumer"`
+		Provider    Node `yaml:"provider"`
+		Magma       Node `yaml:"magma"`
+		AccessPoint Node `yaml:"access-point"`
 	}
 
 	// Cases contains all test cases.

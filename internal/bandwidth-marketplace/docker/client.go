@@ -122,7 +122,7 @@ func (cl *Client) pull(ctx context.Context, ref string) error {
 }
 
 func (cl *Client) start(ctx context.Context, cont *dContainer) (<-chan container.ContainerWaitOKBody, <-chan error, error) {
-	resp, err := cl.dClient.ContainerCreate(ctx, cont.cfg, cont.hostCfg, cont.networkCfg, nil, cont.name)
+	resp, err := cl.dClient.ContainerCreate(ctx, cont.cfg, cont.hostCfg, cont.networkCfg, cont.name)
 	if err != nil {
 		return nil, nil, err
 	}

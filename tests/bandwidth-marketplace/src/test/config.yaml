@@ -14,9 +14,9 @@ cases:
 log:
   enable: true
 
-building_wait_time: 10 # in seconds
+building_wait_time: 10s
 
-default_user_grpc_timeout: 300 # in seconds
+default_user_grpc_timeout: 300s
 
 server_chain:
   # address of dns service
@@ -27,7 +27,7 @@ server_chain:
 
 magma:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/magma:master-0b6d12b8"
+  ref: "0chaindev/magma:staging-b04778a8"
 
   port: "5181"
   grpc_port: "7251"
@@ -37,7 +37,7 @@ magma:
 
 consumer:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/consumer:master-0b6d12b8"
+  ref: "0chaindev/consumer:staging-b04778a8"
 
   port: "5151"
   grpc_port: "7131"
@@ -59,7 +59,7 @@ consumer:
 
 provider:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/provider:master-0b6d12b8"
+  ref: "0chaindev/provider:staging-b04778a8"
 
   port: "5171"
   grpc_port: "7141"
@@ -77,3 +77,8 @@ provider:
 
   keys_file: "./src/provider/config/keys.txt"
 
+access-point:
+  # represents relative path where integration-tests is root dir
+  node_dir: "./src/access-point"
+
+  keys_file: "./src/access-point/config/keys.txt" # from integration-tests as a root dir

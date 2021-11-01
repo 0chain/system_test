@@ -54,9 +54,8 @@ func TestMain(m *testing.M) {
 }
 
 func waitNodes() {
-	sleepTime := time.Duration(testCfg.BuildingWaitTime) * time.Second
-	log.Logger.Info(fmt.Sprintf("Wait %s for starting all containers.", sleepTime.String()))
-	time.Sleep(sleepTime)
+	log.Logger.Info(fmt.Sprintf("Wait %s for starting all containers.", testCfg.BuildingWaitTime.String()))
+	time.Sleep(testCfg.BuildingWaitTime)
 }
 
 func exitIfErr(err error) {

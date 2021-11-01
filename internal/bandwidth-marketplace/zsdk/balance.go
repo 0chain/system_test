@@ -34,27 +34,9 @@ func (b *getBalanceCB) OnBalanceAvailable(status int, value int64, _ string) {
 	b.balance <- value
 }
 
-// GetConsumerBalance returns balance of the configured consumer.
-func GetConsumerBalance(cfg *config.Config) (int64, error) {
-	err := Init(cfg.Consumer.KeysFile, cfg.Consumer.NodeDir, cfg.Consumer.ExtID, cfg)
-	if err != nil {
-		return 0, err
-	}
-	balCB := newGetBalanceCB()
-	err = zcncore.GetBalance(balCB)
-	if err != nil {
-		return 0, err
-	}
-	if balCB.err != nil {
-		return 0, err
-	}
-
-	return <-balCB.balance, nil
-}
-
-// GetProviderBalance returns balance of the configured provider.
-func GetProviderBalance(cfg *config.Config) (int64, error) {
-	err := Init(cfg.Provider.KeysFile, cfg.Provider.NodeDir, cfg.Provider.ExtID, cfg)
+// GetBalance returns balance of the configured node.
+func GetBalance(node config.Node, cfg *config.Config) (int64, error) {
+	err := Init(node.KeysFile, node.NodeDir, node.ExtID, cfg)
 	if err != nil {
 		return 0, err
 	}

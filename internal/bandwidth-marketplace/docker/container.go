@@ -9,7 +9,6 @@ import (
 	"github.com/docker/go-connections/nat"
 
 	"github.com/0chain/system_test/internal/bandwidth-marketplace/config"
-	"github.com/0chain/system_test/internal/bandwidth-marketplace/log"
 )
 
 type (
@@ -26,7 +25,7 @@ type (
 
 // consumer container section
 
-func newConsumerContainer(cfg *config.Node) (*dContainer, error) {
+func newConsumerContainer(cfg config.Node) (*dContainer, error) {
 	mounts, err := consumerCfgMounts()
 	if err != nil {
 		return nil, err
@@ -44,7 +43,7 @@ func newConsumerContainer(cfg *config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func consumerContainerConfig(cfg *config.Node, ports nat.PortMap) *container.Config {
+func consumerContainerConfig(cfg config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -102,7 +101,7 @@ func consumerCfgMounts() ([]mount.Mount, error) {
 
 // magma container section
 
-func newMagmaContainer(cfg *config.Node) (*dContainer, error) {
+func newMagmaContainer(cfg config.Node) (*dContainer, error) {
 	mounts, err := magmaCfgMounts()
 	if err != nil {
 		return nil, err
@@ -120,7 +119,7 @@ func newMagmaContainer(cfg *config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func magmaContainerConfig(magmaCfg *config.Node, ports nat.PortMap) *container.Config {
+func magmaContainerConfig(magmaCfg config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -148,8 +147,6 @@ func magmaCfgMounts() ([]mount.Mount, error) {
 		return nil, err
 	}
 
-	log.Logger.Info("Consumer cfg " + cfgSrc)
-
 	mounts := []mount.Mount{
 		{
 			Type:   mount.TypeBind,
@@ -167,7 +164,7 @@ func magmaCfgMounts() ([]mount.Mount, error) {
 
 // provider container section
 
-func newProviderContainer(cfg *config.Node) (*dContainer, error) {
+func newProviderContainer(cfg config.Node) (*dContainer, error) {
 	mounts, err := providerCfgMounts()
 	if err != nil {
 		return nil, err
@@ -185,7 +182,7 @@ func newProviderContainer(cfg *config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func providerContainerConfig(cfg *config.Node, ports nat.PortMap) *container.Config {
+func providerContainerConfig(cfg config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -203,7 +200,6 @@ func providerContainerConfig(cfg *config.Node, ports nat.PortMap) *container.Con
 			"--logs_dir=/provider/log",
 			"--db_dir=/provider/data",
 			"--config_file=/provider/config/config.yaml",
-			"--terms_config_dir=./config/terms",
 		},
 	}
 }
@@ -244,7 +240,7 @@ func providerCfgMounts() ([]mount.Mount, error) {
 
 // common section
 
-func hostConfig(cfg *config.Node, mounts []mount.Mount) (*container.HostConfig, error) {
+func hostConfig(cfg config.Node, mounts []mount.Mount) (*container.HostConfig, error) {
 	port, err := nat.NewPort("tcp", cfg.Port)
 	if err != nil {
 		return nil, err
@@ -274,7 +270,7 @@ func hostConfig(cfg *config.Node, mounts []mount.Mount) (*container.HostConfig, 
 	}, nil
 }
 
-func networkConfig(cfg *config.Node) *network.NetworkingConfig {
+func networkConfig(cfg config.Node) *network.NetworkingConfig {
 	return &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"testnet0": {

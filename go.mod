@@ -3,7 +3,7 @@ module github.com/0chain/system_test
 go 1.16
 
 require (
-	github.com/0chain/gosdk v1.2.88-0.20210918024236-96f6cee810f7
+	github.com/0chain/gosdk v1.2.88-0.20211015114218-f7c5b969e38a
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
@@ -20,6 +20,7 @@ require (
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.17.0
-	google.golang.org/grpc v1.38.0
+	google.golang.org/grpc v1.39.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
