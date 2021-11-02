@@ -35,7 +35,7 @@ func (b *getBalanceCB) OnBalanceAvailable(status int, value int64, _ string) {
 }
 
 // GetBalance returns balance of the configured node.
-func GetBalance(node config.Node, cfg *config.Config) (int64, error) {
+func GetBalance(node *config.Node, cfg *config.Config) (int64, error) {
 	err := Init(node.KeysFile, node.NodeDir, node.ExtID, cfg)
 	if err != nil {
 		return 0, err

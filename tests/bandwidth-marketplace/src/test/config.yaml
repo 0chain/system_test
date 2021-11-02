@@ -78,7 +78,7 @@ provider:
   keys_file: "./src/provider/config/keys.txt"
 
 access-point:
-  # represents relative path where integration-tests is root dir
+  # represents relative path of sources
   node_dir: "./src/access-point"
 
-  keys_file: "./src/access-point/config/keys.txt" # from integration-tests as a root dir
+  keys_file: "./src/access-point/config/keys.txt"

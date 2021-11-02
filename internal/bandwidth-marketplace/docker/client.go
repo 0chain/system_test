@@ -84,20 +84,19 @@ func (cl *Client) PullAndStartAll(ctx context.Context) (<-chan error, error) {
 				msg := fmt.Sprintf("got %s removing exit status err: %v; exit code: %d", cont.name, st.Error, st.StatusCode)
 				mainErrCh <- errors.New(errCode, msg)
 			}
-
 		}(cont)
 	}
 	return mainErrCh, nil
 }
 
-func (cl *Client) pullAndStart(ctx context.Context, cont *dContainer) (<-chan container.ContainerWaitOKBody, <-chan error, error) {
+func (cl *Client) pullAndStart(ctx context.Context, cont *dContainer) (stCh <-chan container.ContainerWaitOKBody, errCh <-chan error, err error) {
 	if err := cl.pull(ctx, cont.ref); err != nil {
 		return nil, nil, err
 	}
 
 	_ = cl.stopAndRemoveContainer(ctx, cont.name)
 
-	stCh, errCh, err := cl.start(ctx, cont)
+	stCh, errCh, err = cl.start(ctx, cont)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -121,7 +120,7 @@ func (cl *Client) pull(ctx context.Context, ref string) error {
 	return nil
 }
 
-func (cl *Client) start(ctx context.Context, cont *dContainer) (<-chan container.ContainerWaitOKBody, <-chan error, error) {
+func (cl *Client) start(ctx context.Context, cont *dContainer) (stCh <-chan container.ContainerWaitOKBody, errCh <-chan error, err error) {
 	resp, err := cl.dClient.ContainerCreate(ctx, cont.cfg, cont.hostCfg, cont.networkCfg, cont.name)
 	if err != nil {
 		return nil, nil, err
@@ -132,9 +131,8 @@ func (cl *Client) start(ctx context.Context, cont *dContainer) (<-chan container
 		return nil, nil, err
 	}
 
-	statusCh, errCh := cl.dClient.ContainerWait(ctx, resp.ID, container.WaitConditionNextExit)
-
-	return statusCh, errCh, nil
+	stCh, errCh = cl.dClient.ContainerWait(ctx, resp.ID, container.WaitConditionNextExit)
+	return stCh, errCh, nil
 }
 
 // StopAndRemoveAllContainers stops and removes all used containers.

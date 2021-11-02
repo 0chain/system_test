@@ -1,7 +1,8 @@
 package bandwidth_marketplace
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"strconv"
 	"testing"
 	"time"
@@ -70,28 +71,32 @@ func stressUsing(userID, sessionID, apID string) error {
 		userIMSI = userID
 	)
 
-	err := magma.SessionStart(userIMSI, apID, sessionID, testCfg)
-	if err != nil {
+	if err := magma.SessionStart(userIMSI, apID, sessionID, testCfg); err != nil {
 		return err
 	}
 
 	var (
 		sessionStartTime    = time.Now()
-		numUpdates          = rand.Intn(10)
 		octetsIn, octetsOut uint64
 		sessTime            uint32
 	)
-	for i := 0; i < numUpdates; i++ {
-		octetsIn += uint64(rand.Intn(10000))
-		octetsOut += uint64(rand.Intn(10000))
+	numUpdates, err := rand.Int(rand.Reader, big.NewInt(10))
+	if err != nil {
+		return err
+	}
+	for i := 0; i < int(numUpdates.Int64()); i++ {
+		rndIn, rndOut, err := randOctets(10000)
+		if err != nil {
+			return err
+		}
 		sessTime = uint32(time.Since(sessionStartTime).Seconds())
 
 		err = magma.SessionUpdate(userIMSI,
 			apID,
 			sessionID,
 			sessTime,
-			octetsIn,
-			octetsOut,
+			octetsIn+rndIn,
+			octetsOut+rndOut,
 			testCfg,
 		)
 		if err != nil {
@@ -113,4 +118,16 @@ func stressUsing(userID, sessionID, apID string) error {
 	}
 
 	return nil
+}
+
+func randOctets(max int64) (in, out uint64, err error) {
+	inBI, err := rand.Int(rand.Reader, big.NewInt(max))
+	if err != nil {
+		return 0, 0, err
+	}
+	outBI, err := rand.Int(rand.Reader, big.NewInt(max))
+	if err != nil {
+		return 0, 0, err
+	}
+	return inBI.Uint64(), outBI.Uint64(), nil
 }

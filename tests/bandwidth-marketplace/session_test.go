@@ -70,14 +70,14 @@ func TestSession(t *testing.T) {
 		require.NoError(t, err)
 
 		// request billing and check balances
-		payed := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
+		paid := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
 
 		// we dont need min cost payment, so check it
 		sess, err := magmasc.RequestSession(sessionID)
 		require.NoError(t, err)
 		require.True(
 			t,
-			payed != sess.AccessPoint.TermsGetMinCost(),
+			paid != sess.AccessPoint.TermsGetMinCost(),
 			"Billing amount should not be equal to the MinCost",
 		)
 	})
@@ -120,14 +120,14 @@ func TestSession(t *testing.T) {
 		require.NoError(t, err)
 
 		// request billing and check balances
-		payed := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
+		paid := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
 
 		// we need min cost payment, so check it
 		sess, err := magmasc.RequestSession(sessionID)
 		require.NoError(t, err)
 		require.True(
 			t,
-			payed == sess.AccessPoint.TermsGetMinCost(),
+			paid == sess.AccessPoint.TermsGetMinCost(),
 			"Billing amount should be equal to the MinCost",
 		)
 	})

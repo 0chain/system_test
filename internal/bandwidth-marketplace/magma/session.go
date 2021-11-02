@@ -41,9 +41,7 @@ func SessionStart(userIMSI, providerAPID, sessionID string, cfg *config.Config) 
 }
 
 // SessionUpdate calls protos.AccountingServer Update procedure to configured magma GRPC address.
-func SessionUpdate(userIMSI, providerAPID, sessionID string, sessTime uint32,
-	octetsIn, octetsOut uint64, cfg *config.Config) error {
-
+func SessionUpdate(userIMSI, providerAPID, sessionID string, sessTime uint32, octetsIn, octetsOut uint64, cfg *config.Config) error {
 	const errCode = "session_update"
 
 	cl, err := Client(cfg.Magma.GRPCAddress())
@@ -76,9 +74,7 @@ func SessionUpdate(userIMSI, providerAPID, sessionID string, sessTime uint32,
 }
 
 // SessionStop calls protos.AccountingServer Stop procedure to configured magma GRPC address.
-func SessionStop(userIMSI, providerAPID, sessionID string,
-	sessTime uint32, octetsIn, octetsOut uint64, cfg *config.Config) error {
-
+func SessionStop(userIMSI, providerAPID, sessionID string, sessTime uint32, octetsIn, octetsOut uint64, cfg *config.Config) error {
 	const errCode = "session_stop"
 
 	cl, err := Client(cfg.Magma.GRPCAddress())

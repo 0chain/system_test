@@ -19,10 +19,10 @@ type (
 
 		Log Log `yaml:"log"`
 
-		Consumer    Node `yaml:"consumer"`
-		Provider    Node `yaml:"provider"`
-		Magma       Node `yaml:"magma"`
-		AccessPoint Node `yaml:"access-point"`
+		Consumer    *Node `yaml:"consumer"`
+		Provider    *Node `yaml:"provider"`
+		Magma       *Node `yaml:"magma"`
+		AccessPoint *Node `yaml:"access-point"`
 	}
 
 	// Cases contains all test cases.
@@ -73,7 +73,7 @@ func Read() (*Config, error) {
 	defer func(f *os.File) { _ = f.Close() }(f)
 
 	cfg := new(Config)
-	if err = yaml.NewDecoder(f).Decode(cfg); err != nil {
+	if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
 		return nil, err
 	}
 

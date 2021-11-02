@@ -25,7 +25,7 @@ type (
 
 // consumer container section
 
-func newConsumerContainer(cfg config.Node) (*dContainer, error) {
+func newConsumerContainer(cfg *config.Node) (*dContainer, error) {
 	mounts, err := consumerCfgMounts()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func newConsumerContainer(cfg config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func consumerContainerConfig(cfg config.Node, ports nat.PortMap) *container.Config {
+func consumerContainerConfig(cfg *config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -101,7 +101,7 @@ func consumerCfgMounts() ([]mount.Mount, error) {
 
 // magma container section
 
-func newMagmaContainer(cfg config.Node) (*dContainer, error) {
+func newMagmaContainer(cfg *config.Node) (*dContainer, error) {
 	mounts, err := magmaCfgMounts()
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func newMagmaContainer(cfg config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func magmaContainerConfig(magmaCfg config.Node, ports nat.PortMap) *container.Config {
+func magmaContainerConfig(magmaCfg *config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -164,7 +164,7 @@ func magmaCfgMounts() ([]mount.Mount, error) {
 
 // provider container section
 
-func newProviderContainer(cfg config.Node) (*dContainer, error) {
+func newProviderContainer(cfg *config.Node) (*dContainer, error) {
 	mounts, err := providerCfgMounts()
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func newProviderContainer(cfg config.Node) (*dContainer, error) {
 	}, nil
 }
 
-func providerContainerConfig(cfg config.Node, ports nat.PortMap) *container.Config {
+func providerContainerConfig(cfg *config.Node, ports nat.PortMap) *container.Config {
 	exposedPorts := make(map[nat.Port]struct{})
 	for port := range ports {
 		exposedPorts[port] = struct{}{}
@@ -240,7 +240,7 @@ func providerCfgMounts() ([]mount.Mount, error) {
 
 // common section
 
-func hostConfig(cfg config.Node, mounts []mount.Mount) (*container.HostConfig, error) {
+func hostConfig(cfg *config.Node, mounts []mount.Mount) (*container.HostConfig, error) {
 	port, err := nat.NewPort("tcp", cfg.Port)
 	if err != nil {
 		return nil, err
@@ -270,7 +270,7 @@ func hostConfig(cfg config.Node, mounts []mount.Mount) (*container.HostConfig, e
 	}, nil
 }
 
-func networkConfig(cfg config.Node) *network.NetworkingConfig {
+func networkConfig(cfg *config.Node) *network.NetworkingConfig {
 	return &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"testnet0": {

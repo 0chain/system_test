@@ -33,6 +33,6 @@ type (
 
 // GRPCAddress returns full GRPC address for the user,
 // that can connect to the node outside the docker container.
-func (n Node) GRPCAddress() string {
+func (n *Node) GRPCAddress() string {
 	return ":" + n.GRPCPort
 }

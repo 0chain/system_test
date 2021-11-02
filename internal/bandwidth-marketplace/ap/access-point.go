@@ -15,14 +15,14 @@ import (
 	"github.com/0chain/system_test/internal/bandwidth-marketplace/zsdk"
 )
 
-func RegisterAndStake(keysFile, nodeDir string, cfg *config.Config) (ap *magmasc.AccessPoint, err error) {
+func RegisterAndStake(keysFile, nodeDir string, cfg *config.Config) (*magmasc.AccessPoint, error) {
 	log.Logger.Info("Registering Access Point ...")
 
-	if err = zsdk.Init(keysFile, nodeDir, "", cfg); err != nil {
+	if err := zsdk.Init(keysFile, nodeDir, "", cfg); err != nil {
 		return nil, err
 	}
 
-	ap = testAccessPoint()
+	ap := testAccessPoint()
 
 	registered, err := magmasc.IsAccessPointRegisteredRP(node.ID())
 	if err != nil {

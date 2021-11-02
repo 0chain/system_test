@@ -26,7 +26,7 @@ func checkLockedTokens(t *testing.T, sessionID string, startConsBal int64) {
 	require.Equal(t, expConsBal, getConsumerBalance(t))
 }
 
-func checkBillingPayments(t *testing.T, sessionID string, startConsBal, startProvBal, startAPBal int64) (payed int64) {
+func checkBillingPayments(t *testing.T, sessionID string, startConsBal, startProvBal, startAPBal int64) (paid int64) {
 	sess, err := magmasc.RequestSession(sessionID)
 	require.NoError(t, err)
 
