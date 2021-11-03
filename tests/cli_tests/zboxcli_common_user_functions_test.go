@@ -601,6 +601,6 @@ func ConvertToValue(token float64) int64 {
 }
 
 func wait(t *testing.T, duration time.Duration) {
-	t.Logf("Waiting %s", duration)
+	t.Logf("Waiting %s...", duration)
 	time.Sleep(duration)
 }
