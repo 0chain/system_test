@@ -106,6 +106,7 @@ jobs:
       - name: "VIEW TEST CONFIGURATION"
         run: |
           echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
+          echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
           echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
           echo "0box CLI branch:        [${{ env.ZWALLET_BRANCH }}]"
           echo "0wallet CLI branch:     [${{ env.ZBOX_BRANCH }}]"
