@@ -70,12 +70,12 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
 		outputRaw, err := poll(t, time.Minute, 3,
 			func() (interface{}, error) { return writePoolInfo(t, configPath) },
-			func(output interface{}, err error) bool {
-				if len(output.([]string)) != 1 {
+			func(outputFromFunction interface{}, errFromFunction error) bool {
+				if len(outputFromFunction.([]string)) != 1 {
 					return false
 				}
 				initialWritePool := []climodel.WritePoolInfo{}
-				err = json.Unmarshal([]byte(output.([]string)[0]), &initialWritePool)
+				err = json.Unmarshal([]byte(outputFromFunction.([]string)[0]), &initialWritePool)
 
 				roundedBalance := math.Ceil(intToZCN(initialWritePool[0].Balance)*100) / 100
 
@@ -106,12 +106,12 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wait before fetching final write pool
 		outputRaw, err = poll(t, time.Minute, 3,
 			func() (interface{}, error) { return writePoolInfo(t, configPath) },
-			func(output interface{}, err error) bool {
-				if len(output.([]string)) != 1 {
+			func(outputFromFunction interface{}, errFromFunction error) bool {
+				if len(outputFromFunction.([]string)) != 1 {
 					return false
 				}
 				finalWritePool := []climodel.WritePoolInfo{}
-				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+				err = json.Unmarshal([]byte(outputFromFunction.([]string)[0]), &finalWritePool)
 
 				roundedBalance := math.Ceil(intToZCN(finalWritePool[0].Balance)*100) / 100
 
@@ -119,10 +119,9 @@ func TestCommonUserFunctions(t *testing.T) {
 					roundedBalance == (0.5-actualExpectedUploadCostInZCN)
 			},
 		)
-		output = outputRaw.([]string)
 
 		// Get the new Write Pool info after update
-		output, _ = writePoolInfo(t, configPath)
+		output = outputRaw.([]string)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -198,12 +197,12 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		outputRaw, err := poll(t, 30*time.Second, 3,
 			func() (interface{}, error) { return writePoolInfo(t, configPath) },
-			func(output interface{}, err error) bool {
-				if len(output.([]string)) != 1 {
+			func(outputFromFunction interface{}, errFromFunction error) bool {
+				if len(outputFromFunction.([]string)) != 1 {
 					return false
 				}
 				finalWritePool := []climodel.WritePoolInfo{}
-				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+				err = json.Unmarshal([]byte(outputFromFunction.([]string)[0]), &finalWritePool)
 
 				return err != nil && (intToZCN(initialWritePool[0].Balance)-intToZCN(finalWritePool[0].Balance)) < epsilon
 			},
@@ -267,12 +266,12 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		outputRaw, err := poll(t, 30*time.Second, 3,
 			func() (interface{}, error) { return writePoolInfo(t, configPath) },
-			func(output interface{}, err error) bool {
-				if len(output.([]string)) != 1 {
+			func(outputFromFunction interface{}, errFromFunction error) bool {
+				if len(outputFromFunction.([]string)) != 1 {
 					return false
 				}
 				finalWritePool := []climodel.WritePoolInfo{}
-				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+				err = json.Unmarshal([]byte(outputFromFunction.([]string)[0]), &finalWritePool)
 
 				return err != nil && (intToZCN(initialWritePool[0].Balance)-intToZCN(finalWritePool[0].Balance)) < epsilon
 			},
@@ -336,12 +335,12 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		outputRaw, err := poll(t, 10*time.Second, 5,
 			func() (interface{}, error) { return writePoolInfo(t, configPath) },
-			func(output interface{}, err error) bool {
-				if len(output.([]string)) != 1 {
+			func(outputFromFunction interface{}, errFromFunction error) bool {
+				if len(outputFromFunction.([]string)) != 1 {
 					return false
 				}
 				finalWritePool := []climodel.WritePoolInfo{}
-				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+				err = json.Unmarshal([]byte(outputFromFunction.([]string)[0]), &finalWritePool)
 
 				return err != nil && (initialWritePool[0].Balance == finalWritePool[0].Balance) || (float64(finalWritePool[0].Balance-initialWritePool[0].Balance) < epsilon)
 			},
