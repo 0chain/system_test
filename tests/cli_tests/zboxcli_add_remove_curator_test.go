@@ -309,9 +309,6 @@ func TestAddCurator(t *testing.T) {
 		output, err = registerWalletForName(configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		// clientWallet, err := getWalletForName(t, configPath, escapedTestName(t))
-		// require.Nil(t, err, "Error occurred when retrieving client wallet")
-
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
@@ -338,9 +335,7 @@ func TestAddCurator(t *testing.T) {
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
-
 	})
-
 }
 
 func transferAllocationOwnership(t *testing.T, allocationID, newOwner, newOwnerPublicKey string) ([]string, error) {
