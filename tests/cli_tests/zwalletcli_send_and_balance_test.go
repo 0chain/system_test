@@ -112,8 +112,15 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
-		wait(t, time.Minute*2)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalanceRaw, _ := poll(t, time.Minute, 5,
+			func() (interface{}, error) { return getNodeBalanceFromASharder(t, miner.ID), nil },
+			func(output interface{}, err error) bool {
+				endBalanace := output.(*apimodel.Balance)
+
+				return endBalanace.Round > startBalance.Round && endBalanace.Balance > startBalance.Balance
+			},
+		)
+		endBalance := endBalanceRaw.(*apimodel.Balance)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)

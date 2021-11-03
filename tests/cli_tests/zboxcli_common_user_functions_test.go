@@ -68,10 +68,23 @@ func TestCommonUserFunctions(t *testing.T) {
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
 		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
-		wait(t, time.Minute)
+		outputRaw, err := poll(t, time.Minute, 3,
+			func() (interface{}, error) { return writePoolInfo(t, configPath) },
+			func(output interface{}, err error) bool {
+				if len(output.([]string)) != 1 {
+					return false
+				}
+				initialWritePool := []climodel.WritePoolInfo{}
+				err = json.Unmarshal([]byte(output.([]string)[0]), &initialWritePool)
+
+				roundedBalance := math.Ceil(intToZCN(initialWritePool[0].Balance)*100) / 100
+
+				return err != nil && roundedBalance == 0.5
+			},
+		)
+		output = outputRaw.([]string)
 
 		// Get write pool info before file update
-		output, _ = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -91,7 +104,22 @@ func TestCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
-		wait(t, time.Minute)
+		outputRaw, err = poll(t, time.Minute, 3,
+			func() (interface{}, error) { return writePoolInfo(t, configPath) },
+			func(output interface{}, err error) bool {
+				if len(output.([]string)) != 1 {
+					return false
+				}
+				finalWritePool := []climodel.WritePoolInfo{}
+				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+
+				roundedBalance := math.Ceil(intToZCN(finalWritePool[0].Balance)*100) / 100
+
+				return err != nil &&
+					roundedBalance == (0.5-actualExpectedUploadCostInZCN)
+			},
+		)
+		output = outputRaw.([]string)
 
 		// Get the new Write Pool info after update
 		output, _ = writePoolInfo(t, configPath)
@@ -168,8 +196,19 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
-		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		outputRaw, err := poll(t, 30*time.Second, 3,
+			func() (interface{}, error) { return writePoolInfo(t, configPath) },
+			func(output interface{}, err error) bool {
+				if len(output.([]string)) != 1 {
+					return false
+				}
+				finalWritePool := []climodel.WritePoolInfo{}
+				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+
+				return err != nil && (intToZCN(initialWritePool[0].Balance)-intToZCN(finalWritePool[0].Balance)) < epsilon
+			},
+		)
+		output = outputRaw.([]string)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -226,8 +265,19 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
-		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		outputRaw, err := poll(t, 30*time.Second, 3,
+			func() (interface{}, error) { return writePoolInfo(t, configPath) },
+			func(output interface{}, err error) bool {
+				if len(output.([]string)) != 1 {
+					return false
+				}
+				finalWritePool := []climodel.WritePoolInfo{}
+				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+
+				return err != nil && (intToZCN(initialWritePool[0].Balance)-intToZCN(finalWritePool[0].Balance)) < epsilon
+			},
+		)
+		output = outputRaw.([]string)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -284,8 +334,19 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
-		wait(t, 10*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		outputRaw, err := poll(t, 10*time.Second, 5,
+			func() (interface{}, error) { return writePoolInfo(t, configPath) },
+			func(output interface{}, err error) bool {
+				if len(output.([]string)) != 1 {
+					return false
+				}
+				finalWritePool := []climodel.WritePoolInfo{}
+				err = json.Unmarshal([]byte(output.([]string)[0]), &finalWritePool)
+
+				return err != nil && (initialWritePool[0].Balance == finalWritePool[0].Balance) || (float64(finalWritePool[0].Balance-initialWritePool[0].Balance) < epsilon)
+			},
+		)
+		output = outputRaw.([]string)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -608,4 +669,23 @@ func ConvertToValue(token float64) int64 {
 func wait(t *testing.T, duration time.Duration) {
 	t.Logf("Waiting %s", duration)
 	time.Sleep(duration)
+}
+
+func poll(t *testing.T, backoff time.Duration, maxAttempts int, getResult func() (interface{}, error), validResult func(interface{}, error) bool) (interface{}, error) {
+	wait(t, backoff)
+	result, err := getResult()
+
+	for i := 1; i <= maxAttempts; i++ {
+		if !validResult(result, err) {
+			t.Logf("[%d/%d] Polling success condition reached", i, maxAttempts)
+			return result, err
+		} else if i != maxAttempts {
+			t.Logf("[%d/%d] Waiting [%s] as polling success condition failed", i, maxAttempts, backoff)
+			time.Sleep(backoff)
+		} else {
+			t.Logf("[%d/%d] All polling attempts have failed", i, maxAttempts)
+		}
+	}
+
+	return result, err
 }
