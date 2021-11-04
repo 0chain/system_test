@@ -115,9 +115,9 @@ func TestSendAndBalance(t *testing.T) {
 		endBalanceRaw, _ := poll(t, time.Minute, 5,
 			func() (interface{}, error) { return getNodeBalanceFromASharder(t, miner.ID), nil },
 			func(output interface{}, err error) bool {
-				endBalanace := output.(*apimodel.Balance)
+				endBalance := output.(*apimodel.Balance)
 
-				return endBalanace.Round > startBalance.Round && endBalanace.Balance > startBalance.Balance
+				return (endBalance.Round > startBalance.Round) && (endBalance.Balance > startBalance.Balance)
 			},
 		)
 		endBalance := endBalanceRaw.(*apimodel.Balance)

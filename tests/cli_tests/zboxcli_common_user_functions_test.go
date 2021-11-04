@@ -672,9 +672,11 @@ func wait(t *testing.T, duration time.Duration) {
 
 func poll(t *testing.T, backoff time.Duration, maxAttempts int, getResult func() (interface{}, error), validResult func(interface{}, error) bool) (interface{}, error) {
 	wait(t, backoff)
-	result, err := getResult()
+	var result interface{}
+	var err error
 
 	for i := 1; i <= maxAttempts; i++ {
+		result, err = getResult()
 		if !validResult(result, err) {
 			t.Logf("[%d/%d] Polling success condition reached", i, maxAttempts)
 			return result, err
