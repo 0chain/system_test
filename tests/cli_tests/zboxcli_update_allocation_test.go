@@ -184,8 +184,8 @@ func TestUpdateAllocation(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		_, err := cancelAllocation(t, configPath, allocationID)
-		require.NoError(t, err, "cancel allocation failed but should succeed")
+		output, err := cancelAllocation(t, configPath, allocationID)
+		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 	})
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
