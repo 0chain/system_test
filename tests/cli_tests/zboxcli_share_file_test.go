@@ -18,7 +18,7 @@ import (
 func TestShareFile(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Share file with another wallet", func(t *testing.T) {
+	t.Run("Share file using auth ticket with another wallet - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -65,7 +65,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1])
 	})
 
-	t.Run("Revoke shared file", func(t *testing.T) {
+	t.Run("Revoke auth ticket - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -123,7 +123,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
 	})
 
-	t.Run("Share file with expiration", func(t *testing.T) {
+	t.Run("Share file using auth ticket with expiration - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -171,7 +171,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
-	t.Run("Download shared file from wrong clientId", func(t *testing.T) {
+	t.Run("Download shared file using auth ticket from wrong clientId - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -217,7 +217,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
-	t.Run("Share folder with another wallet", func(t *testing.T) {
+	t.Run("Share folder using auth ticket with another wallet - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -262,7 +262,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 	})
 
-	t.Run("Share folder with another wallet, wrong download path", func(t *testing.T) {
+	t.Run("Share folder using auth ticket with another wallet, wrong download path - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
