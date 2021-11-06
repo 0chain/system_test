@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -75,7 +76,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, _ = writePoolInfo(t, configPath)
+		output = writePoolInfo(t, configPath)
 
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
@@ -97,10 +98,13 @@ func TestFileUploadTokenMovement(t *testing.T) {
 	})
 }
 
-func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+func writePoolInfo(t *testing.T, cliConfigFilename string) []string {
 	time.Sleep(10 * time.Second) // TODO replace with poller
 	t.Logf("Getting write pool info...")
-	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	require.Len(t, output, 1, strings.Join(output, "\n"))
+	require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+	return output
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
@@ -109,6 +113,16 @@ func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpat
 	require.Len(t, output, 1)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
 	return output, err
+}
+
+func uploadCostWithUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) (float64, string) {
+	t.Logf("Getting upload cost...")
+	output, err := cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	require.Len(t, output, 1)
+	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
+	cost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+	require.Nil(t, err, "Cost couldn't be parsed to float")
+	return cost, strings.Fields(output[0])[1]
 }
 
 func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
