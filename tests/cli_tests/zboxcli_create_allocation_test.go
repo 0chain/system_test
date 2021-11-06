@@ -255,7 +255,6 @@ func setupWallet(t *testing.T, configPath string) []string {
 }
 
 func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Creating new allocation...")
 	return createNewAllocationForWallet(t, escapedTestName(t)+"_wallet.json", cliConfigFilename, params)
 }
 
