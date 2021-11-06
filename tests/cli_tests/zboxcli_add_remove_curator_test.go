@@ -13,104 +13,6 @@ import (
 func TestAddCurator(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", func(t *testing.T) {
-		t.Parallel()
-
-		curatorWalletName := escapedTestName(t) + "_CURATOR"
-		targetWalletName := escapedTestName(t) + "_TARGET"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(configPath, curatorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = registerWalletForName(configPath, targetWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
-
-		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
-		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
-
-		wait(t, 5*time.Second)
-
-		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
-		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
-
-		output, err = removeCurator(t, params)
-		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
-
-		wait(t, 5*time.Second)
-
-		allocation = getAllocation(t, allocationID)
-		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
-
-		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
-	})
-
-	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *testing.T) {
-		t.Parallel()
-
-		curatorWalletName := escapedTestName(t) + "_CURATOR"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(configPath, curatorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
-
-		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
-		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
-
-		wait(t, 5*time.Second)
-
-		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
-		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
-
-		output, err = removeCurator(t, params)
-		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
-
-		wait(t, 5*time.Second)
-
-		allocation = getAllocation(t, allocationID)
-		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
-	})
-
 	t.Run("Add Curator _ must fail when the allocation doesn't exist ", func(t *testing.T) {
 		t.Parallel()
 
@@ -335,6 +237,104 @@ func TestAddCurator(t *testing.T) {
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
+	})
+
+	t.Run("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", func(t *testing.T) {
+		t.Parallel()
+
+		curatorWalletName := escapedTestName(t) + "_CURATOR"
+		targetWalletName := escapedTestName(t) + "_TARGET"
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(configPath, curatorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		output, err = registerWalletForName(configPath, targetWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
+		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		defer createAllocationTestTeardown(t, allocationID)
+
+		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
+		output, err = addCurator(t, params)
+		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
+
+		wait(t, 5*time.Second)
+
+		allocation := getAllocation(t, allocationID)
+		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
+
+		output, err = removeCurator(t, params)
+		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
+
+		wait(t, 5*time.Second)
+
+		allocation = getAllocation(t, allocationID)
+		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
+
+		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
+	})
+
+	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *testing.T) {
+		t.Parallel()
+
+		curatorWalletName := escapedTestName(t) + "_CURATOR"
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(configPath, curatorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
+		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		defer createAllocationTestTeardown(t, allocationID)
+
+		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
+		output, err = addCurator(t, params)
+		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
+
+		wait(t, 5*time.Second)
+
+		allocation := getAllocation(t, allocationID)
+		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
+
+		output, err = removeCurator(t, params)
+		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
+
+		wait(t, 5*time.Second)
+
+		allocation = getAllocation(t, allocationID)
+		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
 	})
 }
 
