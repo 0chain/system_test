@@ -79,7 +79,7 @@ func TestBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, _ = writePoolInfo(t, configPath)
+		output = writePoolInfo(t, configPath)
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -117,7 +117,7 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Get the new Write-Pool info after upload
-		output, _ = writePoolInfo(t, configPath)
+		output = writePoolInfo(t, configPath)
 
 		finalWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
