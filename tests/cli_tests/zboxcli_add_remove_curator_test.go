@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddCurator(t *testing.T) {
+func TestAddRemoveCurator(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Add Curator _ must fail when the allocation doesn't exist ", func(t *testing.T) {
