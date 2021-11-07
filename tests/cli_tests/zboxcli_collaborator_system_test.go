@@ -39,9 +39,7 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
-
 	})
-
 }
 
 func addCollaborator(t *testing.T, params string) ([]string, error) {
