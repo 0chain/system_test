@@ -613,7 +613,6 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	t.Logf("Uploading file...")
 	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
 }
 
