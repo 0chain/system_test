@@ -74,6 +74,7 @@ jobs:
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
         with:
+           repository: 0chain/system_test
            ref: ${{ inputs.system_tests_branch }}
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
