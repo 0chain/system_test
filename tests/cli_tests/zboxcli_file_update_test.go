@@ -141,11 +141,7 @@ func TestFileUpdate(t *testing.T) {
 		// BUG: File download of thumbnail not working
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-
-		// originalFileChecksum := generateChecksum(t, thumbnailFile)
-		// downloadedFileChecksum := generateChecksum(t, output[0])
-		// require.NotEqual(t, originalFileChecksum, downloadedFileChecksum)
-
+		
 		defer func() {
 			// Delete the downloaded thumbnail file
 			err = os.Remove(thumbnailFile)
@@ -217,7 +213,7 @@ func updateFileWithThumbnail(t *testing.T, allocationID string, remotePath strin
 		"thumbnailpath": thumbnail,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
-
+	require.Len(t, output, 2)
 	return thumbnail
 }
 
@@ -229,4 +225,5 @@ func updateFileWithCommit(t *testing.T, allocationID string, remotePath string, 
 		"commit":     true,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 2)
 }
