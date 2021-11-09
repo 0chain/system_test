@@ -442,10 +442,10 @@ func TestFileStats(t *testing.T) {
 	t.Run("get file stats before and after update", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
 		remotepath := "/"
-		filesize := int64(5)
+		filesize := int64(0.5 * MB)
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
@@ -480,22 +480,10 @@ func TestFileStats(t *testing.T) {
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 
-		expDuration := int64(2) // In hours
-
-		// update size for the allocation
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-			"size":       100,
-		})
-
-		output, err = updateAllocation(t, configPath, params)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		// update size for the file
+		updateFileWithRandomlyGeneratedData(t, allocationID, fname, int64(1*MB))
 
 		// fetch file stats after update
-
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
@@ -513,14 +501,12 @@ func TestFileStats(t *testing.T) {
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
 			require.Equal(t, int64(0), data.NumOfBlockDownloads)
 			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
+			require.Equal(t, int64(2), data.NumOfUpdates, "the number of updates count should increment")
 			if data.WriteMarkerTxn == "" {
 				require.Equal(t, false, data.BlockchainAware)
 			} else {
 				require.Equal(t, true, data.BlockchainAware)
 			}
-
-			//FIXME: POSSIBLE BUG: The update did not get reflected in the file stats
-			require.NotEqual(t, int64(2), data.NumOfUpdates, "the number of updates count should increment")
 
 			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
