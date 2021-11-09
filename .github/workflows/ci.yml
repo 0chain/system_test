@@ -9,6 +9,10 @@ on:
   push:
   workflow_dispatch:
     inputs:
+      test_run_description:
+        description: 'Description/label for this test run to differentiate between builds'
+        default: 'staging'
+        required: true
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
@@ -39,10 +43,6 @@ on:
         required: false
       zbox_image:
         description: '0box DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
-      zdns_image:
-        description: '0dns DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zblock_image:
@@ -105,6 +105,8 @@ jobs:
 
       - name: "VIEW TEST CONFIGURATION"
         run: |
+          echo "Test Run Description:   [${{github.event.inputs.test_run_description}}]"
+
           echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
           echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
           echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
