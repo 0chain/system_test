@@ -73,7 +73,8 @@ jobs:
 
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
-          ref: github.event.inputs.system_tests_branch
+        with:
+           ref: ${{ github.event.inputs.system_tests_branch }}
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
         run: |
