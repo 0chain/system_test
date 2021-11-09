@@ -6,65 +6,65 @@ env:
   DEFAULT_ZBOX_BRANCH: staging
 
 on:
-  push:
-  workflow_dispatch:
+  workflow_call:
     inputs:
+      system_tests_branch:
+        type: string
+        description: 'System Tests (branch or commit SHA) which the tests will use'
+        default: 'master'
+        required: false
       zbox_cli_branch:
+        type: string
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: true
+        required: false
       zwallet_cli_branch:
+        type: string
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: true
+        required: false
       existing_network:
+        type: string
         description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
         default: ''
         required: false
       miner_image:
+        type: string
         description: 'miner DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       sharder_image:
+        type: string
         description: 'sharder DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
+        type: string
         description: 'blobber DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       validator_image:
+        type: string
         description: 'validator DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zbox_image:
+        type: string
         description: '0box DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zdns_image:
+        type: string
         description: '0dns DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zblock_image:
+        type: string
         description: '0block DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
 
 jobs:
-  golangci:
-    if: github.event_name == 'push'
-    name: "lint"
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.42
-          skip-build-cache: true
-          skip-pkg-cache: true
-          only-new-issues: true
-
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
@@ -73,16 +73,9 @@ jobs:
 
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
-
-      - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
-        run: |
-          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+          ref: github.event.inputs.system_tests_branch
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
@@ -106,7 +99,7 @@ jobs:
       - name: "VIEW TEST CONFIGURATION"
         run: |
           echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
-          echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
+          echo "System tests branch:    [${{ github.event.inputs.system_tests_branch }}]"
           echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
           echo "0box CLI branch:        [${{ env.ZBOX_BRANCH }}]"
           echo "0wallet CLI branch:     [${{ env.ZWALLET_BRANCH }}]"
@@ -123,18 +116,15 @@ jobs:
           echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
 
       - name: "Install helm"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-helm@v1
         with:
           version: 'v3.2.2'
 
       - name: "Install kubectl"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-kubectl@v1
         id: install
 
       - name: "Configure helm & kubectl"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
           helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
@@ -143,7 +133,6 @@ jobs:
           echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Remove existing 0Chain network and data"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
           if [ $output -gt 1 ]; then
@@ -156,7 +145,6 @@ jobs:
 
 
       - name: "Deploy 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
           helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
@@ -169,7 +157,6 @@ jobs:
           helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=${{ env.BLOBBER_STAKE_TAG }} 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
 
       - name: "Wait for 0Chain network deployment to complete"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           sleep 60
           counter=0;
@@ -297,7 +284,6 @@ jobs:
         run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
 
       - name: "Tear Down 0Chain network"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
           if [ $output -gt 1 ]; then
