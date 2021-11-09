@@ -7,6 +7,7 @@ env:
 
 on:
   push:
+  workflow_call:
   workflow_dispatch:
     inputs:
       zbox_cli_branch:
@@ -75,7 +76,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call') && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
