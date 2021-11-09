@@ -13,12 +13,12 @@ on:
         type: string
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: true
+        required: false
       zwallet_cli_branch:
         type: string
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: true
+        required: false
       existing_network:
         type: string
         description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
@@ -64,11 +64,11 @@ on:
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: false
+        required: true
       zwallet_cli_branch:
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
-        required: false
+        required: true
       existing_network:
         description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
         default: ''
