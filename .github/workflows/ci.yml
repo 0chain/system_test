@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       test_run_description:
-        description: 'Description/label for this test run to differentiate between builds'
-        default: 'staging'
-        required: true
+        description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
+        default: ''
+        required: false
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
