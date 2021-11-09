@@ -8,6 +8,57 @@ env:
 on:
   push:
   workflow_call:
+    inputs:
+      zbox_cli_branch:
+        type: string
+        description: '0Box CLI (branch or commit SHA) which the tests will use'
+        default: 'staging'
+        required: true
+      zwallet_cli_branch:
+        type: string
+        description: '0Wallet CLI (branch or commit SHA) which the tests will use'
+        default: 'staging'
+        required: true
+      existing_network:
+        type: string
+        description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
+        default: ''
+        required: false
+      miner_image:
+        type: string
+        description: 'miner DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      sharder_image:
+        type: string
+        description: 'sharder DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      blobber_image:
+        type: string
+        description: 'blobber DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      validator_image:
+        type: string
+        description: 'validator DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zbox_image:
+        type: string
+        description: '0box DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zdns_image:
+        type: string
+        description: '0dns DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      zblock_image:
+        type: string
+        description: '0block DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
   workflow_dispatch:
     inputs:
       zbox_cli_branch:
