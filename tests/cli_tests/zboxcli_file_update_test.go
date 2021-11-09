@@ -141,7 +141,7 @@ func TestFileUpdate(t *testing.T) {
 		// BUG: File download of thumbnail not working
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		
+
 		defer func() {
 			// Delete the downloaded thumbnail file
 			err = os.Remove(thumbnailFile)
@@ -199,6 +199,195 @@ func TestFileUpdate(t *testing.T) {
 
 		go createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.Run("update file that does not exists", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+
+		filesize := int64(0.5 * MB)
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, filesize)
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localfile),
+			"localpath":  localfile,
+		})
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		go createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update with another file of size larger than allocation", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		newFileSize := 4 * MB
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(newFileSize))
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+		})
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		go createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update non-encrypted file with encrypted file", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(filesize))
+		require.Nil(t, err)
+
+		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err := listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		isEncrypted := strings.Split(output[2], "|")[6]
+		require.Equal(t, "NO", strings.TrimSpace(isEncrypted))
+
+		// update with encrypted file
+		output, err = updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+			"encrypt":    true,
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err = listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		isEncrypted = strings.Split(output[2], "|")[6]
+		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
+
+		go createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update encrypted file with non-encrypted file", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"encrypt": true})
+
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(filesize))
+		require.Nil(t, err)
+
+		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err := listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		isEncrypted := strings.Split(output[2], "|")[6]
+		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
+
+		// update with encrypted file
+		output, err = updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err = listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		yes := strings.Split(output[2], "|")[6]
+		require.Equal(t, "NO", strings.TrimSpace(yes))
+
+		go createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update encrypted file with encrypted file", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"encrypt": true})
+
+		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err := listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		isEncrypted := strings.Split(output[2], "|")[6]
+		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
+		filename := strings.Split(output[2], "|")[1]
+		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
+
+		localfile := generateRandomTestFileName(t)
+		err = createFileWithSize(localfile, int64(filesize))
+		require.Nil(t, err)
+
+		// update with encrypted file
+		output, err = updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+			"encrypt":    true,
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
+		output, err = listFilesInAllocation(t, configPath, params)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		yes := strings.Split(output[2], "|")[6]
+		require.Equal(t, "YES", strings.Trim(yes, " "))
+		filename = strings.Split(output[2], "|")[1]
+		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
+
+		go createAllocationTestTeardown(t, allocationID)
+	})
 }
 
 func updateFileWithThumbnail(t *testing.T, allocationID string, remotePath string, localpath string, size int64) string {
@@ -225,5 +414,5 @@ func updateFileWithCommit(t *testing.T, allocationID string, remotePath string, 
 		"commit":     true,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2)
+	require.Len(t, output, 3)
 }
