@@ -373,7 +373,7 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 		"parity": 1,
 		"data":   1,
 	})
-	output, err := createNewAllocationForWallet(t, wallet+"_wallet.json", configPath, allocParam)
+	output, err := createNewAllocationForWallet(t, wallet, configPath, allocParam)
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)

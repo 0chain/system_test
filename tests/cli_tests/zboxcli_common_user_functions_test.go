@@ -480,11 +480,15 @@ func TestCommonUserFunctions(t *testing.T) {
 }
 
 func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) string {
+	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, fileSize)
+}
+
+func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationID string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
 
-	output, err := uploadFile(t, configPath, map[string]interface{}{
+	output, err := uploadFileForWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": "/",
 		"localpath":  filename,

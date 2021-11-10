@@ -15,6 +15,38 @@ import (
 
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
+
+	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *testing.T) {
+		t.Parallel()
+
+		ownerWalletName := escapedTestName(t) + "_owner"
+		anotherWalletName := escapedTestName(t) + "_another"
+
+		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		output, err := registerWalletForName(configPath, anotherWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+		anotherWallet, err := getWalletForName(t, configPath, anotherWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		localpath := uploadRandomlyGeneratedFileWithWallet(t, ownerWalletName, allocationID, 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaboratorWithWallet(t, anotherWalletName, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   anotherWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.NotNil(t, err, "Add collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
+		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
+	})
+
 	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *testing.T) {
 		t.Parallel()
 
@@ -29,7 +61,7 @@ func TestCollaborator(t *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, 1*MB)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
 
 		output, err = addCollaborator(t, createParams(map[string]interface{}{
