@@ -5,6 +5,7 @@ cases:
     start_stop_ok: true
     update_non_existing_session_ok: false
     stop_non_existing_session_ok: false
+    reward_pools_all_types: false
 
   # represents test case with big number of users connections
   stress:
@@ -27,7 +28,7 @@ server_chain:
 
 magma:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/magma:staging-b04778a8"
+  ref: "0chaindev/magma:staging-e1558178"
 
   port: "5181"
   grpc_port: "7251"
@@ -37,7 +38,7 @@ magma:
 
 consumer:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/consumer:staging-b04778a8"
+  ref: "0chaindev/consumer:staging-e1558178"
 
   port: "5151"
   grpc_port: "7131"
@@ -59,7 +60,7 @@ consumer:
 
 provider:
   # represents docker image build tags that will be pulled.
-  ref: "0chaindev/provider:staging-b04778a8"
+  ref: "0chaindev/provider:staging-e1558178"
 
   port: "5171"
   grpc_port: "7141"

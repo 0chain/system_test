@@ -3,7 +3,7 @@ module github.com/0chain/system_test
 go 1.16
 
 require (
-	github.com/0chain/gosdk v1.2.88-0.20211015114218-f7c5b969e38a
+	github.com/0chain/gosdk v1.2.88-0.20211108110748-ff2ab8fcbfef
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect

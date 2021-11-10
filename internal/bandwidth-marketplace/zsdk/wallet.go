@@ -1,8 +1,10 @@
 package zsdk
 
 import (
+	"os"
 	"path/filepath"
 
+	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/zmagmacore/crypto"
 	"github.com/0chain/gosdk/zmagmacore/node"
 	"github.com/0chain/gosdk/zmagmacore/wallet"
@@ -37,6 +39,21 @@ func Init(keyPath, nodeDir, extID string, cfg *config.Config) error {
 	}
 
 	node.Start("", 0, extID, wall)
+
+	return nil
+}
+
+// WriteDefaultKeysFile generates key pair with provided signature scheme and writes it to the provided path.
+func WriteDefaultKeysFile(signatureScheme, path string) error {
+	ss := zcncrypto.NewSignatureScheme(signatureScheme)
+	if _, err := ss.GenerateKeys(); err != nil {
+		return err
+	}
+
+	keys := ss.GetPublicKey() + "\n" + ss.GetPrivateKey()
+	if err := os.WriteFile(path, []byte(keys), 0600); err != nil {
+		return err
+	}
 
 	return nil
 }

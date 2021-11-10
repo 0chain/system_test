@@ -37,6 +37,7 @@ type (
 		StartStopOK                bool `yaml:"start_stop_ok"`
 		UpdateNonExistingSessionOK bool `yaml:"update_non_existing_session_ok"`
 		StopNonExistingSessionOK   bool `yaml:"stop_non_existing_session_ok"`
+		RewardPoolsAllTypes        bool `yaml:"reward_pools_all_types"`
 	}
 
 	// StressCase represents test case with big number of users connections.

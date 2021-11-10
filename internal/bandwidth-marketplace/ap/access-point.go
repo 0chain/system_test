@@ -16,8 +16,6 @@ import (
 )
 
 func RegisterAndStake(keysFile, nodeDir string, cfg *config.Config) (*magmasc.AccessPoint, error) {
-	log.Logger.Info("Registering Access Point ...")
-
 	if err := zsdk.Init(keysFile, nodeDir, "", cfg); err != nil {
 		return nil, err
 	}
@@ -56,7 +54,7 @@ func RegisterAndStake(keysFile, nodeDir string, cfg *config.Config) (*magmasc.Ac
 		return nil, err
 	}
 
-	log.Logger.Info("Ap staked")
+	log.Logger.Info("Ap registered and staked")
 
 	return ap, nil
 }

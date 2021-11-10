@@ -33,53 +33,34 @@ func TestSession(t *testing.T) {
 		pourConsumerWallet(t)
 
 		var (
-			sessionID               = "test_session_id_" + strconv.Itoa(time.Now().Nanosecond())
-			sessionTimeDelay uint32 = 5 // in seconds
+			sessionID = "test_session_id_" + strconv.Itoa(time.Now().Nanosecond())
 
-			startingConsumerBal, startingProviderBal, startingAccPointBal        = getConsumerBalance(t), getProviderBalance(t), getAccessPointBalance(t)
-			octetsIn, octetsOut                                           uint64 = 3000000, 3000000
+			startingConsumerBal, startingProviderBal, startingAccPointBal = getConsumerBalance(t), getProviderBalance(t), getAccessPointBalance(t)
+
+			afterStart action = func(t *testing.T) {
+				checkLockedTokens(t, sessionID, startingConsumerBal)
+			}
+			afterStop action = func(t *testing.T) {
+				// request billing and check balances
+				paid := checkBillingPayments(t, sessionID, startingProviderBal, startingAccPointBal)
+
+				// we dont need min cost payment, so check it
+				sess, err := magmasc.RequestSession(sessionID)
+				require.NoError(t, err)
+				require.True(
+					t,
+					paid != sess.AccessPoint.TermsGetMinCost(),
+					"Billing amount should not be equal to the MinCost",
+				)
+
+				require.Equal(
+					t,
+					startingConsumerBal-paid,
+					getConsumerBalance(t),
+				)
+			}
 		)
-
-		// checks for usual using
-
-		err := magma.SessionStart(userIMSI, accessPoint.Id, sessionID, testCfg)
-		require.NoError(t, err)
-
-		// request session and check balances
-		checkLockedTokens(t, sessionID, startingConsumerBal)
-
-		err = magma.SessionUpdate(userIMSI,
-			accessPoint.Id,
-			sessionID,
-			sessionTimeDelay,
-			octetsIn,
-			octetsOut,
-			testCfg,
-		)
-		require.NoError(t, err)
-
-		err = magma.SessionStop(
-			userIMSI,
-			accessPoint.Id,
-			sessionID,
-			2*sessionTimeDelay,
-			octetsIn,
-			octetsOut,
-			testCfg,
-		)
-		require.NoError(t, err)
-
-		// request billing and check balances
-		paid := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
-
-		// we dont need min cost payment, so check it
-		sess, err := magmasc.RequestSession(sessionID)
-		require.NoError(t, err)
-		require.True(
-			t,
-			paid != sess.AccessPoint.TermsGetMinCost(),
-			"Billing amount should not be equal to the MinCost",
-		)
+		simpleSessionActivity(userIMSI, accessPoint.Id, sessionID, afterStart, emptyAction(), afterStop, t)
 	})
 
 	t.Run("Start->Stop_OK", func(t *testing.T) {
@@ -120,7 +101,7 @@ func TestSession(t *testing.T) {
 		require.NoError(t, err)
 
 		// request billing and check balances
-		paid := checkBillingPayments(t, sessionID, startingConsumerBal, startingProviderBal, startingAccPointBal)
+		paid := checkBillingPayments(t, sessionID, startingProviderBal, startingAccPointBal)
 
 		// we need min cost payment, so check it
 		sess, err := magmasc.RequestSession(sessionID)
@@ -187,5 +168,33 @@ func TestSession(t *testing.T) {
 		// checks for balances that must be unchanged
 		require.Equal(t, startingConsumerBalance, getConsumerBalance(t))
 		require.Equal(t, startingProviderBalance, getProviderBalance(t))
+	})
+
+	t.Run("RewardPool_All_Types", func(t *testing.T) {
+		if !testCfg.Cases.Session.RewardPoolsAllTypes {
+			t.Skip()
+		}
+
+		sessionID := "test_session_id_" + strconv.Itoa(time.Now().Nanosecond())
+		rewPoolSessionActivity(
+			userIMSI,
+			accessPoint.Id,
+			sessionID,
+			rewardPoolsConfigurator{
+				provider: pool{
+					enabled: true,
+					name:    sessionID + "_prov_srp",
+				},
+				accessPoint: pool{
+					enabled: true,
+					name:    sessionID + "_ap_srp",
+				},
+				all: pool{
+					enabled: true,
+					name:    sessionID + "_all_srp",
+				},
+			},
+			t,
+		)
 	})
 }
