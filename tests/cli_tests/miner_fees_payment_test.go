@@ -459,6 +459,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
+		stakePoolID := strings.Fields(output[0])[4]
+		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		for endBalance.Round <= startBalance.Round {
@@ -472,6 +474,82 @@ func TestMinerFeesPayment(t *testing.T) {
 		var block_miner_id string
 		var transactionRound int64
 		var expectedMinerFee int64
+
+		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
+			block := getRoundBlockFromASharder(t, round)
+
+			for i := range block.Block.Transactions {
+				txn := block.Block.Transactions[i]
+				// Find the generator miner of the block on which this transaction was recorded
+				if block_miner_id == "" {
+					if txn.ToClientId == MINER_SC_ADDRESS && txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, "stake_pool_lock") {
+						block_miner_id = block.Block.MinerId // Generator miner
+						transactionRound = block.Block.Round
+						block_miner = getMinersDetail(t, minerNode.ID)
+
+						// Expected miner fee is calculating using this formula:
+						// Fee * minerShare * miner.ServiceCharge
+						// Stakeholders' reward is:
+						// Fee * minerShare * (1 - miner.ServiceCharge)
+						// In case of no stakeholders, miner gets:
+						// Fee * minerShare
+						minerFee := ConvertToValue(fee * minerShare)
+						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
+						expectedMinerFee = minerServiceCharge
+						minerFeeRemaining := minerFee - minerServiceCharge
+
+						// If there is no stake, the miner gets entire fee.
+						// Else "Remaining" portion would be distributed to stake holders
+						// And hence not go the miner
+						if miner.TotalStake == 0 {
+							expectedMinerFee += minerFeeRemaining
+						}
+						t.Logf("Expected miner fee: %v", expectedMinerFee)
+						t.Logf("Miner ID: %v", block_miner_id)
+					}
+				} else {
+					// Search for the fee payment to generator miner in "payFee" transaction output
+					if strings.ContainsAny(txn.TransactionData, "stake_pool_lock") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+						var transfers []apimodel.Transfer
+						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
+
+						for _, transfer := range transfers {
+							// Transfer needs to be from Miner Smart contract to Generator miner
+							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
+								continue
+							} else {
+								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
+								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
+								// Transfer fee must be equal to miner fee
+								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+								return // test passed
+							}
+						}
+					}
+				}
+			}
+		}
+
+		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+
+		// Unstake the tokens
+		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobber.Id,
+			"pool_id":    stakePoolID,
+			"fee":        fee,
+		}))
+		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
+
+		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		for endBalance.Round <= startBalance.Round {
+			endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		}
+
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
 			block := getRoundBlockFromASharder(t, round)
