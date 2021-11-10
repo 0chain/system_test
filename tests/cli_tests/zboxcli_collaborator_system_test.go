@@ -79,7 +79,6 @@ func TestCollaborator(t *testing.T) {
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0], "Unexpected output", strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
