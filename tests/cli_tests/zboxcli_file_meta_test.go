@@ -399,12 +399,16 @@ func TestFileMetadata(t *testing.T) {
 }
 
 func getFileMeta(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	return getFileMetaWithWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func getFileMetaWithWallet(t *testing.T, walletName, cliConfigFilename, param string) ([]string, error) {
 	wait(t, 5*time.Second)
 	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(
 		"./zbox meta %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		walletName+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(cmd)

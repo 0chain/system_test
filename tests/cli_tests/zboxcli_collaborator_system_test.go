@@ -16,6 +16,55 @@ import (
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
 
+	t.Run("Remove Collaborator from a file owned by somebody else must fail", func(t *testing.T) {
+		t.Parallel()
+
+		ownerWalletName := escapedTestName(t) + "_owner"
+		anotherWalletName := escapedTestName(t) + "_another"
+
+		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		output, err := registerWalletForName(configPath, anotherWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
+		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+
+		localpath := uploadRandomlyGeneratedFileWithWallet(t, ownerWalletName, allocationID, 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		thirdPersonWalletAddress := "someone_wallet_address"
+
+		output, err = addCollaboratorWithWallet(t, ownerWalletName, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   thirdPersonWalletAddress,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", thirdPersonWalletAddress, remotepath)
+		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
+
+		meta := getFileMetaDataWithWallet(t, ownerWalletName, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, thirdPersonWalletAddress, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		// Now we test if another wallet can remove from collaborators' list
+		output, err = removeCollaboratorWithWallet(t, anotherWalletName, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   thirdPersonWalletAddress,
+			"remotepath": remotepath,
+		}))
+		require.NotNil(t, err, "Remove collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
+		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "remove_collaborator_failed: Failed to remove collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
+	})
+
 	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -271,7 +320,11 @@ func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo 
 }
 
 func getFileMetaData(t *testing.T, params map[string]interface{}) *climodel.FileMetaResult {
-	output, err := getFileMeta(t, configPath, createParams(params))
+	return getFileMetaDataWithWallet(t, escapedTestName(t), params)
+}
+
+func getFileMetaDataWithWallet(t *testing.T, walletName string, params map[string]interface{}) *climodel.FileMetaResult {
+	output, err := getFileMetaWithWallet(t, walletName, configPath, createParams(params))
 	require.Nil(t, err, "Error in getting file meta data", strings.Join(output, "\n"))
 	require.Len(t, output, 1, "Error in getting file meta data - Unexpected number of output lines", strings.Join(output, "\n"))
 
