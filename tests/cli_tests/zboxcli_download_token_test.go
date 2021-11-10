@@ -108,7 +108,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	time.Sleep(30 * time.Second) // TODO replace with poller
+	wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 }

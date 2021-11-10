@@ -15,6 +15,125 @@ import (
 
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
+	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, 1*MB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+
+		meta := getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		// Lock tokens in read pool
+		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"tokens":     0.4,
+			"duration":   "1h",
+		}))
+		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "locked", output[0])
+
+		output, err = removeCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
+
+		meta = getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
+
+		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  "tmp/",
+		}))
+		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
+		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0], "Unexpected output", strings.Join(output, "\n"))
+
+	})
+
+	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
+		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
+
+		meta := getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		output, err = removeCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		expectedOutput = fmt.Sprintf("Collaborator %s removed successfully for the file %s", collaboratorWallet.ClientID, remotepath)
+		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
+
+		meta = getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
+	})
 
 	t.Run("Add Collaborator _ collaborator must be able to read the file", func(t *testing.T) {
 		t.Parallel()
@@ -56,6 +175,10 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
+
+		readPool := getReadPoolInfo(t, allocationID)
+		require.Len(t, readPool, 1, "Read pool must exist")
+		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -135,6 +258,22 @@ func addCollaboratorWithWallet(t *testing.T, walletName, params string) ([]strin
 	t.Logf("Adding collaborator...")
 	cmd := fmt.Sprintf(
 		"./zbox add-collab %s --silent --wallet %s "+
+			"--configDir ./config --config %s",
+		params,
+		walletName+"_wallet.json",
+		configPath,
+	)
+	return cliutils.RunCommand(cmd)
+}
+
+func removeCollaborator(t *testing.T, params string) ([]string, error) {
+	return removeCollaboratorWithWallet(t, escapedTestName(t), params)
+}
+
+func removeCollaboratorWithWallet(t *testing.T, walletName, params string) ([]string, error) {
+	t.Logf("Removing collaborator...")
+	cmd := fmt.Sprintf(
+		"./zbox delete-collab %s --silent --wallet %s "+
 			"--configDir ./config --config %s",
 		params,
 		walletName+"_wallet.json",

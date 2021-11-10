@@ -956,7 +956,7 @@ func downloadFile(t *testing.T, cliConfigFilename, param string) ([]string, erro
 
 func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Downloading file...")
-	time.Sleep(15 * time.Second) // TODO replace with pollers
+	wait(t, 15*time.Second) // TODO replace with pollers
 	cmd := fmt.Sprintf(
 		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
 		param,
