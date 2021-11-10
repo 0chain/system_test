@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -15,6 +16,47 @@ import (
 
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
+
+	t.Run("Add Collaborator _ collaborator must be able to share the file", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}))
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+
+		meta := getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		output, err = shareFile(t, collaboratorWalletName, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+		})
+		require.Nil(t, err, "Error in sharing the file as collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Auth token :.+"), output[0], "Unexpected output", strings.Join(output, "\n"))
+	})
 
 	t.Run("Remove Collaborator from a file owned by somebody else must fail", func(t *testing.T) {
 		t.Parallel()
