@@ -115,7 +115,7 @@ func TestMinerFeesPayment(t *testing.T) {
 						t.Logf("Expected miner fee: %v", expectedMinerFee)
 						t.Logf("Miner ID: %v", block_miner_id)
 					}
-				} 
+				}
 				if block_miner_id != "" {
 					// Search for the fee payment to generator miner in "payFee" transaction output
 					if strings.ContainsAny(txn.TransactionData, "read_pool_lock") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
@@ -611,7 +611,6 @@ func TestMinerFeesPayment(t *testing.T) {
 		t.Parallel()
 
 		tokensToLock := float64(1)
-		lockDuration := time.Minute
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -620,76 +619,38 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// lock tokens
-		output, err = lockInterest(t, configPath, true, 1, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"fee":         0.1,
+			"tokens":      0.5,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
 
 		lockTimer := time.NewTimer(time.Minute)
 
-		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
-
-		// Get balance BEFORE locked tokens expire.
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
-
-		// Get locked tokens BEFORE locked tokens expire.
 		output, err = getLockedTokens(t, configPath)
 		require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Locked tokens:", output[0])
 
-		var statsBeforeExpire climodel.LockedInterestPoolStats
-		err = json.Unmarshal([]byte(output[1]), &statsBeforeExpire)
+		var stats climodel.LockedInterestPoolStats
+		err = json.Unmarshal([]byte(output[1]), &stats)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
-		require.Len(t, statsBeforeExpire.Stats, 1)
-		require.NotEqual(t, "", statsBeforeExpire.Stats[0].ID)
-		require.True(t, statsBeforeExpire.Stats[0].Locked)
-		require.Equal(t, lockDuration, statsBeforeExpire.Stats[0].Duration)
-		require.LessOrEqual(t, statsBeforeExpire.Stats[0].TimeLeft, lockDuration)
-		require.LessOrEqual(t, statsBeforeExpire.Stats[0].StartTime, time.Now().Unix())
-		require.Equal(t, apr, statsBeforeExpire.Stats[0].APR)
-		require.Equal(t, wantInterestEarned, statsBeforeExpire.Stats[0].TokensEarned)
-		require.Equal(t, int64(tokensToLock*1e10), statsBeforeExpire.Stats[0].Balance)
 
 		// Wait until lock expires.
 		<-lockTimer.C
 
-		// Get balance AFTER locked tokens expire.
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: `+wantInterestEarnedAsBalance+` \(\d*\.?\d+ USD\)$`), output[0])
-
-		// Get locked tokens AFTER locked tokens expire.
-		output, err = getLockedTokens(t, configPath)
-		require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Locked tokens:", output[0])
-
-		var statsAfterExpire climodel.LockedInterestPoolStats
-		err = json.Unmarshal([]byte(output[1]), &statsAfterExpire)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
-		require.Len(t, statsAfterExpire.Stats, 1)
-		require.NotEqual(t, "", statsAfterExpire.Stats[0].ID)
-		require.False(t, statsAfterExpire.Stats[0].Locked)
-		require.Equal(t, lockDuration, statsAfterExpire.Stats[0].Duration)
-		require.LessOrEqual(t, statsAfterExpire.Stats[0].TimeLeft, time.Duration(0)) // timeleft can be negative
-		require.Less(t, statsAfterExpire.Stats[0].StartTime, time.Now().Unix())
-		require.Equal(t, apr, statsAfterExpire.Stats[0].APR)
-		require.Equal(t, wantInterestEarned, statsAfterExpire.Stats[0].TokensEarned)
-		require.Equal(t, int64(tokensToLock*1e10), statsAfterExpire.Stats[0].Balance)
-
-		time.Sleep(time.Second) // Sleep to let lock try to earn interest after has expired.
-
 		// unlock
-		output, err = unlockInterest(t, configPath, true, statsAfterExpire.Stats[0].ID)
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": stats.Stats[0].ID,
+			"fee":     0.1,
+		}))
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])
 
-	}) 
+	})
 }

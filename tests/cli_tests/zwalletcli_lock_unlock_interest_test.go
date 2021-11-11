@@ -113,7 +113,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		time.Sleep(time.Second) // Sleep to let lock try to earn interest after has expired.
 
 		// unlock
-		output, err = unlockInterest(t, configPath, true, statsAfterExpire.Stats[0].ID)
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": statsAfterExpire.Stats[0].ID,
+		}))
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])
@@ -737,7 +739,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = unlockInterest(t, configPath, false, "")
+		output, err = unlockInterest(t, configPath, "")
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Error: pool_id flag is missing`, output[0])
@@ -752,7 +754,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = unlockInterest(t, configPath, true, "")
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": "",
+		}))
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -767,7 +771,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = unlockInterest(t, configPath, true, "abcdef")
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": "abcdef",
+		}))
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -826,7 +832,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, int64(10_000_000_000), stats.Stats[0].Balance)
 
 		// Unlock BEFORE locked tokens expire.
-		output, err = unlockInterest(t, configPath, true, stats.Stats[0].ID)
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": stats.Stats[0].ID,
+		}))
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -895,7 +903,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		<-lockTimer.C
 
 		// Unlock attempt by third party wallet.
-		output, err = unlockInterestForWallet(thirdPartyWallet, configPath, true, stats.Stats[0].ID)
+		output, err = unlockInterestForWallet(thirdPartyWallet, configPath, createParams(map[string]interface{}{
+			"pool_id": stats.Stats[0].ID,
+		}))
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -907,15 +917,12 @@ func lockInterest(t *testing.T, cliConfigFilename string, params string) ([]stri
 	return cliutil.RunCommand(cmd)
 }
 
-func unlockInterest(t *testing.T, cliConfigFilename string, withPoolID bool, poolID string) ([]string, error) {
-	return unlockInterestForWallet(escapedTestName(t), cliConfigFilename, withPoolID, poolID)
+func unlockInterest(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+	return unlockInterestForWallet(escapedTestName(t), cliConfigFilename, params)
 }
 
-func unlockInterestForWallet(wallet, cliConfigFilename string, withPoolID bool, poolID string) ([]string, error) {
-	cmd := "./zwallet unlock --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
-	if withPoolID {
-		cmd += ` --pool_id "` + poolID + `"`
-	}
+func unlockInterestForWallet(wallet, cliConfigFilename string, params string) ([]string, error) {
+	cmd := "./zwallet unlock " + params + " --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	return cliutil.RunCommand(cmd)
 }
 
