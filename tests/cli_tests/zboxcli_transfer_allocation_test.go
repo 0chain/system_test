@@ -854,7 +854,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(10240000),
+			"size": int64(1024000),
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -869,7 +869,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0])
 
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 2048000)
+		err = createFileWithSize(file, 204800)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
