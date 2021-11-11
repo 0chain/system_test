@@ -9,6 +9,10 @@ on:
   push:
   workflow_dispatch:
     inputs:
+      test_run_description:
+        description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
+        default: ''
+        required: false
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
@@ -39,10 +43,6 @@ on:
         required: false
       zbox_image:
         description: '0box DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
-      zdns_image:
-        description: '0dns DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       zblock_image:
@@ -105,6 +105,8 @@ jobs:
 
       - name: "VIEW TEST CONFIGURATION"
         run: |
+          echo "Test Run Description:   [${{github.event.inputs.test_run_description}}]"
+
           echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
           echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
           echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
@@ -145,9 +147,9 @@ jobs:
       - name: "Remove existing 0Chain network and data"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
+          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
           if [ $output -gt 1 ]; then
-              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
               sleep 30
           fi
               helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
@@ -299,9 +301,9 @@ jobs:
       - name: "Tear Down 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
+          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
           if [ $output -gt 1 ]; then
-              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
               sleep 30
           fi
               helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
