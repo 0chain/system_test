@@ -518,7 +518,6 @@ func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath 
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
 
-	wait(t, 15*time.Second)
 	output, err := updateFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remotepath,
