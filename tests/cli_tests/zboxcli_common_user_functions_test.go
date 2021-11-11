@@ -87,7 +87,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
 		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
@@ -165,7 +165,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		// Update with same size
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
@@ -518,9 +518,10 @@ func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath 
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
 
+	wait(t, 15*time.Second)
 	output, err := updateFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
-		"remotepath": "/" + remotepath,
+		"remotepath": remotepath,
 		"localpath":  localfile,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -555,6 +556,7 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 
 func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Updating file...")
+
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox update %s --silent --wallet %s --configDir ./config --config %s",

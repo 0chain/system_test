@@ -617,6 +617,7 @@ func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 }
 
 func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	wait(t, 15*time.Second)
 	t.Logf("Uploading file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(

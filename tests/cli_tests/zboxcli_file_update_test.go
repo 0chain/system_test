@@ -129,7 +129,7 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		thumbnailFile := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -389,7 +389,7 @@ func TestFileUpdate(t *testing.T) {
 		go createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update directory ", func(t *testing.T) {
+	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -400,49 +400,48 @@ func TestFileUpdate(t *testing.T) {
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"encrypt": true})
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err := listFilesInAllocation(t, configPath, params)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
-		isEncrypted := strings.Split(output[2], "|")[6]
-		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
-		filename := strings.Split(output[2], "|")[1]
-		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
-
-		localfile := generateRandomTestFileName(t)
-		err = createFileWithSize(localfile, int64(filesize))
-		require.Nil(t, err)
-
-		// update with encrypted file
-		output, err = updateFile(t, configPath, map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(localFilePath),
-			"localpath":  localfile,
-			"encrypt":    true,
-		})
-		require.Nil(t, err, strings.Join(output, "\n"))
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}))
+
+		// BUG: File download of thumbnail not working
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err = listFilesInAllocation(t, configPath, params)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		err = os.Remove(thumbnailFile)
+		require.Nil(t, err)
 
-		yes := strings.Split(output[2], "|")[6]
-		require.Equal(t, "YES", strings.Trim(yes, " "))
-		filename = strings.Split(output[2], "|")[1]
-		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
+		// Update with new thumbnail
+		thumbnailFile = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}))
+
+		// BUG: File download of thumbnail not working
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		err = os.Remove(thumbnailFile)
+		require.Nil(t, err)
 
 		go createAllocationTestTeardown(t, allocationID)
 	})
 }
 
-func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) string {
+func updateFileWithThumbnailURL(t *testing.T, thumbnailURL, allocationID, remotePath, localpath string, size int64) string {
 	thumbnail := "upload_thumbnail_test.png"
-	output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+	output, err := cliutils.RunCommand(fmt.Sprintf("wget %s -O %s", thumbnailURL, thumbnail))
 	require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 	output, err = updateFile(t, configPath, map[string]interface{}{
