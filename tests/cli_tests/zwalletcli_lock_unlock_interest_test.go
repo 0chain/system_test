@@ -912,16 +912,16 @@ func TestLockAndUnlockInterest(t *testing.T) {
 	})
 }
 
-func lockInterest(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func lockInterest(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	cmd := "./zwallet lock " + params + " --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	return cliutil.RunCommand(cmd)
 }
 
-func unlockInterest(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+func unlockInterest(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	return unlockInterestForWallet(escapedTestName(t), cliConfigFilename, params)
 }
 
-func unlockInterestForWallet(wallet, cliConfigFilename string, params string) ([]string, error) {
+func unlockInterestForWallet(wallet, cliConfigFilename, params string) ([]string, error) {
 	cmd := "./zwallet unlock " + params + " --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	return cliutil.RunCommand(cmd)
 }
