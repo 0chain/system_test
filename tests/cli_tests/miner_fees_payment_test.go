@@ -615,19 +615,32 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "Error occurred when retrieving target wallet")
+
 		output, err = executeFaucetWithTokens(t, configPath, tokensToLock)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		mconfig := getMinerSCConfiguration(t)
+		minerShare := mconfig["share_ratio"]
+
+		miners := getMinersList(t)
+		minerNode := miners.Nodes[0].SimpleNode
+		miner := getMinersDetail(t, minerNode.ID).SimpleNode
+
+		// Get miner's start balance
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		// lock tokens
+		fee := 0.1
 		params := createParams(map[string]interface{}{
 			"durationMin": 1,
-			"fee":         0.1,
+			"fee":         fee,
 			"tokens":      0.5,
 		})
 		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
+		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
 
 		lockTimer := time.NewTimer(time.Minute)
 
@@ -640,8 +653,79 @@ func TestMinerFeesPayment(t *testing.T) {
 		err = json.Unmarshal([]byte(output[1]), &stats)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
 
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		for endBalance.Round <= startBalance.Round {
+			endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		}
+
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		var block_miner *climodel.Node
+		var block_miner_id string
+		var transactionRound int64
+		var expectedMinerFee int64
+
+		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
+			block := getRoundBlockFromASharder(t, round)
+
+			for i := range block.Block.Transactions {
+				txn := block.Block.Transactions[i]
+				// Find the generator miner of the block on which this transaction was recorded
+				if block_miner_id == "" {
+					if txn.ToClientId == MINER_SC_ADDRESS && txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, "lock") {
+						block_miner_id = block.Block.MinerId // Generator miner
+						transactionRound = block.Block.Round
+						block_miner = getMinersDetail(t, minerNode.ID)
+
+						// Expected miner fee is calculating using this formula:
+						// Fee * minerShare * miner.ServiceCharge
+						// Stakeholders' reward is:
+						// Fee * minerShare * (1 - miner.ServiceCharge)
+						// In case of no stakeholders, miner gets:
+						// Fee * minerShare
+						minerFee := ConvertToValue(fee * minerShare)
+						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
+						expectedMinerFee = minerServiceCharge
+						minerFeeRemaining := minerFee - minerServiceCharge
+
+						// If there is no stake, the miner gets entire fee.
+						// Else "Remaining" portion would be distributed to stake holders
+						// And hence not go the miner
+						if miner.TotalStake == 0 {
+							expectedMinerFee += minerFeeRemaining
+						}
+						t.Logf("Expected miner fee: %v", expectedMinerFee)
+						t.Logf("Miner ID: %v", block_miner_id)
+					}
+				} else {
+					// Search for the fee payment to generator miner in "payFee" transaction output
+					if strings.ContainsAny(txn.TransactionData, "lock") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+						var transfers []apimodel.Transfer
+						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
+
+						for _, transfer := range transfers {
+							// Transfer needs to be from Miner Smart contract to Generator miner
+							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
+								continue
+							} else {
+								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
+								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
+								// Transfer fee must be equal to miner fee
+								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+								return // test passed
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// Wait until lock expires.
 		<-lockTimer.C
+
+		startBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		// unlock
 		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
@@ -652,5 +736,68 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])
 
+		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		for endBalance.Round <= startBalance.Round {
+			endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		}
+
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
+			block := getRoundBlockFromASharder(t, round)
+
+			for i := range block.Block.Transactions {
+				txn := block.Block.Transactions[i]
+				// Find the generator miner of the block on which this transaction was recorded
+				if block_miner_id == "" {
+					if txn.ToClientId == MINER_SC_ADDRESS && txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, "unlock") {
+						block_miner_id = block.Block.MinerId // Generator miner
+						transactionRound = block.Block.Round
+						block_miner = getMinersDetail(t, minerNode.ID)
+
+						// Expected miner fee is calculating using this formula:
+						// Fee * minerShare * miner.ServiceCharge
+						// Stakeholders' reward is:
+						// Fee * minerShare * (1 - miner.ServiceCharge)
+						// In case of no stakeholders, miner gets:
+						// Fee * minerShare
+						minerFee := ConvertToValue(fee * minerShare)
+						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
+						expectedMinerFee = minerServiceCharge
+						minerFeeRemaining := minerFee - minerServiceCharge
+
+						// If there is no stake, the miner gets entire fee.
+						// Else "Remaining" portion would be distributed to stake holders
+						// And hence not go the miner
+						if miner.TotalStake == 0 {
+							expectedMinerFee += minerFeeRemaining
+						}
+						t.Logf("Expected miner fee: %v", expectedMinerFee)
+						t.Logf("Miner ID: %v", block_miner_id)
+					}
+				} else {
+					// Search for the fee payment to generator miner in "payFee" transaction output
+					if strings.ContainsAny(txn.TransactionData, "unlock") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
+						var transfers []apimodel.Transfer
+						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
+
+						for _, transfer := range transfers {
+							// Transfer needs to be from Miner Smart contract to Generator miner
+							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
+								continue
+							} else {
+								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
+								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
+								// Transfer fee must be equal to miner fee
+								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+								return // test passed
+							}
+						}
+					}
+				}
+			}
+		}
 	})
 }

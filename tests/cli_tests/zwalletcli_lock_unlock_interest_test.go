@@ -755,7 +755,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": "",
+			"pool_id": `""`,
 		}))
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -913,7 +913,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 }
 
 func lockInterest(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
-	cmd := "./zwallet lock " + params + "--silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+	cmd := "./zwallet lock " + params + " --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	return cliutil.RunCommand(cmd)
 }
 
