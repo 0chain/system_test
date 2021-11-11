@@ -328,7 +328,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -409,7 +409,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -499,7 +499,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -544,7 +544,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(4096),
+			"size": int64(20480),
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -594,13 +594,13 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.5,
-			"duration":   "1h",
+			"duration":   "24h",
 		}))
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -670,7 +670,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -917,7 +917,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 
-		transferred := pollForAllocationTransferToEffect(t, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		// balance of old owner should be unchanged
@@ -971,19 +971,20 @@ func transferAllocationOwnershipWithWallet(t *testing.T, walletName string, para
 	return cliutils.RunCommand(cmd)
 }
 
-func pollForAllocationTransferToEffect(t *testing.T, allocationID string) bool {
+func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID string) bool {
 	t.Logf("Polling for 5 minutes until allocation ownership changed...")
 	timeout := time.After(time.Minute * 5)
 
 	// this requires the allocation has file uploaded to work properly.
 	for {
 		// using `list all` to verify transfer as this check blobber content as opposed to `get allocation` which is based on sharder
-		output, err := listAll(t, configPath, allocationID)
+		output, err := listAllWithWallet(t, newOwner, configPath, allocationID)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		// if empty, the transfer has happened from wallet.
-		if output[0] == "[]" {
+		// if not empty, the transfer of allocation contents has occurred on blobbers.
+		// there is only one content expected so once it is no longer empty, transfer is deemed complete.
+		if output[0] != "[]" {
 			return true
 		}
 
