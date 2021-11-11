@@ -440,7 +440,7 @@ func TestFileUpdate(t *testing.T) {
 	})
 }
 
-func updateFileWithThumbnail(t *testing.T, allocationID string, remotePath string, localpath string, size int64) string {
+func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) string {
 	thumbnail := "upload_thumbnail_test.png"
 	output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
 	require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
@@ -456,7 +456,7 @@ func updateFileWithThumbnail(t *testing.T, allocationID string, remotePath strin
 	return thumbnail
 }
 
-func updateFileWithCommit(t *testing.T, allocationID string, remotePath string, localpath string) {
+func updateFileWithCommit(t *testing.T, allocationID, remotePath, localpath string) {
 	output, err := updateFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remotePath,
