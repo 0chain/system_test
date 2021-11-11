@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -44,7 +43,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock tokens
-		output, err = lockInterest(t, configPath, true, 1, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
@@ -160,7 +163,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 800.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// first lock of 0.8 token for 100 min
-		output, err = lockInterest(t, configPath, true, 100, false, 0, true, 0.8, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 100,
+			"tokens":      0.8,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.800000) locked successfully", output[0])
@@ -189,7 +196,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: `+balancePrint(wantInterestEarnedFromLock1+int64(tokensToLock2*1e10))+` \(\d*\.?\d+ USD\)$`), output[0])
 
 		// second lock 0.5 token for 5 hrs
-		output, err = lockInterest(t, configPath, false, 0, true, 5, true, 0.5, 0)
+		params = createParams(map[string]interface{}{
+			"durationHr": 5,
+			"tokens":     0.5,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
@@ -265,7 +276,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 951.123 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock 0.951123 token for 200 minutes
-		output, err = lockInterest(t, configPath, true, int64(lockDuration.Minutes()), false, 0, true, 0.951123, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": int64(lockDuration.Minutes()),
+			"tokens":      0.951123,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.951123) locked successfully", output[0])
@@ -320,8 +335,12 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		// lock 0.75 token for 24 hours
-		output, err = lockInterest(t, configPath, false, 0, true, int64(lockDuration.Hours()), true, 0.75, 0)
+		// lock 0.75 token for 1 year
+		params := createParams(map[string]interface{}{
+			"durationHr": int64(lockDuration.Hours()),
+			"tokens":     0.75,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.750000) locked successfully", output[0])
@@ -379,7 +398,12 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 250.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock
-		output, err = lockInterest(t, configPath, true, int64(lockDurationMin.Minutes()), true, int64(lockDurationHr.Hours()), true, tokensToLock, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": int64(lockDurationMin.Minutes()),
+			"durationHr":  int64(lockDurationHr.Hours()),
+			"tokens":      tokensToLock,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.250000) locked successfully", output[0])
@@ -435,7 +459,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 100.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock
-		output, err = lockInterest(t, configPath, false, 0, true, int64(lockDuration.Hours()), true, tokensToLock, 0)
+		params := createParams(map[string]interface{}{
+			"durationHr": int64(lockDuration.Hours()),
+			"tokens":     tokensToLock,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		// FIXME precision is lost - should say  `Tokens (0.000000001) locked successfully`
@@ -479,7 +507,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 5, false, 0, true, 1.1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 5,
+			"tokens":      1.1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -494,7 +526,10 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, false, 0, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"tokens": 1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: durationHr and durationMin flag is missing. atleast one is required", output[0])
@@ -509,7 +544,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 0, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 0,
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: invalid duration", output[0])
@@ -524,7 +563,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, false, 0, true, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationHr": 0,
+			"tokens":     1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: invalid duration", output[0])
@@ -540,8 +583,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		over1YearMins := int64(year.Minutes()) + 1
-
-		output, err = lockInterest(t, configPath, true, int64(over1YearMins), false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": int64(over1YearMins),
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -558,7 +604,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		over1YearHrs := int64(year.Hours()) + 1
 
-		output, err = lockInterest(t, configPath, false, 0, true, int64(over1YearHrs), true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationHr": int64(over1YearHrs),
+			"tokens":     1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -573,7 +623,12 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 0, true, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 0,
+			"durationHr":  0,
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: invalid duration", output[0])
@@ -588,7 +643,10 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 10, false, 0, false, 0, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 10,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: tokens flag is missing", output[0])
@@ -603,7 +661,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 10, false, 0, true, 0, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 10,
+			"tokens":      0,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -618,7 +680,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 10, false, 0, true, 0.000_000_000_9, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 10,
+			"tokens":      0.000_000_000_9,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -633,7 +699,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 10, false, 0, true, -1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 10,
+			"tokens":      -1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
@@ -648,7 +718,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = lockInterest(t, configPath, true, 10, false, 0, true, 1.01, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 10,
+			"tokens":      1.01,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -714,7 +788,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock 1 token for 1 min
-		output, err = lockInterest(t, configPath, true, 1, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
@@ -769,7 +847,11 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// lock 1 token for 1 min
-		output, err = lockInterest(t, configPath, true, 1, false, 0, true, 1, 0)
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      1,
+		})
+		output, err = lockInterest(t, configPath, params)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
@@ -820,21 +902,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 	})
 }
 
-func lockInterest(t *testing.T, cliConfigFilename string, withDurationMin bool, durationMin int64,
-	withDurationHr bool, durationHr int64, withTokens bool, tokens float64, fee float64) ([]string, error) {
-	cmd := "./zwallet lock --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
-	if withDurationMin {
-		cmd += ` --durationMin "` + strconv.FormatInt(durationMin, 10) + `"`
-	}
-	if withDurationHr {
-		cmd += ` --durationHr "` + strconv.FormatInt(durationHr, 10) + `"`
-	}
-	if withTokens {
-		cmd += ` --tokens "` + strconv.FormatFloat(tokens, 'f', 10, 64) + `"`
-	}
-	if fee > 0 {
-		cmd += ` --fee ` + strconv.FormatFloat(tokens, 'f', 10, 64)
-	}
+func lockInterest(t *testing.T, cliConfigFilename string, params string) ([]string, error) {
+	cmd := "./zwallet lock " + params + "--silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	return cliutil.RunCommand(cmd)
 }
 
