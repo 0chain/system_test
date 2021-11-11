@@ -470,6 +470,7 @@ func TestFileStats(t *testing.T) {
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
 			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			require.Equal(t, int64(1), data.NumOfUpdates)
+			require.Equal(t, int64(0.5 * MB/2), data.Size)
 			if data.WriteMarkerTxn == "" {
 				require.Equal(t, false, data.BlockchainAware)
 			} else {
@@ -502,6 +503,7 @@ func TestFileStats(t *testing.T) {
 			require.Equal(t, int64(0), data.NumOfBlockDownloads)
 			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			require.Equal(t, int64(2), data.NumOfUpdates, "the number of updates count should increment")
+			require.Equal(t, int64(1 * MB/2), data.Size)
 			if data.WriteMarkerTxn == "" {
 				require.Equal(t, false, data.BlockchainAware)
 			} else {
