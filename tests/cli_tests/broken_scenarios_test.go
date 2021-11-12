@@ -291,7 +291,7 @@ func TestBrokenScenarios(t *testing.T) {
 
 		//FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "No wallet in path  ./config/TestMultisigWallet-Wallet_Creation_should_succeed_when_0_LESS_THAN_threshold_LESS_THAN=_num-signers_wallet.json found. Creating wallet...", output[0])
+		require.Equal(t, "No wallet in path  ./config/TestBrokenScenarios-Wallet_Creation_should_succeed_when_0_LESS_THAN_threshold_LESS_THAN=_num-signers_wallet.json found. Creating wallet...", output[0])
 		require.Equal(t, "ZCN wallet created!!", output[1])
 		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 		require.Equal(t, "Read pool created successfully", output[3])
@@ -309,7 +309,7 @@ func TestBrokenScenarios(t *testing.T) {
 
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "No wallet in path  ./config/TestMultisigWallet-Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers_wallet.json found. Creating wallet...", output[0])
+		require.Equal(t, "No wallet in path  ./config/TestBrokenScenarios-Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers_wallet.json found. Creating wallet...", output[0])
 		require.Equal(t, "ZCN wallet created!!", output[1])
 		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
 		require.Equal(t, "Read pool created successfully", output[3])
