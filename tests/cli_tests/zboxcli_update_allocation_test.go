@@ -179,15 +179,6 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel_allocation_immediately_should_succeed", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-
-		output, err := cancelAllocation(t, configPath, allocationID)
-		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
-	})
-
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *testing.T) {
 		t.Parallel()

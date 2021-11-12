@@ -44,4 +44,13 @@ func TestUnhealthyBlobberScenarios(t *testing.T) {
 		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, "+
 			"but got 0/2 sharders", output[len(output)-1])
 	})
+
+	t.Run("Cancel_allocation_immediately_should_succeed", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		output, err := cancelAllocation(t, configPath, allocationID)
+		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
+	})
 }
