@@ -127,7 +127,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -209,7 +209,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -341,7 +341,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -428,7 +428,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -552,7 +552,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -637,7 +637,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -758,7 +758,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
@@ -845,7 +845,7 @@ func TestMinerFeesPayment(t *testing.T) {
 								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
 								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 								// Transfer fee must be equal to miner fee
-								t.Logf("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
 								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
 								found = true
 							}
