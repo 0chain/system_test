@@ -750,6 +750,7 @@ func TestDownload(t *testing.T) {
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
+		wait(t, 15*time.Second)
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
