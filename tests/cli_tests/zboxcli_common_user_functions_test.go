@@ -57,7 +57,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(0.5 * MB)
 
 		// Get expected upload cost for 0.5 MB
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -87,7 +87,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
 		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
@@ -153,7 +153,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		wait(t, 30*time.Second)
 		output, _ = writePoolInfo(t, configPath)
@@ -165,7 +165,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		// Update with same size
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
@@ -210,7 +210,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
@@ -268,7 +268,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
@@ -479,18 +479,22 @@ func TestCommonUserFunctions(t *testing.T) {
 	})
 }
 
-func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) string {
-	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, fileSize)
+func uploadRandomlyGeneratedFile(t *testing.T, allocationID, remotePath string, fileSize int64) string {
+	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize)
 }
 
-func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationID string, fileSize int64) string {
+func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationID, remotePath string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
 
+	if !strings.HasSuffix(remotePath, "/") {
+		remotePath += "/"
+	}
+
 	output, err := uploadFileForWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
-		"remotepath": "/",
+		"remotepath": remotePath + filepath.Base(filename),
 		"localpath":  filename,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -518,13 +522,17 @@ func renameAllocationFile(t *testing.T, allocationID, remotepath, newName string
 }
 
 func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath string, size int64) string {
+	return updateFileWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, size)
+}
+
+func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, allocationID, remotepath string, size int64) string {
 	localfile := generateRandomTestFileName(t)
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
 
-	output, err := updateFile(t, configPath, map[string]interface{}{
+	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
-		"remotepath": "/" + remotepath,
+		"remotepath": remotepath,
 		"localpath":  localfile,
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -558,12 +566,16 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 }
 
 func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	return updateFileWithWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Updating file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox update %s --silent --wallet %s --configDir ./config --config %s",
 		p,
-		escapedTestName(t)+"_wallet.json",
+		walletName+"_wallet.json",
 		cliConfigFilename,
 	)
 
