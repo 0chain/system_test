@@ -989,11 +989,12 @@ func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID stri
 			return true
 		}
 
+		// on timeout, exit with failed transfer allocation.
+		// otherwise, wait and try again
 		select {
 		case <-timeout:
 			return false
 		default:
-			// retry after wait
 			time.Sleep(time.Second * 10)
 		}
 	}
