@@ -482,7 +482,7 @@ func TestFileStats(t *testing.T) {
 		}
 
 		// update size for the file
-		updateFileWithRandomlyGeneratedData(t, allocationID, fname, int64(1*MB))
+		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+fname, int64(1*MB))
 
 		// fetch file stats after update
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
