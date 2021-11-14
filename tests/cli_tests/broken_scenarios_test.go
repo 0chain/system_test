@@ -283,6 +283,9 @@ func TestBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update file with thumbnail", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Downloading thumbnail is not working")
+		}
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -317,6 +320,9 @@ func TestBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Downloading thumbnail is not working")
+		}
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards

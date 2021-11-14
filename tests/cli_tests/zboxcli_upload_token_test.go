@@ -117,11 +117,9 @@ func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpat
 
 func uploadCostWithUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) (cost float64, unit string) {
 	t.Logf("Getting upload cost...")
-	output, err := cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-	require.Len(t, output, 1)
-	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
+	output, _ := getUploadCostInUnit(t, cliConfigFilename, allocationID, localpath)
 	tokenisedString := strings.Fields(output[0])
-	cost, err = strconv.ParseFloat(tokenisedString[0], 64)
+	cost, err := strconv.ParseFloat(tokenisedString[0], 64)
 	require.Nil(t, err, "Cost couldn't be parsed to float")
 	unit = tokenisedString[1]
 	return cost, unit

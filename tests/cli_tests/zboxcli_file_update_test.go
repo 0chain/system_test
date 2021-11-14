@@ -187,32 +187,6 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update with another file of size larger than allocation", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		newFileSize := 4 * MB
-		localfile := generateRandomTestFileName(t)
-		err := createFileWithSize(localfile, int64(newFileSize))
-		require.Nil(t, err)
-
-		output, err := updateFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(localFilePath),
-			"localpath":  localfile,
-		})
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("update non-encrypted file with encrypted file", func(t *testing.T) {
 		t.Parallel()
 
@@ -350,6 +324,32 @@ func TestFileUpdate(t *testing.T) {
 		require.Equal(t, "YES", strings.Trim(yes, " "))
 		filename = strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update with another file of size larger than allocation", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		newFileSize := 4 * MB
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(newFileSize))
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+		})
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
