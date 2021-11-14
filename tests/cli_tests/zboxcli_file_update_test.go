@@ -368,6 +368,7 @@ func updateFileWithThumbnailURL(t *testing.T, thumbnailURL, allocationID, remote
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
+	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
 	return thumbnail
 }
 
@@ -380,4 +381,5 @@ func updateFileWithCommit(t *testing.T, allocationID, remotePath, localpath stri
 	})
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 3)
+	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
 }

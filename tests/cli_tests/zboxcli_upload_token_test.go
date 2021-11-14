@@ -116,7 +116,6 @@ func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpat
 }
 
 func uploadCostWithUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) (cost float64, unit string) {
-	t.Logf("Getting upload cost...")
 	output, _ := getUploadCostInUnit(t, cliConfigFilename, allocationID, localpath)
 	tokenisedString := strings.Fields(output[0])
 	cost, err := strconv.ParseFloat(tokenisedString[0], 64)

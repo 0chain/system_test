@@ -306,8 +306,6 @@ func TestBrokenScenarios(t *testing.T) {
 			"localpath":  "tmp/",
 			"thumbnail":  true,
 		}))
-
-		// BUG: File download of thumbnail not working
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -343,8 +341,6 @@ func TestBrokenScenarios(t *testing.T) {
 			"localpath":  "tmp/",
 			"thumbnail":  true,
 		}))
-
-		// BUG: File download of thumbnail not working
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -360,8 +356,6 @@ func TestBrokenScenarios(t *testing.T) {
 			"localpath":  "tmp/",
 			"thumbnail":  true,
 		}))
-
-		// BUG: File download of thumbnail not working
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
