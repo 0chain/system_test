@@ -356,6 +356,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
+		wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -414,6 +415,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
+		wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,

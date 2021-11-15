@@ -63,7 +63,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -252,7 +252,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		stakePoolID := strings.Fields(output[0])[4]
 		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -328,7 +328,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		lockTimer := time.NewTimer(time.Minute)
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
