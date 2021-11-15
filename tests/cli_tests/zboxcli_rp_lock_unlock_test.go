@@ -101,7 +101,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		params = createParams(map[string]interface{}{
 			"pool_id": readPool[0].Id,
 		})
-		output, err = readPoolUnlock(t, configPath, params)
+		output, err = readPoolUnlock(t, configPath, params, true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		require.Equal(t, "unlocked", output[0])
@@ -356,7 +356,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     1,
-			"duration":   "1m",
+			"duration":   "2m",
 		})
 		output, err = readPoolLock(t, configPath, params)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -375,7 +375,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		params = createParams(map[string]interface{}{
 			"pool_id": readPool[0].Id,
 		})
-		output, err = readPoolUnlock(t, configPath, params)
+		output, err = readPoolUnlock(t, configPath, params, false)
 		require.NotNil(t, err, "Read pool tokens unlocked before expired", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -421,7 +421,12 @@ func TestReadPoolLockUnlock(t *testing.T) {
 	})
 }
 
-func readPoolUnlock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func readPoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Unlocking read tokens...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
+	cmd := fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

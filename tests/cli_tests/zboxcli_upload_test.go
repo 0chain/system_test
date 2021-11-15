@@ -627,7 +627,7 @@ func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param m
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+		return cliutils.RunCommand(t, cmd, 3, time.Second*40)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
