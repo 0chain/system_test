@@ -18,7 +18,7 @@ func TestUnhealthyBlobberScenarios(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID)
+		output, err := cancelAllocation(t, configPath, allocationID, true)
 
 		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -36,7 +36,7 @@ func TestUnhealthyBlobberScenarios(t *testing.T) {
 		})
 
 		// otherAllocationID should not be cancelable from this level
-		output, err := cancelAllocation(t, configPath, otherAllocationID)
+		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
 
 		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
