@@ -123,7 +123,11 @@ func TestAddCurator(t *testing.T) {
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
-		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		})
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "unexpected output length:", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, targetWallet.ClientID)
@@ -166,7 +170,11 @@ func TestAddCurator(t *testing.T) {
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, wallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
-		output, err = transferAllocationOwnership(t, allocationID, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		})
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 	})
 
@@ -288,7 +296,11 @@ func TestAddCurator(t *testing.T) {
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
 
-		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
@@ -336,23 +348,6 @@ func TestAddCurator(t *testing.T) {
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
 	})
-}
-
-func transferAllocationOwnership(t *testing.T, allocationID, newOwner, newOwnerPublicKey string) ([]string, error) {
-	return transferAllocationOwnershipWithWallet(t, allocationID, escapedTestName(t), newOwner, newOwnerPublicKey)
-}
-
-func transferAllocationOwnershipWithWallet(t *testing.T, allocationID, curatorWalletName, newOwner, newOwnerPublicKey string) ([]string, error) {
-	t.Logf("Transaferring allocation ownership...")
-	params := createParams(map[string]interface{}{"allocation": allocationID, "new_owner": newOwner, "new_owner_key": newOwnerPublicKey})
-	cmd := fmt.Sprintf(
-		"./zbox transferallocation %s --silent --wallet %s_wallet.json "+
-			"--configDir ./config --config %s",
-		params,
-		curatorWalletName,
-		configPath,
-	)
-	return cliutils.RunCommand(cmd)
 }
 
 func addCurator(t *testing.T, params string) ([]string, error) {
