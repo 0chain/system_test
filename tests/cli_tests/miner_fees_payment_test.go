@@ -422,7 +422,7 @@ func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFe
 		if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []apimodel.Transfer
 			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
+			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output:", txn.TransactionOutput)
 
 			for _, transfer := range transfers {
 				// Transfer needs to be from Miner Smart contract to Generator miner
