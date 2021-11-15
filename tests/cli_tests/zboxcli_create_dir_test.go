@@ -281,7 +281,7 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(nil, configPath, wallet, true, allocID, false, "")
+		output, err := createDirForWallet(t, configPath, wallet, true, allocID, false, "")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: dirname flag is missing", output[0])
@@ -304,7 +304,7 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(nil, configPath, wallet, true, allocID, true, "")
+		output, err := createDirForWallet(t, configPath, wallet, true, allocID, true, "")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "CreateDir failed. invalid_name: Invalid name for dir", output[0])
@@ -331,7 +331,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(nil, configPath, wallet, false, "", true, "/root")
+		output, err = createDirForWallet(t, configPath, wallet, false, "", true, "/root")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
@@ -348,7 +348,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(nil, configPath, wallet, true, "", true, "/root")
+		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
@@ -377,10 +377,10 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := registerWalletForName(nil, configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(nil, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir")
+		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir")
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir for another allocation must throw error explicitly to not give impression it was success
 

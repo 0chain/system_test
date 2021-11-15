@@ -48,7 +48,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		anotherClientWalletName := escapedTestName(t) + "_ANOTHER_WALLET"
-		output, err = registerWalletForName(nil, configPath, anotherClientWalletName)
+		output, err = registerWalletForName(t, configPath, anotherClientWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		anotherWallet, err := getWalletForName(t, configPath, anotherClientWalletName)
@@ -91,13 +91,13 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
-		output, err = registerWalletForName(nil, configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -147,7 +147,7 @@ func TestAddCurator(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -216,7 +216,7 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
@@ -256,13 +256,13 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
-		output, err = registerWalletForName(nil, configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -314,7 +314,7 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)

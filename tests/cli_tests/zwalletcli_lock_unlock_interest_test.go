@@ -806,14 +806,14 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		thirdPartyWallet := escapedTestName(t) + "_THIRDPARTY"
 
-		output, err = registerWalletForName(nil, configPath, thirdPartyWallet)
+		output, err = registerWalletForName(t, configPath, thirdPartyWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// Wait until lock expires.
 		<-lockTimer.C
 
 		// Unlock attempt by third party wallet.
-		output, err = unlockInterestForWallet(nil, thirdPartyWallet, configPath, true, stats.Stats[0].ID)
+		output, err = unlockInterestForWallet(t, thirdPartyWallet, configPath, true, stats.Stats[0].ID)
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])

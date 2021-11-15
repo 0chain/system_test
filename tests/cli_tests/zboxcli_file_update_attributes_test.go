@@ -229,7 +229,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(nil, configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		allocSize := int64(2048)

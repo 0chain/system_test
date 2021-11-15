@@ -28,7 +28,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err := registerWalletForName(nil, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -66,7 +66,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -92,7 +92,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		nonOwner := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(nil, configPath, nonOwner)
+		output, err := registerWalletForName(t, configPath, nonOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		nonOwnerWallet, err := getWalletForName(t, configPath, nonOwner)
@@ -172,7 +172,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -217,7 +217,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -272,7 +272,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -328,7 +328,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -413,7 +413,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -506,7 +506,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -606,7 +606,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -686,7 +686,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -798,7 +798,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -837,7 +837,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -876,7 +876,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -931,7 +931,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(nil, configPath, newOwner)
+		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
@@ -975,7 +975,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"get balance - Unexpected output", strings.Join(output, "\n"))
 
 		// balance of new owner should be unchanged
-		output, err = getBalanceForWallet(nil, configPath, newOwner)
+		output, err = getBalanceForWallet(t, configPath, newOwner)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
 		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0],

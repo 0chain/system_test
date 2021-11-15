@@ -36,7 +36,7 @@ func TestBrokenScenarios(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(nil, configPath, targetWallet)
+		output, err = registerWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)

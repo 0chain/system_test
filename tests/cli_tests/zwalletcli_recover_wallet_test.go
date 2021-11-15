@@ -19,7 +19,7 @@ func TestRecoverWallet(t *testing.T) {
 			" filter kitten loan absent noodle nation potato planet demise" +
 			" online ten affair rich panel rent sell"
 
-		output, err := recoverWalletFromMnemonic(t, configPath, validMnemonic)
+		output, err := recoverWalletFromMnemonic(t, configPath, validMnemonic, true)
 
 		require.Nil(t, err, "error occurred recovering a wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
@@ -33,7 +33,7 @@ func TestRecoverWallet(t *testing.T) {
 			" filter kitten loan absent noodle nation potato planet demise" +
 			" online ten affair rich panel rent sell"
 
-		output, err := recoverWalletFromMnemonic(t, configPath, inValidMnemonic)
+		output, err := recoverWalletFromMnemonic(t, configPath, inValidMnemonic, false)
 
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
@@ -63,9 +63,15 @@ func TestRecoverWallet(t *testing.T) {
 	})
 }
 
-func recoverWalletFromMnemonic(t *testing.T, configPath, mnemonic string) ([]string, error) {
+func recoverWalletFromMnemonic(t *testing.T, configPath, mnemonic string, retry bool) ([]string, error) {
 	t.Logf("Recovering wallet from mnemonic...")
-	return cliutils.RunCommand(t, "./zwallet recoverwallet "+
-		"--silent --wallet "+escapedTestName(t)+"_wallet.json"+" "+
-		"--configDir ./config --config "+configPath+" --mnemonic \""+mnemonic+"\"", 3, time.Second*2)
+	cmd := "./zwallet recoverwallet " +
+		"--silent --wallet " + escapedTestName(t) + "_wallet.json" + " " +
+		"--configDir ./config --config " + configPath + " --mnemonic \"" + mnemonic + "\""
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
