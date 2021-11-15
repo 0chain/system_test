@@ -63,6 +63,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
+		wait(t, time.Minute)
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
@@ -70,83 +76,14 @@ func TestMinerFeesPayment(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-		wait(t, time.Minute)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "read_pool_lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
 
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
-		var block_miner *climodel.Node
-		var block_miner_id string
-		var transactionRound int64
-		var expectedMinerFee int64
-		found := false
-
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
-
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
-		wait(t, time.Minute)
 		startBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		params = createParams(map[string]interface{}{
@@ -162,72 +99,14 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-		found = false
-		block_miner_id = ""
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
 
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "read_pool_unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
 
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
 	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
@@ -290,76 +169,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		var block_miner *climodel.Node
-		var block_miner_id string
-		var transactionRound int64
-		var expectedMinerFee int64
-		found := false
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "write_pool_lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
 
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
-
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		<-lockTimer.C
 
@@ -381,72 +197,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		found = false
-		block_miner_id = ""
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "write_pool_unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
 
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
 	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
@@ -501,76 +258,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		var block_miner *climodel.Node
-		var block_miner_id string
-		var transactionRound int64
-		var expectedMinerFee int64
-		found := false
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "stake_pool_lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
 
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
-
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		startBalance = getNodeBalanceFromASharder(t, miner.ID)
 
@@ -590,72 +284,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		found = false
-		block_miner_id = ""
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "stake_pool_unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
 
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
 	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
@@ -707,76 +342,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		err = json.Unmarshal([]byte(output[1]), &stats)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
 
-		var block_miner *climodel.Node
-		var block_miner_id string
-		var transactionRound int64
-		var expectedMinerFee int64
-		found := false
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
 
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
-
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		// Wait until lock expires.
 		<-lockTimer.C
@@ -798,71 +370,72 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		found = false
-		block_miner_id = ""
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
 
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ClientId == wallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+	})
+}
 
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
+func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimodel.Balance,
+	wallet *climodel.Wallet, minerNode climodel.SimpleNode, txnData string) (block apimodel.Block) {
+	for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
+		block := getRoundBlockFromASharder(t, round)
 
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From == MINER_SC_ADDRESS && transfer.To == block_miner_id {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								found = true
-							}
-							if found {
-								break
-							}
-						}
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
+		for i := range block.Block.Transactions {
+			txn := block.Block.Transactions[i]
+			// Find the generator miner of the block on which this transaction was recorded
+			if txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, txnData) {
+				return block
 			}
 		}
-		require.True(t, found, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
+	}
+	return block
+}
+
+func getExpectedMinerFees(t *testing.T, fee, minerShare float64, block_miner *climodel.Node) (expectedMinerFee int64) {
+	// Expected miner fee is calculating using this formula:
+	// Fee * minerShare * miner.ServiceCharge
+	// Stakeholders' reward is:
+	// Fee * minerShare * (1 - miner.ServiceCharge)
+	// In case of no stakeholders, miner gets:
+	// Fee * minerShare
+	minerFee := ConvertToValue(fee * minerShare)
+	minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
+	expectedMinerFee = minerServiceCharge
+	minerFeeRemaining := minerFee - minerServiceCharge
+
+	// If there is no stake, the miner gets entire fee.
+	// Else "Remaining" portion would be distributed to stake holders
+	// And hence not go the miner
+	if block_miner.TotalStake == 0 {
+		expectedMinerFee += minerFeeRemaining
+	}
+	return expectedMinerFee
+}
+
+func verifyMinerFeesPayment(t *testing.T, block apimodel.Block, expectedMinerFee int64) bool {
+	for _, txn := range block.Block.Transactions {
+		if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
+			var transfers []apimodel.Transfer
+			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
+
+			for _, transfer := range transfers {
+				// Transfer needs to be from Miner Smart contract to Generator miner
+				if transfer.From == MINER_SC_ADDRESS && transfer.To == block.Block.MinerId {
+					t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
+					require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
+					// Transfer fee must be equal to miner fee
+					t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+					require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
