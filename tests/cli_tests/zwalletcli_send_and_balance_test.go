@@ -60,7 +60,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Equal(t, "Failed to get balance:", output[0])
 
 		// Transfer ZCN from sender to target wallet
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}", true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -214,7 +214,7 @@ func TestSendAndBalance(t *testing.T) {
 
 		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}", false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -234,7 +234,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}"
 
-		output, err = sendZCN(t, configPath, invalidClientID, "1", "{}")
+		output, err = sendZCN(t, configPath, invalidClientID, "1", "{}", false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -262,7 +262,7 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}", true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -288,7 +288,7 @@ func TestSendAndBalance(t *testing.T) {
 
 		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "{}")
+		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "{}", false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -315,7 +315,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (value must be greater than or equal to zero)\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "-1", "{}")
+		output, err = sendZCN(t, configPath, target.ClientID, "-1", "{}", false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -348,7 +348,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"txn_exceed_max_payload\"," +
 			"\"error\":\"txn_exceed_max_payload: transaction payload exceeds the max payload (98304)\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", longDesc)
+		output, err = sendZCN(t, configPath, target.ClientID, "1", longDesc, false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -370,7 +370,7 @@ func TestSendAndBalance(t *testing.T) {
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}"
 
-		output, err = sendZCN(t, configPath, wallet.ClientID, "1", "{}")
+		output, err = sendZCN(t, configPath, wallet.ClientID, "1", "{}", false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -378,12 +378,17 @@ func TestSendAndBalance(t *testing.T) {
 	})
 }
 
-func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string) ([]string, error) {
+func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string, retry bool) ([]string, error) {
 	t.Logf("Sending ZCN...")
-	return cliutils.RunCommandWithoutRetry("./zwallet send --silent --tokens " + tokens +
+	cmd := "./zwallet send --silent --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
 		" --to_client_id " + toClientID +
-		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getRandomUniformFloat64(t *testing.T) float64 {

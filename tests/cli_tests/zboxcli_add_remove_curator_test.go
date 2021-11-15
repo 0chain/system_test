@@ -127,7 +127,7 @@ func TestAddCurator(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": targetWallet.ClientPublicKey,
 			"new_owner":     targetWallet.ClientID,
-		})
+		}, true)
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "unexpected output length:", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, targetWallet.ClientID)
@@ -174,7 +174,7 @@ func TestAddCurator(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": targetWallet.ClientPublicKey,
 			"new_owner":     targetWallet.ClientID,
-		})
+		}, true)
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 	})
 
@@ -300,7 +300,7 @@ func TestAddCurator(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": targetWallet.ClientPublicKey,
 			"new_owner":     targetWallet.ClientID,
-		})
+		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))

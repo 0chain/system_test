@@ -43,7 +43,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"tokens":     0.5,
-		}))
+		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
@@ -124,7 +124,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = stakeTokens(t, configPath, "")
+		output, err = stakeTokens(t, configPath, "", false)
 		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
@@ -141,7 +141,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"tokens": 1.0,
-		}))
+		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
 		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
@@ -176,7 +176,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"tokens":     2.0,
-		}))
+		}), false)
 		require.NotNil(t, err, "Expected error when staking more tokens than in wallet", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
 		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
@@ -216,7 +216,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"tokens":     0.0,
-		}))
+		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
 		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
@@ -256,7 +256,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"tokens":     -1.0,
-		}))
+		}), false)
 		require.NotNil(t, err, "Expected error when staking negative tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
 		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
@@ -273,9 +273,14 @@ func listBlobbers(t *testing.T, cliConfigFilename, params string) ([]string, err
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func stakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func stakeTokens(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Staking tokens...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
+	cmd := fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func stakePoolInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
