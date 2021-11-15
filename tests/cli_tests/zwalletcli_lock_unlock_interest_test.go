@@ -110,7 +110,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, wantInterestEarned, statsAfterExpire.Stats[0].TokensEarned)
 		require.Equal(t, int64(tokensToLock*1e10), statsAfterExpire.Stats[0].Balance)
 
-		time.Sleep(time.Second) // Sleep to let lock try to earn interest after has expired.
+		wait(t, time.Second*5) // Sleep to let lock try to earn interest after has expired.
 
 		// unlock
 		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
