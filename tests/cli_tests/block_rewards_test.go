@@ -111,8 +111,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      0.1,
+			"fee":         0.1,
+		})
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, true, 1, false, 0, true, 0.1, 0.1, false)
+			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
@@ -267,8 +272,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
+		params := createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      0.1,
+			"fee":         0.1,
+		})
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, true, 1, false, 0, true, 0.1, 0.1, false)
+			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
