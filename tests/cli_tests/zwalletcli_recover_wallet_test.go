@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -48,7 +49,7 @@ func TestRecoverWallet(t *testing.T) {
 	t.Run("Recover wallet no mnemonic", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := cliutils.RunCommand("./zwallet recoverwallet --silent " +
+		output, err := cliutils.RunCommandWithoutRetry("./zwallet recoverwallet --silent " +
 			"--wallet " + escapedTestName(t) + "_wallet.json" + " " +
 			"--configDir ./config --config " + configPath)
 
@@ -64,7 +65,7 @@ func TestRecoverWallet(t *testing.T) {
 
 func recoverWalletFromMnemonic(t *testing.T, configPath, mnemonic string) ([]string, error) {
 	t.Logf("Recovering wallet from mnemonic...")
-	return cliutils.RunCommand("./zwallet recoverwallet " +
-		"--silent --wallet " + escapedTestName(t) + "_wallet.json" + " " +
-		"--configDir ./config --config " + configPath + " --mnemonic \"" + mnemonic + "\"")
+	return cliutils.RunCommand(t, "./zwallet recoverwallet "+
+		"--silent --wallet "+escapedTestName(t)+"_wallet.json"+" "+
+		"--configDir ./config --config "+configPath+" --mnemonic \""+mnemonic+"\"", 3, time.Second*2)
 }

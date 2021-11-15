@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -120,7 +121,7 @@ func TestMultisigWallet(t *testing.T) {
 	t.Run("Wallet Creation should fail when args not set", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--silent --wallet %s --configDir ./config --config %s", escapedTestName(t)+
 			"_wallet.json", configPath))
 
@@ -137,7 +138,7 @@ func TestMultisigWallet(t *testing.T) {
 	t.Run("Wallet Creation should fail when threshold not set", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--numsigners %d --silent --wallet %s --configDir ./config "+
 			"--config %s", 3, escapedTestName(t)+"_wallet.json", configPath))
 
@@ -154,9 +155,9 @@ func TestMultisigWallet(t *testing.T) {
 
 func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, threshold int) ([]string, error) {
 	t.Logf("Creating multisig wallet...")
-	return cliutils.RunCommand(fmt.Sprintf(
+	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",
 		numSigners, threshold,
 		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename))
+		cliConfigFilename), 3, time.Second*2)
 }

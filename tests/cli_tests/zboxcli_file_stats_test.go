@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -524,5 +525,5 @@ func getFileStats(t *testing.T, cliConfigFilename, param string) ([]string, erro
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

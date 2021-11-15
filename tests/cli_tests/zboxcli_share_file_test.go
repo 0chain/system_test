@@ -347,13 +347,13 @@ func shareFile(t *testing.T, wallet, cliConfigFilename string, param map[string]
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func registerWalletAndFaucet(t *testing.T, configPath, wallet string) error {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
-	output, err := registerWalletForName(configPath, wallet)
+	output, err := registerWalletForName(nil, configPath, wallet)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)

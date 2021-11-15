@@ -209,7 +209,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
 		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 		filename := generateRandomTestFileName(t)
@@ -242,7 +242,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		filename := "upload_image_test.png"
-		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
+		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
 		require.Nil(t, err, "Failed to download png file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
@@ -270,7 +270,7 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := cliutils.RunCommand("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
+		output, err := cliutils.RunCommandWithoutRetry("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
 		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
@@ -626,7 +626,7 @@ func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param m
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }
 
 func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -639,7 +639,7 @@ func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[st
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {

@@ -423,5 +423,5 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 func readPoolUnlock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Unlocking read tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }

@@ -537,7 +537,7 @@ func moveFile(t *testing.T, cliConfigFilename string, param map[string]interface
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }
 
 func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -550,7 +550,7 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }
 
 func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -563,7 +563,7 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }
 
 func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
@@ -577,7 +577,7 @@ func getAllocation(t *testing.T, allocationID string) (allocation climodel.Alloc
 
 func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) ([]string, error) {
 	t.Logf("Get Allocation...")
-	output, err := cliutils.RunCommandWithRetry(t, fmt.Sprintf(
+	output, err := cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox get --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
 		allocationID,
 		escapedTestName(t)+"_wallet.json",

@@ -541,7 +541,7 @@ func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]s
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
@@ -553,7 +553,7 @@ func listFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]str
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
@@ -565,5 +565,5 @@ func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string) ([]
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

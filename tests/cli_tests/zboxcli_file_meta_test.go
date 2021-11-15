@@ -407,5 +407,5 @@ func getFileMeta(t *testing.T, cliConfigFilename, param string) ([]string, error
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

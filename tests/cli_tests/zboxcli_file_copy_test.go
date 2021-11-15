@@ -438,7 +438,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(nil, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
@@ -571,5 +571,5 @@ func copyFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }

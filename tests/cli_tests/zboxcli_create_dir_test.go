@@ -281,7 +281,7 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(configPath, wallet, true, allocID, false, "")
+		output, err := createDirForWallet(nil, configPath, wallet, true, allocID, false, "")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: dirname flag is missing", output[0])
@@ -304,7 +304,7 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(configPath, wallet, true, allocID, true, "")
+		output, err := createDirForWallet(nil, configPath, wallet, true, allocID, true, "")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "CreateDir failed. invalid_name: Invalid name for dir", output[0])
@@ -331,7 +331,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, wallet, false, "", true, "/root")
+		output, err = createDirForWallet(nil, configPath, wallet, false, "", true, "/root")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
@@ -348,7 +348,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, wallet, true, "", true, "/root")
+		output, err = createDirForWallet(nil, configPath, wallet, true, "", true, "/root")
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
@@ -377,10 +377,10 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(nil, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir")
+		output, err = createDirForWallet(nil, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir")
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir for another allocation must throw error explicitly to not give impression it was success
 
@@ -397,10 +397,10 @@ func TestCreateDir(t *testing.T) {
 }
 
 func createDir(t *testing.T, cliConfigFilename, allocationID, dirname string) ([]string, error) {
-	return createDirForWallet(cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname)
+	return createDirForWallet(t, cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname)
 }
 
-func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string) ([]string, error) {
+func createDirForWallet(t *testing.T, cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string) ([]string, error) {
 	cmd := "./zbox createdir --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if withAllocationFlag {
 		cmd += ` --allocation "` + allocationID + `"`
@@ -408,7 +408,7 @@ func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag boo
 	if withDirnameFlag {
 		cmd += ` --dirname "` + dirname + `"`
 	}
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
@@ -418,6 +418,6 @@ func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, er
 func listAllWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string) ([]string, error) {
 	time.Sleep(5 * time.Second)
 	t.Logf("Listing all...")
-	return cliutils.RunCommand("./zbox list-all --silent --allocation " + allocationID +
-		" --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox list-all --silent --allocation "+allocationID+
+		" --wallet "+wallet+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

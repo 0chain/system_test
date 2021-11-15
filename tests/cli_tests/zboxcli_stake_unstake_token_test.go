@@ -270,20 +270,20 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 func listBlobbers(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting blobber list...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
 func stakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Staking tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
 func stakePoolInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Fetching stake pool info...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
 func unstakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Unlocking tokens from stake pool...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }

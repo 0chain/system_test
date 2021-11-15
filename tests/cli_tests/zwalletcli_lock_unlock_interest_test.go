@@ -806,14 +806,14 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		thirdPartyWallet := escapedTestName(t) + "_THIRDPARTY"
 
-		output, err = registerWalletForName(configPath, thirdPartyWallet)
+		output, err = registerWalletForName(nil, configPath, thirdPartyWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// Wait until lock expires.
 		<-lockTimer.C
 
 		// Unlock attempt by third party wallet.
-		output, err = unlockInterestForWallet(thirdPartyWallet, configPath, true, stats.Stats[0].ID)
+		output, err = unlockInterestForWallet(nil, thirdPartyWallet, configPath, true, stats.Stats[0].ID)
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
@@ -835,28 +835,28 @@ func lockInterest(t *testing.T, cliConfigFilename string, withDurationMin bool, 
 	if fee > 0 {
 		cmd += ` --fee ` + strconv.FormatFloat(tokens, 'f', 10, 64)
 	}
-	return cliutil.RunCommand(cmd)
+	return cliutil.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func unlockInterest(t *testing.T, cliConfigFilename string, withPoolID bool, poolID string) ([]string, error) {
-	return unlockInterestForWallet(escapedTestName(t), cliConfigFilename, withPoolID, poolID)
+	return unlockInterestForWallet(t, escapedTestName(t), cliConfigFilename, withPoolID, poolID)
 }
 
-func unlockInterestForWallet(wallet, cliConfigFilename string, withPoolID bool, poolID string) ([]string, error) {
+func unlockInterestForWallet(t *testing.T, wallet, cliConfigFilename string, withPoolID bool, poolID string) ([]string, error) {
 	cmd := "./zwallet unlock --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if withPoolID {
 		cmd += ` --pool_id "` + poolID + `"`
 	}
-	return cliutil.RunCommand(cmd)
+	return cliutil.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func getLockedTokens(t *testing.T, cliConfigFilename string) ([]string, error) {
 	time.Sleep(5 * time.Second)
-	return cliutil.RunCommand("./zwallet getlockedtokens --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutil.RunCommand(t, "./zwallet getlockedtokens --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func refillFaucet(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
-	return cliutil.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName refill --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+	return cliutil.RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName refill --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		tokens,
 		escapedTestName(t),
 		cliConfigFilename,
