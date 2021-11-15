@@ -26,7 +26,7 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -36,7 +36,7 @@ func TestFileUpdate(t *testing.T) {
 
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(filesize))
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -57,7 +57,7 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -68,7 +68,7 @@ func TestFileUpdate(t *testing.T) {
 		newFileSize := int64(1.5 * MB)
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -99,7 +99,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 			"commit":     true,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -169,7 +169,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err := listFilesInAllocation(t, configPath, params)
+		output, err := listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -187,7 +187,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Len(t, output, 2)
 
 		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err = listFilesInAllocation(t, configPath, params)
+		output, err = listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -215,7 +215,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err := listFilesInAllocation(t, configPath, params)
+		output, err := listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -232,7 +232,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Len(t, output, 2)
 
 		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err = listFilesInAllocation(t, configPath, params)
+		output, err = listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -256,7 +256,7 @@ func TestFileUpdate(t *testing.T) {
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"encrypt": true})
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err := listFilesInAllocation(t, configPath, params)
+		output, err := listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -280,7 +280,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Len(t, output, 2)
 
 		params = createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
-		output, err = listFilesInAllocation(t, configPath, params)
+		output, err = listFilesInAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -321,7 +321,7 @@ func TestFileUpdate(t *testing.T) {
 
 func updateFileWithThumbnailURL(t *testing.T, thumbnailURL, allocationID, remotePath, localpath string, size int64) string {
 	thumbnail := "upload_thumbnail_test.png"
-	output, err := cliutils.RunCommand(fmt.Sprintf("wget %s -O %s", thumbnailURL, thumbnail))
+	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", thumbnailURL, thumbnail))
 	require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 	output, err = updateFile(t, configPath, map[string]interface{}{

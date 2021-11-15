@@ -40,7 +40,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -54,13 +54,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -110,7 +110,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -124,13 +124,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -181,7 +181,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -196,13 +196,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -258,7 +258,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -272,14 +272,14 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		//  FIXME: Should be `Renamed failed`
 		require.Equal(t, "Delete failed: Commit consensus failed", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -330,7 +330,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -345,13 +345,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -402,7 +402,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -417,7 +417,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"remotepath": remotePath,
 			"destname":   destName,
 			"commit":     "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
@@ -442,7 +442,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Equal(t, "Transaction verification success", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -484,7 +484,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": "/child/nonexisting.txt",
 			"destname":   "/child/newnonexisting.txt",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
@@ -495,7 +495,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
@@ -518,7 +518,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -538,7 +538,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -576,7 +576,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destname":   "def.txt",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -593,7 +593,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destname":   "def.txt",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
@@ -609,7 +609,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destname flag is missing", output[0])
@@ -626,5 +626,5 @@ func renameFileForWallet(t *testing.T, cliConfigFilename, wallet string, param m
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }

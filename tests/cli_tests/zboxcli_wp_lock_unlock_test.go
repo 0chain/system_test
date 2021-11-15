@@ -59,7 +59,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"duration":   "2m",
 			"tokens":     1,
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
@@ -124,7 +124,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		params = createParams(map[string]interface{}{
 			"pool_id": customWritePoolId,
 		})
-		output, err = writePoolUnlock(t, configPath, params)
+		output, err = writePoolUnlock(t, configPath, params, true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -169,7 +169,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "5m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -213,7 +213,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"tokens":     -1,
 			"duration":   "5m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -257,7 +257,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"tokens":     0,
 			"duration":   "5m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -295,7 +295,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"allocation": allocationID,
 			"duration":   "5m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
@@ -328,7 +328,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"allocation": allocationID,
 			"tokens":     "0.5",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'duration' flag", output[0])
@@ -362,7 +362,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "2m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -384,7 +384,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		params = createParams(map[string]interface{}{
 			"pool_id": customWritePoolId,
 		})
-		output, err = writePoolUnlock(t, configPath, params)
+		output, err = writePoolUnlock(t, configPath, params, false)
 		require.NotNil(t, err, "Write pool tokens unlocked before expired", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -421,7 +421,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "10m",
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, true)
 		// TODO: change if FIXME is implemented
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
@@ -430,16 +430,26 @@ func TestWritePoolLockUnlock(t *testing.T) {
 	})
 }
 
-func writePoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return writePoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params)
+func writePoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return writePoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
+func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking write tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+	cmd := fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func writePoolUnlock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func writePoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Unlocking write tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox wp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	cmd := fmt.Sprintf("./zbox wp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
