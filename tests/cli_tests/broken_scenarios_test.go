@@ -79,7 +79,9 @@ func TestBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -117,7 +119,9 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Get the new Write-Pool info after upload
-		output = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		finalWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
@@ -331,24 +335,11 @@ func TestBrokenScenarios(t *testing.T) {
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		thumbnail := "upload_thumbnail_test.png"
+		output, err := cliutils.RunCommand(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
+		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
-		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnailFile)
-		require.Nil(t, err)
-
-		// Update with new thumbnail
-		thumbnailFile = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -359,9 +350,66 @@ func TestBrokenScenarios(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		err = os.Remove(thumbnailFile)
+		err = os.Remove(thumbnail)
+		require.Nil(t, err)
+
+		// Update with new thumbnail
+		thumbnail = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		err = os.Remove(thumbnail)
 		require.Nil(t, err)
 
 		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Downloading encrypted file is not working")
+		}
+		t.Parallel()
+
+		allocSize := int64(10 * MB)
+		filesize := int64(10)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateRandomTestFileName(t)
+
+		err := createFileWithSize(filename, filesize)
+		require.Nil(t, err)
+
+		// Upload parameters
+		uploadWithParam(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  filename,
+			"remotepath": remotepath + filepath.Base(filename),
+			"encrypt":    "",
+		})
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		// Downloading encrypted file not working
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  os.TempDir(),
+		}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 	})
 }

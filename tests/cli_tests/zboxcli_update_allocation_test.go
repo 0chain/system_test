@@ -665,6 +665,7 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+
 			"--wallet %s --configDir ./config --config %s",

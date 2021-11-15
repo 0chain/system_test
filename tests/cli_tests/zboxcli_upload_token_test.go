@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -76,7 +75,9 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
@@ -98,13 +99,10 @@ func TestFileUploadTokenMovement(t *testing.T) {
 	})
 }
 
-func writePoolInfo(t *testing.T, cliConfigFilename string) []string {
-	time.Sleep(15 * time.Second) // TODO replace with poller
+func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 	t.Logf("Getting write pool info...")
 	output, err := cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
-	require.Len(t, output, 1, strings.Join(output, "\n"))
-	require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-	return output
+	return output, err
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {

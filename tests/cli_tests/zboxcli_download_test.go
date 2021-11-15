@@ -137,44 +137,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(10 * MB)
-		filesize := int64(10)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		// Upload parameters
-		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": remotepath + filepath.Base(filename),
-			"encrypt":    "",
-		})
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
-		}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-	})
-
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
 		t.Parallel()
 

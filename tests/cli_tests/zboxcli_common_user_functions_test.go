@@ -71,7 +71,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -94,7 +94,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -156,7 +156,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
 		wait(t, 30*time.Second)
-		output = writePoolInfo(t, configPath)
+		output ,err= writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -169,7 +169,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -214,7 +214,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -227,7 +227,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
 		wait(t, 30*time.Second)
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -272,7 +272,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -285,7 +285,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		wait(t, 10*time.Second)
-		output = writePoolInfo(t, configPath)
+		output,err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 

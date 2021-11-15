@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -16,7 +16,7 @@ import (
 func TestFileUpdate(t *testing.T) {
 	t.Parallel()
 
-	t.Run("update with another file of same size", func(t *testing.T) {
+	t.Run("update with another file of same size should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -26,46 +26,28 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		// Get write pool info before file update
-		output := writePoolInfo(t, configPath)
-		initialWritePool := []climodel.WritePoolInfo{}
-		err := json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
 
-		require.Equal(t, allocationID, initialWritePool[0].Id)
-		require.InEpsilonf(t, 0.5, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
-		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
-		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
+		require.Nil(t, err)
+		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
 
-		newLocalFilePath := updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(filesize))
-		cost, unit := uploadCostWithUnit(t, configPath, allocationID, newLocalFilePath)
-		expectedUploadCostInZCN := unitToZCN(cost, unit)
+		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(filesize))
 
-		// Expected cost takes into account data+parity, so we divide by that
-		expectedUploadCostPerEntity := (expectedUploadCostInZCN / (2 + 2))
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
 
-		// Wait before fetching final write pool
-		wait(t, time.Minute/2)
-
-		// Get the new Write Pool info after update
-		output = writePoolInfo(t, configPath)
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-
-		require.Equal(t, allocationID, finalWritePool[0].Id)
-		require.InEpsilon(t, (0.5 - expectedUploadCostPerEntity), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-expectedUploadCostPerEntity, intToZCN(initialWritePool[0].Balance))
-		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
-		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
+		require.Nil(t, err)
+		require.Equal(t, 0.5*MB, actualSize)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update with another file of bigger size", func(t *testing.T) {
+	t.Run("update with another file of bigger size should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -75,47 +57,29 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		// Get write pool info before file update
-		output := writePoolInfo(t, configPath)
-		initialWritePool := []climodel.WritePoolInfo{}
-		err := json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
 
-		require.Equal(t, allocationID, initialWritePool[0].Id)
-		require.InEpsilonf(t, 0.5, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
-		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
-		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
+		require.Nil(t, err)
+		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
 
-		newFileSize := 5 * MB
-		newLocalFilePath := updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
-		cost, unit := uploadCostWithUnit(t, configPath, allocationID, newLocalFilePath)
-		expectedUploadCostInZCN := unitToZCN(cost, unit)
+		newFileSize := int64(1.5 * MB)
+		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
 
-		// Expected cost takes into account data+parity, so we divide by that
-		expectedUploadCostPerEntity := (expectedUploadCostInZCN / (2 + 2))
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
 
-		// Wait before fetching final write pool
-		wait(t, time.Minute/2)
-
-		// Get the new Write Pool info after update
-		output = writePoolInfo(t, configPath)
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-
-		require.Equal(t, allocationID, finalWritePool[0].Id)
-		require.InEpsilon(t, (0.5 - expectedUploadCostPerEntity), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-expectedUploadCostPerEntity, intToZCN(initialWritePool[0].Balance))
-		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
-		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
+		require.Nil(t, err)
+		require.Equal(t, 1.5*MB, actualSize)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update existing file in another allocation", func(t *testing.T) {
+	t.Run("update existing file with commit metadata should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -165,7 +129,7 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update file that does not exists", func(t *testing.T) {
+	t.Run("update file that does not exists should fail", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -187,7 +151,7 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update non-encrypted file with encrypted file", func(t *testing.T) {
+	t.Run("update non-encrypted file with encrypted file should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -233,7 +197,7 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update encrypted file with non-encrypted file", func(t *testing.T) {
+	t.Run("update encrypted file with non-encrypted file should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -278,7 +242,7 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update encrypted file with encrypted file", func(t *testing.T) {
+	t.Run("update encrypted file with encrypted file should work", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -328,17 +292,17 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update with another file of size larger than allocation", func(t *testing.T) {
+	t.Run("update with another file of size larger than allocation should fail", func(t *testing.T) {
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		newFileSize := 4 * MB
+		newFileSize := 2 * MB
 		localfile := generateRandomTestFileName(t)
 		err := createFileWithSize(localfile, int64(newFileSize))
 		require.Nil(t, err)
