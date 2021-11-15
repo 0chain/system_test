@@ -344,7 +344,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := finalizeAllocation(t, configPath, allocationID)
+		output, err := finalizeAllocation(t, configPath, allocationID, false)
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -478,7 +478,7 @@ func TestUpdateAllocation(t *testing.T) {
 		myAllocationID := setupAllocation(t, configPath)
 
 		// First try updating with myAllocationID: should work but it's buggy now
-		output, err := finalizeAllocation(t, configPath, myAllocationID)
+		output, err := finalizeAllocation(t, configPath, myAllocationID, false)
 		require.NotNil(t, err, "expected error finalizing "+
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length "+
@@ -488,7 +488,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"but got 0/2 sharders", output[0])
 
 		// Then try updating with otherAllocationID: should not work
-		output, err = finalizeAllocation(t, configPath, otherAllocationID)
+		output, err = finalizeAllocation(t, configPath, otherAllocationID, false)
 
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error finalizing "+
@@ -707,7 +707,7 @@ func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename st
 	), 3, time.Second*5)
 }
 
-func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+
@@ -716,5 +716,9 @@ func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

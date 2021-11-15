@@ -264,7 +264,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
 
 		// FIXME this does not work at the moment
-		output, err = finalizeAllocation(t, configPath, allocationID)
+		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
