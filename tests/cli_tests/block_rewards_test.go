@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -116,7 +117,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			"fee":         0.1,
 		})
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, params)
+			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
@@ -277,7 +278,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			"fee":         0.1,
 		})
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, params)
+			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
@@ -365,15 +366,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 }
 
 func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
-	return cliutil.RunCommand("./zwallet mn-info --silent --id " + nodeID + " --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutil.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand("./zwallet ls-miners --json --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getMinerSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand("./zwallet mn-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutil.RunCommand(t, "./zwallet mn-config --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getSharders(t *testing.T, cliConfigFilename string) ([]string, error) {

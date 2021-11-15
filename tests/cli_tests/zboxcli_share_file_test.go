@@ -57,7 +57,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  dummyFilePath,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 
 		require.Nil(t, err, "Error in file operation", strings.Join(output, "\n"))
 
@@ -116,7 +116,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  dummyFilePath,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 
 		require.NotNil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -165,7 +165,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  dummyFilePath,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 
 		require.NotNil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
@@ -212,7 +212,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  dummyFilePath,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
@@ -258,7 +258,7 @@ func TestShareFile(t *testing.T) {
 			"authticket": authTicket,
 			"remotepath": remoteOwnerPath,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
 	})
 
@@ -306,7 +306,7 @@ func TestShareFile(t *testing.T) {
 			"authticket": authTicket,
 			"remotepath": remoteOwnerPath,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, download_params, false)
 
 		require.NotNil(t, err, "Error:", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
@@ -326,7 +326,7 @@ func uploadFileForShare(t *testing.T, allocationID, wallet, localpath, remotepat
 		"localpath":  localpath,
 		"remotepath": remotepath,
 		"encrypt":    "",
-	})
+	}, false)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
 
@@ -347,13 +347,13 @@ func shareFile(t *testing.T, wallet, cliConfigFilename string, param map[string]
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func registerWalletAndFaucet(t *testing.T, configPath, wallet string) error {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
-	output, err := registerWalletForName(configPath, wallet)
+	output, err := registerWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)

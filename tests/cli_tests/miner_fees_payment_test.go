@@ -63,7 +63,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -90,7 +90,7 @@ func TestMinerFeesPayment(t *testing.T) {
 			"pool_id": readPool[0].Id,
 			"fee":     fee,
 		})
-		output, err = readPoolUnlock(t, configPath, params)
+		output, err = readPoolUnlock(t, configPath, params, true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 		require.Equal(t, "unlocked", output[0])
 
@@ -151,7 +151,7 @@ func TestMinerFeesPayment(t *testing.T) {
 			"tokens":     1,
 			"fee":        fee,
 		})
-		output, err = writePoolLock(t, configPath, params)
+		output, err = writePoolLock(t, configPath, params, true)
 		lockTimer := time.NewTimer(time.Minute * 2)
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
@@ -185,7 +185,7 @@ func TestMinerFeesPayment(t *testing.T) {
 			"pool_id": writePool[0].Id,
 			"fee":     fee,
 		})
-		output, err = writePoolUnlock(t, configPath, params)
+		output, err = writePoolUnlock(t, configPath, params, true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -245,14 +245,14 @@ func TestMinerFeesPayment(t *testing.T) {
 			"blobber_id": blobber.Id,
 			"tokens":     0.5,
 			"fee":        fee,
-		}))
+		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
 		stakePoolID := strings.Fields(output[0])[4]
 		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -321,14 +321,14 @@ func TestMinerFeesPayment(t *testing.T) {
 			"fee":         fee,
 			"tokens":      0.5,
 		})
-		output, err = lockInterest(t, configPath, params)
+		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
 
 		lockTimer := time.NewTimer(time.Minute)
 
-		wait(t, time.Minute)
+		wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
@@ -359,7 +359,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
 			"pool_id": stats.Stats[0].ID,
 			"fee":     fee,
-		}))
+		}), true)
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])

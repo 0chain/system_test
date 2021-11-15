@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -17,7 +18,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 3, 2
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 
 		//FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
@@ -36,7 +37,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 3, 3
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
 
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
@@ -54,7 +55,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 3, 0
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
@@ -70,7 +71,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 3, -1
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
@@ -86,7 +87,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 1, 1
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
@@ -101,7 +102,7 @@ func TestMultisigWallet(t *testing.T) {
 		t.Parallel()
 		numSigners, threshold := 3, 4
 
-		output, err := createMultiSigWallet(t, configPath, numSigners, threshold)
+		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
@@ -120,7 +121,7 @@ func TestMultisigWallet(t *testing.T) {
 	t.Run("Wallet Creation should fail when args not set", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--silent --wallet %s --configDir ./config --config %s", escapedTestName(t)+
 			"_wallet.json", configPath))
 
@@ -137,7 +138,7 @@ func TestMultisigWallet(t *testing.T) {
 	t.Run("Wallet Creation should fail when threshold not set", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := cliutils.RunCommand(fmt.Sprintf("./zwallet createmswallet "+
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--numsigners %d --silent --wallet %s --configDir ./config "+
 			"--config %s", 3, escapedTestName(t)+"_wallet.json", configPath))
 
@@ -152,11 +153,16 @@ func TestMultisigWallet(t *testing.T) {
 	})
 }
 
-func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, threshold int) ([]string, error) {
+func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, threshold int, retry bool) ([]string, error) {
 	t.Logf("Creating multisig wallet...")
-	return cliutils.RunCommand(fmt.Sprintf(
+	cmd := fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",
 		numSigners, threshold,
 		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename))
+		cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
