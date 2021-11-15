@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -138,7 +139,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download encrypted file
 	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -173,9 +173,11 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 		}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+
+		_, name := path.Split(filename)
+		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", name), output[1])
 	})
 
 	t.Run("Download Shared File Should Work", func(t *testing.T) {

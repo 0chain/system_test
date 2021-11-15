@@ -645,12 +645,16 @@ func createParams(params map[string]interface{}) string {
 }
 
 func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return updateAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, params)
+}
+
+func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
 			"--configDir ./config --config %s",
 		params,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(cmd)
