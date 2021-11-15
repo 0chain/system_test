@@ -71,7 +71,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Write pool balance should increment to 1
-		output,err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -368,7 +368,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		output,err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
