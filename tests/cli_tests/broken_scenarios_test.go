@@ -309,7 +309,7 @@ func TestBrokenScenarios(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 			"thumbnail":  true,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -336,7 +336,7 @@ func TestBrokenScenarios(t *testing.T) {
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
 		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommand(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
 		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
@@ -346,7 +346,7 @@ func TestBrokenScenarios(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 			"thumbnail":  true,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -361,7 +361,7 @@ func TestBrokenScenarios(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 			"thumbnail":  true,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -408,7 +408,7 @@ func TestBrokenScenarios(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  os.TempDir(),
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 	})
