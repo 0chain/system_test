@@ -76,12 +76,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "read_pool_lock")
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "read_pool_lock")
 		blockMinerId := block.Block.MinerId
 		block_miner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		startBalance = getNodeBalanceFromASharder(t, miner.ID)
@@ -100,12 +100,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "read_pool_unlock")
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "read_pool_unlock")
 		blockMinerId = block.Block.MinerId
 		block_miner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -169,12 +169,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "write_pool_lock")
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "write_pool_lock")
 		blockMinerId := block.Block.MinerId
 		block_miner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		<-lockTimer.C
@@ -197,12 +197,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "write_pool_unlock")
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "write_pool_unlock")
 		blockMinerId = block.Block.MinerId
 		block_miner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -258,12 +258,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "stake_pool_lock")
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "stake_pool_lock")
 		blockMinerId := block.Block.MinerId
 		block_miner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		startBalance = getNodeBalanceFromASharder(t, miner.ID)
@@ -284,12 +284,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "stake_pool_unlock")
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "stake_pool_unlock")
 		blockMinerId = block.Block.MinerId
 		block_miner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -342,12 +342,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		err = json.Unmarshal([]byte(output[1]), &stats)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
 
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "lock")
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "lock")
 		blockMinerId := block.Block.MinerId
 		block_miner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		// Wait until lock expires.
@@ -370,18 +370,18 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, minerNode, "unlock")
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "unlock")
 		blockMinerId = block.Block.MinerId
 		block_miner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }
 
 func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimodel.Balance,
-	wallet *climodel.Wallet, minerNode climodel.SimpleNode, txnData string) (block apimodel.Block) {
+	wallet *climodel.Wallet, minerNode *climodel.SimpleNode, txnData string) (block apimodel.Block) {
 	for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
 		block := getRoundBlockFromASharder(t, round)
 
@@ -417,7 +417,7 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, block_miner *cl
 	return expectedMinerFee
 }
 
-func verifyMinerFeesPayment(t *testing.T, block apimodel.Block, expectedMinerFee int64) bool {
+func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
 		if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []apimodel.Transfer
@@ -426,14 +426,15 @@ func verifyMinerFeesPayment(t *testing.T, block apimodel.Block, expectedMinerFee
 
 			for _, transfer := range transfers {
 				// Transfer needs to be from Miner Smart contract to Generator miner
-				if transfer.From == MINER_SC_ADDRESS && transfer.To == block.Block.MinerId {
-					t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-					require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-					// Transfer fee must be equal to miner fee
-					t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-					require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-					return true
+				if transfer.From != MINER_SC_ADDRESS || transfer.To != block.Block.MinerId {
+					continue
 				}
+				t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
+				require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
+				// Transfer fee must be equal to miner fee
+				t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
+				require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+				return true
 			}
 		}
 	}
