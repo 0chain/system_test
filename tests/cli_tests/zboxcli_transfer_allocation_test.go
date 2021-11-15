@@ -162,7 +162,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "-1h",
-		}))
+		}), true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
@@ -258,7 +258,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "-1h",
-		}))
+		}), true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
@@ -720,7 +720,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err = updateAllocationWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "24h",
-		}))
+		}), true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
