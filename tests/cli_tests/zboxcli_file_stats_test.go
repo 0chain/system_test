@@ -409,6 +409,7 @@ func TestFileStats(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
+		wait(t, 2*time.Minute)
 		// get file stats after download
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -485,6 +486,7 @@ func TestFileStats(t *testing.T) {
 		// update size for the file
 		updateFileWithRandomlyGeneratedData(t, allocationID, fname, int64(1*MB))
 
+		wait(t, 2*time.Minute)
 		// fetch file stats after update
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

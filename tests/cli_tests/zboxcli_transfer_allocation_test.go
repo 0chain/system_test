@@ -986,6 +986,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		// write lock pool of old owner should remain locked
 		// FIXME should this be unlocked given the change of ownership?
+		wait(t, 2*time.Minute)
 		output, _ = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
