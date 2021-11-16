@@ -42,7 +42,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -71,7 +71,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -100,7 +100,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/dir/" + filepath.Base(filename),
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -131,7 +131,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/dir/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -142,7 +142,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/dir/",
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0])
@@ -151,7 +151,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -187,7 +187,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/nested/dir/" + filepath.Base(filename),
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -209,7 +209,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
 		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 		filename := generateRandomTestFileName(t)
@@ -221,7 +221,7 @@ func TestUpload(t *testing.T) {
 			"remotepath":    "/",
 			"localpath":     filename,
 			"thumbnailpath": thumbnail,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -242,14 +242,14 @@ func TestUpload(t *testing.T) {
 		})
 
 		filename := "upload_image_test.png"
-		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
+		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
 		require.Nil(t, err, "Failed to download png file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -270,14 +270,14 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := cliutils.RunCommand("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
+		output, err := cliutils.RunCommandWithoutRetry("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
 		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  "./test_video.mp4",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -302,7 +302,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 			"remotepath": "/",
 			"encrypt":    "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -330,7 +330,7 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/dir/" + filepath.Base(filename),
 			"localpath":  filename,
 			"commit":     "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -372,7 +372,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 			"commit":     "",
 			"encrypt":    "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -416,7 +416,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -491,7 +491,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -600,7 +600,7 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
 
-	output, err := uploadFile(t, cliConfigFilename, param)
+	output, err := uploadFile(t, cliConfigFilename, param, true)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
 	require.Len(t, output, 2)
@@ -612,12 +612,11 @@ func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]in
 	require.Equal(t, expected, output[1])
 }
 
-func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	t.Logf("Uploading file...")
-	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
+func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Uploading file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -627,7 +626,11 @@ func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param m
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*40)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -640,7 +643,7 @@ func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[st
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
