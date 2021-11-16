@@ -36,7 +36,7 @@ func TestBrokenScenarios(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, targetWallet)
+		output, err = registerWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
@@ -45,7 +45,7 @@ func TestBrokenScenarios(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description")
+		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description", true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -209,6 +209,7 @@ func TestBrokenScenarios(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.4,
+			"duration":   "5m",
 		})
 		output, err = readPoolLock(t, configPath, params)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -252,7 +253,7 @@ func TestBrokenScenarios(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filename,
 			"localpath":  "../../internal/dummy_file/five_MB_test_file_dowloaded",
-		}))
+		}), true)
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 
 		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")

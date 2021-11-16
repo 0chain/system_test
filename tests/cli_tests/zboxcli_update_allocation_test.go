@@ -34,7 +34,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
@@ -60,7 +60,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
@@ -87,7 +87,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -110,7 +110,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("\"%dm\"", expDuration),
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
@@ -136,7 +136,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -162,7 +162,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"expiry":     fmt.Sprintf("%dm", expDuration),
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -184,7 +184,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID)
+		output, err := cancelAllocation(t, configPath, allocationID, false)
 
 		require.NotNil(t, err, "expected error when canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -202,7 +202,7 @@ func TestUpdateAllocation(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -219,7 +219,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     "1h",
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
@@ -239,7 +239,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
 		})
 
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, reUpdateAllocation, output[0])
@@ -257,7 +257,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation"+
 			"", strings.Join(output, "\n"))
@@ -274,7 +274,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -293,7 +293,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       fmt.Sprintf("\"%d\"", size),
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -314,7 +314,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -326,7 +326,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 		// Cancel the expired allocation
-		output, err = cancelAllocation(t, configPath, allocationID)
+		output, err = cancelAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
@@ -344,7 +344,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := finalizeAllocation(t, configPath, allocationID)
+		output, err := finalizeAllocation(t, configPath, allocationID, false)
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -366,7 +366,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
@@ -385,7 +385,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -402,7 +402,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -431,7 +431,7 @@ func TestUpdateAllocation(t *testing.T) {
 				"allocation": otherAllocationID,
 				"size":       size,
 			})
-			output, err := updateAllocation(t, configPath, params)
+			output, err := updateAllocation(t, configPath, params, true)
 
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
@@ -446,7 +446,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -457,7 +457,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": otherAllocationID,
 			"size":       size,
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -478,7 +478,7 @@ func TestUpdateAllocation(t *testing.T) {
 		myAllocationID := setupAllocation(t, configPath)
 
 		// First try updating with myAllocationID: should work but it's buggy now
-		output, err := finalizeAllocation(t, configPath, myAllocationID)
+		output, err := finalizeAllocation(t, configPath, myAllocationID, false)
 		require.NotNil(t, err, "expected error finalizing "+
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length "+
@@ -488,7 +488,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"but got 0/2 sharders", output[0])
 
 		// Then try updating with otherAllocationID: should not work
-		output, err = finalizeAllocation(t, configPath, otherAllocationID)
+		output, err = finalizeAllocation(t, configPath, otherAllocationID, false)
 
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error finalizing "+
@@ -510,7 +510,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     expiry,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -533,7 +533,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -640,16 +640,24 @@ func createParams(params map[string]interface{}) string {
 	return strings.TrimSpace(builder.String())
 }
 
-func updateAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func updateAllocation(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return updateAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
+}
+
+func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
 			"--configDir ./config --config %s",
 		params,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
@@ -661,10 +669,10 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+
@@ -673,7 +681,12 @@ func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]s
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 // executeFaucetWithTokens executes faucet command with given tokens.
@@ -686,7 +699,7 @@ func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens floa
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
 	t.Logf("Executing faucet...")
-	return cliutils.RunCommandWithRetry(t, fmt.Sprintf("./zwallet faucet --methodName "+
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName "+
 		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		tokens,
 		wallet,
@@ -694,7 +707,7 @@ func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename st
 	), 3, time.Second*5)
 }
 
-func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+
@@ -703,5 +716,9 @@ func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string) ([
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

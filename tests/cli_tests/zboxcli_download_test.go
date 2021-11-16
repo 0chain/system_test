@@ -49,7 +49,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -86,7 +86,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -123,7 +123,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -183,7 +183,7 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -244,7 +244,7 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
@@ -296,7 +296,7 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"remotepath": remotepath + filepath.Base(filename),
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -360,7 +360,7 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"lookuphash": lookuphash,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -419,7 +419,7 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -481,7 +481,7 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"rx_pay":     "",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -502,7 +502,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommand("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
 		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
 		defer func() {
@@ -524,7 +524,7 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 			"thumbnail":  nil,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
@@ -553,7 +553,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/tmp2/" + filepath.Base(filename),
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -591,7 +591,7 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 			"startblock": 0,
 			"endblock":   1,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -626,7 +626,7 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 			"commit":     "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
@@ -677,7 +677,7 @@ func TestDownload(t *testing.T) {
 			"remotepath":      remotepath + filepath.Base(filename),
 			"localpath":       "tmp/",
 			"blockspermarker": 1,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -711,7 +711,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  os.TempDir(),
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -732,7 +732,7 @@ func TestDownload(t *testing.T) {
 			"allocation": "12334qe",
 			"remotepath": "/",
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -764,7 +764,7 @@ func TestDownload(t *testing.T) {
 			"allocation": otherAllocationID,
 			"remotepath": remotepath + filepath.Base(otherFilename),
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0)
 
@@ -785,7 +785,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + "hello.txt",
 			"localpath":  "tmp/",
-		}))
+		}), false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -798,7 +798,7 @@ func TestDownload(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = downloadFile(t, configPath, "")
+		output, err = downloadFile(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -815,7 +815,7 @@ func TestDownload(t *testing.T) {
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-		}))
+		}), false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -843,7 +843,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
@@ -872,14 +872,14 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"expiry":     "-1h",
 		})
-		output, err := updateAllocation(t, configPath, params)
+		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
@@ -909,11 +909,11 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 	return allocationID
 }
 
-func downloadFile(t *testing.T, cliConfigFilename, param string) ([]string, error) {
-	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, param)
+func downloadFile(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
+func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Logf("Downloading file...")
 	time.Sleep(15 * time.Second) // TODO replace with pollers
 	cmd := fmt.Sprintf(
@@ -922,13 +922,18 @@ func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string
 		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func generateChecksum(t *testing.T, filePath string) string {
 	t.Logf("Generating checksum for file [%v]...", filePath)
 
-	output, err := cliutils.RunCommand("shasum -a 256 " + filePath)
+	output, err := cliutils.RunCommandWithoutRetry("shasum -a 256 " + filePath)
 	require.Nil(t, err, "Checksum generation for file %v failed", filePath, strings.Join(output, "\n"))
 
 	matcher := regexp.MustCompile("(.*) " + filePath + "$")

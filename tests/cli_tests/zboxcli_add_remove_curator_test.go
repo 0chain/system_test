@@ -48,7 +48,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		anotherClientWalletName := escapedTestName(t) + "_ANOTHER_WALLET"
-		output, err = registerWalletForName(configPath, anotherClientWalletName)
+		output, err = registerWalletForName(t, configPath, anotherClientWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		anotherWallet, err := getWalletForName(t, configPath, anotherClientWalletName)
@@ -91,13 +91,13 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
-		output, err = registerWalletForName(configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -123,7 +123,11 @@ func TestAddCurator(t *testing.T) {
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
-		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		}, true)
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "unexpected output length:", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, targetWallet.ClientID)
@@ -143,7 +147,7 @@ func TestAddCurator(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -166,7 +170,11 @@ func TestAddCurator(t *testing.T) {
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
 		require.Equal(t, wallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
-		output, err = transferAllocationOwnership(t, allocationID, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		}, true)
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
 	})
 
@@ -208,7 +216,7 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
@@ -248,13 +256,13 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
-		output, err = registerWalletForName(configPath, targetWalletName)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
@@ -288,7 +296,11 @@ func TestAddCurator(t *testing.T) {
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
 
-		output, err = transferAllocationOwnershipWithWallet(t, allocationID, curatorWalletName, targetWallet.ClientID, targetWallet.ClientPublicKey)
+		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": targetWallet.ClientPublicKey,
+			"new_owner":     targetWallet.ClientID,
+		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
@@ -302,7 +314,7 @@ func TestAddCurator(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(configPath, curatorWalletName)
+		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
@@ -338,23 +350,6 @@ func TestAddCurator(t *testing.T) {
 	})
 }
 
-func transferAllocationOwnership(t *testing.T, allocationID, newOwner, newOwnerPublicKey string) ([]string, error) {
-	return transferAllocationOwnershipWithWallet(t, allocationID, escapedTestName(t), newOwner, newOwnerPublicKey)
-}
-
-func transferAllocationOwnershipWithWallet(t *testing.T, allocationID, curatorWalletName, newOwner, newOwnerPublicKey string) ([]string, error) {
-	t.Logf("Transaferring allocation ownership...")
-	params := createParams(map[string]interface{}{"allocation": allocationID, "new_owner": newOwner, "new_owner_key": newOwnerPublicKey})
-	cmd := fmt.Sprintf(
-		"./zbox transferallocation %s --silent --wallet %s_wallet.json "+
-			"--configDir ./config --config %s",
-		params,
-		curatorWalletName,
-		configPath,
-	)
-	return cliutils.RunCommand(cmd)
-}
-
 func addCurator(t *testing.T, params string) ([]string, error) {
 	return addCuratorWithWallet(t, escapedTestName(t), params)
 }
@@ -368,7 +363,7 @@ func addCuratorWithWallet(t *testing.T, walletName, params string) ([]string, er
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func removeCurator(t *testing.T, params string) ([]string, error) {
@@ -384,5 +379,5 @@ func removeCuratorWithWallet(t *testing.T, walletName, params string) ([]string,
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

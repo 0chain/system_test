@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -40,7 +41,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -82,7 +83,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -124,7 +125,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -162,7 +163,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -200,7 +201,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": path.Join(remotepath, absentFileName),
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -248,7 +249,7 @@ func TestFileStats(t *testing.T) {
 				"allocation": otherAllocationID,
 				"remotepath": remoteFilePath,
 				"json":       "",
-			}))
+			}), true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
@@ -280,7 +281,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": otherAllocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -310,7 +311,7 @@ func TestFileStats(t *testing.T) {
 
 		setupAllocation(t, configPath)
 
-		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{}))
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -330,7 +331,7 @@ func TestFileStats(t *testing.T) {
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -344,7 +345,7 @@ func TestFileStats(t *testing.T) {
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-		}))
+		}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -370,7 +371,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -404,16 +405,17 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
+		wait(t, 2*time.Minute)
 		// get file stats after download
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -454,7 +456,7 @@ func TestFileStats(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -484,12 +486,13 @@ func TestFileStats(t *testing.T) {
 		// update size for the file
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+fname, int64(1*MB))
 
+		wait(t, 2*time.Minute)
 		// fetch file stats after update
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -516,7 +519,7 @@ func TestFileStats(t *testing.T) {
 	})
 }
 
-func getFileStats(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+func getFileStats(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Logf("Getting file stats...")
 	cmd := fmt.Sprintf(
 		"./zbox stats %s --silent --wallet %s --configDir ./config --config %s",
@@ -524,5 +527,9 @@ func getFileStats(t *testing.T, cliConfigFilename, param string) ([]string, erro
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

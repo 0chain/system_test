@@ -110,7 +110,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	time.Sleep(30 * time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
-	return cliutils.RunCommand("./zbox rp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox rp-info --allocation "+allocationID+" --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string) ([]string, error) {
@@ -119,12 +119,12 @@ func readPoolLock(t *testing.T, cliConfigFilename, params string) ([]string, err
 
 func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Locking read tokens...")
-	return cliutils.RunCommand(fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename))
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
 }
 
 func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
 	t.Logf("Getting download cost...")
-	return cliutils.RunCommand("./zbox get-download-cost --allocation " + allocationID + " --remotepath " + remotepath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox get-download-cost --allocation "+allocationID+" --remotepath "+remotepath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {
