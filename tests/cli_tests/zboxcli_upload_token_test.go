@@ -100,12 +100,12 @@ func TestFileUploadTokenMovement(t *testing.T) {
 func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
 	time.Sleep(10 * time.Second) // TODO replace with poller
 	t.Logf("Getting write pool info...")
-	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox wp-info --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
-	output, err := cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	require.Len(t, output, 1)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
 	return output, err
@@ -113,7 +113,7 @@ func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpat
 
 func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	t.Logf("Getting challenge pool info...")
-	return cliutils.RunCommand("./zbox cp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox cp-info --allocation "+allocationID+" --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func intToZCN(balance int64) float64 {

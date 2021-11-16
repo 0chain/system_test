@@ -83,22 +83,22 @@ func TestRegisterWallet(t *testing.T) {
 
 func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
 	t.Logf("Registering wallet...")
-	return registerWalletForName(cliConfigFilename, escapedTestName(t))
+	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
-func registerWalletForName(cliConfigFilename, name string) ([]string, error) {
-	return cliutils.RunCommand("./zbox register --silent " +
-		"--wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zbox register --silent "+
+		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
 	time.Sleep(5 * time.Second)
-	return getBalanceForWallet(cliConfigFilename, escapedTestName(t))
+	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getBalanceForWallet(cliConfigFilename, wallet string) ([]string, error) {
-	return cliutils.RunCommand("./zwallet getbalance --silent " +
-		"--wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+func getBalanceForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error) {
@@ -107,8 +107,8 @@ func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error)
 
 func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	t.Logf("Getting wallet...")
-	output, err := cliutils.RunCommand("./zbox getwallet --json --silent " +
-		"--wallet " + name + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
+		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 
 	if err != nil {
 		return nil, err
@@ -129,8 +129,8 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 
 func verifyTransaction(t *testing.T, cliConfigFilename, txn string) ([]string, error) {
 	t.Logf("Verifying transaction...")
-	return cliutils.RunCommand("./zwallet verify --silent --wallet " + escapedTestName(t) + "" +
-		"_wallet.json" + " --hash " + txn + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zwallet verify --silent --wallet "+escapedTestName(t)+""+
+		"_wallet.json"+" --hash "+txn+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func escapedTestName(t *testing.T) string {
