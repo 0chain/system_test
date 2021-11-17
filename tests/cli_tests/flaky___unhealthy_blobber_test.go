@@ -11,7 +11,7 @@ import (
 /*
 Tests in here are skipped until we set up a byzantime chain/investigate conductor tests
 */
-func TestUnhealthyBlobberScenarios(t *testing.T) {
+func Test___FlakyUnhealthyBlobberScenarios(t *testing.T) {
 	t.Run("Cancel Allocation Should Work when blobber fails challenges", func(t *testing.T) {
 		t.Skip("allocations can only be canceled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
 		t.Parallel()

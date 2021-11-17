@@ -18,7 +18,7 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
-func TestBrokenScenarios(t *testing.T) {
+func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
