@@ -530,7 +530,7 @@ func generateRandomTestFileName(t *testing.T) string {
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
 	randomFilename := cliutils.RandomAlphaNumericString(10)
-	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
+	return fmt.Sprintf("%s%s_test.txt", path, randomFilename)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
