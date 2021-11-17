@@ -114,7 +114,7 @@ func TestShareFile(t *testing.T) {
 		output, err = shareFile(t, walletOwner, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "share not reached", output[0],
+		require.Equal(t, "share not found", output[0],
 			"share file - Unexpected output", strings.Join(output, "\n"))
 
 		// Download the file
