@@ -468,7 +468,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		)
 		require.Equal(t, expected, output[1])
 
-		output, err = moveFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
+		output, err = moveFileWithWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
@@ -556,13 +556,17 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 }
 
-func moveFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
+func moveFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	return moveFileWithWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func moveFileWithWallet(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Moving file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox move %s --silent --wallet %s --configDir ./config --config %s",
 		p,
-		wallet+"_wallet.json",
+		walletName+"_wallet.json",
 		cliConfigFilename,
 	)
 

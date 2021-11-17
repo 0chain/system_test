@@ -528,7 +528,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		)
 		require.Equal(t, expected, output[1])
 
-		output, err = renameFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
+		output, err = renameFileWithWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
@@ -616,7 +616,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 }
 
-func renameFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
+func renameFileWithWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
