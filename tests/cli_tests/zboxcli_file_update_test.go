@@ -144,7 +144,7 @@ func TestFileUpdate(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(localfile),
 			"localpath":  localfile,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -182,7 +182,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": "/" + filepath.Base(localFilePath),
 			"localpath":  localfile,
 			"encrypt":    true,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -227,7 +227,7 @@ func TestFileUpdate(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(localFilePath),
 			"localpath":  localfile,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -275,7 +275,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": "/" + filepath.Base(localFilePath),
 			"localpath":  localfile,
 			"encrypt":    true,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -311,7 +311,7 @@ func TestFileUpdate(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(localFilePath),
 			"localpath":  localfile,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -329,7 +329,7 @@ func updateFileWithThumbnailURL(t *testing.T, thumbnailURL, allocationID, remote
 		"remotepath":    remotePath,
 		"localpath":     localpath,
 		"thumbnailpath": thumbnail,
-	})
+	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
 	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
@@ -342,7 +342,7 @@ func updateFileWithCommit(t *testing.T, allocationID, remotePath, localpath stri
 		"remotepath": remotePath,
 		"localpath":  localpath,
 		"commit":     true,
-	})
+	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 3)
 	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])

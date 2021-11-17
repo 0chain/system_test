@@ -524,7 +524,7 @@ func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath 
 		"allocation": allocationID,
 		"remotepath": remotepath,
 		"localpath":  localfile,
-	})
+	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	return localfile
 }
@@ -563,7 +563,7 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	}
 }
 
-func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file...")
 
 	p := createParams(param)
@@ -574,7 +574,11 @@ func updateFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
