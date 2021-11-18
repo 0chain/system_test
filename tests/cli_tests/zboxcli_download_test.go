@@ -693,35 +693,6 @@ func TestDownload(t *testing.T) {
 
 	// Failure Scenarios
 
-	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		expected := fmt.Sprintf(
-			"Download failed. Local file already exists '%s'",
-			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[0])
-	})
-
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
 
