@@ -254,28 +254,6 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with invalid dir - no leading slash", func(t *testing.T) {
-		t.Parallel()
-
-		allocID := setupAllocation(t, configPath)
-
-		filename := "noleadingslash"
-		output, err := createDir(t, configPath, allocID, filename)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash must throw error explicitly to not give impression it was success
-
-		output, err = listAll(t, configPath, allocID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 1)
-		require.Equal(t, filename, files[0].Name, "Directory must be created with expected name", files)
-	})
-
 	t.Run("create attempt with missing dirname param", func(t *testing.T) {
 		t.Parallel()
 
