@@ -665,6 +665,8 @@ func Test___FlakyScenariosFileStats(t *testing.T) {
 }
 
 func Test___FlakyScenariosSendAndBalance(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
 		t.Parallel()
 
@@ -909,6 +911,8 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 }
 
 func Test___FlakyScenariosCreateDir(t *testing.T) {
+	t.Parallel()
+
 	t.Run("create attempt with invalid dir - no leading slash", func(t *testing.T) {
 		t.Parallel()
 
@@ -927,6 +931,44 @@ func Test___FlakyScenariosCreateDir(t *testing.T) {
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		require.Len(t, files, 0)
+	})
+
+}
+
+func Test___FlakyScenariosDownload(t *testing.T) {
+	// Create a folder to keep all the generated files to be uploaded
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
+	t.Parallel()
+
+	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  os.TempDir(),
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		expected := fmt.Sprintf(
+			"Download failed. Local file already exists '%s'",
+			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[0])
 	})
 
 }
