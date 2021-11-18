@@ -532,7 +532,7 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, all
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
 
-	output, err := updateFile(t, walletName, configPath, map[string]interface{}{
+	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remotepath,
 		"localpath":  localfile,
@@ -558,7 +558,11 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	}
 }
 
-func updateFile(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+	return updateFileWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file...")
 
 	p := createParams(param)

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -38,7 +39,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
@@ -58,7 +59,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -74,7 +75,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -102,7 +103,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  "tmp/",
-		}))
+		}), true)
 		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
 		defer os.Remove("tmp" + remotepath)
 		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
@@ -115,7 +116,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -131,7 +132,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -156,7 +157,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -172,7 +173,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
@@ -190,7 +191,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput = fmt.Sprintf("Collaborator %s removed successfully for the file %s", collaboratorWallet.ClientID, remotepath)
@@ -209,7 +210,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -225,7 +226,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -250,7 +251,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
 
 		meta = getFileMetaData(t, map[string]interface{}{
@@ -264,7 +265,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  "tmp/",
-		}))
+		}), false)
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0], "Unexpected output", strings.Join(output, "\n"))
@@ -279,7 +280,7 @@ func TestCollaborator(t *testing.T) {
 		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
-		output, err := registerWalletForName(configPath, anotherWalletName)
+		output, err := registerWalletForName(t, configPath, anotherWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
@@ -295,7 +296,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   anotherWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), false)
 		require.NotNil(t, err, "Add collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
@@ -306,7 +307,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -322,7 +323,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -345,7 +346,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
 
 		meta = getFileMetaData(t, map[string]interface{}{
@@ -373,7 +374,7 @@ func TestCollaborator(t *testing.T) {
 		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
-		output, err := registerWalletForName(configPath, anotherWalletName)
+		output, err := registerWalletForName(t, configPath, anotherWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
@@ -388,7 +389,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   thirdPersonWalletAddress,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", thirdPersonWalletAddress, remotepath)
@@ -407,7 +408,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   thirdPersonWalletAddress,
 			"remotepath": remotepath,
-		}))
+		}), false)
 		require.NotNil(t, err, "Remove collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "remove_collaborator_failed: Failed to remove collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
@@ -421,7 +422,7 @@ func TestCollaborator(t *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -439,7 +440,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
@@ -458,7 +459,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   thirdPersonWalletAddress,
 			"remotepath": remotepath,
-		}))
+		}), false)
 		require.NotNil(t, err, "Add collaborator must fail since the collaborator is not the file owner", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
@@ -469,7 +470,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -485,7 +486,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -500,7 +501,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation":         allocationID,
 			"remotepath":         remotepath,
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, false)
 		require.NotNil(t, err, "Unexpected success in updating the file attributes as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := "updating file attributes: Update attributes failed: request failed, operation failed"
@@ -512,7 +513,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -528,7 +529,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -555,7 +556,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -571,7 +572,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -585,7 +586,7 @@ func TestCollaborator(t *testing.T) {
 		output, err = deleteFile(t, collaboratorWalletName, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-		}))
+		}), false)
 		require.NotNil(t, err, "Unexpected success in deleting the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
@@ -596,7 +597,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -612,7 +613,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -627,7 +628,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"destpath":   "/",
-		})
+		}, true)
 		require.Nil(t, err, "Error in moving the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := "Copy failed: Copy request failed. Operation failed."
@@ -639,7 +640,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -655,7 +656,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -670,11 +671,11 @@ func TestCollaborator(t *testing.T) {
 		err = createFileWithSize(localpath, 128*KB)
 		require.Nil(t, err)
 
-		output, err = updateFile(t, collaboratorWalletName, configPath, map[string]interface{}{
+		output, err = updateFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
-		})
+		}, false)
 		defer os.Remove(localpath)
 		require.NotNil(t, err, "Unexpected success in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
@@ -687,7 +688,7 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(configPath, collaboratorWalletName)
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
@@ -703,7 +704,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
-		}))
+		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
 		meta := getFileMetaData(t, map[string]interface{}{
@@ -718,7 +719,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"destpath":   "/",
-		})
+		}, true)
 		require.Nil(t, err, "Unexpected success in copying the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := "Copy failed: Copy request failed. Operation failed."
@@ -741,7 +742,7 @@ func getFileMetaData(t *testing.T, params map[string]interface{}) *climodel.File
 }
 
 func getFileMetaDataWithWallet(t *testing.T, walletName string, params map[string]interface{}) *climodel.FileMetaResult {
-	output, err := getFileMetaWithWallet(t, walletName, configPath, createParams(params))
+	output, err := getFileMetaWithWallet(t, walletName, configPath, createParams(params), true)
 	require.Nil(t, err, "Error in getting file meta data", strings.Join(output, "\n"))
 	require.Len(t, output, 1, "Error in getting file meta data - Unexpected number of output lines", strings.Join(output, "\n"))
 
@@ -751,11 +752,11 @@ func getFileMetaDataWithWallet(t *testing.T, walletName string, params map[strin
 	return &meta
 }
 
-func addCollaborator(t *testing.T, params string) ([]string, error) {
-	return addCollaboratorWithWallet(t, escapedTestName(t), params)
+func addCollaborator(t *testing.T, params string, retry bool) ([]string, error) {
+	return addCollaboratorWithWallet(t, escapedTestName(t), params, retry)
 }
 
-func addCollaboratorWithWallet(t *testing.T, walletName, params string) ([]string, error) {
+func addCollaboratorWithWallet(t *testing.T, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Adding collaborator...")
 	cmd := fmt.Sprintf(
 		"./zbox add-collab %s --silent --wallet %s "+
@@ -764,14 +765,18 @@ func addCollaboratorWithWallet(t *testing.T, walletName, params string) ([]strin
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func removeCollaborator(t *testing.T, params string) ([]string, error) {
-	return removeCollaboratorWithWallet(t, escapedTestName(t), params)
+func removeCollaborator(t *testing.T, params string, retry bool) ([]string, error) {
+	return removeCollaboratorWithWallet(t, escapedTestName(t), params, retry)
 }
 
-func removeCollaboratorWithWallet(t *testing.T, walletName, params string) ([]string, error) {
+func removeCollaboratorWithWallet(t *testing.T, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Removing collaborator...")
 	cmd := fmt.Sprintf(
 		"./zbox delete-collab %s --silent --wallet %s "+
@@ -780,10 +785,14 @@ func removeCollaboratorWithWallet(t *testing.T, walletName, params string) ([]st
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func deleteFile(t *testing.T, walletName, params string) ([]string, error) {
+func deleteFile(t *testing.T, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Deleting file...")
 	cmd := fmt.Sprintf(
 		"./zbox delete %s --silent --wallet %s "+
@@ -792,5 +801,9 @@ func deleteFile(t *testing.T, walletName, params string) ([]string, error) {
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
