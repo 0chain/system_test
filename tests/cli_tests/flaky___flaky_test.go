@@ -3,11 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	apimodel "github.com/0chain/system_test/internal/api/model"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
 	"math"
 	"os"
 	"path"
@@ -16,6 +11,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	apimodel "github.com/0chain/system_test/internal/api/model"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 func Test___FlakyScenariosMinerFees(t *testing.T) {
@@ -24,8 +25,6 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
-
-	const chunksize = 64 * 1024
 
 	// originally miner_fees_payment.go
 	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
@@ -390,7 +389,6 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
-
 }
 
 func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
@@ -1012,7 +1010,6 @@ func Test___FlakyScenariosCreateDir(t *testing.T) {
 
 		require.Len(t, files, 0)
 	})
-
 }
 
 func Test___FlakyScenariosDownload(t *testing.T) {
@@ -1092,5 +1089,4 @@ func Test___FlakyScenariosDownload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 	})
-
 }

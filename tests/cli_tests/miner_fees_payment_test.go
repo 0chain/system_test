@@ -3,16 +3,16 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"testing"
+
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
 )
 
 func TestMinerFeesPayment(t *testing.T) {
 	t.Parallel()
-
 }
 
 func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimodel.Balance,
