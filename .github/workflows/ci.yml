@@ -307,7 +307,7 @@ jobs:
       - name: "Report Link"
         if: ${{ always() && env.TESTS_RAN == 'true' }}
         run: |
-          echo "SYSTEM TESTS REPORT LINK:
+          echo "SYSTEM TESTS REPORT LINK:"
           echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
           echo "FLAKY SYSTEM TESTS REPORT LINK:"
           echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html"
