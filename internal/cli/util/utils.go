@@ -15,7 +15,7 @@ import (
 
 var Logger = getLogger()
 
-func RunCommand(commandString string) ([]string, error) {
+func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
 	commandName := command[0]
 	args := command[1:]
@@ -43,7 +43,7 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 	return output, err
 }
 
-func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
@@ -51,7 +51,7 @@ func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, ba
 	var count int
 	for {
 		count++
-		output, err := RunCommand(commandString)
+		output, err := RunCommandWithoutRetry(commandString)
 
 		if err == nil {
 			if count > 1 {

@@ -39,7 +39,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"remotepath":              remotePath,
 			"localpath":               file,
 			"attr-who-pays-for-reads": "owner",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -53,7 +53,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation":         allocationID,
 			"remotepath":         remotePath,
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "attributes updated", output[0])
@@ -63,7 +63,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -95,7 +95,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"remotepath":              remotePath,
 			"localpath":               file,
 			"attr-who-pays-for-reads": "owner",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -109,7 +109,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation":         allocationID,
 			"remotepath":         remotePath,
 			"who-pays-for-reads": "owner",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "no changes", output[0])
@@ -119,7 +119,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -151,7 +151,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"remotepath":              remotePath,
 			"localpath":               file,
 			"attr-who-pays-for-reads": "owner",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -166,7 +166,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"remotepath":         remotePath,
 			"who-pays-for-reads": "3rd_party",
 			"commit":             "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		require.Equal(t, "attributes updated", output[0])
@@ -195,7 +195,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -218,7 +218,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation":         allocationID,
 			"remotepath":         "/child/nonexisting.txt",
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "fetching the metadata: file_meta_error: Error getting the file meta data from blobbers", output[0])
@@ -229,7 +229,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
@@ -250,7 +250,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -265,7 +265,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation":         allocationID,
 			"remotepath":         remotePath,
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "fetching the metadata: file_meta_error: Error getting the file meta data from blobbers", output[0])
@@ -275,7 +275,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -295,7 +295,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		output, err = updateFileAttributes(t, configPath, map[string]interface{}{
 			"remotepath":         "/abc.txt",
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing 'allocation' flag", output[0])
@@ -311,7 +311,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		output, err = updateFileAttributes(t, configPath, map[string]interface{}{
 			"allocation":         "abcdef",
 			"who-pays-for-reads": "3rd_party",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing 'remotepath' flag", output[0])
@@ -338,7 +338,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -351,18 +351,18 @@ func TestFileUpdateAttributes(t *testing.T) {
 		output, err = updateFileAttributes(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "no changes", output[0])
 	})
 }
 
-func updateFileAttributes(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	return updateFileAttributesWithWallet(t, cliConfigFilename, escapedTestName(t), param)
+func updateFileAttributes(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+	return updateFileAttributesWithWallet(t, cliConfigFilename, escapedTestName(t), param, retry)
 }
 
-func updateFileAttributesWithWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
+func updateFileAttributesWithWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file attributes...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -372,5 +372,9 @@ func updateFileAttributesWithWallet(t *testing.T, cliConfigFilename, wallet stri
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

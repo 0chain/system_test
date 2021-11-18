@@ -39,7 +39,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -54,13 +54,13 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -110,7 +110,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -124,14 +124,14 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -181,7 +181,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -195,14 +195,14 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -252,7 +252,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -267,7 +267,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePathAtDest,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -281,14 +281,14 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -342,7 +342,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -357,7 +357,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 			"commit":     "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
@@ -382,7 +382,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, "Transaction verification success", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -424,7 +424,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
@@ -436,7 +436,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
@@ -458,7 +458,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -479,7 +479,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
 		// list-all
-		output, err = listAll(t, configPath, allocationID)
+		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -517,7 +517,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destpath":   "/child/",
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
@@ -533,7 +533,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destpath":   "/",
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
@@ -549,7 +549,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
@@ -570,5 +570,5 @@ func moveFileWithWallet(t *testing.T, walletName, cliConfigFilename string, para
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }

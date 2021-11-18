@@ -71,7 +71,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -94,7 +94,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -156,7 +156,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -169,7 +169,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -214,7 +214,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -227,7 +227,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
 		wait(t, 30*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -272,7 +272,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -285,7 +285,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		wait(t, 10*time.Second)
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -356,6 +356,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
+		wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -406,7 +407,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			"allocation": allocationID,
 			"size":       2 * MB,
 		})
-		output, err = updateAllocation(t, configPath, allocParams)
+		output, err = updateAllocation(t, configPath, allocParams, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
@@ -414,6 +415,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
+		wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -465,7 +467,7 @@ func TestCommonUserFunctions(t *testing.T) {
 			"expiry":     "30m",
 			"lock":       0.2,
 		})
-		output, err = updateAllocation(t, configPath, params)
+		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
@@ -496,7 +498,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationI
 		"allocation": allocationID,
 		"remotepath": remotePath + filepath.Base(filename),
 		"localpath":  filename,
-	})
+	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Equal(t, 2, len(output))
 	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
@@ -508,7 +510,7 @@ func moveAllocationFile(t *testing.T, allocationID, remotepath, destination stri
 		"allocation": allocationID,
 		"remotepath": "/" + remotepath,
 		"destpath":   "/" + destination,
-	})
+	}, true)
 	require.Nil(t, err, "error in moving the file: ", strings.Join(output, "\n"))
 }
 
@@ -517,7 +519,7 @@ func renameAllocationFile(t *testing.T, allocationID, remotepath, newName string
 		"allocation": allocationID,
 		"remotepath": "/" + remotepath,
 		"destname":   newName,
-	})
+	}, true)
 	require.Nil(t, err, "error in renaming the file: ", strings.Join(output, "\n"))
 }
 
@@ -534,12 +536,12 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, all
 		"allocation": allocationID,
 		"remotepath": remotepath,
 		"localpath":  localfile,
-	})
+	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	return localfile
 }
 
-func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -549,11 +551,16 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func updateFile(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func updateFile(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file...")
+
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox update %s --silent --wallet %s --configDir ./config --config %s",
@@ -562,7 +569,11 @@ func updateFile(t *testing.T, walletName, cliConfigFilename string, param map[st
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommandWithRetry(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
@@ -576,7 +587,7 @@ func getAllocation(t *testing.T, allocationID string) (allocation climodel.Alloc
 
 func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) ([]string, error) {
 	t.Logf("Get Allocation...")
-	output, err := cliutils.RunCommandWithRetry(t, fmt.Sprintf(
+	output, err := cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox get --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
 		allocationID,
 		escapedTestName(t)+"_wallet.json",
