@@ -269,13 +269,13 @@ jobs:
           echo "TESTS_RAN=true" >> $GITHUB_ENV
           exit $exit_code
 
-      - name: "Run CLI System Flaky Tests"
+      - name: "Run Flaky CLI System Tests"
         if: ${{ always() && env.TESTS_RAN == 'true' }}
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           cd tests/cli_tests
           ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./FLAKY_TEST_RUNNER_COMMAND.sh || true
-          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html --title "0Chain System flaky test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ env.TEST_TIME }}]"
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html --title "0Chain Flaky system test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ env.TEST_TIME }}]"
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA}/flaky ./${{ env.BRANCH }}/latest/flaky
 
       - name: "Deploy report page"
