@@ -270,6 +270,7 @@ jobs:
           exit $exit_code
 
       - name: "Run CLI System Flaky Tests"
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./FLAKY_TEST_RUNNER_COMMAND.sh || true
