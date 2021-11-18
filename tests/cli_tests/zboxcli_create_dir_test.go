@@ -259,7 +259,8 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "noleadingslash")
+		filename := "noleadingslash"
+		output, err := createDir(t, configPath, allocID, filename)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir with no leading slash must throw error explicitly to not give impression it was success
 
@@ -271,7 +272,8 @@ func TestCreateDir(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		require.Len(t, files, 0)
+		require.Len(t, files, 1)
+		require.Equal(t, filename, files[0].Name, "Directory must be created with expected name", files)
 	})
 
 	t.Run("create attempt with missing dirname param", func(t *testing.T) {
