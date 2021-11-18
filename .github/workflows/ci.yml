@@ -250,10 +250,11 @@ jobs:
           go get gotest.tools/gotestsum
           go get github.com/vakenbolt/go-test-report
           cd tests/cli_tests
-          mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}
+          mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}/flaky
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK_URL }}/dns," -i ./config/zbox_config.yaml
-          ATTEMPT_BROKEN_TESTS_FLAG=$(echo $(([[ ${GITHUB_REF#refs/heads/} == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
-          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          ATTEMPT_BROKEN_TESTS_FLAG=''
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m -run  "^Test[^___]*$" ./... -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
+          printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m -run  "^Test___Flaky.*$" ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > FLAKY_TEST_RUNNER_COMMAND.sh && chmod 777 FLAKY_TEST_RUNNER_COMMAND.sh
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
           (./zbox version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZBox Version Info:/") || true
 
@@ -267,6 +268,15 @@ jobs:
           cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
           echo "TESTS_RAN=true" >> $GITHUB_ENV
           exit $exit_code
+
+      - name: "Run Flaky CLI System Tests"
+        if: ${{ always() && env.TESTS_RAN == 'true' }}
+        shell: 'script --return --quiet --command "bash {0}"'
+        run: |
+          cd tests/cli_tests
+          ~/go/bin/gotestsum --jsonfile test-output.json --hide-summary=output --format testname --raw-command -- ./FLAKY_TEST_RUNNER_COMMAND.sh || true
+          cat test-output.json | ~/go/bin/go-test-report --groupSize 1 --output ${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html --title "0Chain Flaky system test suite [${{ env.BRANCH }}/${GITHUB_SHA:0:8}] ran against [${{ env.NETWORK_URL }}] at [${{ env.TEST_TIME }}]"
+          cp -R ./${{ env.BRANCH }}/${GITHUB_SHA}/flaky ./${{ env.BRANCH }}/latest/flaky
 
       - name: "Deploy report page"
         if: ${{ always() && env.TESTS_RAN == 'true' }}
@@ -296,7 +306,11 @@ jobs:
 
       - name: "Report Link"
         if: ${{ always() && env.TESTS_RAN == 'true' }}
-        run: echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
+        run: |
+          echo "SYSTEM TESTS REPORT LINK:"
+          echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
+          echo "FLAKY SYSTEM TESTS REPORT LINK:"
+          echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html"
 
       - name: "Tear Down 0Chain network"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
