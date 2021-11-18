@@ -372,45 +372,4 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Downloading encrypted file is not working")
-		}
-		t.Parallel()
-
-		allocSize := int64(10 * MB)
-		filesize := int64(10)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		// Upload parameters
-		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": remotepath + filepath.Base(filename),
-			"encrypt":    "",
-		})
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		// Downloading encrypted file not working
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-	})
 }
