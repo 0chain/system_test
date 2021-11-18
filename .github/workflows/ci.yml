@@ -252,7 +252,7 @@ jobs:
           cd tests/cli_tests
           mkdir -p $(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')/${GITHUB_SHA}/flaky
           sed "s,block_worker:.*,block_worker: https://${{ env.NETWORK_URL }}/dns," -i ./config/zbox_config.yaml
-          ATTEMPT_BROKEN_TESTS_FLAG=$(echo $(([[ ${GITHUB_REF#refs/heads/} == 'master' ]] && [[ '${{ github.event_name }}' == 'push' ]] && echo '') || echo ' -short'))
+          ATTEMPT_BROKEN_TESTS_FLAG=''
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m -run  "^Test[^___]*$" ./... -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > TEST_RUNNER_COMMAND.sh && chmod 777 TEST_RUNNER_COMMAND.sh
           printf '#!/bin/bash\nset -o pipefail\nCONFIG_PATH=./zbox_config.yaml go test -timeout=30m -run  "^Test___Flaky.*$" ./... '$ATTEMPT_BROKEN_TESTS_FLAG' -json -count=1 -timeout=30m | sed -r "/(=== (CONT|RUN|PAUSE).*)|(--- FAIL:.*)|(\\"Test\\":\\".*\/[pP]arallel\\")/d"' > FLAKY_TEST_RUNNER_COMMAND.sh && chmod 777 FLAKY_TEST_RUNNER_COMMAND.sh
           (./zwallet version --configDir ./config --config ./zbox_config.yaml --wallet ../ignore --silent | grep -A2 'Version info' | sed "s/Version info:/ZWallet Version Info:/") || true
@@ -307,7 +307,9 @@ jobs:
       - name: "Report Link"
         if: ${{ always() && env.TESTS_RAN == 'true' }}
         run: |
+          echo "SYSTEM TESTS REPORT LINK:
           echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
+          echo "FLAKY SYSTEM TESTS REPORT LINK:"
           echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html"
 
       - name: "Tear Down 0Chain network"
