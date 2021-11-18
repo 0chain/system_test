@@ -18,7 +18,7 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
-func TestBrokenScenarios(t *testing.T) {
+func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
@@ -79,7 +79,9 @@ func TestBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
@@ -117,7 +119,9 @@ func TestBrokenScenarios(t *testing.T) {
 		})
 
 		// Get the new Write-Pool info after upload
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		finalWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
@@ -205,6 +209,7 @@ func TestBrokenScenarios(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.4,
+			"duration":   "5m",
 		})
 		output, err = readPoolLock(t, configPath, params)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -280,5 +285,90 @@ func TestBrokenScenarios(t *testing.T) {
 			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
 			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
 		}
+	})
+
+	t.Run("update file with thumbnail", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Downloading thumbnail is not working")
+		}
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		defer func() {
+			// Delete the downloaded thumbnail file
+			err = os.Remove(thumbnailFile)
+			require.Nil(t, err)
+		}()
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Downloading thumbnail is not working")
+		}
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		thumbnail := "upload_thumbnail_test.png"
+		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
+		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
+
+		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		err = os.Remove(thumbnail)
+		require.Nil(t, err)
+
+		// Update with new thumbnail
+		thumbnail = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		err = os.Remove(thumbnail)
+		require.Nil(t, err)
+
+		createAllocationTestTeardown(t, allocationID)
 	})
 }

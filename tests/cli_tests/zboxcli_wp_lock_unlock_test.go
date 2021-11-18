@@ -27,9 +27,10 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Write Pool must not exist before allocation is created
-		output, _ = writePoolInfo(t, configPath)
-
+		output, err = writePoolInfo(t, configPath)
 		require.Len(t, output, 2)
+		require.NotNil(t, err)
+
 		// FIXME: CLI shows error requesting "read" pool info when it should show "write"
 		require.Equal(t, "Failed to get write pool info: error requesting read pool info:", output[0])
 		require.Equal(t, "consensus_failed: consensus failed on sharders", output[1])
@@ -70,7 +71,9 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Write pool balance should increment to 1
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePools := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePools)
@@ -365,7 +368,9 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		output, _ = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePools := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePools)
