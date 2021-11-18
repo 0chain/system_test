@@ -1026,15 +1026,15 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 func Test___FlakyScenariosCreateDir(t *testing.T) {
 	t.Parallel()
 
-	t.Run("create attempt with invalid dir - no leading slash", func(t *testing.T) {
+	t.Run("create dir with no leading slash should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "noleadingslash")
+		dirName := "noleadingslash"
+		output, err := createDir(t, configPath, allocID, dirName)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash must throw error explicitly to not give impression it was success
-
+		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -1043,7 +1043,8 @@ func Test___FlakyScenariosCreateDir(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		require.Len(t, files, 0)
+		require.Len(t, files, 1)
+		require.Equal(t, dirName, files[0].Name, "Directory must be created", files)
 	})
 }
 
