@@ -173,7 +173,7 @@ func TestBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
+			"lock":   0.6,
 			"size":   10485760,
 			"expire": "1h",
 		})
@@ -244,7 +244,6 @@ func TestBrokenScenarios(t *testing.T) {
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
 
 		// Download the file
-
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/" + filename,
