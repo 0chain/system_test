@@ -124,6 +124,64 @@ jobs:
           echo "Explorer docker image:  [${{ env.EXPLORER_TAG }}]"
           echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
 
+      - name: "Get CLI Cache Key"
+        run: |
+          if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZWALLET_SHA=${{ env.ZWALLET_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ env.ZBOX_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+            then
+              echo ZBOX_SHA=${{ env.ZBOX_BRANCH }} >> $GITHUB_ENV
+            else
+             echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
+          fi
+
+      - name: "Cache CLI Binaries"
+        id: cli-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            tests/cli_tests/zbox
+            tests/cli_tests/zwallet
+          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}-v2
+
+      - name: "Checkout 0wallet CLI"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.ZWALLET_BRANCH }}
+          repository: 0chain/zwalletcli
+          fetch-depth: 1
+          path: ./zwalletcli
+
+      - name: "Checkout 0box CLI"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.ZBOX_BRANCH }}
+          repository: 0chain/zboxcli
+          fetch-depth: 1
+          path: ./zboxcli
+
+      - name: "Setup Go"
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: "Build CLI Binaries"
+        if: steps.cli-cache.outputs.cache-hit != 'true'
+        run: |
+          cd zwalletcli
+          make install
+          mv zwallet ../tests/cli_tests
+          cd ../zboxcli
+          make install
+          mv zbox ../tests/cli_tests
+
       - name: "Install helm"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: azure/setup-helm@v1
@@ -185,63 +243,6 @@ jobs:
             exit 1
           fi
 
-      - name: "Get CLI Cache Key"
-        run: |
-          if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
-            then
-              echo ZWALLET_SHA=${{ env.ZWALLET_BRANCH }} >> $GITHUB_ENV
-            else
-             echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
-          fi
-
-          if [[ ${{ env.ZBOX_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
-            then
-              echo ZBOX_SHA=${{ env.ZBOX_BRANCH }} >> $GITHUB_ENV
-            else
-             echo ZBOX_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zboxcli/git/refs/heads/${{ env.ZBOX_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
-          fi
-
-      - name: "Cache CLI Binaries"
-        id: cli-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            tests/cli_tests/zbox
-            tests/cli_tests/zwallet
-          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}-v2
-
-      - name: "Checkout 0wallet CLI"
-        if: steps.cli-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ env.ZWALLET_BRANCH }}
-          repository: 0chain/zwalletcli
-          fetch-depth: 1
-          path: ./zwalletcli
-
-      - name: "Checkout 0box CLI"
-        if: steps.cli-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ env.ZBOX_BRANCH }}
-          repository: 0chain/zboxcli
-          fetch-depth: 1
-          path: ./zboxcli
-
-      - name: "Setup Go"
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-
-      - name: "Build CLI Binaries"
-        if: steps.cli-cache.outputs.cache-hit != 'true'
-        run: |
-          cd zwalletcli
-          make install
-          mv zwallet ../tests/cli_tests
-          cd ../zboxcli
-          make install
-          mv zbox ../tests/cli_tests
 
       - name: "Set up system tests"
         run: |

@@ -55,7 +55,7 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 
 		if err == nil {
 			if count > 1 {
-				t.Logf("%sCommand passed on retry [%v/%v]\n", green, count, maxAttempts)
+				t.Logf("%sCommand passed on retry [%v/%v]. Output: [%v]\n", green, count, maxAttempts, strings.Join(output, " -<NEWLINE>- "))
 			}
 			return output, nil
 		} else if count < maxAttempts {
