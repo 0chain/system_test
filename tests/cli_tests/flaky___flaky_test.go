@@ -70,7 +70,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 			"duration":   "1m",
 			"fee":        fee,
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
@@ -168,7 +168,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePool := []climodel.WritePoolInfo{}
@@ -531,7 +531,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -544,7 +544,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -606,7 +606,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get write pool info before file update
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -629,7 +629,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -979,7 +979,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		output, _ = writePoolInfo(t, configPath)
+		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -1026,7 +1026,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		// write lock pool of old owner should remain locked
 		// FIXME should this be unlocked given the change of ownership?
 		wait(t, 2*time.Minute)
-		output, _ = writePoolInfo(t, configPath)
+		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
