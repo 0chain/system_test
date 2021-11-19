@@ -79,7 +79,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -119,7 +119,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		})
 
 		// Get the new Write-Pool info after upload
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -211,7 +211,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"tokens":     0.4,
 			"duration":   "5m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

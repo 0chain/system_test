@@ -57,7 +57,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "1m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -145,7 +145,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "5m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -189,7 +189,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     -1,
 			"duration":   "5m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -233,7 +233,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     0,
 			"duration":   "5m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -276,7 +276,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"allocation": allocationID,
 			"duration":   "5m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
@@ -319,7 +319,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"allocation": allocationID,
 			"tokens":     "0.5",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'duration' flag", output[0])
@@ -358,7 +358,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "2m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -412,7 +412,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 			"tokens":     1,
 			"duration":   "10m",
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		// TODO: change if FIXME is implemented
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 

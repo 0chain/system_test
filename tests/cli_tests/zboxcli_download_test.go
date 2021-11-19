@@ -872,7 +872,7 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 		"allocation": allocationID,
 		"tokens":     tokens / 2,
 		"duration":   "10m",
-	}))
+	}), true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, "locked", output[0])

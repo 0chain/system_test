@@ -26,7 +26,7 @@ func TestAddCurator(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
 		params := createParams(map[string]interface{}{"allocation": "INVALID ALLOCATION ID", "curator": wallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
 	})
@@ -55,7 +55,7 @@ func TestAddCurator(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": anotherWallet.ClientID})
-		output, err = addCuratorWithWallet(t, anotherClientWalletName, params)
+		output, err = addCuratorWithWallet(t, anotherClientWalletName, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
 	})
@@ -77,7 +77,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
 		require.Equal(t, "Error: curator flag is missing", output[0], strings.Join(output, "\n"))
 	})
@@ -114,7 +114,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
 		wait(t, 5*time.Second)
@@ -161,7 +161,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
 		wait(t, 5*time.Second)
@@ -198,7 +198,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
 		wait(t, 5*time.Second)
@@ -236,7 +236,7 @@ func TestAddCurator(t *testing.T) {
 		require.Equal(t, 0, len(allocation.Curators), "Curator list must be empty at the beginning")
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("%s added %s as a curator to allocation %s", curatorWallet.ClientID, curatorWallet.ClientID, allocationID)
@@ -279,7 +279,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
 		wait(t, 5*time.Second)
@@ -300,7 +300,7 @@ func TestAddCurator(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": targetWallet.ClientPublicKey,
 			"new_owner":     targetWallet.ClientID,
-		}, true)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
@@ -331,7 +331,7 @@ func TestAddCurator(t *testing.T) {
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
-		output, err = addCurator(t, params)
+		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
 		wait(t, 5*time.Second)
@@ -350,11 +350,11 @@ func TestAddCurator(t *testing.T) {
 	})
 }
 
-func addCurator(t *testing.T, params string) ([]string, error) {
-	return addCuratorWithWallet(t, escapedTestName(t), params)
+func addCurator(t *testing.T, params string, retry bool) ([]string, error) {
+	return addCuratorWithWallet(t, escapedTestName(t), params, retry)
 }
 
-func addCuratorWithWallet(t *testing.T, walletName, params string) ([]string, error) {
+func addCuratorWithWallet(t *testing.T, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Adding curator...")
 	cmd := fmt.Sprintf(
 		"./zbox addcurator %s --silent --wallet %s "+
@@ -363,7 +363,11 @@ func addCuratorWithWallet(t *testing.T, walletName, params string) ([]string, er
 		walletName+"_wallet.json",
 		configPath,
 	)
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func removeCurator(t *testing.T, params string) ([]string, error) {
