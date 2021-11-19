@@ -51,7 +51,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -106,7 +106,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -161,7 +161,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -175,7 +175,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"revoke":     "",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "share not found", output[0],
@@ -228,7 +228,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath":         file,
 			"expiration-seconds": 10,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -285,7 +285,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/subfolder1",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -349,7 +349,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -413,7 +413,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -476,7 +476,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -492,7 +492,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath":          file,
 			"revoke":              "",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Share revoked for client "+clientId, strings.Join(output, "\n"),
@@ -555,7 +555,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath":          file,
 			"expiration-seconds":  10,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -622,7 +622,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -687,7 +687,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": walletOwnerModel.EncryptionPublicKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -750,7 +750,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/subfolder1",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -827,7 +827,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/subfolder2",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -874,7 +874,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/blahblah.txt",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "file_meta_error: Error getting object meta data from blobbers", output[0],
@@ -911,7 +911,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/blahblah.txt",
 		}
-		output, err = shareFile(t, sharerWallet, configPath, shareParams)
+		output, err = shareFileWithWallet(t, sharerWallet, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "file_meta_error: Error getting object meta data from blobbers", output[0],
@@ -921,8 +921,6 @@ func TestShareFile(t *testing.T) {
 	t.Run("Share file with missing allocation should fail", func(t *testing.T) {
 		t.Parallel()
 
-		walletOwner := escapedTestName(t)
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -930,7 +928,7 @@ func TestShareFile(t *testing.T) {
 		shareParams := map[string]interface{}{
 			"remotepath": "/blahblah.txt",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error: allocation flag is missing", output[0],
@@ -940,8 +938,6 @@ func TestShareFile(t *testing.T) {
 	t.Run("Share file with missing remotepath should fail", func(t *testing.T) {
 		t.Parallel()
 
-		walletOwner := escapedTestName(t)
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -949,7 +945,7 @@ func TestShareFile(t *testing.T) {
 		shareParams := map[string]interface{}{
 			"allocation": "dummy",
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error: remotepath flag is missing", output[0],
@@ -998,7 +994,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -1104,7 +1100,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -1219,7 +1215,7 @@ func TestShareFile(t *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          file,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -1341,7 +1337,7 @@ func TestShareFile(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": filename,
 		}
-		output, err = shareFile(t, walletOwner, configPath, shareParams)
+		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 
@@ -1431,36 +1427,11 @@ func TestShareFile(t *testing.T) {
 	})
 }
 
-func uploadFileForShare(t *testing.T, allocationID, wallet, localpath, remotepath string, encrypt bool) {
-	var output []string
-
-	// upload file
-	fileSize := int64(256)
-	err := createFileWithSize(localpath, fileSize)
-	require.Nil(t, err)
-
-	uploadParams := map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  localpath,
-		"remotepath": remotepath,
-	}
-
-	if encrypt {
-		uploadParams["encrypt"] = ""
-	}
-
-	output, err = uploadFileForWallet(t, wallet, configPath, uploadParams, false)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2)
-
-	expected := fmt.Sprintf(
-		"Status completed callback. Type = application/octet-stream. Name = %s",
-		filepath.Base(remotepath),
-	)
-	require.Equal(t, expected, output[1])
+func shareFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	return shareFileWithWallet(t, escapedTestName(t), cliConfigFilename, param)
 }
 
-func shareFile(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Sharing file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -1473,7 +1444,7 @@ func shareFile(t *testing.T, wallet, cliConfigFilename string, param map[string]
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func registerWalletAndFaucet(t *testing.T, configPath, wallet string) error {
+func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	output, err := registerWalletForName(t, configPath, wallet)
@@ -1482,13 +1453,6 @@ func registerWalletAndFaucet(t *testing.T, configPath, wallet string) error {
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-	return nil
-}
-
-func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
-	err := registerWalletAndFaucet(t, configPath, wallet)
-	require.Nil(t, err)
-
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,
 		"size":   10485760,
@@ -1496,7 +1460,7 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 		"parity": 1,
 		"data":   1,
 	})
-	output, err := createNewAllocationForWallet(t, wallet+"_wallet.json", configPath, allocParam)
+	output, err = createNewAllocationForWallet(t, wallet+"_wallet.json", configPath, allocParam)
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)
