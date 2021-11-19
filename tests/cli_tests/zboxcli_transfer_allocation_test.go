@@ -602,7 +602,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"tokens":     0.5,
 			"duration":   "1h",
-		}), false)
+		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "write pool lock - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0], "write pool lock - Unexpected output", strings.Join(output, "\n"))
