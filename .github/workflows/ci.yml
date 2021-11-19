@@ -2,7 +2,7 @@ name: "0Chain System Tests"
 
 env:
   DEFAULT_TAG: staging
-  DEFAULT_ZWALLET_BRANCH: 6aaae2a4b9de4ea1e502df791182395a78994a06
+  DEFAULT_ZWALLET_BRANCH: staging
   DEFAULT_ZBOX_BRANCH: staging
 
 on:

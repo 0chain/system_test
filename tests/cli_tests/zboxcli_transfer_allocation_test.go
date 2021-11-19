@@ -28,7 +28,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -92,7 +92,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -122,7 +122,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -172,7 +172,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -218,7 +218,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -273,7 +273,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -336,7 +336,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"localpath":  downloadFilePath,
 			"remotepath": remotePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output length", strings.Join(output, "\n"))
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1],
@@ -357,7 +357,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -440,7 +440,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -551,7 +551,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -719,7 +719,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -758,7 +758,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],

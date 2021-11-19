@@ -925,7 +925,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": newOwnerWallet.ClientPublicKey,
 			"new_owner":     newOwnerWallet.ClientID,
-		}, true)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
@@ -945,7 +945,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -1056,7 +1056,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -1132,7 +1132,7 @@ func Test___FlakyScenariosCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "noleadingslash")
+		output, err := createDir(t, configPath, allocID, "noleadingslash", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir with no leading slash must throw error explicitly to not give impression it was success
 
