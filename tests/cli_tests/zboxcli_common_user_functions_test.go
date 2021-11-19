@@ -54,7 +54,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -67,7 +67,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -112,7 +112,7 @@ func TestCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -125,7 +125,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
 		wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 

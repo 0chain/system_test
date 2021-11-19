@@ -75,7 +75,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -99,9 +99,15 @@ func TestFileUploadTokenMovement(t *testing.T) {
 	})
 }
 
-func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+func writePoolInfo(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Getting write pool info...")
-	return cliutils.RunCommand(t, "./zbox wp-info --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	cmd := "./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {

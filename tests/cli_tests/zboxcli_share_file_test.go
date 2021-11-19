@@ -388,7 +388,7 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 		"tokens":     0.4,
 		"duration":   "1h",
 	})
-	output, err = readPoolLockWithWallet(t, wallet, configPath, readPoolParams)
+	output, err = readPoolLockWithWallet(t, wallet, configPath, readPoolParams, true)
 	require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)
