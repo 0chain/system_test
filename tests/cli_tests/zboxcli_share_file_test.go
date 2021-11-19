@@ -380,7 +380,7 @@ func TestShareFile(t *testing.T) {
 
 		// upload file
 		file := generateRandomTestFileName(t)
-		fileSize := int64(1024000) // must upload big file to ensure has significant cost
+		fileSize := int64(102400) // this is big enough to cause problem with download
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
