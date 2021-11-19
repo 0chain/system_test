@@ -36,7 +36,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": file,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -91,7 +91,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -146,7 +146,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": file,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -212,7 +212,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": file,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -270,7 +270,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": remoteOwnerPath,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -326,7 +326,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -390,7 +390,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -453,7 +453,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -531,7 +531,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -597,7 +597,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -662,7 +662,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -727,7 +727,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": remoteOwnerPath,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -792,7 +792,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": remoteOwnerPath,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -804,7 +804,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": remoteOwnerPathSubfolder,
 			"encrypt":    "",
 		}
-		output, err = uploadFile(t, configPath, uploadParams, false)
+		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -971,7 +971,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -1085,7 +1085,7 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"remotepath": file,
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -1192,7 +1192,7 @@ func TestShareFile(t *testing.T) {
 			"encrypt":                 "",
 			"attr-who-pays-for-reads": "3rd_party",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
@@ -1322,7 +1322,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath":              filename,
 			"attr-who-pays-for-reads": "3rd_party",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, false)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(filename)), output[1])
