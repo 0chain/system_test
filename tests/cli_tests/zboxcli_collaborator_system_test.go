@@ -18,6 +18,42 @@ import (
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
 
+	t.Run("Add Collaborator _ collaborator client id must be added to file collaborators list", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
+		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
+
+		meta := getMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+	})
+
 	t.Run("Add Collaborator _ collaborator can NOT be added to a directory", func(t *testing.T) {
 		t.Parallel()
 
@@ -54,42 +90,6 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, output, 1, "Unexpected output length", strings.Join(output, "\n"))
 		expectedOutput := "add_collaborator_failed: Failed to add collaborator on all blobbers."
 		require.Equal(t, expectedOutput, output[0], "Unexpected output in add collaborator", strings.Join(output, "\n"))
-	})
-
-	t.Run("Add Collaborator _ collaborator client id must be added to file collaborators list", func(t *testing.T) {
-		t.Parallel()
-
-		collaboratorWalletName := escapedTestName(t) + "_collaborator"
-
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
-
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"collabid":   collaboratorWallet.ClientID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
-		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
-
-		meta := getMetaData(t, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
-		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 	})
 
 	t.Run("Add Collaborator _ collaborator must be able to read the file", func(t *testing.T) {
