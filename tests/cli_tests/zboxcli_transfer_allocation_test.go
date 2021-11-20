@@ -464,7 +464,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		// share publicly
-		output, err = shareFile(t, escapedTestName(t), configPath, map[string]interface{}{
+		output, err = shareFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 		})
