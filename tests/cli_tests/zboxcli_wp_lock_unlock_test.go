@@ -27,7 +27,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Write Pool must not exist before allocation is created
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, false)
 		require.Len(t, output, 2)
 		require.NotNil(t, err)
 
@@ -71,7 +71,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Write pool balance should increment to 1
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -368,7 +368,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -377,6 +377,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
 
 		// Unlock without waiting till expiration should result in error
+		require.True(t, len(writePools) >= 2, "number of write pools did not math expected")
 		customWritePoolId := writePools[0].Id
 		if customWritePoolId == allocationID {
 			customWritePoolId = writePools[1].Id

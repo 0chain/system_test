@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -69,7 +70,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 			"duration":   "1m",
 			"fee":        fee,
 		})
-		output, err = readPoolLock(t, configPath, params)
+		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
@@ -167,7 +168,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePool := []climodel.WritePoolInfo{}
@@ -530,7 +531,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 
 		// Get initial write pool
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -543,7 +544,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath)
+		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -558,6 +559,106 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
 			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
 		}
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
+		t.Parallel()
+
+		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
+		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
+		// 0.5 MBs.
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock":   "0.5",
+			"size":   10 * MB,
+			"data":   2,
+			"parity": 2,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		fileSize := int64(0.5 * MB)
+
+		// Get expected upload cost for 0.5 MB
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
+
+		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
+		wait(t, time.Minute)
+
+		// Get write pool info before file update
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		require.Equal(t, allocationID, initialWritePool[0].Id)
+		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
+		require.InEpsilonf(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
+		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
+		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
+		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+
+		remotepath := "/" + filepath.Base(localpath)
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
+
+		// Wait before fetching final write pool
+		wait(t, time.Minute)
+
+		// Get the new Write Pool info after update
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		require.Equal(t, allocationID, finalWritePool[0].Id)
+		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
+		require.InEpsilon(t, (0.5 - 2*actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
+		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
+		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
+		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
+
+		// Blobber pool balance should reduce by expected cost of 0.5 MB for each blobber
+		totalChangeInWritePool := float64(0)
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
+
+			// deduce tokens
+			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
+			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
+			assert.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
+			totalChangeInWritePool += diff
+		}
+
+		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})
 }
@@ -824,7 +925,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 			"allocation":    allocationID,
 			"new_owner_key": newOwnerWallet.ClientPublicKey,
 			"new_owner":     newOwnerWallet.ClientID,
-		}, true)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
@@ -844,7 +945,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -878,7 +979,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		output, _ = writePoolInfo(t, configPath)
+		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -925,7 +1026,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		// write lock pool of old owner should remain locked
 		// FIXME should this be unlocked given the change of ownership?
 		wait(t, 2*time.Minute)
-		output, _ = writePoolInfo(t, configPath)
+		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
@@ -955,7 +1056,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		output, err := addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"curator":    ownerWallet.ClientID,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
@@ -1032,7 +1133,7 @@ func Test___FlakyScenariosCreateDir(t *testing.T) {
 		allocID := setupAllocation(t, configPath)
 
 		dirName := "noleadingslash"
-		output, err := createDir(t, configPath, allocID, dirName)
+		output, err := createDir(t, configPath, allocID, dirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
 		output, err = listAll(t, configPath, allocID, true)

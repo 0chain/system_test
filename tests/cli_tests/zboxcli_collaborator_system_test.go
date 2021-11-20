@@ -90,7 +90,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"tokens":     0.4,
 			"duration":   "1h",
-		}))
+		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
@@ -242,7 +242,7 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"tokens":     0.4,
 			"duration":   "1h",
-		}))
+		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
