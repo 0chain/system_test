@@ -18,6 +18,44 @@ import (
 func TestCollaborator(t *testing.T) {
 	t.Parallel()
 
+	t.Run("Add Collaborator _ collaborator can NOT be added to a directory", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		dirName := "/NewFolder"
+		output, err = createDir(t, configPath, allocationID, dirName, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+
+		meta := getMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": dirName,
+			"json":       "",
+		})
+		require.Equal(t, 0, len(meta.Collaborators), "Directory collaborators list expected to be empty")
+
+		// Add collaborator to directory
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": dirName,
+		}), false)
+		require.NotNil(t, err, "Unexpected success in adding collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected output length", strings.Join(output, "\n"))
+		expectedOutput := "add_collaborator_failed: Failed to add collaborator on all blobbers."
+		require.Equal(t, expectedOutput, output[0], "Unexpected output in add collaborator", strings.Join(output, "\n"))
+	})
+
 	t.Run("Add Collaborator _ collaborator client id must be added to file collaborators list", func(t *testing.T) {
 		t.Parallel()
 
@@ -45,7 +83,7 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -78,7 +116,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -135,7 +173,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -179,7 +217,7 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -197,7 +235,7 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput = fmt.Sprintf("Collaborator %s removed successfully for the file %s", collaboratorWallet.ClientID, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		meta = getFileMetaData(t, map[string]interface{}{
+		meta = getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -229,7 +267,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -254,7 +292,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
 
-		meta = getFileMetaData(t, map[string]interface{}{
+		meta = getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -326,7 +364,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -349,7 +387,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in deleting collaborator", strings.Join(output, "\n"))
 
-		meta = getFileMetaData(t, map[string]interface{}{
+		meta = getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -395,7 +433,7 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", thirdPersonWalletAddress, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		meta := getFileMetaDataWithWallet(t, ownerWalletName, map[string]interface{}{
+		meta := getMetaDataWithWallet(t, ownerWalletName, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -446,7 +484,7 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -489,7 +527,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -532,7 +570,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -575,7 +613,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -616,7 +654,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -659,7 +697,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -707,7 +745,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -764,7 +802,7 @@ func TestCollaborator(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
 
-		meta := getFileMetaData(t, map[string]interface{}{
+		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
@@ -807,11 +845,11 @@ func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo 
 	return readPool
 }
 
-func getFileMetaData(t *testing.T, params map[string]interface{}) *climodel.FileMetaResult {
-	return getFileMetaDataWithWallet(t, escapedTestName(t), params)
+func getMetaData(t *testing.T, params map[string]interface{}) *climodel.FileMetaResult {
+	return getMetaDataWithWallet(t, escapedTestName(t), params)
 }
 
-func getFileMetaDataWithWallet(t *testing.T, walletName string, params map[string]interface{}) *climodel.FileMetaResult {
+func getMetaDataWithWallet(t *testing.T, walletName string, params map[string]interface{}) *climodel.FileMetaResult {
 	output, err := getFileMetaWithWallet(t, walletName, configPath, createParams(params), true)
 	require.Nil(t, err, "Error in getting file meta data", strings.Join(output, "\n"))
 	require.Len(t, output, 1, "Error in getting file meta data - Unexpected number of output lines", strings.Join(output, "\n"))
