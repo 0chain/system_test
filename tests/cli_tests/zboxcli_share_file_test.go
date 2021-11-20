@@ -1231,7 +1231,7 @@ func TestShareFile(t *testing.T) {
 			"tokens":     0.4,
 			"duration":   "1h",
 		})
-		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams)
+		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
@@ -1353,7 +1353,7 @@ func TestShareFile(t *testing.T) {
 			"tokens":     0.4,
 			"duration":   "1h",
 		})
-		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams)
+		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
