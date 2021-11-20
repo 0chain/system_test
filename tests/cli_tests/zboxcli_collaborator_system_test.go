@@ -725,6 +725,76 @@ func TestCollaborator(t *testing.T) {
 		expectedOutput := "Copy failed: Copy request failed. Operation failed."
 		require.Equal(t, expectedOutput, output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
+
+	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := generateRandomTestFileName(t)
+		err = createFileWithSize(localpath, 128*KB)
+		require.Nil(t, err)
+		defer os.Remove(localpath)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localpath),
+			"localpath":  localpath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, 2, len(output))
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+
+		meta := getFileMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"tokens":     0.4,
+			"duration":   "1h",
+		}), true)
+		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "locked", output[0])
+
+		readPool := getReadPoolInfo(t, allocationID)
+		require.Len(t, readPool, 1, "Read pool must exist")
+		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+
+		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  "tmp/",
+		}), true)
+		require.NotNil(t, err, "Unexpected success in downloading the file as collaborator", strings.Join(output, "\n"))
+		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		expectedOutput := "Error in file operation: File content didn't match with uploaded file"
+		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
+	})
 }
 
 func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo {
