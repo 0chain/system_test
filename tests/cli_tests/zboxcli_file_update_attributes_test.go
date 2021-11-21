@@ -261,7 +261,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		// update file attributes
-		output, err = updateFileAttributesForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
+		output, err = updateFileAttributesWithWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation":         allocationID,
 			"remotepath":         remotePath,
 			"who-pays-for-reads": "3rd_party",
@@ -359,10 +359,10 @@ func TestFileUpdateAttributes(t *testing.T) {
 }
 
 func updateFileAttributes(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return updateFileAttributesForWallet(t, cliConfigFilename, escapedTestName(t), param, retry)
+	return updateFileAttributesWithWallet(t, cliConfigFilename, escapedTestName(t), param, retry)
 }
 
-func updateFileAttributesForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateFileAttributesWithWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file attributes...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(

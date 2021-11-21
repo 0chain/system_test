@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddCurator(t *testing.T) {
+func TestAddRemoveCurator(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Add Curator _ must fail when the allocation doesn't exist ", func(t *testing.T) {
@@ -31,7 +31,7 @@ func TestAddCurator(t *testing.T) {
 		require.Contains(t, output[0], "adding curator:[txn] too less sharders to confirm it", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Curator _ must fail when the user is not the owner ", func(t *testing.T) {
+	t.Run("Add Curator _ attempt to add curator by anyone except allocation owner must fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

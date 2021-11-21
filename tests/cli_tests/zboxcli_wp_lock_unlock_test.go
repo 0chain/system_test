@@ -377,6 +377,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
 
 		// Unlock without waiting till expiration should result in error
+		require.True(t, len(writePools) >= 2, "number of write pools did not math expected")
 		customWritePoolId := writePools[0].Id
 		if customWritePoolId == allocationID {
 			customWritePoolId = writePools[1].Id
