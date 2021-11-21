@@ -255,7 +255,7 @@ func setupWallet(t *testing.T, configPath string) []string {
 }
 
 func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return createNewAllocationForWallet(t, escapedTestName(t)+"_wallet.json", cliConfigFilename, params)
+	return createNewAllocationForWallet(t, escapedTestName(t), cliConfigFilename, params)
 }
 
 func createNewAllocationForWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
@@ -263,9 +263,9 @@ func createNewAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
-		wallet,
+		wallet+"_wallet.json",
 		cliConfigFilename,
-		escapedTestName(t)+"_allocation.txt"), 3, time.Second*5)
+		wallet+"_allocation.txt"), 3, time.Second*5)
 }
 
 func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {
