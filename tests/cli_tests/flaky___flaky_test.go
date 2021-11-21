@@ -1010,7 +1010,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
 		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0],
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0],
 			"get balance - Unexpected output", strings.Join(output, "\n"))
 
 		// balance of new owner should be unchanged
