@@ -68,7 +68,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should decrement from 1.5 to 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Write pool balance should increment to 1
 		output, err = writePoolInfo(t, configPath, true)
@@ -161,7 +161,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in write pool distributed amongst all blobbers
 		params := createParams(map[string]interface{}{
@@ -177,7 +177,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *testing.T) {
@@ -205,7 +205,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in write pool should not succeed
 		params := createParams(map[string]interface{}{
@@ -221,7 +221,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.Run("Should not be able to lock zero write tokens", func(t *testing.T) {
@@ -249,7 +249,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in write pool should not succeed
 		params := createParams(map[string]interface{}{
@@ -265,7 +265,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *testing.T) {

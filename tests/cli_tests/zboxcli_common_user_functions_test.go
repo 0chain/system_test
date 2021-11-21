@@ -167,7 +167,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00[0-9] mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
 	})
