@@ -576,6 +576,10 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 }
 
 func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+	return setupAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, extraParams...)
+}
+
+func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 1.0
 	// Then create new allocation
 	allocParam := map[string]interface{}{
@@ -598,13 +602,13 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 		}
 	}
 	// First create a wallet and run faucet command
-	output, err := registerWallet(t, cliConfigFilename)
+	output, err := registerWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, cliConfigFilename, faucetTokens)
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-	output, err = createNewAllocation(t, cliConfigFilename, createParams(allocParam))
+	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(allocParam))
 	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
 
 	// Get the allocation ID and return it

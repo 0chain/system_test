@@ -1022,7 +1022,10 @@ func TestShareFile(t *testing.T) {
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, file)
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": file,
+		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -1128,7 +1131,10 @@ func TestShareFile(t *testing.T) {
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, file)
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": file,
+		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -1256,7 +1262,10 @@ func TestShareFile(t *testing.T) {
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, file)
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": file,
+		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -1378,7 +1387,10 @@ func TestShareFile(t *testing.T) {
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, filename)
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": filename,
+		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -1460,7 +1472,9 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 		"parity": 1,
 		"data":   1,
 	})
-	output, err = createNewAllocationForWallet(t, wallet+"_wallet.json", configPath, allocParam)
+
+	output, err = createNewAllocationForWallet(t, wallet, configPath, allocParam)
+
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)

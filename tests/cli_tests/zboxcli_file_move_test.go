@@ -468,11 +468,11 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		)
 		require.Equal(t, expected, output[1])
 
-		output, err = moveFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
+		output, err = moveFileWithWallet(t, nonAllocOwnerWallet, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
@@ -556,7 +556,11 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 }
 
-func moveFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
+func moveFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+	return moveFileWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func moveFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Moving file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -566,5 +570,9 @@ func moveFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map
 		cliConfigFilename,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
