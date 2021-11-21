@@ -524,16 +524,13 @@ func createFileWithSize(name string, size int64) error {
 }
 
 func generateRandomTestFileName(t *testing.T) string {
-	path := os.TempDir()
-	if !strings.HasSuffix(path, "/") {
-		path += "/"
-	}
+	path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
 
 	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
 	// consensus fails. So we are generating files with random (but short)
 	// name here.
 	randomFilename := cliutils.RandomAlphaNumericString(10)
-	return fmt.Sprintf("%s%s_test.txt", path, randomFilename)
+	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {

@@ -108,9 +108,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	wait(t, 30*time.Second) // TODO replace with poller
+	return readPoolInfoWithwallet(t, escapedTestName(t), cliConfigFilename, allocationID)
+}
+
+func readPoolInfoWithwallet(t *testing.T, wallet, cliConfigFilename, allocationID string) ([]string, error) {
+	time.Sleep(30 * time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
-	return cliutils.RunCommand(t, "./zbox rp-info --allocation "+allocationID+" --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	return cliutils.RunCommand(t, "./zbox rp-info --allocation "+allocationID+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
@@ -127,9 +131,18 @@ func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params stri
 	}
 }
 
-func getDownloadCostInUnit(t *testing.T, cliConfigFilename, allocationID, remotepath string) ([]string, error) {
+func getDownloadCost(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return getDownloadCostWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
+}
+
+func getDownloadCostWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Getting download cost...")
-	return cliutils.RunCommand(t, "./zbox get-download-cost --allocation "+allocationID+" --remotepath "+remotepath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	cmd := fmt.Sprintf("./zbox get-download-cost %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func unitToZCN(unitCost float64, unit string) float64 {
