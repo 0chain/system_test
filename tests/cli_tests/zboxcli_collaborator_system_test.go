@@ -181,7 +181,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = shareFile(t, collaboratorWalletName, configPath, map[string]interface{}{
+		output, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 		})
@@ -372,7 +372,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = shareFile(t, collaboratorWalletName, configPath, map[string]interface{}{
+		output, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 		})
@@ -394,7 +394,7 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
 
-		output, err = shareFile(t, collaboratorWalletName, configPath, map[string]interface{}{
+		output, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 		})
