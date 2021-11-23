@@ -53,7 +53,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Use sp-info to check the staked tokens in blobber's stake pool
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{

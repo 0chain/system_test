@@ -51,7 +51,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
@@ -108,7 +108,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, fileSize)
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
 		wait(t, 30*time.Second)
@@ -167,7 +167,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -212,14 +212,22 @@ func TestCommonUserFunctions(t *testing.T) {
 	})
 }
 
-func uploadRandomlyGeneratedFile(t *testing.T, allocationID string, fileSize int64) string {
+func uploadRandomlyGeneratedFile(t *testing.T, allocationID, remotePath string, fileSize int64) string {
+	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize)
+}
+
+func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationID, remotePath string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
 
-	output, err := uploadFile(t, configPath, map[string]interface{}{
+	if !strings.HasSuffix(remotePath, "/") {
+		remotePath += "/"
+	}
+
+	output, err := uploadFileForWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
-		"remotepath": "/",
+		"remotepath": remotePath + filepath.Base(filename),
 		"localpath":  filename,
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -247,34 +255,21 @@ func renameAllocationFile(t *testing.T, allocationID, remotepath, newName string
 }
 
 func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath string, size int64) string {
+	return updateFileWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, size)
+}
+
+func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, allocationID, remotepath string, size int64) string {
 	localfile := generateRandomTestFileName(t)
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
 
-	output, err := updateFile(t, configPath, map[string]interface{}{
+	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remotepath,
 		"localpath":  localfile,
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	return localfile
-}
-
-func moveFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	t.Logf("Moving file...")
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox move %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
 }
 
 func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
@@ -295,13 +290,17 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 }
 
 func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+	return updateFileWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file...")
 
 	p := createParams(param)
 	cmd := fmt.Sprintf(
 		"./zbox update %s --silent --wallet %s --configDir ./config --config %s",
 		p,
-		escapedTestName(t)+"_wallet.json",
+		walletName+"_wallet.json",
 		cliConfigFilename,
 	)
 

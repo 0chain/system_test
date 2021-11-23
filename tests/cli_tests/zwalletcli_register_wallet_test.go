@@ -134,7 +134,8 @@ func verifyTransaction(t *testing.T, cliConfigFilename, txn string) ([]string, e
 }
 
 func escapedTestName(t *testing.T) string {
-	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-",
-		"<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-", "?", "-")
+	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
+		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
+		"?", "-")
 	return replacer.Replace(t.Name())
 }

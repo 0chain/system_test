@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -24,6 +25,92 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	require.Nil(t, err)
 
 	t.Parallel()
+
+	// The test is failing due to a possible bug.
+	// When owner downloads the file the cost is deduced from the read pool,
+	// But it seems the collaborators can download the file for free
+	t.Run("Add Collaborator _ file owner must pay for collaborators' reads", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Read pool balance is not being updated at all.")
+		}
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 4 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 1*MB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+
+		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
+		expectedDownloadCost := ConvertToValue(expectedDownloadCostInZCN)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+
+		meta := getMetaData(t, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		})
+		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
+
+		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"tokens":     0.4,
+			"duration":   "1h",
+		}), true)
+		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "locked", output[0])
+
+		readPool := getReadPoolInfo(t, allocationID)
+		require.Len(t, readPool, 1, "Read pool must exist")
+		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+
+		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
+		defer os.Remove("tmp" + remotepath)
+		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
+		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
+
+		// Wait for read markers to be redeemed
+		wait(t, 5*time.Second)
+
+		readPool = getReadPoolInfo(t, allocationID)
+		require.Len(t, readPool, 1, "Read pool must exist")
+		// expected download cost times to the number of blobbers
+		expectedPoolBalance := ConvertToValue(0.4) - int64(len(readPool[0].Blobber))*expectedDownloadCost
+		require.InEpsilon(t, expectedPoolBalance, readPool[0].Balance, 0.000001, "Read Pool balance must be equal to (initial balace-download cost)")
+		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool[0].Balance)
+	})
 
 	t.Run("Send with description", func(t *testing.T) {
 		if testing.Short() {
@@ -177,7 +264,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
+			"lock":   0.6,
 			"size":   10485760,
 			"expire": "1h",
 		})
@@ -238,7 +325,10 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			t.Logf("Blobber [%v] balance is [%v]", i, intToZCN(initialReadPool[0].Blobber[i].Balance))
 		}
 
-		output, err = getDownloadCostInUnit(t, configPath, allocationID, "/"+filename)
+		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filename,
+		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
@@ -248,7 +338,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
 
 		// Download the file
-
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/" + filename,
