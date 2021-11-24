@@ -868,22 +868,6 @@ func Test___FlakyScenariosSendAndBalance(t *testing.T) {
 	})
 }
 
-func Test___FlakyScenariosUpdateAllocation(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Cancel Allocation Should Work when blobber fails challenges", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-
-		output, err := cancelAllocation(t, configPath, allocationID, true)
-
-		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`), output[0])
-	})
-}
-
 func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 	t.Parallel()
 
@@ -1105,79 +1089,12 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 	})
 }
 
-func Test___FlakyScenariosCreateDir(t *testing.T) {
-	t.Parallel()
-
-	t.Run("create dir with no leading slash should work", func(t *testing.T) {
-		t.Parallel()
-
-		allocID := setupAllocation(t, configPath)
-
-		dirName := "noleadingslash"
-		output, err := createDir(t, configPath, allocID, dirName, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
-		output, err = listAll(t, configPath, allocID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 1)
-		require.Equal(t, dirName, files[0].Name, "Directory must be created", files)
-	})
-}
-
 func Test___FlakyScenariosDownload(t *testing.T) {
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
 	t.Parallel()
-
-	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Downloading encrypted file is not working")
-		}
-		t.Parallel()
-
-		allocSize := int64(10 * MB)
-		filesize := int64(10)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		// Upload parameters
-		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": remotepath + filepath.Base(filename),
-			"encrypt":    "",
-		})
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		// Downloading encrypted file not working
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
 		t.Parallel()
