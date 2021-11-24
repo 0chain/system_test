@@ -55,7 +55,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		lockTimer := time.NewTimer(time.Minute)
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -110,7 +110,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, wantInterestEarned, statsAfterExpire.Stats[0].TokensEarned)
 		require.Equal(t, int64(tokensToLock*1e10), statsAfterExpire.Stats[0].Balance)
 
-		wait(t, time.Second*5) // Sleep to let lock try to earn interest after has expired.
+		cliutil.Wait(t, time.Second*5) // Sleep to let lock try to earn interest after has expired.
 
 		// unlock
 		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
@@ -175,7 +175,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.800000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance after first lock.
 		output, err = getBalance(t, configPath)
@@ -208,7 +208,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance after second lock.
 		output, err = getBalance(t, configPath)
@@ -288,7 +288,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.951123) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -348,7 +348,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.750000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -411,7 +411,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.250000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -472,7 +472,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (0.000000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -804,7 +804,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -867,7 +867,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		lockTimer := time.NewTimer(time.Minute)
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
-		time.Sleep(time.Second)
+		cliutil.Wait(t, time.Second)
 
 		// Get balance BEFORE locked tokens expire.
 		output, err = getBalance(t, configPath)
@@ -935,7 +935,7 @@ func unlockInterestForWallet(t *testing.T, wallet, cliConfigFilename, params str
 }
 
 func getLockedTokens(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second)
+	cliutil.Wait(t, 5*time.Second)
 	return cliutil.RunCommand(t, "./zwallet getlockedtokens --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 

@@ -236,7 +236,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error extracting auth token")
 		require.NotEqual(t, "", authTicket)
 
-		time.Sleep(10 * time.Second)
+		cliutils.Wait(t, 10*time.Second)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -563,7 +563,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error extracting auth token")
 		require.NotEqual(t, "", authTicket)
 
-		time.Sleep(10 * time.Second)
+		cliutils.Wait(t, 10*time.Second)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)

@@ -396,7 +396,7 @@ func TestFileStats(t *testing.T) {
 		// update size for the file
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+fname, int64(1*MB))
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		// fetch file stats after update
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

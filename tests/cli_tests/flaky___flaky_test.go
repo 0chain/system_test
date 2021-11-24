@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/assert"
@@ -75,7 +77,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -106,7 +108,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 		require.Equal(t, "unlocked", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -175,7 +177,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &writePool)
 		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -203,7 +205,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -253,7 +255,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 
 		lockTimer := time.NewTimer(time.Minute)
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
@@ -289,7 +291,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -350,7 +352,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		stakePoolID := strings.Fields(output[0])[4]
 		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -376,7 +378,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -429,7 +431,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -479,7 +481,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -530,7 +532,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
-		wait(t, 10*time.Second)
+		cliutils.Wait(t, 10*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -543,7 +545,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
-		wait(t, 10*time.Second)
+		cliutils.Wait(t, 10*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -603,7 +605,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
 		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 
 		// Get write pool info before file update
 		output, err = writePoolInfo(t, configPath, true)
@@ -626,7 +628,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
 		output, err = writePoolInfo(t, configPath, true)
@@ -730,7 +732,7 @@ func Test___FlakyScenariosFileStats(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		// get file stats after download
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -798,7 +800,7 @@ func Test___FlakyScenariosSendAndBalance(t *testing.T) {
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
-		wait(t, time.Minute*2)
+		cliutils.Wait(t, time.Minute*2)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -990,7 +992,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 
 		// write lock pool of old owner should remain locked
 		// FIXME should this be unlocked given the change of ownership?
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))

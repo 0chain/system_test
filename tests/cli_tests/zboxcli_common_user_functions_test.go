@@ -53,7 +53,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
-		wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -66,7 +66,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
-		wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -111,7 +111,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
-		wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -124,7 +124,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
-		wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -343,9 +343,4 @@ func ConvertToToken(value int64) float64 {
 // ConvertToValue converts ZCN tokens to value
 func ConvertToValue(token float64) int64 {
 	return int64(token * float64(TOKEN_UNIT))
-}
-
-func wait(t *testing.T, duration time.Duration) {
-	t.Logf("Waiting %s...", duration)
-	time.Sleep(duration)
 }

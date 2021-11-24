@@ -92,7 +92,7 @@ func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]stri
 }
 
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second)
+	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 

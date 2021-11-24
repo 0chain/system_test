@@ -112,7 +112,7 @@ func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]strin
 }
 
 func readPoolInfoWithwallet(t *testing.T, wallet, cliConfigFilename, allocationID string) ([]string, error) {
-	time.Sleep(30 * time.Second) // TODO replace with poller
+	cliutils.Wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand(t, "./zbox rp-info --allocation "+allocationID+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

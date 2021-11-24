@@ -102,7 +102,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 
 		// Wait for read markers to be redeemed
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		readPool = getReadPoolInfo(t, allocationID)
 		require.Len(t, readPool, 1, "Read pool must exist")
