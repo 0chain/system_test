@@ -186,11 +186,10 @@ func TestUpdateAllocation(t *testing.T) {
 
 		output, err := cancelAllocation(t, configPath, allocationID, false)
 
-		require.NotNil(t, err, "expected error when canceling allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		// FIXME; note incorrect "error creating" error message: should be "error updating"
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to "+
-			"confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Nil(t, err, "unexpected error when canceling allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "unexpected output length", strings.Join(output, "\n"))
+		require.Regexp(t, "Allocation canceled with txId : [0-9a-f]+", output[0],
+			"cancel allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update

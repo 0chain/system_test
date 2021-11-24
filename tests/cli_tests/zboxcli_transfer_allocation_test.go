@@ -178,11 +178,10 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// FIXME this does not work at the moment. Also error is not correct.
 		output, err = cancelAllocation(t, configPath, allocationID, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "cancel allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "cancel allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, "Allocation canceled with txId : [0-9a-f]+", output[0],
 			"cancel allocation - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -193,7 +192,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		// FIXME should this fail?
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,
 			"new_owner_key": newOwnerWallet.ClientPublicKey,
