@@ -147,7 +147,7 @@ jobs:
           path: |
             tests/cli_tests/zbox
             tests/cli_tests/zwallet
-          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}-v2
+          key: cli-cache-${{ runner.os }}-${{ env.ZWALLET_SHA }}-${{ env.ZBOX_SHA }}-v3
 
       - name: "Checkout 0wallet CLI"
         if: steps.cli-cache.outputs.cache-hit != 'true'
