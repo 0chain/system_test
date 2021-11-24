@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -147,7 +148,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		require.Equal(t, cfgBefore[configKey], cfgAfter[configKey], "invalid value %s for %s should not be set", newValue, configKey)
 	})
 
-	t.Run("update bt non-smartcontract owner should fail", func(t *testing.T) {
+	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		t.Parallel()
 
 		configKey := "min_lock"
@@ -256,5 +257,5 @@ func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[strin
 		configPath,
 	)
 
-	return cliutils.RunCommandWithoutRetry(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

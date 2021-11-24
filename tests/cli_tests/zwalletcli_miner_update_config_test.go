@@ -217,5 +217,5 @@ func updateMinerSCConfig(t *testing.T, walletName string, param map[string]inter
 		configPath,
 	)
 
-	return cliutils.RunCommandWithoutRetry(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }

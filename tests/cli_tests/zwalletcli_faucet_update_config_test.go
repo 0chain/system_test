@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -215,5 +216,5 @@ func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]inte
 		configPath,
 	)
 
-	return cliutils.RunCommandWithoutRetry(cmd)
+	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
