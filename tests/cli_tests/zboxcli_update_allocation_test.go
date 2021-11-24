@@ -179,21 +179,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Cancel Allocation Should Work when blobber fails challenges", func(t *testing.T) {
-		t.Skip("allocations can only be canceled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-
-		output, err := cancelAllocation(t, configPath, allocationID, true)
-
-		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`), output[0])
-	})
-
 	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-		t.Skip("allocations can only be canceled if 20% of blobbers fail 20 challenges, which we can't force on a vanilla chain as a black box test")
 		t.Parallel()
 
 		var otherAllocationID string
@@ -212,7 +198,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"but got 0/2 sharders", output[len(output)-1])
 	})
 
-	t.Run("Cancel_allocation_immediately_should_succeed", func(t *testing.T) {
+	t.Run("Cancel allocation immediately should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
