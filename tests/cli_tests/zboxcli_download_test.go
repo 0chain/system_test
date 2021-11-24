@@ -242,7 +242,7 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[len(output)-1])
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+		downloadedFileChecksum := generateChecksum(t, strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename))
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
