@@ -1125,9 +1125,7 @@ func Test___FlakyScenariosDownload(t *testing.T) {
 		require.Equal(t, expected, output[0])
 	})
 
-	// Getting 503 error sometimes
-	// https://0chain.slack.com/archives/C02AV6MKT36/p1637794370370700?thread_ts=1637258601.300400&cid=C02AV6MKT36
-	//
+	// Getting 502 gateway as error sometimes
 	// originally at zwalletcli_miner_update_config_test.go
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		t.Parallel()
