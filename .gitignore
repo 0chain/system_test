@@ -19,6 +19,7 @@
 vendor/
 
 # Temp test output
+tests/cli_tests/config/sc_owner_wallet.json
 tests/cli_tests/config/*wallet.json
 tests/cli_tests/config/*allocation.txt
 tests/cli_tests/tmp/

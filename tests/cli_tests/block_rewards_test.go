@@ -373,10 +373,6 @@ func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func getMinerSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand(t, "./zwallet mn-config --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
 func getSharders(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
