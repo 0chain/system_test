@@ -2,13 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepairAllocation(t *testing.T) {
@@ -50,7 +51,7 @@ func TestRepairAllocation(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired:  %s", "1"), output[1])
 
 		fileBase := filepath.Base(file)
-		_, err = os.Stat("tmp_repair/"+fileBase)
+		_, err = os.Stat("tmp_repair/" + fileBase)
 		require.Nil(t, err)
 	})
 }
