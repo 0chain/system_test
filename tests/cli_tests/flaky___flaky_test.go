@@ -1124,4 +1124,27 @@ func Test___FlakyScenariosDownload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 	})
+
+	// Getting 503 error sometimes
+	// https://0chain.slack.com/archives/C02AV6MKT36/p1637794370370700?thread_ts=1637258601.300400&cid=C02AV6MKT36
+	//
+	// originally at zwalletcli_miner_update_config_test.go
+	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
+		t.Parallel()
+
+		configKey := "interest_rate"
+		newValue := "0.1"
+
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		})
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+	})
 }
