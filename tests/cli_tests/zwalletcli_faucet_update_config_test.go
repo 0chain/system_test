@@ -109,7 +109,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update bt non-smartcontract owner should fail", func(t *testing.T) {
+	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		t.Parallel()
 
 		configKey := "max_pour_amount"
