@@ -82,6 +82,11 @@ func RandomAlphaNumericString(n int) string {
 	return string(ret)
 }
 
+func Wait(t *testing.T, duration time.Duration) {
+	t.Logf("Waiting %s...", duration)
+	time.Sleep(duration)
+}
+
 func sanitizeOutput(rawOutput []byte) []string {
 	output := strings.Split(string(rawOutput), "\n")
 	var sanitizedOutput []string

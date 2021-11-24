@@ -422,7 +422,7 @@ func listAll(t *testing.T, cliConfigFilename, allocationID string, retry bool) (
 }
 
 func listAllWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
-	time.Sleep(5 * time.Second)
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing all...")
 	cmd := "./zbox list-all --silent --allocation " + allocationID +
 		" --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
