@@ -16,7 +16,8 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
-		// Cannot be run in parallel as it alters config
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}

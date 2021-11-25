@@ -17,7 +17,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should allow update of min_lock", func(t *testing.T) {
-		// Cannot be run in parallel as it alters config
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -115,16 +116,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = getInterestPoolSCConfig(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfgBefore := map[string]string{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			cfgBefore[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-		}
-
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
@@ -133,18 +124,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-
-		output, err = getInterestPoolSCConfig(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfgAfter := map[string]string{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			cfgAfter[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-		}
-
-		require.Equal(t, cfgBefore[configKey], cfgAfter[configKey], "invalid value %s for %s should not be set", newValue, configKey)
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
