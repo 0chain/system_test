@@ -215,5 +215,5 @@ func updateVestingPoolSCConfig(t *testing.T, walletName string, param map[string
 		configPath,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	return cliutils.RunCommandWithoutRetry(cmd)
 }

@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -257,5 +256,5 @@ func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[strin
 		configPath,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	return cliutils.RunCommandWithoutRetry(cmd)
 }
