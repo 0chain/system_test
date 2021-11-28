@@ -397,7 +397,7 @@ func getMinersList(t *testing.T) *climodel.NodeList {
 
 func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	// Get MinerSC Global Config
-	output, err := getMinerSCConfig(t, configPath)
+	output, err := getMinerSCConfig(t, configPath, true)
 	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 

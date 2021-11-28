@@ -345,7 +345,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "5m",
+			"expire": "30m",
 			"size":   "1024",
 			"lock":   "0.5",
 		})
@@ -360,7 +360,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     1,
-			"duration":   "2m",
+			"duration":   "30m",
 		})
 		output, err = writePoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
