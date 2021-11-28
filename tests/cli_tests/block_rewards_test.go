@@ -40,7 +40,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Get MinerSC Global Config
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
@@ -214,7 +214,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Get MinerSC Global Config
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
