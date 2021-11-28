@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
-	cliutil "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
@@ -33,7 +33,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = getFaucetSCConfig(t, configPath)
+		output, err = getFaucetSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -49,7 +49,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			})
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -59,13 +59,13 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
-		output, err = getFaucetSCConfig(t, configPath)
+		output, err = getFaucetSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -103,7 +103,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -122,7 +122,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -148,7 +148,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -171,7 +171,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -194,19 +194,26 @@ func TestFaucetUpdateConfig(t *testing.T) {
 
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 }
 
-func getFaucetSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getFaucetSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Retrieving faucet config...")
-	return cliutil.RunCommandWithoutRetry("./zwallet fc-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+
+	cmd := "./zwallet fc-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}) ([]string, error) {
+func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating faucet config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -216,5 +223,9 @@ func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]inte
 		configPath,
 	)
 
-	return cliutils.RunCommandWithoutRetry(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

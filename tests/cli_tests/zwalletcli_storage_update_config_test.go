@@ -33,7 +33,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = getStorageSCConfig(t, configPath)
+		output, err = getStorageSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -49,7 +49,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			})
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -59,13 +59,13 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
-		output, err = getStorageSCConfig(t, configPath)
+		output, err = getStorageSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -103,7 +103,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -122,7 +122,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -148,7 +148,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -171,7 +171,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -194,19 +194,26 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_read_price",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 }
 
-func getStorageSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getStorageSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Retrieving storage config...")
-	return cliutils.RunCommand(t, "./zwallet sc-config --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+
+	cmd := "./zwallet sc-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func updateStorageSCConfig(t *testing.T, walletName string, param map[string]interface{}) ([]string, error) {
+func updateStorageSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating storage config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -216,5 +223,9 @@ func updateStorageSCConfig(t *testing.T, walletName string, param map[string]int
 		configPath,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

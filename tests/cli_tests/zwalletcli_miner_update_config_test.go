@@ -33,7 +33,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -49,7 +49,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 			output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			})
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			// FIXME should say miner instead of storagesc
@@ -60,14 +60,14 @@ func TestMinerUpdateConfig(t *testing.T) {
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		// FIXME should say miner instead of storagesc
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -105,7 +105,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -124,7 +124,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		output, err = updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -150,7 +150,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -173,7 +173,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -196,19 +196,26 @@ func TestMinerUpdateConfig(t *testing.T) {
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "interest_rate",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 }
 
-func getMinerSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getMinerSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Retrieving miner config...")
-	return cliutils.RunCommand(t, "./zwallet mn-config --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+
+	cmd := "./zwallet mn-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}) ([]string, error) {
+func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating miner config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -218,5 +225,9 @@ func updateMinerSCConfig(t *testing.T, walletName string, param map[string]inter
 		configPath,
 	)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

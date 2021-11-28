@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
-	cliutil "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
@@ -41,7 +41,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = getInterestPoolSCConfig(t, configPath)
+		output, err = getInterestPoolSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -64,7 +64,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValueFormatted,
-			})
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -74,13 +74,13 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValueFormatted,
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
-		output, err = getInterestPoolSCConfig(t, configPath)
+		output, err = getInterestPoolSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -119,7 +119,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -139,7 +139,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
@@ -166,7 +166,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		})
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -190,7 +190,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -213,19 +213,26 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "min_lock",
-		})
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 }
 
-func getInterestPoolSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getInterestPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Retrieving interest pool config...")
-	return cliutil.RunCommandWithoutRetry("./zwallet ip-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+
+	cmd := "./zwallet ip-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}) ([]string, error) {
+func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating interest pool config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -235,5 +242,9 @@ func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[strin
 		configPath,
 	)
 
-	return cliutils.RunCommandWithoutRetry(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
