@@ -82,11 +82,11 @@ func TestRegisterWallet(t *testing.T) {
 }
 
 func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
-	t.Logf("Registering wallet...")
 	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
 func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]string, error) {
+	t.Logf("Registering wallet...")
 	return cliutils.RunCommand(t, "./zbox register --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

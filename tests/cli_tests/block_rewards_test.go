@@ -40,7 +40,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Get MinerSC Global Config
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
@@ -214,7 +214,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Get MinerSC Global Config
-		output, err = getMinerSCConfig(t, configPath)
+		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
@@ -371,10 +371,6 @@ func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
 
 func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
-func getMinerSCConfig(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand(t, "./zwallet mn-config --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getSharders(t *testing.T, cliConfigFilename string) ([]string, error) {
