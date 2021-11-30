@@ -81,9 +81,9 @@ func TestRepairAllocation(t *testing.T) {
 
 		// deleting the file in single blobber
 		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": file,
-			"blobber_url":   allocation.Blobbers[1].BaseUrl,
+			"allocation":  allocationID,
+			"remotepath":  file,
+			"blobber_url": allocation.Blobbers[1].BaseUrl,
 		})
 		output, err = deleteFile(t, walletOwner, params, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -123,8 +123,8 @@ func TestRepairAllocation(t *testing.T) {
 		err = createFileWithSize(file2, file2Size)
 		require.Nil(t, err)
 
-		files:= []string{file, file2}
-		_ := uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
+		files := []string{file, file2}
+		uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
 
 		// now try to repair allocation to different folder
 		// Create a folder to keep all the generated files to be uploaded
@@ -169,8 +169,8 @@ func TestRepairAllocation(t *testing.T) {
 		err = createFileWithSize(file2, file2Size)
 		require.Nil(t, err)
 
-		files:= []string{file2}
-		_ := uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
+		files := []string{file2}
+		uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
 
 		// now try to repair allocation to different folder
 		// Create a folder to keep all the generated files to be uploaded
@@ -221,7 +221,7 @@ func TestRepairAllocation(t *testing.T) {
 	})
 }
 
-func uploadAndDeleteInSingleBlobber(t *testing.T, walletOwner, allocationID string, files []string) error {
+func uploadAndDeleteInSingleBlobber(t *testing.T, walletOwner, allocationID string, files []string) {
 	for _, file := range files {
 		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -248,7 +248,6 @@ func uploadAndDeleteInSingleBlobber(t *testing.T, walletOwner, allocationID stri
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("%s deleted", file), output[1])
 	}
-	return nil
 }
 
 func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
