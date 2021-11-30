@@ -2,19 +2,22 @@ package cli_tests
 
 import (
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepairAllocation(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Repair not required", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -51,6 +54,8 @@ func TestRepairAllocation(t *testing.T) {
 	})
 
 	t.Run("Attempt file repair on single file that needs repaired", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocationWithParity(t, configPath, walletOwner, 3, 3)
 
@@ -102,6 +107,8 @@ func TestRepairAllocation(t *testing.T) {
 	})
 
 	t.Run("Attempt file repair on multiple files that needs repaired", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocationWithParity(t, configPath, walletOwner, 3, 3)
 
@@ -130,12 +137,14 @@ func TestRepairAllocation(t *testing.T) {
 			"rootpath":   "tmp_repair/",
 		})
 
-		output, err := repairAllocation(t, walletOwner, configPath, params, false)
+		output, err := repairAllocation(t, walletOwner, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired:  %s", "2"), output[len(output)-1])
 	})
 
 	t.Run("Attempt file repair on file that does need repaired with a file that does not need repaired", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocationWithParity(t, configPath, walletOwner, 3, 3)
 
@@ -174,12 +183,14 @@ func TestRepairAllocation(t *testing.T) {
 			"rootpath":   "tmp_repair/",
 		})
 
-		output, err = repairAllocation(t, walletOwner, configPath, params, false)
+		output, err = repairAllocation(t, walletOwner, configPath, params, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired:  %s", "1"), output[len(output)-1])
 	})
 
 	t.Run("Don't supply repair path", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -194,6 +205,8 @@ func TestRepairAllocation(t *testing.T) {
 	})
 
 	t.Run("Don't supply root path", func(t *testing.T) {
+		t.Parallel()
+
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -240,7 +253,7 @@ func uploadAndDeleteInSingleBlobber(t *testing.T, walletOwner, allocationID stri
 
 func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Repairing allocation...")
-	cmd := fmt.Sprintf("./zbox --silent start-repair %s --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	cmd := fmt.Sprintf("./zbox start-repair --silent %s --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
