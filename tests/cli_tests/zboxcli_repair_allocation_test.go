@@ -48,7 +48,7 @@ func TestRepairAllocation(t *testing.T) {
 			"rootpath":   "tmp_repair/",
 		})
 
-		output, err = repairAllocation(t, walletOwner, configPath, params, false)
+		output, _ = repairAllocation(t, walletOwner, configPath, params, false)
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired:  0"), output[0])
 	})
@@ -124,7 +124,7 @@ func TestRepairAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		files:= []string{file, file2}
-		uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
+		_ := uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
 
 		// now try to repair allocation to different folder
 		// Create a folder to keep all the generated files to be uploaded
@@ -170,7 +170,7 @@ func TestRepairAllocation(t *testing.T) {
 		require.Nil(t, err)
 
 		files:= []string{file2}
-		uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
+		_ := uploadAndDeleteInSingleBlobber(t, walletOwner, allocationID, files)
 
 		// now try to repair allocation to different folder
 		// Create a folder to keep all the generated files to be uploaded
