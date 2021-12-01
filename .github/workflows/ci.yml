@@ -1,10 +1,5 @@
 name: "0Chain System Tests"
 
-env:
-  DEFAULT_TAG: staging
-  DEFAULT_ZWALLET_BRANCH: staging
-  DEFAULT_ZBOX_BRANCH: staging
-
 on:
   push:
   workflow_dispatch:
@@ -70,9 +65,9 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 40
     steps:
-
-      - name: "Checkout System Tests"
-        uses: actions/checkout@v2
-
-      - name: "System tests"
+      - name: "Run System tests"
         uses: 0chain/system_test@feature/composite-action
+        with:
+          smart_contract_owner: ${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}

@@ -1,5 +1,9 @@
 name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
+env:
+  DEFAULT_TAG: staging
+  DEFAULT_ZWALLET_BRANCH: staging
+  DEFAULT_ZBOX_BRANCH: staging
 inputs:
   smart_contract_owner:
     description: 'blah'
