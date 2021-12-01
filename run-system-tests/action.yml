@@ -1,36 +1,41 @@
 name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
 inputs:
-  smart_contract_owner:
-    description: 'blah'
-    default: "default-remove"
+  system_tests_branch:
     required: true
-  svc_account_secret:
-    description: 'blah'
-    default: "default-remove"
+    description: 'System tests branch to run'
+    default: 'master'
+  network:
     required: true
+    description: 'Network to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
   zbox_cli_branch:
+    required: true
     description: '0Box CLI (branch or commit SHA) which the tests will use'
     default: 'staging'
-    required: true
   zwallet_cli_branch:
+    required: true
     description: '0Wallet CLI (branch or commit SHA) which the tests will use'
     default: 'staging'
+  smart_contract_owner:
     required: true
-  existing_network:
-    description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
-    default: "default-remove"
-    required: true
+    description: 'smart contract owner wallet, used in smart contract config tests'
+  svc_account_secret:
+    required: false
+    description: 'secret used to publish test results'
+
 runs:
   using: "composite"
   steps:
     - name: "Checkout System Tests"
       uses: actions/checkout@v2
+      with:
+        repository: "0chain/system_test"
+        ref: ${{ inputs.system_tests_branch }}
 
     - name: "Config: Run tests against 0Chain network"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        echo "NETWORK_URL=$(echo ${{ inputs.existing_network }})" >> $GITHUB_ENV
+        echo "NETWORK_URL=$(echo ${{ inputs.network }})" >> $GITHUB_ENV
         echo "ZBOX_BRANCH=$(echo ${{inputs.zbox_cli_branch}})" >> $GITHUB_ENV
         echo "ZWALLET_BRANCH=$(echo ${{inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
 
