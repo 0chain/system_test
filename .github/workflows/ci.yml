@@ -73,6 +73,6 @@ jobs:
 
       - name: "Checkout System Tests"
         uses: actions/checkout@v2
-        
+
       - name: "System tests"
         uses: 0chain/system_test@feature/composite-action
