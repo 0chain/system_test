@@ -59,8 +59,6 @@ runs:
     - name: "VIEW DEPLOY CONFIGURATION"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        echo "Test Run Description:   [${{inputs.test_run_description}}]"
-
         echo "DEPLOYING 0CHAIN WITH THE FOLLOWING CONFIGURATION:"
         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
         echo "Miner docker image:     [${{ env.MINER_TAG }}]"

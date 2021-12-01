@@ -42,8 +42,6 @@ runs:
     - name: "VIEW TEST CONFIGURATION"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        echo "Test Run Description:   [${{inputs.test_run_description}}]"
-
         echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
         echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
