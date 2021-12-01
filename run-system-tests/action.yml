@@ -1,19 +1,14 @@
 name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
-env:
-  DEFAULT_ZWALLET_BRANCH: staging
-  DEFAULT_ZBOX_BRANCH: staging
 inputs:
   smart_contract_owner:
     description: 'blah'
+    default: "default-remove"
     required: true
   svc_account_secret:
     description: 'blah'
+    default: "default-remove"
     required: true
-  test_run_description:
-    description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
-    default: ''
-    required: false
   zbox_cli_branch:
     description: '0Box CLI (branch or commit SHA) which the tests will use'
     default: 'staging'
@@ -24,8 +19,8 @@ inputs:
     required: true
   existing_network:
     description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
-    default: ''
-    required: false
+    default: "default-remove"
+    required: true
 runs:
   using: "composite"
   steps:
