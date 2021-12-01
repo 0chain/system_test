@@ -1,6 +1,18 @@
 name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
 inputs:
+  smart_contract_owner:
+    description: 'blah'
+    default: ''
+    required: false
+  svc_account_secret:
+    description: 'blah'
+    default: ''
+    required: false
+  kube_config:
+    description: 'blah'
+    default: ''
+    required: false
   test_run_description:
     description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
     default: ''
@@ -48,6 +60,7 @@ runs:
       uses: actions/checkout@v2
 
     - name: "Config: Run tests against existing 0Chain network"
+      shell: 'script --return --quiet --command "bash {0}"'
       if: github.event_name == 'workflow_dispatch' && inputs.existing_network != ''
       run: |
         echo "NETWORK_URL=$(echo ${{ inputs.existing_network }})" >> $GITHUB_ENV
@@ -55,6 +68,7 @@ runs:
         echo "ZWALLET_BRANCH=$(echo ${{inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
 
     - name: "Config: Deploy new 0Chain network then run tests against it"
+      shell: 'script --return --quiet --command "bash {0}"'
       if: github.event_name == 'push' || inputs.existing_network == ''
       run: |
         echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
@@ -77,6 +91,7 @@ runs:
         echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
     - name: "VIEW TEST CONFIGURATION"
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "Test Run Description:   [${{inputs.test_run_description}}]"
 
@@ -98,6 +113,7 @@ runs:
         echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
 
     - name: "Get CLI Cache Key"
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
           then
@@ -147,6 +163,7 @@ runs:
 
     - name: "Build CLI Binaries"
       if: steps.cli-cache.outputs.cache-hit != 'true'
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         cd zwalletcli
         make install
@@ -168,15 +185,17 @@ runs:
 
     - name: "Configure helm & kubectl"
       if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
         helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
         helm repo update
         mkdir -p ./kube
-        echo "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
+        echo "${{ inputs.kube_config }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
 
     - name: "Remove existing 0Chain network and data"
       if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
         if [ $output -gt 1 ]; then
@@ -190,6 +209,7 @@ runs:
 
     - name: "Deploy 0Chain network"
       if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
         helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
@@ -203,6 +223,7 @@ runs:
 
     - name: "Wait for 0Chain network deployment to complete"
       if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         sleep 60
         counter=0;
@@ -218,6 +239,7 @@ runs:
 
 
     - name: "Set up system tests"
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')" >> $GITHUB_ENV
         echo "TEST_TIME=$(date '+%Y-%m-%d_%H.%M.%S')" >> $GITHUB_ENV
@@ -235,7 +257,7 @@ runs:
     - name: "Run CLI System Tests"
       shell: 'script --return --quiet --command "bash {0}"'
       env:
-        SMART_CONTRACT_OWNER_WALLET_JSON: ${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}
+        SMART_CONTRACT_OWNER_WALLET_JSON: ${{ inputs.smart_contract_owner }}
       run: |
         cd tests/cli_tests
         exit_code=0
@@ -284,7 +306,7 @@ runs:
       with:
         publish_branch: test_reports
         keep_files: true
-        github_token: "${{ secrets.SVC_ACCOUNT_SECRET }}"
+        github_token: "${{ inputs.svc_account }}"
         publish_dir: "./tests/cli_tests/${{ env.BRANCH }}"
         destination_dir: "./${{ env.BRANCH }}"
         user_name: "github-actions[bot]"
@@ -292,10 +314,12 @@ runs:
 
     - name: "Wait for report deployment to complete"
       if: ${{ always() && env.TESTS_RAN == 'true' }}
+      shell: 'script --return --quiet --command "bash {0}"'
       run: counter=0; while [ $counter -lt 5 ] && curl -o /dev/null -Isw '%{http_code}\n' "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html?t=$(date +%s)" | grep -v 200 > /dev/null; do sleep 10 && echo "Waiting for report page to deploy..." && ((counter=counter+1)); done
 
     - name: "Report Links"
       if: ${{ always() && env.TESTS_RAN == 'true' }}
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "SYSTEM TESTS REPORT LINK:"
         echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
@@ -304,6 +328,7 @@ runs:
 
     - name: "Tear Down 0Chain network"
       if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
       run: |
         output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
         if [ $output -gt 1 ]; then
