@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: "Setup"
         run: echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-        
+
       - name: "Run System tests"
         uses: 0chain/system_test@feature/composite-action
         with:

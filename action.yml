@@ -50,6 +50,10 @@ inputs:
     description: '0box DOCKER IMAGE to deploy'
     default: 'staging'
     required: false
+  zdns_image:
+    description: '0dns DOCKER IMAGE to deploy'
+    default: 'staging'
+    required: false
   zblock_image:
     description: '0block DOCKER IMAGE to deploy'
     default: 'staging'
