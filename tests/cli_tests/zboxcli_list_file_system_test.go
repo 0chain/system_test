@@ -19,7 +19,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
+var reAuthToken = regexp.MustCompile(`^Auth Ticket: (.*)$`)
 
 func TestListFileSystem(t *testing.T) {
 	t.Parallel()

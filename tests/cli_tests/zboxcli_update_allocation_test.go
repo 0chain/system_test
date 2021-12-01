@@ -524,5 +524,5 @@ func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename st
 		tokens,
 		wallet,
 		cliConfigFilename,
-	), 3, time.Second*5)
+	), 3, time.Second*10)
 }
