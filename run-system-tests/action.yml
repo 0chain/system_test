@@ -176,7 +176,7 @@ runs:
       with:
         publish_branch: test_reports
         keep_files: true
-        github_token: "${{ inputs.svc_account }}"
+        github_token: "${{ inputs.svc_account_secret }}"
         publish_dir: "./tests/cli_tests/${{ env.BRANCH }}"
         destination_dir: "./${{ env.BRANCH }}"
         user_name: "github-actions[bot]"
