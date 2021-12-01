@@ -22,14 +22,17 @@ inputs:
   deploy_report_page:
     required: true
     default: true
-    description: 'secret used to publish test results'
+    description: ''
   archive_results:
     required: true
     default: true
-    description: 'secret used to publish test results'
+    description: ''
   run_flaky_tests:
     required: true
     default: true
+    description: ''
+  svc_account_secret:
+    required: false
     description: 'secret used to publish test results'
 
 runs:
