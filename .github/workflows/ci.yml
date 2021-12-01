@@ -68,6 +68,6 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/system_test@feature/composite-action
         with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          smart_contract_owner: ${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}
+          kube_config: "hello"${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          smart_contract_owner: "hello2"${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
