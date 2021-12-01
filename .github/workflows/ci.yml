@@ -68,9 +68,14 @@ jobs:
       - name: "Setup"
         run: echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      - name: "Run System tests"
-        uses: 0chain/system_test/run-system-tests@feature/composite-action
+      - name: "Deploy 0Chain"
+        uses: 0chain/system_test/deploy-0chain@feature/composite-action
         with:
           kube_config: "${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}"
           smart_contract_owner: "${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}"
           svc_account_secret: "${{ secrets.SVC_ACCOUNT_SECRET }}"
+
+      - name: "Run System tests"
+        uses: 0chain/system_test/run-system-tests@feature/composite-action
+        with:
+          existing_network: "dev-2.devnet-0chain.net"
