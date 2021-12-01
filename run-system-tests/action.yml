@@ -140,7 +140,7 @@ runs:
         exit $exit_code
 
     - name: "Archive CLI Config & Console Output"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       uses: actions/upload-artifact@v2
       with:
         name: System-Test-${{ env.TEST_TIME }}
@@ -150,7 +150,7 @@ runs:
           ./tests/cli_tests/${{ env.BRANCH }}/latest/index.html
 
     - name: "Run Flaky CLI System Tests"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         cd tests/cli_tests
@@ -161,7 +161,7 @@ runs:
         cp -R ./${{ env.BRANCH }}/${GITHUB_SHA}/flaky ./${{ env.BRANCH }}/latest/flaky
 
     - name: "Archive Flaky Test CLI Config & Console Output"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       uses: actions/upload-artifact@v2
       with:
         name: Flaky-System-Test-${{ env.TEST_TIME }}
@@ -171,7 +171,7 @@ runs:
           ./tests/cli_tests/${{ env.BRANCH }}/latest/flaky/index.html
 
     - name: "Deploy report pages"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       uses: peaceiris/actions-gh-pages@v3
       with:
         publish_branch: test_reports
@@ -183,12 +183,12 @@ runs:
         user_email: "github-actions[bot]@users.noreply.github.com"
 
     - name: "Wait for report deployment to complete"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       shell: 'script --return --quiet --command "bash {0}"'
       run: counter=0; while [ $counter -lt 5 ] && curl -o /dev/null -Isw '%{http_code}\n' "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html?t=$(date +%s)" | grep -v 200 > /dev/null; do sleep 10 && echo "Waiting for report page to deploy..." && ((counter=counter+1)); done
 
     - name: "Report Links"
-      if: ${{ always() && env.TESTS_RAN == 'true' }}
+#      if: ${{ always() && env.TESTS_RAN == 'true' }}
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "SYSTEM TESTS REPORT LINK:"
