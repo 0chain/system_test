@@ -7,16 +7,13 @@ env:
 inputs:
   smart_contract_owner:
     description: 'blah'
-    default: ''
-    required: false
+    required: true
   svc_account_secret:
     description: 'blah'
-    default: ''
-    required: false
+    required: true
   kube_config:
     description: 'blah'
-    default: ''
-    required: false
+    required: true
   test_run_description:
     description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
     default: ''
