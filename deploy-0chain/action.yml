@@ -153,3 +153,8 @@ runs:
           echo "Chain setup did not complete as expected"
           exit 1
         fi
+
+    - name: "Teardown 0Chain Network"
+      uses: webiny/action-post-run@2.0.1
+      with:
+        run: echo "conditional teardown!"
