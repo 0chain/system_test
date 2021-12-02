@@ -189,8 +189,7 @@ runs:
         echo "TEARING DOWN 0CHAIN NETWORK AFTER WORKFLOW RUN:"
         echo "======================================================"
         echo
-        if [[ "$TESTS_PASSED" == "true" ]];
-           then
+        if [ "$TESTS_PASSED" == "true" ]; then
            output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
            if [ $output -gt 1 ]; then
               helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config";
