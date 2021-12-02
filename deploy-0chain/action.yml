@@ -155,11 +155,13 @@ runs:
         fi
 
     - uses: webiny/action-post-run@2.0.1
-      id: post-run-command
       with:
-        run: echo "this thing works!"
-    - uses: webiny/action-post-run@2.0.1
-      id: another-post-run-command
-      with:
-        command: echo "this thing works again!"
-        working-directory: "/"
+        run: |
+        sleep 5
+        echo "this thing works!"
+        sleep 5
+        ls -l
+        sleep 5
+        echo "again"
+        curl
+        
