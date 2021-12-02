@@ -176,8 +176,8 @@ runs:
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        mkdir post
-        cd post
+        mkdir ~/post
+        cd ~/post
         echo '
         #!/bin/bash
         echo
@@ -200,4 +200,4 @@ runs:
       uses: webiny/action-post-run@2.0.1
       with:
         run: bash ./post.sh
-        working-directory: ./post
+        working-directory: ~/post
