@@ -154,7 +154,7 @@ runs:
           exit 1
         fi
 
-    - name: "Destroy 0Chain Network"
+    - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
         run: |
