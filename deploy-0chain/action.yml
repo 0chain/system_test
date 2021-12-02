@@ -185,15 +185,20 @@ runs:
         #!/bin/bash
         echo
         echo "======================================================"
-        echo "0CHAIN NETWORK TEARDOWN:"
+        echo "TEARING DOWN 0CHAIN NETWORK AFTER WORKFLOW RUN:"
         echo "======================================================"
         echo
-        output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
-        if [ $output -gt 1 ]; then
-            helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config";
-            sleep 30;
+        if [[ $TESTS_PASSED == 'true' ]];
+           then
+           output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
+           if [ $output -gt 1 ]; then
+              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config";
+              sleep 30;
+           fi
+           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
+        else
+           echo "SKIPPING TEARDOWN AS <> WAS $TESTS_PASSED"
         fi
-        helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
         ' > ./post.sh;
         chmod 777 ./post.sh;
 

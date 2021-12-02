@@ -169,6 +169,14 @@ runs:
         rm -rf ./config/sc_owner_wallet.json || true
         cp -R ./${{ env.BRANCH }}/${GITHUB_SHA} ./${{ env.BRANCH }}/latest
         echo "TESTS_RAN=true" >> $GITHUB_ENV
+
+        if [[ $exit_code == 0 ]];
+          then
+            echo TESTS_PASSED=true >> $GITHUB_ENV
+          else
+            echo TESTS_PASSED=false >> $GITHUB_ENV
+        fi
+
         exit $exit_code
 
     - name: "Archive CLI Config & Console Output"
