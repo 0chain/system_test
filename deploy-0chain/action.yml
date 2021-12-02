@@ -113,69 +113,74 @@ runs:
         echo "CONFIGURING HELM"
         echo "=================================================="
         echo
+        cd ..
         helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
         helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
         helm repo update
-        mkdir -p ../kube
+        mkdir -p ./kube
         echo "${{ inputs.kube_config }}" | base64 -d > ../kube/${{ env.NAMESPACE }}-config
 
-#    - name: "Remove existing 0Chain network and data"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      shell: 'script --return --quiet --command "bash {0}"'
-#      run: |
-#        echo
-#        echo "=================================================="
-#        echo "REMOVING EXISTING 0CHAIN NETWORK"
-#        echo "=================================================="
-#        echo
-#        output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
-#        if [ $output -gt 1 ]; then
-#            helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
-#            sleep 30
-#        fi
-#            helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#            kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#            kubectl delete all --all -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#
-#
-#    - name: "Deploy 0Chain network"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      shell: 'script --return --quiet --command "bash {0}"'
-#      run: |
-#        echo
-#        echo "=================================================="
-#        echo "DEPLOYING 0CHAIN NETWORK"
-#        echo "=================================================="
-#        echo
-#        helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=${{ env.EXPLORER_TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.ZPROXY_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#        helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=${{ env.BLOBBER_STAKE_TAG }} 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
-#
-#    - name: "Wait for 0Chain network deployment to complete"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      shell: 'script --return --quiet --command "bash {0}"'
-#      run: |
-#        sleep 60
-#        counter=0;
-#        while [ $counter -lt 30 ] && kubectl -n ${{ env.NAMESPACE }} get pods --kubeconfig ./kube/${{ env.NAMESPACE }}-config | grep blobber-stake | grep -vi Completed; do
-#          sleep 10
-#          echo "Waiting Chain deployment to finish." && ((counter=counter+1));
-#        done
-#
-#        if [ $counter -eq 30 ]; then
-#          echo "Chain setup did not complete as expected"
-#          exit 1
-#        fi
-
-    - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
+    - name: "Remove existing 0Chain network and data"
+      if: github.event_name == 'push' || inputs.existing_network == ''
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "=================================================="
+        echo "REMOVING EXISTING 0CHAIN NETWORK"
+        echo "=================================================="
+        echo
+        cd ..
+        output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
+        if [ $output -gt 1 ]; then
+            helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
+            sleep 30
+        fi
+            helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+            kubectl wait --for=condition=complete --timeout 900s job/helm-clean-directory -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+            kubectl delete all --all -n ${{ env.NAMESPACE }} --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+
+
+    - name: "Deploy 0Chain network"
+      if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
+      run: |
+        echo
+        echo "=================================================="
+        echo "DEPLOYING 0CHAIN NETWORK"
+        echo "=================================================="
+        echo
+        cd ..
+        helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install 0block --set zblock.persistence.enabled=true --set zblock.host=devnet-0chain.net --set zblock.image.tag=${{ env.ZBLOCK_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zblock --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install explorer --set explorer.persistence.enabled=true --set explorer.image.tag=${{ env.EXPLORER_TAG }} --set explorer.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/explorer --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install 0proxy --set zproxy.persistence.enabled=true --set zproxy.host=devnet-0chain.net --set zproxy.image.tag=${{ env.ZPROXY_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zproxy --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install --wait  0box --set zbox.persistence.enabled=true --set zbox.host=devnet-0chain.net --set zbox.image.tag=${{ env.ZBOX_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zbox --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install 0search --set zsearch.persistence.enabled=true --set zsearch.host=devnet-0chain.net --set zsearch.image.tag=${{ env.ZSEARCH_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/zsearch --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+        helm upgrade --install --wait  blobber-stake -n ${{ env.NAMESPACE }} --set blobberStake.blobberCount=6 --set blobberStake.host=devnet-0chain.net --set blobberStake.image.tag=${{ env.BLOBBER_STAKE_TAG }} 0chain-helm/blobberStake --kubeconfig ./kube/${{ env.NAMESPACE }}-config
+
+    - name: "Wait for 0Chain network deployment to complete"
+      if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
+      run: |
+        cd ..
+        sleep 60
+        counter=0;
+        while [ $counter -lt 30 ] && kubectl -n ${{ env.NAMESPACE }} get pods --kubeconfig ./kube/${{ env.NAMESPACE }}-config | grep blobber-stake | grep -vi Completed; do
+          sleep 10
+          echo "Waiting Chain deployment to finish." && ((counter=counter+1));
+        done
+
+        if [ $counter -eq 30 ]; then
+          echo "Chain setup did not complete as expected"
+          exit 1
+        fi
+
+    - name: "Create post teardown script"
+      shell: 'script --return --quiet --command "bash {0}"'
+      run: |
+        cd ..
         echo '
         #!/bin/bash
         echo
@@ -189,10 +194,8 @@ runs:
             sleep 30;
         fi
         helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
-        ' > ../post.sh;
-        chmod 777 ../post.sh;
-        pwd
-        ls -l ../
+        ' > ./post.sh;
+        chmod 777 ./post.sh;
 
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
