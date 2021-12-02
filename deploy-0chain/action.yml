@@ -189,4 +189,11 @@ runs:
               sleep 30;
           fi
           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
-          ' > post.sh && chmod 777 post.sh && ./post.sh
+          ' > post.sh
+          chmod 777 post.sh
+          bash ./post.sh
+
+    - name: "POST WORKFLOW RUN: Destroy 0Chain Network test"
+      uses: webiny/action-post-run@2.0.1
+      with:
+        command: ./post.sh
