@@ -92,7 +92,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/system_test/deploy-0chain@feature/composite-action
+        uses: 0chain/actions/deploy-0chain@master
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           miner_image: env.MINER_TAG
@@ -108,7 +108,7 @@ jobs:
           blobber_stake_image: latest
 
       - name: "Run System tests"
-        uses: 0chain/system_test/run-system-tests@feature/composite-action
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: env.NETWORK_URL
           zbox_cli_branch: env.ZBOX_BRANCH
