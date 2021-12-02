@@ -172,11 +172,6 @@ runs:
           echo "Chain setup did not complete as expected"
           exit 1
         fi
-
-    - name: "POST WORKFLOW RUN: Destroy 0Chain Network test"
-      uses: webiny/action-post-run@2.0.1
-      with:
-        run: ./post.sh
         
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
@@ -194,6 +189,6 @@ runs:
               sleep 30;
           fi
           helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
-          ' > post.sh
-          chmod 777 post.sh
-          ls -l post.sh
+          ' > post.sh;
+          chmod 777 post.sh;
+          ./post.sh;
