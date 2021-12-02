@@ -165,11 +165,12 @@ runs:
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         cd ..
+        echo "Waiting for 0Chain deployment to finish..."
         sleep 60
         counter=0;
         while [ $counter -lt 30 ] && kubectl -n ${{ env.NAMESPACE }} get pods --kubeconfig ./kube/${{ env.NAMESPACE }}-config | grep blobber-stake | grep -vi Completed; do
           sleep 10
-          echo "Waiting Chain deployment to finish." && ((counter=counter+1));
+          echo "Still waiting for 0Chain deployment to finish..." && ((counter=counter+1));
         done
 
         if [ $counter -eq 30 ]; then
@@ -188,7 +189,7 @@ runs:
         echo "TEARING DOWN 0CHAIN NETWORK AFTER WORKFLOW RUN:"
         echo "======================================================"
         echo
-        if [[ $TESTS_PASSED == 'true' ]];
+        if [[ "$TESTS_PASSED" == "true" ]];
            then
            output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
            if [ $output -gt 1 ]; then
