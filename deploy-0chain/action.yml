@@ -173,6 +173,11 @@ runs:
           exit 1
         fi
 
+    - name: "POST WORKFLOW RUN: Destroy 0Chain Network test"
+      uses: webiny/action-post-run@2.0.1
+      with:
+        run: ./post.sh
+        
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
@@ -192,8 +197,3 @@ runs:
           ' > post.sh
           chmod 777 post.sh
           ls -l post.sh
-
-    - name: "POST WORKFLOW RUN: Destroy 0Chain Network test"
-      uses: webiny/action-post-run@2.0.1
-      with:
-        run: ./post.sh
