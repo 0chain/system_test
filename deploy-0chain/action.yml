@@ -178,6 +178,7 @@ runs:
       with:
         run: |
           echo '
+          #!/bin/bash
           echo
           echo "======================================================"
           echo "0CHAIN NETWORK TEARDOWN:"
