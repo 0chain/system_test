@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/assert"
@@ -75,7 +77,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -106,7 +108,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 		require.Equal(t, "unlocked", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -175,7 +177,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &writePool)
 		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -203,7 +205,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -253,7 +255,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 
 		lockTimer := time.NewTimer(time.Minute)
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
@@ -289,7 +291,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "Unlock tokens success", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -350,7 +352,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		stakePoolID := strings.Fields(output[0])[4]
 		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -376,7 +378,7 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
 
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -429,7 +431,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -479,7 +481,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 
 		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		for _, blobber_detail := range allocation.BlobberDetails {
 			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 				"blobber_id": blobber_detail.BlobberID,
@@ -530,7 +532,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
-		wait(t, 10*time.Second)
+		cliutils.Wait(t, 10*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -543,7 +545,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		remotepath := filepath.Base(localpath)
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
-		wait(t, 10*time.Second)
+		cliutils.Wait(t, 10*time.Second)
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -603,7 +605,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
 		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 
 		// Get write pool info before file update
 		output, err = writePoolInfo(t, configPath, true)
@@ -626,7 +628,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
-		wait(t, time.Minute)
+		cliutils.Wait(t, time.Minute)
 
 		// Get the new Write Pool info after update
 		output, err = writePoolInfo(t, configPath, true)
@@ -659,6 +661,124 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		}
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 4 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+		fileSize := int64(math.Floor(1 * MB))
+
+		// Upload 1 MB file
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+
+		// Get initial write pool
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		// Rename file
+		remotepath := filepath.Base(localpath)
+		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
+
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		// Get final write pool, no deduction should have been done
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
+			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
+		}
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("File Update with same size - Users should not be charged, blobber should not be paid", func(t *testing.T) {
+		t.Parallel()
+
+		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
+		// of size 1 MB. Get write pool info and check nothing has been deducted.
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 4 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+		fileSize := int64(math.Floor(1 * MB))
+
+		// Upload 1 MB file
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		// Update with same size
+		remotepath := "/" + filepath.Base(localpath)
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
+
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		// Get final write pool, no deduction should have been made
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
+			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
+		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 }
@@ -730,7 +850,7 @@ func Test___FlakyScenariosFileStats(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		// get file stats after download
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -798,7 +918,7 @@ func Test___FlakyScenariosSendAndBalance(t *testing.T) {
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
-		wait(t, time.Minute*2)
+		cliutils.Wait(t, time.Minute*2)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
@@ -865,41 +985,6 @@ func Test___FlakyScenariosSendAndBalance(t *testing.T) {
 				}
 			}
 		}
-	})
-}
-
-func Test___FlakyScenariosUpdateAllocation(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Cancel Allocation Should Work when blobber fails challenges", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-
-		output, err := cancelAllocation(t, configPath, allocationID, true)
-
-		require.Nil(t, err, "error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`), output[0])
-	})
-
-	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
-		var otherAllocationID string
-		// This test creates a separate wallet and allocates there, test nesting needed to create other wallet json
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
-			otherAllocationID = setupAllocation(t, configPath)
-		})
-
-		// otherAllocationID should not be cancelable from this level
-		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
-
-		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[len(output)-1])
 	})
 }
 
@@ -1025,7 +1110,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 
 		// write lock pool of old owner should remain locked
 		// FIXME should this be unlocked given the change of ownership?
-		wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
@@ -1124,79 +1209,12 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 	})
 }
 
-func Test___FlakyScenariosCreateDir(t *testing.T) {
-	t.Parallel()
-
-	t.Run("create dir with no leading slash should work", func(t *testing.T) {
-		t.Parallel()
-
-		allocID := setupAllocation(t, configPath)
-
-		dirName := "noleadingslash"
-		output, err := createDir(t, configPath, allocID, dirName, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
-		output, err = listAll(t, configPath, allocID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 1)
-		require.Equal(t, dirName, files[0].Name, "Directory must be created", files)
-	})
-}
-
 func Test___FlakyScenariosDownload(t *testing.T) {
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
 	t.Parallel()
-
-	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Downloading encrypted file is not working")
-		}
-		t.Parallel()
-
-		allocSize := int64(10 * MB)
-		filesize := int64(10)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		// Upload parameters
-		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": remotepath + filepath.Base(filename),
-			"encrypt":    "",
-		})
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		// Downloading encrypted file not working
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
 		t.Parallel()

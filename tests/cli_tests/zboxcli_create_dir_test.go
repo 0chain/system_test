@@ -166,6 +166,27 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
+	t.Run("create dir with no leading slash should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocID := setupAllocation(t, configPath)
+
+		dirName := "noleadingslash"
+		output, err := createDir(t, configPath, allocID, dirName, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
+		output, err = listAll(t, configPath, allocID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, files, 1)
+		require.Equal(t, dirName, files[0].Name, "Directory must be created", files)
+	})
+
 	t.Run("create with existing dir but different case", func(t *testing.T) {
 		t.Parallel()
 
@@ -401,7 +422,7 @@ func listAll(t *testing.T, cliConfigFilename, allocationID string, retry bool) (
 }
 
 func listAllWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
-	time.Sleep(5 * time.Second)
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing all...")
 	cmd := "./zbox list-all --silent --allocation " + allocationID +
 		" --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename

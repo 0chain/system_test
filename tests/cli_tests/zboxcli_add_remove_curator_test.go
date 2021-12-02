@@ -117,7 +117,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
@@ -164,7 +164,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
@@ -201,7 +201,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
@@ -284,7 +284,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
@@ -293,7 +293,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = removeCurator(t, params)
 		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
@@ -336,7 +336,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
@@ -345,7 +345,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = removeCurator(t, params)
 		require.Nil(t, err, "error in removing curator", strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")

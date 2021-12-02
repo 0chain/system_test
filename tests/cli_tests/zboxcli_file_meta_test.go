@@ -403,7 +403,7 @@ func getFileMeta(t *testing.T, cliConfigFilename, param string, retry bool) ([]s
 }
 
 func getFileMetaWithWallet(t *testing.T, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
-	wait(t, 5*time.Second)
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(
 		"./zbox meta %s --silent --wallet %s --configDir ./config --config %s",
