@@ -64,11 +64,10 @@ runs:
         echo "ZBOX_TAG=$(echo '${{inputs.zbox_image}}')" >> $GITHUB_ENV
         echo "ZDNS_TAG=$(echo '${{inputs.zdns_image}}')" >> $GITHUB_ENV
         echo "ZBLOCK_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
-
-        echo "EXPLORER_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
-        echo "BLOBBER_STAKE_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
-        echo "ZPROXY_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
-        echo "ZSEARCH_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
+        echo "EXPLORER_TAG=$(echo '${{inputs.explorer_image}}')" >> $GITHUB_ENV
+        echo "BLOBBER_STAKE_TAG=$(echo '${{inputs.blobber_stake_image}}')" >> $GITHUB_ENV
+        echo "ZPROXY_TAG=$(echo '${{inputs.zproxy_image}}')" >> $GITHUB_ENV
+        echo "ZSEARCH_TAG=$(echo '${{inputs.zsearch_image}}')" >> $GITHUB_ENV
 
         echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
         echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
