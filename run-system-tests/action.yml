@@ -2,9 +2,8 @@ name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
 inputs:
   system_tests_branch:
-    required: true
+    required: false
     description: 'System tests branch to run'
-    default: 'master'
   network:
     required: true
     description: 'Network to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'

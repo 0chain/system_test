@@ -1,7 +1,5 @@
 name: "0Chain System Tests"
 description: "Run 0Chain System Tests"
-env:
-  DEFAULT_TAG: staging
 inputs:
   kube_config:
     description: 'blah'
@@ -9,31 +7,49 @@ inputs:
   miner_image:
     description: 'miner DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   sharder_image:
     description: 'sharder DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   blobber_image:
     description: 'blobber DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   validator_image:
     description: 'validator DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   zbox_image:
     description: '0box DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   zdns_image:
     description: '0dns DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
   zblock_image:
     description: '0block DOCKER IMAGE to deploy'
     default: 'staging'
-    required: false
+    required: true
+  explorer_image:
+    description: '0block DOCKER IMAGE to deploy'
+    default: 'latest'
+    required: true
+  zproxy_image:
+    description: '0block DOCKER IMAGE to deploy'
+    default: 'staging'
+    required: true
+  zsearch_image:
+    description: '0block DOCKER IMAGE to deploy'
+    default: 'staging'
+    required: true
+  blobber_stake_image:
+    description: '0block DOCKER IMAGE to deploy'
+    default: 'latest'
+    required: true
+
+
 runs:
   using: "composite"
   steps:
@@ -41,17 +57,18 @@ runs:
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-        echo "MINER_TAG=$(echo $(([ -z '${{inputs.miner_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.miner_image}}'))" >> $GITHUB_ENV
-        echo "SHARDER_TAG=$(echo $(([ -z '${{inputs.sharder_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.sharder_image}}'))" >> $GITHUB_ENV
-        echo "BLOBBER_TAG=$(echo $(([ -z '${{inputs.blobber_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.blobber_image}}'))" >> $GITHUB_ENV
-        echo "VALIDATOR_TAG=$(echo $(([ -z '${{inputs.validator_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.validator_image}}'))" >> $GITHUB_ENV
-        echo "ZBOX_TAG=$(echo $(([ -z '${{inputs.zbox_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.zbox_image}}'))" >> $GITHUB_ENV
-        echo "ZDNS_TAG=$(echo $(([ -z '${{inputs.zdns_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.zdns_image}}'))" >> $GITHUB_ENV
-        echo "ZBLOCK_TAG=$(echo $(([ -z '${{inputs.zblock_image}}' ] && echo '${{env.DEFAULT_TAG}}') || echo '${{inputs.zblock_image}}'))" >> $GITHUB_ENV
-        echo "EXPLORER_TAG=latest" >> $GITHUB_ENV
-        echo "BLOBBER_STAKE_TAG=latest" >> $GITHUB_ENV
-        echo "ZPROXY_TAG=staging" >> $GITHUB_ENV
-        echo "ZSEARCH_TAG=staging" >> $GITHUB_ENV
+        echo "MINER_TAG=$(echo '${{inputs.miner_image}}')" >> $GITHUB_ENV
+        echo "SHARDER_TAG=$(echo '${{inputs.sharder_image}}')" >> $GITHUB_ENV
+        echo "BLOBBER_TAG=$(echo '${{inputs.blobber_image}}')" >> $GITHUB_ENV
+        echo "VALIDATOR_TAG=$(echo '${{inputs.validator_image}}')" >> $GITHUB_ENV
+        echo "ZBOX_TAG=$(echo '${{inputs.zbox_image}}')" >> $GITHUB_ENV
+        echo "ZDNS_TAG=$(echo '${{inputs.zdns_image}}')" >> $GITHUB_ENV
+        echo "ZBLOCK_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
+
+        echo "EXPLORER_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
+        echo "BLOBBER_STAKE_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
+        echo "ZPROXY_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
+        echo "ZSEARCH_TAG=$(echo '${{inputs.zblock_image}}')" >> $GITHUB_ENV
 
         echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
         echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV

@@ -78,7 +78,7 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/system_test/run-system-tests@feature/composite-action
         with:
-          system_tests_branch: "master"
+#          system_tests_branch: "master"
           network: "dev-${{ env.RUNNER_NUMBER }}.devnet-0chain.net"
           zbox_cli_branch: staging
           zwallet_cli_branch: staging
