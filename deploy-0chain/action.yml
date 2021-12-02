@@ -197,5 +197,5 @@ runs:
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
-        run: ls -l ../
+        run: ../post.sh
 #        working-directory: ~/post
