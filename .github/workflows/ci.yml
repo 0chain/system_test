@@ -78,12 +78,11 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/system_test/run-system-tests@feature/composite-action
         with:
-#          system_tests_branch: "master"
           network: "dev-${{ env.RUNNER_NUMBER }}.devnet-0chain.net"
           zbox_cli_branch: staging
           zwallet_cli_branch: staging
           smart_contract_owner_wallet_json: ${{ secrets.SMART_CONTRACT_OWNER_WALLET_JSON }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: false
-          archive_results: false
-          run_flaky_tests: false
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: true
