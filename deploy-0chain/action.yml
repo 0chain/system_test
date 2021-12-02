@@ -176,7 +176,6 @@ runs:
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        cd ../
         echo '
         #!/bin/bash
         echo
@@ -191,7 +190,7 @@ runs:
         fi
         helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
         ' > ~/post.sh;
-        chmod 777 ~/post.sh;
+        chmod 777 ../post.sh;
         pwd
         ls -l
 
