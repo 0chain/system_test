@@ -332,3 +332,10 @@ type FileStats struct {
 	BlockchainAware     bool      `json:"blockchain_aware"`
 	CreatedAt           time.Time `json:"CreatedAt"`
 }
+
+type FileDiff struct {
+	Op         string     `json:"operation"`
+	Path       string     `json:"path"`
+	Type       string     `json:"type"`
+	Attributes Attributes `json:"attributes"`
+}

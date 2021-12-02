@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -511,16 +513,19 @@ func extractAuthToken(str string) (string, error) {
 }
 
 func createFileWithSize(name string, size int64) error {
-	f, err := os.Create(name)
-	if err != nil {
-		return err
-	}
+	buffer := make([]byte, size)
+	rand.Read(buffer)
+	return ioutil.WriteFile(name, buffer, 0666)
+	// f, err := os.Create(name)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err := f.Truncate(size); err != nil {
-		return err
-	}
+	// if err := f.Truncate(size); err != nil {
+	// 	return err
+	// }
 
-	return nil
+	// return nil
 }
 
 func generateRandomTestFileName(t *testing.T) string {
