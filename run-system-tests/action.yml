@@ -37,15 +37,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout System Tests"
-      uses: actions/checkout@v2
-      with:
-        repository: "0chain/system_test"
-        ref: ${{ inputs.system_tests_branch }}
-
     - name: "Config: Run tests against 0Chain network"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo "SYSTEM_TESTS_BRANCH=$(echo $(([ -z '${{inputs.system_tests_branch}}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{inputs.system_tests_branch}}'))" >> $GITHUB_ENV
         echo "NETWORK_URL=$(echo ${{ inputs.network }})" >> $GITHUB_ENV
         echo "ZBOX_BRANCH=$(echo ${{inputs.zbox_cli_branch}})" >> $GITHUB_ENV
         echo "ZWALLET_BRANCH=$(echo ${{inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
@@ -54,10 +49,17 @@ runs:
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
-        echo "System tests branch:    [${GITHUB_REF#refs/*/}]"
+        echo "System tests branch:    [${{ env.SYSTEM_TESTS_BRANCH }}]"
         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
         echo "0box CLI branch:        [${{ env.ZBOX_BRANCH }}]"
         echo "0wallet CLI branch:     [${{ env.ZWALLET_BRANCH }}]"
+
+    - name: "Checkout System Tests"
+      uses: actions/checkout@v2
+      with:
+        repository: "0chain/system_test"
+        ref: ${{ env.SYSTEM_TESTS_BRANCH }}
+
 
     - name: "Get CLI Cache Key"
       shell: 'script --return --quiet --command "bash {0}"'
