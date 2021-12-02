@@ -116,8 +116,8 @@ runs:
         helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
         helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
         helm repo update
-        mkdir -p ./kube
-        echo "${{ inputs.kube_config }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
+        mkdir -p ../kube
+        echo "${{ inputs.kube_config }}" | base64 -d > ../kube/${{ env.NAMESPACE }}-config
 
 #    - name: "Remove existing 0Chain network and data"
 #      if: github.event_name == 'push' || inputs.existing_network == ''
@@ -176,6 +176,7 @@ runs:
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        cd ../
         echo '
         #!/bin/bash
         echo
@@ -189,13 +190,13 @@ runs:
             sleep 30;
         fi
         helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
-        ' > post.sh;
-        chmod 777 post.sh;
+        ' > ~/post.sh;
+        chmod 777 ~/post.sh;
         pwd
         ls -l
 
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
-        run: ls -l
+        run: ls -l ../
 #        working-directory: ~/post
