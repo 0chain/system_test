@@ -191,25 +191,13 @@ runs:
         helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
         ' > post.sh;
         chmod 777 post.sh;
-        ./post.sh;
 
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
-        run: |
-          echo '
-          #!/bin/bash
-          echo
-          echo "======================================================"
-          echo "0CHAIN NETWORK TEARDOWN:"
-          echo "======================================================"
-          echo
-          output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | wc -l);
-          if [ $output -gt 1 ]; then
-              helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config";
-              sleep 30;
-          fi
-          helm upgrade --install --wait --timeout 120s cleanup -n ${{ env.NAMESPACE }} 0chain-helm2/cleanDir --kubeconfig ./kube/${{ env.NAMESPACE }}-config;
-          ' > post.sh;
-          chmod 777 post.sh;
-          ./post.sh;
+        run: ./post.sh;
+
+    - name: "POST WORKFLOW RUN: Destroy 0Chain Network hello"
+      uses: webiny/action-post-run@2.0.1
+      with:
+        run: echo "hello"
