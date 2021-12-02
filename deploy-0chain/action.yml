@@ -118,7 +118,7 @@ runs:
         helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
         helm repo update
         mkdir -p ./kube
-        echo "${{ inputs.kube_config }}" | base64 -d > ../kube/${{ env.NAMESPACE }}-config
+        echo "${{ inputs.kube_config }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
 
     - name: "Remove existing 0Chain network and data"
       if: github.event_name == 'push' || inputs.existing_network == ''
