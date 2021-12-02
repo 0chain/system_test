@@ -24,12 +24,12 @@ inputs:
     description: '0box DOCKER IMAGE to deploy'
     default: 'staging'
     required: true
-  zdns_image:
-    description: '0dns DOCKER IMAGE to deploy'
-    default: 'staging'
-    required: true
   zblock_image:
     description: '0block DOCKER IMAGE to deploy'
+    default: 'staging'
+    required: true
+  zdns_image:
+    description: '0dns DOCKER IMAGE to deploy'
     default: 'staging'
     required: true
   explorer_image:
