@@ -155,12 +155,6 @@ runs:
         fi
 
     - uses: webiny/action-post-run@2.0.1
-      with:
-        run: |
-          sleep 5
-          echo "this thing works!"
-          sleep 5
-          ls -l
-          sleep 5
-          echo "again"
-          curl
+    - uses: webiny/action-post-run@2.0.1
+    - uses: webiny/action-post-run@2.0.1
+    - uses: webiny/action-post-run@2.0.1
