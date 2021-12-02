@@ -68,14 +68,14 @@ runs:
     - name: "Get CLI Cache Key"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        if [[ ${{ env.ZWALLET_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+        if [[ '${{ env.ZWALLET_BRANCH }}' =~ ^[a-f0-9]{40}$ ]];
           then
             echo ZWALLET_SHA=${{ env.ZWALLET_BRANCH }} >> $GITHUB_ENV
           else
            echo ZWALLET_SHA=$(curl --silent --fail https://api.github.com/repos/0chain/zwalletcli/git/refs/heads/${{ env.ZWALLET_BRANCH }} | jq --raw-output .object.sha) >> $GITHUB_ENV
         fi
 
-        if [[ ${{ env.ZBOX_BRANCH }} =~ ^[a-f0-9]{40}$ ]];
+        if [[ '${{ env.ZBOX_BRANCH }}' =~ ^[a-f0-9]{40}$ ]];
           then
             echo ZBOX_SHA=${{ env.ZBOX_BRANCH }} >> $GITHUB_ENV
           else

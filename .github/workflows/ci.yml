@@ -77,8 +77,8 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo '${{env.DEFAULT_ZBOX_BRANCH}}') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo '${{env.DEFAULT_ZWALLET_BRANCH}}') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
           echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo 'staging-556fedc2') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
           echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo 'staging-556fedc2') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
