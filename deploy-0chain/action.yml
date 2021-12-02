@@ -72,53 +72,53 @@ runs:
         echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
         echo "NAMESPACE=dev-${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-#    - name: "VIEW DEPLOY CONFIGURATION"
-#      shell: 'script --return --quiet --command "bash {0}"'
-#      run: |
-#        echo
-#        echo "=================================================="
-#        echo "DEPLOYING 0CHAIN WITH THE FOLLOWING CONFIGURATION:"
-#        echo "=================================================="
-#        echo
-#        echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
-#        echo "Miner docker image:     [${{ env.MINER_TAG }}]"
-#        echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
-#        echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
-#        echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
-#        echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
-#        echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
-#        echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
-#        echo "0Proxy docker image:    [${{ env.ZPROXY_TAG }}]"
-#        echo "0Search docker image:   [${{ env.ZSEARCH_TAG }}]"
-#        echo "Explorer docker image:  [${{ env.EXPLORER_TAG }}]"
-#        echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
-#
-#    - name: "Install helm"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      uses: azure/setup-helm@v1
-#      with:
-#        version: 'v3.2.2'
-#
-#    - name: "Install kubectl"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      uses: azure/setup-kubectl@v1
-#      id: install
-#
-#    - name: "Configure helm & kubectl"
-#      if: github.event_name == 'push' || inputs.existing_network == ''
-#      shell: 'script --return --quiet --command "bash {0}"'
-#      run: |
-#        echo
-#        echo "=================================================="
-#        echo "CONFIGURING HELM"
-#        echo "=================================================="
-#        echo
-#        helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
-#        helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
-#        helm repo update
-#        mkdir -p ./kube
-#        echo "${{ inputs.kube_config }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
-#
+    - name: "VIEW DEPLOY CONFIGURATION"
+      shell: 'script --return --quiet --command "bash {0}"'
+      run: |
+        echo
+        echo "=================================================="
+        echo "DEPLOYING 0CHAIN WITH THE FOLLOWING CONFIGURATION:"
+        echo "=================================================="
+        echo
+        echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
+        echo "Miner docker image:     [${{ env.MINER_TAG }}]"
+        echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
+        echo "Blobber docker image:   [${{ env.BLOBBER_TAG }}]"
+        echo "Validator docker image: [${{ env.VALIDATOR_TAG }}]"
+        echo "0box docker image:      [${{ env.ZBOX_TAG }}]"
+        echo "0dns docker image:      [${{ env.ZDNS_TAG }}]"
+        echo "0block docker image:    [${{ env.ZBLOCK_TAG }}]"
+        echo "0Proxy docker image:    [${{ env.ZPROXY_TAG }}]"
+        echo "0Search docker image:   [${{ env.ZSEARCH_TAG }}]"
+        echo "Explorer docker image:  [${{ env.EXPLORER_TAG }}]"
+        echo "Stake docker image:     [${{ env.BLOBBER_STAKE_TAG }}]"
+
+    - name: "Install helm"
+      if: github.event_name == 'push' || inputs.existing_network == ''
+      uses: azure/setup-helm@v1
+      with:
+        version: 'v3.2.2'
+
+    - name: "Install kubectl"
+      if: github.event_name == 'push' || inputs.existing_network == ''
+      uses: azure/setup-kubectl@v1
+      id: install
+
+    - name: "Configure helm & kubectl"
+      if: github.event_name == 'push' || inputs.existing_network == ''
+      shell: 'script --return --quiet --command "bash {0}"'
+      run: |
+        echo
+        echo "=================================================="
+        echo "CONFIGURING HELM"
+        echo "=================================================="
+        echo
+        helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
+        helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
+        helm repo update
+        mkdir -p ./kube
+        echo "${{ inputs.kube_config }}" | base64 -d > ./kube/${{ env.NAMESPACE }}-config
+
 #    - name: "Remove existing 0Chain network and data"
 #      if: github.event_name == 'push' || inputs.existing_network == ''
 #      shell: 'script --return --quiet --command "bash {0}"'
@@ -192,7 +192,7 @@ runs:
         ' > post.sh;
         chmod 777 post.sh;
         ./post.sh;
-        
+
     - name: "POST WORKFLOW RUN: Destroy 0Chain Network"
       uses: webiny/action-post-run@2.0.1
       with:
