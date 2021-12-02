@@ -1,8 +1,8 @@
-name: "0Chain System Tests"
-description: "Run 0Chain System Tests"
+name: "Deploy 0Chain Network"
+description: "Deploy 0Chain Network to k8s cluster using helm"
 inputs:
   kube_config:
-    description: 'blah'
+    description: 'cluster details'
     required: true
   miner_image:
     description: 'miner DOCKER IMAGE to deploy'
@@ -33,19 +33,19 @@ inputs:
     default: 'staging'
     required: true
   explorer_image:
-    description: '0block DOCKER IMAGE to deploy'
+    description: 'Explorer DOCKER IMAGE to deploy'
     default: 'latest'
     required: true
   zproxy_image:
-    description: '0block DOCKER IMAGE to deploy'
+    description: '0Proxy DOCKER IMAGE to deploy'
     default: 'staging'
     required: true
   zsearch_image:
-    description: '0block DOCKER IMAGE to deploy'
+    description: '0Search DOCKER IMAGE to deploy'
     default: 'staging'
     required: true
   blobber_stake_image:
-    description: '0block DOCKER IMAGE to deploy'
+    description: 'Blobber stake DOCKER IMAGE to deploy'
     default: 'latest'
     required: true
 
@@ -53,7 +53,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Config: Deploy new 0Chain network"
+    - name: "Setup Config"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
         echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
