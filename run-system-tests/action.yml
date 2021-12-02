@@ -15,7 +15,7 @@ inputs:
     required: true
     description: '0Wallet CLI (branch or commit SHA) which the tests will use'
     default: 'staging'
-  smart_contract_owner:
+  smart_contract_owner_wallet_json:
     required: true
     description: 'smart contract owner wallet, used in smart contract config tests'
   deploy_report_page:
@@ -48,7 +48,11 @@ runs:
     - name: "VIEW TEST CONFIGURATION"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "======================================================"
         echo "RUNNING SYSTEM TESTS WITH THE FOLLOWING CONFIGURATION:"
+        echo "======================================================"
+        echo
         echo "System tests branch:    [${{ env.SYSTEM_TESTS_BRANCH }}]"
         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
         echo "0box CLI branch:        [${{ env.ZBOX_BRANCH }}]"
@@ -114,6 +118,11 @@ runs:
       if: steps.cli-cache.outputs.cache-hit != 'true'
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "======================================================"
+        echo "BUILDING 0WALLET AND 0BOX CLI BINARIES:"
+        echo "======================================================"
+        echo
         cd zwalletcli
         make install
         mv zwallet ../tests/cli_tests
@@ -124,6 +133,11 @@ runs:
     - name: "Set up system tests"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "======================================================"
+        echo "SETTING UP SYSTEM TESTS:"
+        echo "======================================================"
+        echo
         echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')" >> $GITHUB_ENV
         echo "TEST_TIME=$(date '+%Y-%m-%d_%H.%M.%S')" >> $GITHUB_ENV
         go get gotest.tools/gotestsum
@@ -140,8 +154,13 @@ runs:
     - name: "Run CLI System Tests"
       shell: 'script --return --quiet --command "bash {0}"'
       env:
-        SMART_CONTRACT_OWNER_WALLET_JSON: ${{ inputs.smart_contract_owner }}
+        SMART_CONTRACT_OWNER_WALLET_JSON: ${{ inputs.smart_contract_owner_wallet_json }}
       run: |
+        echo
+        echo "======================================================"
+        echo "RUNNING SYSTEM TESTS:"
+        echo "======================================================"
+        echo
         cd tests/cli_tests
         exit_code=0
         echo "$SMART_CONTRACT_OWNER_WALLET_JSON" >> ./config/sc_owner_wallet.json
@@ -166,6 +185,11 @@ runs:
       if:  ${{ always() && inputs.run_flaky_tests == 'true' }}
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "======================================================"
+        echo "RUNNING FLAKY SYSTEM TESTS:"
+        echo "======================================================"
+        echo
         cd tests/cli_tests
         rm -rf cmdlog.log || true
         rm -rf test-output.json || true
@@ -204,7 +228,11 @@ runs:
       if: ${{ always() && env.TESTS_RAN == 'true' && inputs.deploy_report_page == 'true' }}
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
-        echo "SYSTEM TESTS REPORT LINK:"
+        echo
+        echo "======================================================"
+        echo "SYSTEM TESTS HTML REPORTS:"
+        echo "======================================================"
+        echo
         echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
         echo "FLAKY SYSTEM TESTS REPORT LINK:"
         echo "https://0chain.github.io/system_test/${{ env.BRANCH }}/${GITHUB_SHA}/flaky/index.html"

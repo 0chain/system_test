@@ -75,7 +75,11 @@ runs:
     - name: "VIEW DEPLOY CONFIGURATION"
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "=================================================="
         echo "DEPLOYING 0CHAIN WITH THE FOLLOWING CONFIGURATION:"
+        echo "=================================================="
+        echo
         echo "0Chain network URL:     [${{ env.NETWORK_URL }}]"
         echo "Miner docker image:     [${{ env.MINER_TAG }}]"
         echo "Sharder docker image:   [${{ env.SHARDER_TAG }}]"
@@ -104,6 +108,11 @@ runs:
       if: github.event_name == 'push' || inputs.existing_network == ''
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "=================================================="
+        echo "CONFIGURING HELM"
+        echo "=================================================="
+        echo
         helm repo add 0chain-helm http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/latest/
         helm repo add 0chain-helm2 http://0chain-helm-chart.s3-website.us-east-2.amazonaws.com/helmCharts/
         helm repo update
@@ -114,6 +123,11 @@ runs:
       if: github.event_name == 'push' || inputs.existing_network == ''
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "=================================================="
+        echo "REMOVING EXISTING 0CHAIN NETWORK"
+        echo "=================================================="
+        echo
         output=$(helm list -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | wc -l);
         if [ $output -gt 1 ]; then
             helm list --short -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config" -a | xargs -L1 helm delete -n ${{ env.NAMESPACE }} --kubeconfig "./kube/${{ env.NAMESPACE }}-config"
@@ -128,6 +142,11 @@ runs:
       if: github.event_name == 'push' || inputs.existing_network == ''
       shell: 'script --return --quiet --command "bash {0}"'
       run: |
+        echo
+        echo "=================================================="
+        echo "DEPLOYING 0CHAIN NETWORK"
+        echo "=================================================="
+        echo
         helm upgrade --install --wait  0chain --set sharder.persistence.enabled=true --set miner.persistence.enabled=true --set sharder.image.tag=${{ env.SHARDER_TAG }} --set miner.image.tag=${{ env.MINER_TAG }} -n ${{ env.NAMESPACE }} 0chain-helm/zchain --kubeconfig ./kube/${{ env.NAMESPACE }}-config
         helm upgrade --install --wait  0dns --set zdns.persistence.enabled=true --set zdns.image.tag=${{ env.ZDNS_TAG }} --set zdns.host=devnet-0chain.net -n ${{ env.NAMESPACE }}  0chain-helm/zdns --kubeconfig ./kube/${{ env.NAMESPACE }}-config
         helm upgrade --install --wait  blobber --set blobber.persistence.enabled=true --set blobber.host=devnet-0chain.net --set blobber.image.tag=${{ env.BLOBBER_TAG }} --set validator.image.tag=${{ env.VALIDATOR_TAG }} -n ${{ env.NAMESPACE }}  0chain-helm/blobber --kubeconfig ./kube/${{ env.NAMESPACE }}-config
