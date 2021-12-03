@@ -27,7 +27,7 @@ on:
         required: false
       miner_image:
         description: 'miner DOCKER IMAGE to deploy'
-        default: 'staging'
+        default: 'staging-556fedc2'
         required: false
       sharder_image:
         description: 'sharder DOCKER IMAGE to deploy'
