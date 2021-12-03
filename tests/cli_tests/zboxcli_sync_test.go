@@ -123,7 +123,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 	})
 
 	t.Run("Sync path to empty allocation - exclude a path should work", func(t *testing.T) {
-		// t.Parallel()
+		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)

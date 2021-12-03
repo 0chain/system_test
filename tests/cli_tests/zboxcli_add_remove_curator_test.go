@@ -242,7 +242,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		expectedOutput := fmt.Sprintf("%s added %s as a curator to allocation %s", curatorWallet.ClientID, curatorWallet.ClientID, allocationID)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
-		wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		allocation = getAllocation(t, allocationID)
 		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
