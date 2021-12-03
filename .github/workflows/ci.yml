@@ -31,7 +31,7 @@ on:
         required: false
       sharder_image:
         description: 'sharder DOCKER IMAGE to deploy'
-        default: 'staging'
+        default: 'staging-556fedc2'
         required: false
       blobber_image:
         description: 'blobber DOCKER IMAGE to deploy'

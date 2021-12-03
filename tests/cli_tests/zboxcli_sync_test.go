@@ -19,7 +19,85 @@ import (
 func TestSyncWithBlobbers(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Sync path to non-empty allocation - locally updated files must be updated in allocation", func(t *testing.T) {
+	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localFolderRoot := filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
+		err := os.MkdirAll(localFolderRoot, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localFolderRoot)
+		defer os.RemoveAll(localFolderRoot)
+
+		// Create a local file in root
+		err = createFileWithSize(path.Join(localFolderRoot, "root.txt"), 32*KB)
+		require.Nil(t, err, "Cannot create a local file")
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file_initial climodel.AllocationFile
+		for _, item := range files {
+			if item.Name == "root.txt" {
+				file_initial = item
+			}
+		}
+		require.NotNil(t, file_initial, "sync error, file 'root.txt' must be uploaded to allocation", files)
+
+		// Update the local file in root
+		err = createFileWithSize(path.Join(localFolderRoot, "root.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		var differences []climodel.FileDiff
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 1, "we updated a file, we except 1 change but we got %v", len(differences), differences)
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == "root.txt" {
+				file = item
+			}
+		}
+		require.NotNil(t, file, "sync error, file 'root.txt' must've been uploaded to the allocation", files2)
+
+		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
+	})
+
+	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
