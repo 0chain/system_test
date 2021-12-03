@@ -119,7 +119,6 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.Greater(t, file1.Size, file1_initial.Size, "file1 expected to be updated to bigger size")
 		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
-
 	})
 
 	t.Run("Sync path to empty allocation - exclude a path should work", func(t *testing.T) {
@@ -230,7 +229,6 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.Greater(t, includedFile_final.Size, includedFile_initial.Size, "included file expected to be updated to bigger size")
 		require.Equal(t, excludedFile_initial.Size, excludedFile_final.Size, "excluded file expected to NOT be updated")
-
 	})
 
 	t.Run("Sync path to NON-empty allocation (Replace Existing File) should work", func(t *testing.T) {
