@@ -99,11 +99,11 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price                int64   `json:"read_price"`
-	Write_price               int64   `json:"write_price"`
-	Min_lock_demand           float64 `json:"min_lock_demand"`
-	Max_offer_duration        int64   `json:"max_offer_duration"`
-	Challenge_completion_time int64   `json:"challenge_completion_time"`
+	Read_price                int64         `json:"read_price"`
+	Write_price               int64         `json:"write_price"`
+	Min_lock_demand           float64       `json:"min_lock_demand"`
+	Max_offer_duration        int64         `json:"max_offer_duration"`
+	Challenge_completion_time time.Duration `json:"challenge_completion_time"`
 }
 
 type Settings struct {
@@ -331,4 +331,15 @@ type FileStats struct {
 	BlobberURL          string    `json:"blobber_url"`
 	BlockchainAware     bool      `json:"blockchain_aware"`
 	CreatedAt           time.Time `json:"CreatedAt"`
+}
+
+type BlobberDetails struct {
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	Terms             Terms             `json:"terms"`
+	Capacity          int64             `json:"capacity"`
+	Used              int64             `json:"used"`
+	LastHealthCheck   int64             `json:"last_health_check"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
