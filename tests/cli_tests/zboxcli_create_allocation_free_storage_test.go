@@ -1,0 +1,346 @@
+package cli_tests
+
+import (
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"golang.org/x/crypto/sha3"
+
+	"github.com/herumi/bls-go-binary/bls"
+
+	"github.com/stretchr/testify/require"
+
+	apimodel "github.com/0chain/system_test/internal/api/model"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+)
+
+const (
+	chainID                     = "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
+	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
+	txnTypeSmartContract        = 1000 // A smart contract transaction type
+)
+
+func init() {
+	err := bls.Init(bls.CurveFp254BNb)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestCreateAllocationFreeStorage(t *testing.T) {
+	t.Parallel()
+
+	// free_allocation_settings.data_shards     10
+	// free_allocation_settings.duration        50h0m0s
+	// free_allocation_settings.max_challenge_completion_time   1m0s
+	// free_allocation_settings.parity_shards   5
+	// free_allocation_settings.read_pool_fraction      0.2
+	// free_allocation_settings.read_price_range.max    0.04
+	// free_allocation_settings.read_price_range.min    0
+	// free_allocation_settings.size    10000000000
+	// free_allocation_settings.write_price_range.max   0.04
+	// free_allocation_settings.write_price_range.min   0
+
+	configKeyDataShards := "free_allocation_settings.data_shards"
+	configKeyParityShards := "free_allocation_settings.parity_shards"
+	configKeySize := "free_allocation_settings.size"
+	configKeyMcct := "free_allocation_settings.max_challenge_completion_time"
+	configKeyReadPriceRangeMax := "free_allocation_settings.read_price_range.max"
+	configKeyWritePriceRangeMax := "free_allocation_settings.write_price_range.max"
+	configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
+	configKeyDuration := "free_allocation_settings.duration"
+
+	keys := strings.Join([]string{
+		configKeyDataShards,
+		configKeyParityShards,
+		configKeySize,
+		configKeyMcct,
+		configKeyReadPriceRangeMax,
+		configKeyWritePriceRangeMax,
+		configKeyDuration,
+	}, ",")
+
+	output, err := getStorageSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+	cfgBefore := map[string]string{}
+	for _, o := range output {
+		configPair := strings.Split(o, "\t")
+		cfgBefore[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
+	}
+
+	// ensure revert in config is run regardless of test result
+	defer func() {
+		oldValues := strings.Join([]string{
+			cfgBefore[configKeyDataShards],
+			cfgBefore[configKeyParityShards],
+			cfgBefore[configKeySize],
+			cfgBefore[configKeyMcct],
+			cfgBefore[configKeyReadPriceRangeMax],
+			cfgBefore[configKeyWritePriceRangeMax],
+			cfgBefore[configKeyDuration],
+		}, ",")
+
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   keys,
+			"values": oldValues,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	}()
+
+	newValues := strings.Join([]string{
+		"2",      // decreasing data shards from default 10
+		"2",      // decreasing parity shards from default 5
+		"100000", // decreasing size from default 10000000000
+		"3m",     // increasing mcct from default 1m0s
+		"1",      // increasing read price range max from default 0.04
+		"1",      // increasing write price range max from default 0.04
+		"1h0m0s", // lowering duration from default 50h0m0s
+	}, ",")
+
+	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		"keys":   keys,
+		"values": newValues,
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+
+	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
+
+		assigner := escapedTestName(t) + "_ASSIGNER"
+		recipient := escapedTestName(t)
+
+		// register SC owner wallet
+		output, err := registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		// register assigner wallet
+		output, err = registerWalletForName(t, configPath, assigner)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		// Open the wallet file themselves to get private key for signing data
+		ownerWallet := getZCNWallet(t, "./config/"+scOwnerWallet+"_wallet.json")
+		assignerWallet := getZCNWallet(t, "./config/"+assigner+"_wallet.json")
+
+		// miners list
+		output, err = getMiners(t, configPath)
+		require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var miners climodel.NodeList
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+		require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+		freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
+		err = sendTxn(miners, freeAllocAssignerTxn)
+		require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
+
+		output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
+		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Transaction verification success", output[0])
+
+		// TODO REMOVE THIS
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		readPoolFraction, err := strconv.ParseFloat(cfgBefore[configKeyReadPoolFraction], 64)
+		require.Nil(t, err, "Read pool fraction config is not float: %s", cfgBefore[configKeyReadPoolFraction])
+
+		wantReadPoolFraction := marker.FreeTokens * readPoolFraction
+		wantWritePoolToken := marker.FreeTokens - wantReadPoolFraction
+
+		// Verify write and read pools are set with tokens
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		writePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &writePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Len(t, writePool, 1, "More than 1 write pool found", strings.Join(output, "\n"))
+		require.Equal(t, ConvertToValue(wantWritePoolToken), writePool[0].Balance, "Expected write pool amount not met", strings.Join(output, "\n"))
+
+		readPool := getReadPoolInfo(t, allocationID)
+		require.Len(t, readPool, 1, "Read pool must exist")
+		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+	})
+
+	// TODO Create free storage
+	// TODO Create free storage with malformed marker should fail
+	// TODO Create free storage with invalid marker contents should fail
+	// TODO Create free storage with invalid marker signature should fail
+	// TODO Create free storage with wrong recipient wallet should fail
+	// TODO Create free storage with tokens exceeding assigner's individual limit should fail
+	// TODO Create free storage with tokens exceeding assigner's total limit should fail
+}
+
+func getZCNWallet(t *testing.T, file string) *climodel.WalletFile {
+	wallet := &climodel.WalletFile{}
+
+	f, err := os.Open(file)
+	require.Nil(t, err, "wallet file %s not found", file)
+
+	ownerWalletBytes, err := ioutil.ReadAll(f)
+	require.Nil(t, err, "error reading wallet file %s", file)
+
+	err = json.Unmarshal(ownerWalletBytes, wallet)
+	require.Nil(t, err, "error marshaling wallet content")
+
+	return wallet
+}
+
+func sendTxn(miners climodel.NodeList, txn *apimodel.Transaction) error {
+	var (
+		err error
+		wg  sync.WaitGroup
+	)
+
+	for i := range miners.Nodes {
+		wg.Add(1)
+		go func(node climodel.Node) {
+			defer wg.Done()
+			_, apiErr := apiPutTransaction(getNodeBaseURL(node.Host, node.Port), txn)
+			if apiErr != nil {
+				err = apiErr
+			}
+		}(miners.Nodes[i])
+	}
+	wg.Wait()
+
+	return err
+}
+
+func apiPutTransaction(minerBaseURL string, txn *apimodel.Transaction) (*http.Response, error) {
+	txnData, err := json.Marshal(txn)
+	if err != nil {
+		return nil, err
+	}
+
+	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
+}
+
+func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile) *apimodel.Transaction {
+	txn := &apimodel.Transaction{}
+	txn.Version = "1.0"
+	txn.ClientId = from.ClientID
+	txn.CreationDate = time.Now().Unix()
+	txn.ChainId = chainID
+	txn.PublicKey = from.ClientKey
+	txn.TransactionType = txnTypeSmartContract
+	txn.ToClientId = storageSmartContractAddress
+	txn.TransactionValue = 0
+
+	input := map[string]interface{}{
+		"name":             assigner.ClientID,
+		"public_key":       assigner.ClientKey,
+		"individual_limit": 10.0,
+		"total_limit":      20.0,
+	}
+
+	sn := apimodel.SmartContractTxnData{Name: "add_free_storage_assigner", InputArgs: input}
+	snBytes, err := json.Marshal(sn)
+	require.Nil(t, err, "error marshaling smart contract data")
+
+	txn.TransactionData = string(snBytes)
+	txn.Hash = txnHash(txn)
+	txn.Signature = sign(t, txn.Hash, from)
+
+	return txn
+}
+
+func sign(t *testing.T, data string, wallet *climodel.WalletFile) string {
+	rawHash, err := hex.DecodeString(data)
+	require.Nil(t, err, "failed to decode hex %s", data)
+	require.NotNil(t, rawHash, "failed to decode hex %s", data)
+
+	var sk bls.SecretKey
+	sk.SetByCSPRNG()
+	err = sk.DeserializeHexStr(wallet.Keys[0].PrivateKey)
+	require.Nil(t, err, "failed to serialize hex of private key")
+
+	sig := sk.Sign(string(rawHash))
+
+	return sig.SerializeToHexStr()
+}
+
+func txnHash(txn *apimodel.Transaction) string {
+	hashdata := fmt.Sprintf("%v:%v:%v:%v:%v", txn.CreationDate, txn.ClientId,
+		txn.ToClientId, txn.TransactionValue, hash(txn.TransactionData))
+	return hash(hashdata)
+}
+
+func hash(data string) string {
+	h := sha3.New256()
+	h.Write([]byte(data))
+	var buf []byte
+	return hex.EncodeToString(h.Sum(buf))
+}

@@ -12,6 +12,7 @@ type Transaction struct {
 	ClientId          string `json:"client_id"`
 	ToClientId        string `json:"to_client_id"`
 	ChainId           string `json:"chain_id"`
+	PublicKey         string `json:"public_key,omitempty"`
 	TransactionData   string `json:"transaction_data"`
 	TransactionValue  int64  `json:"transaction_value"`
 	Signature         string `json:"signature"`
@@ -21,6 +22,11 @@ type Transaction struct {
 	TransactionOutput string `json:"transaction_output,omitempty"`
 	TxnOutputHash     string `json:"txn_output_hash"`
 	TransactionStatus int    `json:"transaction_status"`
+}
+
+type SmartContractTxnData struct {
+	Name      string      `json:"name"`
+	InputArgs interface{} `json:"input"`
 }
 
 type Block struct {
