@@ -76,7 +76,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	}, ",")
 
 	output, err = getStorageSCConfig(t, configPath, true)
-	fmt.Println(strings.Join(output, "\n"))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -176,18 +175,18 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, "Transaction verification success", output[0])
 
 		// TODO REMOVE THIS
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		//executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
+		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
