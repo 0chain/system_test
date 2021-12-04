@@ -75,6 +75,5 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
-          sleep 60
+          sleep 120
