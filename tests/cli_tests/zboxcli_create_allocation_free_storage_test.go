@@ -52,6 +52,10 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	// free_allocation_settings.write_price_range.max   0.04
 	// free_allocation_settings.write_price_range.min   0
 
+	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
 	configKeyDataShards := "free_allocation_settings.data_shards"
 	configKeyParityShards := "free_allocation_settings.parity_shards"
 	configKeySize := "free_allocation_settings.size"
@@ -71,7 +75,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		configKeyDuration,
 	}, ",")
 
-	output, err := getStorageSCConfig(t, configPath, true)
+	output, err = getStorageSCConfig(t, configPath, true)
+	fmt.Println(strings.Join(output, "\n"))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
