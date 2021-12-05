@@ -128,7 +128,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
