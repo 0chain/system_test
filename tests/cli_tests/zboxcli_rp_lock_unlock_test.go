@@ -364,6 +364,8 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
+		cliutils.Wait(t, 5*time.Second)
+
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
