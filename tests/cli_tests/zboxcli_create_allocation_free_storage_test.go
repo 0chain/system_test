@@ -84,7 +84,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	configKeyReadPriceRangeMax := "free_allocation_settings.read_price_range.max"
 	configKeyWritePriceRangeMax := "free_allocation_settings.write_price_range.max"
 	configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
-	configKeyDuration := "free_allocation_settings.duration"
 
 	keys := strings.Join([]string{
 		configKeyDataShards,
@@ -93,7 +92,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		configKeyMcct,
 		configKeyReadPriceRangeMax,
 		configKeyWritePriceRangeMax,
-		configKeyDuration,
 	}, ",")
 
 	output, err = getStorageSCConfig(t, configPath, true)
@@ -115,7 +113,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 			cfgBefore[configKeyMcct],
 			cfgBefore[configKeyReadPriceRangeMax],
 			cfgBefore[configKeyWritePriceRangeMax],
-			cfgBefore[configKeyDuration],
 		}, ",")
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
@@ -135,7 +132,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		"3m",     // increasing mcct from default 1m0s
 		"1",      // increasing read price range max from default 0.04
 		"1",      // increasing write price range max from default 0.04
-		"1h0m0s", // lowering duration from default 50h0m0s
 	}, ",")
 
 	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
@@ -177,20 +173,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		// TODO REMOVE THIS
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
-		// executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
