@@ -29,6 +29,9 @@ const (
 	chainID                     = "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
 	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
 	txnTypeSmartContract        = 1000 // A smart contract transaction type
+
+	freeTokensIndividualLimit = 10.0
+	freeTokensTotalLimit      = 100.0
 )
 
 func init() {
@@ -52,8 +55,26 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	// free_allocation_settings.write_price_range.max   0.04
 	// free_allocation_settings.write_price_range.min   0
 
+	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+	}
+
+	assigner := escapedTestName(t) + "_ASSIGNER"
+
+	// register SC owner wallet
+	output, err := registerWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+	// register assigner wallet
+	output, err = registerWalletForName(t, configPath, assigner)
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+	// Open the wallet file themselves to get private key for signing data
+	ownerWallet := getZCNWallet(t, "./config/"+scOwnerWallet+"_wallet.json")
+	assignerWallet := getZCNWallet(t, "./config/"+assigner+"_wallet.json")
+
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err := registerWallet(t, configPath)
+	output, err = registerWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 	configKeyDataShards := "free_allocation_settings.data_shards"
@@ -126,23 +147,29 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
+	// miners list
+	output, err = getMiners(t, configPath)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
+	err = sendTxn(miners, freeAllocAssignerTxn)
+	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
+
+	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
+	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+	require.Equal(t, "Transaction verification success", output[0])
+
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
 		t.Parallel()
 
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
-		assigner := escapedTestName(t) + "_ASSIGNER"
 		recipient := escapedTestName(t)
-
-		// register SC owner wallet
-		output, err := registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register assigner wallet
-		output, err = registerWalletForName(t, configPath, assigner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
@@ -150,29 +177,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		// Open the wallet file themselves to get private key for signing data
-		ownerWallet := getZCNWallet(t, "./config/"+scOwnerWallet+"_wallet.json")
-		assignerWallet := getZCNWallet(t, "./config/"+assigner+"_wallet.json")
-
-		// miners list
-		output, err = getMiners(t, configPath)
-		require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var miners climodel.NodeList
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
-		require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
-
-		freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
-		err = sendTxn(miners, freeAllocAssignerTxn)
-		require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
-
-		output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
-		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Transaction verification success", output[0])
 
 		// TODO REMOVE THIS
 		// executeFaucetWithTokensForWallet(t, assigner, configPath, 1)
@@ -238,13 +242,165 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
 	})
 
-	// TODO Create free storage
+	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
+		t.Parallel()
+
+		// register recipient wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, []byte("bad marker json"), 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
+	})
+
+	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
+		t.Parallel()
+
+		// register recipient wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, []byte(`{"invalid_marker":true}`), 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
+		t.Parallel()
+
+		recipient := escapedTestName(t)
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		marker.Signature = "badsignature"
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
+		t.Parallel()
+
+		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
+
+		// register correct recipient wallet
+		output, err = registerWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		// register this wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipientCorrect + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
+		t.Parallel()
+
+		recipient := escapedTestName(t)
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: freeTokensIndividualLimit + 1,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+	})
+
+	// TODO Create free storage (not yet succeeding)
 	// TODO Create free storage with malformed marker should fail
 	// TODO Create free storage with invalid marker contents should fail
 	// TODO Create free storage with invalid marker signature should fail
 	// TODO Create free storage with wrong recipient wallet should fail
 	// TODO Create free storage with tokens exceeding assigner's individual limit should fail
-	// TODO Create free storage with tokens exceeding assigner's total limit should fail
 }
 
 func getZCNWallet(t *testing.T, file string) *climodel.WalletFile {
@@ -306,8 +462,8 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	input := map[string]interface{}{
 		"name":             assigner.ClientID,
 		"public_key":       assigner.ClientKey,
-		"individual_limit": 10.0,
-		"total_limit":      20.0,
+		"individual_limit": freeTokensIndividualLimit,
+		"total_limit":      freeTokensTotalLimit,
 	}
 
 	sn := apimodel.SmartContractTxnData{Name: "add_free_storage_assigner", InputArgs: input}
