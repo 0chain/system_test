@@ -4,10 +4,6 @@ on:
   push:
   workflow_dispatch:
     inputs:
-      test_run_description:
-        description: '(OPTIONAL) Add a description/label for this test run. This will allow you to differentiate between test runs later'
-        default: ''
-        required: false
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
         default: 'staging'
@@ -17,7 +13,7 @@ on:
         default: 'staging'
         required: true
       existing_network:
-        description: '(OPTIONAL): EXISTING NETWORK to run system tests against INSTEAD OF DEPLOYING A NEW NETWORK. [example: dev.0chain.net]'
+        description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
       miner_image:
@@ -43,6 +39,10 @@ on:
       zblock_image:
         description: '0block DOCKER IMAGE to deploy'
         default: 'staging'
+        required: false
+      explorer_image:
+        description: 'explorer DOCKER IMAGE to deploy'
+        default: 'latest'
         required: false
 
 jobs:
@@ -85,8 +85,9 @@ jobs:
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
-          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
+          echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
+          echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
@@ -103,7 +104,7 @@ jobs:
           zbox_image: env.ZBOX_TAG
           zblock_image: env.ZBLOCK_TAG
           zdns_image: env.ZDNS_TAG
-          explorer_image: latest
+          explorer_image: env.EXPLORER_TAG
           zproxy_image: staging
           zsearch_image: staging
           blobber_stake_image: latest
