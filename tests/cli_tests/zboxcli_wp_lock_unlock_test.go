@@ -368,6 +368,8 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
+		cliutils.Wait(t, 5*time.Second)
+
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
