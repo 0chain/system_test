@@ -826,7 +826,7 @@ func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID stri
 		case <-timeout:
 			return false
 		default:
-			time.Sleep(time.Second * 10)
+			cliutils.Wait(t, time.Second*10)
 		}
 	}
 }

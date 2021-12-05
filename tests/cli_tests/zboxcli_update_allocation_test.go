@@ -682,7 +682,7 @@ func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params 
 }
 
 func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second)
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing allocations...")
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent "+
