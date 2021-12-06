@@ -138,7 +138,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 1)
+		require.Len(t, files, 2)
 
 		// check if expected file was not renamed
 		foundAtSource := false
