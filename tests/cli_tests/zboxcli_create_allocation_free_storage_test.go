@@ -126,12 +126,12 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	}()
 
 	newValues := strings.Join([]string{
-		"2",      // decreasing data shards from default 10
-		"2",      // decreasing parity shards from default 5
-		"100000", // decreasing size from default 10000000000
-		"3m",     // increasing mcct from default 1m0s
-		"1",      // increasing read price range max from default 0.04
-		"1",      // increasing write price range max from default 0.04
+		"1",    // decreasing data shards from default 10
+		"1",    // decreasing parity shards from default 5
+		"1024", // decreasing size from default 10000000000
+		"3m",   // increasing mcct from default 1m0s
+		"1",    // increasing read price range max from default 0.04
+		"1",    // increasing write price range max from default 0.04
 	}, ",")
 
 	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
