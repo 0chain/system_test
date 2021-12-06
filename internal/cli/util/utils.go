@@ -23,7 +23,7 @@ func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, sanitizeOutput(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
 }
