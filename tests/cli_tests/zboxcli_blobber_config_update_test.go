@@ -40,24 +40,18 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobberList[0].ID}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
+		intialBlobberInfo := blobberList[0]
 
-		var intialBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&intialBlobberInfo)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		oldChallengeCompletionTime := intialBlobberInfo.Terms.Challenge_completion_time
+		oldCapacity := intialBlobberInfo.Capacity
 		defer func() {
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberList[0].ID, "cct": oldChallengeCompletionTime}))
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": oldCapacity}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 		}()
-		newChallengeCompletionTime := 110000 * time.Second
 
-		// BUG: Wallet not able to update blobber details.
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberList[0].ID, "cct": newChallengeCompletionTime}))
+		newCapacity := 90*GB
+
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -69,7 +63,50 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		assert.Equal(t, finalBlobberInfo.Terms.Challenge_completion_time, newChallengeCompletionTime)
+		assert.Equal(t, finalBlobberInfo.Capacity, newCapacity)
+	})
+
+	t.Run("update blobber challenge completion time should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var blobberList []climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		intialBlobberInfo := blobberList[0]
+
+		oldChallengeCompletionTIme := intialBlobberInfo.Terms.Challenge_completion_time
+		defer func() {
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "cct": oldChallengeCompletionTIme}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}()
+
+		newChallengeCompletionTIme := 90*GB
+
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "cct": newChallengeCompletionTIme}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobberList[0].ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		assert.Equal(t, finalBlobberInfo.Terms.Challenge_completion_time, newChallengeCompletionTIme)
 	})
 }
 
