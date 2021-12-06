@@ -130,7 +130,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
+		require.Equal(t, "Copy failed: Commit consensus failed", output[0], "The message no longer matches expected, the issue of incorrect error message may have been fixed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -140,6 +140,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		//FIXME the copy action actually creates the new directory, but does not copy the file
 		require.Len(t, files, 2)
 
 		// check if file was not copied

@@ -128,7 +128,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code
 		require.Len(t, output, 1)
 		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
+		require.Equal(t, "Copy failed: Commit consensus failed", output[0], "The message no longer matches expected, the issue of incorrect error message may have been fixed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -138,6 +138,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		//FIXME the move action actually creates the new directory, but does not move the file
 		require.Len(t, files, 2)
 
 		// check if expected file was not renamed
