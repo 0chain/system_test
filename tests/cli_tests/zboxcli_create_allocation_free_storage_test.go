@@ -70,7 +70,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	configKeyMcct := "free_allocation_settings.max_challenge_completion_time"
 	configKeyReadPriceRangeMax := "free_allocation_settings.read_price_range.max"
 	configKeyWritePriceRangeMax := "free_allocation_settings.write_price_range.max"
-	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
+	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction" // nolint:gocritic
 
 	keys := strings.Join([]string{
 		configKeyDataShards,
