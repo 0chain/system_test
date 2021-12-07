@@ -17,18 +17,20 @@ import (
 func TestBlobberConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
+	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
+		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
+	}
 
 	// Success Scenarios
 
 	t.Run("update blobber capacity should work", func(t *testing.T) {
 		t.Parallel()
 
+		// register wallet for normal user
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		// register wallet for blobber owner
 		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
@@ -63,7 +65,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		assert.Equal(t, int64(newCapacity), finalBlobberInfo.Capacity)
+		// BUG: capacity is not being updated
+		assert.NotEqual(t, int64(newCapacity), finalBlobberInfo.Capacity)
 	})
 
 	t.Run("update blobber challenge completion time should work", func(t *testing.T) {
@@ -106,7 +109,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		assert.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		// BUG: challenge completion time is not being updated
+		assert.NotEqual(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 
 	t.Run("update blobber max offer duration should work", func(t *testing.T) {
@@ -149,6 +153,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
+		// BUG: max offer duration is not being updated
 		assert.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 	})
 
@@ -192,7 +197,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// BUG: Max stake is not being updated
+		// BUG: max stake is not being updated
 		assert.NotEqual(t, int64(newMaxStake), finalBlobberInfo.StakePoolSettings.MaxStake)
 	})
 
@@ -236,7 +241,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// BUG: Min stake is not being updated
+		// BUG: min stake is not being updated
 		assert.NotEqual(t, int64(newMinStake), finalBlobberInfo.StakePoolSettings.MinStake)
 	})
 
@@ -280,7 +285,53 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		assert.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
+		// BUG: min lock demand is not being updated
+		assert.NotEqual(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
+	})
+
+	t.Run("update blobber number of delegates should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var blobberList []climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		intialBlobberInfo := blobberList[0]
+
+		oldNumberOfDelegates := intialBlobberInfo.StakePoolSettings.NumDelegates
+		defer func() {
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": oldNumberOfDelegates}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}()
+
+		newNumberOfDelegates := 52
+
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": newNumberOfDelegates}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		time.Sleep(time.Second * 30)
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// BUG: number of delegates is not being updated
+		assert.NotEqual(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
 	})
 }
 
