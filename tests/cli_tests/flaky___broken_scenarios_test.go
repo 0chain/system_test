@@ -211,6 +211,118 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
 	})
 
+	// based on zbox documents, exlude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
+	// So this is failing due to the whole update in sync is failing.
+	t.Run("Sync path to empty allocation - exclude a path should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		// We want to exclude the folder containing this file from being synced
+		excludedFileName := "file1.txt"
+		excludedFolderName := "excludedFolder"
+		includedFileName := "file2.txt"
+		includedFolderName := "includedFolder"
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			includedFolderName: map[string]interface{}{
+				includedFileName: 8 * KB,
+			},
+			excludedFolderName: map[string]interface{}{
+				excludedFileName: 16 * KB,
+			},
+			"abc.txt": 32 * KB,
+		}
+
+		// Create files and folders based on defined structure recursively
+		rootLocalFolder, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
+		defer os.RemoveAll(rootLocalFolder)
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_initial climodel.AllocationFile
+		var excludedFile_initial climodel.AllocationFile
+
+		for _, item := range files {
+			if item.Name == includedFileName {
+				includedFile_initial = item
+			} else if item.Name == excludedFileName {
+				excludedFile_initial = item
+			}
+		}
+		require.NotNil(t, includedFile_initial, "sync error, file '%s' must be uploaded to allocation", includedFileName, files)
+		require.NotNil(t, excludedFile_initial, "sync error, file '%s' must be uploaded to allocation", excludedFile_initial, files)
+
+		// Update the local files
+		err = createFileWithSize(path.Join(rootLocalFolder, excludedFolderName, excludedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(path.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(path.Join(rootLocalFolder, "abc.txt"), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+			// "excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		var differences []climodel.FileDiff
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 3, "Since we added a file and we updated 2 files we expect 3 differences but we got %v", len(differences))
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   rootLocalFolder,
+			// "excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_final climodel.AllocationFile
+		var excludedFile_final climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == includedFileName {
+				includedFile_final = item
+			} else if item.Name == excludedFileName {
+				excludedFile_final = item
+			}
+		}
+		require.NotNil(t, includedFile_final, "sync error, file '%s' must be uploaded to allocation", includedFileName, files2)
+		require.NotNil(t, excludedFile_final, "sync error, file '%s' must be uploaded to allocation", excludedFileName, files2)
+
+		require.Greater(t, includedFile_final.Size, includedFile_initial.Size, "included file expected to be updated to bigger size")
+		require.Equal(t, excludedFile_initial.Size, excludedFile_final.Size, "excluded file expected to NOT be updated")
+	})
+
 	// The test is failing due to a possible bug.
 	// When owner downloads the file the cost is deduced from the read pool,
 	// But it seems the collaborators can download the file for free
