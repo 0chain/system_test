@@ -1464,7 +1464,7 @@ func TestShareFile(t *testing.T) {
 		}
 	})
 
-	t.Run("Share to public with available-after params should fail ", func(t *testing.T) {
+	t.Run("Share to public with available-after params should fail", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1499,8 +1499,6 @@ func TestShareFile(t *testing.T) {
 			"available-after": 1638371309,
 		}
 		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Cannot set available-after if the clientid is empty", output[0],
 			"share file - Unexpected output", strings.Join(output, "\n"))
 
