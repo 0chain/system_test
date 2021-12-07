@@ -180,6 +180,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		output, err = cancelAllocation(t, configPath, allocationID, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "cancel allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, "Allocation canceled with txId : [0-9a-f]+", output[0],
+			"cancel allocation - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
@@ -823,7 +826,7 @@ func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID stri
 		case <-timeout:
 			return false
 		default:
-			time.Sleep(time.Second * 10)
+			cliutils.Wait(t, time.Second*10)
 		}
 	}
 }

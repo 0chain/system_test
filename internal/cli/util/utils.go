@@ -23,7 +23,7 @@ func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, sanitizeOutput(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
 }
@@ -80,6 +80,11 @@ func RandomAlphaNumericString(n int) string {
 	}
 
 	return string(ret)
+}
+
+func Wait(t *testing.T, duration time.Duration) {
+	t.Logf("Waiting %s...", duration)
+	time.Sleep(duration)
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
