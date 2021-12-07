@@ -213,7 +213,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	// based on zbox documents, exlude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
 	// So this is failing due to the whole update in sync is failing.
-	t.Run("Sync path to empty allocation - exclude a path should work", func(t *testing.T) {
+	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
