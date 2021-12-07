@@ -19,6 +19,53 @@ import (
 func TestSyncWithBlobbers(t *testing.T) {
 	t.Parallel()
 
+	t.Run("Sync path with commit should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			"Folder A": map[string]interface{}{
+				"file 1.txt": 128 * KB,
+				"file 2.txt": 64 * KB,
+			},
+			"Folder B": map[string]interface{}{
+				"file 3.txt": 64 * KB,
+				"Folder C": map[string]interface{}{
+					"file 4.txt": 64 * KB,
+				},
+			},
+			"abc.txt": 128 * KB, // Create a file with same name but different size
+		}
+
+		// Create files and folders based on defined structure recursively
+		localpath, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, localpath)
+		defer os.RemoveAll(localpath)
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"commit":     true,
+			"localpath":  localpath,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		// This will traverse the tree and asserts the existent of the files
+		assertFileExistenceRecursively(t, mockFolderStructure, files)
+	})
+
 	t.Run("Sync path with chunk size specified should work", func(t *testing.T) {
 		t.Parallel()
 
