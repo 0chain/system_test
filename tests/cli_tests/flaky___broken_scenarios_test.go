@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -20,6 +19,8 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
+
+//nolint:gocyclo
 func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
@@ -41,7 +42,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		defer os.RemoveAll(localFolderRoot)
 
 		// Create a local file in root
-		err = createFileWithSize(path.Join(localFolderRoot, "root.txt"), 32*KB)
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 32*KB)
 		require.Nil(t, err, "Cannot create a local file")
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
@@ -68,7 +69,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.NotNil(t, file_initial, "sync error, file 'root.txt' must be uploaded to allocation", files)
 
 		// Update the local file in root
-		err = createFileWithSize(path.Join(localFolderRoot, "root.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 128*KB)
 		require.Nil(t, err, "Cannot update the local file")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
@@ -161,11 +162,11 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		}
 
 		// Update the local files in sub folders
-		err = createFileWithSize(path.Join(rootLocalFolder, "folder1", "file-in-folder1.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder1", "file-in-folder1.txt"), 128*KB)
 		require.Nil(t, err, "Cannot update the local file")
-		err = createFileWithSize(path.Join(rootLocalFolder, "folder2", "file-in-folder2.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder2", "file-in-folder2.txt"), 128*KB)
 		require.Nil(t, err, "Cannot update the local file")
-		err = createFileWithSize(path.Join(rootLocalFolder, "root.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "root.txt"), 128*KB)
 		require.Nil(t, err, "Cannot update the local file")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
@@ -272,11 +273,11 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.NotNil(t, excludedFile_initial, "sync error, file '%s' must be uploaded to allocation", excludedFile_initial, files)
 
 		// Update the local files
-		err = createFileWithSize(path.Join(rootLocalFolder, excludedFolderName, excludedFileName), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, excludedFolderName, excludedFileName), 128*KB)
 		require.Nil(t, err, "Cannot change the file size")
-		err = createFileWithSize(path.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
 		require.Nil(t, err, "Cannot change the file size")
-		err = createFileWithSize(path.Join(rootLocalFolder, "abc.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "abc.txt"), 128*KB)
 		require.Nil(t, err, "Cannot change the file size")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
@@ -574,11 +575,11 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		path, err := filepath.Abs("tmp")
+		tmp, err := filepath.Abs("tmp")
 		require.Nil(t, err)
 
 		filename := cliutils.RandomAlphaNumericString(10) + "_test.txt"
-		fullPath := fmt.Sprintf("%s/%s", path, filename)
+		fullPath := fmt.Sprintf("%s/%s", tmp, filename)
 		err = createFileWithSize(fullPath, 1024*5)
 		require.Nil(t, err, "error while generating file: ", err)
 

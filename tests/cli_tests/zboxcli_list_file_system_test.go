@@ -514,18 +514,8 @@ func extractAuthToken(str string) (string, error) {
 
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
-	rand.Read(buffer)
-	return ioutil.WriteFile(name, buffer, 0666)
-	// f, err := os.Create(name)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if err := f.Truncate(size); err != nil {
-	// 	return err
-	// }
-
-	// return nil
+	rand.Read(buffer) //nolint:gosec,revive
+	return ioutil.WriteFile(name, buffer, os.ModePerm)
 }
 
 func generateRandomTestFileName(t *testing.T) string {
