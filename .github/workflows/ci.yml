@@ -18,11 +18,11 @@ on:
         required: false
       miner_image:
         description: 'miner DOCKER IMAGE to deploy'
-        default: 'staging-556fedc2'
+        default: 'staging'
         required: false
       sharder_image:
         description: 'sharder DOCKER IMAGE to deploy'
-        default: 'staging-556fedc2'
+        default: 'staging'
         required: false
       blobber_image:
         description: 'blobber DOCKER IMAGE to deploy'
