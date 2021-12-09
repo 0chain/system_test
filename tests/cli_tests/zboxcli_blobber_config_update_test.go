@@ -465,9 +465,9 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		assert.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 	})
 
-	// // failure scenarios
+	// failure scenarios
 
-	t.Run("update all params at once should work", func(t *testing.T) {
+	t.Run("update all params at once should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -513,7 +513,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		newMaxStake := intialBlobberInfo.StakePoolSettings.MaxStake + 1
 		newChallengeCompletionTIme := intialBlobberInfo.Terms.Challenge_completion_time + 1*time.Second
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice,"service_charge": newServiceCharge, "read_price": newReadPrice, "number_of_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake, "challenge_completion_time": newChallengeCompletionTIme}))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice, "service_charge": newServiceCharge, "read_price": newReadPrice, "number_of_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake, "challenge_completion_time": newChallengeCompletionTIme}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
