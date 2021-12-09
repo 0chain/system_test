@@ -221,6 +221,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 }
 
 func getInterestPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving interest pool config...")
 
 	cmd := "./zwallet ip-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename

@@ -202,6 +202,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 }
 
 func getVestingPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving vesting config...")
 
 	cmd := "./zwallet vp-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename

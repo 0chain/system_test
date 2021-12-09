@@ -202,6 +202,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 }
 
 func getFaucetSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving faucet config...")
 
 	cmd := "./zwallet fc-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
