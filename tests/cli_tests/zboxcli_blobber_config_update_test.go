@@ -359,7 +359,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 			require.Len(t, output, 1)
 		}()
 
-		newReadPrice := 52
+		newReadPrice := oldReadPrice + 1
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -403,7 +403,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 			require.Len(t, output, 1)
 		}()
 
-		newWritePrice := 52
+		newWritePrice := oldWritePrice + 1
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -465,7 +465,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		assert.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 	})
 
-	// failure scenarios
+	failure scenarios
 
 	t.Run("update all params at once should fail", func(t *testing.T) {
 		t.Parallel()
@@ -497,7 +497,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		oldMaxStake := intialBlobberInfo.StakePoolSettings.MaxStake
 		oldChallengeCompletionTIme := intialBlobberInfo.Terms.Challenge_completion_time
 		defer func() {
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": oldWritePrice, "service_charge": oldServiceCharge, "read_price": oldReadPrice, "number_of_delegates": oldNumberOfDelegates, "max_offer_duration": oldMaxOfferDuration, "capacity": oldCapacity, "min_lock_demand": oldMinLockDemand, "min_stake": oldMinStake, "max_stake": oldMaxStake, "challenge_completion_time": oldChallengeCompletionTIme}))
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": oldWritePrice, "service_charge": oldServiceCharge, "read_price": oldReadPrice, "num_delegates": oldNumberOfDelegates, "max_offer_duration": oldMaxOfferDuration, "capacity": oldCapacity, "min_lock_demand": oldMinLockDemand, "min_stake": oldMinStake, "max_stake": oldMaxStake, "cct": oldChallengeCompletionTIme}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 		}()
@@ -508,14 +508,14 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.NumDelegates + 1
 		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
-		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 1
+		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
 		newMinStake := intialBlobberInfo.StakePoolSettings.MinStake + 1
 		newMaxStake := intialBlobberInfo.StakePoolSettings.MaxStake + 1
 		newChallengeCompletionTIme := intialBlobberInfo.Terms.Challenge_completion_time + 1*time.Second
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice, "service_charge": newServiceCharge, "read_price": newReadPrice, "number_of_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake, "challenge_completion_time": newChallengeCompletionTIme}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice, "service_charge": newServiceCharge, "read_price": newReadPrice, "num_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake, "cct": newChallengeCompletionTIme}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
 
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -525,7 +525,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// BUG: all values not being updated
 		assert.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
 		assert.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 		assert.NotEqual(t, newReadPrice, finalBlobberInfo.Terms.Read_price)
