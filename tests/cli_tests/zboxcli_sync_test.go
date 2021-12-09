@@ -38,9 +38,8 @@ func TestSyncWithBlobbers(t *testing.T) {
 		defer os.RemoveAll(localpath)
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"encryptpath": false,
-			"localpath":   localpath,
+			"allocation": allocationID,
+			"localpath":  localpath,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
@@ -62,17 +61,21 @@ func TestSyncWithBlobbers(t *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
+		filename := "file1.txt"
+
 		// The folder structure tree
 		// Integer values will be consider as files with that size
 		// Map values will be considered as folders
 		mockFolderStructure := map[string]interface{}{
-			"file1.txt": 64 * KB,
+			filename: 64 * KB,
 		}
 
 		// This will create files and folders based on defined structure recursively
 		localpath, err := createMockFolders(t, "", mockFolderStructure)
 		require.Nil(t, err, "Error in creating mock folders: ", err, localpath)
 		defer os.RemoveAll(localpath)
+
+		originalFileChecksum := generateChecksum(t, path.Join(localpath, filename))
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
@@ -89,8 +92,29 @@ func TestSyncWithBlobbers(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		// This will traverse the tree and asserts the existent of the files
-		assertFileExistenceRecursively(t, mockFolderStructure, files)
+		require.Len(t, files, 1, "1 file must be uploaded", files)
+		file := files[0]
+
+		require.NotNil(t, file, "sync error, file 'file1.txt' must be uploaded to allocation", files)
+
+		downloadPath := path.Join(localpath, "download")
+		err = os.MkdirAll(downloadPath, os.ModePerm)
+		require.Nil(t, err, "Error in creating local folders")
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": file.Path,
+			"localpath":  downloadPath,
+		}), true)
+		require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filename)
+		require.Equal(t, expected, output[1])
+
+		downloadedFileChecksum := generateChecksum(t, path.Join(downloadPath, filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum, "Downloaded file checksum is different than the uploaded file checksum")
 	})
 
 	t.Run("Sync path with multiple files encrypted to empty allocation should work", func(t *testing.T) {

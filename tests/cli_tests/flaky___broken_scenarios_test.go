@@ -28,7 +28,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
-	// The test is failling due to sync function inability to detect the file changes in local folder
+	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
 	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
 		t.Parallel()
@@ -108,7 +108,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
 	})
 
-	// The test is failling due to sync function inability to detect the file changes in local folder
+	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
 	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
 	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation", func(t *testing.T) {
 		t.Parallel()
@@ -134,9 +134,8 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		defer os.RemoveAll(rootLocalFolder)
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"encryptpath": false,
-			"localpath":   rootLocalFolder,
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
@@ -178,13 +177,12 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		var differences []climodel.FileDiff
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, differences, 3, "Since we updated 2 files we expect 2 differences but we got %v", len(differences), differences)
+		require.Len(t, differences, 3, "Since we updated 2 files and added 1 file we expect 3 differences but we got %v", len(differences), differences)
 
 		output, err = syncFolder(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"encryptpath": false,
 			"localpath":   rootLocalFolder,
-			// "excludepath": excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
@@ -212,7 +210,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
 	})
 
-	// based on zbox documents, exlude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
+	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
 	// So this is failing due to the whole update in sync is failing.
 	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *testing.T) {
 		t.Parallel()
@@ -245,9 +243,8 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		defer os.RemoveAll(rootLocalFolder)
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"encryptpath": false,
-			"localpath":   rootLocalFolder,
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
@@ -281,22 +278,21 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Cannot change the file size")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  rootLocalFolder,
-			// "excludepath": excludedFolderName,
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
 		var differences []climodel.FileDiff
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, differences, 3, "Since we added a file and we updated 2 files we expect 3 differences but we got %v", len(differences))
+		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
 
 		output, err = syncFolder(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
-			"encryptpath": false,
 			"localpath":   rootLocalFolder,
-			// "excludepath": excludedFolderName,
+			"excludepath": excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
