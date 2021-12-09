@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -19,7 +18,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
 )
 
 func Test___FlakyScenariosMinerFees(t *testing.T) {

@@ -1437,7 +1437,6 @@ func TestShareFile(t *testing.T) {
 			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
 		}
 	})
-
 }
 
 func shareFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
