@@ -465,7 +465,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		assert.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 	})
 
-	failure scenarios
+	// failure scenarios
 
 	t.Run("update all params at once should fail", func(t *testing.T) {
 		t.Parallel()
