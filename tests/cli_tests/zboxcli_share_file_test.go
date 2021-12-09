@@ -1504,7 +1504,7 @@ func TestShareFile(t *testing.T) {
 
 	})
 
-	t.Run("Download file before available-after params should fail ", func(t *testing.T) {
+	t.Run("Download file before available-after params should fail", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1565,7 +1565,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "the file is not available until: "+time.Now().UTC().Format("2006-01-02T15:04:05"), output[1],
+		require.Equal(t, "the file is not available until: "+time.Unix(int64(futureTime), 0).UTC().Format("2006-01-02T15:04:05"), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
