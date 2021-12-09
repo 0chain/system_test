@@ -27,7 +27,6 @@ func Test___FlakyScenariosMinerFees(t *testing.T) {
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	// originally miner_fees_payment.go
 	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
 		t.Parallel()
 
