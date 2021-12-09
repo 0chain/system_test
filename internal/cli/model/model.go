@@ -339,3 +339,25 @@ type FileDiff struct {
 	Type       string     `json:"type"`
 	Attributes Attributes `json:"attributes"`
 }
+
+type FreeStorageMarker struct {
+	Assigner   string  `json:"assigner,omitempty"`
+	Recipient  string  `json:"recipient"`
+	FreeTokens float64 `json:"free_tokens"`
+	Timestamp  int64   `json:"timestamp"`
+	Signature  string  `json:"signature,omitempty"`
+}
+
+type WalletFile struct {
+	ClientID    string    `json:"client_id"`
+	ClientKey   string    `json:"client_key"`
+	Keys        []KeyPair `json:"keys"`
+	Mnemonic    string    `json:"mnemonics"`
+	Version     string    `json:"version"`
+	DateCreated string    `json:"date_created"`
+}
+
+type KeyPair struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
