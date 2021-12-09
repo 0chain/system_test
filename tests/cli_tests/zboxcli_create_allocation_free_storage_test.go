@@ -57,8 +57,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 	// Open the wallet file themselves to get private key for signing data
-	ownerWallet := getZCNWallet(t, "./config/"+scOwnerWallet+"_wallet.json")
-	assignerWallet := getZCNWallet(t, "./config/"+assigner+"_wallet.json")
+	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
+	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
 	output, err = registerWallet(t, configPath)
@@ -371,7 +371,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 }
 
-func getZCNWallet(t *testing.T, file string) *climodel.WalletFile {
+func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
 	f, err := os.Open(file)
