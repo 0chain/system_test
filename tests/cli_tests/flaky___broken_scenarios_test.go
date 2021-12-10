@@ -51,13 +51,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":   localFolderRoot,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		var file_initial climodel.AllocationFile
@@ -77,9 +79,10 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":  localFolderRoot,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		var differences []climodel.FileDiff
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
+		err = json.Unmarshal([]byte(output[0]), &differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, differences, 1, "we updated a file, we except 1 change but we got %v", len(differences), differences)
 
@@ -88,13 +91,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":  localFolderRoot,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files2 []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files2)
+		err = json.Unmarshal([]byte(output[0]), &files2)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		var file climodel.AllocationFile
@@ -138,13 +143,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":  rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		// This will traverse the tree and asserts the existent of the files
@@ -165,19 +172,18 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Cannot update the local file")
 		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder2", "file-in-folder2.txt"), 128*KB)
 		require.Nil(t, err, "Cannot update the local file")
-		err = createFileWithSize(filepath.Join(rootLocalFolder, "root.txt"), 128*KB)
-		require.Nil(t, err, "Cannot update the local file")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		var differences []climodel.FileDiff
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
+		err = json.Unmarshal([]byte(output[0]), &differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, differences, 3, "Since we updated 2 files and added 1 file we expect 3 differences but we got %v", len(differences), differences)
+		require.Len(t, differences, 2, "Since we updated 2 files we expect 2 differences but we got %v", len(differences), differences)
 
 		output, err = syncFolder(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
@@ -185,13 +191,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":   rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files2 []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files2)
+		err = json.Unmarshal([]byte(output[0]), &files2)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		var file1 climodel.AllocationFile
@@ -247,13 +255,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"localpath":  rootLocalFolder,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		var includedFile_initial climodel.AllocationFile
@@ -283,9 +293,10 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"excludepath": excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		var differences []climodel.FileDiff
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&differences)
+		err = json.Unmarshal([]byte(output[0]), &differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
 
@@ -295,13 +306,15 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"excludepath": excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var files2 []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files2)
+		err = json.Unmarshal([]byte(output[0]), &files2)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
 		var includedFile_final climodel.AllocationFile
