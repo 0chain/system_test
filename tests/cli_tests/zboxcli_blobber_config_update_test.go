@@ -11,7 +11,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/require"
 )
 
 func TestBlobberConfigUpdate(t *testing.T) {
