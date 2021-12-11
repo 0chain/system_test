@@ -472,7 +472,6 @@ func TestFileStats(t *testing.T) {
 
 			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
-
 		}
 
 		// Delete the uploaded file, since we will be downloading it now
@@ -516,7 +515,6 @@ func TestFileStats(t *testing.T) {
 
 			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
-
 		}
 	})
 }

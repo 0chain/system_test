@@ -686,7 +686,6 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
-
 }
 
 func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
