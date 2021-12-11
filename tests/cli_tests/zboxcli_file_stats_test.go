@@ -63,7 +63,7 @@ func TestFileStats(t *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 
-			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 	})
@@ -105,7 +105,7 @@ func TestFileStats(t *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 
-			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 	})
@@ -147,7 +147,7 @@ func TestFileStats(t *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 
-			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 	})
@@ -269,7 +269,7 @@ func TestFileStats(t *testing.T) {
 					require.Equal(t, true, data.BlockchainAware)
 				}
 
-				//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+				// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 				// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 			}
 		})
@@ -389,7 +389,7 @@ func TestFileStats(t *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 
-			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 
@@ -423,7 +423,97 @@ func TestFileStats(t *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 
-			//FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
+		}
+	})
+
+	t.Run("get file stats before and after download", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		remotepath := "/"
+		filesize := int64(256)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var stats map[string]climodel.FileStats
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+
+		for _, data := range stats {
+			require.Equal(t, fname, data.Name)
+			require.Equal(t, remoteFilePath, data.Path)
+			require.Equal(t, int64(0), data.NumOfBlockDownloads)
+			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
+			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
+			require.Equal(t, int64(1), data.NumOfUpdates)
+			if data.WriteMarkerTxn == "" {
+				require.Equal(t, false, data.BlockchainAware)
+			} else {
+				require.Equal(t, true, data.BlockchainAware)
+			}
+
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
+		}
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		cliutils.Wait(t, 2*time.Minute)
+		// get file stats after download
+		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+
+		for _, data := range stats {
+			require.Equal(t, fname, data.Name)
+			require.Equal(t, remoteFilePath, data.Path)
+			require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
+			require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			require.Equal(t, int64(1), data.NumOfUpdates)
+			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
+			if data.WriteMarkerTxn == "" {
+				require.Equal(t, false, data.BlockchainAware)
+			} else {
+				require.Equal(t, true, data.BlockchainAware)
+			}
+
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
 			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 	})
