@@ -333,6 +333,13 @@ type FileStats struct {
 	CreatedAt           time.Time `json:"CreatedAt"`
 }
 
+type FileDiff struct {
+	Op         string     `json:"operation"`
+	Path       string     `json:"path"`
+	Type       string     `json:"type"`
+	Attributes Attributes `json:"attributes"`
+}
+
 type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
