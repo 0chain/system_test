@@ -60,17 +60,17 @@ To run the entire test suite (minus tests for known broken features) run:
 cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
 cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
 cd ./tests/cli_tests/
-go test ./... -v -short
+go test -run  "^Test___Flaky.*$" ./... -v
 ```
 Debug logging can be achieved by running
 ```bash
-DEBUG=true go test ./... -v -short
+DEBUG=true go test -run  "^Test___Flaky.*$" ./... -v
 ```
-Include tests for broken features as part of your test run by removing the '-short' flag
+Include tests for broken features as part of your test run by running
 ```bash
 go test ./... -v
 ```
-PS: Test suite execution may be slower when running locally vs the system tests pipeline.   
+PS: Test suite execution will be slower when running locally vs the system tests pipeline.   
 Output will also be less clear vs the system tests pipeline.   
 Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
