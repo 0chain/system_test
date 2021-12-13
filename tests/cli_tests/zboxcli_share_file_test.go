@@ -1499,9 +1499,9 @@ func TestShareFile(t *testing.T) {
 			"available-after": 1638371309,
 		}
 		output, err = shareFile(t, configPath, shareParams)
+		require.Nil(t, err, "error sharing file")
 		require.Equal(t, "Cannot set available-after if the clientid is empty", output[0],
 			"share file - Unexpected output", strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Download file before available-after params should fail", func(t *testing.T) {
