@@ -482,7 +482,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		var finalBlobberInfo climodel.BlobberDetails
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
 	})
 }
 
