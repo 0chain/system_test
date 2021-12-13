@@ -344,6 +344,13 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
 
+type FileDiff struct {
+	Op         string     `json:"operation"`
+	Path       string     `json:"path"`
+	Type       string     `json:"type"`
+	Attributes Attributes `json:"attributes"`
+}
+
 type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`

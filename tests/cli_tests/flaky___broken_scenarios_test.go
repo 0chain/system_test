@@ -19,6 +19,8 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
+
+//nolint:gocyclo
 func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
@@ -26,13 +28,315 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
+	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
+	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
+	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localFolderRoot := filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
+		err := os.MkdirAll(localFolderRoot, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localFolderRoot)
+		defer os.RemoveAll(localFolderRoot)
+
+		// Create a local file in root
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 32*KB)
+		require.Nil(t, err, "Cannot create a local file")
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file_initial climodel.AllocationFile
+		for _, item := range files {
+			if item.Name == "root.txt" {
+				file_initial = item
+			}
+		}
+		require.NotNil(t, file_initial, "sync error, file 'root.txt' must be uploaded to allocation", files)
+
+		// Update the local file in root
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 1, "we updated a file, we except 1 change but we got %v", len(differences), differences)
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == "root.txt" {
+				file = item
+			}
+		}
+		require.NotNil(t, file, "sync error, file 'root.txt' must've been uploaded to the allocation", files2)
+
+		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
+	})
+
+	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
+	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
+	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			"folder1": map[string]interface{}{
+				"file-in-folder1.txt": 32 * KB,
+			},
+			"folder2": map[string]interface{}{
+				"file-in-folder2.txt": 16 * KB,
+			},
+		}
+
+		// Create files and folders based on the defined structure recursively
+		rootLocalFolder, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
+		defer os.RemoveAll(rootLocalFolder)
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		// This will traverse the tree and asserts the existent of the files
+		assertFileExistenceRecursively(t, mockFolderStructure, files)
+
+		var file1_initial climodel.AllocationFile
+		var file2_initial climodel.AllocationFile
+		for _, item := range files {
+			if item.Name == "file-in-folder1.txt" {
+				file1_initial = item
+			} else if item.Name == "file-in-folder2.txt" {
+				file2_initial = item
+			}
+		}
+
+		// Update the local files in sub folders
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder1", "file-in-folder1.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder2", "file-in-folder2.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 2, "Since we updated 2 files we expect 2 differences but we got %v", len(differences), differences)
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file1 climodel.AllocationFile
+		var file2 climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == "file-in-folder1.txt" {
+				file1 = item
+			} else if item.Name == "file-in-folder2.txt" {
+				file2 = item
+			}
+		}
+		require.NotNil(t, file1, "sync error, file 'file-in-folder1.txt' must be uploaded to allocation", files2)
+		require.NotNil(t, file2, "sync error, file 'file-in-folder2.txt' must be uploaded to allocation", files2)
+
+		require.Greater(t, file1.Size, file1_initial.Size, "file1 expected to be updated to bigger size")
+		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
+	})
+
+	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
+	// So this is failing due to the whole update in sync is failing.
+	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		// We want to exclude the folder containing this file from being synced
+		excludedFileName := "file1.txt"
+		excludedFolderName := "excludedFolder"
+		includedFileName := "file2.txt"
+		includedFolderName := "includedFolder"
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			includedFolderName: map[string]interface{}{
+				includedFileName: 8 * KB,
+			},
+			excludedFolderName: map[string]interface{}{
+				excludedFileName: 16 * KB,
+			},
+			"abc.txt": 32 * KB,
+		}
+
+		// Create files and folders based on defined structure recursively
+		rootLocalFolder, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
+		defer os.RemoveAll(rootLocalFolder)
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_initial climodel.AllocationFile
+		var excludedFile_initial climodel.AllocationFile
+
+		for _, item := range files {
+			if item.Name == includedFileName {
+				includedFile_initial = item
+			} else if item.Name == excludedFileName {
+				excludedFile_initial = item
+			}
+		}
+		require.NotNil(t, includedFile_initial, "sync error, file '%s' must be uploaded to allocation", includedFileName, files)
+		require.NotNil(t, excludedFile_initial, "sync error, file '%s' must be uploaded to allocation", excludedFile_initial, files)
+
+		// Update the local files
+		err = createFileWithSize(filepath.Join(rootLocalFolder, excludedFolderName, excludedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "abc.txt"), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_final climodel.AllocationFile
+		var excludedFile_final climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == includedFileName {
+				includedFile_final = item
+			} else if item.Name == excludedFileName {
+				excludedFile_final = item
+			}
+		}
+		require.NotNil(t, includedFile_final, "sync error, file '%s' must be uploaded to allocation", includedFileName, files2)
+		require.NotNil(t, excludedFile_final, "sync error, file '%s' must be uploaded to allocation", excludedFileName, files2)
+
+		require.Greater(t, includedFile_final.Size, includedFile_initial.Size, "included file expected to be updated to bigger size")
+		require.Equal(t, excludedFile_initial.Size, excludedFile_final.Size, "excluded file expected to NOT be updated")
+	})
+
 	// The test is failing due to a possible bug.
 	// When owner downloads the file the cost is deduced from the read pool,
 	// But it seems the collaborators can download the file for free
 	t.Run("Add Collaborator _ file owner must pay for collaborators' reads", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Read pool balance is not being updated at all.")
-		}
 		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
@@ -113,9 +417,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("Send with description", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Send ZCN with description is temporarily broken due to json object enforcement")
-		}
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -141,9 +442,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Blobber write pool balance is not being updated correctly")
-		}
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -251,135 +549,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
-	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Blobber read pool balance is not being updated correctly")
-		}
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
-
-		allocParam := createParams(map[string]interface{}{
-			"lock":   0.6,
-			"size":   10485760,
-			"expire": "1h",
-		})
-		output, err = createNewAllocation(t, configPath, allocParam)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
-
-		allocationID := strings.Fields(output[0])[2]
-
-		path, err := filepath.Abs("tmp")
-		require.Nil(t, err)
-
-		filename := cliutils.RandomAlphaNumericString(10) + "_test.txt"
-		fullPath := fmt.Sprintf("%s/%s", path, filename)
-		err = createFileWithSize(fullPath, 1024*5)
-		require.Nil(t, err, "error while generating file: ", err)
-
-		// upload a dummy 5 MB file
-		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  fullPath,
-			"remotepath": "/",
-		})
-
-		// Lock read pool tokens
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "5m",
-		})
-		output, err = readPoolLock(t, configPath, params, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
-		// Read pool before download
-		output, err = readPoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-
-		initialReadPool := []climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(initialReadPool[0].Balance), epsilon, "read pool balance did not match expected")
-		require.IsType(t, int64(1), initialReadPool[0].ExpireAt)
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] balance is [%v]", i, intToZCN(initialReadPool[0].Blobber[i].Balance))
-		}
-
-		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filename,
-		}), true)
-		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
-
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
-
-		// Download the file
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filename,
-			"localpath":  "../../internal/dummy_file/five_MB_test_file_dowloaded",
-		}), true)
-		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
-
-		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
-
-		require.Len(t, output, 2)
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
-
-		// Read pool after download
-		output, err = readPoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-
-		finalReadPool := []climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Less(t, intToZCN(finalReadPool[0].Balance), 0.4)
-		require.IsType(t, int64(1), finalReadPool[0].ExpireAt)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
-
-			// amount deducted
-			diff := intToZCN(initialReadPool[0].Blobber[i].Balance) - intToZCN(finalReadPool[0].Blobber[i].Balance)
-			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
-		}
-	})
-
 	t.Run("update file with thumbnail", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Downloading thumbnail is not working")
-		}
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
@@ -412,9 +582,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("Downloading thumbnail is not working")
-		}
 		t.Parallel()
 
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
