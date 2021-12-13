@@ -10,6 +10,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -197,7 +198,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// BUG: max stake is not being updated
+		// FIXME: max stake is not being updated
 		require.NotEqual(t, int64(newMaxStake), finalBlobberInfo.StakePoolSettings.MaxStake)
 	})
 
@@ -242,7 +243,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// BUG: min stake is not being updated
+		// FIXME: min stake is not being updated
 		require.NotEqual(t, int64(newMinStake), finalBlobberInfo.StakePoolSettings.MinStake)
 	})
 
@@ -439,16 +440,49 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
-		require.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
-		require.NotEqual(t, newReadPrice, finalBlobberInfo.Terms.Read_price)
-		require.NotEqual(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
-		require.NotEqual(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
-		require.NotEqual(t, newCapacity, finalBlobberInfo.Capacity)
-		require.NotEqual(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
-		require.NotEqual(t, newMinStake, finalBlobberInfo.StakePoolSettings.MinStake)
-		require.NotEqual(t, newMaxStake, finalBlobberInfo.StakePoolSettings.MaxStake)
-		require.NotEqual(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		assert.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
+		assert.NotEqual(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
+		assert.NotEqual(t, newReadPrice, finalBlobberInfo.Terms.Read_price)
+		assert.NotEqual(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		assert.NotEqual(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
+		assert.NotEqual(t, newCapacity, finalBlobberInfo.Capacity)
+		assert.NotEqual(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
+		assert.NotEqual(t, newMinStake, finalBlobberInfo.StakePoolSettings.MinStake)
+		assert.NotEqual(t, newMaxStake, finalBlobberInfo.StakePoolSettings.MaxStake)
+		assert.NotEqual(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+	})
+
+	t.Run("update no params should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var blobberList []climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		intialBlobberInfo := blobberList[0]
+
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
 	})
 }
 
