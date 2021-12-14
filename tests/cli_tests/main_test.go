@@ -10,6 +10,7 @@ import (
 )
 
 const scOwnerWallet = "sc_owner"
+const blobberOwnerWallet = "blobber_owner"
 
 var configPath string
 
@@ -24,10 +25,11 @@ func TestMain(m *testing.M) {
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
-				// skip deleting the SC owner wallet
-				if !strings.HasSuffix(f, scOwnerWallet+"_wallet.json") {
-					_ = os.Remove(f)
+				// skip deleting the SC owner wallet and blobber owner wallet
+				if strings.HasSuffix(f, scOwnerWallet+"_wallet.json") || strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") {
+					continue
 				}
+				_ = os.Remove(f)
 			}
 		}
 
