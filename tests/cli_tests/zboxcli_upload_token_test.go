@@ -75,8 +75,9 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath)
-		require.Nil(t, err, "Failed to fetch Write Pool info", strings.Join(output, "\n"))
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
@@ -98,20 +99,28 @@ func TestFileUploadTokenMovement(t *testing.T) {
 	})
 }
 
-func writePoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
-	time.Sleep(5 * time.Second) // TODO replace with poller
+func writePoolInfo(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	t.Logf("Getting write pool info...")
-	return cliutils.RunCommand("./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	cmd := "./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
-	return cliutils.RunCommand("./zbox get-upload-cost --allocation " + allocationID + " --localpath " + localpath + " --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	require.Len(t, output, 1)
+	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
+	return output, err
 }
 
 func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
 	t.Logf("Getting challenge pool info...")
-	return cliutils.RunCommand("./zbox cp-info --allocation " + allocationID + " --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommand(t, "./zbox cp-info --allocation "+allocationID+" --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func intToZCN(balance int64) float64 {

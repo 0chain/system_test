@@ -36,7 +36,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -66,7 +66,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + fname,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -95,7 +95,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + fname,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -151,7 +151,7 @@ func TestFileMetadata(t *testing.T) {
 			"authticket": authTicket,
 			"lookuphash": lookupHash,
 			"json":       "",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -186,7 +186,7 @@ func TestFileMetadata(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath + fname,
 			"lookuphash": lookupHash,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -205,7 +205,7 @@ func TestFileMetadata(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath + fname,
 			"lookuphash": "ab12ok90",
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -240,7 +240,7 @@ func TestFileMetadata(t *testing.T) {
 			"localpath":  filename,
 			"remotepath": remotepath,
 			"encrypt":    "",
-		})
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -251,7 +251,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"json":       "",
 			"remotepath": remotepath + fname,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -287,7 +287,7 @@ func TestFileMetadata(t *testing.T) {
 				"allocation": otherAllocationID,
 				"json":       "",
 				"remotepath": remotepath,
-			}))
+			}), true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 
@@ -309,7 +309,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"json":       "",
 			"remotepath": remotepath + fname,
-		}))
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -327,7 +327,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": otherAllocationID,
 			"json":       "",
 			"remotepath": remotepath + filepath.Base(otherfile),
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
@@ -340,7 +340,7 @@ func TestFileMetadata(t *testing.T) {
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
@@ -355,7 +355,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"json":       "",
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
@@ -379,7 +379,7 @@ func TestFileMetadata(t *testing.T) {
 			"allocation": allocationID,
 			"json":       "",
 			"lookuphash": lookupHash,
-		}))
+		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
@@ -388,7 +388,7 @@ func TestFileMetadata(t *testing.T) {
 	t.Run("Get File Meta Without Parameter Should Fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := getFileMeta(t, configPath, "")
+		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t,
@@ -398,14 +398,22 @@ func TestFileMetadata(t *testing.T) {
 	})
 }
 
-func getFileMeta(t *testing.T, cliConfigFilename, param string) ([]string, error) {
-	time.Sleep(5 * time.Second)
+func getFileMeta(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+	return getFileMetaWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func getFileMetaWithWallet(t *testing.T, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(
 		"./zbox meta %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		walletName+"_wallet.json",
 		cliConfigFilename,
 	)
-	return cliutils.RunCommand(cmd)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

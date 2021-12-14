@@ -19,11 +19,11 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/rootdir")
+		output, err := createDir(t, configPath, allocID, "/rootdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -47,15 +47,15 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/parent")
+		output, err := createDir(t, configPath, allocID, "/parent", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = createDir(t, configPath, allocID, "/parent/child")
+		output, err = createDir(t, configPath, allocID, "/parent/child", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -85,11 +85,11 @@ func TestCreateDir(t *testing.T) {
 		}
 		longDirName := string(b)
 
-		output, err := createDir(t, configPath, allocID, "/"+longDirName)
+		output, err := createDir(t, configPath, allocID, "/"+longDirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -119,11 +119,11 @@ func TestCreateDir(t *testing.T) {
 		}
 		longDirName := string(b)
 
-		output, err := createDir(t, configPath, allocID, "/"+longDirName)
+		output, err := createDir(t, configPath, allocID, "/"+longDirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir with very long directory name must throw error explicitly to not give impression it was success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -139,15 +139,15 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/existingdir")
+		output, err := createDir(t, configPath, allocID, "/existingdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = createDir(t, configPath, allocID, "/existingdir")
+		output, err = createDir(t, configPath, allocID, "/existingdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir for another allocation must return a message that it was already existing
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -166,20 +166,41 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
+	t.Run("create dir with no leading slash should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocID := setupAllocation(t, configPath)
+
+		dirName := "noleadingslash"
+		output, err := createDir(t, configPath, allocID, dirName, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
+		output, err = listAll(t, configPath, allocID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, files, 1)
+		require.Equal(t, dirName, files[0].Name, "Directory must be created", files)
+	})
+
 	t.Run("create with existing dir but different case", func(t *testing.T) {
 		t.Parallel()
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/existingdir")
+		output, err := createDir(t, configPath, allocID, "/existingdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = createDir(t, configPath, allocID, "/existingDir")
+		output, err = createDir(t, configPath, allocID, "/existingDir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -203,11 +224,11 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/nonexistent/child")
+		output, err := createDir(t, configPath, allocID, "/nonexistent/child", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -231,11 +252,11 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDir(t, configPath, allocID, "/abc!@#$%^&*()<>{}[]:;'?,.")
+		output, err := createDir(t, configPath, allocID, "/abc!@#$%^&*()<>{}[]:;'?,.", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: createdir command has no output on success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -254,26 +275,6 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with invalid dir - no leading slash", func(t *testing.T) {
-		t.Parallel()
-
-		allocID := setupAllocation(t, configPath)
-
-		output, err := createDir(t, configPath, allocID, "noleadingslash")
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash must throw error explicitly to not give impression it was success
-
-		output, err = listAll(t, configPath, allocID)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 0)
-	})
-
 	t.Run("create attempt with missing dirname param", func(t *testing.T) {
 		t.Parallel()
 
@@ -281,12 +282,12 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(configPath, wallet, true, allocID, false, "")
+		output, err := createDirForWallet(t, configPath, wallet, true, allocID, false, "", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: dirname flag is missing", output[0])
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -304,12 +305,12 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createDirForWallet(configPath, wallet, true, allocID, true, "")
+		output, err := createDirForWallet(t, configPath, wallet, true, allocID, true, "", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "CreateDir failed. invalid_name: Invalid name for dir", output[0])
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -331,7 +332,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, wallet, false, "", true, "/root")
+		output, err = createDirForWallet(t, configPath, wallet, false, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
@@ -348,7 +349,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, wallet, true, "", true, "/root")
+		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
@@ -363,7 +364,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
-		output, err = createDir(t, configPath, "invalidallocation", "/root")
+		output, err = createDir(t, configPath, "invalidallocation", "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: "+
@@ -377,14 +378,14 @@ func TestCreateDir(t *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := registerWalletForName(configPath, nonAllocOwnerWallet)
+		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-		output, err = createDirForWallet(configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir")
+		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 0) // FIXME: creating dir for another allocation must throw error explicitly to not give impression it was success
 
-		output, err = listAll(t, configPath, allocID)
+		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -396,11 +397,11 @@ func TestCreateDir(t *testing.T) {
 	})
 }
 
-func createDir(t *testing.T, cliConfigFilename, allocationID, dirname string) ([]string, error) {
-	return createDirForWallet(cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname)
+func createDir(t *testing.T, cliConfigFilename, allocationID, dirname string, retry bool) ([]string, error) {
+	return createDirForWallet(t, cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname, retry)
 }
 
-func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string) ([]string, error) {
+func createDirForWallet(t *testing.T, cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string, retry bool) ([]string, error) {
 	cmd := "./zbox createdir --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if withAllocationFlag {
 		cmd += ` --allocation "` + allocationID + `"`
@@ -408,12 +409,27 @@ func createDirForWallet(cliConfigFilename, wallet string, withAllocationFlag boo
 	if withDirnameFlag {
 		cmd += ` --dirname "` + dirname + `"`
 	}
-	return cliutils.RunCommand(cmd)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
-func listAll(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	time.Sleep(5 * time.Second)
+func listAll(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+	return listAllWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, retry)
+}
+
+func listAllWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing all...")
-	return cliutils.RunCommand("./zbox list-all --silent --allocation " + allocationID +
-		" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	cmd := "./zbox list-all --silent --allocation " + allocationID +
+		" --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

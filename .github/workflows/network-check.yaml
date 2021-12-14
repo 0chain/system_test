@@ -47,7 +47,7 @@ jobs:
           do
             echo "Executing smoke tests attempt [$counter/5]"
             exit_code=0
-            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on || { echo "Sleeping for 30s" && sleep 30 && exit_code=1 && ((counter=counter+1)); }
+            newman run "./0chain-smoke-test.json" -e "./Environments/custom.postman_environment.json" -r cli --color on --global-var "ITERATION=$counter" || { ((counter=counter+1)) && exit_code=1 && [ $counter -lt 6 ] && echo "TEST ATTEMPT FAILED. Sleeping for 30s" && sleep 30; }
           done
 
           if [ $counter -eq 6 ]; then
@@ -55,7 +55,15 @@ jobs:
             exit 1
           fi
 
-      - name: "Notify Slack"
+      - name: "Check if should send slack notification"
         if: failure()
+        id: send-slack-notification
+        uses: peter-murray/value-as-flag-action@0.0.1
+        with:
+          value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
+          default: false
+
+      - name: "Notify Slack"
+        if: failure() && steps.send-slack-notification.outputs.value == 'true'
         run: |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> [${{ matrix.network }}] network seems to be unhealthy. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}

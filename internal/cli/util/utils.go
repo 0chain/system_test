@@ -15,7 +15,7 @@ import (
 
 var Logger = getLogger()
 
-func RunCommand(commandString string) ([]string, error) {
+func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
 	commandName := command[0]
 	args := command[1:]
@@ -23,7 +23,7 @@ func RunCommand(commandString string) ([]string, error) {
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
 
-	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, string(rawOutput))
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, sanitizeOutput(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
 }
@@ -43,7 +43,7 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 	return output, err
 }
 
-func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
@@ -51,11 +51,11 @@ func RunCommandWithRetry(t *testing.T, commandString string, maxAttempts int, ba
 	var count int
 	for {
 		count++
-		output, err := RunCommand(commandString)
+		output, err := RunCommandWithoutRetry(commandString)
 
 		if err == nil {
 			if count > 1 {
-				t.Logf("%sCommand passed on retry [%v/%v]\n", green, count, maxAttempts)
+				t.Logf("%sCommand passed on retry [%v/%v]. Output: [%v]\n", green, count, maxAttempts, strings.Join(output, " -<NEWLINE>- "))
 			}
 			return output, nil
 		} else if count < maxAttempts {
@@ -80,6 +80,11 @@ func RandomAlphaNumericString(n int) string {
 	}
 
 	return string(ret)
+}
+
+func Wait(t *testing.T, duration time.Duration) {
+	t.Logf("Waiting %s...", duration)
+	time.Sleep(duration)
 }
 
 func sanitizeOutput(rawOutput []byte) []string {
