@@ -402,7 +402,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t,"consensus_failed: consensus failed on sharders", output[1])
+		require.Equal(t, "consensus_failed: consensus failed on sharders", output[1])
 	})
 
 	t.Run("update with invalid blobber wallet/owner should fail", func(t *testing.T) {
