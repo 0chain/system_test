@@ -846,7 +846,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: please get files from folder, and download them one by one", output[0],
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
