@@ -61,7 +61,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -106,7 +107,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		}
 	})
 
-	t.Run("upload from feed with delay flag must work", func(t *testing.T) {
+	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -142,7 +143,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -224,7 +226,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -307,7 +310,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -388,7 +392,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -470,7 +475,8 @@ func TestStreamUploadDownload(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		// Kills upload process as well as it's child processes
-		cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -543,7 +549,6 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
 			"--localpath", localpath, "--feed", feed, "--sync", "--delay", "-10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
 			"--configDir", "./config", "--config", configPath)
@@ -576,7 +581,6 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		chunksize := -655360
 		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
 			"--localpath", localpath, "--feed", feed, "--sync", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
@@ -613,7 +617,6 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
 			"--localpath", localpath, "--live", "--delay", "-10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
 			"--configDir", "./config", "--config", configPath)
@@ -646,7 +649,6 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		chunksize := -655360
 		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
 			"--localpath", localpath, "live", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
