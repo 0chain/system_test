@@ -95,18 +95,9 @@ func TestStreamUploadDownload(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
-		for i, file := range files {
-			require.Equal(t, file.Name, ts_files[i], "each file created locally must also be found uploaded to allocation")
+		for _, file := range files {
+			_, found := cliutils.Contains(ts_files, file.Name)
+			require.True(t, found, "files created locally must be found uploaded to allocation")
 		}
-
-		// output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-		// 	"allocation": allocationID,
-		// 	"tokens":     1,
-		// 	"duration":   "5m",
-		// }), true)
-		// require.Nil(t, err, "error locking readpool tokens", strings.Join(output, "\n"))
-		// require.Len(t, output, 1)
-		// require.Equal(t, "locked", output[0])
-
 	})
 }
