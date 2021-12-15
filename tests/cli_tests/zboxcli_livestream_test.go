@@ -43,7 +43,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -125,7 +125,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -207,7 +207,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -275,8 +275,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -292,7 +290,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -357,8 +355,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -374,7 +370,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -439,8 +435,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload local webcam feed with a different chunksize must work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -456,7 +450,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -543,7 +537,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -575,7 +569,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -594,8 +588,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -611,7 +603,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
@@ -626,8 +618,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a negative chunksize should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -643,7 +633,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), "stream-up", escapedTestName(t))
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
