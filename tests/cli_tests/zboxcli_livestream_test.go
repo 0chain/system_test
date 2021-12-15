@@ -75,11 +75,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
@@ -157,11 +157,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
@@ -240,11 +240,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
@@ -324,11 +324,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
@@ -406,11 +406,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
@@ -489,11 +489,11 @@ func TestStreamUploadDownload(t *testing.T) {
 				}
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 = 1
+					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					ts_files = append(ts_files, info.Name())
-					count_ts = 1
+					count_ts += 1
 					return nil
 				}
 				return nil
