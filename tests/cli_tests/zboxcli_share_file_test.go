@@ -1288,6 +1288,9 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
+		// wait ReadMarker to redeem
+		cliutils.Wait(t, 30*time.Second)
+
 		// Read pool after download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
@@ -1412,6 +1415,9 @@ func TestShareFile(t *testing.T) {
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
+
+		// wait ReadMarker to redeem
+		cliutils.Wait(t, 30*time.Second)
 
 		// Read pool after download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
