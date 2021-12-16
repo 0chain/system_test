@@ -169,6 +169,9 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			"keys":   ownerKey,
 			"values": oldOwner,
 		}, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
