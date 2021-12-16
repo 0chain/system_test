@@ -53,5 +53,4 @@ jobs:
     steps:
       - name: "Config: Run tests against existing 0Chain network"
         run: |
-          ${{ each parameter in github.event.inputs }}:
-          echo "${{ parameter.Key }} : ${{ parameter.Value }}"
+          ${{ github.event.inputs }}
