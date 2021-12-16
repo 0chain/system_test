@@ -126,6 +126,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 
 		ownerKey := "owner_id"
 		newOwner := "22e412a350036944f9762a3d6b5687ee4f64d20d2cf6faf2571a490defd10f17"
+		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
@@ -144,6 +145,11 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+
+		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   ownerKey,
+			"values": oldOwner,
+		}, false)
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
