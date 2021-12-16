@@ -50,7 +50,9 @@ jobs:
     name: "System Tests"
     runs-on: [ tests-suite ]
     timeout-minutes: 90
+    parameters:
+      test_parameter: test_value
     steps:
-      - name: "Config: Run tests against existing 0Chain network"
-        run: |
-          ${{ github.event.inputs }}
+    - ${{ each parameter in parameters }}:
+      - script: echo ${{ parameter.Key }} # Outputs 'test_parameter'
+      - script: echo ${{ parameter.Value }} # Outputs 'test_value'
