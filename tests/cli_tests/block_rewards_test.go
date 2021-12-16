@@ -353,9 +353,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 }
 
-func keyValuePairStringToMap(t *testing.T, input []string) (map[string]string, map[string]float64) {
-	stringMap := map[string]string{}
-	floatMap := map[string]float64{}
+func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string]string, floatMap map[string]float64) {
+	stringMap = map[string]string{}
+	floatMap = map[string]float64{}
 	for _, tapSeparatedKeyValuePair := range input {
 		kvp := strings.Split(tapSeparatedKeyValuePair, "\t")
 		key := strings.TrimSpace(kvp[0])
@@ -369,7 +369,7 @@ func keyValuePairStringToMap(t *testing.T, input []string) (map[string]string, m
 		}
 		stringMap[key] = val
 	}
-	return stringMap, floatMap
+	return
 }
 
 func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
