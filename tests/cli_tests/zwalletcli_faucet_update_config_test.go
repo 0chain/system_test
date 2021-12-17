@@ -110,6 +110,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update owner id then update max_pour_amount with old owner should fail", func(t *testing.T) {
+		t.Skip()
 		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {

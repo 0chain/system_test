@@ -128,6 +128,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 	// FIXME should fail given config key value is not valid and not actually updated
 	t.Run("update owner and update min_lock after with old owner should fail\"", func(t *testing.T) {
+		t.Skip()
 		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
