@@ -97,7 +97,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 		// remotepath must have numbered .ts files
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
@@ -172,7 +172,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
@@ -248,7 +248,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 			// FIXME: Num of blocks must be equal to ceil(size/chunksize)
 			// require.Equal(t, int64(file.NumBlocks), math.Ceil(float64(file.Size)/float64(chunksize)), "chunksize should be: ", chunksize)
 		}
@@ -323,7 +323,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
@@ -396,7 +396,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
@@ -470,7 +470,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling the response from list files")
 
 		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile("up([0-9]+).ts"), file.Name, "files created locally must be found uploaded to allocation")
+			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 			// FIXME: Num of blocks must be equal to ceil(size/chunksize)
 			// require.Equal(t, int64(file.NumBlocks), math.Ceil(float64(file.Size)/float64(chunksize)), "chunksize should be: ", chunksize)
 		}
