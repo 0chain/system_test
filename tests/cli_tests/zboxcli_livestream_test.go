@@ -73,6 +73,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
@@ -155,6 +156,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
@@ -238,6 +240,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
@@ -320,6 +323,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
@@ -400,6 +404,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
@@ -481,6 +486,7 @@ func TestStreamUploadDownload(t *testing.T) {
 				if err != nil {
 					return err
 				}
+				t.Log(info.Name())
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "m3u8" {
 					count_m3u8 += 1
