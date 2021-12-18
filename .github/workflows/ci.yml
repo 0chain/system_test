@@ -55,4 +55,4 @@ jobs:
       - name: "Config: Run tests against existing 0Chain network"
 
         run: |
-          echo "${{ github.event.repository.name }}"
+          echo "https://0chain.github.io/${{ github.event.repository.name }}/${{ env.BRANCH }}/${GITHUB_SHA}/index.html"
