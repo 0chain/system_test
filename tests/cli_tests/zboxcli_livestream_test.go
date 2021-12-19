@@ -2,12 +2,11 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -49,19 +48,13 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--feed", feed, "--sync", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a live feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"feed":       feed,
+			"sync":       "",
+		}))
 		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -125,20 +118,15 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--feed", feed, "--sync", "--delay", "10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a live feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
-		require.Nil(t, err, "error in killing upload command")
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"feed":       feed,
+			"sync":       "",
+			"delay":      10,
+		}))
+		require.Nil(t, err, "error in killing upload command with delay flag")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -200,20 +188,15 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		chunksize := 655360
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--feed", feed, "--sync", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a live feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"feed":       feed,
+			"sync":       "",
+			"chunksize":  chunksize,
+		}))
 		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -276,19 +259,12 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--live", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a local webcam feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"live":       "",
+		}))
 		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -349,19 +325,13 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--live", "--delay", "10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a local webcam feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"live":       "",
+			"delay":      10,
+		}))
 		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -422,20 +392,14 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		// Using exec.Command as we need the pid to kill this later
 		chunksize := 655360
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--live", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Start()
-		require.Nil(t, err, "error in uploading a live feed")
-
-		// Need atleast 3-4 .ts files uploaded
-		cliutils.Wait(t, 30*time.Second)
-
-		// Kills upload process as well as it's child processes
-		err = cmd.Process.Kill()
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"live":       "",
+			"chunksize":  chunksize,
+		}))
 		require.Nil(t, err, "error in killing upload command")
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -502,11 +466,14 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--feed", feed, "--sync", "--delay", "-10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Run()
+		err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"feed":       feed,
+			"sync":       "",
+			"delay":      -10,
+		}))
 		require.NotNil(t, err, "negative delay should fail")
 	})
 
@@ -535,14 +502,16 @@ func TestStreamUploadDownload(t *testing.T) {
 		defer os.RemoveAll(localfolder)
 
 		chunksize := -655360
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--feed", feed, "--sync", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-
-		// FIXME: negative chunksize works without error, after implementing fix change Start() to Run()
-		// and Nil() to NotNil()
-		err = cmd.Start()
+		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+		// runUploadFeed below
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"feed":       feed,
+			"sync":       "",
+			"chunksize":  chunksize,
+		}))
 		require.Nil(t, err, "expected error when using negative chunksize")
 	})
 
@@ -568,11 +537,13 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "--live", "--delay", "-10", "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-		err = cmd.Run()
+		err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"live":       "",
+			"delay":      -10,
+		}))
 		require.NotNil(t, err, "negative delay should fail")
 	})
 
@@ -599,14 +570,36 @@ func TestStreamUploadDownload(t *testing.T) {
 		defer os.RemoveAll(localfolder)
 
 		chunksize := -655360
-		cmd := exec.Command("./zbox", "upload", "--allocation", allocationID, "--remotepath", remotepath,
-			"--localpath", localpath, "live", "--chunksize", strconv.Itoa(chunksize), "--silent", "--wallet", escapedTestName(t)+"_wallet.json",
-			"--configDir", "./config", "--config", configPath)
-		cliutils.Setpgid(cmd)
-
-		// FIXME: negative chunksize works without error, after implementing fix change Start() to Run()
-		// and Nil() to NotNil()
-		err = cmd.Start()
-		require.Nil(t, err, "expected error when using negative chunksize")
+		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+		// runUploadFeed below
+		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"feed":       feed,
+			"chunksize":  chunksize,
+		}))
+		require.NotNil(t, err, "expected error when using negative chunksize")
 	})
+}
+
+func startUploadFeed(t *testing.T, cliConfigFilename, params string) error {
+	t.Logf("Starting upload of live stream to zbox...")
+	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
+	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
+	require.Nil(t, err, "error in uploading a live feed")
+
+	// Need atleast 3-4 .ts files uploaded
+	cliutils.Wait(t, 30*time.Second)
+
+	// Kills upload process as well as it's child processes
+	err = cmd.Process.Kill()
+	return err
+}
+
+func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
+	t.Logf("Starting upload of live stream to zbox...")
+	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
+	_, err := cliutils.RunCommandWithoutRetry(commandString)
+	return err
 }
