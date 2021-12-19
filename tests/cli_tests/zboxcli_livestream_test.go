@@ -23,16 +23,25 @@ func TestStreamUploadDownload(t *testing.T) {
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	isStreamAvailable := false
 	feed := ""
-	feeds := []string{
-		`https://www.youtube.com/watch?v=5qap5aO4i9A`,
-		`https://www.youtube.com/watch?v=Dx5qFachd3A`,
-		`https://www.youtube.com/watch?v=21qNxnCS8WU`,
-	}
+	const feed1 = `https://www.youtube.com/watch?v=5qap5aO4i9A`
+	const feed2 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
+	const feed3 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
 
-	for _, link := range feeds {
-		resp, err := http.Get(link)
+	for i := 1; i < 4; i++ {
+		var resp *http.Response
+		var err error
+		switch i {
+		case 1:
+			resp, err = http.Get(feed1)
+			feed = feed1
+		case 2:
+			resp, err = http.Get(feed2)
+			feed = feed2
+		case 3:
+			resp, err = http.Get(feed3)
+			feed = feed3
+		}
 		if err == nil && resp.StatusCode == 200 {
-			feed = link
 			isStreamAvailable = true
 			break
 		}
