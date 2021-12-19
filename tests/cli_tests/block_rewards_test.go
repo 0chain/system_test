@@ -44,13 +44,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
-		mconfig := map[string]float64{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			val, err := strconv.ParseFloat(strings.TrimSpace(configPair[1]), 64)
-			require.Nil(t, err, "config val %s for %s is unexpected not float64: %s", configPair[1], configPair[0], strings.Join(output, "\n"))
-			mconfig[strings.TrimSpace(configPair[0])] = val
-		}
+		_, configAsFloat := keyValuePairStringToMap(t, output)
 
 		// Get miner list.
 		output, err = getMiners(t, configPath)
@@ -168,21 +162,21 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 			// reward rate declines per epoch
 			// new reward ratio = current reward rate * (1.0 - reward decline rate)
-			epochs := round / int64(mconfig[epochConfigKey])
-			rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
+			epochs := round / int64(configAsFloat[epochConfigKey])
+			rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
 
 			// block reward (mint) = block reward (configured) * reward rate
-			blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
+			blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
 
 			// generator rewards = block reward * share ratio
-			generatorRewards := blockRewardMint * mconfig[shareRatioConfigKey]
+			generatorRewards := blockRewardMint * configAsFloat[shareRatioConfigKey]
 
 			// generator reward service charge = generator rewards * service charge
 			generatorRewardServiceCharge := generatorRewards * miner.ServiceCharge
 			generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
 
 			// generator fees = block fees * share ratio
-			generatorFees := float64(blockFees) * mconfig[shareRatioConfigKey]
+			generatorFees := float64(blockFees) * configAsFloat[shareRatioConfigKey]
 
 			// generator fee service charge = generator fees * service charge
 			generatorFeeServiceCharge := generatorFees * miner.ServiceCharge
@@ -218,13 +212,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 
-		mconfig := map[string]float64{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			val, err := strconv.ParseFloat(strings.TrimSpace(configPair[1]), 64)
-			require.Nil(t, err, "config val %s for %s is unexpected not float64: %s", configPair[1], configPair[0], strings.Join(output, "\n"))
-			mconfig[strings.TrimSpace(configPair[0])] = val
-		}
+		_, configAsFloat := keyValuePairStringToMap(t, output)
 
 		// Get sharder list.
 		output, err = getSharders(t, configPath)
@@ -324,15 +312,15 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 			// reward rate declines per epoch
 			// new reward ratio = current reward rate * (1.0 - reward decline rate)
-			epochs := round / int64(mconfig[epochConfigKey])
-			rewardRate := mconfig[rewardRateConfigKey] * math.Pow(1.0-mconfig[rewardDeclineRateConfigKey], float64(epochs))
+			epochs := round / int64(configAsFloat[epochConfigKey])
+			rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
 
 			// block reward (mint) = block reward (configured) * reward rate
-			blockRewardMint := mconfig[blockRewardConfigKey] * 1e10 * rewardRate
+			blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
 
 			// generator rewards = block reward * share ratio
 			// sharders rewards  = block reward - generator rewards
-			sharderRewards := blockRewardMint * (1 - mconfig[shareRatioConfigKey])
+			sharderRewards := blockRewardMint * (1 - configAsFloat[shareRatioConfigKey])
 			sharderRewardsShare := sharderRewards / float64(len(sharders))
 
 			// sharder reward service charge = sharders rewards * service charge
@@ -341,7 +329,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 			// generator fees = block fees * share ratio
 			// sharders fees  = block fees - generator fees
-			sharderFees := float64(blockFees) * (1 - mconfig[shareRatioConfigKey])
+			sharderFees := float64(blockFees) * (1 - configAsFloat[shareRatioConfigKey])
 			sharderFeesShare := sharderFees / float64(len(sharders))
 
 			// sharder fee service charge = sharders fees * service charge
@@ -363,6 +351,25 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		gotBalanceDiff := endBalance.Balance - startBalance.Balance
 		assert.InEpsilonf(t, wantBalanceDiff, gotBalanceDiff, 0.0000001, "expected total share is not close to actual share: want %d, got %d", wantBalanceDiff, gotBalanceDiff)
 	})
+}
+
+func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string]string, floatMap map[string]float64) {
+	stringMap = map[string]string{}
+	floatMap = map[string]float64{}
+	for _, tapSeparatedKeyValuePair := range input {
+		kvp := strings.Split(tapSeparatedKeyValuePair, "\t")
+		key := strings.TrimSpace(kvp[0])
+		val := strings.TrimSpace(kvp[1])
+
+		float, err := strconv.ParseFloat(val, 64)
+		if err == nil {
+			floatMap[key] = float
+		} else {
+			t.Logf("Value [%s] for key [%s] is not a float so will not be added to the float map", val, key)
+		}
+		stringMap[key] = val
+	}
+	return
 }
 
 func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
