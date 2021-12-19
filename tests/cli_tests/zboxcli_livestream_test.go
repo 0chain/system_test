@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,7 +21,26 @@ func TestStreamUploadDownload(t *testing.T) {
 	t.Parallel()
 
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
-	feed := `https://www.youtube.com/watch?v=5qap5aO4i9A`
+	isStreamAvailable := false
+	feed := ""
+	feeds := []string{
+		`https://www.youtube.com/watch?v=5qap5aO4i9A`,
+		`https://www.youtube.com/watch?v=Dx5qFachd3A`,
+		`https://www.youtube.com/watch?v=21qNxnCS8WU`,
+	}
+
+	for _, link := range feeds {
+		resp, err := http.Get(link)
+		if err == nil && resp.StatusCode == 200 {
+			feed = link
+			isStreamAvailable = true
+			break
+		}
+	}
+
+	if !isStreamAvailable {
+		t.Skipf("No youtube live feed available right now")
+	}
 
 	// Success scenarios
 
