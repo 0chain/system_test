@@ -482,7 +482,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.NotNil(t, err, "negative delay should fail")
 	})
 
-	t.Run("Upload from feed with a negative chunksize should fail", func(t *testing.T) {
+	t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
