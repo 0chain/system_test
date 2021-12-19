@@ -21,31 +21,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	t.Parallel()
 
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
-	isStreamAvailable := false
-	feed := ""
-	const feed1 = `https://www.youtube.com/watch?v=5qap5aO4i9A`
-	const feed2 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
-	const feed3 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
-
-	for i := 1; i < 4; i++ {
-		var resp *http.Response
-		var err error
-		switch i {
-		case 1:
-			resp, err = http.Get(feed1)
-			feed = feed1
-		case 2:
-			resp, err = http.Get(feed2)
-			feed = feed2
-		case 3:
-			resp, err = http.Get(feed3)
-			feed = feed3
-		}
-		if err == nil && resp.StatusCode == 200 {
-			isStreamAvailable = true
-			break
-		}
-	}
+	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
 	if !isStreamAvailable {
 		t.Skipf("No youtube live feed available right now")
@@ -631,4 +607,31 @@ func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
 	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
 	_, err := cliutils.RunCommandWithoutRetry(commandString)
 	return err
+}
+
+func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
+	feed = ""
+	const feed1 = `https://www.youtube.com/watch?v=5qap5aO4i9A`
+	const feed2 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
+	const feed3 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
+
+	for i := 1; i < 4; i++ {
+		var resp *http.Response
+		var err error
+		switch i {
+		case 1:
+			resp, err = http.Get(feed1)
+			feed = feed1
+		case 2:
+			resp, err = http.Get(feed2)
+			feed = feed2
+		case 3:
+			resp, err = http.Get(feed3)
+			feed = feed3
+		}
+		if err == nil && resp.StatusCode == 200 {
+			return feed, true
+		}
+	}
+	return "", false
 }
