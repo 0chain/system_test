@@ -18,8 +18,6 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
-	t.Parallel()
-
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
