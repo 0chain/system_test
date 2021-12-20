@@ -6,8 +6,10 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +21,8 @@ import (
 
 func TestStreamUploadDownload(t *testing.T) {
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
+	KillFFMPEG()
+
 	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
 	if !isStreamAvailable {
@@ -28,8 +32,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	// Success scenarios
 
 	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -59,6 +61,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"sync":       "",
 		}))
 		require.Nil(t, err, "error in killing upload command")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -98,8 +101,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -130,6 +131,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"delay":      10,
 		}))
 		require.Nil(t, err, "error in killing upload command with delay flag")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -168,8 +170,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunksize must work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -201,6 +201,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"chunksize":  chunksize,
 		}))
 		require.Nil(t, err, "error in killing upload command")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -269,6 +270,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"live":       "",
 		}))
 		require.Nil(t, err, "error in killing upload command")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -336,6 +338,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"delay":      10,
 		}))
 		require.Nil(t, err, "error in killing upload command")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -404,6 +407,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"chunksize":  chunksize,
 		}))
 		require.Nil(t, err, "error in killing upload command")
+		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -446,8 +450,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -478,6 +480,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"delay":      -10,
 		}))
 		require.NotNil(t, err, "negative delay should fail")
+		KillFFMPEG()
 	})
 
 	t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
@@ -510,6 +513,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"delay":      -10,
 		}))
 		require.NotNil(t, err, "negative delay should fail")
+		KillFFMPEG()
 	})
 }
 
@@ -559,4 +563,12 @@ func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 		}
 	}
 	return "", false
+}
+
+func KillFFMPEG() {
+	if runtime.GOOS == "windows" {
+		_ = exec.Command("Taskkill", "/IM", "ffmpeg.exe", "/F").Run()
+	} else if runtime.GOOS == "linux" {
+		_ = exec.Command("killall", "ffmpeg").Run()
+	}
 }
