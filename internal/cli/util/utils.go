@@ -86,6 +86,7 @@ func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff t
 			time.Sleep(backoff)
 		} else {
 			t.Logf("Command failed on final attempt [%v/%v] due to error [%v].\n", count, maxAttempts, err)
+			_ = cmd.Process.Kill()
 			return cmd, err
 		}
 	}
