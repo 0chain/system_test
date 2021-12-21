@@ -110,7 +110,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update owner and update max_destinations after with old owner should fail", func(t *testing.T) {
-		t.Skip()
 		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
