@@ -358,8 +358,14 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 	floatMap = map[string]float64{}
 	for _, tapSeparatedKeyValuePair := range input {
 		kvp := strings.Split(tapSeparatedKeyValuePair, "\t")
-		key := strings.TrimSpace(kvp[0])
-		val := strings.TrimSpace(kvp[1])
+		var key, val string
+		if len(kvp) == 2 {
+			key = strings.TrimSpace(kvp[0])
+			val = strings.TrimSpace(kvp[1])
+		} else if len(kvp) == 1 {
+			key = strings.TrimSpace(kvp[0])
+			val = ""
+		}
 
 		float, err := strconv.ParseFloat(val, 64)
 		if err == nil {
