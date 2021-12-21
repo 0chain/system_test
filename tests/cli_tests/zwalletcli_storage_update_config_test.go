@@ -112,11 +112,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter := map[string]string{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			cfgAfter[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-		}
+		cfgAfter, _ := keyValuePairStringToMap(t, output)
 
 		require.Equal(t, newOwner, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwner)
 
