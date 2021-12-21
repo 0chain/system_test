@@ -29,6 +29,7 @@ func TestVestingPool(t *testing.T) {
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
 
 	vpConfigMap := configFromKeyValuePair(output)
+	validDuration := getValidDuration(t, vpConfigMap)
 
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *testing.T) {
 		t.Parallel()
@@ -45,8 +46,6 @@ func TestVestingPool(t *testing.T) {
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
-
-		validDuration := getValidDuration(t, vpConfigMap)
 
 		// add a vesting pool for sending 0.1 to target wallet
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
@@ -74,8 +73,6 @@ func TestVestingPool(t *testing.T) {
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
-
-		validDuration := getValidDuration(t, vpConfigMap)
 
 		// add a vesting pool for sending 0.1 to target wallet
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
@@ -112,8 +109,6 @@ func TestVestingPool(t *testing.T) {
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		validDuration := getValidDuration(t, vpConfigMap)
-
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			// adding second wallet this way since map doesn't allow repeated keys
 			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
@@ -148,8 +143,6 @@ func TestVestingPool(t *testing.T) {
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		validDuration := getValidDuration(t, vpConfigMap)
-
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			// adding second wallet this way since map doesn't allow repeated keys
 			"d":           targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
@@ -178,8 +171,6 @@ func TestVestingPool(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		validDuration := getValidDuration(t, vpConfigMap)
-
 		// add a vesting pool for sending 0.5 to target wallet by locking 0.1 tokens
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"d":        targetWallet.ClientID + ":0.5",
@@ -206,8 +197,6 @@ func TestVestingPool(t *testing.T) {
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
-
-		validDuration := getValidDuration(t, vpConfigMap)
 
 		// add a vesting pool for sending 0.1 to target wallet by locking 0.5 tokens
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
@@ -246,7 +235,6 @@ func TestVestingPool(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		validDuration := getValidDuration(t, vpConfigMap)
 		startTime := time.Now().Add(5 * time.Second)
 
 		// add a vesting pool for sending 0.1 to target wallet
@@ -294,7 +282,6 @@ func TestVestingPool(t *testing.T) {
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		validDuration := getValidDuration(t, vpConfigMap)
 		startTime := time.Now().Add(5 * time.Second)
 
 		// add a vesting pool for sending 0.1 to target wallet
