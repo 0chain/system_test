@@ -134,12 +134,15 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			cfgAfter[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
 		}
 
-		require.Equal(t, newOwner, cfgAfter["owner"], "new value [%s] for owner was not set", newOwner)
+		require.Equal(t, newOwner, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwner)
 
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": oldOwner,
 		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
 	})
 
 	// FIXME should fail given config key value is not valid and not actually updated
