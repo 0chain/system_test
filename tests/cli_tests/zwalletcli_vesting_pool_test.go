@@ -394,6 +394,33 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1, "expected output of length 1")
 		require.Equal(t, output[0], "parsing destinations: invalid destination id: \"abcdef123456\"")
 	})
+
+	t.Run("Vesting pool with one valid destination and one invalid destination should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		// add a vesting pool for sending 0.1 to target wallet
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":        targetWallet.ClientID + ":0.1" + " --d abcdef123456:0.1",
+			"lock":     0.3,
+			"duration": validDuration,
+		}), false)
+		require.NotNil(t, err, "expected error when using invalid address")
+		require.Len(t, output, 1, "expected output of length 1")
+		require.Equal(t, output[0], "parsing destinations: invalid destination id: \"abcdef123456\"")
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
