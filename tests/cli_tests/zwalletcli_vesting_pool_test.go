@@ -114,7 +114,6 @@ func TestVestingPool(t *testing.T) {
 
 		validDuration := getValidDuration(t, vpConfigMap)
 
-		// add a vesting pool for sending 0.1 to target wallet
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			// adding second wallet this way since map doesn't allow repeated keys
 			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
@@ -151,7 +150,6 @@ func TestVestingPool(t *testing.T) {
 
 		validDuration := getValidDuration(t, vpConfigMap)
 
-		// add a vesting pool for sending 0.1 to target wallet
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			// adding second wallet this way since map doesn't allow repeated keys
 			"d":           targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
@@ -182,7 +180,7 @@ func TestVestingPool(t *testing.T) {
 
 		validDuration := getValidDuration(t, vpConfigMap)
 
-		// add a vesting pool for sending 0.1 to target wallet
+		// add a vesting pool for sending 0.5 to target wallet by locking 0.1 tokens
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"d":        targetWallet.ClientID + ":0.5",
 			"lock":     0.1,
@@ -211,7 +209,7 @@ func TestVestingPool(t *testing.T) {
 
 		validDuration := getValidDuration(t, vpConfigMap)
 
-		// add a vesting pool for sending 0.1 to target wallet
+		// add a vesting pool for sending 0.1 to target wallet by locking 0.5 tokens
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"d":        targetWallet.ClientID + ":0.1",
 			"lock":     0.5,
@@ -230,6 +228,47 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error fetching vesting pool info")
 		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
 		require.Equal(t, output[2], "can unlock:   400.000 mZCN (excess)")
+	})
+
+	t.Run("Vesting pool with start time in future should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		validDuration := getValidDuration(t, vpConfigMap)
+		startTime := time.Now().Add(5 * time.Second)
+
+		// add a vesting pool for sending 0.1 to target wallet
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":          targetWallet.ClientID + ":0.1",
+			"lock":       0.1,
+			"duration":   validDuration,
+			"start_time": startTime.Unix(),
+		}), true)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		// verify start time using vp-info
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching pool-info")
+		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Equal(t, output[7], "start_time:   "+time.Unix(startTime.Unix(), 0).String())
 	})
 }
 
