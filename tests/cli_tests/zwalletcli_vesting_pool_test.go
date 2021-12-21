@@ -53,7 +53,7 @@ func TestVestingPool(t *testing.T) {
 			"d":        targetWallet.ClientID + ":0.1",
 			"lock":     0.1,
 			"duration": validDuration,
-		}))
+		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
@@ -83,7 +83,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":        0.1,
 			"duration":    validDuration,
 			"description": "this is a vesting pool",
-		}))
+		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
@@ -120,7 +120,7 @@ func TestVestingPool(t *testing.T) {
 			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
 			"lock":     0.3,
 			"duration": validDuration,
-		}))
+		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
@@ -158,17 +158,51 @@ func TestVestingPool(t *testing.T) {
 			"lock":        0.3,
 			"duration":    validDuration,
 			"description": "this is a vesting pool",
-		}))
+		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 	})
+
+	t.Run("Vesting pool with locking insufficient tokens should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		validDuration := getValidDuration(t, vpConfigMap)
+
+		// add a vesting pool for sending 0.1 to target wallet
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":        targetWallet.ClientID + ":0.5",
+			"lock":     0.1,
+			"duration": validDuration,
+		}), false)
+		require.NotNil(t, err, "expected error when creating a vesting pool without insufficent locked tokens")
+		require.Len(t, output, 1)
+		require.Equal(t, "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}", output[0], "output did not match expected error message")
+	})
 }
 
-func vestingPoolAdd(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Adding a new vesting pool...")
-	return cliutils.RunCommand(t, "./zwallet vp-add "+params+
-		" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	if retry {
+		return cliutils.RunCommand(t, "./zwallet vp-add "+params+
+			" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry("./zwallet vp-add " + params +
+			" --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	}
 }
 
 func configFromKeyValuePair(output []string) map[string]interface{} {
