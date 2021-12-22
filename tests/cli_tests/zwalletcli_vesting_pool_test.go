@@ -177,7 +177,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     0.1,
 			"duration": validDuration,
 		}), false)
-		require.NotNil(t, err, "expected error when creating a vesting pool without insufficent locked tokens")
+		require.NotNil(t, err, "expected error when creating a vesting pool without insufficient locked tokens")
 		require.Len(t, output, 1)
 		require.Equal(t, "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}", output[0], "output did not match expected error message")
 	})
