@@ -1,6 +1,3 @@
-//go:build livestream
-// +build livestream
-
 package cli_tests
 
 import (
