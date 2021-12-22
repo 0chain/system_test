@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +17,6 @@ const maxDestinations = "max_destinations"
 const maxDuration = "max_duration"
 const minDuration = "min_duration"
 const minLock = "min_lock"
-const ownerId = "owner_id"
 
 func TestVestingPool(t *testing.T) {
 	t.Parallel()
@@ -547,6 +547,43 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using description length greater than max allowed")
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+	})
+
+	t.Run("Vesting pool with destinations greater than max destinations should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		var invalidDestinations int
+		if maxDestinationsAllowed, ok := vpConfigMap[maxDestinations].(int); ok {
+			invalidDestinations = maxDestinationsAllowed + 1
+		}
+
+		output, err = executeFaucetWithTokens(t, configPath, float64(invalidDestinations)*0.1)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWallets := make([]*climodel.Wallet, invalidDestinations)
+		var destinationString string
+		for i := 0; i < invalidDestinations; i++ {
+			targetWalletName := "targetWallet" + strconv.Itoa(i) + escapedTestName(t)
+			output, err = registerWalletForName(t, configPath, targetWalletName)
+			require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+			targetWallets[i], err = getWalletForName(t, configPath, targetWalletName)
+			require.Nil(t, err, "error fetching destination wallet")
+
+			destinationString += targetWallets[i].ClientID + ":0.1 --d "
+		}
+		destinationString = destinationString[:len(destinationString)-5]
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":        destinationString,
+			"lock":     float64(invalidDestinations) * 0.1,
+			"duration": validDuration,
+		}), false)
+		require.NotNil(t, err, "expected error when using more destinations than allowed")
+		require.Len(t, output, 1, "expected output of length 1")
 		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
 	})
 }
