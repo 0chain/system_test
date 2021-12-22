@@ -452,6 +452,66 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
+	t.Run("File Update with same size - Users should not be charged, blobber should not be paid", func(t *testing.T) {
+		t.Parallel()
+
+		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
+		// of size 1 MB. Get write pool info and check nothing has been deducted.
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 4 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+		fileSize := int64(math.Floor(1 * MB))
+
+		// Upload 1 MB file
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		// Update with same size
+		remotepath := "/" + filepath.Base(localpath)
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
+
+		cliutils.Wait(t, 30*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		// Get final write pool, no deduction should have been made
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
+			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
+		}
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
 		t.Parallel()
 
@@ -686,6 +746,117 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
+
+	t.Run("transfer allocation accounting test", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": int64(1024000),
+		})
+
+		ownerWallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "Error occurred when retrieving owner wallet")
+
+		output, err := addCurator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"curator":    ownerWallet.ClientID,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
+			"add curator - Unexpected output", strings.Join(output, "\n"))
+
+		file := generateRandomTestFileName(t)
+		err = createFileWithSize(file, 204800)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+			"upload file - Unexpected output", strings.Join(output, "\n"))
+
+		newOwner := escapedTestName(t) + "_NEW_OWNER"
+
+		output, err = registerWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
+		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		output, _ = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Len(t, initialWritePool, 1)
+
+		require.True(t, initialWritePool[0].Locked, strings.Join(output, "\n"))
+		require.Equal(t, allocationID, initialWritePool[0].Id, strings.Join(output, "\n"))
+		require.Equal(t, allocationID, initialWritePool[0].AllocationId, strings.Join(output, "\n"))
+
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": newOwnerWallet.ClientPublicKey,
+			"new_owner":     newOwnerWallet.ClientID,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
+			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
+
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
+
+		// balance of old owner should be unchanged
+		// FIXME should this contain the released pool balances given the change of ownership?
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
+		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0],
+			"get balance - Unexpected output", strings.Join(output, "\n"))
+
+		// balance of new owner should be unchanged
+		output, err = getBalanceForWallet(t, configPath, newOwner)
+		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
+		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0],
+			"get balance - Unexpected output", strings.Join(output, "\n"))
+
+		// zero cost to transfer
+		expectedTransferCost := int64(0)
+
+		// write lock pool of old owner should remain locked
+		// FIXME should this be unlocked given the change of ownership?
+		cliutils.Wait(t, 2*time.Minute)
+		output, _ = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Len(t, finalWritePool, 1)
+
+		actualCost := initialWritePool[0].Balance - finalWritePool[0].Balance
+
+		require.Equal(t, expectedTransferCost, actualCost)
+		require.True(t, finalWritePool[0].Locked, strings.Join(output, "\n"))
+		require.Equal(t, allocationID, finalWritePool[0].Id, strings.Join(output, "\n"))
+		require.Equal(t, allocationID, finalWritePool[0].AllocationId, strings.Join(output, "\n"))
+	})
 }
 
 func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
@@ -739,12 +910,7 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgBefore := map[string]string{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			cfgBefore[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-		}
-
+		cfgBefore, _ := keyValuePairStringToMap(t, output)
 		// ensure revert in config is run regardless of test result
 		defer func() {
 			oldValue := cfgBefore[configKey]
@@ -771,11 +937,7 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter := map[string]string{}
-		for _, o := range output {
-			configPair := strings.Split(o, "\t")
-			cfgAfter[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-		}
+		cfgAfter, _ := keyValuePairStringToMap(t, output)
 
 		require.Equal(t, newValue, cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
 

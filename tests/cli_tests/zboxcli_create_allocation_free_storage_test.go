@@ -86,11 +86,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfgBefore := map[string]string{}
-	for _, o := range output {
-		configPair := strings.Split(o, "\t")
-		cfgBefore[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
-	}
+	cfgBefore, _ := keyValuePairStringToMap(t, output)
 
 	// ensure revert in config is run regardless of test result
 	defer func() {

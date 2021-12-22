@@ -21,15 +21,10 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 
-		//FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "No wallet in path  ./config/TestMultisigWallet-Wallet_Creation_should_succeed_when_0_LESS_THAN_threshold_LESS_THAN=_num-signers_wallet.json found. Creating wallet...", output[0])
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
-
+		// FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
 		// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
-		require.Equal(t, fmt.Sprintf("registering %d wallets", numSigners+1), output[4])
+		require.True(t, len(output) > 1, "Output was less than number of assertions", strings.Join(output, "\n"))
+		require.Contains(t, output, fmt.Sprintf("registering %d wallets", numSigners+1))
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
@@ -40,14 +35,8 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
 
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "No wallet in path  ./config/TestMultisigWallet-Wallet_Creation_should_succeed_when_threshold_is_equal_to_num-signers_wallet.json found. Creating wallet...", output[0])
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
-
-		// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
-		require.Equal(t, fmt.Sprintf("registering %d wallets", numSigners+1), output[4])
+		require.True(t, len(output) > 1, "Output was less than number of assertions", strings.Join(output, "\n"))
+		require.Contains(t, output, fmt.Sprintf("registering %d wallets", numSigners+1))
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
@@ -58,13 +47,10 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
+		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
 		//FIXME: BUG - panic: runtime error: index out of range [0] with length 0
-		require.Equal(t, "panic: runtime error: index out of range [0] with length 0", output[4])
+		require.Contains(t, output, "panic: runtime error: index out of range [0] with length 0")
 	})
 
 	t.Run("Wallet Creation should fail when threshold is -1", func(t *testing.T) {
@@ -74,13 +60,10 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
+		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
 		//FIXME: BUG - panic: runtime error: makeslice: len out of range
-		require.Equal(t, "panic: runtime error: makeslice: len out of range", output[4])
+		require.Contains(t, output, "panic: runtime error: makeslice: len out of range")
 	})
 
 	t.Run("Wallet Creation should fail when signers is < 2", func(t *testing.T) {
@@ -90,12 +73,9 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
+		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
-		require.Equal(t, "Error: too few signers. Minimum numsigners required is 2", output[4])
+		require.Contains(t, output, "Error: too few signers. Minimum numsigners required is 2")
 	})
 
 	t.Run("Wallet Creation should fail when threshold is greater than num-signers", func(t *testing.T) {
@@ -105,17 +85,11 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
 
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "No wallet in path  ./config/TestMultisigWallet"+
-			"-Wallet_Creation_should_fail_when_threshold_is_greater_than_"+
-			"num-signers_wallet.json found. Creating wallet...", output[0])
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
+		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
-		require.Equal(t, fmt.Sprintf("Error: given threshold (%d) is too high. "+
+		require.Contains(t, output, fmt.Sprintf("Error: given threshold (%d) is too high. "+
 			"Threshold has to be less than or equal to numsigners (%d)", threshold,
-			numSigners), output[4])
+			numSigners))
 	})
 
 	t.Run("Wallet Creation should fail when args not set", func(t *testing.T) {
@@ -126,13 +100,10 @@ func TestMultisigWallet(t *testing.T) {
 			"_wallet.json", configPath))
 
 		require.NotNil(t, err, "expected command to fail", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number of "+
+		require.True(t, len(output) > 0, "Output was less than number of "+
 			"assertions", strings.Join(output, "\n"))
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
 
-		require.Equal(t, "Error: numsigners flag is missing", output[4])
+		require.Contains(t, output, "Error: numsigners flag is missing")
 	})
 
 	t.Run("Wallet Creation should fail when threshold not set", func(t *testing.T) {
@@ -145,11 +116,8 @@ func TestMultisigWallet(t *testing.T) {
 		require.NotNil(t, err, "expected command to fail", strings.Join(output, "\n"))
 		require.True(t, len(output) > 4, "Output was less than number "+
 			"of assertions", strings.Join(output, "\n"))
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
 
-		require.Equal(t, "Error: threshold flag is missing", output[4])
+		require.Contains(t, output, "Error: threshold flag is missing")
 	})
 }
 
