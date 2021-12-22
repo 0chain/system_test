@@ -57,6 +57,7 @@ type AllocationFile struct {
 type Blobber struct {
 	BlobberID string `json:"blobber_id"`
 	Balance   int64  `json:"balance"`
+	BaseUrl   string `json:"url"`
 }
 
 type ReadPoolInfo struct {

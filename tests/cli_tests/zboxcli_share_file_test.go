@@ -1456,7 +1456,7 @@ func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param m
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
+func registerAndCreateAllocationWithParity(t *testing.T, configPath, wallet string, parity, shards int) (string, *climodel.Wallet) {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	output, err := registerWalletForName(t, configPath, wallet)
@@ -1469,8 +1469,8 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 		"lock":   0.5,
 		"size":   10485760,
 		"expire": "1h",
-		"parity": 1,
-		"data":   1,
+		"parity": parity,
+		"data":   shards,
 	})
 
 	output, err = createNewAllocationForWallet(t, wallet, configPath, allocParam)
@@ -1498,4 +1498,8 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	require.Nil(t, err)
 
 	return allocationID, walletModel
+}
+
+func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
+	return registerAndCreateAllocationWithParity(t, configPath, wallet, 1, 1)
 }
