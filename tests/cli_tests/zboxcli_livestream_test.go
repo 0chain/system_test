@@ -20,6 +20,7 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
+	t.Parallel()
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
 
@@ -32,6 +33,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	// Success scenarios
 
 	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -101,6 +103,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -170,6 +173,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunksize must work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -242,6 +246,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -309,6 +314,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -377,6 +383,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload local webcam feed with a different chunksize must work", func(t *testing.T) {
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -448,6 +455,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	// Failure Scenarios
+	// FIXME: Disabled for now due to process hanging
 }
 
 func startUploadFeed(t *testing.T, cliConfigFilename, params string) error {
