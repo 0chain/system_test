@@ -713,7 +713,7 @@ func TestVestingPool(t *testing.T) {
 		// require.Equal(t, output[20], "sent:        0 SAS (real value)")
 		require.Equal(t, output[20], "pending:     200.000 mZCN (not sent, real value)")
 		require.Regexp(t, regexp.MustCompile(`vested: {6}\d*\.?\d+ [um]ZCN \(virtual, time based value\)`), output[21])
-		// FIXME:
+		// FIXME: multiple destinations info not printing complete info for all destinations
 		// require.Regexp(t, regexp.MustCompile("last unlock: [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9 +-]{5} [A-Z]{3}"), output[23])
 		require.Equal(t, output[22], "client_id:    "+clientWallet.ClientID)
 	})
