@@ -587,6 +587,7 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
 	})
 
+	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
 	t.Run("Vesting pool info with valid pool_id should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -600,19 +601,15 @@ func TestVestingPool(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
-		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		clientWallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error fetching client wallet")
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
-		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error fetching destination wallet")
-
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			// adding second wallet this way since map doesn't allow repeated keys
-			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
+			"d":        targetWallet.ClientID + ":0.1",
 			"lock":     0.3,
 			"duration": validDuration,
 		}), true)
@@ -628,6 +625,24 @@ func TestVestingPool(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
 		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Equal(t, output[0], "pool_id:      "+poolId)
+		require.Equal(t, output[1], "balance:      300.000 mZCN")
+		require.Equal(t, output[2], "can unlock:   200.000 mZCN (excess)")
+		require.Equal(t, output[3], "sent:         0 SAS (real value)")
+		require.Equal(t, output[4], "pending:      100.000 mZCN (not sent, real value)")
+		require.Regexp(t, regexp.MustCompile(`vested:       \d*\.?\d+ [um]ZCN \(virtual, time based value\)`), output[5])
+		require.Equal(t, output[6], "description:")
+		require.Regexp(t, regexp.MustCompile("start_time:   [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9 +-]{5} [A-Z]{3}"), output[7])
+		require.Regexp(t, regexp.MustCompile("expire_at:    [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9 +-]{5} [A-Z]{3}"), output[8])
+		require.Equal(t, output[9], "destinations:")
+		require.Equal(t, output[10], "- id:          "+targetWallet.ClientID)
+		require.Equal(t, output[11], "vesting:     100.000 mZCN")
+		require.Regexp(t, regexp.MustCompile(`can unlock:  \d*\.?\d+ [um]ZCN \(virtual, time based value\)`), output[12])
+		require.Equal(t, output[13], "sent:        0 SAS (real value)")
+		require.Equal(t, output[14], "pending:     100.000 mZCN (not sent, real value)")
+		require.Regexp(t, regexp.MustCompile(`vested:      \d*\.?\d+ [um]ZCN \(virtual, time based value\)`), output[15])
+		require.Regexp(t, regexp.MustCompile("last unlock: [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9 +-]{5} [A-Z]{3}"), output[16])
+		require.Equal(t, output[17], "client_id:    "+clientWallet.ClientID)
 	})
 }
 
