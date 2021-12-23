@@ -23,6 +23,7 @@ func TestFileDelete(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -52,6 +53,7 @@ func TestFileDelete(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/root/"
 		filesize := int64(1 * KB)
@@ -81,6 +83,7 @@ func TestFileDelete(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -131,6 +134,7 @@ func TestFileDelete(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -153,6 +157,7 @@ func TestFileDelete(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -165,7 +170,7 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  filename,
-			"encrypt":    true,
+			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -188,5 +193,40 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("delete shared file should fail", func(t *testing.T) {
+		t.Parallel()
+
+		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+
+		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
+		remotepath := "/" + filepath.Base(localpath)
+
+		output, err = addCollaborator(t, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"collabid":   collaboratorWallet.ClientID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
+		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
+
+		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 	})
 }
