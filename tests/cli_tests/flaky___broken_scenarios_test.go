@@ -728,6 +728,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
 	})
 
+	// FIXME: Commented out because these cases hang the broken test suite till timeout
+
+	// FIXME: add param validation
 	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *testing.T) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -764,6 +767,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// 	KillFFMPEG()
 	// })
 
+	// FIXME: add param validation
 	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
 	// 	t.Parallel()
 
@@ -803,6 +807,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// 	KillFFMPEG()
 	// })
 
+	// FIXME: add param validation
 	// t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -837,6 +842,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// 	KillFFMPEG()
 	// })
 
+	// FIXME: add param validation
 	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
