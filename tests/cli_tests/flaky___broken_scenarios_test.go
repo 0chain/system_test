@@ -1,3 +1,4 @@
+//nolint:gocritic
 package cli_tests
 
 import (
@@ -21,7 +22,6 @@ Tests in here are skipped until the feature has been fixed
 */
 
 //nolint:gocyclo
-//nolint:gocritic
 
 func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
@@ -728,145 +728,145 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
 	})
 
-	t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *testing.T) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		chunksize := -655360
-		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
-		// runUploadFeed below
-		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  localpath,
-			"remotepath": remotepath,
-			"live":       "",
-			"chunksize":  chunksize,
-		}))
-		require.Nil(t, err, "expected error when using negative chunksize")
-		KillFFMPEG()
-	})
+	// 	chunksize := -655360
+	// 	// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+	// 	// runUploadFeed below
+	// 	err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"live":       "",
+	// 		"chunksize":  chunksize,
+	// 	}))
+	// 	require.Nil(t, err, "expected error when using negative chunksize")
+	// 	KillFFMPEG()
+	// })
 
-	t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
+	// 	t.Parallel()
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		chunksize := -655360
-		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
-		// runUploadFeed below
-		err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  localpath,
-			"remotepath": remotepath,
-			"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
-			"sync":       "",
-			"chunksize":  chunksize,
-		}))
-		require.Nil(t, err, "expected error when using negative chunksize")
-		KillFFMPEG()
-	})
+	// 	chunksize := -655360
+	// 	// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+	// 	// runUploadFeed below
+	// 	err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+	// 		"sync":       "",
+	// 		"chunksize":  chunksize,
+	// 	}))
+	// 	require.Nil(t, err, "expected error when using negative chunksize")
+	// 	KillFFMPEG()
+	// })
 
-	t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  localpath,
-			"remotepath": remotepath,
-			"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
-			"sync":       "",
-			"delay":      -10,
-		}))
-		require.NotNil(t, err, "negative delay should fail")
-		KillFFMPEG()
-	})
+	// 	err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+	// 		"sync":       "",
+	// 		"delay":      -10,
+	// 	}))
+	// 	require.NotNil(t, err, "negative delay should fail")
+	// 	KillFFMPEG()
+	// })
 
-	t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  localpath,
-			"remotepath": remotepath,
-			"live":       "",
-			"delay":      -10,
-		}))
-		require.NotNil(t, err, "negative delay should fail")
-		KillFFMPEG()
-	})
+	// 	err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"live":       "",
+	// 		"delay":      -10,
+	// 	}))
+	// 	require.NotNil(t, err, "negative delay should fail")
+	// 	KillFFMPEG()
+	// })
 }
