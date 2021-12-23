@@ -464,13 +464,6 @@ func startUploadFeed(t *testing.T, cliConfigFilename, params string) error {
 	return err
 }
 
-func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
-	t.Logf("Starting upload of live stream to zbox...")
-	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
-	_, err := cliutils.RunCommandWithoutRetry(commandString)
-	return err
-}
-
 func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 	feed = ""
 	const feed1 = `https://www.youtube.com/watch?v=5qap5aO4i9A`

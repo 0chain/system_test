@@ -870,3 +870,10 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// 	KillFFMPEG()
 	// })
 }
+
+// func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
+// 	t.Logf("Starting upload of live stream to zbox...")
+// 	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
+// 	_, err := cliutils.RunCommandWithoutRetry(commandString)
+// 	return err
+// }
