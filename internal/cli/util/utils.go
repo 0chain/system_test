@@ -68,6 +68,43 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 	}
 }
 
+func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
+	var count int
+	for {
+		count++
+		cmd, err := StartCommandWithoutRetry(commandString)
+
+		if err == nil {
+			if count > 1 {
+				t.Logf("Command started on retry [%v/%v].", count, maxAttempts)
+			}
+			return cmd, err
+		} else if count < maxAttempts {
+			t.Logf("Command failed on attempt [%v/%v] due to error [%v]\n", count, maxAttempts, err)
+			t.Logf("Sleeping for backoff duration: %v\n", backoff)
+			_ = cmd.Process.Kill()
+			time.Sleep(backoff)
+		} else {
+			t.Logf("Command failed on final attempt [%v/%v] due to error [%v].\n", count, maxAttempts, err)
+			_ = cmd.Process.Kill()
+			return cmd, err
+		}
+	}
+}
+
+func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
+	command := parseCommand(commandString)
+	commandName := command[0]
+	args := command[1:]
+	sanitizedArgs := sanitizeArgs(args)
+
+	cmd = exec.Command(commandName, sanitizedArgs...)
+	Setpgid(cmd)
+	err = cmd.Start()
+
+	return cmd, err
+}
+
 func RandomAlphaNumericString(n int) string {
 	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
 	ret := make([]byte, n)
@@ -153,4 +190,13 @@ func getLogger() *logrus.Logger {
 	}
 
 	return logger
+}
+
+func Contains(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
 }
