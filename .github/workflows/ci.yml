@@ -55,4 +55,4 @@ jobs:
       - name: "Config: Run tests against existing 0Chain network"
 
         run: |
-          >&2 echo "error"
+          echo "::warning ::test warning"
