@@ -215,7 +215,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching vesting pool info")
-		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Len(t, output, 18, "expected output of length 18")
 		require.Equal(t, output[2], "can unlock:   400.000 mZCN (excess)")
 	})
 
@@ -255,7 +255,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
-		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Len(t, output, 18, "expected output of length 18")
 		require.Equal(t, output[7], "start_time:   "+time.Unix(startTime.Unix(), 0).String())
 	})
 
@@ -302,7 +302,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
-		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Len(t, output, 23, "expected output of length 23")
 		require.Equal(t, output[7], "start_time:   "+time.Unix(startTime.Unix(), 0).String())
 	})
 
@@ -624,7 +624,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
-		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Len(t, output, 18, "expected output of length 18")
 		require.Equal(t, output[0], "pool_id:      "+poolId)
 		require.Equal(t, output[1], "balance:      300.000 mZCN")
 		require.Equal(t, output[2], "can unlock:   200.000 mZCN (excess)")
@@ -688,7 +688,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
-		require.GreaterOrEqual(t, len(output), 18, "expected output of length 18 atleast")
+		require.Len(t, output, 23, "expected output of length 23")
 		require.Equal(t, output[0], "pool_id:      "+poolId)
 		require.Equal(t, output[1], "balance:      300.000 mZCN")
 		require.Equal(t, output[2], "can unlock:   0 SAS (excess)")
@@ -925,9 +925,70 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching pool-info")
-		require.Len(t, output, 11, "expected output of length 18 atleast")
+		require.Len(t, output, 11, "expected output of length 11 atleast")
 		require.Equal(t, "destinations:", output[9])
 		require.Equal(t, "client_id:    "+wallet.ClientID, output[10])
+	})
+
+	t.Run("Vesting pool stop for multiple destinations should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWalletName2 := "targetWallet2" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWalletName3 := "targetWallet3" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName3)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		targetWallet3, err := getWalletForName(t, configPath, targetWalletName3)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			// adding second wallet this way since map doesn't allow repeated keys
+			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2" + " --d " + targetWallet3.ClientID + ":0.3",
+			"lock":     0.6,
+			"duration": validDuration,
+		}), true)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		// Stopping with multiple destinations
+		output, err = vestingPoolStop(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+			"d":       targetWallet.ClientID + " --d " + targetWallet2.ClientID,
+		}), true)
+		require.Nil(t, err, "error stopping vesting pool")
+		// FIXME: output only shows stop vesting for last destination flag. Should show all stopped destinations
+		require.Len(t, output, 1)
+		require.Equal(t, "Stop vesting for "+targetWallet2.ClientID+".", output[0])
+
+		// Destination should be removed from vp-info after stopping
+		// FIXME: Multiple d flags don't work, only last flag passed is stopped.
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching pool-info")
+		require.Len(t, output, 23, "expected output of length 23")
 	})
 }
 
