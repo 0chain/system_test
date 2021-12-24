@@ -1175,6 +1175,20 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error parsing float from balance")
 		require.Greater(t, balance, 900.000)
 	})
+
+	t.Run("Vesting pool delete with invalid pool_id should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{
+			"pool_id": "invalidPoolId",
+		}), false)
+		require.NotNil(t, err, "expected error when deleting invalid vesting pool id")
+		require.Len(t, output, 1)
+		require.Equal(t, "Failed to delete vesting pool: {\"error\": \"verify transaction failed\"}", output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
