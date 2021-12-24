@@ -1166,6 +1166,14 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error deleting vesting pool")
 		require.Len(t, output, 1)
 		require.Equal(t, "Vesting pool deleted successfully.", output[0])
+
+		// Wallet balance should be greater than 0.9 since non-vested tokens should return
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "error getting wallet balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		balance, err := strconv.ParseFloat(regexp.MustCompile(`\d*\.?\d+`).FindString(output[0]), 64)
+		require.Nil(t, err, "error parsing float from balance")
+		require.Greater(t, balance, 900.000)
 	})
 }
 
