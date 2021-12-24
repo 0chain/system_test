@@ -31,6 +31,8 @@ func TestVestingPool(t *testing.T) {
 	vpConfigMap := configFromKeyValuePair(output)
 	validDuration := getValidDuration(t, vpConfigMap)
 
+	// VP-ADD cases
+
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -632,6 +634,8 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, "missing required 'lock' flag", output[0])
 	})
 
+	// VP-INFO cases
+
 	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
 	t.Run("Vesting pool info with valid pool_id should work", func(t *testing.T) {
 		t.Parallel()
@@ -833,6 +837,8 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
 
+	// VP-LIST cases
+
 	t.Run("Vesting pool list before and after adding pool must work", func(t *testing.T) {
 		t.Parallel()
 
@@ -938,6 +944,8 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "no vesting pools", output[0])
 	})
+
+	// VP-STOP cases
 
 	t.Run("Vesting pool stop for pool with one destinaton should work", func(t *testing.T) {
 		t.Parallel()
