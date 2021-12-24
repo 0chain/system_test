@@ -776,6 +776,8 @@ func TestVestingPool(t *testing.T) {
 	})
 
 	t.Run("Vesting pool list before and after adding pool must work", func(t *testing.T) {
+		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
