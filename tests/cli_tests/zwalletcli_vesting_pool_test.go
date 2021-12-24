@@ -1031,6 +1031,27 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "Failed to stop vesting: {\"error\": \"verify transaction failed\"}", output[0])
 	})
+
+	t.Run("Vesting pool stop without pool id must fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		output, err = vestingPoolStop(t, configPath, createParams(map[string]interface{}{
+			"d": targetWallet.ClientID,
+		}), false)
+		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
+		require.Len(t, output, 1)
+		require.Equal(t, "missing required 'pool_id' flag", output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
