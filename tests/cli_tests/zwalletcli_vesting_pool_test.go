@@ -990,6 +990,47 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error fetching pool-info")
 		require.Len(t, output, 23, "expected output of length 23")
 	})
+
+	t.Run("Vesting pool stop for someone else's pool must fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		foreignWalletName := "foreignWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error registering new wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		output, err = vestingPoolAddForWallet(t, configPath, createParams(map[string]interface{}{
+			"d":        targetWallet.ClientID + ":0.1",
+			"lock":     0.1,
+			"duration": validDuration,
+		}), true, foreignWalletName)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		// Stopping with multiple destinations
+		output, err = vestingPoolStop(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+			"d":       targetWallet.ClientID,
+		}), false)
+		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
+		require.Len(t, output, 1)
+		require.Equal(t, "Failed to stop vesting: {\"error\": \"verify transaction failed\"}", output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
