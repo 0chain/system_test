@@ -863,6 +863,23 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "-  "+poolId, output[0])
 	})
+
+	t.Run("Vesting pool list with invalid client id should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		output, err = vestingPoolList(t, configPath, createParams(map[string]interface{}{
+			"client_id": "abcdef123456",
+		}), false)
+		require.Nil(t, err, "error listing vesting pools")
+		require.Len(t, output, 1)
+		require.Equal(t, "no vesting pools", output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
