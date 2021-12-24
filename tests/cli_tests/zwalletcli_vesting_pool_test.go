@@ -947,7 +947,7 @@ func TestVestingPool(t *testing.T) {
 
 	// VP-STOP cases
 
-	t.Run("Vesting pool stop for pool with one destinaton should work", func(t *testing.T) {
+	t.Run("Vesting pool stop for pool with one destination should work", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
