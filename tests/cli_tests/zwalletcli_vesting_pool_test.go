@@ -599,7 +599,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when adding a new vesting pool without destination")
 		require.Len(t, output, 1)
-		require.Regexp(t, "missing required 'd' flag", output[0])
+		require.Equal(t, "missing required 'd' flag", output[0])
 	})
 
 	t.Run("Vesting pool add without duration flag should fail", func(t *testing.T) {
@@ -614,7 +614,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when adding a new vesting pool without duration")
 		require.Len(t, output, 1)
-		require.Regexp(t, "missing required 'duration' flag", output[0])
+		require.Equal(t, "missing required 'duration' flag", output[0])
 	})
 
 	t.Run("Vesting pool add without lock flag should fail", func(t *testing.T) {
@@ -629,7 +629,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when adding a new vesting pool without lock")
 		require.Len(t, output, 1)
-		require.Regexp(t, "missing required 'lock' flag", output[0])
+		require.Equal(t, "missing required 'lock' flag", output[0])
 	})
 
 	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
@@ -803,7 +803,7 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error fetching pool-info", strings.Join(output, "\n"))
 	})
 
-	t.Run("Vesting pool info ith invalid pool_id should fail", func(t *testing.T) {
+	t.Run("Vesting pool info with invalid pool_id should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -818,6 +818,19 @@ func TestVestingPool(t *testing.T) {
 		require.NotNil(t, err, "expected error when using invalid pool_id")
 		require.Len(t, output, 1, "expected output of length 1")
 		require.Equal(t, "{\"code\":\"resource_not_found\",\"error\":\"resource_not_found: can't get pool: value not present\"}", output[0])
+	})
+
+	t.Run("Vesting pool info without pool id flag should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		// verify start time using vp-info
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{}), false)
+		require.NotNil(t, err, "expected error when using vp-info without pool id flag")
+		require.Len(t, output, 1, "expected output of length 1")
+		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
 
 	t.Run("Vesting pool list before and after adding pool must work", func(t *testing.T) {
