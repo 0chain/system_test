@@ -919,6 +919,17 @@ func vestingPoolList(t *testing.T, cliConfigFilename, params string, retry bool)
 	}
 }
 
+func vestingPoolStop(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("Stopping vesting pool...")
+	if retry {
+		return cliutils.RunCommand(t, "./zwallet vp-stop "+params+
+			" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry("./zwallet vp-stop " + params +
+			" --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	}
+}
+
 func configFromKeyValuePair(output []string) map[string]interface{} {
 	config := make(map[string]interface{})
 	for _, keyValuePair := range output {
