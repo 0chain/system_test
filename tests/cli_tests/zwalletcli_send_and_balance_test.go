@@ -161,7 +161,8 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}", true)
+		//FIXME: This passes when fees are disabled but should be rejected once they are enabled
+		output, err = sendZCN(t, configPath, target.ClientID, "0", "{}", true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
