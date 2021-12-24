@@ -587,7 +587,7 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
 	})
 
-	t.Run("Vesting pool add without destination param should fail", func(t *testing.T) {
+	t.Run("Vesting pool add without destination flag should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -603,6 +603,24 @@ func TestVestingPool(t *testing.T) {
 		require.NotNil(t, err, "expected error when adding a new vesting pool without destination")
 		require.Len(t, output, 1)
 		require.Regexp(t, "missing required 'd' flag", output[0])
+	})
+
+	t.Run("Vesting pool add without duration flag should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"lock": 0.1,
+			"d":    "dummyClientID",
+		}), false)
+		require.NotNil(t, err, "expected error when adding a new vesting pool without destination")
+		require.Len(t, output, 1)
+		require.Regexp(t, "missing required 'duration' flag", output[0])
 	})
 
 	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
