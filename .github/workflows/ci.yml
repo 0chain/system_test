@@ -55,4 +55,4 @@ jobs:
       - name: "Config: Run tests against existing 0Chain network"
 
         run: |
-          sudo apt install -y npm && sleep 50
+          sudo apt install -y npm && sleep 60
