@@ -1133,6 +1133,8 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, "missing required 'd' flag", output[0])
 	})
 
+	// VP-DELETE cases
+
 	t.Run("Vesting pool delete should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -1228,6 +1230,18 @@ func TestVestingPool(t *testing.T) {
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
 		require.Equal(t, "Failed to delete vesting pool: {\"error\": \"verify transaction failed\"}", output[0])
+	})
+
+	t.Run("Vesting pool delete without pool id flag should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{}), false)
+		require.NotNil(t, err, "expected error using vp-delete without pool id")
+		require.Len(t, output, 1)
+		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
 }
 
