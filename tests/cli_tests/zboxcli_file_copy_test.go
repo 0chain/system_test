@@ -91,7 +91,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to non-existing directory should fail", func(t *testing.T) {
+	t.Run("copy file to non-existing directory should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
