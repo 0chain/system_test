@@ -128,9 +128,9 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Commit consensus failed", output[0], "The message no longer matches expected, the issue of incorrect error message may have been fixed")
+		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -140,10 +140,9 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		// FIXME the copy action actually creates the new directory, but does not copy the file
-		require.Len(t, files, 2)
+		require.Len(t, files, 3)
 
-		// check if file was not copied
+		// check if expected file has been copied. both files should be there
 		foundAtSource := false
 		foundAtDest := false
 		for _, f := range files {
@@ -156,10 +155,14 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			}
 			if f.Path == destpath+filename {
 				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
 			}
 		}
 		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
-		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file to same directory should fail", func(t *testing.T) {
