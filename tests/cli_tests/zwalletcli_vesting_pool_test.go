@@ -1122,7 +1122,7 @@ func TestVestingPool(t *testing.T) {
 		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
 
-	t.Run("Veting pool stop without destination should fail", func(t *testing.T) {
+	t.Run("Vesting pool stop without destination should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
