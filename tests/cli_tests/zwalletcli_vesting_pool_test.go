@@ -1502,6 +1502,59 @@ func TestVestingPool(t *testing.T) {
 		// output[1] should be 0 SAS, output[3]: "1.000 mZCN (real value)", output[13]: "1.000 mZCN"
 		// output[14] should be 0 SAS, output[4]: 0 SAS
 	})
+
+	t.Run("Vesting pool trigger for a pool with multiple destinations should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWalletName2 := "targetWallet2" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			// adding second wallet this way since map doesn't allow repeated keys
+			"d":        targetWallet.ClientID + ":0.1" + " --d " + targetWallet2.ClientID + ":0.2",
+			"lock":     0.3,
+			"duration": validDuration,
+		}), true)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error trigerring vesting pool")
+		require.Len(t, output, 1)
+		require.Equal(t, "Vesting triggered successfully.", output[0])
+
+		// Vp-info should show that all tokens are transferred to destination wallets
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching vesting pool info")
+		require.Len(t, output, 24, "expected output of length 24 atleast")
+		// FIXME:
+		// Balance should be 0 SAS, Sent should be 3.000 mZCN, sent for ID 1 should be 1.000 mZCN
+		// Sent for ID 2 should be 2.000 mZCN
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
