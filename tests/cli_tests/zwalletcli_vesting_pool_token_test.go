@@ -54,8 +54,8 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 		currTime := time.Now().Unix()
 		require.Nil(t, err, "error fetching pool info")
 		require.Len(t, output, 18, "expected output of length 18")
-		ratio := (float64(currTime) - float64(startTime))/120 // 120 is duration
-		expectedTransferAmount := 2 * ratio                 // 0.1 is destination amount
+		ratio := (float64(currTime) - float64(startTime)) / 120 // 120 is duration
+		expectedTransferAmount := 2 * ratio                     // 0.1 is destination amount
 		actualTransferAmount, err := strconv.ParseFloat(regexp.MustCompile(`\d+\.?\d*`).FindString(output[15]), 64)
 		require.Nil(t, err, "error parsing float from vp-info")
 		unit := regexp.MustCompile("[um]?ZCN").FindString(output[15])
