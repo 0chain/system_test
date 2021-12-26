@@ -1401,6 +1401,20 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1, "expected output of length 1")
 		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
+
+	t.Run("Vesting unlock with invalid pool id must fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
+			"pool_id": "abcdef123456",
+		}), false)
+		require.NotNil(t, err, "error unlocking vesting pool tokens")
+		require.Len(t, output, 1, "expected output of length 1")
+		require.Equal(t, "Failed to unlock tokens: {\"error\": \"verify transaction failed\"}", output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
