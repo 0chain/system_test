@@ -230,8 +230,6 @@ func TestFileStats(t *testing.T) {
 	t.Run("get file stats for an allocation you dont own", func(t *testing.T) {
 		t.Parallel()
 
-		var stats map[string]climodel.FileStats
-
 		otherAllocationID := ""
 		remotepath := "/"
 		filesize := int64(533)
@@ -252,7 +250,7 @@ func TestFileStats(t *testing.T) {
 			}), true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
-
+			var stats map[string]climodel.FileStats
 			err = json.Unmarshal([]byte(output[0]), &stats)
 			require.Nil(t, err)
 
@@ -285,25 +283,10 @@ func TestFileStats(t *testing.T) {
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
+		var stats map[string]climodel.FileStats
 		err = json.Unmarshal([]byte(output[0]), &stats)
 		require.Nil(t, err)
-
-		for _, data := range stats {
-			require.Equal(t, "", data.Name)
-			require.Equal(t, "", data.Path)
-			require.Equal(t, "", data.PathHash)
-			require.Equal(t, int64(0), data.Size)
-			require.Equal(t, int64(0), data.NumOfBlocks)
-			require.Equal(t, int64(0), data.NumOfBlockDownloads)
-			require.Equal(t, int64(0), data.NumOfChallenges)
-			require.Equal(t, int64(0), data.NumOfUpdates)
-			require.Equal(t, "", data.WriteMarkerTxn)
-			require.Equal(t, "", data.LastChallengeTxn)
-			require.Equal(t, "", data.BlobberID)
-			require.Equal(t, "", data.BlobberURL)
-			require.Equal(t, false, data.BlockchainAware)
-		}
+		require.Len(t, stats, 0)
 	})
 
 	t.Run("get file stats with no params supplied", func(t *testing.T) {
