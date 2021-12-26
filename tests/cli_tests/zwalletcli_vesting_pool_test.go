@@ -1453,6 +1453,55 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1, "expected output of length 1")
 		require.Equal(t, "Failed to unlock tokens: {\"error\": \"verify transaction failed\"}", output[0])
 	})
+
+	// VP-TRIGGER cases
+
+	// FIXME: vp-trigger is not working, tokens still keep on being sent in a timely manner as opposed to being release all at once.
+	t.Run("Vesting pool trigger for one destination pool should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		// add a vesting pool for sending 0.1 to target wallet
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":        targetWallet.ClientID + ":0.1",
+			"lock":     0.1,
+			"duration": validDuration,
+		}), true)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error trigerring vesting pool")
+		require.Len(t, output, 1)
+		require.Equal(t, "Vesting triggered successfully.", output[0])
+
+		// vp-info should show vested tokens as sent
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching vesting pool info")
+		require.Len(t, output, 18)
+		// FIXME:
+		// output[1] should be 0 SAS, output[3]: "1.000 mZCN (real value)", output[13]: "1.000 mZCN"
+		// output[14] should be 0 SAS, output[4]: 0 SAS
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
@@ -1515,7 +1564,7 @@ func vestingPoolDelete(t *testing.T, cliConfigFilename, params string, retry boo
 }
 
 func vestingPoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return vestingPoolUnlockForWallet(t, configPath, params, retry, escapedTestName(t))
+	return vestingPoolUnlockForWallet(t, cliConfigFilename, params, retry, escapedTestName(t))
 }
 
 func vestingPoolUnlockForWallet(t *testing.T, cliConfigFilename, params string, retry bool, wallet string) ([]string, error) {
@@ -1525,6 +1574,21 @@ func vestingPoolUnlockForWallet(t *testing.T, cliConfigFilename, params string, 
 			" --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*5)
 	} else {
 		return cliutils.RunCommandWithoutRetry("./zwallet vp-unlock " + params +
+			" --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	}
+}
+
+func vestingPoolTrigger(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return vestingPoolTriggerForWallet(t, cliConfigFilename, params, retry, escapedTestName(t))
+}
+
+func vestingPoolTriggerForWallet(t *testing.T, cliConfigFilename, params string, retry bool, wallet string) ([]string, error) {
+	t.Log("Triggering vesting pool...")
+	if retry {
+		return cliutils.RunCommand(t, "./zwallet vp-trigger "+params+
+			" --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry("./zwallet vp-trigger " + params +
 			" --silent --wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 	}
 }
