@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,6 +15,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 func TestShareFile(t *testing.T) {
@@ -1208,6 +1210,9 @@ func TestShareFile(t *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 4, strings.Join(output, "\n"))
+		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
+		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1281,6 +1286,7 @@ func TestShareFile(t *testing.T) {
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, file),
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1341,6 +1347,9 @@ func TestShareFile(t *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 4, strings.Join(output, "\n"))
+		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
+		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -1406,6 +1415,7 @@ func TestShareFile(t *testing.T) {
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  filename,
 			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, filename),
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1459,8 +1469,16 @@ func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param m
 func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
+	// Output:
+	// 		[0]:"ZCN wallet created"
+	// 		[1]:"Creating related read pool for storage smart-contract..."
+	// 		[2]:"Read pool created successfully"
+	// 		[3]:"Wallet registered"
 	output, err := registerWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Len(t, output, 4, strings.Join(output, "\n"))
+	require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
+	require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
@@ -1468,7 +1486,7 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,
 		"size":   10485760,
-		"expire": "1h",
+		"expire": "2h",
 		"parity": 1,
 		"data":   1,
 	})
@@ -1498,4 +1516,22 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	require.Nil(t, err)
 
 	return allocationID, walletModel
+}
+
+// Hash - hash the given data and return the hash as hex string
+func Hash(data string) string {
+	return hex.EncodeToString(RawHash(data))
+}
+
+// RawHash - Logic to hash the text and return the hash bytes
+func RawHash(data string) []byte {
+	hash := sha3.New256()
+	hash.Write([]byte(data))
+	var buf []byte
+	return hash.Sum(buf)
+}
+
+// GetReferenceLookup hash(allocationID + ":" + path)
+func GetReferenceLookup(allocationID, path string) string {
+	return Hash(allocationID + ":" + path)
 }
