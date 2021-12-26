@@ -1248,6 +1248,57 @@ func TestVestingPool(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'pool_id' flag", output[0])
 	})
+
+	// VP-UNLOCK cases
+
+	t.Run("Vesting pool unlock for one destination and excess tokens in pool should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
+
+		targetWalletName := "targetWallet" + escapedTestName(t)
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching destination wallet")
+
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":        targetWallet.ClientID + ":0.1",
+			"lock":     0.2,
+			"duration": validDuration,
+		}), true)
+		require.Nil(t, err, "error adding a new vesting pool")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+
+		cliutils.Wait(t, time.Second)
+
+		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error unlocking vesting pool tokens")
+		require.Len(t, output, 1, "expected output of length 1")
+		require.Equal(t, "Tokens unlocked successfully.", output[0])
+
+		// Vp-info should show (can unlock) as 0, wallet should have increased by 0.1
+		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching vesting pool info")
+		require.Equal(t, "can unlock:   0 SAS (excess)", output[2])
+
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "error fetching wallet balance")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: 900.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+	})
 }
 
 func vestingPoolAdd(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
@@ -1305,6 +1356,17 @@ func vestingPoolDelete(t *testing.T, cliConfigFilename, params string, retry boo
 			" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*5)
 	} else {
 		return cliutils.RunCommandWithoutRetry("./zwallet vp-delete " + params +
+			" --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+	}
+}
+
+func vestingPoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("Deleting vesting pool...")
+	if retry {
+		return cliutils.RunCommand(t, "./zwallet vp-unlock "+params+
+			" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry("./zwallet vp-unlock " + params +
 			" --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
 	}
 }
