@@ -366,7 +366,7 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 			key = strings.TrimSpace(kvp[0])
 			val = ""
 		}
-
+		// add comment
 		float, err := strconv.ParseFloat(val, 64)
 		if err == nil {
 			floatMap[key] = float
