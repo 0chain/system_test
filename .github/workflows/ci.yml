@@ -26,7 +26,7 @@ on:
         required: false
       blobber_image:
         description: 'blobber DOCKER IMAGE to deploy'
-        default: 'bug/issue-401-copy-file-when-no-dir'
+        default: 'staging'
         required: false
       validator_image:
         description: 'validator DOCKER IMAGE to deploy'
