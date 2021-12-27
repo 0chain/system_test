@@ -67,6 +67,6 @@ jobs:
     steps:
 
       - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+      
         run: |
           echo "[${{ github.repository }}]"
