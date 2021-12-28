@@ -1,3 +1,4 @@
+//nolint:gocritic
 package cli_tests
 
 import (
@@ -21,6 +22,7 @@ Tests in here are skipped until the feature has been fixed
 */
 
 //nolint:gocyclo
+
 func Test___FlakyBrokenScenarios(t *testing.T) {
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
@@ -627,4 +629,257 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.Run("update blobber read price should work", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("update blobber read price not working.")
+		}
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var blobberList []climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		intialBlobberInfo := blobberList[0]
+
+		oldReadPrice := intialBlobberInfo.Terms.Read_price
+		defer func() {
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": oldReadPrice}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}()
+
+		newReadPrice := oldReadPrice + 1
+
+		// BUG: read price is not being updated
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		time.Sleep(30 * time.Second)
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// BUG: read price is not being updated
+		require.NotEqual(t, newReadPrice, finalBlobberInfo.Terms.Read_price)
+	})
+
+	t.Run("update blobber write price should work", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("update blobber write price not working.")
+		}
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var blobberList []climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		intialBlobberInfo := blobberList[0]
+
+		oldWritePrice := intialBlobberInfo.Terms.Write_price
+		defer func() {
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": oldWritePrice}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}()
+
+		newWritePrice := oldWritePrice + 1
+
+		// BUG: write price is not being updated
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		time.Sleep(30 * time.Second)
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// BUG: write price is not being updated
+		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
+	})
+
+	// FIXME: Commented out because these cases hang the broken test suite till timeout
+
+	// FIXME: add param validation
+	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
+
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
+
+	// 	chunksize := -655360
+	// 	// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+	// 	// runUploadFeed below
+	// 	err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"live":       "",
+	// 		"chunksize":  chunksize,
+	// 	}))
+	// 	require.Nil(t, err, "expected error when using negative chunksize")
+	// 	KillFFMPEG()
+	// })
+
+	// FIXME: add param validation
+	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
+	// 	t.Parallel()
+
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
+
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
+
+	// 	chunksize := -655360
+	// 	// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+	// 	// runUploadFeed below
+	// 	err = startUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+	// 		"sync":       "",
+	// 		"chunksize":  chunksize,
+	// 	}))
+	// 	require.Nil(t, err, "expected error when using negative chunksize")
+	// 	KillFFMPEG()
+	// })
+
+	// FIXME: add param validation
+	// t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
+
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
+
+	// 	err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+	// 		"sync":       "",
+	// 		"delay":      -10,
+	// 	}))
+	// 	require.NotNil(t, err, "negative delay should fail")
+	// 	KillFFMPEG()
+	// })
+
+	// FIXME: add param validation
+	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
+
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
+
+	// 	err = runUploadFeed(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  localpath,
+	// 		"remotepath": remotepath,
+	// 		"live":       "",
+	// 		"delay":      -10,
+	// 	}))
+	// 	require.NotNil(t, err, "negative delay should fail")
+	// 	KillFFMPEG()
+	// })
 }
+
+// func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
+// 	t.Logf("Starting upload of live stream to zbox...")
+// 	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
+// 	_, err := cliutils.RunCommandWithoutRetry(commandString)
+// 	return err
+// }
