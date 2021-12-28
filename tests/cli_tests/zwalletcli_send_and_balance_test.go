@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -161,7 +160,8 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "{}", true)
+		//FIXME: This passes when fees are disabled but should be rejected once they are enabled
+		output, err = sendZCN(t, configPath, target.ClientID, "0", "{}", true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -401,12 +401,6 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 
-	mconfig := map[string]float64{}
-	for i := range output {
-		configPair := strings.Split(output[i], "\t")
-		val, err := strconv.ParseFloat(strings.TrimSpace(configPair[1]), 64)
-		require.Nil(t, err, "config val %s for %s is unexpected not float64: %s", configPair[1], configPair[0], strings.Join(output, "\n"))
-		mconfig[strings.TrimSpace(configPair[0])] = val
-	}
-	return mconfig
+	_, returnVal := keyValuePairStringToMap(t, output)
+	return returnVal
 }
