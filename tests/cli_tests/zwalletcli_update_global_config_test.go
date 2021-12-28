@@ -23,7 +23,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		}
 
 		configKey := "server_chain.transaction.timeout"
-		newValue := "35"
+		newValue := "32"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
@@ -59,7 +59,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 2*time.Minute)
+		cliutils.Wait(t, 2*time.Second)
 
 		cfgAfter := getGlobalConfiguration(t, true)
 
