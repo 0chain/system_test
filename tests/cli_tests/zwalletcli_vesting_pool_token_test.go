@@ -14,7 +14,7 @@ import (
 func TestVestingPoolTokenAccounting(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Vesting pool with one destination should move tokens from balance to pending", func(t *testing.T) {
+	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -60,6 +60,26 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 		require.Nil(t, err, "error parsing float from vp-info")
 		unit := regexp.MustCompile("[um]?ZCN").FindString(output[15])
 		actualTransferAmount = unitToZCN(actualTransferAmount, unit)
-		require.InEpsilon(t, expectedTransferAmount, actualTransferAmount, 0.05)
+		require.GreaterOrEqualf(t, actualTransferAmount, expectedTransferAmount,
+			"transferred amount [%v] should have been greater than or equal to expected transferred amount [%v]", actualTransferAmount, expectedTransferAmount)
+
+		// Target wallet should be able to unlock tokens from vesting pool
+		output, err = vestingPoolUnlockForWallet(t, configPath, createParams(map[string]interface{}{
+			"pool_id": poolId,
+		}), true, targetWalletName)
+		require.Nil(t, err, "error unlocking tokens from vesting pool by target wallet")
+		require.Len(t, output, 1)
+		require.Equal(t, "Tokens unlocked successfully.", output[0])
+
+		output, err = getBalanceForWallet(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching balance for target wallet")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: \d+\.?\d* [um]?ZCN \(\d+\.?\d* USD\)`), output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
+		require.Nil(t, err, "error parsing float from balance")
+		newBalanceInZCN := unitToZCN(newBalanceValue, strings.Fields(newBalance)[1])
+		require.GreaterOrEqualf(t, newBalanceInZCN, actualTransferAmount,
+			"amount in wallet after unlock should be greater or equal to transferred amount")
 	})
 }
