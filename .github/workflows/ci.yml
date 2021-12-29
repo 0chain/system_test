@@ -6,7 +6,7 @@ on:
     inputs:
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
-        default: 'bug/issue-401-copy-file-when-no-dir'
+        default: 'staging'
         required: true
       zwallet_cli_branch:
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
