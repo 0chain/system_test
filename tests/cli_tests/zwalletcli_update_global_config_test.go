@@ -22,8 +22,11 @@ func TestUpdateGlobalConfig(t *testing.T) {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		configKey := "server_chain.transaction.timeout"
-		newValue := "32"
+		// configKey := "server_chain.block.max_block_size"
+		// newValue := "11"
+
+		configKey := "server_chain.smart_contract.setting_update_period"
+		newValue := "215"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
@@ -43,12 +46,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 				"values": oldValue,
 			}, true)
 		}()
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-		t.Logf("Start Balance: %v", startBalance)
 
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
@@ -128,7 +125,7 @@ func updateGlobalConfigWithWallet(t *testing.T, walletName string, param map[str
 	t.Logf("Updating global config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zwallet global-update-config %s --silent --wallet %s --configDir ./config --config %s",
+		"./zwallet global-update-config %s --wallet %s --configDir ./config --config %s",
 		p,
 		walletName+"_wallet.json",
 		configPath,
