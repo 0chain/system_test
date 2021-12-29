@@ -1544,6 +1544,11 @@ func TestVestingPool(t *testing.T) {
 		// FIXME:
 		// output[1] should be 0 SAS, output[3]: "1.000 mZCN (real value)", output[13]: "1.000 mZCN"
 		// output[14] should be 0 SAS, output[4]: 0 SAS
+
+		output, err = getBalanceForWallet(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching wallet balance")
+		// FIXME: Balance should be 1.000 mZCN
+		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ [um]?ZCN \(\d*\.?\d+ USD\)`), output[0])
 	})
 
 	t.Run("Vesting pool trigger for a pool with multiple destinations should work", func(t *testing.T) {
@@ -1597,6 +1602,16 @@ func TestVestingPool(t *testing.T) {
 		// FIXME:
 		// Balance should be 0 SAS, Sent should be 3.000 mZCN, sent for ID 1 should be 1.000 mZCN
 		// Sent for ID 2 should be 2.000 mZCN
+
+		output, err = getBalanceForWallet(t, configPath, targetWalletName)
+		require.Nil(t, err, "error fetching wallet balance")
+		// FIXME: Balance should be 1.000 mZCN
+		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ [um]?ZCN \(\d*\.?\d+ USD\)`), output[0])
+
+		output, err = getBalanceForWallet(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error fetching wallet balance")
+		// FIXME: Balance should be 2.000 mZCN
+		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ [um]?ZCN \(\d*\.?\d+ USD\)`), output[0])
 	})
 
 	t.Run("Triggering someone else's pool must fail", func(t *testing.T) {
