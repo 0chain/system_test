@@ -66,7 +66,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
 		cfgAfter, _ := keyValuePairStringToMap(t, output)
-
 		require.Equal(t, newValue, cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
 
 		// test transaction to verify chain is still working
