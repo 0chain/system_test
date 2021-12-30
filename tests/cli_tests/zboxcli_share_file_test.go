@@ -1476,9 +1476,6 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	// 		[3]:"Wallet registered"
 	output, err := registerWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-	require.Len(t, output, 4, strings.Join(output, "\n"))
-	require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
-	require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
