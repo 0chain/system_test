@@ -418,31 +418,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool[0].Balance)
 	})
 
-	t.Run("Send with description", func(t *testing.T) {
-		t.Parallel()
-
-		targetWallet := escapedTestName(t) + "_TARGET"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		target, err := getWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description", true)
-		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "Send tokens success", output[0])
-		// cannot verify transaction payload at this moment due to transaction hash not being printed.
-	})
-
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
 		t.Parallel()
 
