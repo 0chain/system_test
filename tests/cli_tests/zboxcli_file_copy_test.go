@@ -10,6 +10,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -215,6 +216,71 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.Len(t, files, 1)
+
+		// check if file is still there
+		found := false
+		for _, f := range files {
+			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
+				found = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("copy file to dir with existing children should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/testing_path/copy_here/children/" + filename
+		destpath := "/testing_path/copy_here"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		output, err = copyFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		assert.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		assert.Len(t, files, 5)
 
 		// check if file is still there
 		found := false
