@@ -267,9 +267,9 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
