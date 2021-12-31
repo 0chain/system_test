@@ -90,7 +90,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 		require.GreaterOrEqualf(t, newBalanceInZCN, actualVestedAmount,
 			"amount in wallet after unlock should be greater or equal to transferred amount")
 	})
-	return
+
 	t.Run("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", func(t *testing.T) {
 		t.Parallel()
 
@@ -141,6 +141,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 		require.GreaterOrEqual(t, len(output), 23, "expected output of length 23 or more")
 		ratio := math.Min((float64(currTime)-float64(startTime))/120, 1) // 120 is duration
 		expectedVestedAmount1 := 1 * ratio
+		expectedVestedAmount1 = math.Round(expectedVestedAmount1*1e6) / 1e6
 		actualVestedAmount1, err := strconv.ParseFloat(regexp.MustCompile(`\d+\.?\d*`).FindString(output[15]), 64)
 		require.Nil(t, err, "error parsing float from vp-info")
 		unit := regexp.MustCompile("[um]?ZCN").FindString(output[15])
@@ -176,6 +177,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 		require.Nil(t, err, "error fetching pool info")
 		ratio = math.Min((float64(currTime)-float64(startTime))/120, 1) // 120 is duration
 		expectedVestedAmount2 := 2 * ratio
+		expectedVestedAmount2 = math.Round(expectedVestedAmount2*1e6) / 1e6
 		actualVestedAmount2, err := strconv.ParseFloat(regexp.MustCompile(`\d+\.?\d*`).FindString(output[22]), 64)
 		require.Nil(t, err, "error parsing float from vp-info")
 		unit = regexp.MustCompile("[um]?ZCN").FindString(output[22])
