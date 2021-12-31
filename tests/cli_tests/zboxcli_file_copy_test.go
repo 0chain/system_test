@@ -274,12 +274,12 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 5)
 
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 1)
+		require.Len(t, files, 5)
 
 		// check if file is still there
 		found := false
