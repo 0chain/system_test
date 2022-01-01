@@ -616,8 +616,9 @@ func TestDownload(t *testing.T) {
 	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		filesize := int64(256)
+		// 1 block is of size 655360, we upload 20 blocks and download 1 block
+		allocSize := int64(655360 * 4)
+		filesize := int64(655360 * 2)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -631,21 +632,46 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(filename),
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var stats map[string]climodel.FileStats
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+		var data climodel.FileStats
+		for _, data = range stats {
+			break
+		}
+
+		startBlock := 1
+		endBlock := 1
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-			"startblock": 0,
-			"endblock":   1,
+			"startblock": startBlock,
+			"endblock":   endBlock,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = . Name = %s",
+			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+
+		info, err := os.Stat("tmp/" + filepath.Base(filename))
+		require.Nil(t, err, "error getting file stats")
+		// downloaded file size should equal to ratio of block downloaded by original file size
+		require.Equal(t, float64(info.Size()), (float64((endBlock-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
