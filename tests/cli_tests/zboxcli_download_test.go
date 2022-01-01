@@ -671,6 +671,67 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64((data.NumOfBlocks-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
 	})
 
+	t.Run("Download File With Only endblock Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		// 1 block is of size 655360, we upload 20 blocks and download 1 block
+		allocSize := int64(655360 * 4)
+		filesize := int64(655360 * 2)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(filename),
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var stats map[string]climodel.FileStats
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+		var data climodel.FileStats
+		for _, data = range stats {
+			break
+		}
+
+		endBlock := int64(5) // blocks 1 to 5 should be downloaded
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"endblock":   endBlock,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		// FIXME: Type = application/octet-stream.
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = . Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		info, err := os.Stat("tmp/" + filepath.Base(filename))
+		require.Nil(t, err, "error getting file stats")
+		// downloaded file size should equal to ratio of block downloaded by original file size
+		// FIXME: giving only endblock should download from block 1 to that endblock.
+		// Instead, empty file is downloaded.
+		require.NotEqual(t, float64(info.Size()), (float64(endBlock)/float64(data.NumOfBlocks))*float64((filesize)))
+	})
+
 	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
 		t.Parallel()
 
