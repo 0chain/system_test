@@ -674,6 +674,42 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64((endBlock-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
 	})
 
+	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *testing.T) {
+		t.Parallel()
+
+		// 1 block is of size 655360
+		allocSize := int64(655360 * 4)
+		filesize := int64(655360 * 2)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		startBlock := 0
+		endBlock := 5
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"startblock": startBlock,
+			"endblock":   endBlock,
+		}), true)
+		// FIXME: error should not be nil, as this is unexpected behavior.
+		// An empty File is downloaded instead of first 5 blocks.
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+	})
+
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
 		t.Parallel()
 
