@@ -199,8 +199,8 @@ func TestCreateDir(t *testing.T) {
 		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
 
 		output, err = createDir(t, configPath, allocID, dirName, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		assert.Len(t, output, 1)
+		require.Nilf(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Lenf(t, output, 1, "output value is %s", output)
 		assert.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
