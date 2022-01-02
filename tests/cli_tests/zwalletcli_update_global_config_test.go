@@ -125,7 +125,7 @@ func updateGlobalConfigWithWallet(t *testing.T, walletName string, param map[str
 	t.Logf("Updating global config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zwallet global-update-config %s --wallet %s --configDir ./config --config %s",
+		"./zwallet global-update-config %s --silent --wallet %s --configDir ./config --config %s",
 		p,
 		walletName+"_wallet.json",
 		configPath,
