@@ -195,12 +195,13 @@ func TestCreateDir(t *testing.T) {
 		dirName := "noleadingslash"
 		output, err := createDir(t, configPath, allocID, dirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
+		require.Lenf(t, output, 1, "output value is %s", output)
+		require.Equal(t, dirName+"created.", output[0])
 
 		output, err = createDir(t, configPath, allocID, dirName, true)
 		require.Nilf(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0)                       // FIXME: should show success output
-		require.NotEqual(t, dirName+"created.", output) // FIXME: should be equal to output[0]
+		require.Lenf(t, output, 1, "output value is %s", output)
+		require.Equal(t, "CreateDir failed:  {\"code\":\"duplicate_file\",\"error\":\"duplicate_file: File at path already exists\"}, {\"code\":\"duplicate_file\",\"error\":\"duplicate_file: File at path already exists\"}", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
