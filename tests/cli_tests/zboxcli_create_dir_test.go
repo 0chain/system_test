@@ -197,7 +197,6 @@ func TestCreateDir(t *testing.T) {
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
-
 	})
 
 	t.Run("create with existing dir but different case", func(t *testing.T) {
@@ -386,7 +385,6 @@ func TestCreateDir(t *testing.T) {
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
-
 	})
 }
 
