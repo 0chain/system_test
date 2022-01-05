@@ -127,7 +127,7 @@ func TestCreateDir(t *testing.T) {
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `CreateDir failed:  {"error":"ERROR: value too long for type character varying(100) (SQLSTATE 22001)"}`, output[0])
+		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"error":"ERROR: value too long for type character varying(100) (SQLSTATE 22001)"}`), "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -155,7 +155,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDir(t, configPath, allocID, dirname, false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`, output[0])
+		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`), "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("create dir with no leading slash should work", func(t *testing.T) {
@@ -196,7 +196,8 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDir(t, configPath, allocID, dirname, false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`, output[0])
+		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
+
 	})
 
 	t.Run("create with existing dir but different case", func(t *testing.T) {
@@ -384,7 +385,8 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `CreateDir failed:  {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`, output[0])
+		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
+
 	})
 }
 
