@@ -71,7 +71,8 @@ func TestCollaborator(t *testing.T) {
 		dirName := "/NewFolder"
 		output, err = createDir(t, configPath, allocationID, dirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/NewFolder directory created", output[0])
 
 		meta := getMetaData(t, map[string]interface{}{
 			"allocation": allocationID,
