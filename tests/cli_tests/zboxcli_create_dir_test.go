@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -21,7 +22,8 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/rootdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/rootdir directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -49,11 +51,13 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/parent", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/parent directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, "/parent/child", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1) // FIXME: createdir command has no output on success
+		require.Equal(t, "/parent/child directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -87,7 +91,8 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/"+longDirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/"+longDirName+" directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -120,12 +125,12 @@ func TestCreateDir(t *testing.T) {
 		longDirName := string(b)
 
 		output, err := createDir(t, configPath, allocID, "/"+longDirName, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with very long directory name must throw error explicitly to not give impression it was success
+		require.Error(t, errors.New(`{"error":"ERROR: value too long for type character varying(100) (SQLSTATE 22001)"}`))
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 1, "unexpected output"+strings.Join(output, ", "))
+		require.Equal(t, "[]", output[0], "unexpected output"+strings.Join(output, ", "))
 
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
@@ -141,11 +146,12 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/existingdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/existingdir directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, "/existingdir", true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir for another allocation must return a message that it was already existing
+		require.Error(t, errors.New(`{"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`))
+		require.Len(t, output, 1)
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -174,7 +180,9 @@ func TestCreateDir(t *testing.T) {
 		dirName := "noleadingslash"
 		output, err := createDir(t, configPath, allocID, dirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
+		require.Len(t, output, 1)
+		require.Equal(t, dirName+" directory created", output[0])
+
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -195,11 +203,12 @@ func TestCreateDir(t *testing.T) {
 		dirName := "noleadingslash"
 		output, err := createDir(t, configPath, allocID, dirName, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be success message in output
+		require.Len(t, output, 1)
+		require.Equal(t, dirName+" directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, dirName, true)
-		require.Nilf(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir with no leading slash, there should be failure message in output
+		require.Error(t, errors.New(`{"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`))
+		require.Len(t, output, 1)
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -220,11 +229,13 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/existingdir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/existingdir directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, "/existingDir", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/existingDir directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -252,7 +263,8 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/nonexistent/child", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/nonexistent/child directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -280,7 +292,8 @@ func TestCreateDir(t *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, "/abc!@#$%^&*()<>{}[]:;'?,.", true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: createdir command has no output on success
+		require.Len(t, output, 1)
+		require.Equal(t, "/abc!@#$%^&*()<>{}[]:;'?,. directory created", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -334,7 +347,7 @@ func TestCreateDir(t *testing.T) {
 		output, err := createDirForWallet(t, configPath, wallet, true, allocID, true, "", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "CreateDir failed. invalid_name: Invalid name for dir", output[0])
+		require.Equal(t, "CreateDir failed:  invalid_name: Invalid name for dir", output[0])
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -378,7 +391,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
 	})
 
 	t.Run("create attempt with invalid allocation", func(t *testing.T) {
@@ -393,8 +406,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDir(t, configPath, "invalidallocation", "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error fetching the allocation. allocation_fetch_error: "+
-			"Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
 	})
 
 	t.Run("create attempt with someone else's allocation", func(t *testing.T) {
@@ -408,8 +420,8 @@ func TestCreateDir(t *testing.T) {
 		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 0) // FIXME: creating dir for another allocation must throw error explicitly to not give impression it was success
+		require.Error(t, errors.New(`{"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`))
+		require.Len(t, output, 1)
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
