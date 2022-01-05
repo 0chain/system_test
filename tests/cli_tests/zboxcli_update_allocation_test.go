@@ -603,8 +603,6 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 		"lock":   0.5,
 		"size":   10000,
 		"expire": "1h",
-		// "data":   "1",
-		// "parity": "1",
 	}
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
