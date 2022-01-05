@@ -131,7 +131,8 @@ func TestCreateDir(t *testing.T) {
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 1, "unexpected output"+strings.Join(output, ", "))
+		require.Equal(t, "[]", output[0], "unexpected output"+strings.Join(output, ", "))
 
 		var files []climodel.AllocationFile
 		err = json.Unmarshal([]byte(output[0]), &files)
