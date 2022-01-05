@@ -313,4 +313,52 @@ func TestFileDelete(t *testing.T) {
 		require.Len(t, output, 1)
 		require.NotEqual(t, "null", output[0], strings.Join(output, "\n"))
 	})
+
+	t.Run("delete file that does not exist should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/"
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + "doesnotexist",
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+	})
+
+	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+	})
+
+	t.Run("delete file by not supplying allocation ID should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"remotepath": remoteFilePath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+	})
 }
