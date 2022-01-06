@@ -45,7 +45,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but config takes params in ZCN
+				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -107,7 +107,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"max_stake": miner.MaxStake / 1e10, // miner.MaxStake is in Int, but config takes params in ZCN
+				"max_stake": miner.MaxStake / 1e10, // miner.MaxStake is in Int, but this command takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -138,7 +138,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but config takes params in ZCN
+				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -200,13 +200,44 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but config takes params in ZCN
+				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but this command takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
 			require.Equal(t, "settings updated", output[0])
 		}()
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
+
+	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		var miners climodel.MinerSCNodes
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		miner := miners.Nodes[2]
+
+		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"min_stake": -1,
+		}), false)
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":        miner.ID,
+				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
+			}), true)
+			require.Nil(t, err, "error reverting miner node settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
