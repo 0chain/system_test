@@ -44,7 +44,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
-		}))
+		}), true)
 		require.Nil(t, err, "error reverting miner node settings after test")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
@@ -53,7 +53,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
 				"min_stake": oldMinerInfo.MinStake,
-			}))
+			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
 			require.Equal(t, "settings updated", output[0])
@@ -88,12 +88,12 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
-		}))
+		}), true)
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":            miner.ID,
 				"num_delegates": oldMinerInfo.NumberOfDelegates,
-			}))
+			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
 			require.Equal(t, "settings updated", output[0])
@@ -128,12 +128,12 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": 99,
-		}))
+		}), true)
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
 				"max_stake": oldMinerInfo.MaxStake,
-			}))
+			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
 			require.Equal(t, "settings updated", output[0])
@@ -148,13 +148,17 @@ func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
 }
 
-func minerUpdateSettings(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWallet)
+func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWallet, retry)
 }
 
-func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string) ([]string, error) {
+func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("Updating miner settings...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+	if retry {
+		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+	}
 }
 
 func minerInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
