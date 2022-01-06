@@ -170,7 +170,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": mnConfig["min_stake"] - 1e-9,
+			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
 		defer func() {
 			output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
@@ -182,6 +182,46 @@ func TestMinerUpdateSettings(t *testing.T) {
 			require.Equal(t, "settings updated", output[0])
 		}()
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
+
+	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		var miners climodel.MinerSCNodes
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		miner := miners.Nodes[2]
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}))
+		require.Nil(t, err, "error fetching miner node info")
+		require.Len(t, output, 1)
+
+		var oldMinerInfo climodel.SimpleNode
+		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+
+		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":            miner.ID,
+			"num_delegates": mnConfig["max_delegates"] + 1,
+		}), false)
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":            miner.ID,
+				"num_delegates": oldMinerInfo.NumberOfDelegates,
+			}), true)
+			require.Nil(t, err, "error reverting miner node settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.NotNil(t, err, "expected error when updating num_delegated greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
