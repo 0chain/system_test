@@ -254,7 +254,7 @@ type StakePoolDelegatePoolInfo struct {
 	PendingInterests int64  `json:"pending_interests"` // total for all time
 	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
 	// time it can't be unstaked.
-	Unstake int64 `json:"unstake"`
+	Unstake bool `json:"unstake"`
 }
 
 type StakePoolSettings struct {
