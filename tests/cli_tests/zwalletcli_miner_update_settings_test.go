@@ -17,6 +17,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	}
 }
 
+func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
+}
+
 func minerUpdateSettings(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWallet)
 }
