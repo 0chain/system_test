@@ -102,6 +102,46 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 	})
+
+	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		var miners climodel.MinerSCNodes
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		miner := miners.Nodes[2]
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}))
+		require.Nil(t, err, "error fetching miner node info")
+		require.Len(t, output, 1)
+
+		var oldMinerInfo climodel.SimpleNode
+		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+
+		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"max_stake": 99,
+		}))
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":        miner.ID,
+				"max_stake": oldMinerInfo.MaxStake,
+			}))
+			require.Nil(t, err, "error reverting miner node settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.Nil(t, err, "error updating max_stake in miner node")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+	})
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
