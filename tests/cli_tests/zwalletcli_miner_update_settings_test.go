@@ -34,16 +34,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 		miner := miners.Nodes[2]
 
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
-		}))
-		require.Nil(t, err, "error fetching miner node info")
-		require.Len(t, output, 1)
-
-		var oldMinerInfo climodel.SimpleNode
-		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
-		require.Nil(t, err, "error unmarshalling miner info")
-
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
@@ -55,7 +45,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": oldMinerInfo.MinStake,
+				"min_stake": miner.MinStake,
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -78,15 +68,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 		miner := miners.Nodes[2]
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
-		}))
-		require.Nil(t, err, "error fetching miner node info")
-		require.Len(t, output, 1)
-
-		var oldMinerInfo climodel.SimpleNode
-		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
-		require.Nil(t, err, "error unmarshalling miner info")
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
@@ -95,7 +76,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":            miner.ID,
-				"num_delegates": oldMinerInfo.NumberOfDelegates,
+				"num_delegates": miner.NumberOfDelegates,
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -118,15 +99,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 		miner := miners.Nodes[2]
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
-		}))
-		require.Nil(t, err, "error fetching miner node info")
-		require.Len(t, output, 1)
-
-		var oldMinerInfo climodel.SimpleNode
-		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
-		require.Nil(t, err, "error unmarshalling miner info")
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
@@ -135,7 +107,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"max_stake": oldMinerInfo.MaxStake,
+				"max_stake": miner.MaxStake,
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -158,15 +130,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 		miner := miners.Nodes[2]
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
-		}))
-		require.Nil(t, err, "error fetching miner node info")
-		require.Len(t, output, 1)
-
-		var oldMinerInfo climodel.SimpleNode
-		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
-		require.Nil(t, err, "error unmarshalling miner info")
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
@@ -175,7 +138,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": oldMinerInfo.MinStake,
+				"min_stake": miner.MinStake,
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -198,15 +161,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 		miner := miners.Nodes[2]
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
-		}))
-		require.Nil(t, err, "error fetching miner node info")
-		require.Len(t, output, 1)
-
-		var oldMinerInfo climodel.SimpleNode
-		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
-		require.Nil(t, err, "error unmarshalling miner info")
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
@@ -215,7 +169,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":            miner.ID,
-				"num_delegates": oldMinerInfo.NumberOfDelegates,
+				"num_delegates": miner.NumberOfDelegates,
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -242,9 +196,4 @@ func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, walle
 	} else {
 		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
-}
-
-func minerInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	t.Log("Fetching miner node info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
 }
