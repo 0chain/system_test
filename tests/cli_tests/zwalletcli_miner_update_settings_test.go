@@ -256,19 +256,50 @@ func TestMinerUpdateSettings(t *testing.T) {
 		miner := miners.Nodes[2]
 
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id":        miner.ID,
 			"max_stake": -1,
 		}), false)
-		defer func ()  {
+		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id": miner.ID,
+				"id":        miner.ID,
 				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but this command takes params in ZCN
-			}), true)	
+			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
 			require.Equal(t, "settings updated", output[0])
 		}()
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
+
+	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		var miners climodel.MinerSCNodes
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		miner := miners.Nodes[2]
+
+		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":            miner.ID,
+			"num_delegates": -1,
+		}), false)
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":            miner.ID,
+				"num_delegates": miner.NumberOfDelegates,
+			}), true)
+			require.Nil(t, err, "error reverting miner node settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
