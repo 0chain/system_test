@@ -21,20 +21,19 @@ func TestMinerUpdateSettings(t *testing.T) {
 	}
 
 	mnConfig := getMinerSCConfiguration(t)
+	output, err := listMiners(t, configPath, "--json")
+	require.Nil(t, err, "error listing miners")
+	require.Len(t, output, 1)
+
+	var miners climodel.MinerSCNodes
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "error unmarshalling ls-miners json output")
+	miner := miners.Nodes[2]
 
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
 		}), true)
@@ -59,17 +58,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
 		}), true)
@@ -90,17 +79,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), true)
@@ -121,17 +100,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
@@ -152,17 +121,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
@@ -183,17 +142,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
@@ -214,17 +163,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": -1,
 		}), false)
@@ -245,17 +184,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": -1,
 		}), false)
@@ -276,17 +205,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := listMiners(t, configPath, "--json")
-		require.Nil(t, err, "error listing miners")
-		require.Len(t, output, 1)
-
-		var miners climodel.MinerSCNodes
-		err = json.Unmarshal([]byte(output[0]), &miners)
-		require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-		miner := miners.Nodes[2]
-
-		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": -1,
 		}), false)
