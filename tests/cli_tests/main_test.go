@@ -27,7 +27,8 @@ func TestMain(m *testing.M) {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
 				// skip deleting the SC owner wallet and blobber owner wallet
-				if strings.HasSuffix(f, scOwnerWallet+"_wallet.json") || strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") {
+				if strings.HasSuffix(f, scOwnerWallet+"_wallet.json") || strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
+					strings.HasSuffix(f, minerNodeDelegateWallet+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
