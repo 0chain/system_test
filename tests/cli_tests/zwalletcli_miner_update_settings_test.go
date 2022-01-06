@@ -31,14 +31,28 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling ls-miners json output")
 		miner := miners.Nodes[2]
 
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+		}))
+		require.Nil(t, err, "error fetching miner node info")
+		require.Len(t, output, 1)
+
+		var oldMinerInfo climodel.SimpleNode
+		err = json.Unmarshal([]byte(output[0]), &oldMinerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+
 		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
 		}))
+		require.Nil(t, err, "error reverting miner node settings after test")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": 0,
+				"min_stake": oldMinerInfo.MinStake,
 			}))
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -61,4 +75,9 @@ func minerUpdateSettings(t *testing.T, cliConfigFilename, params string) ([]stri
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string) ([]string, error) {
 	t.Log("Updating miner settings...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+}
+
+func minerInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+	t.Log("Fetching miner node info...")
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
 }
