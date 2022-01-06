@@ -45,7 +45,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": miner.MinStake,
+				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but config takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -107,7 +107,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"max_stake": miner.MaxStake,
+				"max_stake": miner.MaxStake / 1e10, // miner.MaxStake is in Int, but config takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -138,7 +138,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		defer func() {
 			output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        miner.ID,
-				"min_stake": miner.MinStake,
+				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but config takes params in ZCN
 			}), true)
 			require.Nil(t, err, "error reverting miner node settings after test")
 			require.Len(t, output, 1)
@@ -179,6 +179,37 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
+
+	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		var miners climodel.MinerSCNodes
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		miner := miners.Nodes[2]
+
+		output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"max_stake": mnConfig["max_stake"] + 1e-10,
+		}), false)
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":        miner.ID,
+				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but config takes params in ZCN
+			}), true)
+			require.Nil(t, err, "error reverting miner node settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
@@ -191,9 +222,10 @@ func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, retry b
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("Updating miner settings...")
+	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
-		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
-		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
