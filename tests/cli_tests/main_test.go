@@ -11,6 +11,7 @@ import (
 
 const scOwnerWallet = "sc_owner"
 const blobberOwnerWallet = "blobber_owner"
+const minerNodeDelegateWallet = "miner_node_delegate"
 
 var configPath string
 
