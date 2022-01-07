@@ -231,6 +231,18 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
 	})
+
+	t.Run("Miner update with nothing to update should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}), false)
+		require.Nil(t, err, "output")
+		// FIXME: some indication that no param has been selected to update should be given
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+	})
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
