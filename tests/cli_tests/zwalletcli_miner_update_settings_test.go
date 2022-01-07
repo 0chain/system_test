@@ -97,6 +97,31 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 	})
 
+	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":            miner.ID,
+			"num_delegates": 5,
+			"max_stake":     101,
+			"min_stake":     1,
+		}), true)
+		defer func() {
+			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":            miner.ID,
+				"num_delegates": miner.NumberOfDelegates,
+				"min_stake":     miner.MinStake / 1e10,
+				"max_stake":     miner.MaxStake / 1e10,
+			}), true)
+			require.Nil(t, err, "error reverting miner settings after test")
+			require.Len(t, output, 1)
+			require.Equal(t, "settings updated", output[0])
+		}()
+		require.Nil(t, err, "error updating multiple settings with delegate wallet")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+	})
+
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
 		t.Parallel()
 
