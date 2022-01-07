@@ -222,6 +222,15 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
+
+	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := minerUpdateSettings(t, configPath, "", false)
+		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "missing id flag", output[0])
+	})
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
