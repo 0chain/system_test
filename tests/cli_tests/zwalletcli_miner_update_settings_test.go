@@ -243,6 +243,37 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 	})
+
+	t.Run("Miner update settings from non-delegate wallet should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":            miner.ID,
+			"num_delegates": 5,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+
+		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"min_stake": 1,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+
+		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"max_stake": 99,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
