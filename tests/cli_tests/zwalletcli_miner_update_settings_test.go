@@ -30,6 +30,19 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 	miner := miners.Nodes[2]
 
+	// Revert miner settings after test is complete
+	defer func() {
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":            miner.ID,
+			"num_delegates": miner.NumberOfDelegates,
+			"min_stake":     miner.MinStake / 1e10,
+			"max_stake":     miner.MaxStake / 1e10,
+		}), true)
+		require.Nil(t, err, "error reverting miner settings after test")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+	}()
+
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -41,15 +54,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
@@ -62,15 +66,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":            miner.ID,
 			"num_delegates": 5,
 		}), true)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":            miner.ID,
-				"num_delegates": miner.NumberOfDelegates,
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.Nil(t, err, "error updating num_delegates in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
@@ -83,15 +79,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), true)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"max_stake": miner.MaxStake / 1e10, // miner.MaxStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.Nil(t, err, "error updating max_stake in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
@@ -106,17 +94,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake":     101,
 			"min_stake":     1,
 		}), true)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":            miner.ID,
-				"num_delegates": miner.NumberOfDelegates,
-				"min_stake":     miner.MinStake / 1e10,
-				"max_stake":     miner.MaxStake / 1e10,
-			}), true)
-			require.Nil(t, err, "error reverting miner settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
@@ -129,15 +106,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
-		defer func() {
-			output, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
@@ -150,15 +119,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":            miner.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":            miner.ID,
-				"num_delegates": miner.NumberOfDelegates,
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error when updating num_delegated greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
@@ -171,15 +132,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
@@ -192,15 +145,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"min_stake": -1,
 		}), false)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"min_stake": miner.MinStake / 1e10, //miner.MinStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
@@ -213,15 +158,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"max_stake": -1,
 		}), false)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        miner.ID,
-				"max_stake": miner.MaxStake / 1e10, //miner.MaxStake is in Int, but this command takes params in ZCN
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
@@ -234,15 +171,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":            miner.ID,
 			"num_delegates": -1,
 		}), false)
-		defer func() {
-			output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":            miner.ID,
-				"num_delegates": miner.NumberOfDelegates,
-			}), true)
-			require.Nil(t, err, "error reverting miner node settings after test")
-			require.Len(t, output, 1)
-			require.Equal(t, "settings updated", output[0])
-		}()
+
 		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
