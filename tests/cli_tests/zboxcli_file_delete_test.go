@@ -16,10 +16,6 @@ import (
 func TestFileDelete(t *testing.T) {
 	t.Parallel()
 
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
-
 	t.Run("delete existing file in root directory should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -35,7 +31,7 @@ func TestFileDelete(t *testing.T) {
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
@@ -44,7 +40,7 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -65,7 +61,7 @@ func TestFileDelete(t *testing.T) {
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
@@ -74,7 +70,7 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -116,15 +112,16 @@ func TestFileDelete(t *testing.T) {
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -133,15 +130,13 @@ func TestFileDelete(t *testing.T) {
 	t.Run("delete existing file with encryption should work", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
-		})
+		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 10)
+		err := createFileWithSize(filename, 10)
 		require.Nil(t, err)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
@@ -159,15 +154,16 @@ func TestFileDelete(t *testing.T) {
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -203,21 +199,22 @@ func TestFileDelete(t *testing.T) {
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing directory should fail", func(t *testing.T) {
+	t.Run("delete existing root directory should fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -230,7 +227,7 @@ func TestFileDelete(t *testing.T) {
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-		}), false)
+		}), true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "Delete failed")
@@ -239,10 +236,38 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.NotEqual(t, "null", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("delete existing non-root directory should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/root/"
+		filesize := int64(1 * KB)
+		generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("delete file that does not exist should fail", func(t *testing.T) {
@@ -313,7 +338,7 @@ func TestFileDelete(t *testing.T) {
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
@@ -322,7 +347,7 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
-		}), false)
+		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -331,5 +356,29 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+	})
+
+	t.Run("delete existing file in someone else's allocation should fail", func(t *testing.T) {
+		t.Parallel()
+
+		var allocationID, filename string
+		remotepath := "/"
+		filesize := int64(2)
+
+		t.Run("create another allocation", func(t *testing.T) {
+			allocationID = setupAllocation(t, configPath)
+			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			require.NotEqual(t, "", filename)
+		})
+
+		remoteFilePath := remotepath + filepath.Base(filename)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "Delete failed")
 	})
 }
