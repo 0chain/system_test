@@ -364,6 +364,7 @@ func TestFileDelete(t *testing.T) {
 		var allocationID, filename string
 		remotepath := "/"
 		filesize := int64(2)
+		setupAllocation(t, configPath)
 
 		t.Run("create another allocation", func(t *testing.T) {
 			allocationID = setupAllocation(t, configPath)
