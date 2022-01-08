@@ -16,8 +16,8 @@ import (
 func TestMinerUpdateSettings(t *testing.T) {
 	t.Parallel()
 
-	if _, err := os.Stat("./config/" + minerNodeDelegateWallet + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWallet+"_wallet.json")
+	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
 	}
 
 	mnConfig := getMinerSCConfiguration(t)
@@ -25,10 +25,19 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
+	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
+
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
-	miner := miners.Nodes[2]
+	
+	var miner climodel.Node
+	for _, miner = range miners.Nodes {
+		if miner.ID == minerNodeDelegateWallet.ClientID {
+			break
+		}
+	}
 
 	// Revert miner settings after test is complete
 	defer func() {
@@ -269,11 +278,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
 func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWallet, retry)
+	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWalletName, retry)
 }
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
@@ -288,5 +297,5 @@ func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, walle
 
 func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Fetching miner node info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
