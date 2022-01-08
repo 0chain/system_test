@@ -44,8 +44,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	}()
 
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
@@ -57,11 +55,20 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}), true)
+		require.Nil(t, err, "error fetching miner info")
+		require.Len(t, output, 1)
+
+		var minerInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &minerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+		require.Equal(t, 1, int(intToZCN(minerInfo.MinStake)))
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
@@ -70,33 +77,64 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating num_delegates in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}), true)
+		require.Nil(t, err, "error fetching miner info")
+		require.Len(t, output, 1)
+
+		var minerInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &minerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+		require.Equal(t, 5, minerInfo.NumberOfDelegates)
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": 99,
+			"max_stake": 101,
 		}), true)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}), true)
+		require.Nil(t, err, "error fetching miner info")
+		require.Len(t, output, 1)
+
+		var minerInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &minerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+		require.Equal(t, 101, int(intToZCN(minerInfo.MaxStake)))
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
-			"max_stake":     101,
+			"max_stake":     99,
 			"min_stake":     1,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner.ID,
+		}), true)
+		require.Nil(t, err, "error fetching miner info")
+		require.Len(t, output, 1)
+
+		var minerInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &minerInfo)
+		require.Nil(t, err, "error unmarshalling miner info")
+		require.Equal(t, 5, minerInfo.NumberOfDelegates)
+		require.Equal(t, float64(99), intToZCN(minerInfo.MaxStake))
+		require.Equal(t, float64(1), intToZCN(minerInfo.MinStake))
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
@@ -246,4 +284,9 @@ func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, walle
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("Fetching miner node info...")
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWallet, cliConfigFilename), 3, time.Second*2)
 }
