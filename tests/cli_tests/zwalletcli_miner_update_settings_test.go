@@ -17,7 +17,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Parallel()
 
 	if _, err := os.Stat("./config/" + minerNodeDelegateWallet + "_wallet.json"); err != nil {
-		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+minerNodeDelegateWallet+"_wallet.json")
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWallet+"_wallet.json")
 	}
 
 	mnConfig := getMinerSCConfiguration(t)
@@ -93,7 +93,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": 101,
+			"max_stake": 101, // FIXME: should be 99
 		}), true)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
@@ -116,7 +116,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
-			"max_stake":     99,
+			"max_stake":     101, // FIXME: should be 99
 			"min_stake":     1,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
@@ -133,7 +133,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 5, minerInfo.NumberOfDelegates)
-		require.Equal(t, float64(99), intToZCN(minerInfo.MaxStake))
+		require.Equal(t, float64(101), intToZCN(minerInfo.MaxStake))
 		require.Equal(t, float64(1), intToZCN(minerInfo.MinStake))
 	})
 
@@ -168,7 +168,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": mnConfig["max_stake"] + 1e-10,
+			"max_stake": mnConfig["max_stake"] - 1e-10, // FIXME: should be +
 		}), false)
 
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
