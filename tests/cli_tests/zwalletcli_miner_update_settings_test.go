@@ -31,7 +31,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
-	
+
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
 		if miner.ID == minerNodeDelegateWallet.ClientID {
