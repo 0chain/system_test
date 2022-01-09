@@ -38,7 +38,6 @@ func bridgeOwnerInit(
 	password, ethereumaddress, bridgeaddress, wzcnaddress, authorizersaddress, ethereumnodeurl string,
 	gaslimit, value int64,
 ) ([]string, error) {
-
 	t.Logf("Init bridge owner config (owner.yaml) in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet bridge-owner-init" +
