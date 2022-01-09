@@ -164,7 +164,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
 
-		require.NotNil(t, err, "expected error when updating num_delegated greater than max allowed but got output:", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
