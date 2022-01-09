@@ -19,7 +19,7 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		t.Parallel()
 
-		keyDir := path.Join(GetConfigDir(), "wallets")
+		keyDir := path.Join(GetConfigDir(t), "wallets")
 
 		err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
 			if !info.IsDir() {
