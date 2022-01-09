@@ -226,6 +226,18 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
 	})
+
+	t.Run("Sharder update with nothing to update should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id": sharder.ID,
+		}), false)
+		// FIXME: some indication that no param has been selected to update should be given
+		require.Nil(t, err)
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {

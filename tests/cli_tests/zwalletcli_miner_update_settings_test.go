@@ -236,8 +236,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": miner.ID,
 		}), false)
-		require.Nil(t, err, "output")
 		// FIXME: some indication that no param has been selected to update should be given
+		require.Nil(t, err)
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 	})
