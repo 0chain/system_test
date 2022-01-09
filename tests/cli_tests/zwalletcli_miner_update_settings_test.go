@@ -57,9 +57,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"min_stake": 1,
 		}), true)
-		require.Nil(t, err, "error reverting miner node settings after test")
-		require.Len(t, output, 1)
-		require.Equal(t, "settings updated", output[0])
 
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 1)
