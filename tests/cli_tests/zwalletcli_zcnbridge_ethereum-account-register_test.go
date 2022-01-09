@@ -55,13 +55,10 @@ func ethRegisterAccount(t *testing.T, mnemonic, password string) ([]string, erro
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-func GetConfigDir() string {
+func GetConfigDir(t *testing.T) string {
 	var configDir string
 	home, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	require.NoError(t, err)
 	configDir = home + "/.zcn"
 	return configDir
 }
