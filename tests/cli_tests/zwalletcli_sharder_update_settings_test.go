@@ -238,6 +238,37 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 	})
+
+	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":            sharder.ID,
+			"num_delegates": 5,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+
+		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":        sharder.ID,
+			"max_stake": 99,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+
+		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":        sharder.ID,
+			"min_stake": 1,
+		}), escapedTestName(t), false)
+		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
