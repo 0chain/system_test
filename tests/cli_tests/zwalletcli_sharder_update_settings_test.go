@@ -217,6 +217,15 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
+
+	t.Run("Sharder update without sharder id flag should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := sharderUpdateSettings(t, configPath, "", false)
+		require.NotNil(t, err, "expected error trying to update sharder node without id, but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "missing id flag", output[0])
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
