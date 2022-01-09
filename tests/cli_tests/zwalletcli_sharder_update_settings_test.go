@@ -51,6 +51,27 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "settings updated", output[0])
 	}()
+
+	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {
+		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        sharder.ID,
+			"min_stake": 1,
+		}), true)
+		require.Nil(t, err, "error reverting sharder node settings after test")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": sharder.ID,
+		}), true)
+		require.Nil(t, err, "error fwtching sharder info")
+		require.Len(t, output, 1)
+
+		var sharderInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
+		require.Nil(t, err, "error unmarshalling sharder info")
+		require.Equal(t, 1, int(intToZCN(sharderInfo.MinStake)))
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
