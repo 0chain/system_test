@@ -169,6 +169,18 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
+
+	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        sharder.ID,
+			"max_stake": mnConfig["max_stake"] - 1e-10, // FIXME: should be +
+		}), false)
+		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
