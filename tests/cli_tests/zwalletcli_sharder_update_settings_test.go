@@ -182,14 +182,26 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
 
-	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
+	t.Run("Sharder update min_stake negative value should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"min_stake": -1,
 		}), false)
-		require.NotNil(t, err, "expected error when updating negative min_stake but got ouput:", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
+
+	t.Run("Sharder update max_stake value should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        sharder.ID,
+			"max_stake": -1,
+		}), false)
+		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
