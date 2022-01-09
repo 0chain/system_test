@@ -19,20 +19,7 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		t.Parallel()
 
-		keyDir := path.Join(GetConfigDir(t), "wallets")
-
-		err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
-			if !info.IsDir() {
-				require.NoError(t, err)
-				if strings.Contains(path, "c49926c4124cee1cba0ea94ea31a6c12318df947") {
-					err = os.Remove(path)
-					require.NoError(t, err)
-				}
-			}
-			return nil
-		})
-
-		require.NoError(t, err)
+		DeleteDefaultAccount(t)
 
 		output, err := ethRegisterAccount(t,
 			"tag volcano eight thank tide danger coast health above argue embrace heavy",
@@ -46,13 +33,30 @@ func TestEthRegisterAccount(t *testing.T) {
 
 // eth-register-account
 func ethRegisterAccount(t *testing.T, mnemonic, password string) ([]string, error) {
-	t.Logf("register ethereum account using mnemonic and protected with password in HOME (~/.zcn) folder")
+	t.Logf("Register ethereum account using mnemonic and protected with password in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet " + "eth-register-account" +
 		" --password " + password +
 		" --mnemonic " + fmt.Sprintf("\"%s\"", mnemonic)
 
 	return cliutils.RunCommandWithoutRetry(cmd)
+}
+
+func DeleteDefaultAccount(t *testing.T) {
+	keyDir := path.Join(GetConfigDir(t), "wallets")
+
+	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
+		if !info.IsDir() {
+			require.NoError(t, err)
+			if strings.Contains(path, "c49926c4124cee1cba0ea94ea31a6c12318df947") {
+				err = os.Remove(path)
+				require.NoError(t, err)
+			}
+		}
+		return nil
+	})
+
+	require.NoError(t, err)
 }
 
 func GetConfigDir(t *testing.T) string {
