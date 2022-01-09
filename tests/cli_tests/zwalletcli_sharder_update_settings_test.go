@@ -114,6 +114,31 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling sharder info")
 		require.Equal(t, 101, int(intToZCN(sharderInfo.MaxStake)))
 	})
+	
+	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
+		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":            sharder.ID,
+			"num_delegates": 8,
+			"min_stake":     2,
+			"max_stake":     102, // should be 98
+		}), true)
+		require.Nil(t, err, "error updating multiple settings in sharder node")
+		require.Len(t, output, 1)
+		require.Equal(t, "settings updated", output[0])
+
+		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": sharder.ID,
+		}), true)
+		require.Nil(t, err, "error fetching sharder info")
+		require.Len(t, output, 1)
+
+		var sharderInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
+		require.Nil(t, err, "error unmarshalling sharder info")
+		require.Equal(t, 8, sharderInfo.NumberOfDelegates)
+		require.Equal(t, 2, int(intToZCN(sharderInfo.MinStake)))
+		require.Equal(t, 102, int(intToZCN(sharderInfo.MaxStake)))
+	})
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
