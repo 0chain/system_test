@@ -1,12 +1,12 @@
 package cli_tests
 
 import (
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"strings"
 	"testing"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBridgeOwnerInit(t *testing.T) {
