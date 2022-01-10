@@ -99,7 +99,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": 101, // FIXME: should be 99
+			"max_stake": 99,
 		}), true)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
@@ -115,14 +115,14 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 101, int(intToZCN(minerInfo.MaxStake)))
+		require.Equal(t, 99, int(intToZCN(minerInfo.MaxStake)))
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
-			"max_stake":     101, // FIXME: should be 99
+			"max_stake":     99,
 			"min_stake":     1,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
@@ -139,7 +139,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 5, minerInfo.NumberOfDelegates)
-		require.Equal(t, float64(101), intToZCN(minerInfo.MaxStake))
+		require.Equal(t, float64(99), intToZCN(minerInfo.MaxStake))
 		require.Equal(t, float64(1), intToZCN(minerInfo.MinStake))
 	})
 
@@ -174,7 +174,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": mnConfig["max_stake"] - 1e-10, // FIXME: should be +
+			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
@@ -185,7 +185,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 51,
 			"max_stake": 48,
