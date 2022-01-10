@@ -17,9 +17,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	t.Parallel()
 
 	mnConfig := getMinerSCConfiguration(t)
-	output, err := listMiners(t, configPath, "--json")
-	require.Nil(t, err, "error listing miners")
-	require.Len(t, output, 1)
 
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
@@ -28,7 +25,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharderNodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharder wallet")
 
-	output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
+	output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
 		"id": sharderNodeDelegateWallet.ClientID,
 	}), true)
 	require.Nil(t, err, "error fetching sharder settings")
@@ -46,6 +43,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 	}
 
+	// revert sharder node settings after test
 	defer func() {
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
@@ -103,7 +101,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
-			"max_stake": 101, // FIXME: should be 99
+			"max_stake": 99,
 		}), true)
 		require.Nil(t, err, "error updating max_stake in sharder node")
 		require.Len(t, output, 1)
@@ -118,7 +116,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 101, int(intToZCN(sharderInfo.MaxStake)))
+		require.Equal(t, 99, int(intToZCN(sharderInfo.MaxStake)))
 	})
 
 	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
@@ -126,7 +124,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"id":            sharder.ID,
 			"num_delegates": 8,
 			"min_stake":     2,
-			"max_stake":     102, // should be 98
+			"max_stake":     98,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings in sharder node")
 		require.Len(t, output, 1)
@@ -143,7 +141,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling sharder info")
 		require.Equal(t, 8, sharderInfo.NumberOfDelegates)
 		require.Equal(t, 2, int(intToZCN(sharderInfo.MinStake)))
-		require.Equal(t, 102, int(intToZCN(sharderInfo.MaxStake)))
+		require.Equal(t, 98, int(intToZCN(sharderInfo.MaxStake)))
 	})
 
 	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {
@@ -175,7 +173,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
-			"max_stake": mnConfig["max_stake"] - 1e-10, // FIXME: should be +
+			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -207,7 +205,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
 
-	t.Run("Sharder update max_stake value should fail", func(t *testing.T) {
+	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
