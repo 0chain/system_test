@@ -110,7 +110,7 @@ jobs:
           blobber_stake_image: latest
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@mn-update-tests
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
