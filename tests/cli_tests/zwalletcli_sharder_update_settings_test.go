@@ -68,7 +68,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
 		}), true)
-		require.Nil(t, err, "error fwtching sharder info")
+		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
 
 		var sharderInfo climodel.Node
