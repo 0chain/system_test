@@ -130,15 +130,17 @@ func TestCommonUserFunctions(t *testing.T) {
 			err = json.Unmarshal([]byte(output[0]), &stakePool)
 			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
 
-			allocationOffer := climodel.StakePoolOfferInfo{}
-			for _, offer := range stakePool.Offers {
-				if offer.AllocationID == allocationID {
-					allocationOffer = *offer
-				}
-			}
-
-			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
-			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			t.Logf(
+				"Expected blobber id [%v] to lock [%v] but it actually locked [%v]",
+				blobber_detail.BlobberID,
+				int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)),
+				int64(stakePool.OffersTotal),
+			)
+			assert.Equal(
+				t,
+				int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)),
+				int64(stakePool.OffersTotal),
+			)
 		}
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -189,15 +191,16 @@ func TestCommonUserFunctions(t *testing.T) {
 			err = json.Unmarshal([]byte(output[0]), &stakePool)
 			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
 
-			allocationOffer := climodel.StakePoolOfferInfo{}
-			for _, offer := range stakePool.Offers {
-				if offer.AllocationID == allocationID {
-					allocationOffer = *offer
-				}
-			}
-
-			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
-			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			t.Logf(
+				"Expected blobber id [%v] to lock [%v] but it actually locked [%v]",
+				blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)),
+				stakePool.OffersTotal,
+			)
+			assert.Equal(
+				t,
+				int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)),
+				stakePool.OffersTotal,
+			)
 		}
 
 		createAllocationTestTeardown(t, allocationID)
