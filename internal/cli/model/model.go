@@ -372,3 +372,24 @@ type KeyPair struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
 }
+
+type Miner struct {
+	ID                string      `json:"id"`
+	N2NHost           string      `json:"n2n_host"`
+	Host              string      `json:"host"`
+	Port              int         `json:"port"`
+	PublicKey         string      `json:"public_key"`
+	ShortName         string      `json:"short_name"`
+	BuildTag          string      `json:"build_tag"`
+	TotalStake        int         `json:"total_stake"`
+	DelegateWallet    string      `json:"delegate_wallet"`
+	ServiceCharge     float64     `json:"service_charge"`
+	NumberOfDelegates int         `json:"number_of_delegates"`
+	MinStake          int64       `json:"min_stake"`
+	MaxStake          int64       `json:"max_stake"`
+	Stat              interface{} `json:"stat"`
+}
+
+type MinerSCNodes struct {
+	Nodes []Node `json:"Nodes"`
+}
