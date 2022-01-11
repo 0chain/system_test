@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -15,12 +16,20 @@ import (
 func TestMinerSCUserPoolInfo(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Getting MinerSC Stake pools of a wallet with 0 pools should work", func(t *testing.T) {
+	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	}
+
+	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	require.Nil(t, err, "error fetching wallet")
+
+	t.Run("Getting MinerSC Stake pools of a wallet before and after making a pool should work", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
+		// before locking tokens against a miner
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
 		require.Nil(t, err, "error fetching stake pools")
 		require.Len(t, output, 1)
@@ -29,6 +38,11 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &pools)
 		require.Nil(t, err, "error unmarshalling minerSC pools info")
 		require.Empty(t, pools)
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id": minerNodeDelegateWallet.ClientID,
+		}), true)
+		require.Nil(t, err, "error ")
 	})
 }
 
