@@ -50,7 +50,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, true)
+		}, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -65,6 +65,27 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		// test transaction to verify chain is still working
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	})
+
+	t.Run("Update Global Config with a non-owner wallet Should Fail ", func(t *testing.T) {
+		t.Parallel()
+
+		configKey := "server_chain.smart_contract.setting_update_period"
+		newValue := "215"
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		// cfgBefore := getGlobalConfiguration(t, true)
+		// oldValue := cfgBefore[configKey]
+
+		output, err = updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Get Global Config Should Work", func(t *testing.T) {
