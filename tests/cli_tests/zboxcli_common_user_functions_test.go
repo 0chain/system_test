@@ -131,10 +131,12 @@ func TestCommonUserFunctions(t *testing.T) {
 			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
 
 			t.Logf(
-				"Expected blobber id [%v] to lock [%v] but it actually locked [%v]",
+				"Expected blobber id [%v] to lock [%v] but it actually locked [%v], size [%v], write price [%v]",
 				blobber_detail.BlobberID,
 				int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)),
 				int64(stakePool.OffersTotal),
+				int64(blobber_detail.Size),
+				int64(blobber_detail.Terms.Write_price),
 			)
 			assert.Equal(
 				t,
