@@ -380,8 +380,12 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 }
 
 func getShardersList(t *testing.T) map[string]climodel.Sharder {
+	return getShardersListForWallet(t, escapedTestName(t))
+}
+
+func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
-	output, err := getSharders(t, configPath)
+	output, err := getShardersForWallet(t, configPath, wallet)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 1)
 	require.Equal(t, "MagicBlock Sharders", output[0])
