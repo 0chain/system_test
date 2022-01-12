@@ -418,31 +418,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool[0].Balance)
 	})
 
-	t.Run("Send with description", func(t *testing.T) {
-		t.Parallel()
-
-		targetWallet := escapedTestName(t) + "_TARGET"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		target, err := getWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description", true)
-		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "Send tokens success", output[0])
-		// cannot verify transaction payload at this moment due to transaction hash not being printed.
-	})
-
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
 		t.Parallel()
 
@@ -549,38 +524,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
-	})
-
-	t.Run("update file with thumbnail", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		defer func() {
-			// Delete the downloaded thumbnail file
-			err = os.Remove(thumbnailFile)
-			require.Nil(t, err)
-		}()
-		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
