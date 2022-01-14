@@ -695,53 +695,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Len(t, output, 1)
 	})
 
-	t.Run("delete shared file by collaborator should fail", func(t *testing.T) {
-		t.Parallel()
-
-		collaboratorWalletName := escapedTestName(t) + "_collaborator"
-
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
-
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"collabid":   collaboratorWallet.ClientID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
-		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
-
-		output, err = deleteFile(t, collaboratorWalletName, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
-
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), false)
-
-		// FIXME: File is being deleted even though the collaborator is not the owner and delete prior failed
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
-	})
-
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
 
 	// FIXME: add param validation
