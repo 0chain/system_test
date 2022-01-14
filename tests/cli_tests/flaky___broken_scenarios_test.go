@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -669,6 +670,29 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		// BUG: write price is not being updated
 		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
+	})
+
+	t.Run("delete existing file in root directory with commit should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"commit":     true,
+		}), true)
+
+		// FIXME: error in deleting file with commit
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 	})
 
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
