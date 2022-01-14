@@ -2,13 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/stretchr/testify/require"
 )
