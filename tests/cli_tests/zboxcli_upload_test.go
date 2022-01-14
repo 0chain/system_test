@@ -597,10 +597,13 @@ func TestUpload(t *testing.T) {
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
+	uploadWithParamForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+func uploadWithParamForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) {
 	filename, ok := param["localpath"].(string)
 	require.True(t, ok)
 
-	output, err := uploadFile(t, cliConfigFilename, param, true)
+	output, err := uploadFileForWallet(t, wallet, cliConfigFilename, param, true)
 	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
 
 	require.Len(t, output, 2)
@@ -648,13 +651,17 @@ func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[st
 }
 
 func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
+	return generateFileAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, size)
+}
+
+func generateFileAndUploadForWallet(t *testing.T, wallet, allocationID, remotepath string, size int64) string {
 	filename := generateRandomTestFileName(t)
 
 	err := createFileWithSize(filename, size)
 	require.Nil(t, err)
 
 	// Upload parameters
-	uploadWithParam(t, configPath, map[string]interface{}{
+	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"localpath":  filename,
 		"remotepath": remotepath + filepath.Base(filename),

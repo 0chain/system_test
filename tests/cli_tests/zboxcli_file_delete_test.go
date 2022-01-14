@@ -285,38 +285,35 @@ func TestFileDelete(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-			"allocation": allocationID,
+			"allocation": "abc",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error: allocation flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
-
-		remotepath := "/"
-		filesize := int64(1 * KB)
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		fname := filepath.Base(filename)
-		remoteFilePath := path.Join(remotepath, fname)
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-			"remotepath": remoteFilePath,
+			"remotepath": "/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error: remotepath flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("delete existing file in root directory with wallet balance accounting", func(t *testing.T) {
@@ -367,11 +364,9 @@ func TestFileDelete(t *testing.T) {
 		filesize := int64(2)
 		setupAllocation(t, configPath)
 
-		t.Run("create another allocation", func(t *testing.T) {
-			allocationID = setupAllocation(t, configPath)
-			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-			require.NotEqual(t, "", filename)
-		})
+		allocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_owner", configPath)
+		filename = generateFileAndUploadForWallet(t, escapedTestName(t)+"_owner", allocationID, remotepath, filesize)
+		require.NotEqual(t, "", filename)
 
 		remoteFilePath := remotepath + filepath.Base(filename)
 
@@ -382,5 +377,14 @@ func TestFileDelete(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "Delete failed")
+
+		output, err = listFilesInAllocationForWallet(t, escapedTestName(t)+"_owner", configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 }

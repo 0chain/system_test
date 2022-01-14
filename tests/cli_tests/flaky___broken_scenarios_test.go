@@ -728,66 +728,18 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"json":       "",
 		}), false)
+
+		// FIXME: File is being deleted even though the collaborator is not the owner and delete prior failed
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
-		// FIXME: Deleting the file even though the collaborator is not the owner and delete prior failed
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
-	})
-
-	t.Run("delete existing file shared via auth ticket by owner should work", func(t *testing.T) {
-		t.Parallel()
-
-		var allocationID, filename string
-		remotepath := "/"
-		filesize := int64(2)
-
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
-			allocationID = setupAllocation(t, configPath)
-			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-			require.NotEqual(t, "", filename)
-
-			shareParam := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"remotepath": remotepath,
-			})
-
-			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-
-			// authTicket, err = extractAuthToken(output[0])
-			// require.Nil(t, err, err)
-			// require.NotEqual(t, "", authTicket)
-
-			// h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
-			// lookupHash = fmt.Sprintf("%x", h)
-			// require.NotEqual(t, "", lookupHash)
-		})
-		remoteFilePath := remotepath + filepath.Base(filename)
-
-		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remoteFilePath,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
-
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
