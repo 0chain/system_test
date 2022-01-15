@@ -26,7 +26,7 @@ func TestGetEthBurnTicker(t *testing.T) {
 		t.Parallel()
 
 		output, err := zwallet(
-			"bridge-get-eth-burn",
+			"bridge-get-zcn-burn",
 			"0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95",
 		)
 
