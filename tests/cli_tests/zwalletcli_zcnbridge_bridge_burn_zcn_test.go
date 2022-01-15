@@ -9,24 +9,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeBurnEth(t *testing.T) {
+func TestBridgeBurnZCN(t *testing.T) {
 	t.Parallel()
 
 	var zwallet = func(cmd, amount string) ([]string, error) {
-		t.Logf("burn WZCN tokens that will be minted on ZCN chain, amount: %s", amount)
+		t.Logf("burn ZCN tokens that will be minted for WZCN tokens, amount: %s", amount)
 		run := fmt.Sprintf("./zwallet %s --amount %s", cmd, amount)
 		return cliutils.RunCommandWithoutRetry(run)
 	}
 
-	t.Run("Burn WZCN tokens", func(t *testing.T) {
+	t.Run("Burn ZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := zwallet(
-			"bridge-burn-eth",
-			"10",
+			"bridge-burn-zcn",
+			"1",
 		)
 
-		require.Nil(t, err, "error trying to burn WZCN tokens: %s", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "Verification: WZCN burn [OK]")
+		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))
+		require.Contains(t, output[len(output)-1], "Verification successful")
 	})
 }
