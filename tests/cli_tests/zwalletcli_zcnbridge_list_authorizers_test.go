@@ -12,17 +12,22 @@ import (
 func TestListAuthorizers(t *testing.T) {
 	t.Parallel()
 
+	const (
+		Help = "Getting  list of authorizers"
+	)
+
+	var zwallet = func(cmd string) ([]string, error) {
+		t.Logf(Help)
+		run := fmt.Sprintf("./zwallet %s", cmd)
+		return cliutils.RunCommandWithoutRetry(run)
+	}
+
 	t.Run("List of authorizers", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := zwalletListAuthCLI("bridge-list-auth")
+		output, err := zwallet("bridge-list-auth")
 
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
 		t.Log(output)
 	})
-}
-
-func zwalletListAuthCLI(cmd string) ([]string, error) {
-	run := fmt.Sprintf("./zwallet %s", cmd)
-	return cliutils.RunCommandWithoutRetry(run)
 }
