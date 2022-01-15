@@ -9,11 +9,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeBurnEth(t *testing.T) {
+func TestBridgeBurnWZCN(t *testing.T) {
 	t.Parallel()
 
+	const (
+		Help = "Burn WZCN tokens that will be minted on ZCN chain"
+	)
+
 	var zwallet = func(cmd, amount string) ([]string, error) {
-		t.Logf("burn WZCN tokens that will be minted on ZCN chain, amount: %s", amount)
+		t.Logf("%s, amount: %s", Help, amount)
 		run := fmt.Sprintf("./zwallet %s --amount %s", cmd, amount)
 		return cliutils.RunCommandWithoutRetry(run)
 	}

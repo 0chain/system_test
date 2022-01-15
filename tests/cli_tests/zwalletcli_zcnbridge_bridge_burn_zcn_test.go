@@ -12,8 +12,12 @@ import (
 func TestBridgeBurnZCN(t *testing.T) {
 	t.Parallel()
 
+	const (
+		Help = "Burn ZCN tokens that will be minted for WZCN tokens"
+	)
+
 	var zwallet = func(cmd, amount string) ([]string, error) {
-		t.Logf("burn ZCN tokens that will be minted for WZCN tokens, amount: %s", amount)
+		t.Logf("%s, amount: %s", Help, amount)
 		run := fmt.Sprintf("./zwallet %s --amount %s", cmd, amount)
 		return cliutils.RunCommandWithoutRetry(run)
 	}
