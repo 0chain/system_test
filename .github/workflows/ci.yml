@@ -1,5 +1,7 @@
 name: "0Chain System Tests"
-
+concurrency:
+  group: "system-tests-${{ github.ref }}"
+  cancel-in-progress: true
 on:
   push:
   workflow_dispatch:
@@ -110,7 +112,7 @@ jobs:
           blobber_stake_image: latest
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@mn-update-tests
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}

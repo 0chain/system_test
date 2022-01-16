@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -526,38 +527,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
-	t.Run("update file with thumbnail", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		defer func() {
-			// Delete the downloaded thumbnail file
-			err = os.Remove(thumbnailFile)
-			require.Nil(t, err)
-		}()
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
 		t.Parallel()
 
@@ -701,6 +670,29 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		// BUG: write price is not being updated
 		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
+	})
+
+	t.Run("delete existing file in root directory with commit should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"commit":     true,
+		}), true)
+
+		// FIXME: error in deleting file with commit
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 	})
 
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
