@@ -117,7 +117,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": sharderNodeDelegateWallet.ClientID,
+			"id":      sharderNodeDelegateWallet.ClientID,
 			"pool_id": poolId,
 		}), true)
 		if err != nil {
@@ -179,7 +179,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeDelegateWallet.ClientID,
+			"id":      minerNodeDelegateWallet.ClientID,
 			"pool_id": minerPoolId,
 		}), true)
 		if err != nil {
@@ -187,7 +187,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		}
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": sharderNodeDelegateWallet.ClientID,
+			"id":      sharderNodeDelegateWallet.ClientID,
 			"pool_id": sharderPoolId,
 		}), true)
 		if err != nil {
