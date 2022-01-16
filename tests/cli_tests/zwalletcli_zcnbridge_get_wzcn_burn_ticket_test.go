@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetEthBurnTicker(t *testing.T) {
+func TestGetWZCNBurnTicket(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -22,11 +22,11 @@ func TestGetEthBurnTicker(t *testing.T) {
 		return cliutils.RunCommandWithoutRetry(run)
 	}
 
-	t.Run("Burn WZCN tokens", func(t *testing.T) {
+	t.Run("Get WZCN burn ticket", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := zwallet(
-			"bridge-get-zcn-burn",
+			"bridge-get-wzcn-burn",
 			"0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95",
 		)
 
