@@ -106,6 +106,59 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Equal(t, poolId, poolsInfo.Pools["sharder"][sharderNodeDelegateWallet.ClientID][0].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["sharder"][sharderNodeDelegateWallet.ClientID][0].Balance))
 	})
+
+	t.Run("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error fetching wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		targetWalletName := escapedTestName(t) + "_target"
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     minerNodeDelegateWallet.ClientID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error locking tokens against node")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
+		minerPoolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharderNodeDelegateWallet.ClientID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error locking tokens against node")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
+		sharderPoolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+
+		output, err = stakePoolsInMinerSCInfoForWallet(t, configPath, createParams(map[string]interface{}{
+			"client_id": wallet.ClientID,
+		}), targetWalletName, true)
+		require.Nil(t, err, "error fetching Miner SC User Pools")
+		require.Len(t, output, 1)
+
+		var poolsInfo climodel.MinerSCUserPoolsInfo
+		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
+		require.Nil(t, err, "error unmarshalling Miner SC User Pools")
+
+		require.Len(t, poolsInfo.Pools["miner"][minerNodeDelegateWallet.ClientID], 1)
+		require.Equal(t, minerPoolId, poolsInfo.Pools["miner"][minerNodeDelegateWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["miner"][minerNodeDelegateWallet.ClientID][0].Balance))
+
+		require.Len(t, poolsInfo.Pools["sharder"][sharderNodeDelegateWallet.ClientID], 1)
+		require.Equal(t, sharderPoolId, poolsInfo.Pools["sharder"][sharderNodeDelegateWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["sharder"][sharderNodeDelegateWallet.ClientID][0].Balance))
+	})
 }
 
 func stakePoolsInMinerSCInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
