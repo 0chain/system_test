@@ -12,13 +12,10 @@ import (
 func TestGetZCNBurnTicket(t *testing.T) {
 	t.Parallel()
 
-	const (
-		Help = "Get ZCN burn ticket"
-	)
-
-	var zwallet = func(cmd, hash string) ([]string, error) {
-		t.Logf("%s, hash: %s", Help, hash)
+	var zwallet = func(cmd, hash, help string) ([]string, error) {
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
+		t.Logf("%s: hash: %s", help, hash)
+		t.Log(run)
 		return cliutils.RunCommandWithoutRetry(run)
 	}
 
@@ -28,9 +25,23 @@ func TestGetZCNBurnTicket(t *testing.T) {
 		output, err := zwallet(
 			"bridge-get-zcn-burn",
 			"0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95",
+			"Get ZCN burn ticket",
 		)
 
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Contains(t, output[len(output)-1], "Verification [OK]")
+	})
+
+	t.Run("Get WZCN burn ticket", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := zwallet(
+			"bridge-get-wzcn-burn",
+			"0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95",
+			"Get WZCN burn ticket",
+		)
+
+		require.Nil(t, err, "error: '%s'", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 }

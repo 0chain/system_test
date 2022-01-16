@@ -1,15 +1,9 @@
 package cli_tests
 
 import (
-	"fmt"
-	"io/fs"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,9 +13,10 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		t.Parallel()
 
-		DeleteDefaultAccount(t)
+		deleteDefaultAccountInStorage(t)
 
-		output, err := ethRegisterAccount(t,
+		output, err := registerAccountInStorage(
+			t,
 			"tag volcano eight thank tide danger coast health above argue embrace heavy",
 			"password",
 		)
@@ -31,38 +26,25 @@ func TestEthRegisterAccount(t *testing.T) {
 	})
 }
 
-// eth-register-account
-func ethRegisterAccount(t *testing.T, mnemonic, password string) ([]string, error) {
-	t.Logf("Register ethereum account using mnemonic and protected with password in HOME (~/.zcn) folder")
+func TestEthListAccounts(t *testing.T) {
+	t.Parallel()
 
-	cmd := "./zwallet " + "eth-register-account" +
-		" --password " + password +
-		" --mnemonic " + fmt.Sprintf("\"%s\"", mnemonic)
+	t.Run("List Ethereum account registered in local key chain", func(t *testing.T) {
+		t.Parallel()
 
-	return cliutils.RunCommandWithoutRetry(cmd)
-}
+		output, err := registerAccountInStorage(
+			t,
+			"tag volcano eight thank tide danger coast health above argue embrace heavy",
+			"password",
+		)
 
-func DeleteDefaultAccount(t *testing.T) {
-	keyDir := path.Join(GetConfigDir(t), "wallets")
+		require.NoError(t, err)
+		require.Contains(t, output[len(output)-1], "Imported account 0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947")
 
-	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
-		if !info.IsDir() {
-			require.NoError(t, err)
-			if strings.Contains(path, "c49926c4124cee1cba0ea94ea31a6c12318df947") {
-				err = os.Remove(path)
-				require.NoError(t, err)
-			}
-		}
-		return nil
+		output, err = listAccounts(t)
+
+		deleteDefaultAccountInStorage(t)
+		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
+		require.Contains(t, output[len(output)-1], "0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947")
 	})
-
-	require.NoError(t, err)
-}
-
-func GetConfigDir(t *testing.T) string {
-	var configDir string
-	home, err := os.UserHomeDir()
-	require.NoError(t, err)
-	configDir = home + "/.zcn"
-	return configDir
 }
