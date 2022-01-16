@@ -76,7 +76,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		// before locking tokens agaisnt a sharder
+		// before locking tokens against a sharder
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
 		require.Nil(t, err, "error fetching stake pools")
 		require.Len(t, output, 1)
