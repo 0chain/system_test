@@ -529,23 +529,31 @@ func generateRandomTestFileName(t *testing.T) string {
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	return shareFolderInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func shareFolderInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Sharing file/folder...")
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+	return listFilesInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func listFilesInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 15*time.Second) // TODO replace with poller
 	t.Logf("Listing individual file in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	if retry {
