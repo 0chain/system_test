@@ -98,10 +98,10 @@ linters:
     - gosec
     # - gomnd
     # - goprintffuncname
-    # - gosimple
+    - gosimple
     - govet
-    # - ineffassign
-    # - interfacer
+    - ineffassign
+    - interfacer
     - lll
     - misspell
     # - nakedret
@@ -109,13 +109,13 @@ linters:
     # - rowserrcheck
     # - scopelint
     - staticcheck
-    # - structcheck
+    - structcheck
 #    - stylecheck
     - typecheck
-    # - unconvert
-#    - unparam
+    - unconvert
+    - unparam
     - unused
-    # - varcheck
+    - varcheck
     - whitespace
 
   # don't enable:
