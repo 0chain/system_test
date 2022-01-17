@@ -33,12 +33,6 @@ func TestCreateDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
-
 		wantFile := climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}
 		require.Len(t, files, 1, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Equal(t, wantFile, files[0])
@@ -69,12 +63,6 @@ func TestCreateDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
-
 		require.Len(t, files, 2, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, files, climodel.AllocationFile{Name: "parent", Path: "/parent", Type: "d"})
 		require.Contains(t, files, climodel.AllocationFile{Name: "child", Path: "/parent/child", Type: "d"})
@@ -102,12 +90,6 @@ func TestCreateDir(t *testing.T) {
 		var files []climodel.AllocationFile
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
 
 		wantFile := climodel.AllocationFile{Name: longDirName[1:], Path: longDirName, Type: "d"}
 		require.Len(t, files, 1, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
@@ -224,12 +206,6 @@ func TestCreateDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
-
 		require.Len(t, files, 2, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, files, climodel.AllocationFile{Name: "existingdir", Path: "/existingdir", Type: "d"})
 		require.Contains(t, files, climodel.AllocationFile{Name: "existingDir", Path: "/existingDir", Type: "d"})
@@ -254,12 +230,6 @@ func TestCreateDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
-
 		require.Len(t, files, 2, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, files, climodel.AllocationFile{Name: "nonexistent", Path: "/nonexistent", Type: "d"})
 		require.Contains(t, files, climodel.AllocationFile{Name: "child", Path: "/nonexistent/child", Type: "d"})
@@ -283,12 +253,6 @@ func TestCreateDir(t *testing.T) {
 		var files []climodel.AllocationFile
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		// Directory size is either 6 or 8. After check remove size for assertions after
-		for i, dir := range files {
-			require.Contains(t, []int{6, 8}, dir.Size, "Directory is not of size 6 or 8: %v", dir)
-			files[i].Size = 0
-		}
 
 		wantFile := climodel.AllocationFile{Name: dirname[1:], Path: dirname, Type: "d"}
 		require.Len(t, files, 1, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
