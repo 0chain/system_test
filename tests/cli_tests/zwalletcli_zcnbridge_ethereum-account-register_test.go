@@ -32,6 +32,14 @@ func TestEthRegisterAccount(t *testing.T) {
 		return cliutils.RunCommandWithoutRetry(run)
 	}
 
+	zwalletList := func(cmd string) ([]string, error) {
+		t.Logf("List ethereum account registered in local key chain in HOME (~/.zcn) folder")
+
+		run := fmt.Sprintf("./zwallet %s", cmd)
+
+		return cliutils.RunCommandWithoutRetry(run)
+	}
+
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		t.Parallel()
 
@@ -49,7 +57,7 @@ func TestEthRegisterAccount(t *testing.T) {
 		require.NoError(t, err)
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
-		output, err = listAccounts(t)
+		output, err = zwalletList("eth-list-accounts")
 
 		deleteDefaultAccountInStorage(t, address)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
@@ -65,5 +73,6 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic stri
 		mnemonic,
 		password,
 	)
+
 	return output, err
 }

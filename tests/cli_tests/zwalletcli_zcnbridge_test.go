@@ -8,18 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
-
-// eth-register-account
-func listAccounts(t *testing.T) ([]string, error) {
-	t.Logf("List Ethereum account registered in local key chain in HOME (~/.zcn) folder")
-
-	cmd := "./zwallet " + "eth-list-accounts"
-
-	return cliutils.RunCommandWithoutRetry(cmd)
-}
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
 	keyDir := path.Join(getConfigDir(t), "wallets")
