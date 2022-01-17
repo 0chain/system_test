@@ -26,7 +26,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		// newValue := "11"
 
 		configKey := "server_chain.smart_contract.setting_update_period"
-		newValue := "215"
+		newValue := "200"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
