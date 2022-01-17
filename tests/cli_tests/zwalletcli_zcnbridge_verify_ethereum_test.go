@@ -4,9 +4,14 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	Address = "0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230"
 )
 
 func TestBridgeVerify(t *testing.T) {
@@ -19,7 +24,7 @@ func TestBridgeVerify(t *testing.T) {
 	var zwallet = func(cmd, hash string) ([]string, error) {
 		t.Logf("%s for %s", Help, hash)
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
-		return cliutils.RunCommand(run, 3, ,time.Second*5)
+		return cliutils.RunCommand(t, run, 3, time.Second*5)
 	}
 
 	t.Run("Verify ethereum transaction", func(t *testing.T) {
@@ -27,10 +32,10 @@ func TestBridgeVerify(t *testing.T) {
 
 		output, err := zwallet(
 			"bridge-verify",
-			"0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230",
+			Address,
 		)
 
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
-		require.Equal(t, "Transaction verification success: 0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230", output[len(output)-1])
+		require.Equal(t, "Transaction verification success: "+Address, output[len(output)-1])
 	})
 }

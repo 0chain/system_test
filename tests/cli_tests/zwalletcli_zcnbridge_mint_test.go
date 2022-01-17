@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -19,7 +20,7 @@ func TestBridgeMint(t *testing.T) {
 	var zwallet = func(cmd, hash, help string) ([]string, error) {
 		t.Logf("%s, hash: %s", help, hash)
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
-		return cliutils.RunCommand(t, run, 3, time.Second * 5)
+		return cliutils.RunCommand(t, run, 3, time.Second*5)
 	}
 
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
