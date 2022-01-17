@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path"
@@ -14,17 +13,6 @@ import (
 )
 
 // eth-register-account
-func registerAccountInStorage(t *testing.T, mnemonic, password string) ([]string, error) {
-	t.Logf("Register ethereum account using mnemonic and protected with password in HOME (~/.zcn) folder")
-
-	cmd := "./zwallet " + "eth-register-account" +
-		" --password " + password +
-		" --mnemonic " + fmt.Sprintf("\"%s\"", mnemonic)
-
-	return cliutils.RunCommandWithoutRetry(cmd)
-}
-
-// eth-register-account
 func listAccounts(t *testing.T) ([]string, error) {
 	t.Logf("List Ethereum account registered in local key chain in HOME (~/.zcn) folder")
 
@@ -33,13 +21,13 @@ func listAccounts(t *testing.T) ([]string, error) {
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-func deleteDefaultAccountInStorage(t *testing.T) {
+func deleteDefaultAccountInStorage(t *testing.T, address string) {
 	keyDir := path.Join(getConfigDir(t), "wallets")
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
 			require.NoError(t, err)
-			if strings.Contains(path, "c49926c4124cee1cba0ea94ea31a6c12318df947") {
+			if strings.Contains(path, address) {
 				err = os.Remove(path)
 				require.NoError(t, err)
 			}
