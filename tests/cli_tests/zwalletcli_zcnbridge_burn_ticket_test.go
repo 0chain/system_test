@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,7 @@ func TestBurnTicket(t *testing.T) {
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
 		t.Logf("%s: hash: %s", help, hash)
 		t.Log(run)
-		return cliutils.RunCommandWithoutRetry(run)
+		return cliutils.RunCommand(t, run, 3, time.Second*15)
 	}
 
 	t.Run("Get ZCN burn ticket", func(t *testing.T) {

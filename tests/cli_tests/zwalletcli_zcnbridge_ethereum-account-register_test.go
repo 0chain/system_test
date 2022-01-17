@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
@@ -33,7 +34,7 @@ func TestEthRegisterAccount(t *testing.T) {
 			mnemonic,
 		)
 
-		return cliutils.RunCommandWithoutRetry(run)
+		return cliutils.RunCommand(t, run, 3, time.Second*15)
 	}
 
 	zwalletList := func(cmd string) ([]string, error) {

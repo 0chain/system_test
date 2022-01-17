@@ -19,7 +19,7 @@ func TestBridgeMint(t *testing.T) {
 	var zwallet = func(cmd, hash, help string) ([]string, error) {
 		t.Logf("%s, hash: %s", help, hash)
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
-		return cliutils.RunCommandWithoutRetry(run)
+		return cliutils.RunCommand(t, run, 3, time.Second * 5)
 	}
 
 	t.Run("Mint WZCN tokens", func(t *testing.T) {

@@ -19,7 +19,7 @@ func TestBridgeVerify(t *testing.T) {
 	var zwallet = func(cmd, hash string) ([]string, error) {
 		t.Logf("%s for %s", Help, hash)
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
-		return cliutils.RunCommandWithoutRetry(run)
+		return cliutils.RunCommand(run, 3, ,time.Second*5)
 	}
 
 	t.Run("Verify ethereum transaction", func(t *testing.T) {

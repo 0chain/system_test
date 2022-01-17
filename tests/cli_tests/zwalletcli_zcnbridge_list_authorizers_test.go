@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -19,7 +20,7 @@ func TestListAuthorizers(t *testing.T) {
 	var zwallet = func(cmd string) ([]string, error) {
 		t.Logf(Help)
 		run := fmt.Sprintf("./zwallet %s", cmd)
-		return cliutils.RunCommandWithoutRetry(run)
+		return cliutils.RunCommand(t, run, 3, time.Second*5)
 	}
 
 	t.Run("List of authorizers", func(t *testing.T) {
