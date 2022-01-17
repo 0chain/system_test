@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetZCNBurnTicket(t *testing.T) {
+func TestBurnTicket(t *testing.T) {
 	t.Parallel()
 
 	var zwallet = func(cmd, hash, help string) ([]string, error) {
