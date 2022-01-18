@@ -74,8 +74,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"new_owner":     nonOwnerWallet.ClientID,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Error adding curator:curator_transfer_allocation_failed:only curators or the owner can transfer allocations; 05fa2faaa9d9b0cb7e532f9d78081f8c9440f57fbf88658547814406f053350b is neither", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -234,8 +234,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		// FIXME this does not work at the moment
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Equal(t, len(output), 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed:allocation is not expired yet, or waiting a challenge completion", output[0],
 			"finalize allocation - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -698,8 +698,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"new_owner":     newOwnerWallet.ClientID,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Error adding curator:curator_transfer_allocation_failed:value not present", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 

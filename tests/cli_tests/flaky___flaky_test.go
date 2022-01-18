@@ -942,7 +942,7 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 			"values": newValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
 	})
 

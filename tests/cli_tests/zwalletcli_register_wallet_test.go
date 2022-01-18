@@ -70,7 +70,7 @@ func TestRegisterWallet(t *testing.T) {
 		output, err = verifyTransaction(t, configPath, txnID)
 		require.Nil(t, err, "Could not verify faucet transaction", strings.Join(output, "\n"))
 
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Transaction verification success", output[0])
 
 		output, err = getBalance(t, configPath)
@@ -138,4 +138,17 @@ func escapedTestName(t *testing.T) string {
 		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
 		"?", "-")
 	return replacer.Replace(t.Name())
+}
+
+func assertChargeableError(t *testing.T, output []string, msg string) {
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+
+	split := strings.Split(output[1], ":")
+	require.Len(t, split, 2, strings.Join(split, "\n"))
+	output, _ = verifyTransaction(t, configPath, split[1])
+	require.Len(t, output, 3, strings.Join(output, "\n"))
+	confStatus := strings.Trim(strings.Split(output[1], ":")[1], " ") //TransactionStatus: 2
+	require.Equal(t, "2", confStatus, strings.Join(output, "\n"))
+	errString := strings.Trim(strings.Trim(strings.SplitN(output[2], ":", 2)[1], " "), "\"") //TransactionOutput: "update_settings:key max_pour_amount, unable to convert x to state.balance
+	require.Equal(t, msg, errString, strings.Join(output, "\n"))
 }

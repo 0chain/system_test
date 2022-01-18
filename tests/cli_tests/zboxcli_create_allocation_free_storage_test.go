@@ -143,7 +143,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
 	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.Len(t, output, 3)
 	require.Equal(t, "Transaction verification success", output[0])
 
 	// FIXME not working at the moment
@@ -245,8 +245,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: free_allocation_failed:error getting assigner details: value not present", output[0])
 	})
 
 	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
@@ -280,8 +280,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
 	})
 
 	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
@@ -362,8 +362,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
 	})
 }
 

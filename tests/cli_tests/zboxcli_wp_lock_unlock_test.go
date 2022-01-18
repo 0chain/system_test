@@ -170,9 +170,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"duration":   "5m",
 		})
 		output, err = writePoolLock(t, configPath, params, false)
-		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		assertChargeableError(t, output, "failed to unlock tokens:pool () doesn't exist")
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
@@ -258,9 +256,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"duration":   "5m",
 		})
 		output, err = writePoolLock(t, configPath, params, false)
-		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		assertChargeableError(t, output, "failed to unlock tokens:pool () doesn't exist")
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
@@ -388,10 +384,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			"pool_id": customWritePoolId,
 		})
 		output, err = writePoolUnlock(t, configPath, params, false)
-		require.NotNil(t, err, "Write pool tokens unlocked before expired", strings.Join(output, "\n"))
-
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to unlock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		assertChargeableError(t, output, "failed to unlock tokens:pool () doesn't exist")
 	})
 
 	// Possible FIXME: Locking write tokens for duration more than allocation's duration

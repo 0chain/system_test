@@ -95,9 +95,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		assertChargeableError(t, output, "update_config:value x cannot be converted to time.Duration, failing to set config key max_destinations")
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -114,9 +112,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		assertChargeableError(t, output, "update_config:unauthorized access - only the owner can access")
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
@@ -140,9 +136,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": 1,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		assertChargeableError(t, output, "update_config:config setting unknown_key not found")
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
