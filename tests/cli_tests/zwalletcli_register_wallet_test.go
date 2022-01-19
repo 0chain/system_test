@@ -152,3 +152,16 @@ func assertChargeableError(t *testing.T, output []string, msg string) {
 	errString := strings.Trim(strings.Trim(strings.SplitN(output[2], ":", 2)[1], " "), "\"") //TransactionOutput: "update_settings:key max_pour_amount, unable to convert x to state.balance
 	require.Equal(t, msg, errString, strings.Join(output, "\n"))
 }
+
+func assertChargeableErrorRegexp(t *testing.T, output []string, reg *regexp.Regexp) {
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+
+	split := strings.Split(output[1], ":")
+	require.Len(t, split, 2, strings.Join(split, "\n"))
+	output, _ = verifyTransaction(t, configPath, split[1])
+	require.Len(t, output, 3, strings.Join(output, "\n"))
+	confStatus := strings.Trim(strings.Split(output[1], ":")[1], " ") //TransactionStatus: 2
+	require.Equal(t, "2", confStatus, strings.Join(output, "\n"))
+	errString := strings.Trim(strings.Trim(strings.SplitN(output[2], ":", 2)[1], " "), "\"") //TransactionOutput: "update_settings:key max_pour_amount, unable to convert x to state.balance
+	require.Regexp(t, reg, errString, strings.Join(output, "\n"))
+}

@@ -462,7 +462,8 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed:can't find allocation in client's allocations list: af13a9ecbb6fae14900749d668b218097a7c8ffa2a4afe30b5a78ff2efa68d96 (1)", output[0])
+		reg := regexp.MustCompile("Error updating allocation:allocation_updating_failed:can't find allocation in client's allocations list: [a-z0-9]{64} \\(1\\)")
+		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)

@@ -117,7 +117,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			"pool_id": statsAfterExpire.Stats[0].ID,
 		}), true)
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Unlock tokens success", output[0])
 
 		// Get balance AFTER locked tokens are unlocked. Would show rounded off to highest (ZCN).
@@ -204,7 +204,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
@@ -888,7 +888,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = unlockInterestForWallet(t, thirdPartyWallet, configPath, createParams(map[string]interface{}{
 			"pool_id": stats.Stats[0].ID,
 		}), false)
-		assertChargeableError(t, output, "failed to unlock tokens:pool (9fa3d002041c5dc5c4f3da44bfa6247f5ee4b4340f237cb1e5b978200a7679db) doesn't exist")
+		reg := regexp.MustCompile("failed to unlock tokens:pool \\([a-z0-9]{64}\\) doesn't exist")
+		assertChargeableErrorRegexp(t, output, reg)
 	})
 }
 

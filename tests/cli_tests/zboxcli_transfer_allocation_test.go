@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -75,7 +76,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:curator_transfer_allocation_failed:only curators or the owner can transfer allocations; 05fa2faaa9d9b0cb7e532f9d78081f8c9440f57fbf88658547814406f053350b is neither", output[0],
+		reg := regexp.MustCompile("Error adding curator:curator_transfer_allocation_failed:only curators or the owner can transfer allocations; [a-z0-9]{64} is neither")
+		require.Regexp(t, reg, output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
