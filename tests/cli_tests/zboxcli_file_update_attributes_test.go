@@ -187,7 +187,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		// verify commit txn
 		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
 		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
 
 		// check if file attributes was updated

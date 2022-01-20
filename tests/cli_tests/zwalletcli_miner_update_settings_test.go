@@ -48,7 +48,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake":     miner.MaxStake / 1e10,
 		}), true)
 		require.Nil(t, err, "error reverting miner settings after test")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 	}()
 
@@ -103,7 +103,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -150,10 +150,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:min_stake is less than allowed by SC: -1 \\u003e 0")
 
-		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
@@ -164,9 +163,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
 
-		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:number_of_delegates greater than max_delegates of SC: 0 \\u003e 200")
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
@@ -177,9 +175,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 
-		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "")
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
@@ -190,9 +187,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake": 51,
 			"max_stake": 48,
 		}), false)
-		require.NotNil(t, err, "Expected error when trying to update max_stake to less than min_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:max_stake is greater than allowed by SC: 480000000000 \\u003e 1000000000000")
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
@@ -203,9 +199,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake": -1,
 		}), false)
 
-		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:min_stake is less than allowed by SC: -10000000000 \\u003e 0")
 	})
 
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
@@ -229,9 +224,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": -1,
 		}), false)
 
-		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid negative number_of_delegates: 0")
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
@@ -265,26 +259,35 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":            miner.ID,
 			"num_delegates": 5,
 		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableError(t, output, "update_miner_settings:access denied")
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
 		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		assertChargeableError(t, output, "update_miner_settings:access denied")
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		assertChargeableError(t, output, "update_miner_settings:max_stake is greater than allowed by SC: 990000000000 \\u003e 1000000000000")
 	})
+}
+
+func assertChargeableErrorDelegateMiner(t *testing.T, output []string, msg string) {
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+
+	split := strings.Split(output[1], ":")
+	require.Len(t, split, 2, strings.Join(split, "\n"))
+	output, _ = verifyTransaction(t, configPath, split[1])
+	require.Len(t, output, 7, strings.Join(output, "\n"))
+	confStatus := strings.Trim(strings.Split(output[5], ":")[1], " ") //TransactionStatus: 2
+	require.Equal(t, "2", confStatus, strings.Join(output, "\n"))
+	errString := strings.Trim(strings.Trim(strings.SplitN(output[6], ":", 2)[1], " "), "\"") //TransactionOutput: "update_settings:key max_pour_amount, unable to convert x to state.balance
+	require.Equal(t, msg, errString, strings.Join(output, "\n"))
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {

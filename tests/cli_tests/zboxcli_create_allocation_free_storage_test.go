@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -323,8 +324,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Error creating free allocation: free_allocation_failed:marker verification failed: marker timestamped in the future: ([0-9]{10})"), output[0])
 	})
 
 	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {

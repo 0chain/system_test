@@ -41,8 +41,8 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 			"start_time": startTime,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -76,7 +76,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 			"pool_id": poolId,
 		}), true, targetWalletName)
 		require.Nil(t, err, "error unlocking tokens from vesting pool by target wallet")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
 
 		output, err = getBalanceForWallet(t, configPath, targetWalletName)
@@ -122,8 +122,8 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 			"duration": "2m",
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -156,7 +156,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 			"pool_id": poolId,
 		}), true, targetWalletName)
 		require.Nil(t, err, "error unlocking tokens from vesting pool by target wallet")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
 
 		output, err = getBalanceForWallet(t, configPath, targetWalletName)
@@ -192,7 +192,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 			"pool_id": poolId,
 		}), true, targetWalletName2)
 		require.Nil(t, err, "error unlocking tokens from vesting pool by target wallet")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
 
 		output, err = getBalanceForWallet(t, configPath, targetWalletName2)

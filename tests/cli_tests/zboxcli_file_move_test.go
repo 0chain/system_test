@@ -377,7 +377,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		// verify commit txn
 		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
 		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
 
 		// list-all

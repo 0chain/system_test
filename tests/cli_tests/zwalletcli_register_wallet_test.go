@@ -70,7 +70,7 @@ func TestRegisterWallet(t *testing.T) {
 		output, err = verifyTransaction(t, configPath, txnID)
 		require.Nil(t, err, "Could not verify faucet transaction", strings.Join(output, "\n"))
 
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
 
 		output, err = getBalance(t, configPath)
