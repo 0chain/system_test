@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
 	"math/big"
@@ -327,7 +328,7 @@ func getRandomUniformFloat64(t *testing.T) float64 {
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
 	t.Logf("Sending ZCN...")
-	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc "%s" --to_client_id %s `, tokens, desc, toClientID)
+	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc "%q" --to_client_id %s `, tokens, desc, toClientID)
 
 	if fee > 0 {
 		cmd += fmt.Sprintf(" --fee %v ", fee)
@@ -348,7 +349,7 @@ func getRoundBlockFromASharder(t *testing.T, round int64) apimodel.Block {
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body: %v", err)
 
 	var block apimodel.Block
@@ -367,7 +368,7 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 
 	var startBalance apimodel.Balance

@@ -96,6 +96,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:key max_pour_amount, unable to convert x to state.balance")
 	})
 
@@ -113,6 +114,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:unauthorized access - only the owner can access")
 	})
 
@@ -137,6 +139,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": 1,
 		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:key unknown_key not recognised as setting")
 	})
 

@@ -225,7 +225,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed:update allocation changes nothing", output[0])
 	})
 
-	//TODO is it normal to create read pool?
+	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
 

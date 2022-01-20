@@ -433,7 +433,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 			output[0], strings.Join(output, "\n"))
 	})
 
-	//FIXME sortout why it fails
+	// FIXME sortout why it fails
 	t.Run("update all params at once should work", func(t *testing.T) {
 		t.Parallel()
 

@@ -164,7 +164,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.Nil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		assertChargeableErrorDelegateMiner(t, output, "update_sharder_settings:number_of_delegates greater than max_delegates of SC: 201 \\u003e 200")
-
 	})
 
 	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
@@ -270,7 +269,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.Nil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_sharder_settings:access denied")
-
 	})
 }
 

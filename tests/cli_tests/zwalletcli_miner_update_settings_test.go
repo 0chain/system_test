@@ -152,7 +152,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:min_stake is less than allowed by SC: -1 \\u003e 0")
-
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
