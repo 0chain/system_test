@@ -164,7 +164,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:number_of_delegates greater than max_delegates of SC: 0 \\u003e 200")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:number_of_delegates greater than max_delegates of SC: 201 \\u003e 200")
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
@@ -176,7 +176,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000")
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
@@ -188,7 +188,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake": 48,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:max_stake is greater than allowed by SC: 480000000000 \\u003e 1000000000000")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000")
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
@@ -212,7 +212,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 
 		require.Nil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:max_stake is greater than allowed by SC: -10000000000 \\u003e 1000000000000")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid negative min_stake: 0 or max_stake: -10000000000")
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
@@ -224,7 +224,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid negative number_of_delegates: 0")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid negative number_of_delegates: -1")
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
@@ -272,7 +272,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
-		assertChargeableError(t, output, "update_miner_settings:max_stake is greater than allowed by SC: 990000000000 \\u003e 1000000000000")
+		assertChargeableError(t, output, "update_miner_settings:access denied")
 	})
 }
 
