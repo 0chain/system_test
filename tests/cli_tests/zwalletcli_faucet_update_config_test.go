@@ -140,6 +140,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"values": 1,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
+		//nolint:misspell
 		assertChargeableError(t, output, "update_settings:key unknown_key not recognised as setting")
 	})
 

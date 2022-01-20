@@ -271,6 +271,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_miner_settings:access denied")
 	})
 }

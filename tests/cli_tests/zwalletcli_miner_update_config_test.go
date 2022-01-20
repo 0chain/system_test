@@ -98,6 +98,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.Nil(t, err, "Failed to unlock interest pool", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:cannot convert key interest_rate value x to float64: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax")
 	})
 
@@ -115,6 +116,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:unauthorized access - only the owner can access")
 	})
 

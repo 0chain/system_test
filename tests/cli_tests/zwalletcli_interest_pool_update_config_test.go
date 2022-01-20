@@ -132,11 +132,13 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.Nil(t, err, "Failed to update interest pool", strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 
 		split := strings.Split(output[1], ":")
 		require.Len(t, split, 2, strings.Join(split, "\n"))
 		output, err = verifyTransaction(t, configPath, split[1])
+		require.Nil(t, err, "Failed to verify transaction", strings.Join(output, "\n"))
 		require.Len(t, output, 3, strings.Join(output, "\n"))
 		confStatus := strings.Trim(strings.Split(output[1], ":")[1], " ") //TransactionStatus: 2
 		require.Equal(t, "2", confStatus, strings.Join(output, "\n"))

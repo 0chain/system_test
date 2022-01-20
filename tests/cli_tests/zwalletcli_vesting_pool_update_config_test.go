@@ -95,6 +95,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_config:value x cannot be converted to time.Duration, failing to set config key max_destinations")
 	})
 
@@ -112,6 +113,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_config:unauthorized access - only the owner can access")
 	})
 
@@ -136,6 +138,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": 1,
 		}, false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_config:config setting unknown_key not found")
 	})
 

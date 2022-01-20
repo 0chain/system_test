@@ -179,6 +179,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     0.1,
 			"duration": validDuration,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:not enough tokens to create pool provided")
 	})
 
@@ -335,6 +336,7 @@ func TestVestingPool(t *testing.T) {
 			"duration":   validDuration,
 			"start_time": startTime.Unix(),
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: vesting starts before now")
 	})
 
@@ -371,6 +373,7 @@ func TestVestingPool(t *testing.T) {
 			"duration":   validDuration,
 			"start_time": startTime.Unix(),
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: vesting starts before now")
 	})
 
@@ -448,6 +451,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     0.3,
 			"duration": invalidDuration,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: vesting duration is too short")
 	})
 
@@ -478,6 +482,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     0.3,
 			"duration": invalidDuration,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: vesting duration is too long")
 	})
 
@@ -507,6 +512,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     invalidLockAmount,
 			"duration": validDuration,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:insufficient amount to lock")
 	})
 
@@ -538,6 +544,7 @@ func TestVestingPool(t *testing.T) {
 			"duration":    validDuration,
 			"description": invalidDescription,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: entry description is too long")
 	})
 
@@ -573,6 +580,7 @@ func TestVestingPool(t *testing.T) {
 			"lock":     float64(invalidDestinations) * 0.1,
 			"duration": validDuration,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "create_vesting_pool_failed:invalid request: too many destinations")
 	})
 
@@ -1123,6 +1131,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 			"d":       targetWallet.ClientID,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "stop_vesting_failed:only owner can stop a vesting")
 	})
 
@@ -1217,6 +1226,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "invalidPoolId",
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "delete_vesting_pool_failed:can't get pool: value not present")
 	})
 
@@ -1254,6 +1264,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "delete_vesting_pool_failed:only pool owner can delete the pool")
 	})
 
@@ -1407,6 +1418,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		reg := regexp.MustCompile("unlock_vesting_pool_failed:vesting pool: destination [a-z0-9]{64} not found in the pool")
 		assertChargeableErrorRegexp(t, output, reg)
 	})
@@ -1443,6 +1455,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "unlock_vesting_pool_failed:draining pool: no excess tokens to unlock")
 	})
 
@@ -1467,6 +1480,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "abcdef123456",
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "unlock_vesting_pool_failed:can't get pool: value not present")
 	})
 
@@ -1619,6 +1633,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "trigger_vesting_pool_failed:only owner can trigger the pool")
 	})
 
@@ -1643,6 +1658,7 @@ func TestVestingPool(t *testing.T) {
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "abcdef123456",
 		}), false)
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		assertChargeableError(t, output, "trigger_vesting_pool_failed:can't get pool: value not present")
 	})
 }
