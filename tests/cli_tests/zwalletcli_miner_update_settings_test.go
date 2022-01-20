@@ -59,7 +59,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "error updating min stake in miner node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -81,7 +81,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "error updating num_delegates in miner node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -126,7 +126,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake":     1,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -211,9 +211,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake": -1,
 		}), false)
 
-		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Nil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:max_stake is greater than allowed by SC: -10000000000 \\u003e 1000000000000")
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
@@ -245,7 +244,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 	})
 

@@ -62,7 +62,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err, "error reverting sharder node settings after test")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -83,7 +83,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"num_delegates": 5,
 		}), true)
 		require.Nil(t, err, "error updating num_delegated in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -104,7 +104,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"max_stake": 99,
 		}), true)
 		require.Nil(t, err, "error updating max_stake in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -127,7 +127,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"max_stake":     98,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
@@ -240,7 +240,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 	})
 
