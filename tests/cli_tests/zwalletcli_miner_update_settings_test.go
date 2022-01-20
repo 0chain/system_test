@@ -224,7 +224,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid negative number_of_delegates: -1")
+		assertChargeableErrorDelegateMiner(t, output, "update_miner_settings:invalid non-positive number_of_delegates: -1")
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
