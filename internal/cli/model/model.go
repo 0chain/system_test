@@ -393,3 +393,17 @@ type Miner struct {
 type MinerSCNodes struct {
 	Nodes []Node `json:"Nodes"`
 }
+
+type MinerSCDelegatePoolInfo struct {
+	ID           string `json:"id"`
+	Balance      int64  `json:"balance"`
+	InterestPaid int64  `json:"interest_paid"`
+	RewardPaid   int64  `json:"reward_paid"`
+	Status       string `json:"status"`
+	High         int64  `json:"high"`
+	Low          int64  `json:"low"`
+}
+
+type MinerSCUserPoolsInfo struct {
+	Pools map[string]map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
+}
