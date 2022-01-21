@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -115,6 +116,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		// Get the ending balance for miner's delegate wallet.
@@ -270,6 +272,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		// Get the ending balance for sharder's delegate wallet.

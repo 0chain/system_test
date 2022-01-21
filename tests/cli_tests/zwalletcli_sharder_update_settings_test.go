@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -54,6 +55,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error reverting sharder settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	}()
 
 	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {

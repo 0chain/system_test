@@ -440,7 +440,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
-
+		require.Equal(t, "TransactionStatus: 1", output[1])
+		require.Greater(t, len(output[2]), 0, output[2])
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))

@@ -51,6 +51,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		lockTimer := time.NewTimer(time.Minute)
 
@@ -119,6 +120,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Unlock tokens success", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Get balance AFTER locked tokens are unlocked. Would show rounded off to highest (ZCN).
 		output, err = getBalance(t, configPath)
@@ -173,6 +175,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.800000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)

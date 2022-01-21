@@ -58,6 +58,7 @@ func TestVestingPool(t *testing.T) {
 		require.Nil(t, err, "error adding a new vesting pool")
 		require.Len(t, output, 2)
 		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("Vesting pool with single destination and description should work", func(t *testing.T) {

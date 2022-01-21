@@ -28,7 +28,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		params := createParams(map[string]interface{}{"allocation": "INVALID ALLOCATION ID", "curator": wallet.ClientID})
 		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "expected error on adding curator", strings.Join(output, "\n"))
-
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:alloc_cancel_failed:value not present", strings.Join(output, "\n"))
 	})
 
@@ -58,6 +58,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": anotherWallet.ClientID})
 		output, err = addCuratorWithWallet(t, anotherClientWalletName, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error adding curator:add_curator_failed:only owner can add a curator", strings.Join(output, "\n"))
 	})
 
