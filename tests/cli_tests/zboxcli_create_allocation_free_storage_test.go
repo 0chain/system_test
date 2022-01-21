@@ -246,7 +246,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Equal(t, len(output), 1)
+		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 		require.Equal(t, "Error creating free allocation: free_allocation_failed:error getting assigner details: value not present", output[0])
 	})
 

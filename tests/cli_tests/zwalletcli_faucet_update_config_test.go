@@ -96,7 +96,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:key max_pour_amount, unable to convert x to state.balance")
 	})
 
@@ -114,7 +114,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		assertChargeableError(t, output, "update_settings:unauthorized access - only the owner can access")
 	})
 
@@ -134,12 +134,11 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		// register SC owner wallet
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		//nolint:misspell
 		assertChargeableError(t, output, "update_settings:key unknown_key not recognised as setting")
 	})
