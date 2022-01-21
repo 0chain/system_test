@@ -147,6 +147,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Len(t, output, 3)
 	require.Equal(t, "Transaction verification success", output[0])
 	require.Equal(t, "TransactionStatus: 1", output[1])
+	require.Greater(t, len(output[2]), 0, output[2])
 
 	// FIXME not working at the moment
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
