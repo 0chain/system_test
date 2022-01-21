@@ -72,6 +72,8 @@ func TestRegisterWallet(t *testing.T) {
 
 		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
+		require.Equal(t, "TransactionStatus: 1", output[1])
+		require.Greater(t, len(output[2]), 0, output[2])
 
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "An error occurred retrieving wallet balance", strings.Join(output, "\n"))
