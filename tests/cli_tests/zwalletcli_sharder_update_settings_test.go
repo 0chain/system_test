@@ -66,6 +66,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error reverting sharder node settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -87,6 +88,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating num_delegated in sharder node")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -108,6 +110,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating max_stake in sharder node")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -131,6 +134,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating multiple settings in sharder node")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -243,6 +247,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err)
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {

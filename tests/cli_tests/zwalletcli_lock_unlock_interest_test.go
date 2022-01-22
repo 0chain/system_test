@@ -209,6 +209,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -289,6 +290,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.951123) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -349,6 +351,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.750000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -412,6 +415,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.250000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -473,6 +477,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Len(t, output, 2)
 		// FIXME precision is lost - should say  `Tokens (0.000000001) locked successfully`
 		require.Equal(t, "Tokens (0.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -807,6 +812,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -868,6 +874,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		lockTimer := time.NewTimer(time.Minute)
 

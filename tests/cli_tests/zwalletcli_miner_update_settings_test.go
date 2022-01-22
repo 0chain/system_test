@@ -63,6 +63,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": miner.ID,
@@ -107,6 +108,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating max_stake in miner node")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": miner.ID,
@@ -130,6 +132,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": miner.ID,
@@ -247,6 +250,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err)
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("Miner update settings from non-delegate wallet should fail", func(t *testing.T) {
