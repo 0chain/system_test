@@ -20,10 +20,7 @@ const (
 
 // cmd: bridge-client-init
 func TestBridgeClientInit(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
-		t.Parallel()
 
 		output, err := createDefaultClientBridgeConfig(t)
 
@@ -36,7 +33,6 @@ func TestBridgeClientInit(t *testing.T) {
 	customPath := path.Join(getConfigDir(), "test")
 
 	t.Run("Init bridge client config to custom path and default file", func(t *testing.T) {
-		t.Parallel()
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -67,7 +63,6 @@ func TestBridgeClientInit(t *testing.T) {
 	})
 
 	t.Run("Init bridge client config to custom path and custom config file", func(t *testing.T) {
-		t.Parallel()
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -99,25 +94,9 @@ func TestBridgeClientInit(t *testing.T) {
 	})
 }
 
-func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
-	return bridgeClientInit(t,
-		"password",
-		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
-		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
-		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
-		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
-		0.75,
-		300000,
-		0,
-	)
-}
-
 // cmd: bridge-owner-init
 func TestBridgeOwnerInit(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Init bridge owner config to default path and file", func(t *testing.T) {
-		t.Parallel()
 
 		output, err := bridgeOwnerInit(
 			t,
@@ -136,6 +115,35 @@ func TestBridgeOwnerInit(t *testing.T) {
 		require.Nil(t, err, "error trying to create an initial owner config", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Owner config file was saved to %s", customPath), output[len(output)-1])
 	})
+}
+
+// cmd: bridge-client-init
+func bridgeClientInit(
+	t *testing.T,
+	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
+	consensusthreshold float64,
+	gaslimit, value int64,
+	opts ...*Option,
+) ([]string, error) {
+	t.Logf("Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder")
+
+	cmd := "./zwallet bridge-client-init" +
+		" --password " + password +
+		" --ethereumaddress " + ethereumaddress +
+		" --bridgeaddress " + bridgeaddress +
+		" --wzcnaddress " + wzcnaddress +
+		" --ethereumnodeurl " + ethereumnodeurl +
+		" --consensusthreshold " + fmt.Sprintf("%.4f", consensusthreshold) +
+		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
+		" --value " + strconv.FormatInt(value, 10)
+
+	for _, opt := range opts {
+		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
+	}
+
+	t.Log(cmd)
+
+	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
 // cmd: bridge-owner-init
@@ -166,16 +174,38 @@ func bridgeOwnerInit(
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-// cmd: bridge-client-init
-func bridgeClientInit(
-	t *testing.T,
+func createBridgeClientTestConfig() {
+	runCreateBridgeClientTestConfig(
+		"password",
+		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
+		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
+		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
+		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
+		0.75,
+		300000,
+		0,
+	)
+}
+
+func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
+	return bridgeClientInit(t,
+		"password",
+		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
+		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
+		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
+		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
+		0.75,
+		300000,
+		0,
+	)
+}
+
+func runCreateBridgeClientTestConfig(
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
 	opts ...*Option,
-) ([]string, error) {
-	t.Logf("Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder")
-
+) {
 	cmd := "./zwallet bridge-client-init" +
 		" --password " + password +
 		" --ethereumaddress " + ethereumaddress +
@@ -190,9 +220,7 @@ func bridgeClientInit(
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
 	}
 
-	t.Log(cmd)
-
-	return cliutils.RunCommandWithoutRetry(cmd)
+	_, _ = cliutils.RunCommandWithoutRetry(cmd)
 }
 
 func WithOption(name, value string) *Option {

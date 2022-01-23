@@ -14,6 +14,8 @@ import (
 func TestBridgeBurn(t *testing.T) {
 	t.Parallel()
 
+	_, _ = createDefaultClientBridgeConfig(t)
+
 	var zwallet = func(cmd, amount, help string) ([]string, error) {
 		run := fmt.Sprintf(
 			"./zwallet %s --amount %s --path %s --bridge_config %s",
