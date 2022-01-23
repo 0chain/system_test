@@ -3,7 +3,7 @@ module github.com/0chain/system_test
 go 1.16
 
 require (
-	github.com/0chain/gosdk v1.4.2
+	github.com/0chain/gosdk v1.4.1-0.20220122152535-04b7af8a23f7
 	github.com/herumi/bls-go-binary v1.0.1-0.20210830012634-a8e769d3b872
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
@@ -12,4 +12,4 @@ require (
 )
 
 // temporary, for development
-replace github.com/0chain/gosdk => ../gosdk
+// replace github.com/0chain/gosdk => ../gosdk
