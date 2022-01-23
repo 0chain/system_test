@@ -14,10 +14,18 @@ const blobberOwnerWallet = "blobber_owner"
 const minerNodeDelegateWalletName = "miner_node_delegate"
 const sharderNodeDelegateWalletName = "sharder_node_delegate"
 
-var configPath string
+var (
+	configPath       string
+	bridgeConfigFile string
+)
 
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
+	bridgeConfigFile = os.Getenv("BRIDGE_CONFIG_PATH")
+
+	if bridgeConfigFile == "" {
+		bridgeConfigFile = "bridge.yaml"
+	}
 
 	if configPath == "" {
 		configPath = "./zbox_config.yaml"

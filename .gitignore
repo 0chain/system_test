@@ -33,3 +33,5 @@ tests/cli_tests/tmp/
 .vscode
 tests/cli_tests/__debug_bin
 tests/cli_tests/upload_thumbnail_test.png
+
+tests/cli_tests/logs/

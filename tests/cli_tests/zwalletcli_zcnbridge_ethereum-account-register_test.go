@@ -83,7 +83,7 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic stri
 }
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
-	keyDir := path.Join(getConfigDir(t), "wallets")
+	keyDir := path.Join(getConfigDir(), "wallets")
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -99,10 +99,12 @@ func deleteDefaultAccountInStorage(t *testing.T, address string) {
 	require.NoError(t, err)
 }
 
-func getConfigDir(t *testing.T) string {
+func getConfigDir() string {
 	var configDir string
 	home, err := os.UserHomeDir()
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 	configDir = home + "/.zcn"
 	return configDir
 }

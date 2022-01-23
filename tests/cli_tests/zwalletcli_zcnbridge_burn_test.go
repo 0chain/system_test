@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +15,13 @@ func TestBridgeBurn(t *testing.T) {
 	t.Parallel()
 
 	var zwallet = func(cmd, amount, help string) ([]string, error) {
-		run := fmt.Sprintf("./zwallet %s --amount %s", cmd, amount)
+		run := fmt.Sprintf(
+			"./zwallet %s --amount %s --path %s --bridge_config %s",
+			cmd,
+			amount,
+			filepath.Dir(configPath),
+			bridgeConfigFile,
+		)
 		t.Logf("%s: amount %s", help, amount)
 		t.Log(run)
 		return cliutils.RunCommand(t, run, 3, time.Second*15)
