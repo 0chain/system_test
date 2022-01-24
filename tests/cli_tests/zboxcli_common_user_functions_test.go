@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -114,36 +112,6 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
-
-		allocation := getAllocation(t, allocationID)
-
-		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
-		cliutils.Wait(t, 2*time.Minute)
-		for _, blobber_detail := range allocation.BlobberDetails {
-			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id": blobber_detail.BlobberID,
-				"json":       "",
-			}))
-			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
-
-			stakePool := climodel.StakePoolInfo{}
-			err = json.Unmarshal([]byte(output[0]), &stakePool)
-			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
-
-			t.Logf(
-				"Expected blobber id [%v] to lock [%v] but it actually locked [%v], size [%v], write price [%v]",
-				blobber_detail.BlobberID,
-				int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)),
-				int64(stakePool.OffersTotal),
-				int64(blobber_detail.Size),
-				int64(blobber_detail.Terms.Write_price),
-			)
-			assert.Equal(
-				t,
-				int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)),
-				int64(stakePool.OffersTotal),
-			)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -177,33 +145,6 @@ func TestCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
-
-		allocation := getAllocation(t, allocationID)
-
-		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
-		cliutils.Wait(t, 2*time.Minute)
-		for _, blobber_detail := range allocation.BlobberDetails {
-			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id": blobber_detail.BlobberID,
-				"json":       "",
-			}))
-			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
-
-			stakePool := climodel.StakePoolInfo{}
-			err = json.Unmarshal([]byte(output[0]), &stakePool)
-			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
-
-			t.Logf(
-				"Expected blobber id [%v] to lock [%v] but it actually locked [%v]",
-				blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)),
-				stakePool.OffersTotal,
-			)
-			assert.Equal(
-				t,
-				int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)),
-				stakePool.OffersTotal,
-			)
-		}
 
 		createAllocationTestTeardown(t, allocationID)
 	})
