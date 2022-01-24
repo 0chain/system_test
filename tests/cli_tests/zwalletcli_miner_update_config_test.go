@@ -98,8 +98,9 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, "Failed to unlock interest pool", strings.Join(output, "\n"))
-		assertChargeableError(t, output, "update_settings:cannot convert key interest_rate value x to float64: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax")
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings:cannot convert key interest_rate value x to float64: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -116,8 +117,9 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
-		assertChargeableError(t, output, "update_settings:unauthorized access - only the owner can access")
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings:unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {

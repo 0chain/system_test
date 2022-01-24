@@ -96,8 +96,9 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableError(t, output, "update_settings:key max_pour_amount, unable to convert x to state.balance")
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings:key max_pour_amount, unable to convert x to state.balance", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -114,8 +115,9 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		assertChargeableError(t, output, "update_settings:unauthorized access - only the owner can access")
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings:unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
@@ -138,9 +140,10 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": 1,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 		//nolint:misspell
-		assertChargeableError(t, output, "update_settings:key unknown_key not recognised as setting")
+		require.Equal(t, "update_settings:key unknown_key not recognised as setting", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
