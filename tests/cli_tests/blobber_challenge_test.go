@@ -29,7 +29,7 @@ func TestBlobberChallenge(t *testing.T) {
 			"tokens": 1,
 		})
 
-		remotepath := "/"
+		remotepath := "/dir/"
 		filesize := 2 * MB
 		filename := generateRandomTestFileName(t)
 
@@ -39,7 +39,7 @@ func TestBlobberChallenge(t *testing.T) {
 		// Upload parameters
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
-			"remotepath": remotepath,
+			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 			"commit":     "",
 		}, true)
@@ -114,8 +114,8 @@ func TestBlobberChallenge(t *testing.T) {
 		err = json.Unmarshal(res2Body, &openChallengesAfter)
 		require.Nil(t, err, "error unmarshalling response body")
 
-		// Open challenges must have changed after a download request
-		require.NotEqual(t, openChallengesBefore, openChallengesAfter)
+		// New challenges must have been created after a download request
+		require.Greater(t, len(openChallengesAfter.Challenges), len(openChallengesBefore.Challenges))
 	})
 }
 

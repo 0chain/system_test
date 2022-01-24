@@ -22,296 +22,296 @@ func TestUpload(t *testing.T) {
 
 	// Success Scenarios
 
-	t.Run("Upload File With half Size of the Allocation Should Work ", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File With half Size of the Allocation Should Work ", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(1 * MB)
-		fileSize := int64(512 * KB)
+	// 	allocSize := int64(1 * MB)
+	// 	fileSize := int64(512 * KB)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"parity": 1,
-			"data":   1,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size":   allocSize,
+	// 		"parity": 1,
+	// 		"data":   1,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/",
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+	// 	allocSize := int64(2048)
+	// 	fileSize := int64(256)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/",
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload File to a Directory Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File to a Directory Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+	// 	allocSize := int64(2048)
+	// 	fileSize := int64(1024)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/dir/" + filepath.Base(filename),
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	//FIXME: POSSIBLE BUG: Uploading file to a remote directory without
-	// filename causes the file to be renamed to directory's name and upload to root
-	t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
-		t.Parallel()
+	// //FIXME: POSSIBLE BUG: Uploading file to a remote directory without
+	// // filename causes the file to be renamed to directory's name and upload to root
+	// t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+	// 	allocSize := int64(2048)
+	// 	fileSize := int64(1024)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/dir/",
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = dir"
-		require.Equal(t, expected, output[1])
+	// 	expected := "Status completed callback. Type = application/octet-stream. Name = dir"
+	// 	require.Equal(t, expected, output[1])
 
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/",
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0])
+	// 	output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/dir/",
+	// 		"json":       "",
+	// 	}), true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Equal(t, "null", output[0])
 
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+	// 	output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/",
+	// 		"json":       "",
+	// 	}), true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
 
-		var listResults []climodel.ListFileResult
-		err = json.Unmarshal([]byte(output[0]), &listResults)
-		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
+	// 	var listResults []climodel.ListFileResult
+	// 	err = json.Unmarshal([]byte(output[0]), &listResults)
+	// 	require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-		require.Len(t, listResults, 1)
-		result := listResults[0]
+	// 	require.Len(t, listResults, 1)
+	// 	result := listResults[0]
 
-		require.Equal(t, "dir", result.Name)
-		require.Equal(t, "/dir", result.Path)
-		require.Equal(t, fileSize, result.ActualSize)
-		require.Equal(t, "f", result.Type)
-		require.Equal(t, "", result.EncryptionKey)
-	})
+	// 	require.Equal(t, "dir", result.Name)
+	// 	require.Equal(t, "/dir", result.Path)
+	// 	require.Equal(t, fileSize, result.ActualSize)
+	// 	require.Equal(t, "f", result.Type)
+	// 	require.Equal(t, "", result.EncryptionKey)
+	// })
 
-	t.Run("Upload File to Nested Directory Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File to Nested Directory Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+	// 	allocSize := int64(2048)
+	// 	fileSize := int64(1024)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/nested/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/nested/dir/" + filepath.Base(filename),
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload File with Thumbnail Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File with Thumbnail Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(10 * 1024 * 1024)
-		fileSize := int64(256)
+	// 	allocSize := int64(10 * 1024 * 1024)
+	// 	fileSize := int64(256)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
-		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
+	// 	thumbnail := "upload_thumbnail_test.png"
+	// 	output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
+	// 	require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
 
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
+	// 	filename := generateRandomTestFileName(t)
+	// 	err = createFileWithSize(filename, fileSize)
+	// 	require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation":    allocationID,
-			"remotepath":    "/",
-			"localpath":     filename,
-			"thumbnailpath": thumbnail,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err = uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation":    allocationID,
+	// 		"remotepath":    "/",
+	// 		"localpath":     filename,
+	// 		"thumbnailpath": thumbnail,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload Image File Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload Image File Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(10 * 1024 * 1024)
+	// 	allocSize := int64(10 * 1024 * 1024)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": allocSize,
+	// 	})
 
-		filename := "upload_image_test.png"
-		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
-		require.Nil(t, err, "Failed to download png file: ", strings.Join(output, "\n"))
+	// 	filename := "upload_image_test.png"
+	// 	output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + filename)
+	// 	require.Nil(t, err, "Failed to download png file: ", strings.Join(output, "\n"))
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err = uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/",
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = image/png. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = image/png. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload Video File Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload Video File Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocSize := int64(100 * 1024 * 1024)
+	// 	allocSize := int64(100 * 1024 * 1024)
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size":   allocSize,
+	// 		"tokens": 1,
+	// 	})
 
-		output, err := cliutils.RunCommandWithoutRetry("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
-		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+	// 	output, err := cliutils.RunCommandWithoutRetry("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
+	// 	require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  "./test_video.mp4",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err = uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": "/",
+	// 		"localpath":  "./test_video.mp4",
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = video/mp4. Name = test_video.mp4"
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := "Status completed callback. Type = video/mp4. Name = test_video.mp4"
+	// 	require.Equal(t, expected, output[1])
+	// })
 
-	t.Run("Upload File with Encryption Should Work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Upload File with Encryption Should Work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
-		})
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
+	// 		"size": 10000,
+	// 	})
 
-		filename := generateRandomTestFileName(t)
+	// 	filename := generateRandomTestFileName(t)
 
-		err := createFileWithSize(filename, 10)
-		require.Nil(t, err)
+	// 	err := createFileWithSize(filename, 10)
+	// 	require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": "/",
-			"encrypt":    "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  filename,
+	// 		"remotepath": "/",
+	// 		"encrypt":    "",
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+	// })
 
 	t.Run("Upload File with Commit Should Work", func(t *testing.T) {
 		t.Parallel()
@@ -353,6 +353,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
 		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
 	})
+	return
 
 	t.Run("Upload Encrypted File with Commit Should Work", func(t *testing.T) {
 		t.Parallel()
