@@ -239,7 +239,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[len(output)-3])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed:can't find allocation in client's allocations list: 123abc (0)", output[3])
 	})
 
 	t.Run("Update Expired Allocation Should Fail", func(t *testing.T) {
