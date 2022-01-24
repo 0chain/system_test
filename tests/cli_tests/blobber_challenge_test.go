@@ -10,9 +10,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -80,7 +82,7 @@ func TestBlobberChallenge(t *testing.T) {
 		sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get base URL for API calls.
-		sharderBaseUrl := fmt.Sprintf(`http://%s`, sharder.Host)
+		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 		res1, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
 		require.Nil(t, err, "error getting challenges", res1)
 		require.True(t, res1.StatusCode >= 200 && res1.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
@@ -98,6 +100,8 @@ func TestBlobberChallenge(t *testing.T) {
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 30*time.Second)
 
 		res2, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
 		require.Nil(t, err, "error getting challenges", res2)
