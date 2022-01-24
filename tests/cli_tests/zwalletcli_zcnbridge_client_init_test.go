@@ -14,9 +14,68 @@ import (
 )
 
 const (
-	DefaultOwnerConfig  = "owner.yaml"
-	DefaultBridgeConfig = "bridge.yaml"
+	DefaultConfigBridgeFileName = "bridge.yaml"
+	DefaultConfigOwnerFileName  = "owner.yaml"
+	DefaultConfigChainFileName  = "config.yaml"
 )
+
+const (
+	OptionHash             = "hash"          // OptionHash hash passed to cmd
+	OptionAmount           = "amount"        // OptionAmount amount passed to cmd
+	OptionRetries          = "retries"       // OptionRetries retries
+	OptionConfigFolder     = "path"          // OptionConfigFolder config folder
+	OptionChainConfigFile  = "chain_config"  // OptionChainConfigFile sdk config filename
+	OptionBridgeConfigFile = "bridge_config" // OptionBridgeConfigFile bridge config filename
+	OptionOwnerConfigFile  = "owner_config"  // OptionOwnerConfigFile bridge owner config filename
+	OptionMnemonic         = "mnemonic"      // OptionMnemonic bridge config filename
+	OptionKeyPassword      = "password"      // OptionKeyPassword bridge config filename
+)
+
+func PrepareBridgeClient() error {
+	output, err := prepareBridgeClientConfig()
+	fmt.Println(output)
+	if err != nil {
+		return err
+	}
+
+	output, err = prepareBridgeClientWallet()
+	fmt.Println(output)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Tests prerequisites
+func prepareBridgeClientConfig() ([]string, error) {
+	return runCreateBridgeClientTestConfig(
+		"password",
+		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
+		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
+		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
+		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
+		75,
+		300000,
+		0,
+		WithOption(OptionConfigFolder, configDir),
+		WithOption(OptionBridgeConfigFile, bridgeClientConfigFile),
+	)
+}
+
+// Use it to import account to the given home folder
+func prepareBridgeClientWallet() ([]string, error) {
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-import-account --%s %s --%s \"%s\" --%s %s",
+		OptionConfigFolder, configDir,
+		OptionMnemonic, mnemonic,
+		OptionKeyPassword, password,
+	)
+
+	fmt.Println(cmd)
+
+	return cliutils.RunCommandWithoutRetry(cmd)
+}
 
 // cmd: bridge-client-init
 func TestBridgeClientInit(t *testing.T) {
@@ -24,7 +83,7 @@ func TestBridgeClientInit(t *testing.T) {
 
 		output, err := createDefaultClientBridgeConfig(t)
 
-		customPath := filepath.Join(getConfigDir(), DefaultBridgeConfig)
+		customPath := filepath.Join(getConfigDir(), DefaultConfigBridgeFileName)
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
@@ -56,7 +115,7 @@ func TestBridgeClientInit(t *testing.T) {
 			WithOption("path", customPath),
 		)
 
-		customPath := filepath.Join(customPath, DefaultBridgeConfig)
+		customPath := filepath.Join(customPath, DefaultConfigBridgeFileName)
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
@@ -110,7 +169,7 @@ func TestBridgeOwnerInit(t *testing.T) {
 			0,
 		)
 
-		customPath := filepath.Join(getConfigDir(), DefaultOwnerConfig)
+		customPath := filepath.Join(getConfigDir(), DefaultConfigOwnerFileName)
 
 		require.Nil(t, err, "error trying to create an initial owner config", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("Owner config file was saved to %s", customPath), output[len(output)-1])
@@ -174,19 +233,6 @@ func bridgeOwnerInit(
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-func createBridgeClientTestConfig() {
-	runCreateBridgeClientTestConfig(
-		"password",
-		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
-		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
-		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
-		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
-		0.75,
-		300000,
-		0,
-	)
-}
-
 func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
 	return bridgeClientInit(t,
 		"password",
@@ -205,7 +251,7 @@ func runCreateBridgeClientTestConfig(
 	consensusthreshold float64,
 	gaslimit, value int64,
 	opts ...*Option,
-) {
+) ([]string, error) {
 	cmd := "./zwallet bridge-client-init" +
 		" --password " + password +
 		" --ethereumaddress " + ethereumaddress +
@@ -220,7 +266,7 @@ func runCreateBridgeClientTestConfig(
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
 	}
 
-	_, _ = cliutils.RunCommandWithoutRetry(cmd)
+	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
 func WithOption(name, value string) *Option {
