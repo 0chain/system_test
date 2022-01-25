@@ -550,6 +550,8 @@ func TestDownload(t *testing.T) {
 		thumbnail := "upload_thumbnail_test.png"
 		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
 		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
+		_, err = os.Stat(thumbnail)
+		require.Nil(t, err, "Failed to save thumbnail png file to disk")
 
 		defer func() {
 			// Delete the downloaded thumbnail file
