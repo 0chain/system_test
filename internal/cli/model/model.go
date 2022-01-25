@@ -222,7 +222,7 @@ type StakePoolInfo struct {
 	Capacity     int64                        `json:"capacity"`
 	WritePrice   int64                        `json:"write_price"`
 	OffersTotal  int64                        `json:"offers_total"`
-	UnstakeTotal int64                        `json:"unstakeTotal"`
+	UnstakeTotal int64                        `json:"unstake_total"`
 	Delegate     []*StakePoolDelegatePoolInfo `json:"delegate"`
 	Penalty      int64                        `json:"penalty"`
 	Rewards      StakePoolRewardsInfo         `json:"rewards"`
