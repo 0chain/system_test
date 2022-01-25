@@ -229,13 +229,6 @@ type StakePoolInfo struct {
 	Settings     StakePoolSettings            `json:"settings"`
 }
 
-type StakePoolOfferInfo struct {
-	Lock         int64  `json:"lock"`
-	Expire       int64  `json:"expire"`
-	AllocationID string `json:"allocation_id"`
-	IsExpired    bool   `json:"is_expired"`
-}
-
 // StakePoolRewardsInfo represents stake pool rewards.
 type StakePoolRewardsInfo struct {
 	Charge    int64 `json:"charge"`    // total for all time
