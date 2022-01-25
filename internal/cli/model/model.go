@@ -224,7 +224,6 @@ type StakePoolInfo struct {
 	OffersTotal  int64                        `json:"offers_total"`
 	UnstakeTotal int64                        `json:"unstakeTotal"`
 	Delegate     []*StakePoolDelegatePoolInfo `json:"delegate"`
-	Earnings     int64                        `json:"interests"`
 	Penalty      int64                        `json:"penalty"`
 	Rewards      StakePoolRewardsInfo         `json:"rewards"`
 	Settings     StakePoolSettings            `json:"settings"`
