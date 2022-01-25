@@ -237,13 +237,11 @@ type StakePoolRewardsInfo struct {
 }
 
 type StakePoolDelegatePoolInfo struct {
-	ID               string `json:"id"`                // pool ID
-	Balance          int64  `json:"balance"`           // current balance
-	DelegateID       string `json:"delegate_id"`       // wallet
-	Rewards          int64  `json:"rewards"`           // total for all time
-	Interests        int64  `json:"interests"`         // total for all time
-	Penalty          int64  `json:"penalty"`           // total for all time
-	PendingInterests int64  `json:"pending_interests"` // total for all time
+	ID         string `json:"id"`          // pool ID
+	Balance    int64  `json:"balance"`     // current balance
+	DelegateID string `json:"delegate_id"` // wallet
+	Rewards    int64  `json:"rewards"`     // total for all time
+	Penalty    int64  `json:"penalty"`     // total for all time
 	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
 	// time it can't be unstaked.
 	Unstake bool `json:"unstake"`
