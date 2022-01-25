@@ -1248,6 +1248,43 @@ func TestDownload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 	})
+
+	t.Run("Download Root Folder Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/sub/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename1 := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum1 := generateChecksum(t, filename1)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename1)
+		require.Nil(t, err)
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  "tmp/folder/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename1),
+		)
+		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename1))
+
+		require.Equal(t, originalFileChecksum1, downloadedFileChecksum)
+	})
 }
 
 func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraParam map[string]interface{}) string {

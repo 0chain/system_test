@@ -562,6 +562,32 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 	})
+
+	t.Run("Update blobber terms should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
+		expDuration := int64(1) // In hours
+
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"update_terms": "",
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		allocations := parseListAllocations(t, configPath)
+		ac, ok := allocations[allocationID]
+		require.True(t, ok, "current allocation not found", allocationID, allocations)
+		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
+		)
+	})
 }
 
 func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, climodel.Allocation) {
