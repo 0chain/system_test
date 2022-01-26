@@ -247,7 +247,7 @@ func TestUpload(t *testing.T) {
 		err := os.WriteFile(filename, fileBytes, os.ModePerm)
 		require.Nil(t, err, "failed to generate thumbnail", err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
