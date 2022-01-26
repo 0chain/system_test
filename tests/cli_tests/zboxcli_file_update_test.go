@@ -358,7 +358,7 @@ func TestFileUpdate(t *testing.T) {
 	})
 }
 
-//nolint: unnamedResult
+//nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
 	thumbnail := "upload_thumbnail_test.png"
 
