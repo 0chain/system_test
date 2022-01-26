@@ -242,9 +242,7 @@ type StakePoolDelegatePoolInfo struct {
 	DelegateID string `json:"delegate_id"` // wallet
 	Rewards    int64  `json:"rewards"`     // total for all time
 	Penalty    int64  `json:"penalty"`     // total for all time
-	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
-	// time it can't be unstaked.
-	Unstake bool `json:"unstake"`
+	Unstake    bool   `json:"unstake"`
 }
 
 type StakePoolSettings struct {
