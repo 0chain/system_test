@@ -568,15 +568,20 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
+		localPath := "tmp/" + filepath.Base(filename)
+
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
+			"localpath":  localPath,
 			"thumbnail":  nil,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+
+		stat, err := os.Stat(localPath)
+		require.Nil(t, err)
+		require.Equal(t, len(thumbnailBytes), stat.Size())
 	})
 
 	t.Run("Download to Non-Existent Path Should Work", func(t *testing.T) {
