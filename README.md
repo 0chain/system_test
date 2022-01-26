@@ -78,7 +78,7 @@ Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.
 
 For developing new system tests for code still in developer branches, tests can be run against a locally running chain.
 Typically, for a 0chain change you will have a PR for several modules that need to work
-together. For example, `0chain`, `blobber`, `GoSDK`, `zboxclie` and `zwalletclie`.
+together. For example, `0chain`, `blobber`, `GoSDK`, `zboxcli` and `zwalletcli`.
 
 The first step requires setting up a running chain using the GitHub branches from the PRs.
 Use the instructions for building a [local chain 0chain](https://github.com/0chain/0chain#setup-network),
