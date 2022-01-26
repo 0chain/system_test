@@ -581,7 +581,7 @@ func TestDownload(t *testing.T) {
 
 		stat, err := os.Stat(localPath)
 		require.Nil(t, err)
-		require.Equal(t, len(thumbnailBytes), stat.Size())
+		require.Equal(t, len(thumbnailBytes), int(stat.Size()))
 	})
 
 	t.Run("Download to Non-Existent Path Should Work", func(t *testing.T) {

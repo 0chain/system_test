@@ -45,7 +45,7 @@ func TestFileUpdate(t *testing.T) {
 
 		stats, err := os.Stat(thumbnailFile)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, thumbnailSize, stats.Size())
+		require.Equal(t, thumbnailSize, int(stats.Size()))
 
 		defer func() {
 			// Delete the downloaded thumbnail file
