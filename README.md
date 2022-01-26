@@ -107,6 +107,8 @@ following data
 Now open the system_test project in [GoLand](https://www.jetbrains.com/go/),
 you should now be able to run any of the `cli_tests` in debug.
 
+You can run tests against a remote chain if you have already deployed elsewhere eg. dev.0chain.net
+
 ## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
 If some tests fail, it is likely that a code issue has been introduced.  
