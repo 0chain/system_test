@@ -574,7 +574,7 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 			"thumbnail":  nil,
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
 	})
