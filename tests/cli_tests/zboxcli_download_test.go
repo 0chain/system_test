@@ -564,7 +564,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		localPath := filepath.Join(os.TempDir(), +filepath.Base(filename))
+		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

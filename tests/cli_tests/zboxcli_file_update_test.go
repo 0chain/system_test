@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -437,23 +436,6 @@ func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath s
 	require.Len(t, output, 2)
 	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
 	return thumbnail, thumbnailSize
-}
-
-func updateFileWithThumbnailURL(t *testing.T, thumbnailURL, allocationID, remotePath, localpath string, size int64) string {
-	thumbnail := "upload_thumbnail_test.png"
-	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", thumbnailURL, thumbnail))
-	require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
-
-	output, err = updateFile(t, configPath, map[string]interface{}{
-		"allocation":    allocationID,
-		"remotepath":    remotePath,
-		"localpath":     localpath,
-		"thumbnailpath": thumbnail,
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2)
-	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
-	return thumbnail
 }
 
 func updateFileWithCommit(t *testing.T, allocationID, remotePath, localpath string) {
