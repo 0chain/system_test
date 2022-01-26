@@ -74,6 +74,39 @@ PS: Test suite execution will be slower when running locally vs the system tests
 Output will also be less clear vs the system tests pipeline.   
 Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
+## Run individual tests against local 0chain network
+
+For developing new system tests for code still in developer branches, tests can be run against a locally running chain.
+Typically, for a 0chain change you will have a PR for several modules that need to work
+together. For example, `0chain`, `blobber`, `GoSDK`, `zboxclie` and `zwalletclie`.
+
+The first step requires setting up a running chain using the GitHub branches from the PRs.
+Use the instructions for building a [local chain 0chain](https://github.com/0chain/0chain#setup-network),
+[add a few blobbers](https://github.com/0chain/blobber#building-and-starting-the-nodes).
+Make sure you [stake the blobbers](https://github.com/0chain/0chain/blob/staging/code/go/0chain.net/smartcontract/storagesc/README.md#order).
+
+For `zboxcli` and `zwalletcle` changes you need to first build the executable and copy into local
+system test directory. For example:
+```bash
+cd zboxcli
+make install
+cp zbox ../system_test/tests/cli_tests/zbox
+```
+
+Make sure you have the correct system test branch. Now you need to edit `system_test/tests/cli_tests/config/zbox_config.yaml`
+Edit the line `block_worker: https://dev.0chain.net/dns` to the appropriate setting for you, something like
+```yaml
+block_worker: http://192.168.1.100:9091
+```
+Finally, you need to add a `system_test/tests/cli_tests/config/sc_owner_wallet.json` file with the
+following data
+```json
+{"client_id":"1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802","client_key":"7b630ba670dac2f22d43c2399b70eff378689a53ee03ea20957bb7e73df016200fea410ba5102558b0c39617e5afd2c1843b161a1dedec15e1ab40543a78a518","keys":[{"public_key":"7b630ba670dac2f22d43c2399b70eff378689a53ee03ea20957bb7e73df016200fea410ba5102558b0c39617e5afd2c1843b161a1dedec15e1ab40543a78a518","private_key":"c06b6f6945ba02d5a3be86b8779deca63bb636ce7e46804a479c50e53c864915"}],"mnemonics":"cactus panther essence ability copper fox wise actual need cousin boat uncover ride diamond group jacket anchor current float rely tragic omit child payment","version":"1.0","date_created":"2021-08-04 18:53:56.949069945 +0100 BST m=+0.018986002"}
+```
+
+Now open the system_test project in [GoLand](https://www.jetbrains.com/go/),
+you should now be able to run any of the `cli_tests` in debug.
+
 ## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
 If some tests fail, it is likely that a code issue has been introduced.  
