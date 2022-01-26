@@ -72,7 +72,7 @@ go test ./... -v
 ```
 PS: Test suite execution will be slower when running locally vs the system tests pipeline.   
 Output will also be less clear vs the system tests pipeline.   
-Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
+Therefore, we recommend using an IDE such as [GoLand](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
 ## Run individual tests against local 0chain network
 
@@ -85,7 +85,7 @@ Use the instructions for building a [local chain 0chain](https://github.com/0cha
 [add a few blobbers](https://github.com/0chain/blobber#building-and-starting-the-nodes).
 Make sure you [stake the blobbers](https://github.com/0chain/0chain/blob/staging/code/go/0chain.net/smartcontract/storagesc/README.md#order).
 
-For `zboxcli` and `zwalletcle` changes you need to first build the executable and copy into local
+For `zboxcli` and `zwalletcl` changes you need to first build the executable and copy into local
 system test directory. For example:
 ```bash
 cd zboxcli
