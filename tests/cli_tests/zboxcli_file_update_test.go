@@ -55,6 +55,60 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
+	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 2,
+		})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		thumbnail := "upload_thumbnail_test.png"
+		//nolint
+
+		generateThumbnail(t, thumbnail)
+
+		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+			"thumbnail":  true,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		err = os.Remove(thumbnail)
+		require.Nil(t, err)
+
+		// Update with new thumbnail
+		thumbnail, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		localPath := filepath.Join(os.TempDir(), thumbnail)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  localPath,
+			"thumbnail":  true,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		stat, err := os.Stat(localPath)
+		require.Nil(t, err)
+		require.Equal(t, thumbnailSize, int(stat.Size()))
+
+		err = os.Remove(thumbnail)
+		require.Nil(t, err)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 	t.Run("update with another file of same size should work", func(t *testing.T) {
 		t.Parallel()
 
