@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -373,7 +373,7 @@ func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	f, err := os.Open(file)
 	require.Nil(t, err, "wallet file %s not found", file)
 
-	ownerWalletBytes, err := ioutil.ReadAll(f)
+	ownerWalletBytes, err := io.ReadAll(f)
 	require.Nil(t, err, "error reading wallet file %s", file)
 
 	err = json.Unmarshal(ownerWalletBytes, wallet)
