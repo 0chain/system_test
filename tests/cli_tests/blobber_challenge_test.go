@@ -3,7 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -92,10 +92,10 @@ func TestBlobberChallenge(t *testing.T) {
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
-		res1Body, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 		var openChallengesBefore apimodel.BlobberChallenge
-		err = json.Unmarshal(res1Body, &openChallengesBefore)
+		err = json.Unmarshal(resBody, &openChallengesBefore)
 		require.Nil(t, err, "error unmarshalling response body")
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -112,10 +112,10 @@ func TestBlobberChallenge(t *testing.T) {
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
-		res2Body, err := ioutil.ReadAll(res.Body)
+		resBody, err = io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 		var openChallengesAfter apimodel.BlobberChallenge
-		err = json.Unmarshal(res2Body, &openChallengesAfter)
+		err = json.Unmarshal(resBody, &openChallengesAfter)
 		require.Nil(t, err, "error unmarshalling response body")
 
 		// New challenges must have been created after a download request
