@@ -216,7 +216,7 @@ func TestFileDelete(t *testing.T) {
 		err = createFileWithSize(filename, filesize)
 		require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":    allocationID,
 			"remotepath":    remotepath,
 			"localpath":     filename,

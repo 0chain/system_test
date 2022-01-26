@@ -213,10 +213,10 @@ func TestUpload(t *testing.T) {
 		thumbnail := "upload_thumbnail_test.png"
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":    allocationID,
 			"remotepath":    "/",
 			"localpath":     filename,
