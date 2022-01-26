@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -515,7 +514,7 @@ func extractAuthToken(str string) (string, error) {
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
 	rand.Read(buffer) //nolint:gosec,revive
-	return ioutil.WriteFile(name, buffer, os.ModePerm)
+	return os.WriteFile(name, buffer, os.ModePerm)
 }
 
 func generateRandomTestFileName(t *testing.T) string {

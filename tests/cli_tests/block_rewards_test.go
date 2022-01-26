@@ -3,7 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"reflect"
@@ -94,7 +94,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
@@ -123,7 +123,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err = ioutil.ReadAll(res.Body)
+		resBody, err = io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
@@ -142,7 +142,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			resBody, err = ioutil.ReadAll(res.Body)
+			resBody, err = io.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
@@ -249,7 +249,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
@@ -278,7 +278,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err = ioutil.ReadAll(res.Body)
+		resBody, err = io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
@@ -297,7 +297,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			resBody, err = ioutil.ReadAll(res.Body)
+			resBody, err = io.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
