@@ -67,46 +67,37 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/"
 		thumbnail := "upload_thumbnail_test.png"
 		//nolint
-
 		generateThumbnail(t, thumbnail)
-		defer func() {
-			//nolint: errcheck
-			os.Remove(thumbnail)
-		}()
 
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
+		//nolint: errcheck
+		os.Remove(thumbnail)
+		//nolint: errcheck
+		os.Remove(localFilePath)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  os.TempDir(),
+			"localpath":  localFilePath,
 			"thumbnail":  true,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		defer func() {
-			//nolint: errcheck
-			os.Remove(localFilePath)
-			//nolint: errcheck
-			os.Remove(filepath.Join(os.TempDir(), filepath.Base(localFilePath)))
-		}()
+
+		//nolint: errcheck
+		os.Remove(localFilePath)
 
 		// Update with new thumbnail
 		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+		//nolint: errcheck
+		os.Remove(newThumbnail)
 
-		localThumbnailPath := filepath.Join(os.TempDir(), newThumbnail)
-
-		defer func() {
-			//nolint: errcheck
-			os.Remove(localThumbnailPath)
-			//nolint: errcheck
-			os.Remove(newThumbnail)
-		}()
+		localThumbnailPath := filepath.Join(os.TempDir(), filepath.Base(newThumbnail))
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  os.TempDir(),
+			"localpath":  localThumbnailPath,
 			"thumbnail":  true,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -115,6 +106,9 @@ func TestFileUpdate(t *testing.T) {
 		stat, err := os.Stat(localThumbnailPath)
 		require.Nil(t, err)
 		require.Equal(t, newThumbnailSize, int(stat.Size()))
+
+		//nolint: errcheck
+		os.Remove(localThumbnailPath)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
