@@ -79,19 +79,29 @@ func TestFileUpdate(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
+			"localpath":  os.TempDir(),
 			"thumbnail":  true,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		defer func() {
+			//nolint: errcheck
 			os.Remove(localFilePath)
+			//nolint: errcheck
+			os.Remove(filepath.Join(os.TempDir(), filepath.Base(localFilePath)))
 		}()
 
 		// Update with new thumbnail
-		thumbnail, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
-		localThumbnailPath := filepath.Join(os.TempDir(), thumbnail)
+		localThumbnailPath := filepath.Join(os.TempDir(), newThumbnail)
+
+		defer func() {
+			//nolint: errcheck
+			os.Remove(localThumbnailPath)
+			//nolint: errcheck
+			os.Remove(newThumbnail)
+		}()
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -104,12 +114,7 @@ func TestFileUpdate(t *testing.T) {
 
 		stat, err := os.Stat(localThumbnailPath)
 		require.Nil(t, err)
-		require.Equal(t, thumbnailSize, int(stat.Size()))
-
-		defer func() {
-			//nolint: errcheck
-			os.Remove(localThumbnailPath)
-		}()
+		require.Equal(t, newThumbnailSize, int(stat.Size()))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
