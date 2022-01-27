@@ -327,7 +327,7 @@ func getRandomUniformFloat64(t *testing.T) float64 {
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
 	t.Logf("Sending ZCN...")
-	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc "%q" --to_client_id %s `, tokens, desc, toClientID)
+	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc %q --to_client_id %s `, tokens, desc, toClientID)
 
 	if fee > 0 {
 		cmd += fmt.Sprintf(" --fee %v ", fee)
