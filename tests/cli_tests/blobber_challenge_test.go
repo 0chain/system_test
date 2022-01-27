@@ -57,7 +57,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"commit":     "",
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
