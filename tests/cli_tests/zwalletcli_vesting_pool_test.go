@@ -1444,7 +1444,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
-		reg := regexp.MustCompile("unlock_vesting_pool_failed:vesting pool: destination [a-z0-9]{64} not found in the pool")
+		reg := regexp.MustCompile("unlock_vesting_pool_failed: vesting pool: destination [a-z0-9]{64} not found in the pool")
 		require.Regexp(t, reg, output[0])
 	})
 

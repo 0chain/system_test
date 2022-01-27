@@ -285,7 +285,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_sharder_settings: access denied", output[0])
+		require.Equal(t, "update_sharder_settings: azwalletcli_vesting_pool_test.go:1448ccess denied", output[0])
 	})
 }
 
