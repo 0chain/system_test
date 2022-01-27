@@ -69,6 +69,10 @@ func TestFileUpdate(t *testing.T) {
 		//nolint
 
 		generateThumbnail(t, thumbnail)
+		defer func() {
+			//nolint: errcheck
+			os.Remove(thumbnail)
+		}()
 
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
 
@@ -80,9 +84,6 @@ func TestFileUpdate(t *testing.T) {
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
 
 		// Update with new thumbnail
 		thumbnail, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
@@ -102,8 +103,10 @@ func TestFileUpdate(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
+		defer func() {
+			//nolint: errcheck
+			os.Remove(localPath)
+		}()
 
 		createAllocationTestTeardown(t, allocationID)
 	})
