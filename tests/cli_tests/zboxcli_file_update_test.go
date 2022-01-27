@@ -413,7 +413,6 @@ func TestFileUpdate(t *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-
 }
 
 func generateThumbnail(t *testing.T, localpath string) int {

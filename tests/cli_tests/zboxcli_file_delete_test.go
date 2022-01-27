@@ -436,5 +436,4 @@ func TestFileDelete(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
-
 }
