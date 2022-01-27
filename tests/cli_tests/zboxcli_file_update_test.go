@@ -99,7 +99,7 @@ func TestFileUpdate(t *testing.T) {
 			"localpath":  localThumbnailPath,
 			"thumbnail":  true,
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		stat, err := os.Stat(localThumbnailPath)

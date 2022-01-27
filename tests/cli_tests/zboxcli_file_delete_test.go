@@ -226,12 +226,12 @@ func TestFileDelete(t *testing.T) {
 		require.Len(t, output, 2)
 
 		fname := filepath.Base(filename)
-		remoteFilePath := path.Join(remotepath, fname)
+		remoteFilePath := filepath.Join(remotepath, fname)
 
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-		}), true)
+		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
@@ -436,4 +436,5 @@ func TestFileDelete(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
+
 }
