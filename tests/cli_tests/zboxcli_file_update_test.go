@@ -437,7 +437,7 @@ func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath s
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
-	require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(localpath), output[1])
+	require.True(t, strings.HasPrefix(output[1], "Status completed callback.") && strings.HasSuffix(output[1], "Name = "+filepath.Base(localpath)))
 	return thumbnail, thumbnailSize
 }
 
