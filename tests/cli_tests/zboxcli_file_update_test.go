@@ -96,7 +96,7 @@ func TestFileUpdate(t *testing.T) {
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  localThumbnailPath,
+			"localpath":  os.TempDir(),
 			"thumbnail":  true,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
