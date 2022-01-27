@@ -84,12 +84,14 @@ func TestFileUpdate(t *testing.T) {
 
 		// Update with new thumbnail
 		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+
+		localThumbnailPath := filepath.Join(os.TempDir(), filepath.Base(newThumbnail))
 		//nolint: errcheck
 		os.Remove(newThumbnail)
 		//nolint: errcheck
 		os.Remove(localFilePath)
-
-		localThumbnailPath := filepath.Join(os.TempDir(), filepath.Base(newThumbnail))
+		//nolint: errcheck
+		os.Remove(localThumbnailPath)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
