@@ -268,11 +268,6 @@ func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string
 	return output, err
 }
 
-// size in gigabytes
-func sizeInGB(size int64) float64 {
-	return float64(size) / GB
-}
-
 // ConvertToToken converts the value to ZCN tokens
 func ConvertToToken(value int64) float64 {
 	return float64(value) / float64(TOKEN_UNIT)
