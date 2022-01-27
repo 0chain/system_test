@@ -51,6 +51,9 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 	var count int
 	for {
 		count++
+		if count == maxAttempts {
+			commandString = strings.Replace(commandString, "--silent", "", 1)
+		}
 		output, err := RunCommandWithoutRetry(commandString)
 
 		if err == nil {
