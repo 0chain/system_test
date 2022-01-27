@@ -281,7 +281,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:access denied", output[0])
+		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
@@ -289,7 +289,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:access denied", output[0])
+		require.Equal(t, "update_miner_settings: access denied", output[0])
 	})
 }
 

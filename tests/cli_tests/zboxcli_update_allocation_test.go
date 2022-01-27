@@ -292,7 +292,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be "+
 			"at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed:can't update expired allocation", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *testing.T) {
 		t.Parallel()
@@ -357,7 +357,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation: fini_alloc_failed:allocation is not expired yet, or waiting a challenge completion", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both expired and non-expired)
@@ -411,7 +411,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed:can't update expired allocation", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 
 	t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
@@ -483,7 +483,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length "+
 			"be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation: fini_alloc_failed:allocation is not expired yet, or waiting a challenge completion", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 
 		// Then try updating with otherAllocationID: should not work
 		output, err = finalizeAllocation(t, configPath, otherAllocationID, false)
@@ -493,7 +493,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed:not allowed, unknown finalization initiator", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: not allowed, unknown finalization initiator", output[0])
 	})
 
 	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *testing.T) {
