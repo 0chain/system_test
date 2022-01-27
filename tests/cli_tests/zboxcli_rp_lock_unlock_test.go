@@ -148,7 +148,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed:lock amount is greater than balance", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
@@ -236,7 +236,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = readPoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed:insufficient amount to lock", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
@@ -381,7 +381,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.NotNil(t, err, "Read pool tokens unlocked before expired", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to unlock tokens in read pool: read_pool_unlock_failed:the pool is not expired yet", output[0])
+		require.Equal(t, "Failed to unlock tokens in read pool: read_pool_unlock_failed: the pool is not expired yet", output[0])
 	})
 
 	// Possible FIXME: Locking read tokens for duration more than allocation's duration

@@ -249,7 +249,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "Error creating free allocation: free_allocation_failed:error getting assigner details: value not present", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: error getting assigner details: value not present", output[0])
 	})
 
 	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
@@ -329,7 +329,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile("Error creating free allocation: free_allocation_failed:marker verification failed: marker timestamped in the future: ([0-9]{10})"), output[0])
+		require.Regexp(t, regexp.MustCompile("Error creating free allocation: free_allocation_failed: marker verification failed: marker timestamped in the future: ([0-9]{10})"), output[0])
 	})
 
 	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {

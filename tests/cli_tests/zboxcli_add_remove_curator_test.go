@@ -29,7 +29,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "expected error on adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error adding curator:alloc_cancel_failed:value not present", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error adding curator:alloc_cancel_failed: value not present", strings.Join(output, "\n"))
 	})
 
 	t.Run("Add Curator _ attempt to add curator by anyone except allocation owner must fail", func(t *testing.T) {
@@ -59,7 +59,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCuratorWithWallet(t, anotherClientWalletName, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error adding curator:add_curator_failed:only owner can add a curator", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error adding curator:add_curator_failed: only owner can add a curator", strings.Join(output, "\n"))
 	})
 
 	t.Run("Add Curator _ must fail when 'curator' parameter is missing", func(t *testing.T) {
@@ -307,7 +307,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error adding curator:curator_transfer_allocation_failed:only curators or the owner can transfer allocations;", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error adding curator:curator_transfer_allocation_failed: only curators or the owner can transfer allocations;", strings.Join(output, "\n"))
 	})
 
 	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *testing.T) {

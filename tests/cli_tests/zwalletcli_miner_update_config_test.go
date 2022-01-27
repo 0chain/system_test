@@ -31,7 +31,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings:unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {

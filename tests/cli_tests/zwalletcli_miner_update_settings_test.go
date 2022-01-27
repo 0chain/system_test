@@ -158,7 +158,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:min_stake is less than allowed by SC: -1 \\u003e 0", output[0])
+		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -1 \\u003e 0", output[0])
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
@@ -171,7 +171,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
+		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
@@ -184,7 +184,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
+		require.Equal(t, "update_miner_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
@@ -197,7 +197,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when trying to update max_stake to less than min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
+		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
@@ -210,7 +210,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
+		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
 	})
 
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
@@ -223,7 +223,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:invalid negative min_stake: 0 or max_stake: -10000000000", output[0])
+		require.Equal(t, "update_miner_settings: invalid negative min_stake: 0 or max_stake: -10000000000", output[0])
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
@@ -236,7 +236,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:invalid non-positive number_of_delegates: -1", output[0])
+		require.Equal(t, "update_miner_settings: invalid non-positive number_of_delegates: -1", output[0])
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
@@ -273,7 +273,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings:access denied", output[0])
+		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
