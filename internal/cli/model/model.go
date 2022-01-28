@@ -215,18 +215,26 @@ type BlobberAllocation struct {
 }
 
 type StakePoolInfo struct {
-	ID           string                       `json:"pool_id"`
-	Balance      int64                        `json:"balance"`
-	Unstake      int64                        `json:"unstake"`
-	Free         int64                        `json:"free"`
-	Capacity     int64                        `json:"capacity"`
-	WritePrice   int64                        `json:"write_price"`
-	OffersTotal  int64                        `json:"offers_total"`
-	UnstakeTotal int64                        `json:"unstake_total"`
-	Delegate     []*StakePoolDelegatePoolInfo `json:"delegate"`
-	Penalty      int64                        `json:"penalty"`
-	Rewards      StakePoolRewardsInfo         `json:"rewards"`
-	Settings     StakePoolSettings            `json:"settings"`
+	ID          string                       `json:"pool_id"`
+	Balance     int64                        `json:"balance"`
+	Unstake     int64                        `json:"unstake"`
+	Free        int64                        `json:"free"`
+	Capacity    int64                        `json:"capacity"`
+	WritePrice  int64                        `json:"write_price"`
+	Offers      []*StakePoolOfferInfo        `json:"offers"`
+	OffersTotal int64                        `json:"offers_total"`
+	Delegate    []*StakePoolDelegatePoolInfo `json:"delegate"`
+	Earnings    int64                        `json:"interests"`
+	Penalty     int64                        `json:"penalty"`
+	Rewards     StakePoolRewardsInfo         `json:"rewards"`
+	Settings    StakePoolSettings            `json:"settings"`
+}
+
+type StakePoolOfferInfo struct {
+	Lock         int64  `json:"lock"`
+	Expire       int64  `json:"expire"`
+	AllocationID string `json:"allocation_id"`
+	IsExpired    bool   `json:"is_expired"`
 }
 
 // StakePoolRewardsInfo represents stake pool rewards.
@@ -237,12 +245,16 @@ type StakePoolRewardsInfo struct {
 }
 
 type StakePoolDelegatePoolInfo struct {
-	ID         string `json:"id"`          // pool ID
-	Balance    int64  `json:"balance"`     // current balance
-	DelegateID string `json:"delegate_id"` // wallet
-	Rewards    int64  `json:"rewards"`     // total for all time
-	Penalty    int64  `json:"penalty"`     // total for all time
-	Unstake    bool   `json:"unstake"`
+	ID               string `json:"id"`                // pool ID
+	Balance          int64  `json:"balance"`           // current balance
+	DelegateID       string `json:"delegate_id"`       // wallet
+	Rewards          int64  `json:"rewards"`           // total for all time
+	Interests        int64  `json:"interests"`         // total for all time
+	Penalty          int64  `json:"penalty"`           // total for all time
+	PendingInterests int64  `json:"pending_interests"` // total for all time
+	// Unstake > 0, then the pool wants to unstake. And the Unstake is maximal
+	// time it can't be unstaked.
+	Unstake int64 `json:"unstake"`
 }
 
 type StakePoolSettings struct {
