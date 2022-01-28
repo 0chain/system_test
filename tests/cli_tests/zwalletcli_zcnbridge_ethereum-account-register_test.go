@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	address  = "c49926c4124cee1cba0ea94ea31a6c12318df947"
+	address  = "C49926C4124cEe1cbA0Ea94Ea31a6c12318df947"
 	mnemonic = "tag volcano eight thank tide danger coast health above argue embrace heavy"
 	password = "password"
 )
@@ -40,7 +40,7 @@ func TestEthRegisterAccount(t *testing.T) {
 	zwalletList := func(cmd string) ([]string, error) {
 		t.Logf("List ethereum account registered in local key chain in HOME (~/.zcn) folder")
 
-		run := fmt.Sprintf("./zwallet %s", cmd)
+		run := fmt.Sprintf("./zwallet %s --path %s", cmd, configDir)
 
 		return cliutils.RunCommandWithoutRetry(run)
 	}
@@ -62,7 +62,7 @@ func TestEthRegisterAccount(t *testing.T) {
 		require.NoError(t, err)
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
-		output, err = zwalletList("eth-list-accounts")
+		output, err = zwalletList("bridge-list-accounts")
 
 		deleteDefaultAccountInStorage(t, address)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
@@ -74,7 +74,7 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic stri
 	deleteDefaultAccountInStorage(t, address)
 
 	output, err := zwallet(
-		"eth-register-account",
+		"bridge-import-account",
 		mnemonic,
 		password,
 	)
@@ -83,12 +83,12 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic stri
 }
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
-	keyDir := path.Join(getConfigDir(), "wallets")
+	keyDir := path.Join(configDir, "wallets")
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
 			require.NoError(t, err)
-			if strings.Contains(path, address) {
+			if strings.Contains(strings.ToLower(path), strings.ToLower(address)) {
 				err = os.Remove(path)
 				require.NoError(t, err)
 			}

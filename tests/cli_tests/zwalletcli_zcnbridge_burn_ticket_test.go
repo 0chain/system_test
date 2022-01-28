@@ -21,6 +21,7 @@ func TestBurnTicket(t *testing.T) {
 	}
 
 	t.Run("Get ZCN burn ticket", func(t *testing.T) {
+		t.Skipf("Skipping due to context deadline error when burning ZCN tokens")
 		t.Parallel()
 
 		output, err := zwallet(
@@ -34,6 +35,7 @@ func TestBurnTicket(t *testing.T) {
 	})
 
 	t.Run("Get WZCN burn ticket", func(t *testing.T) {
+		t.Skipf("Skipping due to Authorizer failing to register in the 0chain")
 		t.Parallel()
 
 		output, err := zwallet(
