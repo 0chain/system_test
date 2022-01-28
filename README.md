@@ -60,11 +60,11 @@ To run the entire test suite (minus tests for known broken features) run:
 cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
 cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
 cd ./tests/cli_tests/
-go test -run  "^Test___Flaky.*$" ./... -v
+go test -run "^Test[^___]*$" ./... -v
 ```
 Debug logging can be achieved by running
 ```bash
-DEBUG=true go test -run  "^Test___Flaky.*$" ./... -v
+DEBUG=true go test -run "^Test[^___]*$" ./... -v
 ```
 Include tests for broken features as part of your test run by running
 ```bash

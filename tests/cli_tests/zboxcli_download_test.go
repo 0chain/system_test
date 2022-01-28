@@ -534,7 +534,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download thumbnail of file
 	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -548,8 +547,8 @@ func TestDownload(t *testing.T) {
 		})
 
 		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommandWithoutRetry("wget https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png -O " + thumbnail)
-		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
+		//nolint
+		thumbnailSize := generateThumbnail(t, thumbnail)
 
 		defer func() {
 			// Delete the downloaded thumbnail file
@@ -565,15 +564,20 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
+			"localpath":  localPath,
 			"thumbnail":  nil,
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+
+		stat, err := os.Stat(localPath)
+		require.Nil(t, err)
+		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
 
 	t.Run("Download to Non-Existent Path Should Work", func(t *testing.T) {
