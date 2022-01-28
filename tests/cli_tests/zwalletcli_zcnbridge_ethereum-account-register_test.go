@@ -6,9 +6,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"gopkg.in/errgo.v2/errors"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
@@ -84,8 +87,16 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic stri
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
 	keyDir := path.Join(configDir, "wallets")
+	if _, err := os.Stat(keyDir); err != nil {
+		t.Skipf("wallets folder at location is missing: %s", keyDir)
+	}
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
+		if e := IsNil(info); e != nil {
+			t.Logf("path %s is nil", path)
+			return nil
+		}
+
 		if !info.IsDir() {
 			require.NoError(t, err)
 			if strings.Contains(strings.ToLower(path), strings.ToLower(address)) {
@@ -107,4 +118,18 @@ func getConfigDir() string {
 	}
 	configDir = home + "/.zcn"
 	return configDir
+}
+
+func IsNil(value interface{}) error {
+	val := reflect.ValueOf(value)
+	if val.Kind() != reflect.Ptr {
+		return errors.New("result must be a pointer")
+	}
+
+	val = val.Elem()
+	if !val.CanAddr() {
+		return errors.New("result must be addressable (a pointer)")
+	}
+
+	return nil
 }

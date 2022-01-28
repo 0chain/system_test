@@ -44,6 +44,9 @@ func TestMain(m *testing.M) {
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
+	configDir, _ = filepath.Abs(configDir)
+	configPath, _ = filepath.Abs(configPath)
+
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
