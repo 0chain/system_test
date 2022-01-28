@@ -32,14 +32,12 @@ const (
 )
 
 func PrepareBridgeClient() error {
-	output, err := prepareBridgeClientConfig()
-	fmt.Println(output)
+	_, err := prepareBridgeClientConfig()
 	if err != nil {
 		return err
 	}
 
-	output, err = prepareBridgeClientWallet()
-	fmt.Println(output)
+	_, err = prepareBridgeClientWallet()
 	if err != nil {
 		return err
 	}
@@ -72,15 +70,12 @@ func prepareBridgeClientWallet() ([]string, error) {
 		OptionKeyPassword, password,
 	)
 
-	fmt.Println(cmd)
-
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
 // cmd: bridge-client-init
 func TestBridgeClientInit(t *testing.T) {
 	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
-
 		output, err := createDefaultClientBridgeConfig(t)
 
 		customPath := filepath.Join(getConfigDir(), DefaultConfigBridgeFileName)
@@ -156,7 +151,6 @@ func TestBridgeClientInit(t *testing.T) {
 // cmd: bridge-owner-init
 func TestBridgeOwnerInit(t *testing.T) {
 	t.Run("Init bridge owner config to default path and file", func(t *testing.T) {
-
 		output, err := bridgeOwnerInit(
 			t,
 			"password",

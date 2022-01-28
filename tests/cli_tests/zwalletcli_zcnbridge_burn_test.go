@@ -55,5 +55,4 @@ func TestBridgeBurn(t *testing.T) {
 		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Verification successful")
 	})
-
 }
