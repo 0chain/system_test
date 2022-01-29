@@ -97,7 +97,8 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_config: value x cannot be converted to time.Duration, failing to set config key max_destinations",
+			output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -116,7 +117,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
@@ -142,7 +143,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_config: config setting unknown_key not found", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {

@@ -195,8 +195,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.NotNil(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-		require.Equal(t, "Error creating allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[len(output)-3])
+		require.Equal(t, "Creating related read pool for storage smart-contract...", output[len(output)-3])
 	})
 
 	t.Run("Cancel allocation immediately should work", func(t *testing.T) {
@@ -223,10 +222,10 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too less sharders to "+
-			"confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: update allocation changes nothing", output[0])
 	})
 
+	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -240,9 +239,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too less "+
-			"sharders to confirm it: min_confirmation is 50%, but got 0/2 "+
-			"sharders", output[len(output)-3])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: 123abc (0)", output[3])
 	})
 
 	t.Run("Update Expired Allocation Should Fail", func(t *testing.T) {
@@ -280,9 +277,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be "+
 			"at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 
 		// Update the expired allocation's size
 		size := int64(2048)
@@ -297,8 +292,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be "+
 			"at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too less sharders "+
-			"to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *testing.T) {
 		t.Parallel()
@@ -316,9 +310,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation "+
-			"is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1023 < 1024", output[0])
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
@@ -350,9 +342,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"length be at least 1", strings.Join(output, "\n"))
 
 		//FIXME: POSSIBLE BUG: Error message shows error in creating instead of error in canceling
-		require.Equal(t, "Error creating allocation:[txn] too less "+
-			"sharders to confirm it: min_confirmation is "+
-			"50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Error creating allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation
@@ -367,9 +357,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both expired and non-expired)
@@ -408,9 +396,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too"+
-			" less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 
 		// Update the expired allocation's size
 		size := int64(2048)
@@ -425,9 +411,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, but got 0/2 "+
-			"sharders", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 
 	t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
@@ -478,9 +462,8 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, but "+
-			"got 0/2 sharders", output[0])
+		reg := regexp.MustCompile("Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: [a-z0-9]{64} \\(1\\)")
+		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
 
 	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation (both owned and others)
@@ -500,9 +483,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length "+
 			"be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, "+
-			"but got 0/2 sharders", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 
 		// Then try updating with otherAllocationID: should not work
 		output, err = finalizeAllocation(t, configPath, otherAllocationID, false)
@@ -512,9 +493,7 @@ func TestUpdateAllocation(t *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output "+
 			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:[txn] too "+
-			"less sharders to confirm it: min_confirmation is 50%, but "+
-			"got 0/2 sharders", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: not allowed, unknown finalization initiator", output[0])
 	})
 
 	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *testing.T) {

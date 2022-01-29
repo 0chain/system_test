@@ -56,8 +56,9 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("Vesting pool with single destination and description should work", func(t *testing.T) {
@@ -84,8 +85,8 @@ func TestVestingPool(t *testing.T) {
 			"description": "this is a vesting pool",
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 	})
 
 	t.Run("Vesting pool with multiple destinations should work", func(t *testing.T) {
@@ -118,8 +119,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 	})
 
 	t.Run("Vesting pool with multiple destinations and description should work", func(t *testing.T) {
@@ -153,8 +154,8 @@ func TestVestingPool(t *testing.T) {
 			"description": "this is a vesting pool",
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 	})
 
 	t.Run("Vesting pool with locking insufficient tokens should fail", func(t *testing.T) {
@@ -181,7 +182,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when creating a vesting pool without insufficient locked tokens")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}", output[0], "output did not match expected error message")
+		require.Equal(t, "create_vesting_pool_failed: not enough tokens to create pool provided", output[0], "output did not match expected error message")
 	})
 
 	t.Run("Vesting pool with excess locked tokens should work and allow unlocking", func(t *testing.T) {
@@ -207,8 +208,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -247,8 +248,8 @@ func TestVestingPool(t *testing.T) {
 			"start_time": startTime.Unix(),
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -294,8 +295,8 @@ func TestVestingPool(t *testing.T) {
 			"start_time": startTime.Unix(),
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -339,7 +340,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using past start_time")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: vesting starts before now")
 	})
 
 	t.Run("Vesting pool with start time in past for multiple destinations should fail", func(t *testing.T) {
@@ -377,7 +378,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using past start_time")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: vesting starts before now")
 	})
 
 	t.Run("Vesting pool with invalid destination should fail", func(t *testing.T) {
@@ -456,7 +457,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using duration less than min duration")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: vesting duration is too short")
 	})
 
 	t.Run("Vesting pool with duration greater than max duration should fail", func(t *testing.T) {
@@ -488,7 +489,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using duration greater than max duration")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: vesting duration is too long")
 	})
 
 	t.Run("Vesting pool with lock less than min lock should fail", func(t *testing.T) {
@@ -519,7 +520,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using lock less than min lock")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: insufficient amount to lock")
 	})
 
 	t.Run("Vesting pool with description greater than max description length should fail", func(t *testing.T) {
@@ -552,7 +553,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using description length greater than max allowed")
 		require.Len(t, output, 1)
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: entry description is too long")
 	})
 
 	t.Run("Vesting pool with destinations greater than max destinations should fail", func(t *testing.T) {
@@ -589,7 +590,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using more destinations than allowed")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, output[0], "Failed to add vesting pool: {\"error\": \"verify transaction failed\"}")
+		require.Equal(t, output[0], "create_vesting_pool_failed: invalid request: too many destinations")
 	})
 
 	t.Run("Vesting pool add without destination flag should fail", func(t *testing.T) {
@@ -666,8 +667,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -730,8 +731,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -798,8 +799,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -875,8 +876,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -918,8 +919,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -976,8 +977,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -986,8 +987,9 @@ func TestVestingPool(t *testing.T) {
 			"d":       targetWallet.ClientID,
 		}), true)
 		require.Nil(t, err, "error stopping vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Stop vesting for "+targetWallet.ClientID+".", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Destination should be removed from vp-info after stopping
 		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -1007,8 +1009,9 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error unlocking tokens from vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "error fetching balance for target wallet")
@@ -1058,9 +1061,10 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
 		// Stopping with multiple destinations
@@ -1070,8 +1074,9 @@ func TestVestingPool(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error stopping vesting pool")
 		// FIXME: output only shows stop vesting for last destination flag. Should show all stopped destinations
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Stop vesting for "+targetWallet2.ClientID+".", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Destination should be removed from vp-info after stopping
 		// FIXME: Multiple d flags don't work, only last flag passed is stopped.
@@ -1089,8 +1094,9 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error unlocking tokens from vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "error fetching balance for target wallet")
@@ -1129,9 +1135,10 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
 		// Stopping with multiple destinations
@@ -1141,7 +1148,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to stop vesting: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "stop_vesting_failed: only owner can stop a vesting", output[0])
 	})
 
 	t.Run("Vesting pool stop without pool id must fail", func(t *testing.T) {
@@ -1203,10 +1210,11 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		cliutils.Wait(t, time.Second)
 
@@ -1214,8 +1222,9 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error deleting vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Vesting pool deleted successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Wallet balance should be greater than 0.9 since non-vested tokens should return
 		output, err = getBalance(t, configPath)
@@ -1237,7 +1246,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when deleting invalid vesting pool id")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to delete vesting pool: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "delete_vesting_pool_failed: can't get pool: value not present", output[0])
 	})
 
 	t.Run("Deleting someone else's vesting pool should fail", func(t *testing.T) {
@@ -1266,17 +1275,18 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to delete vesting pool: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "delete_vesting_pool_failed: only pool owner can delete the pool", output[0])
 	})
 
 	t.Run("Vesting pool delete without pool id flag should fail", func(t *testing.T) {
@@ -1315,8 +1325,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -1326,8 +1336,9 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error unlocking vesting pool tokens")
-		require.Len(t, output, 1, "expected output of length 1")
+		require.Len(t, output, 2, "expected output of length 1")
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Vp-info should show (can unlock) as 0, wallet should have increased by 0.1
 		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -1364,10 +1375,11 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		cliutils.Wait(t, time.Second*5)
 
@@ -1375,7 +1387,7 @@ func TestVestingPool(t *testing.T) {
 			"pool_id": poolId,
 		}), true, targetWalletName)
 		require.Nil(t, err, "error unlocking vesting pool tokens")
-		require.Len(t, output, 1, "expected output of length 1")
+		require.Len(t, output, 2, "expected output of length 1")
 		require.Equal(t, "Tokens unlocked successfully.", output[0])
 
 		// Vp-info should show (can unlock) as 0, wallet should have increased by 0.1
@@ -1421,17 +1433,19 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to unlock tokens: {\"error\": \"verify transaction failed\"}", output[0])
+		reg := regexp.MustCompile("unlock_vesting_pool_failed: vesting pool: destination [a-z0-9]{64} not found in the pool")
+		require.Regexp(t, reg, output[0])
 	})
 
 	t.Run("Vesting pool unlock for one destination and no excess tokens in pool should fail", func(t *testing.T) {
@@ -1456,8 +1470,8 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
 
@@ -1468,7 +1482,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "error unlocking vesting pool tokens")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, "Failed to unlock tokens: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "unlock_vesting_pool_failed: draining pool: no excess tokens to unlock", output[0])
 	})
 
 	t.Run("Vesting unlock without pool id must fail", func(t *testing.T) {
@@ -1494,7 +1508,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "error unlocking vesting pool tokens")
 		require.Len(t, output, 1, "expected output of length 1")
-		require.Equal(t, "Failed to unlock tokens: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "unlock_vesting_pool_failed: can't get pool: value not present", output[0])
 	})
 
 	// VP-TRIGGER cases
@@ -1523,17 +1537,19 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error trigerring vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Vesting triggered successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// vp-info should show vested tokens as sent
 		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -1581,17 +1597,19 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error trigerring vesting pool")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Vesting triggered successfully.", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Vp-info should show that all tokens are transferred to destination wallets
 		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -1638,17 +1656,18 @@ func TestVestingPool(t *testing.T) {
 			"duration": validDuration,
 		}), true, foreignWalletName)
 		require.Nil(t, err, "error adding a new vesting pool")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully: [a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
+		require.Len(t, output, 2)
+		require.Regexp(t, regexp.MustCompile("Vesting pool added successfully:[a-z0-9]{64}:vestingpool:[a-z0-9]{64}"), output[0], "output did not match expected vesting pool pattern")
 		poolId := regexp.MustCompile("[a-z0-9]{64}:vestingpool:[a-z0-9]{64}").FindString(output[0])
 		require.NotEmpty(t, poolId, "expected pool ID as output to vp-add command")
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": poolId,
 		}), false)
 		require.NotNil(t, err, "expected error stopping someone elses's vesting pool")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to trigger vesting: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "trigger_vesting_pool_failed: only owner can trigger the pool", output[0])
 	})
 
 	t.Run("Vesting pool trigger without pool id flag should fail", func(t *testing.T) {
@@ -1674,7 +1693,7 @@ func TestVestingPool(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error trigerring vesting pool with invalid pool id")
 		require.Len(t, output, 1)
-		require.Equal(t, "Failed to trigger vesting: {\"error\": \"verify transaction failed\"}", output[0])
+		require.Equal(t, "trigger_vesting_pool_failed: can't get pool: value not present", output[0])
 	})
 }
 
