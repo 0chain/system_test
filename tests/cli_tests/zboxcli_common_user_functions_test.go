@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -93,11 +95,112 @@ func TestCommonUserFunctions(t *testing.T) {
 	})
 
 	t.Run("Create Allocation - Blobbers must lock appropriate amount of tokens in stake pool", func(t *testing.T) {
-		t.Skip("To be covered after addition of stakePool table to eventsDB")
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 1 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		allocation := getAllocation(t, allocationID)
+
+		// Each blobber should lock (size of allocation on that blobber * write_price of blobber) in stake pool
+		cliutils.Wait(t, 2*time.Minute)
+		for _, blobber_detail := range allocation.BlobberDetails {
+			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id": blobber_detail.BlobberID,
+				"json":       "",
+			}))
+			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			stakePool := climodel.StakePoolInfo{}
+			err = json.Unmarshal([]byte(output[0]), &stakePool)
+			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			allocationOffer := climodel.StakePoolOfferInfo{}
+			for _, offer := range stakePool.Offers {
+				if offer.AllocationID == allocationID {
+					allocationOffer = *offer
+				}
+			}
+
+			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+		}
+		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("Update Allocation - Blobbers' lock in stake pool must increase according to updated size", func(t *testing.T) {
-		t.Skip("To be covered after addition of stakePool table to eventsDB")
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 1 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		// Updated allocation params
+		allocParams = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       2 * MB,
+		})
+		output, err = updateAllocation(t, configPath, allocParams, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
+
+		allocation := getAllocation(t, allocationID)
+
+		// Each blobber should lock (updated size of allocation on that blobber * write_price of blobber) in stake pool
+		cliutils.Wait(t, 2*time.Minute)
+		for _, blobber_detail := range allocation.BlobberDetails {
+			output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id": blobber_detail.BlobberID,
+				"json":       "",
+			}))
+			assert.Nil(t, err, "Error fetching stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			stakePool := climodel.StakePoolInfo{}
+			err = json.Unmarshal([]byte(output[0]), &stakePool)
+			assert.Nil(t, err, "Error unmarshalling stake pool info for blobber id: ", blobber_detail.BlobberID, "\n", strings.Join(output, "\n"))
+
+			allocationOffer := climodel.StakePoolOfferInfo{}
+			for _, offer := range stakePool.Offers {
+				if offer.AllocationID == allocationID {
+					allocationOffer = *offer
+				}
+			}
+
+			t.Logf("Expected blobber id [%v] to lock [%v] but it actually locked [%v]", blobber_detail.BlobberID, int64(blobber_detail.Size*int64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+			assert.Equal(t, int64(sizeInGB(blobber_detail.Size)*float64(blobber_detail.Terms.Write_price)), int64(allocationOffer.Lock))
+		}
+
+		createAllocationTestTeardown(t, allocationID)
 	})
 }
 
@@ -217,6 +320,11 @@ func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename), retry, time.Second*5)
 	return output, err
+}
+
+// size in gigabytes
+func sizeInGB(size int64) float64 {
+	return float64(size) / GB
 }
 
 // ConvertToToken converts the value to ZCN tokens
