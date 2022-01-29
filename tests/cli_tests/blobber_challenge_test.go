@@ -39,6 +39,48 @@ func TestBlobberChallenge(t *testing.T) {
 	// Get base URL for API calls.
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
+	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 1,
+		})
+
+		allocation := getAllocation(t, allocationId)
+
+		var blobberId string
+		for _, blobber := range allocation.BlobberDetails {
+			blobberId = blobber.BlobberID
+			break
+		}
+
+		res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
+		require.Nil(t, err, "error getting challenges", res)
+		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "failed API request")
+
+		resBody, err := io.ReadAll(res.Body)
+		require.Nil(t, err, "error reading response body")
+		var openChallengesBefore apimodel.BlobberChallenge
+		err = json.Unmarshal(resBody, &openChallengesBefore)
+
+		remotepath := "/dir/"
+		filesize := 2 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+			"chunksize":  2 * MB,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		passed := pollForOpenChallenges(t, sharderBaseUrl, blobberId, &openChallengesBefore)
+		require.True(t, passed, "expected new challenges to be created after an upload operation")
+	})
+
 	t.Run("Downloading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -52,7 +94,6 @@ func TestBlobberChallenge(t *testing.T) {
 		err := createFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		// Upload parameters
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
