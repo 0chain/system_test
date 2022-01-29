@@ -61,6 +61,7 @@ func TestBlobberChallenge(t *testing.T) {
 		require.Nil(t, err, "error reading response body")
 		var openChallengesBefore apimodel.BlobberChallenge
 		err = json.Unmarshal(resBody, &openChallengesBefore)
+		require.Nil(t, err, "error unmarshalling response body")
 
 		remotepath := "/dir/"
 		filesize := 2 * MB
