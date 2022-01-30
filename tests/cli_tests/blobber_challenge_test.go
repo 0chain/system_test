@@ -35,7 +35,7 @@ func TestBlobberChallenge(t *testing.T) {
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 	// Get base URL for API calls.
-	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+	sharderBaseURLs := getAllSharderBaseURLs(&sharders)
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -412,9 +412,9 @@ func TestBlobberChallenge(t *testing.T) {
 	})
 }
 
-func getAllSharderBaseURLs(sharders map[string]climodel.Sharder) []string {
+func getAllSharderBaseURLs(sharders *map[string]climodel.Sharder) []string {
 	sharderURLs := make([]string, 0)
-	for _, sharder := range sharders {
+	for _, sharder := range *sharders {
 		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
 	}
 	return sharderURLs
@@ -431,7 +431,7 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Res
 	return nil, errors.New("all sharders gave an error at endpoint /openchallenges")
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs []string, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
 	wg := sync.WaitGroup{}
 	mutex := &sync.RWMutex{}
