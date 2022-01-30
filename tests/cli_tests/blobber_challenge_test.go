@@ -2,12 +2,12 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -34,11 +34,8 @@ func TestBlobberChallenge(t *testing.T) {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
-	// Use first sharder from map.
-	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-
 	// Get base URL for API calls.
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -53,7 +50,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, blobber.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		remotepath := "/dir/"
 		filesize := 2 * MB
@@ -70,7 +67,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
 	})
 
@@ -117,7 +114,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -126,7 +123,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -173,7 +170,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -182,7 +179,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error moving file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -229,7 +226,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -237,7 +234,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error deleting file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -284,7 +281,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -293,7 +290,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error copying file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -340,7 +337,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		localfile := generateRandomTestFileName(t)
 		err = createFileWithSize(localfile, 2*MB)
@@ -354,7 +351,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an update operation")
 	})
 
@@ -401,7 +398,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -410,16 +407,31 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error renaming file", strings.Join(output, "\n"))
 
-		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a rename operation")
 	})
 }
 
-func apiGetOpenChallenges(sharderBaseURL, blobberId string) (*http.Response, error) {
-	return http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId))
+func getAllSharderBaseURLs(sharders map[string]climodel.Sharder) []string {
+	sharderURLs := make([]string, 0)
+	for _, sharder := range sharders {
+		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
+	}
+	return sharderURLs
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
+func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Response, error) {
+	for _, sharderBaseURL := range sharderBaseURLs {
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId))
+		if res.StatusCode < 200 || res.StatusCode >= 300 || err != nil {
+			continue
+		}
+		return res, err
+	}
+	return nil, errors.New("all sharders gave an error at endpoint /openchallenges")
+}
+
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs []string, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
 	wg := sync.WaitGroup{}
 	mutex := &sync.RWMutex{}
@@ -427,7 +439,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers 
 		wg.Add(1)
 		go func(index int, blobberId string) {
 			defer wg.Done()
-			res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
+			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
 			require.Nil(t, err, "error getting challenges", res)
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 			require.NotNil(t, res.Body, "Open challenges API response must not be nil")
@@ -447,10 +459,10 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers 
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseUrl string, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
 	t.Log("Checking for open challenges in 30 seconds...")
 	cliutils.Wait(t, 30*time.Second)
-	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
+	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 	for _, blobber := range openChallengesAfter {
 		if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
