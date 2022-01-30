@@ -462,7 +462,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
-		reg := regexp.MustCompile("Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: [a-z0-9]{64} \\(1\\)")
+		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: [a-z0-9]{64} \(1\)`)
 		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
 

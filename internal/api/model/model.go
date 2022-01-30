@@ -1,5 +1,9 @@
 package apimodel
 
+import (
+	climodel "github.com/0chain/system_test/internal/cli/model"
+)
+
 type Balance struct {
 	Txn     string `json:"txn"`
 	Round   int64  `json:"round"`
@@ -63,4 +67,66 @@ type Transfer struct {
 	From   string `json:"from"`
 	To     string `json:"to"`
 	Amount int64  `json:"amount"`
+}
+
+type StorageNodeGeolocation struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	// reserved / Accuracy float64 `mapstructure:"accuracy"`
+}
+
+type ValidationNode struct {
+	ID                string                     `json:"id"`
+	BaseURL           string                     `json:"url"`
+	PublicKey         string                     `json:"-"`
+	StakePoolSettings climodel.StakePoolSettings `json:"stake_pool_settings"`
+}
+
+type StorageNode struct {
+	ID              string                 `json:"id"`
+	BaseURL         string                 `json:"url"`
+	Geolocation     StorageNodeGeolocation `json:"geolocation"`
+	Terms           climodel.Terms         `json:"terms"`    // terms
+	Capacity        int64                  `json:"capacity"` // total blobber capacity
+	Used            int64                  `json:"used"`     // allocated capacity
+	LastHealthCheck int64                  `json:"last_health_check"`
+	PublicKey       string                 `json:"-"`
+	// StakePoolSettings used initially to create and setup stake pool.
+	StakePoolSettings climodel.StakePoolSettings `json:"stake_pool_settings"`
+}
+
+type ValidationTicket struct {
+	ChallengeID  string `json:"challenge_id"`
+	BlobberID    string `json:"blobber_id"`
+	ValidatorID  string `json:"validator_id"`
+	ValidatorKey string `json:"validator_key"`
+	Result       bool   `json:"success"`
+	Message      string `json:"message"`
+	MessageCode  string `json:"message_code"`
+	Timestamp    int64  `json:"timestamp"`
+	Signature    string `json:"signature"`
+}
+
+type ChallengeResponse struct {
+	ID                string              `json:"challenge_id"`
+	ValidationTickets []*ValidationTicket `json:"validation_tickets"`
+}
+
+type StorageChallenge struct {
+	Created        int64              `json:"created"`
+	ID             string             `json:"id"`
+	PrevID         string             `json:"prev_id"`
+	Validators     []*ValidationNode  `json:"validators"`
+	RandomNumber   int64              `json:"seed"`
+	AllocationID   string             `json:"allocation_id"`
+	Blobber        *StorageNode       `json:"blobber"`
+	AllocationRoot string             `json:"allocation_root"`
+	Response       *ChallengeResponse `json:"challenge_response,omitempty"`
+}
+
+type BlobberChallenge struct {
+	BlobberID                string                       `json:"blobber_id"`
+	Challenges               []*StorageChallenge          `json:"challenges"`
+	ChallengeMap             map[string]*StorageChallenge `json:"-"`
+	LatestCompletedChallenge *StorageChallenge            `json:"lastest_completed_challenge"`
 }
