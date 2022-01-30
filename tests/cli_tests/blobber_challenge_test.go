@@ -29,13 +29,13 @@ func TestBlobberChallenge(t *testing.T) {
 	require.Greater(t, len(output), 1)
 	require.Equal(t, "MagicBlock Sharders", output[0])
 
-	var sharders map[string]climodel.Sharder
+	var sharders map[string]*climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 	// Get base URL for API calls.
-	sharderBaseURLs := getAllSharderBaseURLs(&sharders)
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -412,9 +412,9 @@ func TestBlobberChallenge(t *testing.T) {
 	})
 }
 
-func getAllSharderBaseURLs(sharders *map[string]climodel.Sharder) []string {
+func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	sharderURLs := make([]string, 0)
-	for _, sharder := range *sharders {
+	for _, sharder := range sharders {
 		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
 	}
 	return sharderURLs
