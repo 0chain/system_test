@@ -422,6 +422,7 @@ func apiGetOpenChallenges(sharderBaseURL, blobberId string) (*http.Response, err
 func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
 	wg := sync.WaitGroup{}
+	mutex := &sync.RWMutex{}
 	for index, blobberId := range blobbers {
 		wg.Add(1)
 		go func(index int, blobberId string) {
@@ -437,7 +438,9 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers 
 			err = json.Unmarshal(resBody, &openChallengesInBlobber)
 			require.Nil(t, err, "error unmarshalling response body")
 
+			mutex.Lock()
 			openChallenges[blobberId] = openChallengesInBlobber
+			mutex.Unlock()
 		}(index, blobberId)
 	}
 	wg.Wait()
