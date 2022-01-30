@@ -53,27 +53,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, blobber.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		remotepath := "/dir/"
 		filesize := 2 * MB
@@ -90,7 +70,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
 	})
 
@@ -137,27 +117,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -166,7 +126,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -213,27 +173,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -242,7 +182,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error moving file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -289,27 +229,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -317,7 +237,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error deleting file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -364,27 +284,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -393,7 +293,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error copying file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
@@ -440,27 +340,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		localfile := generateRandomTestFileName(t)
 		err = createFileWithSize(localfile, 2*MB)
@@ -474,7 +354,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an update operation")
 	})
 
@@ -521,27 +401,7 @@ func TestBlobberChallenge(t *testing.T) {
 			blobbers = append(blobbers, stat.BlobberID)
 		}
 
-		openChallengesBefore := make(map[string]apimodel.BlobberChallenge)
-		wg := sync.WaitGroup{}
-		for index, blobberId := range blobbers {
-			wg.Add(1)
-			go func(index int, blobberId string) {
-				defer wg.Done()
-				res, err := apiGetOpenChallenges(sharderBaseUrl, blobberId)
-				require.Nil(t, err, "error getting challenges", res)
-				require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-				require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-				resBody, err := io.ReadAll(res.Body)
-				require.Nil(t, err, "Error reading response body")
-				var openChallengesBeforeInBlobber apimodel.BlobberChallenge
-				err = json.Unmarshal(resBody, &openChallengesBeforeInBlobber)
-				require.Nil(t, err, "error unmarshalling response body")
-
-				openChallengesBefore[blobberId] = openChallengesBeforeInBlobber
-			}(index, blobberId)
-		}
-		wg.Wait()
+		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
@@ -550,7 +410,7 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error renaming file", strings.Join(output, "\n"))
 
-		passed := pollForOpenChallenges(t, sharderBaseUrl, blobbers, openChallengesBefore)
+		passed := areNewChallengesOpened(t, sharderBaseUrl, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after a rename operation")
 	})
 }
@@ -559,10 +419,8 @@ func apiGetOpenChallenges(sharderBaseURL, blobberId string) (*http.Response, err
 	return http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId))
 }
 
-func pollForOpenChallenges(t *testing.T, sharderBaseUrl string, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
-	t.Log("polling for open challenges for 2 mins...")
-	cliutils.Wait(t, 30*time.Second)
-	openChallengesAfter := make(map[string]apimodel.BlobberChallenge)
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseUrl string, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
+	openChallenges = make(map[string]apimodel.BlobberChallenge)
 	wg := sync.WaitGroup{}
 	for index, blobberId := range blobbers {
 		wg.Add(1)
@@ -575,14 +433,21 @@ func pollForOpenChallenges(t *testing.T, sharderBaseUrl string, blobbers []strin
 
 			resBody, err := io.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body")
-			var openChallengesAfterInBlobber apimodel.BlobberChallenge
-			err = json.Unmarshal(resBody, &openChallengesAfterInBlobber)
+			var openChallengesInBlobber apimodel.BlobberChallenge
+			err = json.Unmarshal(resBody, &openChallengesInBlobber)
 			require.Nil(t, err, "error unmarshalling response body")
 
-			openChallengesAfter[blobberId] = openChallengesAfterInBlobber
+			openChallenges[blobberId] = openChallengesInBlobber
 		}(index, blobberId)
 	}
 	wg.Wait()
+	return openChallenges
+}
+
+func areNewChallengesOpened(t *testing.T, sharderBaseUrl string, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
+	t.Log("Checking for open challenges in 30 seconds...")
+	cliutils.Wait(t, 30*time.Second)
+	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseUrl, blobbers)
 
 	for _, blobber := range openChallengesAfter {
 		if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
