@@ -1,7 +1,6 @@
 package apimodel
 
 import (
-	"github.com/0chain/gosdk/core/common"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
@@ -90,22 +89,22 @@ type StorageNode struct {
 	Terms           climodel.Terms         `json:"terms"`    // terms
 	Capacity        int64                  `json:"capacity"` // total blobber capacity
 	Used            int64                  `json:"used"`     // allocated capacity
-	LastHealthCheck common.Timestamp       `json:"last_health_check"`
+	LastHealthCheck int64                  `json:"last_health_check"`
 	PublicKey       string                 `json:"-"`
 	// StakePoolSettings used initially to create and setup stake pool.
 	StakePoolSettings climodel.StakePoolSettings `json:"stake_pool_settings"`
 }
 
 type ValidationTicket struct {
-	ChallengeID  string           `json:"challenge_id"`
-	BlobberID    string           `json:"blobber_id"`
-	ValidatorID  string           `json:"validator_id"`
-	ValidatorKey string           `json:"validator_key"`
-	Result       bool             `json:"success"`
-	Message      string           `json:"message"`
-	MessageCode  string           `json:"message_code"`
-	Timestamp    common.Timestamp `json:"timestamp"`
-	Signature    string           `json:"signature"`
+	ChallengeID  string `json:"challenge_id"`
+	BlobberID    string `json:"blobber_id"`
+	ValidatorID  string `json:"validator_id"`
+	ValidatorKey string `json:"validator_key"`
+	Result       bool   `json:"success"`
+	Message      string `json:"message"`
+	MessageCode  string `json:"message_code"`
+	Timestamp    int64  `json:"timestamp"`
+	Signature    string `json:"signature"`
 }
 
 type ChallengeResponse struct {
@@ -114,7 +113,7 @@ type ChallengeResponse struct {
 }
 
 type StorageChallenge struct {
-	Created        common.Timestamp   `json:"created"`
+	Created        int64              `json:"created"`
 	ID             string             `json:"id"`
 	PrevID         string             `json:"prev_id"`
 	Validators     []*ValidationNode  `json:"validators"`
