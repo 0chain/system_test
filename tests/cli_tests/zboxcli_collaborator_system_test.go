@@ -138,11 +138,26 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, readPool, 1, "Read pool must exist")
 		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
 
+		shareParams := map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"clientid":   collaboratorWallet.ClientID,
+		}
+		output, err = shareFile(t, configPath, shareParams)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, "Error extracting auth token")
+		require.NotEqual(t, "", authTicket)
+
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  "tmp/",
+			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, remotepath),
 		}), true)
+
 		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
 		defer os.Remove("tmp" + remotepath)
 		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
@@ -300,10 +315,24 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
 
+		shareParams := map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"clientid":   collaboratorWallet.ClientID,
+		}
+		output, err = shareFile(t, configPath, shareParams)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, "Error extracting auth token")
+		require.NotEqual(t, "", authTicket)
+
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  "tmp/",
+			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, remotepath),
 		}), false)
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
