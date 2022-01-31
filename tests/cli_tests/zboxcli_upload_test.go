@@ -58,8 +58,8 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload Large File Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(3 * GB)
-		fileSize := int64(1 * GB)
+		allocSize := int64(1 * GB)
+		fileSize := int64(100 * MB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
