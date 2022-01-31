@@ -55,6 +55,35 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
+	t.Run("Upload Large File Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(3 * GB)
+		fileSize := int64(1 * GB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -398,7 +427,112 @@ func TestUpload(t *testing.T) {
 		require.NotEqual(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
+	t.Run("Data shards do not require more allocation space", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(512 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   2,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1, "Output length was less than expected")
+		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
+	})
+
 	// Failure Scenarios
+
+	//FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
+	t.Run("Upload File too large - file size larger than allocation should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(2 * MB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   1,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1, "Output length was less than expected")
+		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+	})
+
+	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(513 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   1,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1, "Output length was less than expected")
+		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+	})
+
+	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(257 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 3,
+			"data":   1,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1, "Output length was less than expected")
+		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
 		t.Parallel()
