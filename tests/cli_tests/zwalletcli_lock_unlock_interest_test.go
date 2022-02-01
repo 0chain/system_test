@@ -919,7 +919,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			"pool_id": stats.Stats[0].ID,
 		}), false)
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		reg := regexp.MustCompile("failed to unlock tokens: pool \\([a-z0-9]{64}\\) doesn't exist")
+		reg := regexp.MustCompile(`failed to unlock tokens: pool \([a-z0-9]{64}\) doesn't exist`)
 		require.Regexp(t, reg, output[0])
 	})
 }
