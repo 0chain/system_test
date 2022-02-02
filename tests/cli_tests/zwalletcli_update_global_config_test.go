@@ -15,15 +15,41 @@ import (
 func TestUpdateGlobalConfig(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Update Global Config Should Work", func(t *testing.T) {
+	t.Run("Update Global Config - setting immutable config must fail", func(t *testing.T) {
 		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		// configKey := "server_chain.block.max_block_size"
-		// newValue := "11"
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "Failed to get wallet")
+
+		configKey := "server_chain.owner"
+		newValue := wallet.ClientID
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, false)
+		require.NotNil(t, err, "Setting immutable config must fail. but it didn't", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_globals: validation: server_chain.owner cannot be modified via a transaction", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("Update Global Config - Setting mutable config should work", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
 
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "200"
@@ -38,6 +64,9 @@ func TestUpdateGlobalConfig(t *testing.T) {
 
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue := cfgBefore[configKey]
+		if oldValue == newValue {
+			newValue = "201"
+		}
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
@@ -76,16 +105,13 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		// cfgBefore := getGlobalConfiguration(t, true)
-		// oldValue := cfgBefore[configKey]
-
 		output, err = updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_globals: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Get Global Config Should Work", func(t *testing.T) {
