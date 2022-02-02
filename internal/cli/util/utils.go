@@ -51,11 +51,6 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 	var count int
 	for {
 		count++
-
-		if count == maxAttempts {
-			commandString = strings.Replace(commandString, "--silent", "", 1)
-		}
-
 		output, err := RunCommandWithoutRetry(commandString)
 
 		if err == nil {
@@ -68,6 +63,8 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 			time.Sleep(backoff)
 		} else {
 			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
+			commandString = strings.Replace(commandString, "--silent", "", 1)
+			_, _ = RunCommandWithoutRetry(commandString) // Only for logging!
 			return output, err
 		}
 	}
