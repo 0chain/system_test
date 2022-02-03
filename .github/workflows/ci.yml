@@ -16,7 +16,7 @@ on:
         required: true
       existing_network:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
-        default: 'kube.devnet-0chain.net'
+        default: ''
         required: false
       miner_image:
         description: 'miner DOCKER IMAGE to deploy'

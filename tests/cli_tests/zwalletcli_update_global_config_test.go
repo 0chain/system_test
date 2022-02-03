@@ -15,6 +15,135 @@ import (
 func TestUpdateGlobalConfig(t *testing.T) {
 	t.Parallel()
 
+	t.Run("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
+
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "Failed to get wallet")
+
+		configKey1 := "server_chain.owner"
+		newValue1 := wallet.ClientID
+
+		configKey2 := "server_chain.smart_contract.setting_update_period"
+		newValue2 := "210"
+
+		cfgBefore := getGlobalConfiguration(t, true)
+
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey1 + "," + configKey2,
+			"values": newValue1 + "," + newValue2,
+		}, false)
+		require.NotNil(t, err, "Setting immutable config must fail. but it didn't", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_globals: validation: server_chain.owner cannot be modified via a transaction", output[0], strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 2*time.Second)
+
+		cfgAfter := getGlobalConfiguration(t, true)
+
+		require.Equal(t, cfgBefore[configKey1], cfgAfter[configKey1], "new value %s for config %s must not be set", newValue1, configKey1)
+		require.Equal(t, cfgBefore[configKey2], cfgAfter[configKey2], "new value %s for config %s must not be set", newValue2, configKey2)
+
+		// test transaction to verify chain is still working
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	})
+
+	t.Run("Update Global Config - update with suppliying no parameter must update nothing", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		cfgBefore := getGlobalConfiguration(t, true)
+
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{}, false)
+		require.Nil(t, err, "Error in updating global config", strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 2*time.Second)
+
+		cfgAfter := getGlobalConfiguration(t, true)
+
+		for key, value := range cfgBefore {
+			require.Equal(t, cfgBefore[key], cfgAfter[key], "The command should not update the values but it changes '%v' from %v to %v", key, value, cfgAfter[key])
+		}
+	})
+
+	t.Run("Update Global Config - update with invalid key must fail", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		configKey := "invalid.key"
+		newValue := "120ms"
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, false)
+		require.NotNil(t, err, "Setting config with invalid key must fail. but it didn't", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_globals: validation: 'invalid.key' is not a valid global setting", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("Update Global Config - update with invalid value must fail", func(t *testing.T) {
+		t.Parallel()
+
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		configKey := "server_chain.block.proposal.max_wait_time"
+		newValue := "abc"
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, false)
+		require.NotNil(t, err, "Setting config with invalid value must fail. but it didn't", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_globals: validation: server_chain.block.proposal.max_wait_time value abc cannot be parsed as a time.duration", output[0], strings.Join(output, "\n"))
+	})
+
 	t.Run("Update Global Config - Update multiple mutable config should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -68,8 +197,8 @@ func TestUpdateGlobalConfig(t *testing.T) {
 
 		cfgAfter := getGlobalConfiguration(t, true)
 
-		require.Equal(t, newValue1, cfgAfter[configKey1], "new value %s for config was not set", newValue1, configKey1)
-		require.Equal(t, newValue2, cfgAfter[configKey2], "new value %s for config was not set", newValue2, configKey2)
+		require.Equal(t, newValue1, cfgAfter[configKey1], "new value %s for config %s was not set", newValue1, configKey1)
+		require.Equal(t, newValue2, cfgAfter[configKey2], "new value %s for config %s was not set", newValue2, configKey2)
 
 		// test transaction to verify chain is still working
 		output, err = executeFaucetWithTokens(t, configPath, 1)
