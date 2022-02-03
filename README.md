@@ -27,6 +27,23 @@ You can view the network URL of deployment by checking the "VIEW TEST CONFIGURAT
 
 If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
 
+### Run system tests to unblock merging code changes spanning multiple repos protected by automatic system tests
+
+There may arise a scenario when PRs will fail against default system tests. Consider this, you raise a PR on zboxcli, blobber and 0chain repos simultaneously that only work with new code on all three of them. In this case the PRs raised on all 3 of them will fail system tests because the PR raised on zboxcli will have the new code in that zboxcli branch, but not the required blobber or 0chain code, and so on for the other 2 repos.
+
+In such a case, go to `actions` tab on any of the repos, find the 0Chain System Tests workflow (like [here](https://github.com/0chain/0chain/actions/workflows/system_tests.yml)), input all the custom branches and run it manually. After the completion, all the PRs used in this manual run will be updated to the status of the run (green on success, red otherwise).
+
+Note: While trying to run this workflow manually, if you do not see an input field to one of the repos you want to use, just look in a different repo's actions. This is because GitHub only allows 10 input params, but all params should be covered in different repos.
+
+### Updating system tests along with change in another repo
+
+If you need to update system tests according to a PR in some other repos, the protocol is:
+
+- Make a feature branch on system tests repo with the updated tests
+- Run system tests from any one of those repos manually against this feature branch, passing should make those PRs green.
+- Merge all the other PRs in different repos.
+- This feature branch will now pass against default config, and should be ready to merge.
+
 ### Run tests against an existing 0Chain network with the system tests pipeline
 
 The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can also run tests against an existing 0Chain network  
@@ -60,11 +77,11 @@ To run the entire test suite (minus tests for known broken features) run:
 cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
 cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
 cd ./tests/cli_tests/
-go test -run  "^Test___Flaky.*$" ./... -v
+go test -run "^Test[^___]*$" ./... -v
 ```
 Debug logging can be achieved by running
 ```bash
-DEBUG=true go test -run  "^Test___Flaky.*$" ./... -v
+DEBUG=true go test -run "^Test[^___]*$" ./... -v
 ```
 Include tests for broken features as part of your test run by running
 ```bash
