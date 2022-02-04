@@ -387,7 +387,7 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	// Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
-	require.Greater(t, len(output), 1)
+	require.Greater(t, len(output), 0)
 	require.Equal(t, "MagicBlock Sharders", output[0])
 
 	var sharders map[string]climodel.Sharder
@@ -415,11 +415,11 @@ func getMinersList(t *testing.T) *climodel.NodeList {
 	// Get miner list.
 	output, err := getMiners(t, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
 
 	var miners climodel.NodeList
-	err = json.Unmarshal([]byte(output[0]), &miners)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	err = json.Unmarshal([]byte(output[len(output)-1]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[len(output)-1], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 	return &miners
 }

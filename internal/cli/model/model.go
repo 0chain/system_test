@@ -392,6 +392,20 @@ type MinerSCDelegatePoolInfo struct {
 	Low          int64  `json:"low"`
 }
 
+type LockConfig struct {
+	ID               string           `json:"ID"`
+	SimpleGlobalNode SimpleGlobalNode `json:"simple_global_node"`
+	MinLockPeriod    int64            `json:"min_lock_period"`
+}
+
+type SimpleGlobalNode struct {
+	MaxMint     int64   `json:"max_mint"`
+	TotalMinted int64   `json:"total_minted"`
+	MinLock     int64   `json:"min_lock"`
+	Apr         float64 `json:"apr"`
+	OwnerId     string  `json:"owner_id"`
+}
+
 type MinerSCUserPoolsInfo struct {
 	Pools map[string]map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
 }
