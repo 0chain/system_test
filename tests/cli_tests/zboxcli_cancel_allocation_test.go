@@ -24,7 +24,7 @@ func TestCancelAllocation(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID, false)
+		output, err := cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
