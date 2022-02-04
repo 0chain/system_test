@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
+	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -100,6 +102,34 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
 	})
+
+	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error staking tokens against a node")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("locked with: [a-f0-9]{64}"), output[0])
+		poolId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[0])
+
+		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
+		require.Nil(t, err)
+		balance := getBalanceFromSharders(t, wallet.ClientID)
+		// Balance sho
+		require.Greater(t, balance, poolsInfo.RewardPaid)
+	})
 }
 
 func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
@@ -141,4 +171,33 @@ func minerSharderPoolInfoForWallet(t *testing.T, cliConfigFilename, params, wall
 	} else {
 		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-pool-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
+}
+
+func getBalanceFromSharders(t *testing.T, clientId string) int64 {
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]*climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	// Get base URL for API calls.
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+	res, err := apiGetBalance(sharderBaseURLs[0], clientId)
+	require.Nil(t, err, "error getting balance")
+
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get balance")
+	require.NotNil(t, res.Body, "Balance API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var startBalance apimodel.Balance
+	err = json.Unmarshal(resBody, &startBalance)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return startBalance.Balance
 }
