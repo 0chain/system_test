@@ -55,35 +55,6 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload Large File Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(100 * MB)
-		fileSize := int64(49 * MB)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
