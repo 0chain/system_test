@@ -64,6 +64,24 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
+
+	// FIXME: Output shows success output with a pool id and no error
+	t.Run("Staking tokens against invalid miner should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     "abcdefgh",
+			"tokens": 1,
+		}), false)
+		// FIXME: should be Notnil
+		require.Nil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
+	})
 }
 
 func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
