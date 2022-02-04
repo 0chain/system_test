@@ -82,6 +82,24 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		// FIXME: should be Notnil
 		require.Nil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
 	})
+
+	t.Run("Staking negative tokens against invalid miner should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": -1,
+		}), false)
+		require.NotNil(t, err, "expected error when staking negative tokens but got output: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
+	})
 }
 
 func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
