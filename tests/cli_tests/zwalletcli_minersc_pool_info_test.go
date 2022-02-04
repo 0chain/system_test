@@ -208,29 +208,3 @@ func stakePoolsInMinerSCInfoForWallet(t *testing.T, cliConfigFilename, params, w
 		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-user-info %s --json --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
 }
-
-func minerOrSharderLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return minerOrSharderLockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
-}
-
-func minerOrSharderLockForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
-	t.Log("locking tokens against miner/sharder...")
-	if retry {
-		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
-	} else {
-		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
-	}
-}
-
-func minerOrSharderUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return minerOrSharderUnlockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
-}
-
-func minerOrSharderUnlockForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
-	t.Log("unlocking tokens from miner/sharder pool...")
-	if retry {
-		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
-	} else {
-		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
-	}
-}
