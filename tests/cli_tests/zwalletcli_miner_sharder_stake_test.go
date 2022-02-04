@@ -49,6 +49,21 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
 	})
+
+	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": 1,
+		}), false)
+		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
 }
 
 func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
