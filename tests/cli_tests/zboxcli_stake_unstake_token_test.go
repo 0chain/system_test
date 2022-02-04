@@ -292,3 +292,15 @@ func unstakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, er
 	t.Log("Unlocking tokens from stake pool...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
+
+func getBlobbersList(t *testing.T) []climodel.BlobberInfo {
+	blobbers := []climodel.BlobberInfo{}
+	output, err := listBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+
+	err = json.Unmarshal([]byte(output[0]), &blobbers)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
+
+	return blobbers
+}
