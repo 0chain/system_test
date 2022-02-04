@@ -16,7 +16,6 @@ import (
 const (
 	DefaultConfigBridgeFileName = "bridge.yaml"
 	DefaultConfigOwnerFileName  = "owner.yaml"
-	DefaultConfigChainFileName  = "config.yaml"
 )
 
 const (
