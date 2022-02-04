@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
@@ -67,7 +68,7 @@ func TestCancelAllocation(t *testing.T) {
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		//FIXME: error is incorrect, should be error cancelling allocation
+		//FIXME: error is incorrect, should be error canceling allocation
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
 	})
 
@@ -99,7 +100,6 @@ func TestCancelAllocation(t *testing.T) {
 
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
 	})
-
 }
 
 func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {

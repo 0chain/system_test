@@ -164,7 +164,6 @@ func TestMinerSharderStake(t *testing.T) {
 		require.Equal(t, poolId2, poolsInfo.Pools["sharder"][sharderId][1].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["sharder"][sharderId][1].Balance))
 	})
-
 }
 
 func minerOrSharderLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {

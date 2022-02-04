@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFinalizeAllocation(t *testing.T) {
@@ -82,7 +83,6 @@ func TestFinalizeAllocation(t *testing.T) {
 		require.Len(t, output, 4)
 		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
 	})
-
 }
 
 func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
