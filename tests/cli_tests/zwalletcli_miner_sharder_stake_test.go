@@ -92,10 +92,10 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `"fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "delegate_pool_add: miner not found or genesis miner used", output[0])
 	})
 
-	t.Run("Staking negative tokens against invalid miner should fail", func(t *testing.T) {
+	t.Run("Staking negative tokens against valid miner should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -179,7 +179,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `"fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", miner.NumberOfDelegates, miner.NumberOfDelegates), output[0])
 	})
 
 	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
@@ -193,16 +193,10 @@ func TestMinerSharderStakeTests(t *testing.T) {
 
 		maxStake := intToZCN(miner.MaxStake)
 
-		wg := &sync.WaitGroup{}
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				_, err = executeFaucetWithTokens(t, configPath, 9.0)
-				require.Nil(t, err, "error executing faucet")
-			}()
+			_, err = executeFaucetWithTokens(t, configPath, 9.0)
+			require.Nil(t, err, "error executing faucet")
 		}
-		wg.Wait()
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.Greater(t, balance, miner.MaxStake)
