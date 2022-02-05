@@ -207,7 +207,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `"fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "delegate_pool_add: stake is greater than max allowed: 1010000000000 \\u003e 1000000000000", output[0])
 	})
 }
 
