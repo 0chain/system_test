@@ -216,7 +216,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", balance, miner.MaxStake), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.MaxStake+1e10, miner.MaxStake), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
@@ -230,13 +230,13 @@ func TestMinerSharderStakeTests(t *testing.T) {
 
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeDelegateWallet.ClientID,
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner.ID,
+			"id":     minerNodeDelegateWallet.ClientID,
 			"tokens": 0.5,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
