@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -221,6 +222,10 @@ func TestMinerSharderStakeTests(t *testing.T) {
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
 		t.Parallel()
+
+		if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+		}
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
