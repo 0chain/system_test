@@ -45,7 +45,6 @@ func TestMain(m *testing.M) {
 	}
 
 	configDir, _ = filepath.Abs(configDir)
-	configPath, _ = filepath.Abs(configPath)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
