@@ -144,7 +144,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: can't get stake pool: value not present", output[0])
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *testing.T) {
@@ -179,7 +179,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking more tokens than in wallet", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance", output[0])
 
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
@@ -219,7 +219,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: too small stake to lock", output[0])
 
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
@@ -291,4 +291,16 @@ func stakePoolInfo(t *testing.T, cliConfigFilename, params string) ([]string, er
 func unstakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Unlocking tokens from stake pool...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
+}
+
+func getBlobbersList(t *testing.T) []climodel.BlobberInfo {
+	blobbers := []climodel.BlobberInfo{}
+	output, err := listBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+
+	err = json.Unmarshal([]byte(output[0]), &blobbers)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
+
+	return blobbers
 }

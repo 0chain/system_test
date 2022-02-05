@@ -31,6 +31,35 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
+	t.Run("Upload Large File Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(500 * MB)
+		fileSize := int64(99 * MB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
 	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
 	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
@@ -525,53 +554,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
-	})
-
-	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
-		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
-
-		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
-
-		// Update with new thumbnail
-		thumbnail = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
-
-		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("update blobber read price should work", func(t *testing.T) {

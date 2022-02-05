@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -52,8 +53,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"min_stake":     intToZCN(oldSharderInfo.MinStake),
 		}), true)
 		require.Nil(t, err, "error reverting sharder settings after test")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	}()
 
 	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {
@@ -62,8 +64,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err, "error reverting sharder node settings after test")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -83,8 +86,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"num_delegates": 5,
 		}), true)
 		require.Nil(t, err, "error updating num_delegated in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -104,8 +108,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"max_stake": 99,
 		}), true)
 		require.Nil(t, err, "error updating max_stake in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -127,8 +132,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"max_stake":     98,
 		}), true)
 		require.Nil(t, err, "error updating multiple settings in sharder node")
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -152,8 +158,8 @@ func TestSharderUpdateSettings(t *testing.T) {
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_sharder_settings: min_stake is less than allowed by SC: -1 \\u003e 0", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Sharder update with num_delegates more than global max_delegates should fail", func(t *testing.T) {
@@ -165,7 +171,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
 	})
 
 	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
@@ -177,7 +183,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
 	})
 
 	t.Run("Sharder update min_stake greater than max_stake should fail", func(t *testing.T) {
@@ -190,7 +196,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when trying to update min_stake greater than max stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
 	})
 
 	t.Run("Sharder update min_stake negative value should fail", func(t *testing.T) {
@@ -202,7 +208,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
 	})
 
 	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
@@ -214,7 +220,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: invalid negative min_stake: 0 or max_stake: -10000000000", output[0])
 	})
 
 	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
@@ -226,7 +232,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: invalid non-positive number_of_delegates: -1", output[0])
 	})
 
 	t.Run("Sharder update without sharder id flag should fail", func(t *testing.T) {
@@ -246,8 +252,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {
@@ -262,7 +269,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: access denied", output[0])
 
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
@@ -270,7 +277,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: access denied", output[0])
 
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
@@ -278,7 +285,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "update_sharder_settings: access denied", output[0])
 	})
 }
 
