@@ -21,6 +21,7 @@ func TestBridgeBurn(t *testing.T) {
 			configDir,
 			bridgeClientConfigFile,
 		)
+		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 		t.Logf("%s: amount %s", help, amount)
 		t.Log(run)
 		return cliutils.RunCommand(t, run, 3, time.Second*15)

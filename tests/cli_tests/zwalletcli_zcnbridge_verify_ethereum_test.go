@@ -24,6 +24,7 @@ func TestBridgeVerify(t *testing.T) {
 	var zwallet = func(cmd, hash string) ([]string, error) {
 		t.Logf("%s for %s", Help, hash)
 		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
+		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 		return cliutils.RunCommand(t, run, 3, time.Second*5)
 	}
 

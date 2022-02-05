@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -83,7 +82,7 @@ func TestBridgeClientInit(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 
-	customPath := path.Join(getConfigDir(), "test")
+	customPath := filepath.Join(getConfigDir(), "test")
 
 	t.Run("Init bridge client config to custom path and default file", func(t *testing.T) {
 		//goland:noinspection GoUnhandledErrorResult
@@ -189,6 +188,8 @@ func bridgeClientInit(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
 	}
@@ -216,6 +217,8 @@ func bridgeOwnerInit(
 		" --ethereumnodeurl " + ethereumnodeurl +
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
+
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
