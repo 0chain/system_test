@@ -30,7 +30,7 @@ func TestBridgeBurn(t *testing.T) {
 	t.Run("Burning WZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
-		err := PrepareBridgeClient()
+		err := PrepareBridgeClient(t)
 		require.NoError(t, err)
 
 		output, err := zwallet(

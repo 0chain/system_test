@@ -29,13 +29,13 @@ const (
 	OptionKeyPassword      = "password"      // OptionKeyPassword bridge config filename
 )
 
-func PrepareBridgeClient() error {
-	_, err := prepareBridgeClientConfig()
+func PrepareBridgeClient(t *testing.T) error {
+	_, err := prepareBridgeClientConfig(t)
 	if err != nil {
 		return err
 	}
 
-	_, err = prepareBridgeClientWallet()
+	_, err = prepareBridgeClientWallet(t)
 	if err != nil {
 		return err
 	}
@@ -44,8 +44,9 @@ func PrepareBridgeClient() error {
 }
 
 // Tests prerequisites
-func prepareBridgeClientConfig() ([]string, error) {
+func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
 	return runCreateBridgeClientTestConfig(
+		t,
 		"password",
 		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
 		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
@@ -60,13 +61,15 @@ func prepareBridgeClientConfig() ([]string, error) {
 }
 
 // Use it to import account to the given home folder
-func prepareBridgeClientWallet() ([]string, error) {
+func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --%s %s --%s \"%s\" --%s %s",
 		OptionConfigFolder, configDir,
 		OptionMnemonic, mnemonic,
 		OptionKeyPassword, password,
 	)
+
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
@@ -243,6 +246,7 @@ func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
 }
 
 func runCreateBridgeClientTestConfig(
+	t *testing.T,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
@@ -257,6 +261,8 @@ func runCreateBridgeClientTestConfig(
 		" --consensusthreshold " + fmt.Sprintf("%.4f", consensusthreshold) +
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
+
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
