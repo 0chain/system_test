@@ -50,6 +50,15 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
+
+		// teardown
+		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      miner.ID,
+			"pool_id": poolId,
+		}), true)
+		if err != nil {
+			t.Log("error unlocking tokens after test: ", t.Name())
+		}
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
@@ -125,8 +134,16 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		// Balance sho
 		require.Equal(t, balance, poolsInfo.RewardPaid)
+
+		// teardown
+		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      miner.ID,
+			"pool_id": poolId,
+		}), true)
+		if err != nil {
+			t.Log("error unlocking tokens after test: ", t.Name())
+		}
 	})
 }
 
