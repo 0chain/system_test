@@ -145,6 +145,31 @@ func TestMinerSharderStakeTests(t *testing.T) {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 	})
+
+	t.Run("Making more pools than allowed by max_delegates should fail", func(t *testing.T) {
+		t.Parallel()
+
+		miner := miners.Nodes[1] // Choose a different miner so it has 0 pools
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 9.9)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		for i := 0; i < miner.NumberOfDelegates; i++ {
+			_, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
+				"id":     miner.ID,
+				"tokens": 9.0 / miner.NumberOfDelegates,
+			}), escapedTestName(t)+fmt.Sprintf("%d", i), true)
+			require.Nil(t, err)
+		}
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": 9.0 / miner.NumberOfDelegates,
+		}), false)
+		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
+	})
 }
 
 func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
