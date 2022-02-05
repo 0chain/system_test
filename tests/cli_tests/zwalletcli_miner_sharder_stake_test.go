@@ -28,7 +28,16 @@ func TestMinerSharderStakeTests(t *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 
-	miner := miners.Nodes[0]
+	// Use the miner node not used in TestMinerSCUserPoolInfo
+	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
+
+	var miner climodel.Node
+	for _, miner = range miners.Nodes {
+		if miner.ID != minerNodeDelegateWallet.ClientID {
+			break
+		}
+	}
 
 	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *testing.T) {
 		t.Parallel()
@@ -207,7 +216,32 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_add: stake is greater than max allowed: 1010000000000 \\u003e 1000000000000", output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", balance, miner.MaxStake), output[0])
+	})
+
+	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
+		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+			"id":        miner.ID,
+			"min_stake": 1,
+		}), true)
+		require.Nil(t, err)
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": 0.5,
+		}), true)
+		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is lesser than min allowed: %d \\u003e %d", 5000000000, 10000000000), output[0])
 	})
 }
 
