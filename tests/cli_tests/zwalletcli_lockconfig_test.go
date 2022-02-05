@@ -31,7 +31,7 @@ func TestLockConfig(t *testing.T) {
 		require.NotEmpty(t, lockConfig.ID, strings.Join(output, "\n"))
 		require.NotEmpty(t, lockConfig.SimpleGlobalNode, strings.Join(output, "\n"))
 		require.NotEmpty(t, lockConfig.SimpleGlobalNode.MaxMint, strings.Join(output, "\n"))
-		require.NotEmpty(t, lockConfig.SimpleGlobalNode.TotalMinted, strings.Join(output, "\n"))
+		require.NotNil(t, lockConfig.SimpleGlobalNode.TotalMinted, strings.Join(output, "\n"))
 		require.NotEmpty(t, lockConfig.SimpleGlobalNode.MinLock, strings.Join(output, "\n"))
 		require.NotEmpty(t, lockConfig.SimpleGlobalNode.Apr, strings.Join(output, "\n"))
 		require.NotEmpty(t, lockConfig.SimpleGlobalNode.OwnerId, strings.Join(output, "\n"))
