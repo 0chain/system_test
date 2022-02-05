@@ -112,11 +112,11 @@ func deleteDefaultAccountInStorage(t *testing.T, address string) {
 
 func getConfigDir() string {
 	var configDir string
-	home, err := os.UserHomeDir()
+	curr, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	configDir = home + "/.zcn"
+	configDir = filepath.Join(curr, "config")
 	return configDir
 }
 
