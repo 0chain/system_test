@@ -67,7 +67,6 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
 
-	// FIXME: Output shows success output with a pool id and no error
 	t.Run("Staking tokens against invalid miner should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -81,8 +80,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 			"id":     "abcdefgh",
 			"tokens": 1,
 		}), false)
-		// FIXME: should be Notnil
-		require.Nil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
 	})
 
 	t.Run("Staking negative tokens against invalid miner should fail", func(t *testing.T) {
@@ -128,7 +126,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		// Balance sho
-		require.Greater(t, balance, poolsInfo.RewardPaid)
+		require.Equal(t, balance, poolsInfo.RewardPaid)
 	})
 }
 
