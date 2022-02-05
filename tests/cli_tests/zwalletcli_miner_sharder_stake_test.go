@@ -7,6 +7,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -146,7 +147,7 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}
 	})
 
-	t.Run("Making more pools than allowed by max_delegates should fail", func(t *testing.T) {
+	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
 		t.Parallel()
 
 		miner := miners.Nodes[1] // Choose a different miner so it has 0 pools
@@ -157,13 +158,19 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 9.9)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		wg := &sync.WaitGroup{}
 		for i := 0; i < miner.NumberOfDelegates; i++ {
-			_, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
-				"id":     miner.ID,
-				"tokens": 9.0 / miner.NumberOfDelegates,
-			}), escapedTestName(t)+fmt.Sprintf("%d", i), true)
-			require.Nil(t, err)
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				_, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
+					"id":     miner.ID,
+					"tokens": 9.0 / miner.NumberOfDelegates,
+				}), escapedTestName(t)+fmt.Sprintf("%d", i), true)
+				require.Nil(t, err)
+			}(i)
 		}
+		wg.Wait()
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": 9.0 / miner.NumberOfDelegates,
