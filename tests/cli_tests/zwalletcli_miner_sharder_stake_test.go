@@ -162,7 +162,12 @@ func TestMinerSharderStakeTests(t *testing.T) {
 	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
 		t.Parallel()
 
-		miner := miners.Nodes[1] // Choose a different miner so it has 0 pools
+		var newMiner climodel.Node // Choose a different miner so it has 0 pools
+		for _, newMiner = range miners.Nodes {
+			if newMiner.ID != minerNodeDelegateWallet.ClientID && newMiner != miner {
+				break
+			}
+		}
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -171,25 +176,25 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		wg := &sync.WaitGroup{}
-		for i := 0; i < miner.NumberOfDelegates; i++ {
+		for i := 0; i < newMiner.NumberOfDelegates; i++ {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
 				_, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
-					"id":     miner.ID,
-					"tokens": 9.0 / miner.NumberOfDelegates,
+					"id":     newMiner.ID,
+					"tokens": 9.0 / newMiner.NumberOfDelegates,
 				}), escapedTestName(t)+fmt.Sprintf("%d", i), true)
 				require.Nil(t, err)
 			}(i)
 		}
 		wg.Wait()
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner.ID,
-			"tokens": 9.0 / miner.NumberOfDelegates,
+			"id":     newMiner.ID,
+			"tokens": 9.0 / newMiner.NumberOfDelegates,
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", miner.NumberOfDelegates, miner.NumberOfDelegates), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.NumberOfDelegates, newMiner.NumberOfDelegates), output[0])
 	})
 
 	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
