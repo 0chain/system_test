@@ -76,10 +76,10 @@ func TestBridgeClientInit(t *testing.T) {
 	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
 		output, err := createDefaultClientBridgeConfig(t)
 
-		customPath := filepath.Join(getConfigDir(), DefaultConfigBridgeFileName)
+		defaultPath := filepath.Join(getZCNDir(), DefaultConfigBridgeFileName)
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
+		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", defaultPath), output[len(output)-1])
 	})
 
 	customPath := filepath.Join(getConfigDir(), "test")
@@ -161,10 +161,10 @@ func TestBridgeOwnerInit(t *testing.T) {
 			0,
 		)
 
-		customPath := filepath.Join(getConfigDir(), DefaultConfigOwnerFileName)
+		defaultPath := filepath.Join(getZCNDir(), DefaultConfigOwnerFileName)
 
 		require.Nil(t, err, "error trying to create an initial owner config", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("Owner config file was saved to %s", customPath), output[len(output)-1])
+		require.Equal(t, fmt.Sprintf("Owner config file was saved to %s", defaultPath), output[len(output)-1])
 	})
 }
 

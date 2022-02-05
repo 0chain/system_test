@@ -120,6 +120,16 @@ func getConfigDir() string {
 	return configDir
 }
 
+func getZCNDir() string {
+	var configDir string
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	configDir = home + "/.zcn"
+	return configDir
+}
+
 func IsNil(value interface{}) error {
 	val := reflect.ValueOf(value)
 	if val.Kind() != reflect.Ptr {
