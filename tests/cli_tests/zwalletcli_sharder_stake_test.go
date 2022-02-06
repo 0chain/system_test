@@ -1,0 +1,90 @@
+package cli_tests
+
+import (
+	"os"
+	"regexp"
+	"strings"
+	"testing"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/stretchr/testify/require"
+)
+
+func TestSharderStake(t *testing.T) {
+	t.Parallel()
+
+	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	}
+
+	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
+	// require.Nil(t, err, "error listing sharders")
+	// require.Len(t, output, 1)
+
+	// var sharders climodel.MinerSCNodes
+	// err = json.Unmarshal([]byte(output[0]), &sharders)
+	// require.Nil(t, err, "error unmarshalling ls-sharders json output")
+
+	// Use the sharder not used in TestMinerSCUserPoolInfo
+	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharderNodeDelegateWalletName)
+	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
+
+	var sharder climodel.Sharder
+	for _, sharder = range sharders {
+		if sharder.ID != sharderNodeDelegateWallet.ClientID {
+			break
+		}
+	}
+
+	var (
+		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
+		poolIdRegex     = regexp.MustCompile("[a-f0-9]{64}")
+	)
+
+	t.Run("Staking tokens against valid sharder with valid tokens should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharder.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error locking tokens against a node")
+		require.Len(t, output, 1)
+		require.Regexp(t, lockOutputRegex, output[0])
+		poolId := poolIdRegex.FindString(output[0])
+
+		poolsInfo, err := pollForPoolInfo(t, sharder.ID, poolId)
+		require.Nil(t, err)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
+
+		// teardown
+		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      sharder.ID,
+			"pool_id": poolId,
+		}), true)
+		if err != nil {
+			t.Log("error unlocking tokens after test: ", t.Name())
+		}
+	})
+
+	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharder.ID,
+			"tokens": 1,
+		}), false)
+		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+	})
+}
