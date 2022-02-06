@@ -37,6 +37,8 @@ func TestEthRegisterAccount(t *testing.T) {
 			mnemonic,
 		)
 
+		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+
 		return cliutils.RunCommand(t, run, 3, time.Second*15)
 	}
 
@@ -44,6 +46,8 @@ func TestEthRegisterAccount(t *testing.T) {
 		t.Logf("List ethereum account registered in local key chain in HOME (~/.zcn) folder")
 
 		run := fmt.Sprintf("./zwallet %s --path %s", cmd, configDir)
+
+		cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 		return cliutils.RunCommandWithoutRetry(run)
 	}
