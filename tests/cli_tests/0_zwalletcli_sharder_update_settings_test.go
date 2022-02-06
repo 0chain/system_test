@@ -15,8 +15,6 @@ import (
 )
 
 func TestSharderUpdateSettings(t *testing.T) {
-	t.Parallel()
-
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -151,8 +149,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
@@ -163,8 +159,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update with num_delegates more than global max_delegates should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
@@ -175,8 +169,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
@@ -187,8 +179,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update min_stake greater than max_stake should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"max_stake": 48,
@@ -200,8 +190,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update min_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"min_stake": -1,
@@ -212,8 +200,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder.ID,
 			"max_stake": -1,
@@ -224,8 +210,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
 			"num_delegates": -1,
@@ -236,8 +220,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update without sharder id flag should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, "", false)
 		require.NotNil(t, err, "expected error trying to update sharder node without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -245,8 +227,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update with nothing to update should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
 		}), false)
@@ -258,8 +238,6 @@ func TestSharderUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
