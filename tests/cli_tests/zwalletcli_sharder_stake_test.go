@@ -105,4 +105,40 @@ func TestSharderStake(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
 	})
+
+	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Equal(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharder.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error staking tokens against a node")
+		require.Len(t, output, 1)
+		require.Regexp(t, lockOutputRegex, output[0])
+		poolId := poolIdRegex.FindString(output[0])
+
+		poolsInfo, err := pollForPoolInfo(t, sharder.ID, poolId)
+		require.Nil(t, err)
+		balance := getBalanceFromSharders(t, wallet.ClientID)
+		require.Equal(t, balance, poolsInfo.RewardPaid)
+
+		// teardown
+		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      sharder.ID,
+			"pool_id": poolId,
+		}), true)
+		if err != nil {
+			t.Log("error unlocking tokens after test: ", t.Name())
+		}
+	})
 }
