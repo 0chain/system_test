@@ -341,10 +341,63 @@ func TestMinerStake(t *testing.T) {
 			"id":     miner.ID,
 			"tokens": intToZCN(miner.MaxStake)/2 + 1,
 		}), true)
+
 		// FIXME: Change to NotNil and Equal post-fix
 		require.Nil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.MaxStake+1e10, miner.MaxStake), output[0])
+	})
+
+	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
+	t.Run("Unlock tokens with invalid node id should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     miner.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error staking tokens against a node")
+		require.Len(t, output, 1)
+		require.Regexp(t, lockOutputRegex, output[0])
+		poolId := poolIdRegex.FindString(output[0])
+
+		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      "abcdefgh",
+			"pool_id": poolId,
+		}), false)
+		require.NotNil(t, err, "expected error when using invalid node id")
+		require.Len(t, output, 1)
+		require.Equal(t, "delegate_pool_del: error getting miner node: value not present", output[0])
+
+		// teardown
+		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      miner.ID,
+			"pool_id": poolId,
+		}), true)
+		if err != nil {
+			t.Log("error unlocking tokens after test: ", t.Name())
+		}
+	})
+
+	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      miner.ID,
+			"pool_id": "abcdefgh",
+		}), false)
+		require.NotNil(t, err, "expected error when using invalid node id")
+		require.Len(t, output, 1)
+		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
 	})
 }
 
