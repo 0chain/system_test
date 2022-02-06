@@ -209,7 +209,7 @@ func TestMinerStake(t *testing.T) {
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Equal(t, balance, poolsInfo.RewardPaid)
+		require.GreaterOrEqual(t, balance, poolsInfo.RewardPaid)
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
@@ -302,6 +302,14 @@ func TestMinerStake(t *testing.T) {
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err)
+
+		defer func() {
+			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":        minerNodeDelegateWallet.ClientID,
+				"min_stake": 1,
+			}), true)
+			require.Nil(t, err)
+		}()
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     minerNodeDelegateWallet.ClientID,

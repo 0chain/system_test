@@ -176,7 +176,7 @@ func TestSharderStake(t *testing.T) {
 		poolsInfo, err := pollForPoolInfo(t, sharder.ID, poolId)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Equal(t, balance, poolsInfo.RewardPaid)
+		require.GreaterOrEqual(t, balance, poolsInfo.RewardPaid)
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
