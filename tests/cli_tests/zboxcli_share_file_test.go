@@ -130,8 +130,7 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	// FIXME is auth ticket with no target wallet and expiration meant to be eternal and cannot be revoked?
-	t.Run("Revoke auth ticket on publicly-shared unencrypted file should fail", func(t *testing.T) {
+	t.Run("Revoke auth ticket on publicly-shared unencrypted file should pass", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -178,10 +177,8 @@ func TestShareFile(t *testing.T) {
 			"revoke":     "",
 		}
 		output, err = shareFile(t, configPath, shareParams)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "share not found", output[0],
-			"share file - Unexpected output", strings.Join(output, "\n"))
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
