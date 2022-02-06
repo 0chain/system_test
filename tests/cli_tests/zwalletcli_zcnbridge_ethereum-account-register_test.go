@@ -47,7 +47,7 @@ func TestEthRegisterAccount(t *testing.T) {
 
 		run := fmt.Sprintf("./zwallet %s --path %s", cmd, configDir)
 
-		cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 		return cliutils.RunCommandWithoutRetry(run)
 	}
