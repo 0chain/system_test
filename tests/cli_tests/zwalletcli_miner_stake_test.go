@@ -411,11 +411,11 @@ func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePoo
 			"id":      minerID,
 			"pool_id": poolId,
 		}), true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
-		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
+		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 
 		if poolsInfo.Status == "ACTIVE" {
 			return poolsInfo, nil
