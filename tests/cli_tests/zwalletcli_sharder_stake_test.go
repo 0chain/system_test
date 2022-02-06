@@ -187,4 +187,19 @@ func TestSharderStake(t *testing.T) {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 	})
+
+	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+			"id":      sharder.ID,
+			"pool_id": "abcdefgh",
+		}), false)
+		require.NotNil(t, err, "expected error when using invalid node id")
+		require.Len(t, output, 1)
+		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
+	})
 }
