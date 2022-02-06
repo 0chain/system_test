@@ -71,14 +71,25 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
 
-		// teardown
-		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+		// Unlock should work
+		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"id":      miner.ID,
 			"pool_id": poolId,
 		}), true)
-		if err != nil {
-			t.Log("error unlocking tokens after test: ", t.Name())
-		}
+		require.Nil(t, err, "error unlocking tokens against a node")
+		require.Len(t, output, 1)
+		require.Equal(t, "tokens will be unlocked next VC", output[0])
+
+		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
+			"id":      miner.ID,
+			"pool_id": poolId,
+		}), true)
+		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
+		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
+		require.Equal(t, "DELETING", poolsInfo.Status)
 	})
 
 	t.Run("Multiple stakes against a miner should create multiple pools", func(t *testing.T) {
