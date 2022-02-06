@@ -18,8 +18,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerSharderStakeTests(t *testing.T) {
+func TestMinerStake(t *testing.T) {
 	t.Parallel()
+
+	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	}
 
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
@@ -40,6 +44,11 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}
 	}
 
+	var (
+		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
+		poolIdRegex     = regexp.MustCompile("[a-f0-9]{64}")
+	)
+
 	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -55,8 +64,8 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("locked with: [a-f0-9]{64}"), output[0])
-		poolId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[0])
+		require.Regexp(t, lockOutputRegex, output[0])
+		poolId := poolIdRegex.FindString(output[0])
 
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
@@ -141,8 +150,8 @@ func TestMinerSharderStakeTests(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("locked with: [a-f0-9]{64}"), output[0])
-		poolId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[0])
+		require.Regexp(t, lockOutputRegex, output[0])
+		poolId := poolIdRegex.FindString(output[0])
 
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
@@ -227,10 +236,6 @@ func TestMinerSharderStakeTests(t *testing.T) {
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
 		t.Parallel()
-
-		if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
-		}
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
