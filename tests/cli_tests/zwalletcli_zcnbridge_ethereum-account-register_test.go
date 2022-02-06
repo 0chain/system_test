@@ -55,7 +55,7 @@ func TestEthRegisterAccount(t *testing.T) {
 
 		output, err := deleteAndCreateAccount(t, zwallet)
 
-		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
+		require.Nilf(t, err, "error trying to register ethereum account: %s", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 	})
 
@@ -70,7 +70,7 @@ func TestEthRegisterAccount(t *testing.T) {
 		output, err = zwalletList("bridge-list-accounts")
 
 		deleteDefaultAccountInStorage(t, address)
-		require.Nil(t, err, "error trying to list ethereum accounts in local key storage", strings.Join(output, "\n"))
+		require.Nilf(t, err, "error trying to list ethereum accounts in local key storage: %s", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], address)
 	})
 }
