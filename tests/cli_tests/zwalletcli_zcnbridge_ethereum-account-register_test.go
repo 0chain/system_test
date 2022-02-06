@@ -19,10 +19,9 @@ import (
 )
 
 const (
-	address       = "C49926C4124cEe1cbA0Ea94Ea31a6c12318df947"
-	mnemonic      = "tag volcano eight thank tide danger coast health above argue embrace heavy"
-	password      = "password"
-	walletsFolder = "wallets"
+	address  = "C49926C4124cEe1cbA0Ea94Ea31a6c12318df947"
+	mnemonic = "tag volcano eight thank tide danger coast health above argue embrace heavy"
+	password = "password"
 )
 
 func TestEthRegisterAccount(t *testing.T) {
@@ -32,11 +31,10 @@ func TestEthRegisterAccount(t *testing.T) {
 		t.Logf("Register ethereum account using mnemonic and protected with password in HOME (~/.zcn) folder")
 
 		run := fmt.Sprintf(
-			"./zwallet %s --password %s --mnemonic \"%s\" --path %s",
+			"./zwallet %s --password %s --mnemonic \"%s\"",
 			cmd,
 			password,
 			mnemonic,
-			configDir,
 		)
 
 		return cliutils.RunCommand(t, run, 3, time.Second*15)
@@ -75,11 +73,7 @@ func TestEthRegisterAccount(t *testing.T) {
 	})
 }
 
-func deleteAndCreateAccount(t *testing.T, zwallet func(
-	cmd string,
-	mnemonic string,
-	password string,
-) ([]string, error)) ([]string, error) {
+func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic string, password string) ([]string, error)) ([]string, error) {
 	deleteDefaultAccountInStorage(t, address)
 
 	output, err := zwallet(
@@ -92,14 +86,9 @@ func deleteAndCreateAccount(t *testing.T, zwallet func(
 }
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
-	keyDir := path.Join(configDir, walletsFolder)
+	keyDir := path.Join(configDir, "wallets")
 	if _, err := os.Stat(keyDir); err != nil {
-		t.Logf("%s folder is missing: %s", walletsFolder, keyDir)
-		t.Logf("Creating %s folder", keyDir)
-		err := os.MkdirAll(keyDir, os.ModePerm)
-		if err != nil {
-			t.Skipf("Skipping - could not create %s folder", keyDir)
-		}
+		t.Skipf("wallets folder at location is missing: %s", keyDir)
 	}
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {
@@ -128,7 +117,6 @@ func getConfigDir() string {
 		panic(err)
 	}
 	configDir = filepath.Join(curr, "config")
-
 	return configDir
 }
 
@@ -139,7 +127,6 @@ func getZCNDir() string {
 		panic(err)
 	}
 	configDir = home + "/.zcn"
-
 	return configDir
 }
 
