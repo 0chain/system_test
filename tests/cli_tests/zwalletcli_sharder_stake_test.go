@@ -13,19 +13,12 @@ import (
 func TestSharderStake(t *testing.T) {
 	t.Parallel()
 
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
 	}
 
 	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
-	// require.Nil(t, err, "error listing sharders")
-	// require.Len(t, output, 1)
 
-	// var sharders climodel.MinerSCNodes
-	// err = json.Unmarshal([]byte(output[0]), &sharders)
-	// require.Nil(t, err, "error unmarshalling ls-sharders json output")
-
-	// Use the sharder not used in TestMinerSCUserPoolInfo
 	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharderNodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
