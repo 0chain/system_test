@@ -17,26 +17,26 @@ const (
 func TestBridgeVerify(t *testing.T) {
 	t.Parallel()
 
-	const (
-		Help = "Verify ethereum transaction"
-	)
-
-	var zwallet = func(cmd, hash string) ([]string, error) {
-		t.Logf("%s for %s", Help, hash)
-		run := fmt.Sprintf("./zwallet %s --hash %s", cmd, hash)
-		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
-		return cliutils.RunCommand(t, run, 3, time.Second*5)
-	}
-
 	t.Run("Verify ethereum transaction", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := zwallet(
-			"bridge-verify",
-			Address,
-		)
-
+		output, err := verifyBridgeTransaction(t, Address, false)
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
 		require.Equal(t, "Transaction verification success: "+Address, output[len(output)-1])
 	})
+}
+
+func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) {
+	t.Logf("verifying ethereum transaction...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-verify %s --silent "+
+			"--configDir ./config --config %s",
+		address,
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

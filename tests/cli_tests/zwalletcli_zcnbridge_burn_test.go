@@ -13,32 +13,13 @@ import (
 func TestBridgeBurn(t *testing.T) {
 	t.Parallel()
 
-	var zwallet = func(cmd, amount, help string) ([]string, error) {
-		run := fmt.Sprintf(
-			"./zwallet %s --amount %s --path %s --bridge_config %s",
-			cmd,
-			amount,
-			configDir,
-			bridgeClientConfigFile,
-		)
-		run += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
-		t.Logf("%s: amount %s", help, amount)
-		t.Log(run)
-		return cliutils.RunCommand(t, run, 3, time.Second*15)
-	}
-
 	t.Run("Burning WZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
 		err := PrepareBridgeClient(t)
 		require.NoError(t, err)
 
-		output, err := zwallet(
-			"bridge-burn-eth",
-			"10",
-			"Burning WZCN tokens that will be minted for ZCN tokens",
-		)
-
+		output, err := burnEth(t, "10", configDir, bridgeClientConfigFile, false)
 		require.Nil(t, err, "error trying to burn WZCN tokens: %s", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Verification: WZCN burn [OK]")
 	})
@@ -47,13 +28,46 @@ func TestBridgeBurn(t *testing.T) {
 		t.Skipf("Skipping due to transaction execution errr (context deadline error)")
 		t.Parallel()
 
-		output, err := zwallet(
-			"bridge-burn-zcn",
-			"1",
-			"Burning ZCN tokens that will be minted for WZCN tokens",
-		)
-
+		output, err := burnZcn(t, "1", configDir, bridgeClientConfigFile, false)
 		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Verification successful")
 	})
+}
+
+func burnZcn(t *testing.T, amount, path, bridgeClientConfigFile string, retry bool) ([]string, error) {
+	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-burn-zcn %s -- path %s --bridge_config %s --silent "+
+			"--configDir ./config --config %s --wallet %s",
+		amount,
+		path,
+		bridgeClientConfigFile,
+		configPath,
+		escapedTestName(t)+"_wallet.json",
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func burnEth(t *testing.T, amount, path, bridgeClientConfigFile string, retry bool) ([]string, error) {
+	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-burn-eth %s -- path %s --bridge_config %s --silent "+
+			"--configDir ./config --config %s --wallet %s",
+		amount,
+		path,
+		bridgeClientConfigFile,
+		configPath,
+		escapedTestName(t)+"_wallet.json",
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
