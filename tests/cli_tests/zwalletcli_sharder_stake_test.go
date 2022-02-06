@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"os"
 	"regexp"
 	"strings"
@@ -64,6 +65,47 @@ func TestSharderStake(t *testing.T) {
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
+	})
+
+	t.Run("Multiple stakes against a sharder should create multiple pools", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharder.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error staking tokens against node")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
+		poolId1 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+			"id":     sharder.ID,
+			"tokens": 1,
+		}), true)
+		require.Nil(t, err, "error staking tokens against node")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
+		poolId2 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+
+		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.Len(t, output, 1)
+
+		var poolsInfo climodel.MinerSCUserPoolsInfo
+		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
+		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
+		require.Len(t, poolsInfo.Pools["sharder"][sharder.ID], 2)
+		require.Equal(t, poolId1, poolsInfo.Pools["sharder"][sharder.ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["sharder"][sharder.ID][0].Balance))
+		require.Equal(t, poolId2, poolsInfo.Pools["sharder"][sharder.ID][1].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["sharder"][sharder.ID][1].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
