@@ -137,6 +137,140 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
+	//TODO: Directory download seems broken
+	t.Run("Download Entire Directory Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/nested/dir/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  "tmp/dir",
+		}), false)
+		require.Error(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+	})
+
+	//TODO: Directory share seems broken
+	t.Run("Download File From Shared Folder Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		var authTicket, filename string
+
+		filesize := int64(10)
+		remotepath := "/"
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
+			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"size":   10 * 1024,
+				"tokens": 1,
+			})
+			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err := os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotepath,
+			})
+
+			output, err := shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		// Just register a wallet so that we can work further
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err)
+
+		// Download file using auth-ticket: should work
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"localpath":  "tmp/dir",
+			"remotepath": "/" + filename,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+	})
+
+	t.Run("Download Entire Shared Folder Should Fail", func(t *testing.T) {
+		t.Parallel()
+
+		var authTicket, filename string
+
+		filesize := int64(10)
+		remotepath := "/"
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
+			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"size":   10 * 1024,
+				"tokens": 1,
+			})
+			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err := os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotepath,
+			})
+
+			output, err := shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		// Just register a wallet so that we can work further
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err)
+
+		// Download file using auth-ticket: should work
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"localpath":  "tmp/dir",
+			"remotepath": "/",
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "Error in file operation: please get files from folder, and download them one by one", output[0])
+	})
+
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
 		t.Parallel()
 
