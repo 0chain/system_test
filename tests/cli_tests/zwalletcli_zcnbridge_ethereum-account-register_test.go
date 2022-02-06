@@ -62,7 +62,7 @@ func TestEthRegisterAccount(t *testing.T) {
 
 		output, err := deleteAndCreateAccount(t, zwallet)
 
-		require.NoError(t, err)
+		require.NoError(t, err, "prerequisites failed")
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
 		output, err = zwalletList("bridge-list-accounts")
