@@ -68,12 +68,15 @@ func TestEthRegisterAccount(t *testing.T) {
 		output, err = zwalletList("bridge-list-accounts")
 
 		deleteDefaultAccountInStorage(t, address)
-		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
+		require.Nil(t, err, "error trying to list ethereum accounts in local key storage", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], address)
 	})
 }
 
-func deleteAndCreateAccount(t *testing.T, zwallet func(cmd string, mnemonic string, password string) ([]string, error)) ([]string, error) {
+func deleteAndCreateAccount(
+	t *testing.T,
+	zwallet func(cmd string, mnemonic string, password string) ([]string, error),
+) ([]string, error) {
 	deleteDefaultAccountInStorage(t, address)
 
 	output, err := zwallet(
