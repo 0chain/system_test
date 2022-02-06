@@ -96,7 +96,8 @@ func TestMinerStake(t *testing.T) {
 		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
 	})
 
-	t.Run("Staking tokens against invalid miner should fail", func(t *testing.T) {
+	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
+	t.Run("Staking tokens against invalid node id should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
