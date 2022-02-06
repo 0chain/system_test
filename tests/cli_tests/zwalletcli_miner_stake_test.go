@@ -306,7 +306,7 @@ func TestMinerStake(t *testing.T) {
 		defer func() {
 			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        minerNodeDelegateWallet.ClientID,
-				"min_stake": 1,
+				"min_stake": 0,
 			}), true)
 			require.Nil(t, err)
 		}()
