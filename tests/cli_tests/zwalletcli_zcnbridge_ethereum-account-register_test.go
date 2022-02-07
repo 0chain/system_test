@@ -77,7 +77,7 @@ func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]strin
 }
 
 func listAccounts(t *testing.T, retry bool) ([]string, error) {
-	t.Logf("Register ethereum account using mnemonic and protected with password...")
+	t.Logf("List ethereum accounts...")
 	cmd := fmt.Sprintf("./zwallet bridge-list-accounts --path %s", configDir)
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
