@@ -15,7 +15,6 @@ import (
 )
 
 func TestSharderUpdateSettings(t *testing.T) {
-
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {

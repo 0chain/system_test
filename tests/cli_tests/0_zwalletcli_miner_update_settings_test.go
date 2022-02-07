@@ -15,7 +15,6 @@ import (
 )
 
 func TestMinerUpdateSettings(t *testing.T) {
-
 	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
 	}
