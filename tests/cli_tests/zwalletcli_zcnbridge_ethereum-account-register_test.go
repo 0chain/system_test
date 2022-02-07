@@ -40,7 +40,7 @@ func TestEthRegisterAccount(t *testing.T) {
 		t.Parallel()
 
 		deleteDefaultAccountInStorage(t, address)
-		output, err := importAccount(t, mnemonic, password, false)
+		output, err := importAccount(t, password, mnemonic, false)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
@@ -61,7 +61,7 @@ func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]strin
 		mnemonic,
 		configPath,
 		escapedTestName(t)+"_wallet.json",
-		configPath,
+		configDir,
 	)
 
 	if retry {
