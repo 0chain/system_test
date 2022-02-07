@@ -209,7 +209,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: invalid negative min_stake: 0 or max_stake: -10000000000", output[0])
+		require.True(t, strings.HasPrefix(output[0], "update_sharder_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_sharder_settings: invalid negative min_stake:]")
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
