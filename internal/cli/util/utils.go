@@ -68,7 +68,9 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 				t.Logf("%sThe verbose output for the command is:", red)
 				commandString = strings.Replace(commandString, "--silent", "", 1)
 				out, _ := RunCommandWithoutRetry(commandString) // Only for logging!
-				t.Logf("%s%s", red, strings.Join(out, " -<NEWLINE>- "))
+				for _, line := range out {
+					t.Logf("%s%s", red, line)
+				}
 			}
 
 			return output, err
