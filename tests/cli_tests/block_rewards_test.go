@@ -373,8 +373,6 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 		float, err := strconv.ParseFloat(val, 64)
 		if err == nil {
 			floatMap[key] = float
-		} else {
-			t.Logf("Value [%s] for key [%s] is not a float so will not be added to the float map", val, key)
 		}
 		stringMap[key] = val
 	}
