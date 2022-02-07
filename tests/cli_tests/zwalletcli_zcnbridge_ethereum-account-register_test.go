@@ -30,7 +30,8 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := deleteAndCreateAccount(t)
+		deleteDefaultAccountInStorage(t, address)
+		output, err := importAccount(t, mnemonic, password, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 	})
@@ -38,8 +39,9 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Run("List ethereum account registered in local key storage", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := deleteAndCreateAccount(t)
-		require.NoError(t, err)
+		deleteDefaultAccountInStorage(t, address)
+		output, err := importAccount(t, mnemonic, password, false)
+		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
 		output, err = listAccounts(t, false)
@@ -48,13 +50,6 @@ func TestEthRegisterAccount(t *testing.T) {
 
 		deleteDefaultAccountInStorage(t, address)
 	})
-}
-
-func deleteAndCreateAccount(t *testing.T) ([]string, error) {
-	deleteDefaultAccountInStorage(t, address)
-
-	output, err := importAccount(t, mnemonic, password, false)
-	return output, err
 }
 
 func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]string, error) {
