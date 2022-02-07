@@ -29,9 +29,10 @@ func TestBridgeVerify(t *testing.T) {
 func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) {
 	t.Logf("verifying ethereum transaction...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-verify --hash %s --silent --configDir ./config --config %s",
+		"./zwallet bridge-verify --hash %s --silent --configDir ./config --config %s --path %s",
 		address,
 		configPath,
+		configDir,
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)

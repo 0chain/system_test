@@ -57,15 +57,16 @@ func deleteAndCreateAccount(t *testing.T) ([]string, error) {
 	return output, err
 }
 
-func importAccount(t *testing.T, password string, mnemonic string, retry bool) ([]string, error) {
+func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]string, error) {
 	t.Logf("Register ethereum account using mnemonic and protected with password...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --password %s --mnemonic \"%s\" --silent "+
-			"--configDir ./config --config %s --wallet %s",
+			"--configDir ./config --config %s --wallet %s --path %s",
 		password,
 		mnemonic,
 		configPath,
 		escapedTestName(t)+"_wallet.json",
+		configPath,
 	)
 
 	if retry {

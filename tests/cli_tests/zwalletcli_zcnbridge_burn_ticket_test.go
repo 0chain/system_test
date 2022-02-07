@@ -36,10 +36,11 @@ func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-get-zcn-burn %s --silent "+
-			"--configDir ./config --config %s --wallet %s",
+			"--configDir ./config --config %s --wallet %s --path %s",
 		hash,
 		configPath,
 		escapedTestName(t)+"_wallet.json",
+		configDir,
 	)
 
 	if retry {
@@ -53,10 +54,11 @@ func getWrappedZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, e
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-get-zcn-burn %s --silent "+
-			"--configDir ./config --config %s --wallet %s",
+			"--configDir ./config --config %s --wallet %s --path %s",
 		hash,
 		configPath,
 		escapedTestName(t)+"_wallet.json",
+		configDir,
 	)
 
 	if retry {

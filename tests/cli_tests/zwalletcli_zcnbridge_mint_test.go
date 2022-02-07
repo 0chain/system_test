@@ -40,9 +40,10 @@ func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, 
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-zcn %s --silent "+
-			"--configDir ./config --config %s",
+			"--configDir ./config --config %s --path %s",
 		transactionHash,
 		configPath,
+		configDir,
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
@@ -55,9 +56,10 @@ func mintWrappedZcnTokens(t *testing.T, transactionHash string, retry bool) ([]s
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-wzcn %s --silent "+
-			"--configDir ./config --config %s",
+			"--configDir ./config --config %s --path %s",
 		transactionHash,
 		configPath,
+		configDir,
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
