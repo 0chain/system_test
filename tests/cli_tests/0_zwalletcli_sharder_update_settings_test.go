@@ -15,8 +15,6 @@ import (
 )
 
 func TestSharderUpdateSettings(t *testing.T) {
-	t.Parallel()
-
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -220,7 +218,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_sharder_settings: invalid negative min_stake: 0 or max_stake: -10000000000", output[0])
+		require.True(t, strings.HasPrefix(output[0], "update_sharder_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_sharder_settings: invalid negative min_stake:]")
 	})
 
 	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
