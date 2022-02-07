@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// todo: enable tests
 func TestListAuthorizers(t *testing.T) {
 	t.Parallel()
 
@@ -22,6 +23,7 @@ func TestListAuthorizers(t *testing.T) {
 	})
 }
 
+//nolint
 func getAuthorizersList(t *testing.T, retry bool) ([]string, error) {
 	t.Logf("Getting  list of authorizers...")
 	cmd := fmt.Sprintf(

@@ -24,6 +24,7 @@ func TestBridgeBurn(t *testing.T) {
 		require.Contains(t, output[len(output)-1], "Verification: WZCN burn [OK]")
 	})
 
+	// todo: enable test
 	t.Run("Burning ZCN tokens", func(t *testing.T) {
 		t.Skipf("Skipping due to transaction execution errr (context deadline error)")
 		t.Parallel()
@@ -34,6 +35,7 @@ func TestBridgeBurn(t *testing.T) {
 	})
 }
 
+//nolint
 func burnZcn(t *testing.T, amount, path, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(

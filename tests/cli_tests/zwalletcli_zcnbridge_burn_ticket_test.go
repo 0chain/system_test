@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// todo: enable tests
 func TestBurnTicket(t *testing.T) {
 	t.Parallel()
 
@@ -32,6 +33,7 @@ func TestBurnTicket(t *testing.T) {
 	})
 }
 
+//nolint
 func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
@@ -50,6 +52,7 @@ func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	}
 }
 
+//nolint
 func getWrappedZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
