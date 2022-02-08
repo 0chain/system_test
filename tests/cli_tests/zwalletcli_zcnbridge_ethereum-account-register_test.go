@@ -28,8 +28,6 @@ func TestEthRegisterAccount(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
-		t.Parallel()
-
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, mnemonic, password, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
@@ -37,8 +35,6 @@ func TestEthRegisterAccount(t *testing.T) {
 	})
 
 	t.Run("List ethereum account registered in local key storage", func(t *testing.T) {
-		t.Parallel()
-
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.NoError(t, err, strings.Join(output, "\n"))
