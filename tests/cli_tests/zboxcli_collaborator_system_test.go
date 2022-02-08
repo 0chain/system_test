@@ -182,13 +182,13 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		_, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
+		output, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 		})
-		require.NotNil(t, err)
-		// require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		// require.Regexp(t, regexp.MustCompile("Auth token :.+"), output[0], "Unexpected output", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error when collaborator shares a file")
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Auth token :.+"), output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
