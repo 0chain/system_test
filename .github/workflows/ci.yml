@@ -109,7 +109,7 @@ jobs:
           explorer_image: ${{ env.EXPLORER_TAG }}
           zproxy_image: staging
           zsearch_image: staging
-          blobber_stake_image: 0chaindev/stake:nonce
+          blobber_stake_image: nonce
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
