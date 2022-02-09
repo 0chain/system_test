@@ -84,7 +84,8 @@ func importAccount(t *testing.T, zwallet func(
 	mnemonic string,
 	password string,
 	retry bool,
-) ([]string, error)) ([]string, error) {
+) ([]string, error),
+) ([]string, error) {
 	t.Logf("Register ethereum account using mnemonic and protected with password...")
 	output, err := zwallet(
 		"bridge-import-account",
@@ -93,23 +94,7 @@ func importAccount(t *testing.T, zwallet func(
 		false,
 	)
 
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
-func listAccounts(t *testing.T, retry bool) ([]string, error) {
-	t.Logf("List ethereum accounts...")
-	cmd := fmt.Sprintf("./zwallet bridge-list-accounts --path %s", configDir)
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
+	return output, err
 }
 
 func deleteDefaultAccountInStorage(t *testing.T, address string) {
