@@ -10,26 +10,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// todo: enable tests
 func TestListAuthorizers(t *testing.T) {
 	t.Parallel()
 
-	const (
-		Help = "Getting  list of authorizers"
-	)
-
-	var zwallet = func(cmd string) ([]string, error) {
-		t.Logf(Help)
-		run := fmt.Sprintf("./zwallet %s", cmd)
-		return cliutils.RunCommand(t, run, 3, time.Second*5)
-	}
-
-	t.Run("List of authorizers", func(t *testing.T) {
+	t.Run("List authorizers should work", func(t *testing.T) {
 		t.Skip("Temporarily skipping due to deployment issue")
 		t.Parallel()
 
-		output, err := zwallet("bridge-list-auth")
-
+		output, err := getAuthorizersList(t, true)
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
-		t.Log(output)
 	})
+}
+
+//nolint
+func getAuthorizersList(t *testing.T, retry bool) ([]string, error) {
+	t.Logf("Getting  list of authorizers...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-list-auth --silent "+
+			"--configDir ./config --config %s",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
