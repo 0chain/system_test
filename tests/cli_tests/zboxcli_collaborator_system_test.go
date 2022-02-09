@@ -203,7 +203,7 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.NotNil(t, err, "expected error when collaborator shares a file")
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Auth token :.+"), output[0], "Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("consensus not reached"), output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
@@ -315,23 +315,10 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
 
-		shareParams := map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"clientid":   collaboratorWallet.ClientID,
-		}
-		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-		authTicket, err := extractAuthToken(output[0])
-		require.Nil(t, err, "Error extracting auth token")
-		require.NotEqual(t, "", authTicket)
-
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  "tmp/",
-			"authticket": authTicket,
 			"lookuphash": GetReferenceLookup(allocationID, remotepath),
 		}), false)
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
