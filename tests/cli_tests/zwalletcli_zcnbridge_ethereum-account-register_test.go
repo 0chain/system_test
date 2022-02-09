@@ -60,8 +60,6 @@ func TestEthRegisterAccount(t *testing.T) {
 	}
 
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
-		t.Parallel()
-
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, zwallet)
 		require.Nilf(t, err, "error trying to register ethereum account: %s", strings.Join(output, "\n"))
@@ -69,8 +67,6 @@ func TestEthRegisterAccount(t *testing.T) {
 	})
 
 	t.Run("List ethereum account registered in local key storage", func(t *testing.T) {
-		t.Parallel()
-
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, zwallet)
 		require.NoError(t, err, "prerequisites failed")
