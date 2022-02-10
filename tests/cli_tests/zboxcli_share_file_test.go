@@ -187,11 +187,13 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.Nil(t, err)
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		_, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.NotNil(t, err)
+		/*
+			require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+				"download file - Unexpected output", strings.Join(output, "\n"))
+		*/
 	})
 
 	t.Run("Expired auth ticket of a publicly-shared file should fail to download", func(t *testing.T) {
