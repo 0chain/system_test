@@ -189,10 +189,10 @@ func TestShareFile(t *testing.T) {
 		})
 		_, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err)
-		/*
-			require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-			require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-				"download file - Unexpected output", strings.Join(output, "\n"))
+		/* TODO: Enable output assertion
+		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+			"download file - Unexpected output", strings.Join(output, "\n"))
 		*/
 	})
 
