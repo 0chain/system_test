@@ -54,6 +54,7 @@ func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 	}
 }
 
+//nolint
 func burnEth(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
