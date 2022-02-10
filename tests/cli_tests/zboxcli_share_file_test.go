@@ -75,7 +75,7 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Shared encrypted file to public using auth ticket should failed to download", func(t *testing.T) {
+	t.Run("Shared encrypted file to public using auth ticket should fail to download", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -130,8 +130,7 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	// FIXME is auth ticket with no target wallet and expiration meant to be eternal and cannot be revoked?
-	t.Run("Revoke auth ticket on publicly-shared unencrypted file should fail", func(t *testing.T) {
+	t.Run("Revoke auth ticket on publicly-shared unencrypted file should fail to download", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -178,10 +177,8 @@ func TestShareFile(t *testing.T) {
 			"revoke":     "",
 		}
 		output, err = shareFile(t, configPath, shareParams)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "share not found", output[0],
-			"share file - Unexpected output", strings.Join(output, "\n"))
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -190,11 +187,13 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		_, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.NotNil(t, err)
+		/* TODO: Enable output assertion
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
+		*/
 	})
 
 	t.Run("Expired auth ticket of a publicly-shared file should fail to download", func(t *testing.T) {

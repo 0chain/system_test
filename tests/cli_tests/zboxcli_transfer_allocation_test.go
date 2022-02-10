@@ -528,6 +528,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
+		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"localpath":  downloadFilePath,
 			"authticket": authTicket,
@@ -536,6 +537,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
+		*/
 	})
 
 	t.Run("transfer allocation and update allocation", func(t *testing.T) {
