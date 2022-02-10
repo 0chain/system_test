@@ -14,15 +14,37 @@ const blobberOwnerWallet = "blobber_owner"
 const minerNodeDelegateWalletName = "miner_node_delegate"
 const sharderNodeDelegateWalletName = "sharder_node_delegate"
 
-var configPath string
+var (
+	configPath             string
+	configDir              string
+	bridgeClientConfigFile string
+	bridgeOwnerConfigFile  string
+)
 
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
+	configDir = os.Getenv("CONFIG_DIR")
+	bridgeClientConfigFile = os.Getenv("BRIDGE_CONFIG_FILE")
+	bridgeOwnerConfigFile = os.Getenv("BRIDGE_OWNER_CONFIG_FILE")
+
+	if bridgeClientConfigFile == "" {
+		bridgeClientConfigFile = DefaultConfigBridgeFileName
+	}
+
+	if bridgeOwnerConfigFile == "" {
+		bridgeOwnerConfigFile = DefaultConfigOwnerFileName
+	}
+
+	if configDir == "" {
+		configDir = getConfigDir()
+	}
 
 	if configPath == "" {
 		configPath = "./zbox_config.yaml"
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
+
+	configDir, _ = filepath.Abs(configDir)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {

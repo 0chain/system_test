@@ -392,6 +392,44 @@ type MinerSCDelegatePoolInfo struct {
 	Low          int64  `json:"low"`
 }
 
+type LockConfig struct {
+	ID               string           `json:"ID"`
+	SimpleGlobalNode SimpleGlobalNode `json:"simple_global_node"`
+	MinLockPeriod    int64            `json:"min_lock_period"`
+}
+
+type SimpleGlobalNode struct {
+	MaxMint     int64   `json:"max_mint"`
+	TotalMinted int64   `json:"total_minted"`
+	MinLock     int64   `json:"min_lock"`
+	Apr         float64 `json:"apr"`
+	OwnerId     string  `json:"owner_id"`
+}
+
 type MinerSCUserPoolsInfo struct {
 	Pools map[string]map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
+}
+
+type PoolStats struct {
+	DelegateID   string `json:"delegate_id"`
+	High         int64  `json:"high"` // } interests and rewards
+	Low          int64  `json:"low"`  // }
+	InterestPaid int64  `json:"interest_paid"`
+	RewardPaid   int64  `json:"reward_paid"`
+	NumRounds    int64  `json:"number_rounds"`
+	Status       string `json:"status"`
+}
+
+type TokenPool struct {
+	ID      string `json:"id"`
+	Balance int64  `json:"balance"`
+}
+
+type ZCNLockingPool struct {
+	TokenPool `json:"pool"`
+}
+
+type DelegatePool struct {
+	*PoolStats     `json:"stats"`
+	ZCNLockingPool `json:"pool"`
 }
