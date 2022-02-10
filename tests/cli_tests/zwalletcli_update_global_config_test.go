@@ -35,8 +35,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - Update mutable config should work", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -87,8 +85,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - Update multiple mutable config should work", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -222,11 +218,9 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	// FIXME! Maybe this is better to fail the command from zwallet in case of no parameters.
+	// FIXME! Maybe this is better to fail the command from zwallet or gosdk in case of no parameters.
 	// Currently in this case transaction is getting executed, but nothing is getting updated.
 	t.Run("Update Global Config - update with suppliying no parameter must update nothing", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
