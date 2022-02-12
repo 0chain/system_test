@@ -89,7 +89,39 @@ go test ./... -v
 ```
 PS: Test suite execution will be slower when running locally vs the system tests pipeline.   
 Output will also be less clear vs the system tests pipeline.   
-Therefore, we recommend using an IDE such as [GoLand/Intellij IDEA](https://www.jetbrains.com/go/) to run/debug individual tests locally
+Therefore, we recommend using an IDE such as [GoLand](https://www.jetbrains.com/go/) to run/debug individual tests locally
+
+## Run individual tests against local 0chain network
+
+For developing new system tests for code still in developer branches, tests can be run against a locally running chain.
+Typically, for a 0chain change you will have a PR for several modules that need to work
+together. For example, `0chain`, `blobber`, `GoSDK`, `zboxcli` and `zwalletcli`.
+
+The first step requires setting up a running chain using the GitHub branches from the PRs.
+Use the instructions for building a [local chain 0chain](https://github.com/0chain/0chain#setup-network),
+[add a few blobbers](https://github.com/0chain/blobber#building-and-starting-the-nodes).
+Make sure you [stake the blobbers](https://github.com/0chain/0chain/blob/staging/code/go/0chain.net/smartcontract/storagesc/README.md#order).
+
+For `zboxcli` and `zwalletcl` changes you need to first build the executable and copy into local
+system test directory. For example:
+```bash
+cd zboxcli
+make install
+cp zbox ../system_test/tests/cli_tests/zbox
+```
+
+Make sure you have the correct system test branch. Now you need to edit `system_test/tests/cli_tests/config/zbox_config.yaml`
+Edit the line `block_worker: https://dev.0chain.net/dns` to the appropriate setting for you, something like
+```yaml
+block_worker: http://192.168.1.100:9091
+```
+Finally, you need to add a `system_test/tests/cli_tests/config/sc_owner_wallet.json` file, with
+the default 0chain owner wallet information. PM the system test team for a copy of the wallet.json file. 
+
+Now open the system_test project in [GoLand](https://www.jetbrains.com/go/),
+you should now be able to run any of the `cli_tests` in debug.
+
+You can run tests against a remote chain if you have already deployed elsewhere eg. dev.0chain.net
 
 ## Handling test failures
 The test suite/pipeline should pass when ran against a healthy network.   
