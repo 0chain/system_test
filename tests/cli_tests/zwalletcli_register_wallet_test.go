@@ -101,7 +101,7 @@ func ensureZeroBalance(t *testing.T, output []string, err error) {
 		require.Equal(t, "Failed to get balance:", output[0])
 		return
 	}
-	require.Regexp(t, regexp.MustCompile(`Balance: \d{1,4} SAS \(\d*\.?\d+ USD\)$`), output[0])
+	require.Equal(t, "Balance: 0 SAS (0.00 USD)", output[0])
 }
 
 func getBalanceForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
