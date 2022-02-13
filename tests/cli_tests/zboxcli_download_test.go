@@ -377,7 +377,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download shared encrypted file
 	t.Run("Download Shared Encrypted File Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -385,10 +384,11 @@ func TestDownload(t *testing.T) {
 
 		filesize := int64(10)
 		remotepath := "/"
+		var allocationID string
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
 			})
@@ -423,11 +423,16 @@ func TestDownload(t *testing.T) {
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[len(output)-1])
 	})
 
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
