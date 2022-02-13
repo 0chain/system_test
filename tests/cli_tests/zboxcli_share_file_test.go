@@ -424,6 +424,12 @@ func TestShareFile(t *testing.T) {
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(file),
+		)
+
+		// download with authticket and lookuphash should work
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
@@ -432,10 +438,18 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
+
+		require.Equal(t, expected, output[len(output)-1])
+
+		// download with authticket should work
+		downloadParams = createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+		})
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
 		require.Equal(t, expected, output[len(output)-1])
 	})
 

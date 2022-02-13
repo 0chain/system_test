@@ -426,18 +426,30 @@ func TestDownload(t *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+
 		// Download file using auth-ticket: should work
 		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"localpath":  "tmp/",
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Equal(t, expected, output[len(output)-1])
+
+		// Download file using auth-ticket and lookuphash: should work
+		output, err = downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
 			"localpath":  "tmp/",
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
+
 		require.Equal(t, expected, output[len(output)-1])
 	})
 
