@@ -372,7 +372,6 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	// FIXME failing download when shared file is huge
 	t.Run("Share encrypted huge file using auth ticket - proxy re-encryption", func(t *testing.T) {
 		t.Parallel()
 
@@ -425,15 +424,35 @@ func TestShareFile(t *testing.T) {
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(file),
+		)
+
+		// download with authticket and lookuphash should work
 		downloadParams := createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, file),
+		})
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Equal(t, expected, output[len(output)-1])
+
+		os.Remove(file) //nolint
+		// download with authticket should work
+		downloadParams = createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Equal(t, expected, output[len(output)-1])
+		os.Remove(file) //nolint
 	})
 
 	t.Run("Revoke auth ticket of encrypted file - proxy re-encryption", func(t *testing.T) {

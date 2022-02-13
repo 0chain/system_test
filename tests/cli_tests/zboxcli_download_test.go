@@ -360,7 +360,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		// Downloading encrypted file not working
+		// Downloading encrypted file should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -377,7 +377,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download shared encrypted file
 	t.Run("Download Shared Encrypted File Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -385,10 +384,20 @@ func TestDownload(t *testing.T) {
 
 		filesize := int64(10)
 		remotepath := "/"
+		var allocationID string
+
+		// register viewer wallet
+		viewerWalletName := escapedTestName(t) + "_viewer"
+		_, err = registerWalletForName(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+
+		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+		require.NotNil(t, viewerWallet)
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
 			})
@@ -403,8 +412,9 @@ func TestDownload(t *testing.T) {
 			require.Nil(t, err)
 
 			shareParam := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"remotepath": remotepath + filepath.Base(filename),
+				"allocation":          allocationID,
+				"remotepath":          remotepath + filepath.Base(filename),
+				"encryptionpublickey": viewerWallet.EncryptionPublicKey,
 			})
 
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
@@ -416,18 +426,35 @@ func TestDownload(t *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
-		require.Nil(t, err)
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+
+		file := "tmp/" + filepath.Base(filename)
 
 		// Download file using auth-ticket: should work
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
-			"localpath":  "tmp/",
+			"localpath":  file,
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+
+		require.Equal(t, expected, output[len(output)-1])
+
+		os.Remove(file) //nolint
+
+		// Download file using auth-ticket and lookuphash: should work
+		output, err = downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
+			"localpath":  file,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Equal(t, expected, output[len(output)-1])
 	})
 
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
