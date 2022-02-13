@@ -427,11 +427,10 @@ func TestShareFile(t *testing.T) {
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
-			"lookuphash":GetReferenceLookup(allocationID, file)
+			"lookuphash": GetReferenceLookup(allocationID, file),
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
 		require.Len(t, output, 2)
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
