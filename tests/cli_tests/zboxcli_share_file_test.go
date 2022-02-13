@@ -441,6 +441,7 @@ func TestShareFile(t *testing.T) {
 
 		require.Equal(t, expected, output[len(output)-1])
 
+		os.Remove(file) //nolint
 		// download with authticket should work
 		downloadParams = createParams(map[string]interface{}{
 			"localpath":  file,
@@ -451,6 +452,7 @@ func TestShareFile(t *testing.T) {
 		require.Len(t, output, 2)
 
 		require.Equal(t, expected, output[len(output)-1])
+		os.Remove(file) //nolint
 	})
 
 	t.Run("Revoke auth ticket of encrypted file - proxy re-encryption", func(t *testing.T) {

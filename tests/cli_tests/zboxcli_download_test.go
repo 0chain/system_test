@@ -360,7 +360,7 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		// Downloading encrypted file not working
+		// Downloading encrypted file should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -431,21 +431,25 @@ func TestDownload(t *testing.T) {
 			filepath.Base(filename),
 		)
 
+		file := "tmp/" + filepath.Base(filename)
+
 		// Download file using auth-ticket: should work
 		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
-			"localpath":  "tmp/",
+			"localpath":  file,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		require.Equal(t, expected, output[len(output)-1])
 
+		os.Remove(file) //nolint
+
 		// Download file using auth-ticket and lookuphash: should work
 		output, err = downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
-			"localpath":  "tmp/",
+			"localpath":  file,
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
