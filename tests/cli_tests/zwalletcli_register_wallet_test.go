@@ -48,10 +48,7 @@ func TestRegisterWallet(t *testing.T) {
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
 		output, err = getBalance(t, configPath)
-
-		require.NotNil(t, err, "Expected initial balance operation to fail", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Failed to get balance:", output[0])
+		ensureZeroBalance(t, output, err)
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
@@ -96,6 +93,15 @@ func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]stri
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
+}
+
+func ensureZeroBalance(t *testing.T, output []string, err error) {
+	if err != nil {
+		require.Len(t, output, 1)
+		require.Equal(t, "Failed to get balance:", output[0])
+		return
+	}
+	require.Equal(t, "Balance: 0 SAS (0.00 USD)", output[0])
 }
 
 func getBalanceForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
