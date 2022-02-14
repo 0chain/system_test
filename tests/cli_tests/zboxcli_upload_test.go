@@ -717,7 +717,7 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(fileName),
 			"localpath":  fileName,
-			"chunksize":  1024,
+			"chunksize":  255,
 			"encrypt":    "",
 		})
 
