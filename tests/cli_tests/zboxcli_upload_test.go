@@ -717,14 +717,14 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(fileName),
 			"localpath":  fileName,
-			"chunksize":  255,
+			"chunksize":  271,
 			"encrypt":    "",
 		})
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		require.Equal(t, "Upload failed. chunk: chunk size is too small. it must greater than 2056 if file is uploaded with encryption", output[0])
+		require.Equal(t, "Upload failed. chunk: chunk size is too small. it must greater than 272 if file is uploaded with encryption", output[0])
 	})
 }
 
