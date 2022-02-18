@@ -78,10 +78,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Regexp(t, successfulBalanceOutputRegex, output[0])
 
 		output, err = getBalanceForWallet(t, configPath, targetWallet)
-		require.NotNil(t, err, "Missing expected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "Failed to get balance:", output[0])
+		ensureZeroBalance(t, output, err)
 
 		// Transfer ZCN from sender to target wallet
 		output, err = sendZCN(t, configPath, target.ClientID, "1", "", true)
@@ -92,10 +89,7 @@ func TestSendAndBalance(t *testing.T) {
 
 		// After send balance checks
 		output, err = getBalance(t, configPath)
-		require.NotNil(t, err, "Missing expected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "Failed to get balance:", output[0])
+		ensureZeroBalance(t, output, err)
 
 		output, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
