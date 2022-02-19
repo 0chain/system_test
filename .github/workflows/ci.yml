@@ -112,7 +112,7 @@ jobs:
           blobber_stake_image: nonce
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feature/transaction-nonce
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
