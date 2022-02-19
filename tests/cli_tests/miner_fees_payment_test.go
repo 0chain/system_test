@@ -14,8 +14,6 @@ import (
 )
 
 func TestMinerFeesPayment(t *testing.T) {
-	t.Parallel()
-
 	mnconfig := getMinerSCConfiguration(t)
 	minerShare := mnconfig["share_ratio"]
 
