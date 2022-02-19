@@ -45,7 +45,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 2*time.Minute)
+		cliutils.Wait(t, 30*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
