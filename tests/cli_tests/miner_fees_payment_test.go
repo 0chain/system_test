@@ -5,14 +5,59 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMinerFeesPayment(t *testing.T) {
 	t.Parallel()
+
+	mnconfig := getMinerSCConfiguration(t)
+	minerShare := mnconfig["share_ratio"]
+
+	miners := getMinersList(t)
+	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+
+	t.Run("Send with fee shuold pay fees to the miners", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		fee := 0.1
+		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
+		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 2*time.Minute)
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, escapedTestName(t))
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+	})
 }
 
 func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimodel.Balance,
@@ -23,7 +68,7 @@ func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimo
 		for i := range block.Block.Transactions {
 			txn := block.Block.Transactions[i]
 			// Find the generator miner of the block on which this transaction was recorded
-			if txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, txnData) {
+			if txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, escapedTestName(t)) {
 				return block
 			}
 		}
