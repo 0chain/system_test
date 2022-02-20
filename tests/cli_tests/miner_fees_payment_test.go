@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -97,7 +98,45 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transer from MinerSC to generator miner not found")
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+	})
+
+	t.Run("Lock and unlock with fee flag should pay fee to the miners", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		fee := 0.1
+		output, err = lockInterest(t, configPath, createParams(map[string]interface{}{
+			"durationMin": 1,
+			"tokens":      0.1,
+			"fee":         fee,
+		}), true)
+		require.Nil(t, err, "error locking tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		lockId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[1])
+		t.Log(lockId)
+
+		cliutils.Wait(t, 30*time.Second)
+
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }
 
