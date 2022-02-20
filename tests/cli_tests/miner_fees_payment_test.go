@@ -21,7 +21,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	miners := getMinersList(t)
 	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
 
-	t.Run("Send with fee should pay fees to the miners", func(t *testing.T) {
+	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -101,7 +101,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("Lock and unlock with fee flag should pay fee to the miners", func(t *testing.T) {
+	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
