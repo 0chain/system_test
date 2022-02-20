@@ -20,7 +20,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	miners := getMinersList(t)
 	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
 
-	t.Run("Send with fee shuold pay fees to the miners", func(t *testing.T) {
+	t.Run("Send with fee should pay fees to the miners", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -45,8 +45,8 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, escapedTestName(t))
 		blockMinerId := block.Block.MinerId
@@ -55,6 +55,49 @@ func TestMinerFeesPayment(t *testing.T) {
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+	})
+
+	t.Run("Vp-add with fee should pay fee to the miners", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error getting target wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		fee := 0.1
+		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+			"d":           targetWallet.ClientID + ":0.1",
+			"lock":        0.1,
+			"duration":    "10m",
+			"fee":         fee,
+			"description": "vestingpool",
+		}), true)
+		require.Nil(t, err, "error adding vesting pool", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 30*time.Second)
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "vestingpool")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transer from MinerSC to generator miner not found")
 	})
 }
 
