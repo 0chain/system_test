@@ -155,6 +155,55 @@ func TestMinerFeesPayment(t *testing.T) {
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+	})
+
+	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocation(t, configPath)
+
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		fee := 0.1
+		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"tokens":     0.5,
+			"duration":   "1m",
+			"fee":        fee,
+		}), true)
+		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
+
+		lockTimer := time.NewTimer(time.Minute)
+		cliutils.Wait(t, 30*time.Second)
+
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "read_pool_lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+
+		<-lockTimer.C
 	})
 }
 
