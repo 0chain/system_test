@@ -113,6 +113,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		startBalance := getNodeBalanceFromASharder(t, miner.ID)
 
+		// lock with fee
 		fee := 0.1
 		output, err = lockInterest(t, configPath, createParams(map[string]interface{}{
 			"durationMin": 1,
@@ -122,8 +123,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "error locking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		lockId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[1])
-		t.Log(lockId)
 
+		lockTimer := time.NewTimer(time.Minute)
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
@@ -137,6 +138,23 @@ func TestMinerFeesPayment(t *testing.T) {
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+
+		<-lockTimer.C
+
+		// Unlock with fee
+		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+
+		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
+			"pool_id": lockId,
+			"fee":     fee,
+		}), true)
+		require.Nil(t, err, "error unlocking tokens", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 30*time.Second)
+
+		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 	})
 }
 
