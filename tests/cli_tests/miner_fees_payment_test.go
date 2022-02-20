@@ -203,7 +203,35 @@ func TestMinerFeesPayment(t *testing.T) {
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
+		output, err = readPoolInfo(t, configPath, allocationId)
+		require.Nil(t, err, "error fetching read pool", strings.Join(output, "\n"))
+		readPool := []climodel.ReadPoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &readPool)
+		require.Nil(t, err, "error unmarshalling read pool", strings.Join(output, "\n"))
+
 		<-lockTimer.C
+
+		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+
+		output, err = readPoolUnlock(t, configPath, createParams(map[string]interface{}{
+			"pool_id": readPool[0].Id,
+			"fee":     fee,
+		}), true)
+		require.Nil(t, err, "error unlocking read pool", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 30*time.Second)
+
+		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "read_pool_unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }
 
