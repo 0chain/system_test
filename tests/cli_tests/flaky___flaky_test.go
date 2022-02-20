@@ -448,7 +448,6 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		//FIXME: there should be client side positive integer validation here
 		configKey := "max_read_price"
 		newValue := "x"
 
@@ -468,63 +467,5 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-	})
-
-	t.Run("should allow update of max_read_price", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
-		configKey := "max_read_price"
-		newValue := "110"
-
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = getStorageSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfgBefore, _ := keyValuePairStringToMap(t, output)
-		// ensure revert in config is run regardless of test result
-		defer func() {
-			oldValue := cfgBefore[configKey]
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys":   configKey,
-				"values": oldValue,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-		}()
-
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newValue,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-
-		output, err = getStorageSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
-
-		require.Equal(t, newValue, cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
-
-		// test transaction to verify chain is still working
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 }
