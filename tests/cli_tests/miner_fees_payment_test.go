@@ -109,7 +109,7 @@ func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimo
 		for i := range block.Block.Transactions {
 			txn := block.Block.Transactions[i]
 			// Find the generator miner of the block on which this transaction was recorded
-			if txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, escapedTestName(t)) {
+			if txn.ClientId == wallet.ClientID && strings.Contains(txn.TransactionData, txnData) {
 				return block
 			}
 		}
