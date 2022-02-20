@@ -281,6 +281,28 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
 
 		<-lockTimer.C
+
+		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+
+		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
+			"pool_id": writePool[0].Id,
+			"fee":     fee,
+		}), true)
+		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
+
+		cliutils.Wait(t, 30*time.Second)
+		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "write_pool_unlock")
+		blockMinerId = block.Block.MinerId
+		block_miner = getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }
 
