@@ -233,6 +233,55 @@ func TestMinerFeesPayment(t *testing.T) {
 		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
+
+	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "Error occurred when retrieving target wallet")
+
+		output, err = executeFaucetWithTokens(t, configPath, 7)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		allocationId := setupAllocation(t, configPath)
+
+		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+
+		// Lock 1 token in Write pool amongst all blobbers
+		fee := 0.1
+		output, err = writePoolLock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"duration":   "2m",
+			"tokens":     1,
+			"fee":        fee,
+		}), true)
+		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
+
+		lockTimer := time.NewTimer(time.Minute * 2)
+		cliutils.Wait(t, 30*time.Second)
+
+		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
+
+		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "write_pool_lock")
+		blockMinerId := block.Block.MinerId
+		block_miner := getMinersDetail(t, blockMinerId)
+
+		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
+
+		output, err = writePoolInfo(t, configPath, true)
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		writePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &writePool)
+		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
+
+		<-lockTimer.C
+	})
 }
 
 func getBlockContainingTransaction(t *testing.T, startBalance, endBalance *apimodel.Balance,
