@@ -528,9 +528,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update blobber read price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber read price not working.")
-		}
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -577,9 +574,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update blobber write price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber write price not working.")
-		}
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
