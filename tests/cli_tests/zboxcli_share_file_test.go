@@ -187,10 +187,10 @@ func TestShareFile(t *testing.T) {
 			"localpath":  file,
 			"authticket": authTicket,
 		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.NotNil(t, err, "Expected error to be present but was not.", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file",
+		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
