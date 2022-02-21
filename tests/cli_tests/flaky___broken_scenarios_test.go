@@ -36,6 +36,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		allocSize := int64(500 * MB)
 		fileSize := int64(99 * MB)
+		chunkSize := int64(99 * MB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -49,6 +50,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
+			"chunksize":  chunkSize,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
