@@ -2,6 +2,8 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -12,7 +14,68 @@ import (
 func TestDeleteDir(t *testing.T) {
 	t.Parallel()
 
-	t.Run("delete nested dir", func(t *testing.T) {
+	t.Run("delete directory containing files and folders", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
+		defer createAllocationTestTeardown(t, allocationID)
+
+		dirname := "/rootdir"
+		output, err := createDir(t, configPath, allocationID, dirname, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, dirname+" directory created", output[0])
+
+		dirname2 := "/rootdir/nested_directory"
+		output, err = createDir(t, configPath, allocationID, dirname2, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, dirname2+" directory created", output[0])
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 16*KB)
+		require.Nil(t, err)
+
+		remotepath := dirname + "/" + filepath.Base(filename)
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  filename,
+		}, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var directories []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &directories)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
+		requireExist(t, "/rootdir", directories, "rootdir expected to be created")
+		requireExist(t, "/rootdir/nested_directory", directories, "nested_directory expected to be created")
+		requireExist(t, remotepath, directories, "a file expected to be created in /rootdir")
+
+		output, err = deleteFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": dirname,
+		}), true)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		// FIXME! delete directory is broken. Test must be fixed when delete directory fauture is fixed
+		t.Log("FIXME! delete directory is broken. Test must be fixed when delete directory fauture is fixed")
+		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate:0")
+	})
+
+	t.Run("delete nested empty directory", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -53,7 +116,7 @@ func TestDeleteDir(t *testing.T) {
 		require.Contains(t, output[len(output)-1], "Delete failed. Delete failed: Success_rate:0")
 	})
 
-	t.Run("delete empty root dir", func(t *testing.T) {
+	t.Run("delete empty root directory", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)

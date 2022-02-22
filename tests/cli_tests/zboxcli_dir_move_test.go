@@ -14,7 +14,7 @@ import (
 func TestMoveDir(t *testing.T) {
 	t.Parallel()
 
-	t.Run("move nested dir", func(t *testing.T) {
+	t.Run("move nested directory", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -64,7 +64,7 @@ func TestMoveDir(t *testing.T) {
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
 
-	t.Run("move root dir", func(t *testing.T) {
+	t.Run("move root directory", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -107,7 +107,7 @@ func TestMoveDir(t *testing.T) {
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
 
-	t.Run("move dir containing files and folders", func(t *testing.T) {
+	t.Run("move directory containing files and folders", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
