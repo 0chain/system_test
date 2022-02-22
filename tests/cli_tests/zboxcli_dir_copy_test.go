@@ -14,10 +14,10 @@ import (
 func TestCopyDir(t *testing.T) {
 	t.Parallel()
 
-	t.Run("copy directory containing files and folders", func(t *testing.T) {
+	t.Run("copy root directory", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
+		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
 		dirname := "/rootdir"
@@ -25,31 +25,6 @@ func TestCopyDir(t *testing.T) {
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, dirname+" directory created", output[0])
-
-		dirname2 := "/rootdir/nested_directory"
-		output, err = createDir(t, configPath, allocationID, dirname2, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname2+" directory created", output[0])
-
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 16*KB)
-		require.Nil(t, err)
-
-		remotepath := dirname + "/" + filepath.Base(filename)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  filename,
-		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -59,10 +34,8 @@ func TestCopyDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &directories)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
-		requireExist(t, "/rootdir", directories, "rootdir expected to be created")
-		requireExist(t, "/rootdir/nested_directory", directories, "nested_directory expected to be created")
-		requireExist(t, remotepath, directories, "a file expected to be created in /rootdir")
+		require.Len(t, directories, 1, "Expecting rootdir created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
+		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir expected to be created")
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -125,10 +98,10 @@ func TestCopyDir(t *testing.T) {
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
 
-	t.Run("copy root directory", func(t *testing.T) {
+	t.Run("copy directory containing files and folders", func(t *testing.T) {
 		t.Parallel()
 
-		allocationID := setupAllocation(t, configPath)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
 		dirname := "/rootdir"
@@ -136,6 +109,31 @@ func TestCopyDir(t *testing.T) {
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, dirname+" directory created", output[0])
+
+		dirname2 := "/rootdir/nested_directory"
+		output, err = createDir(t, configPath, allocationID, dirname2, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, dirname2+" directory created", output[0])
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 16*KB)
+		require.Nil(t, err)
+
+		remotepath := dirname + "/" + filepath.Base(filename)
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  filename,
+		}, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -145,8 +143,10 @@ func TestCopyDir(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &directories)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 
-		require.Len(t, directories, 1, "Expecting rootdir created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
-		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir expected to be created")
+		require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
+		requireExist(t, "/rootdir", directories, "rootdir expected to be created")
+		requireExist(t, "/rootdir/nested_directory", directories, "nested_directory expected to be created")
+		requireExist(t, remotepath, directories, "a file expected to be created in /rootdir")
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
