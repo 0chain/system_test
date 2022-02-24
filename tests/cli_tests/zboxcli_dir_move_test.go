@@ -14,37 +14,25 @@ import (
 func TestMoveDir(t *testing.T) {
 	t.Parallel()
 
-	t.Run("move root directory", func(t *testing.T) {
+	t.Run("move root directory - Broken", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
 		dirname := "/rootdir"
-		output, err := createDir(t, configPath, allocationID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
+		createDirAndAssert(t, dirname, allocationID)
 
 		dirname2 := "/destination_direcory"
-		output, err = createDir(t, configPath, allocationID, dirname2, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname2+" directory created", output[0])
+		createDirAndAssert(t, dirname2, allocationID)
 
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var directories []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &directories)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		var directories = listAllAndParse(t, allocationID)
 
 		require.Len(t, directories, 2, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir expected to be created")
 		require.Contains(t, directories, climodel.AllocationFile{Name: "destination_direcory", Path: "/destination_direcory", Type: "d"}, "destination_direcory expected to be created")
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": dirname,
 			"destpath":   dirname2,
@@ -57,44 +45,29 @@ func TestMoveDir(t *testing.T) {
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
 
-	t.Run("move nested directory", func(t *testing.T) {
+	t.Run("move nested directory - Broken", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
 		dirname := "/rootdir"
-		output, err := createDir(t, configPath, allocationID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
+		createDirAndAssert(t, dirname, allocationID)
 
 		dirname2 := "/rootdir/nested_directory"
-		output, err = createDir(t, configPath, allocationID, dirname2, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname2+" directory created", output[0])
+		createDirAndAssert(t, dirname2, allocationID)
 
 		dirname3 := "/destination_direcory"
-		output, err = createDir(t, configPath, allocationID, dirname3, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname3+" directory created", output[0])
+		createDirAndAssert(t, dirname3, allocationID)
 
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var directories []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &directories)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		var directories = listAllAndParse(t, allocationID)
 
 		require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir expected to be created")
 		require.Contains(t, directories, climodel.AllocationFile{Name: "nested_directory", Path: "/rootdir/nested_directory", Type: "d"}, "nested_directory expected to be created")
 		require.Contains(t, directories, climodel.AllocationFile{Name: "destination_direcory", Path: "/destination_direcory", Type: "d"}, "destination_direcory expected to be created")
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": dirname2,
 			"destpath":   dirname3,
@@ -107,24 +80,21 @@ func TestMoveDir(t *testing.T) {
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
 
-	t.Run("move directory containing files and folders", func(t *testing.T) {
+	t.Run("move directory containing files and folders - Broken", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
 		dirname := "/rootdir"
-		output, err := createDir(t, configPath, allocationID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
+		createDirAndAssert(t, dirname, allocationID)
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 16*KB)
+		err := createFileWithSize(filename, 16*KB)
 		require.Nil(t, err)
 
 		remotepath := dirname + "/" + filepath.Base(filename)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  filename,
@@ -139,18 +109,9 @@ func TestMoveDir(t *testing.T) {
 		require.Equal(t, expected, output[1])
 
 		dest_dir := "/destination_direcory"
-		output, err = createDir(t, configPath, allocationID, dest_dir, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dest_dir+" directory created", output[0])
+		createDirAndAssert(t, dest_dir, allocationID)
 
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var directories []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &directories)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		var directories = listAllAndParse(t, allocationID)
 
 		require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		requireExist(t, "/rootdir", directories, "rootdir expected to be created")
@@ -169,53 +130,6 @@ func TestMoveDir(t *testing.T) {
 		t.Log("FIXME! move directory is broken. Test must be fixed when move directory fauture is fixed")
 		require.Equal(t, "Copy failed: Commit consensus failed", output[0])
 	})
-
-	t.Run("rename root directory", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
-
-		dirname := "/rootdir"
-		output, err := createDir(t, configPath, allocationID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
-
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var directories []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &directories)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, directories, 1, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
-		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir expected to be created")
-
-		output, err = renameFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": dirname,
-			"destname":   "rootdir_renamed",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "/rootdir renamed", output[0])
-
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		err = json.Unmarshal([]byte(output[0]), &directories)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, directories, 1, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
-
-		// FIXME! command result was successful, but folder is not renamed
-		// Fix the following lines after problem is fixed
-		require.NotContains(t, directories, climodel.AllocationFile{Name: "rootdir_renamed", Path: "/rootdir_renamed", Type: "d"}, "rootdir expected to be renamed tp rootdir_renamed")
-		require.Contains(t, directories, climodel.AllocationFile{Name: "rootdir", Path: "/rootdir", Type: "d"}, "rootdir must have been renamed")
-	})
 }
 
 func requireExist(t *testing.T, remotePath string, list []climodel.AllocationFile, msgAndArgs ...interface{}) {
@@ -227,4 +141,23 @@ func requireExist(t *testing.T, remotePath string, list []climodel.AllocationFil
 		}
 	}
 	require.True(t, found, msgAndArgs)
+}
+
+func createDirAndAssert(t *testing.T, remotePath, allocationID string) {
+	require.NotNil(t, remotePath, "Directory name cannot be empty")
+
+	output, err := createDir(t, configPath, allocationID, remotePath, true)
+	require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+	require.Equal(t, remotePath+" directory created", output[0])
+}
+
+func listAllAndParse(t *testing.T, allocationID string) (directories []climodel.AllocationFile) {
+	output, err := listAll(t, configPath, allocationID, true)
+	require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &directories)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+	return
 }
