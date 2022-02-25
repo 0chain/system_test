@@ -35,11 +35,17 @@ func TestSharderUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
 
 	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
+
+	found := false
 	var sharder climodel.Sharder
 	for _, sharder = range sharders {
 		if sharder.ID == sharderNodeDelegateWallet.ClientID {
 			break
 		}
+	}
+
+	if !found {
+		t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
 	}
 
 	// revert sharder node settings after test

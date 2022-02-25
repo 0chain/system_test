@@ -14,11 +14,10 @@ import (
 )
 
 func TestBlobberConfigUpdate(t *testing.T) {
-	t.Parallel()
-
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
+	t.Parallel()
 
 	t.Run("update blobber capacity should work", func(t *testing.T) {
 		// register wallet for normal user
