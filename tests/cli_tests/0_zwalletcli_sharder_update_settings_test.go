@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var coolDownWait = 10 * time.Second
+
 func TestSharderUpdateSettings(t *testing.T) {
 	mnConfig := getMinerSCConfiguration(t)
 
@@ -76,7 +78,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
 		require.Equal(t, 1, int(intToZCN(sharderInfo.MinStake)))
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update num_delegates by delegate wallet should work", func(t *testing.T) {
@@ -99,7 +101,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarhsalling sharder node info")
 		require.Equal(t, 5, sharderInfo.NumberOfDelegates)
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
@@ -122,7 +124,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
 		require.Equal(t, 99, int(intToZCN(sharderInfo.MaxStake)))
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
@@ -149,7 +151,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, 8, sharderInfo.NumberOfDelegates)
 		require.Equal(t, 2, int(intToZCN(sharderInfo.MinStake)))
 		require.Equal(t, 98, int(intToZCN(sharderInfo.MaxStake)))
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {
@@ -161,7 +163,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_sharder_settings: min_stake is less than allowed by SC: -1 \\u003e 0", output[0], strings.Join(output, "\n"))
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update with num_delegates more than global max_delegates should fail", func(t *testing.T) {
@@ -173,7 +175,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
@@ -185,7 +187,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update min_stake greater than max_stake should fail", func(t *testing.T) {
@@ -198,7 +200,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when trying to update min_stake greater than max stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update min_stake negative value should fail", func(t *testing.T) {
@@ -210,7 +212,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
@@ -222,7 +224,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.True(t, strings.HasPrefix(output[0], "update_sharder_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_sharder_settings: invalid negative min_stake:]")
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
@@ -234,7 +236,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: invalid non-positive number_of_delegates: -1", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update without sharder id flag should fail", func(t *testing.T) {
@@ -243,7 +245,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error trying to update sharder node without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update with nothing to update should fail", func(t *testing.T) {
@@ -256,7 +258,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 
 	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {
@@ -287,7 +289,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_sharder_settings: access denied", output[0])
-		time.Sleep(5 * time.Second)
+		time.Sleep(coolDownWait)
 	})
 }
 
