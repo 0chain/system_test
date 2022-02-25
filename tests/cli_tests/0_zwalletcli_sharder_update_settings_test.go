@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var coolDownWait = 10 * time.Second
+var coolDownWait = 5 * time.Second
 
 func TestSharderUpdateSettings(t *testing.T) {
 	mnConfig := getMinerSCConfiguration(t)
