@@ -15,7 +15,7 @@ import (
 // This will test the following config
 
 // ZCNSConfig config both for GlobalNode and AuthorizerNode
-//type ZCNSConfig struct {
+// type ZCNSConfig struct {
 //	MinMintAmount      state.Balance `json:"min_mint_amount"`
 //	MinBurnAmount      state.Balance `json:"min_burn_amount"`
 //	MinStakeAmount     state.Balance `json:"min_stake_amount"`
@@ -24,7 +24,7 @@ import (
 //	MinAuthorizers     int64         `json:"min_authorizers"`
 //	BurnAddress        string        `json:"burn_address"`
 //	OwnerId            datastore.Key `json:"owner_id"`
-//}
+// }
 
 func TestZCNBridgeGlobalSettings(t *testing.T) {
 	t.Parallel()
