@@ -31,35 +31,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Upload Large File Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(500 * MB)
-		fileSize := int64(99 * MB)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
 	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
@@ -557,11 +528,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update blobber read price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber read price not working.")
-		}
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -585,7 +551,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			require.Len(t, output, 1)
 		}()
 
-		newReadPrice := oldReadPrice + 1
+		newReadPrice := oldReadPrice - 1
 
 		// BUG: read price is not being updated
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
@@ -606,11 +572,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	t.Run("update blobber write price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber write price not working.")
-		}
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -634,7 +595,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			require.Len(t, output, 1)
 		}()
 
-		newWritePrice := oldWritePrice + 1
+		newWritePrice := oldWritePrice - 1
 
 		// BUG: write price is not being updated
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
