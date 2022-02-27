@@ -58,6 +58,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	}()
 
+	t.Parallel()
+
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
