@@ -108,7 +108,7 @@ func TestRenameDir(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": file_remote_path,
 			"localpath":  filename,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -161,7 +161,7 @@ func TestRenameDir(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  filename,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 

@@ -98,7 +98,7 @@ func TestMoveDir(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  filename,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
