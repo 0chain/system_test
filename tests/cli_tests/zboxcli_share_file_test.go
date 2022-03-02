@@ -1496,10 +1496,9 @@ func TestShareFile(t *testing.T) {
 		shareParams := map[string]interface{}{
 			"allocation":      allocationID,
 			"remotepath":      file,
-			"available-after": 1638371309,
+			"available-after": time.Now().Unix() - 90*86400,
 		}
-		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, "error sharing file")
+		output, _ = shareFile(t, configPath, shareParams)
 		require.Equal(t, "Cannot set available-after if the clientid is empty", output[0],
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
@@ -1633,6 +1632,69 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
+
+	t.Run("Download file before available-after params should fail", func(t *testing.T) {
+		t.Parallel()
+
+		walletOwner := escapedTestName(t)
+		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+
+		// upload file
+		file := "/availableAfter"
+		fileSize := int64(2560)
+		err := createFileWithSize("/home/rizary/availableAfter", fileSize)
+		require.Nil(t, err)
+
+		uploadParams := map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  "/home/rizary/Downloads/artem.png",
+			"remotepath": "/tmp/artem4.png",
+		}
+		output, err := uploadFile(t, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Equal(t, fmt.Sprintf("Status completed callback. Type = image/png. Name = %s", filepath.Base("/home/rizary/Downloads/artem4.png")), output[1])
+
+		// receiver wallet operations
+		receiverWallet := escapedTestName(t) + "_second"
+
+		output, err = registerWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		clientId := walletReceiver.ClientID
+		futureTime := time.Now().Unix() + 90*86400
+
+		shareParams := map[string]interface{}{
+			"allocation":      allocationID,
+			"clientid":        clientId,
+			"remotepath":      "/tmp/artem4.png",
+			"available-after": futureTime,
+		}
+		output, err = shareFile(t, configPath, shareParams)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, "Error extracting auth token")
+		require.NotEqual(t, "", authTicket)
+
+		// Download the file (delete local copy first)
+		os.Remove(file)
+
+		downloadParams := createParams(map[string]interface{}{
+			"remotepath": "/tmp/artem4.png",
+			"localpath":  "/home/rizary/artem2.png",
+			"authticket": authTicket,
+		})
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Response Error: download_file: the file is not available until: "+time.Unix(int64(futureTime), 0).UTC().Format("2006-01-02T15:04:05"), output[2],
+			"download file - Unexpected output", strings.Join(output, "\n"))
+	})
 }
 
 func shareFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
@@ -1653,24 +1715,26 @@ func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param m
 }
 
 func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
-	faucetTokens := 3.0
+	faucetTokens := 5.0
 	// First create a wallet and run faucet command
+
+	output, err := registerWalletForName(t, configPath, wallet)
+
+	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 	// Output:
-	// 		[0]:"ZCN wallet created"
+	// 		[0]:"Wallet registered"
 	// 		[1]:"Creating related read pool for storage smart-contract..."
 	// 		[2]:"Read pool created successfully"
 	// 		[3]:"Wallet registered"
-	output, err := registerWalletForName(t, configPath, wallet)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 	require.Len(t, output, 4, strings.Join(output, "\n"))
 	require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
 	require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+	// require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
-		"lock":   0.5,
+		"lock":   1.5,
 		"size":   10485760,
 		"expire": "2h",
 		"parity": 1,
@@ -1678,10 +1742,12 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	})
 
 	output, err = createNewAllocationForWallet(t, wallet, configPath, allocParam)
-
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
+	// Output:
+	// 		[0]:"[Allocation created:[]"
 	require.Len(t, output, 1)
+
 	matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
 	require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
@@ -1690,15 +1756,17 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	// locking tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
 		"allocation": allocationID,
-		"tokens":     0.4,
+		"tokens":     1.4,
 		"duration":   "1h",
 	})
 	output, err = readPoolLockWithWallet(t, wallet, configPath, readPoolParams, true)
+	fmt.Printf("OUTPUT:%#v\n", output)
 	require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, "locked", output[0])
-
+	fmt.Printf("THERE OUTPUT:%#v\n", output)
 	walletModel, err := getWalletForName(t, configPath, wallet)
+
 	require.Nil(t, err)
 
 	return allocationID, walletModel
