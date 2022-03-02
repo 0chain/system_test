@@ -40,7 +40,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  thumbnailFile,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -78,7 +78,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localFilePath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -98,7 +98,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localThumbnailPath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
