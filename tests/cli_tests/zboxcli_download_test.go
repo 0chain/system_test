@@ -707,7 +707,7 @@ func TestDownload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		thumbnail := "upload_thumbnail_test.png"
+		thumbnail := escapedTestName(t) + "thumbnail.png"
 		//nolint
 		thumbnailSize := generateThumbnail(t, thumbnail)
 
@@ -732,7 +732,7 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  localPath,
 			"thumbnail":  nil,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 

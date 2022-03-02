@@ -63,7 +63,7 @@ func TestFileUpdate(t *testing.T) {
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		thumbnail := "upload_thumbnail_test.png"
+		thumbnail := escapedTestName(t) + "thumbnail.png"
 		//nolint
 		generateThumbnail(t, thumbnail)
 
@@ -426,7 +426,7 @@ func generateThumbnail(t *testing.T, localpath string) int {
 
 //nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
-	thumbnail := "upload_thumbnail_test.png"
+	thumbnail := escapedTestName(t) + "thumbnail.png"
 
 	thumbnailSize := generateThumbnail(t, thumbnail)
 
