@@ -41,8 +41,6 @@ func init() {
 }
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
-	t.Parallel()
-
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -148,6 +146,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Equal(t, "Transaction verification success", output[0])
 	require.Equal(t, "TransactionStatus: 1", output[1])
 	require.Greater(t, len(output[2]), 0, output[2])
+
+	t.Parallel()
 
 	// FIXME not working at the moment
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
