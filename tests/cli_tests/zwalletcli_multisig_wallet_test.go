@@ -50,7 +50,7 @@ func TestMultisigWallet(t *testing.T) {
 		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
 		//FIXME: BUG - panic: runtime error: index out of range [0] with length 0
-		require.Contains(t, output, "panic: runtime error: index out of range [0] with length 0")
+		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 
 	t.Run("Wallet Creation should fail when threshold is -1", func(t *testing.T) {
@@ -63,7 +63,7 @@ func TestMultisigWallet(t *testing.T) {
 		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
 		//FIXME: BUG - panic: runtime error: makeslice: len out of range
-		require.Contains(t, output, "panic: runtime error: makeslice: len out of range")
+		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 
 	t.Run("Wallet Creation should fail when signers is < 2", func(t *testing.T) {
