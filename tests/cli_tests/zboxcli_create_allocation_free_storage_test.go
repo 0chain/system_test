@@ -63,68 +63,57 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	output, err = registerWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
 
-	// configKeyDataShards := "free_allocation_settings.data_shards"
-	// configKeyParityShards := "free_allocation_settings.parity_shards"
-	// configKeySize := "free_allocation_settings.size"
-	// configKeyMcct := "free_allocation_settings.max_challenge_completion_time"
-	// configKeyReadPriceRangeMax := "free_allocation_settings.read_price_range.max"
-	// configKeyWritePriceRangeMax := "free_allocation_settings.write_price_range.max"
-	// // nolint:gocritic
-	// // configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
+	configKeyDataShards := "free_allocation_settings.data_shards"
+	configKeyParityShards := "free_allocation_settings.parity_shards"
+	configKeySize := "free_allocation_settings.size"
 
-	// keys := strings.Join([]string{
-	// 	configKeyDataShards,
-	// 	configKeyParityShards,
-	// 	configKeySize,
-	// 	configKeyMcct,
-	// 	configKeyReadPriceRangeMax,
-	// 	configKeyWritePriceRangeMax,
-	// }, ",")
+	// nolint:gocritic
+	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
 
-	// output, err = getStorageSCConfig(t, configPath, true)
-	// require.Nil(t, err, strings.Join(output, "\n"))
-	// require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+	keys := strings.Join([]string{
+		configKeyDataShards,
+		configKeyParityShards,
+		configKeySize,
+	}, ",")
 
-	// cfgBefore, _ := keyValuePairStringToMap(t, output)
+	output, err = getStorageSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	// // ensure revert in config is run regardless of test result
-	// defer func() {
-	// 	oldValues := strings.Join([]string{
-	// 		cfgBefore[configKeyDataShards],
-	// 		cfgBefore[configKeyParityShards],
-	// 		cfgBefore[configKeySize],
-	// 		cfgBefore[configKeyMcct],
-	// 		cfgBefore[configKeyReadPriceRangeMax],
-	// 		cfgBefore[configKeyWritePriceRangeMax],
-	// 	}, ",")
+	cfgBefore, _ := keyValuePairStringToMap(t, output)
 
-	// 	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-	// 		"keys":   keys,
-	// 		"values": oldValues,
-	// 	}, true)
-	// 	require.Nil(t, err, strings.Join(output, "\n"))
-	// 	require.Len(t, output, 2, strings.Join(output, "\n"))
-	// 	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-	// 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-	// }()
+	// ensure revert in config is run regardless of test result
+	defer func() {
+		oldValues := strings.Join([]string{
+			cfgBefore[configKeyDataShards],
+			cfgBefore[configKeyParityShards],
+			cfgBefore[configKeySize],
+		}, ",")
 
-	// newValues := strings.Join([]string{
-	// 	"1",    // decreasing data shards from default 10
-	// 	"1",    // decreasing parity shards from default 5
-	// 	"1024", // decreasing size from default 10000000000
-	// 	"2m",   // increasing mcct from default 1m0s
-	// 	"1",    // increasing read price range max from default 0.04
-	// 	"1",    // increasing write price range max from default 0.04
-	// }, ",")
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   keys,
+			"values": oldValues,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	}()
 
-	// output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-	// 	"keys":   keys,
-	// 	"values": newValues,
-	// }, true)
-	// require.Nil(t, err, strings.Join(output, "\n"))
-	// require.Len(t, output, 2, strings.Join(output, "\n"))
-	// require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-	// require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	newValues := strings.Join([]string{
+		"1",    // decreasing data shards from default 10
+		"1",    // decreasing parity shards from default 5
+		"1024", // decreasing size from default 10000000000
+	}, ",")
+
+	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		"keys":   keys,
+		"values": newValues,
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
 	// miners list
 	output, err = getMiners(t, configPath)
