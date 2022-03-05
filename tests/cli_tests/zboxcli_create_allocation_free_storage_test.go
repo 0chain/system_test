@@ -66,6 +66,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	configKeyDataShards := "free_allocation_settings.data_shards"
 	configKeyParityShards := "free_allocation_settings.parity_shards"
 	configKeySize := "free_allocation_settings.size"
+	configKeyDuration := "free_allocation_settings.duration"
 
 	// nolint:gocritic
 	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
@@ -74,6 +75,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		configKeyDataShards,
 		configKeyParityShards,
 		configKeySize,
+		configKeyDuration,
 	}, ",")
 
 	output, err = getStorageSCConfig(t, configPath, true)
@@ -88,6 +90,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 			cfgBefore[configKeyDataShards],
 			cfgBefore[configKeyParityShards],
 			cfgBefore[configKeySize],
+			cfgBefore[configKeyDuration],
 		}, ",")
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
@@ -104,6 +107,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		"1",    // decreasing data shards from default 10
 		"1",    // decreasing parity shards from default 5
 		"1024", // decreasing size from default 10000000000
+		"5m",   // reduce free allocation duration from 50h to 5m
 	}, ",")
 
 	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
