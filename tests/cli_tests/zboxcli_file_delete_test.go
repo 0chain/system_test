@@ -270,7 +270,7 @@ func TestFileDelete(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Delete failed. Delete failed: Invalid reference", "Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
