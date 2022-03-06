@@ -21,11 +21,7 @@ import (
 )
 
 func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
-	t.Parallel()
-
 	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -82,8 +78,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 	})
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -140,8 +134,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 	})
 
 	t.Run("File Update with same size - Users should not be charged, blobber should not be paid", func(t *testing.T) {
-		t.Parallel()
-
 		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
 		// of size 1 MB. Get write pool info and check nothing has been deducted.
 
@@ -200,8 +192,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 	})
 
 	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
-		t.Parallel()
-
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
