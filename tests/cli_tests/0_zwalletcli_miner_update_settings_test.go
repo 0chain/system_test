@@ -31,11 +31,17 @@ func TestMinerUpdateSettings(t *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 
+	found := false
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
 		if miner.ID == minerNodeDelegateWallet.ClientID {
+			found = true
 			break
 		}
+	}
+
+	if !found {
+		t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
 	}
 
 	// Revert miner settings after test is complete
