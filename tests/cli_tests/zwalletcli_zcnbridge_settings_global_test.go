@@ -124,7 +124,7 @@ func updateAndVerify(t *testing.T, key, value string) map[string]string {
 
 func getZCNBridgeGlobalSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
-	t.Logf("Retrieving zcnc bridge global config...")
+	t.Log("Retrieving zcnc bridge global config...")
 
 	cmd :=
 		"./zwallet bridge-config --silent --wallet " +
