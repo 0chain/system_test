@@ -638,6 +638,57 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Len(t, output, 1)
 	})
 
+	// Commented because it makes blobber containers go OOMkilled
+
+	// t.Run("delete directory containing files and folders - Broken", func(t *testing.T) {
+	// 	t.Parallel()
+
+	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
+	// 	defer createAllocationTestTeardown(t, allocationID)
+
+	// 	dirname := "/rootdir"
+	// 	createDirAndAssert(t, dirname, allocationID)
+
+	// 	dirname2 := "/rootdir/nested_directory"
+	// 	createDirAndAssert(t, dirname2, allocationID)
+
+	// 	filename := generateRandomTestFileName(t)
+	// 	err := createFileWithSize(filename, 16*KB)
+	// 	require.Nil(t, err)
+
+	// 	remotepath := dirname + "/" + filepath.Base(filename)
+	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"localpath":  filename,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
+
+	// 	expected := fmt.Sprintf(
+	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
+	// 		filepath.Base(filename),
+	// 	)
+	// 	require.Equal(t, expected, output[1])
+
+	// 	directories := listAllAndParse(t, allocationID)
+
+	// 	require.Len(t, directories, 3, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
+	// 	requireExist(t, "/rootdir", directories, "rootdir expected to be created")
+	// 	requireExist(t, "/rootdir/nested_directory", directories, "nested_directory expected to be created")
+	// 	requireExist(t, remotepath, directories, "a file expected to be created in /rootdir")
+
+	// 	output, err = deleteFile(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": dirname,
+	// 	}), false)
+	// 	require.NotNil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	// FIXME! delete directory is broken. Test must be fixed when delete directory fauture is fixed
+	// 	t.Log("FIXME! delete directory is broken. Test must be fixed when delete directory fauture is fixed")
+	// 	require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate:0")
+	// })
+
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
 
 	// FIXME: add param validation
