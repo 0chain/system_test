@@ -113,7 +113,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@blobber-stake-one
+        uses: 0chain/actions/deploy-0chain@master
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -127,10 +127,10 @@ jobs:
           explorer_image: ${{ env.EXPLORER_TAG }}
           zproxy_image: staging
           zsearch_image: staging
-          blobber_stake_image: one
+          blobber_stake_image: latest
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@blobber-stake-one
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
