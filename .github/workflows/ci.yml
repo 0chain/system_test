@@ -127,7 +127,7 @@ jobs:
           explorer_image: ${{ env.EXPLORER_TAG }}
           zproxy_image: staging
           zsearch_image: staging
-          blobber_stake_image: nonce
+          blobber_stake_image: latest
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@feature/transaction-nonce
