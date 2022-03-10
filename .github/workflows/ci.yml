@@ -64,7 +64,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite ]
+    runs-on: [ tests-suite05 ]
     timeout-minutes: 90
     steps:
       - name: "Get current PR"
@@ -113,7 +113,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@master
+        uses: 0chain/actions/deploy-0chain@feature/add-config-to-repo
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -130,7 +130,7 @@ jobs:
           blobber_stake_image: latest
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feature/add-config-to-repo
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}

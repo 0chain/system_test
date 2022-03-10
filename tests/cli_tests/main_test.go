@@ -9,10 +9,10 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-const scOwnerWallet = "sc_owner"
-const blobberOwnerWallet = "blobber_owner"
-const minerNodeDelegateWalletName = "miner_node_delegate"
-const sharderNodeDelegateWalletName = "sharder_node_delegate"
+const scOwnerWallet = "wallets/sc_owner"
+const blobberOwnerWallet = "wallets/blobber_owner"
+const minerNodeDelegateWalletName = "wallets/miner_node_delegate"
+const sharderNodeDelegateWalletName = "wallets/sharder_node_delegate"
 
 var (
 	configPath             string
