@@ -1,12 +1,9 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
-	"math/big"
 	"reflect"
 	"regexp"
 	"strings"
@@ -307,16 +304,6 @@ func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string, r
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
-}
-
-func getRandomUniformFloat64(t *testing.T) float64 {
-	random, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
-	var randomF big.Float
-	randomBigFloat := *randomF.SetInt(random)
-	randomFloat, _ := randomBigFloat.Float64()
-	randomFloat /= float64(math.MaxInt64)
-	require.Nil(t, err, "error generating random number from crypto/rand")
-	return randomFloat
 }
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
