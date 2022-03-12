@@ -64,14 +64,14 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 		} else {
 			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
 
-			if err != nil {
-				t.Logf("%sThe verbose output for the command is:", red)
-				commandString = strings.Replace(commandString, "--silent", "", 1)
-				out, _ := RunCommandWithoutRetry(commandString) // Only for logging!
-				for _, line := range out {
-					t.Logf("%s%s", red, line)
-				}
-			}
+			//if err != nil {
+			//	t.Logf("%sThe verbose output for the command is:", red)
+			//	commandString = strings.Replace(commandString, "--silent", "", 1)
+			//	out, _ := RunCommandWithoutRetry(commandString) // Only for logging!
+			//	for _, line := range out {
+			//		t.Logf("%s%s", red, line)
+			//	}
+			//}
 
 			return output, err
 		}
