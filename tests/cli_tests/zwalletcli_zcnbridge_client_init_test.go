@@ -63,7 +63,7 @@ func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
 // Use it to import account to the given home folder
 func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-import-account --%s %s --%s \"%s\" --%s %s",
+		"./zwallet bridge-import-account --%s %s --%s %q --%s %s",
 		OptionConfigFolder, configDir,
 		OptionMnemonic, mnemonic,
 		OptionKeyPassword, password,

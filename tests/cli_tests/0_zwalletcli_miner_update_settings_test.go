@@ -27,7 +27,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
-	//minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
