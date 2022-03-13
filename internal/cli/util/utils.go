@@ -73,9 +73,8 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 						t.Logf("%s%s", red, line)
 					}
 				}
-
-				return output, err
 			}
+			return output, err
 		}
 	}
 }
