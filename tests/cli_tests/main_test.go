@@ -13,6 +13,8 @@ const scOwnerWallet = "sc_owner"
 const blobberOwnerWallet = "blobber_owner"
 const minerNodeDelegateWalletName = "miner_node_delegate"
 const sharderNodeDelegateWalletName = "sharder_node_delegate"
+const minerNodeWalletName = "miner_node"
+const sharderNodeWalletName = "sharder_node"
 
 var (
 	configPath             string
@@ -51,7 +53,10 @@ func TestMain(m *testing.M) {
 			for _, f := range files {
 				// skip deleting the SC owner wallet and blobber owner wallet
 				if strings.HasSuffix(f, scOwnerWallet+"_wallet.json") || strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
-					strings.HasSuffix(f, minerNodeDelegateWalletName+"_wallet.json") || strings.HasSuffix(f, sharderNodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, minerNodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharderNodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, minerNodeWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharderNodeWalletName+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)

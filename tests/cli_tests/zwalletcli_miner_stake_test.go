@@ -24,6 +24,9 @@ func TestMinerStake(t *testing.T) {
 	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
 	}
+	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
+	}
 
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
@@ -34,12 +37,12 @@ func TestMinerStake(t *testing.T) {
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 	// Use the miner node not used in TestMinerSCUserPoolInfo
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID != minerNodeDelegateWallet.ClientID {
+		if miner.ID != minerNodeWallet.ClientID {
 			break
 		}
 	}
@@ -226,7 +229,7 @@ func TestMinerStake(t *testing.T) {
 
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
-			if newMiner.ID != minerNodeDelegateWallet.ClientID && newMiner.ID != miner.ID {
+			if newMiner.ID != minerNodeWallet.ClientID && newMiner.ID != miner.ID {
 				break
 			}
 		}
@@ -305,21 +308,21 @@ func TestMinerStake(t *testing.T) {
 
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeDelegateWallet.ClientID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err)
 
 		defer func() {
 			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        minerNodeDelegateWallet.ClientID,
+				"id":        minerNodeWallet.ClientID,
 				"min_stake": 0,
 			}), true)
 			require.Nil(t, err)
 		}()
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeDelegateWallet.ClientID,
+			"id":     minerNodeWallet.ClientID,
 			"tokens": 0.5,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))

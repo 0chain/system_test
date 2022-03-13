@@ -18,13 +18,18 @@ func TestMinerUpdateSettings(t *testing.T) {
 	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
 	}
+	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
+	}
 
 	mnConfig := getMinerSCConfiguration(t)
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	//minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
+	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
 	var miners climodel.MinerSCNodes
@@ -34,7 +39,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	found := false
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID == minerNodeDelegateWallet.ClientID {
+		if miner.ID == minerNodeWallet.ClientID {
 			found = true
 			break
 		}
@@ -60,7 +65,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
 		}), true)
 
@@ -70,7 +75,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": minerNodeWallet.ClientID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -83,7 +88,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            miner.ID,
+			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
 		}), true)
 
@@ -92,7 +97,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": minerNodeWallet.ClientID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -105,7 +110,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"max_stake": 99,
 		}), true)
 
@@ -115,7 +120,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": minerNodeWallet.ClientID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -128,7 +133,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            miner.ID,
+			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
 			"max_stake":     99,
 			"min_stake":     1,
@@ -139,7 +144,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": minerNodeWallet.ClientID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -156,7 +161,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
 
@@ -169,7 +174,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            miner.ID,
+			"id":            minerNodeWallet.ClientID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
 
@@ -182,7 +187,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 
@@ -195,7 +200,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": 51,
 			"max_stake": 48,
 		}), false)
@@ -208,7 +213,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": -1,
 		}), false)
 
@@ -221,7 +226,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"max_stake": -1,
 		}), false)
 
@@ -234,7 +239,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            miner.ID,
+			"id":            minerNodeWallet.ClientID,
 			"num_delegates": -1,
 		}), false)
 
@@ -256,7 +261,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Parallel()
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": minerNodeWallet.ClientID,
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
@@ -272,7 +277,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":            miner.ID,
+			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
@@ -280,7 +285,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
@@ -288,7 +293,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
+			"id":        minerNodeWallet.ClientID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
