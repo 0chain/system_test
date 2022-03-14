@@ -126,11 +126,11 @@ func TestMinerStake(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools["miner"][miner.ID], 2)
-		require.Equal(t, poolId1, poolsInfo.Pools["miner"][miner.ID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["miner"][miner.ID][0].Balance))
-		require.Equal(t, poolId2, poolsInfo.Pools["miner"][miner.ID][1].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["miner"][miner.ID][1].Balance))
+		require.Len(t, poolsInfo.Pools[miner.ID], 2)
+		require.Equal(t, poolId1, poolsInfo.Pools[miner.ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
+		require.Equal(t, poolId2, poolsInfo.Pools[miner.ID][1].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][1].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
