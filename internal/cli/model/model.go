@@ -380,13 +380,11 @@ type MinerSCNodes struct {
 }
 
 type MinerSCDelegatePoolInfo struct {
-	ID           string `json:"id"`
-	Balance      int64  `json:"balance"`
-	InterestPaid int64  `json:"interest_paid"`
-	RewardPaid   int64  `json:"reward_paid"`
-	Status       string `json:"status"`
-	High         int64  `json:"high"`
-	Low          int64  `json:"low"`
+	ID         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	Reward     int64  `json:"reward"`      // uncollected reread
+	RewardPaid int64  `json:"reward_paid"` // total reward all time
+	Status     string `json:"status"`
 }
 
 type LockConfig struct {
@@ -404,7 +402,7 @@ type SimpleGlobalNode struct {
 }
 
 type MinerSCUserPoolsInfo struct {
-	Pools map[string]map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
+	Pools map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
 }
 
 type PoolStats struct {
