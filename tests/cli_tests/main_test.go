@@ -9,10 +9,13 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-const scOwnerWallet = "wallets/sc_owner"
-const blobberOwnerWallet = "wallets/blobber_owner"
-const minerNodeDelegateWalletName = "wallets/miner_node_delegate"
-const sharderNodeDelegateWalletName = "wallets/sharder_node_delegate"
+const (
+	zcnscOwner                    = "wallets/zcnsc_owner"
+	scOwnerWallet                 = "wallets/sc_owner"
+	blobberOwnerWallet            = "wallets/blobber_owner"
+	minerNodeDelegateWalletName   = "wallets/miner_node_delegate"
+	sharderNodeDelegateWalletName = "wallets/sharder_node_delegate"
+)
 
 var (
 	configPath             string
@@ -50,8 +53,11 @@ func TestMain(m *testing.M) {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
 				// skip deleting the SC owner wallet and blobber owner wallet
-				if strings.HasSuffix(f, scOwnerWallet+"_wallet.json") || strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
-					strings.HasSuffix(f, minerNodeDelegateWalletName+"_wallet.json") || strings.HasSuffix(f, sharderNodeDelegateWalletName+"_wallet.json") {
+				if strings.HasSuffix(f, zcnscOwner+"_wallet.json") ||
+					strings.HasSuffix(f, scOwnerWallet+"_wallet.json") ||
+					strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
+					strings.HasSuffix(f, minerNodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharderNodeDelegateWalletName+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
