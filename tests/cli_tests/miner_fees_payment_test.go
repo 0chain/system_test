@@ -417,10 +417,10 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 
 func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
-		if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
+		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []apimodel.Transfer
 			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output:", txn.TransactionOutput)
+			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output: %v\n, txn data: %v\n txn status: %v", txn.TransactionOutput, txn.TransactionData, txn.TransactionStatus)
 
 			for _, transfer := range transfers {
 				// Transfer needs to be from Miner Smart contract to Generator miner
