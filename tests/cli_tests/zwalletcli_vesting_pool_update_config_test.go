@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -14,6 +15,14 @@ import (
 
 func TestVestingPoolUpdateConfig(t *testing.T) {
 	t.Parallel()
+	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+	}
+	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	nonceStr := strings.Split(ret[0], ":")[1]
+	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
 		t.Parallel()
@@ -42,20 +51,22 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		// ensure revert in config is run regardless of test result
 		defer func() {
 			oldValue := cfgBefore[configKey]
+			nonce++
 			output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			}, true)
+			}, nonce, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
 			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 		}()
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, true)
+		}, nonce, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -91,10 +102,11 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, false)
+		}, nonce, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: value x cannot be converted to time.Duration, failing to set config key max_destinations",
@@ -111,10 +123,11 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, false)
+		}, nonce, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -137,10 +150,11 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		}, false)
+		}, nonce, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: config setting unknown_key not found", output[0], strings.Join(output, "\n"))
@@ -161,9 +175,10 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, false)
+		}, nonce, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -184,9 +199,10 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+		nonce++
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_destinations",
-		}, false)
+		}, nonce, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -206,12 +222,13 @@ func getVestingPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool) 
 	}
 }
 
-func updateVestingPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateVestingPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
 	t.Logf("Updating vesting config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zwallet vp-update-config %s --silent --wallet %s --configDir ./config --config %s",
+		"./zwallet vp-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
 		p,
+		nonce,
 		walletName+"_wallet.json",
 		configPath,
 	)
