@@ -260,6 +260,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": newMinLockDemand}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		cliutils.Wait(t, 3*time.Second)
 
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
