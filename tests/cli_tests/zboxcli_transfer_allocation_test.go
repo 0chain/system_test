@@ -16,7 +16,7 @@ import (
 func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Parallel()
 
-	t.Run("transfer allocation by curator", func(t *testing.T) {
+	t.Run("transfer allocation by curator should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -52,6 +52,31 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
+	})
+
+	t.Run("transfer allocation by owner should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": int64(2048),
+		})
+
+		newOwner := escapedTestName(t) + "_NEW_OWNER"
+
+		output, err := registerWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": newOwnerWallet.ClientPublicKey,
+			"new_owner":     newOwnerWallet.ClientID,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 	})
 
 	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *testing.T) {

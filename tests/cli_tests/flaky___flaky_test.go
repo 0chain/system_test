@@ -301,32 +301,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 	t.Parallel()
 
-	t.Run("transfer allocation by owner should fail", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
-		})
-
-		newOwner := escapedTestName(t) + "_NEW_OWNER"
-
-		output, err := registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
-			"allocation":    allocationID,
-			"new_owner_key": newOwnerWallet.ClientPublicKey,
-			"new_owner":     newOwnerWallet.ClientID,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
-			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
-	})
-
 	t.Run("transfer allocation accounting test", func(t *testing.T) {
 		t.Parallel()
 
