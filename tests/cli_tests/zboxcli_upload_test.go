@@ -571,11 +571,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		//FIXME: POSSIBLE BUG: Why are we getting Consensus Rate: NaN?
-		require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000", output[1])
-		require.Equal(t, "Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000", output[2])
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""), `Upload failed. bad request: {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *testing.T) {
