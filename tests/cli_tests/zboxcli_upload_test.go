@@ -532,8 +532,12 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""),
+				`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
+
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
