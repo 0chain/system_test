@@ -480,8 +480,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
+			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *testing.T) {
@@ -506,8 +507,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
+			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *testing.T) {
