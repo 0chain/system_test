@@ -644,10 +644,10 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000", output[1])
-		require.Equal(t, "Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000", output[2])
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""),
+				`bad request: {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *testing.T) {
