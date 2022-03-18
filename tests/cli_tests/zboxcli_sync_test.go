@@ -772,7 +772,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.True(t,
 			strings.HasSuffix(strings.Join(output, ""),
-				`bad request: {\"code\":\"invalid_signature\",\"error\":\"invalid_signature: Invalid signature\"}`),
+				`bad request: {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
 			strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)

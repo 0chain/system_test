@@ -481,7 +481,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
-			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
 			strings.Join(output, "\n"))
 	})
 
@@ -508,7 +508,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
-			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
 			strings.Join(output, "\n"))
 	})
 
