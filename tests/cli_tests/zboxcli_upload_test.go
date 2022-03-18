@@ -537,7 +537,6 @@ func TestUpload(t *testing.T) {
 			strings.HasSuffix(strings.Join(output, ""),
 				`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
 			strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
