@@ -482,8 +482,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
+			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *testing.T) {
@@ -508,8 +509,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
+			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *testing.T) {
@@ -534,8 +536,11 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "Output length was less than expected")
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[len(output)-1])
+
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""),
+				`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
@@ -573,11 +578,9 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		//FIXME: POSSIBLE BUG: Why are we getting Consensus Rate: NaN?
-		require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000", output[1])
-		require.Equal(t, "Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000", output[2])
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""), `Upload failed. bad request: {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *testing.T) {
@@ -648,10 +651,10 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		require.Equal(t, "Error in file operation: Upload failed: Consensus_rate:NaN, expected:10.000000", output[1])
-		require.Equal(t, "Upload failed. Upload failed: Consensus_rate:NaN, expected:10.000000", output[2])
+		require.True(t,
+			strings.HasSuffix(strings.Join(output, ""),
+				`bad request: {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+			strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *testing.T) {
