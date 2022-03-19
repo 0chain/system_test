@@ -379,6 +379,7 @@ func TestUpload(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)
@@ -421,6 +422,7 @@ func TestUpload(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)

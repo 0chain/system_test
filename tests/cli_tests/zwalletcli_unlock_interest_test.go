@@ -106,7 +106,7 @@ func TestUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -170,7 +170,7 @@ func TestUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -194,6 +194,7 @@ func TestUnlockInterest(t *testing.T) {
 			"pool_id": stats.Stats[0].ID,
 		}), false)
 		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		reg := regexp.MustCompile(`failed to unlock tokens: pool \([a-z0-9]{64}\) doesn't exist`)
 		require.Regexp(t, reg, output[0])
 	})

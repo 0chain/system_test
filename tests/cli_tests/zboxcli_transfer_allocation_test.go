@@ -38,7 +38,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -64,7 +64,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err := registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -75,7 +75,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"new_owner":     newOwnerWallet.ClientID,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 	})
 
@@ -89,7 +89,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		nonOwner := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		nonOwnerWallet, err := getWalletForName(t, configPath, nonOwner)
 		require.Nil(t, err, "Error occurred when retrieving non-owner wallet")
@@ -170,7 +170,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -214,7 +214,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -268,7 +268,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -324,7 +324,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -409,7 +409,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -494,6 +494,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"remotepath": remotePath,
 		})
 		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		authTicket, err := extractAuthToken(output[0])
 		require.Nil(t, err, "Error extracting auth token")
@@ -502,7 +503,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -604,7 +605,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -716,7 +717,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -755,7 +756,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -794,7 +795,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -849,7 +850,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))

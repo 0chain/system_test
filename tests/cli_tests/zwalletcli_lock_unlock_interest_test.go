@@ -72,7 +72,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var statsBeforeExpire climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &statsBeforeExpire)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
+		require.NotEmpty(t, statsBeforeExpire)
 		require.Len(t, statsBeforeExpire.Stats, 1)
 		require.NotEqual(t, "", statsBeforeExpire.Stats[0].ID)
 		require.True(t, statsBeforeExpire.Stats[0].Locked)
@@ -100,7 +101,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var statsAfterExpire climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &statsAfterExpire)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, statsAfterExpire.Stats, 1)
 		require.NotEqual(t, "", statsAfterExpire.Stats[0].ID)
 		require.False(t, statsAfterExpire.Stats[0].Locked)
@@ -227,7 +228,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 2)
 
 		// check locked tokens. Order retrieved can be different so search appropriate lock
@@ -309,7 +310,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -370,7 +371,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -434,7 +435,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -496,7 +497,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)

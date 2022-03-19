@@ -18,7 +18,7 @@ func TestGetId(t *testing.T) {
 		t.Parallel()
 
 		miners := getMinersList(t)
-		minerUrl := fmt.Sprint("http://", miners.Nodes[1].Host, ":", miners.Nodes[1].Port)
+		minerUrl := fmt.Sprint("http://", miners.Nodes[0].Host, ":", miners.Nodes[0].Port)
 
 		output, err := getId(t, configPath, minerUrl, true)
 		require.Nil(t, err, "get id failed", strings.Join(output, "\n"))
@@ -33,7 +33,7 @@ func TestGetId(t *testing.T) {
 		_, _ = registerWallet(t, configPath)
 
 		sharders := getShardersList(t)
-		sharderKey := reflect.ValueOf(sharders).MapKeys()[1].String()
+		sharderKey := reflect.ValueOf(sharders).MapKeys()[0].String()
 		sharder := sharders[sharderKey]
 		sharderUrl := fmt.Sprint("http://", sharder.Host, ":", sharder.Port)
 		require.NotNil(t, sharder)

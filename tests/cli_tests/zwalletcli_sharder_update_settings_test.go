@@ -33,6 +33,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	var oldSharderInfo climodel.Node
 	err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
+	require.NotEmpty(t, oldSharderInfo)
 
 	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
 
