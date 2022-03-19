@@ -24,7 +24,7 @@ func TestGetId(t *testing.T) {
 		require.Nil(t, err, "get id failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1, "Expected output length to be at least 2", strings.Join(output, "\n"))
 		require.Equal(t, "URL: "+minerUrl, output[len(output)-2], strings.Join(output, "\n"))
-		require.Equal(t, "ID: "+miners.Nodes[1].ID, output[len(output)-1], strings.Join(output, "\n"))
+		require.Equal(t, "ID: "+miners.Nodes[0].ID, output[len(output)-1], strings.Join(output, "\n"))
 	})
 
 	t.Run("get sharder id should work", func(t *testing.T) {
