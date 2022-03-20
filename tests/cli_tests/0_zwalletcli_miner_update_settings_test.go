@@ -58,22 +58,24 @@ func TestMinerUpdateSettings(t *testing.T) {
 	}
 
 	// Revert miner settings after test is complete
-	defer func() {
-		n := atomic.AddInt64(&nonce, 1)
+	revertChanges := func(nonce int64) {
+		println("start revert")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": miner.NumberOfDelegates,
 			"min_stake":     miner.MinStake / 1e10,
 			"max_stake":     miner.MaxStake / 1e10,
-		}), n, true)
+		}), nonce, true)
 		require.Nil(t, err, "error reverting miner settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-	}()
+		println("end revert")
+	}
 
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -95,10 +97,13 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 1, int(intToZCN(minerInfo.MinStake)))
+
+		println("end test")
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -122,7 +127,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -147,7 +153,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -175,9 +182,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -190,9 +198,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -205,9 +214,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -220,9 +230,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -235,9 +246,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -250,9 +262,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -265,9 +278,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -280,9 +294,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, "", n, false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
@@ -291,9 +306,10 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update with nothing to update should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
+		revertChanges(n - 1)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": minerNodeWallet.ClientID,
@@ -306,12 +322,19 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update settings from non-delegate wallet should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		n := atomic.AddInt64(&nonce, 1)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		n, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
+		n++
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -321,7 +344,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
-		n = atomic.AddInt64(&nonce, 1)
+		n++
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
@@ -331,7 +354,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
-		n = atomic.AddInt64(&nonce, 1)
+		n++
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
