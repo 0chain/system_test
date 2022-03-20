@@ -59,7 +59,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 	// Revert miner settings after test is complete
 	revertChanges := func(nonce int64) {
-		println("start revert")
+		t.Log("start revert")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": miner.NumberOfDelegates,
@@ -70,7 +70,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-		println("end revert")
+		t.Log("end revert")
 	}
 
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
@@ -98,7 +98,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 1, int(intToZCN(minerInfo.MinStake)))
 
-		println("end test")
+		t.Log("end test")
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
@@ -327,14 +327,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-		ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
-		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-		nonceStr := strings.Split(ret[0], ":")[1]
-		n, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-		require.Nil(t, err, "error converting nonce to in")
-
-		n++
+		n := int64(2)
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
@@ -371,12 +364,12 @@ func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error
 }
 
 func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, nonce int64, retry bool) ([]string, error) {
-	println(nonce)
 	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWalletName, nonce, retry)
 }
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, nonce int64, retry bool) ([]string, error) {
 	t.Log("Updating miner settings...")
+	t.Log(nonce)
 	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --withNonce %v --wallet %s_wallet.json --configDir ./config --config %s", params, nonce, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)

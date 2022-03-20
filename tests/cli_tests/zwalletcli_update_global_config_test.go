@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 )
 
 func TestUpdateGlobalConfig(t *testing.T) {
-	t.Parallel()
+	//t.Parallel
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -27,7 +28,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("Get Global Config Should Work", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -64,20 +65,20 @@ func TestUpdateGlobalConfig(t *testing.T) {
 			newValue = "201"
 		}
 
+		n := atomic.AddInt64(&nonce, 2)
+
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			nonce++
 			output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			}, nonce, true)
+			}, n, true)
 		}()
 
-		nonce++
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, nonce, false)
+		}, n-1, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -123,21 +124,20 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		if oldValue2 == newValue2 {
 			newValue2 = "200"
 		}
+		n := atomic.AddInt64(&nonce, 2)
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			nonce++
 			output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey1 + "," + configKey2,
 				"values": oldValue1 + "," + oldValue2,
-			}, nonce, true)
+			}, n, true)
 		}()
 
-		nonce++
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
-		}, nonce, false)
+		}, n-1, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -156,7 +156,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - Update immutable config must fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -175,18 +175,18 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		nonce++
+		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, nonce, false)
+		}, n, false)
 		require.NotNil(t, err, "Setting immutable config must fail. but it didn't", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_globals: validation: server_chain.owner cannot be modified via a transaction", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -211,11 +211,11 @@ func TestUpdateGlobalConfig(t *testing.T) {
 
 		cfgBefore := getGlobalConfiguration(t, true)
 
-		nonce++
+		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
-		}, nonce, false)
+		}, n, false)
 		require.NotNil(t, err, "Setting immutable config must fail. but it didn't", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_globals: validation: server_chain.owner cannot be modified via a transaction", output[0], strings.Join(output, "\n"))
@@ -248,8 +248,8 @@ func TestUpdateGlobalConfig(t *testing.T) {
 
 		cfgBefore := getGlobalConfiguration(t, true)
 
-		nonce++
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{}, nonce, false)
+		n := atomic.AddInt64(&nonce, 1)
+		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{}, n, false)
 		require.Nil(t, err, "Error in updating global config", strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -265,7 +265,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - update with invalid key must fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -281,18 +281,18 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		nonce++
+		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, nonce, false)
+		}, n, false)
 		require.NotNil(t, err, "Setting config with invalid key must fail. but it didn't", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_globals: validation: 'invalid.key' is not a valid global setting", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Update Global Config - update with invalid value must fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -308,18 +308,18 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		nonce++
+		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, nonce, false)
+		}, n, false)
 		require.NotNil(t, err, "Setting config with invalid value must fail. but it didn't", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_globals: validation: server_chain.block.proposal.max_wait_time value abc cannot be parsed as a time.duration", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Update Global Config with a non-owner wallet Should Fail ", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel
 
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "215"
@@ -331,7 +331,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, nonce, false)
+		}, 2, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_globals: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -375,6 +375,7 @@ func getGlobalConfigWithWallet(t *testing.T, walletName string, retry bool) ([]s
 func updateGlobalConfigWithWallet(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
 	t.Logf("Updating global config...")
 	p := createParams(param)
+	t.Log(nonce)
 	cmd := fmt.Sprintf(
 		"./zwallet global-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
 		p,
