@@ -77,6 +77,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
 
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
@@ -104,7 +105,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
@@ -124,12 +125,13 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 5, minerInfo.NumberOfDelegates)
+		t.Log("end test")
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": 99,
@@ -150,12 +152,13 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 99, int(intToZCN(minerInfo.MaxStake)))
+		t.Log("end test")
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
@@ -179,6 +182,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, 5, minerInfo.NumberOfDelegates)
 		require.Equal(t, float64(99), intToZCN(minerInfo.MaxStake))
 		require.Equal(t, float64(1), intToZCN(minerInfo.MinStake))
+		t.Log("end test")
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
@@ -186,7 +190,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
@@ -195,6 +199,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -1 \\u003e 0", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
@@ -202,7 +207,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
@@ -211,6 +216,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
@@ -218,7 +224,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
@@ -227,6 +233,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
@@ -234,7 +241,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 51,
@@ -243,6 +250,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "Expected error when trying to update max_stake to less than min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
@@ -250,7 +258,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": -1,
@@ -259,6 +267,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
@@ -266,7 +275,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": -1,
@@ -275,6 +284,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.True(t, strings.HasPrefix(output[0], "update_miner_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_miner_settings: invalid negative min_stake:]")
+		t.Log("end test")
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
@@ -282,7 +292,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": -1,
@@ -291,6 +301,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: invalid non-positive number_of_delegates: -1", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
@@ -298,11 +309,12 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, "", n, false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update with nothing to update should fail", func(t *testing.T) {
@@ -310,7 +322,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		n := atomic.AddInt64(&nonce, 2)
 		revertChanges(n - 1)
-
+		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": minerNodeWallet.ClientID,
 		}), n, false)
@@ -319,6 +331,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+		t.Log("end test")
 	})
 
 	t.Run("Miner update settings from non-delegate wallet should fail", func(t *testing.T) {
@@ -372,7 +385,7 @@ func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, walle
 	t.Log(nonce)
 	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --withNonce %v --wallet %s_wallet.json --configDir ./config --config %s", params, nonce, wallet, cliConfigFilename)
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 3, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
