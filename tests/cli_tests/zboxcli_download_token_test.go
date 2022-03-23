@@ -205,6 +205,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
 
+		// Wait for blobber to redeem read-tokens
+		// Blobber runs worker in the interval of usually 10 seconds.
+		time.Sleep(time.Second * 20)
+
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
