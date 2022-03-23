@@ -1046,12 +1046,12 @@ func TestShareFile(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
+		expectedDownloadCostInSas := unitToZCN(expectedDownloadCost, unit) * 1e10
+		t.Logf("Download cost: %v sas", expectedDownloadCostInSas)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -1074,8 +1074,10 @@ func TestShareFile(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
+		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
+
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(finalReadPool[0].Balance))
+		require.Equal(t, expectedRPBalance, float64(finalReadPool[0].Balance))
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
@@ -1084,7 +1086,7 @@ func TestShareFile(t *testing.T) {
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Equal(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
+			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
 		}
 	})
 
@@ -1155,12 +1157,12 @@ func TestShareFile(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
+		expectedDownloadCostInSas := unitToZCN(expectedDownloadCost, unit) * 1e10
+		t.Logf("Download cost: %v sas", expectedDownloadCostInSas)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -1183,8 +1185,9 @@ func TestShareFile(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
+		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(finalReadPool[0].Balance))
+		require.Equal(t, expectedRPBalance, float64(finalReadPool[0].Balance))
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
@@ -1193,7 +1196,7 @@ func TestShareFile(t *testing.T) {
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Equal(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
+			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
 		}
 	})
 
