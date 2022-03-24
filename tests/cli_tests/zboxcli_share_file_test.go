@@ -1077,7 +1077,7 @@ func TestShareFile(t *testing.T) {
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Equal(t, expectedRPBalance, float64(finalReadPool[0].Balance))
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
@@ -1191,7 +1191,6 @@ func TestShareFile(t *testing.T) {
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
 		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
-		require.Equal(t, expectedRPBalance, float64(finalReadPool[0].Balance))
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
