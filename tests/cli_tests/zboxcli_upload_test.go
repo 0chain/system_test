@@ -651,7 +651,7 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
 			strings.HasSuffix(strings.Join(output, ""),
-				`bad request: {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+				`bad request: {"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
 			strings.Join(output, "\n"))
 	})
 
