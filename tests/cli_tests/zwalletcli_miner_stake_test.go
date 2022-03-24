@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -31,7 +32,13 @@ func TestMinerStake(t *testing.T) {
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
+
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	ret, err := getNonceForWallet(t, configPath, minerNodeDelegateWalletName, true)
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	nonceStr := strings.Split(ret[0], ":")[1]
+	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	require.Nil(t, err, "error converting nonce to in")
 
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
@@ -307,18 +314,20 @@ func TestMinerStake(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		nonce++
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
-		}), true)
+		}), nonce, true)
 		require.Nil(t, err)
 
 		defer func() {
+			nonce++
 			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 				"id":        minerNodeWallet.ClientID,
 				"min_stake": 0,
-			}), true)
+			}), nonce, true)
 			require.Nil(t, err)
 		}()
 

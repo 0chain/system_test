@@ -13,11 +13,7 @@ import (
 )
 
 func TestMinerUpdateConfig(t *testing.T) {
-	t.Parallel()
-
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "reward_rate"
 		newValue := "0.1"
 
@@ -30,13 +26,11 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"values": newValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
+		require.Len(t, output, 3, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[2], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
 		t.Skip("Skipping test for now as it causes miners to restart and cause test failures to others")
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -58,13 +52,11 @@ func TestMinerUpdateConfig(t *testing.T) {
 			"values": 1,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Len(t, output, 3, strings.Join(output, "\n"))
+		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[2], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -86,8 +78,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
