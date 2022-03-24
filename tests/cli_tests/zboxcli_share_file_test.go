@@ -1190,6 +1190,7 @@ func TestShareFile(t *testing.T) {
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
 		require.Equal(t, expectedRPBalance, float64(finalReadPool[0].Balance))
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
@@ -1336,11 +1337,11 @@ func TestShareFile(t *testing.T) {
 
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
+			initialBal := initialReadPool[0].Blobber[i].Balance
+			finalBal := finalReadPool[0].Blobber[i].Balance
+			require.Greater(t, initialBal, finalBal, "Blobber [%v] initial balance: [%v] and final balance: [%v]",
+				i, initialBal, finalBal)
 
-			// amount deducted
-			diff := initialReadPool[0].Blobber[i].Balance - finalReadPool[0].Blobber[i].Balance
-			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
 		}
 	})
 
@@ -1471,7 +1472,7 @@ func TestShareFile(t *testing.T) {
 			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
 			initialBalance := initialReadPool[0].Blobber[i].Balance
 			finalBalance := finalReadPool[0].Blobber[i].Balance
-			require.Less(t, initialBalance, finalBalance, "blobber [%v] initial balance was [%v] and final balance is [%v]", i, initialBalance, finalBalance)
+			require.Greater(t, initialBalance, finalBalance, "blobber [%v] initial balance was [%v] and final balance is [%v]", i, initialBalance, finalBalance)
 		}
 	})
 }

@@ -219,7 +219,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInZCN*1e10
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Less(t, float64(finalReadPool[0].Balance), expectedRPBalance)
+		require.InEpsilon(t, float64(finalReadPool[0].Balance), expectedRPBalance, epsilon)
 		require.IsType(t, int64(1), finalReadPool[0].ExpireAt)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
