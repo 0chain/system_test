@@ -29,7 +29,7 @@ func TestEthRegisterAccount(t *testing.T) {
 
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
 		deleteDefaultAccountInStorage(t, address)
-		output, err := importAccount(t, mnemonic, password, false)
+		output, err := importAccount(t, password, mnemonic, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 	})
