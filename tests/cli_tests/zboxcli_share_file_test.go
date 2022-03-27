@@ -1049,12 +1049,12 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
+		expectedDownloadCostInSas := unitToZCN(expectedDownloadCost, unit) * 1e10
+		t.Logf("Download cost: %v sas", expectedDownloadCostInSas)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -1079,8 +1079,10 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
+		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
+
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(finalReadPool[0].Balance))
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
@@ -1089,7 +1091,7 @@ func TestShareFile(t *testing.T) {
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Equal(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
+			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
 		}
 	})
 
@@ -1163,12 +1165,12 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
+		expectedDownloadCostInSas := unitToZCN(expectedDownloadCost, unit) * 1e10
+		t.Logf("Download cost: %v sas", expectedDownloadCostInSas)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
@@ -1183,6 +1185,9 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
+		// Wait for blobber to redeem read-tokens
+		// Blobber runs worker in the interval of usually 10 seconds.
+		time.Sleep(time.Second * 20)
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
@@ -1193,8 +1198,9 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
+		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(finalReadPool[0].Balance))
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
@@ -1203,7 +1209,7 @@ func TestShareFile(t *testing.T) {
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Equal(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
+			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
 		}
 	})
 
@@ -1323,6 +1329,9 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
+		// Wait for blobber to redeem read-tokens
+		// Blobber runs worker in the interval of usually 10 seconds.
+		time.Sleep(time.Second * 20)
 		// Read pool after download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
@@ -1342,11 +1351,10 @@ func TestShareFile(t *testing.T) {
 
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-
-			// amount deducted
-			diff := initialReadPool[0].Blobber[i].Balance - finalReadPool[0].Blobber[i].Balance
-			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
+			initialBal := initialReadPool[0].Blobber[i].Balance
+			finalBal := finalReadPool[0].Blobber[i].Balance
+			require.Greater(t, initialBal, finalBal, "Blobber [%v] initial balance: [%v] and final balance: [%v]",
+				i, initialBal, finalBal)
 		}
 	})
 
@@ -1480,7 +1488,9 @@ func TestShareFile(t *testing.T) {
 			// amount deducted
 			diff := initialReadPool[0].Blobber[i].Balance - finalReadPool[0].Blobber[i].Balance
 			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
+			initialBalance := initialReadPool[0].Blobber[i].Balance
+			finalBalance := finalReadPool[0].Blobber[i].Balance
+			require.Greater(t, initialBalance, finalBalance, "blobber [%v] initial balance was [%v] and final balance is [%v]", i, initialBalance, finalBalance)
 		}
 	})
 }
