@@ -42,7 +42,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  downloadThumbnailFile,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -66,7 +66,7 @@ func TestFileUpdate(t *testing.T) {
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		thumbnail := "upload_thumbnail_test.png"
+		thumbnail := escapedTestName(t) + "thumbnail.png"
 		//nolint
 		generateThumbnail(t, thumbnail)
 
@@ -81,7 +81,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localFilePath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -101,7 +101,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localThumbnailPath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -214,6 +214,7 @@ func TestFileUpdate(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)
@@ -432,7 +433,7 @@ func generateThumbnail(t *testing.T, localpath string) int {
 
 //nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
-	thumbnail := "upload_thumbnail_test.png"
+	thumbnail := escapedTestName(t) + "thumbnail.png"
 
 	thumbnailSize := generateThumbnail(t, thumbnail)
 

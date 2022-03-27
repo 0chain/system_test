@@ -31,6 +31,7 @@ func TestEthRegisterAccount(t *testing.T) {
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, mnemonic, password, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 	})
 
@@ -38,10 +39,12 @@ func TestEthRegisterAccount(t *testing.T) {
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 
 		output, err = listAccounts(t, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], address)
 
 		deleteDefaultAccountInStorage(t, address)

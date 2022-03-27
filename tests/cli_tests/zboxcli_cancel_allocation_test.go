@@ -49,7 +49,7 @@ func TestCancelAllocation(t *testing.T) {
 	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
 		t.Parallel()
 
-		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
+		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)

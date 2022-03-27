@@ -36,6 +36,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 	// Get base URL for API calls.
 	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+	require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{

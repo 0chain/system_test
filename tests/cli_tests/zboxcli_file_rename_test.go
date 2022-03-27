@@ -428,6 +428,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, fileSize, commitResp.MetaData.Size)
@@ -497,7 +498,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)

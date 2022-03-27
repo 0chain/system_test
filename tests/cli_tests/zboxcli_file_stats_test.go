@@ -296,8 +296,8 @@ func TestFileStats(t *testing.T) {
 
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
-		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
 	t.Run("get file stats with no allocation param supplied", func(t *testing.T) {
@@ -316,8 +316,8 @@ func TestFileStats(t *testing.T) {
 			"json":       "",
 		}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
-		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
 	t.Run("get file stats with no remotepath param supplied", func(t *testing.T) {
@@ -330,8 +330,8 @@ func TestFileStats(t *testing.T) {
 			"json":       "",
 		}), false)
 		require.NotNil(t, err, "getting stats without params should fail", strings.Join(output, "\n"))
-		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 	})
 
 	t.Run("get file stats before and after update", func(t *testing.T) {
@@ -467,7 +467,6 @@ func TestFileStats(t *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
 
 		cliutils.Wait(t, 2*time.Minute)
 		// get file stats after download

@@ -22,6 +22,7 @@ func TestBridgeVerify(t *testing.T) {
 
 		output, err := verifyBridgeTransaction(t, Address, false)
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Equal(t, "Transaction verification success: "+Address, output[len(output)-1])
 	})
 }

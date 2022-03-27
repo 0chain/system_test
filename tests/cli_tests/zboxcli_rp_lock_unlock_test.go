@@ -42,6 +42,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 1.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// There should be no read pool before lock
@@ -68,11 +69,13 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should decrement from 1.5 to 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Read pool balance should increment to 1
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
@@ -103,12 +106,14 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		})
 		output, err = readPoolUnlock(t, configPath, params, true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		require.Equal(t, "unlocked", output[0])
 
 		// Wallet balance should increment from 0.5 to 1.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -137,6 +142,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in read pool distributed amongst all blobbers
@@ -153,6 +159,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -181,6 +188,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in read pool should not succeed
@@ -197,6 +205,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -225,6 +234,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in read pool should not succeed
@@ -241,6 +251,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -269,6 +280,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Not specifying amount to lock should not succeed
@@ -284,6 +296,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -312,6 +325,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Not specifying amount to lock should not succeed
@@ -327,6 +341,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -368,10 +383,12 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.Len(t, readPool, 1)
 
 		// Unlock without waiting till expiration should result in error
 		params = createParams(map[string]interface{}{

@@ -26,7 +26,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -43,7 +43,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -60,7 +60,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -77,7 +77,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -94,7 +94,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -111,7 +111,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -128,7 +128,7 @@ func TestCreateAllocation(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		createAllocationTestTeardown(t, allocationID)
 	})
 

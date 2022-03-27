@@ -437,7 +437,7 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  file,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -450,7 +450,7 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
 			"localpath":  file,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -707,7 +707,7 @@ func TestDownload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		thumbnail := "upload_thumbnail_test.png"
+		thumbnail := escapedTestName(t) + "thumbnail.png"
 		//nolint
 		thumbnailSize := generateThumbnail(t, thumbnail)
 
@@ -732,7 +732,7 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  localPath,
 			"thumbnail":  nil,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -1171,6 +1171,7 @@ func TestDownload(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)
@@ -1464,6 +1465,7 @@ func generateChecksum(t *testing.T, filePath string) string {
 
 	output, err := cliutils.RunCommandWithoutRetry("shasum -a 256 " + filePath)
 	require.Nil(t, err, "Checksum generation for file %v failed", filePath, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0)
 
 	matcher := regexp.MustCompile("(.*) " + filePath + "$")
 	require.Regexp(t, matcher, output[0], "Checksum execution output did not match expected", strings.Join(output, "\n"))

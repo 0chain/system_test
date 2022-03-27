@@ -20,6 +20,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 	miners := getMinersList(t)
 	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
@@ -205,6 +206,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		output, err = readPoolInfo(t, configPath, allocationId)
 		require.Nil(t, err, "error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "error unmarshalling read pool", strings.Join(output, "\n"))
@@ -275,6 +277,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		output, err = writePoolInfo(t, configPath, true)
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
@@ -318,6 +321,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))

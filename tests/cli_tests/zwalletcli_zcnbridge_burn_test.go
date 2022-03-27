@@ -22,6 +22,7 @@ func TestBridgeBurn(t *testing.T) {
 
 		output, _ := burnEth(t, "10", bridgeClientConfigFile, true)
 		// todo: enable test: require.Nil(t, err, "error trying to burn WZCN tokens: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:") // : WZCN burn [OK]")
 	})
 
@@ -32,6 +33,7 @@ func TestBridgeBurn(t *testing.T) {
 
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification successful")
 	})
 }
