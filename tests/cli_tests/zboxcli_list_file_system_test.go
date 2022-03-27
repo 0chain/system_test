@@ -38,7 +38,7 @@ func TestListFileSystem(t *testing.T) {
 			"remotepath": "/",
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
@@ -59,7 +59,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 
@@ -111,7 +111,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 
@@ -148,7 +148,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -182,7 +182,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -215,7 +215,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -259,7 +259,7 @@ func TestListFileSystem(t *testing.T) {
 			"remotepath": remotepath,
 			"lookuphash": lookupHash,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -318,7 +318,7 @@ func TestListFileSystem(t *testing.T) {
 			"authticket": authTicket,
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -374,7 +374,7 @@ func TestListFileSystem(t *testing.T) {
 
 		// Just register a wallet so that we can work further
 		_, err := registerWallet(t, configPath)
-		require.Nil(t, err, err)
+		require.Nil(t, err)
 
 		// Listing contents of allocationID: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -433,6 +433,8 @@ func TestListFileSystem(t *testing.T) {
 			"List files with no parameter failed due to error", err,
 			strings.Join(output, "\n"))
 
+		require.Greater(t, len(output), 0)
+
 		require.Equal(t,
 			"Error: remotepath / authticket flag is missing",
 			output[len(output)-1],
@@ -461,7 +463,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}), true)
-			require.Nil(t, err, err)
+			require.Nil(t, err)
 			require.Len(t, output, 1)
 			require.NotEqual(t, "null", output[0], strings.Join(output, "\n"))
 		})
@@ -475,7 +477,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 

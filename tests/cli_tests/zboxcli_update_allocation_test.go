@@ -329,6 +329,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: [a-z0-9]{64} \(1\)`)
 		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
@@ -436,17 +437,18 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 	}
 	// First create a wallet and run faucet command
 	output, err := registerWalletForName(t, cliConfigFilename, walletName)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(allocParam))
-	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
 	// Get the allocation ID and return it
 	allocationID, err := getAllocationID(output[0])
-	require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID
 }
