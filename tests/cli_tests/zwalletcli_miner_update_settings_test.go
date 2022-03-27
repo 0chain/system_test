@@ -307,10 +307,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
 		//t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 2)
-		revertChanges(n - 1)
+		n := atomic.AddInt64(&nonce, 1)
+		revertChanges(n)
 		t.Log("start test")
-		output, err := minerUpdateSettings(t, configPath, "", n, false)
+		//doesn't matter what nonce is used
+		output, err := minerUpdateSettings(t, configPath, "", 0, false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
@@ -382,7 +383,7 @@ func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, nonce i
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, nonce int64, retry bool) ([]string, error) {
 	t.Log("Updating miner settings...")
-	t.Log(nonce)
+	t.Log(t.Name(), nonce)
 	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --withNonce %v --wallet %s_wallet.json --configDir ./config --config %s", params, nonce, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*10)

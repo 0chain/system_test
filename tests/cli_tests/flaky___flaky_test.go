@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
