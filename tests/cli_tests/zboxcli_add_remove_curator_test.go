@@ -13,7 +13,7 @@ import (
 func TestAddRemoveCurator(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Add Curator _ must fail when the allocation doesn't exist ", func(t *testing.T) {
+	t.Run("Add Curator _ must fail when the allocation doesn't exist", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -42,10 +42,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		anotherClientWalletName := escapedTestName(t) + "_ANOTHER_WALLET"
@@ -72,15 +73,17 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID})
 		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "unexpected success on adding curator", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Equal(t, "Error: curator flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
@@ -109,10 +112,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
@@ -122,7 +126,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
 		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
@@ -131,7 +135,7 @@ func TestAddRemoveCurator(t *testing.T) {
 			"new_owner":     targetWallet.ClientID,
 		}, true)
 		require.Nil(t, err, "error in transferring allocation as curator", strings.Join(output, "\n"))
-		require.Equal(t, 1, len(output), "unexpected output length:", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "unexpected output length:", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, targetWallet.ClientID)
 		require.Equal(t, expectedOutput, output[0], "unexpected output:", strings.Join(output, "\n"))
 	})
@@ -156,10 +160,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
@@ -169,7 +174,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, wallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
@@ -193,10 +198,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
@@ -206,7 +212,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, wallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 	})
 
@@ -228,14 +234,15 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 0, len(allocation.Curators), "Curator list must be empty at the beginning")
+		require.Len(t, allocation.Curators, 0, "Curator list must be empty at the beginning")
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
 		output, err = addCurator(t, params, true)
@@ -247,7 +254,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation = getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 	})
 
@@ -276,10 +283,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
@@ -289,7 +297,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
 		output, err = removeCurator(t, params)
@@ -298,7 +306,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation = getAllocation(t, allocationID)
-		require.Equal(t, 0, len(allocation.Curators), "Curators list must be empty after removing curator")
+		require.Len(t, allocation.Curators, 0, "Curators list must be empty after removing curator")
 
 		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
 			"allocation":    allocationID,
@@ -328,10 +336,11 @@ func TestAddRemoveCurator(t *testing.T) {
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
-		require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 		defer createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
@@ -341,7 +350,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		cliutils.Wait(t, 5*time.Second)
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1, len(allocation.Curators), "Curator must've added to the allocation curators list")
+		require.Len(t, allocation.Curators, 1, "Curator must've added to the allocation curators list")
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 
 		output, err = removeCurator(t, params)

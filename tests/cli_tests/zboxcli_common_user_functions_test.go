@@ -48,6 +48,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
@@ -87,6 +88,7 @@ func TestCommonUserFunctions(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 300.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
@@ -120,7 +122,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationI
 		"localpath":  filename,
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Equal(t, 2, len(output))
+	require.Len(t, output, 2)
 	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
 	return filename
 }
@@ -203,7 +205,7 @@ func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, pa
 func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
 	output, err := getAllocationWithRetry(t, configPath, allocationID, 1)
 	require.Nil(t, err, "error fetching allocation")
-	require.GreaterOrEqual(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+	require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
 	err = json.Unmarshal([]byte(output[0]), &allocation)
 	require.Nil(t, err, "error unmarshalling allocation json")
 	return
