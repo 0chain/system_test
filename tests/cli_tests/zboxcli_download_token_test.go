@@ -86,6 +86,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
@@ -162,6 +163,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
@@ -185,6 +187,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			"remotepath": "/" + filename,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -212,6 +215,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)

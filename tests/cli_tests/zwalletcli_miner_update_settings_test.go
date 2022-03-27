@@ -58,6 +58,8 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	}()
 
+	t.Parallel()
+
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
@@ -153,8 +155,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
@@ -166,8 +166,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
@@ -179,8 +177,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake greater than global max_stake should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
@@ -192,8 +188,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake less than min_stake should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 51,
@@ -205,8 +199,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update min_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": -1,
@@ -218,8 +210,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": -1,
@@ -231,8 +221,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": -1,
@@ -244,8 +232,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update without miner id flag should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, "", false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -253,8 +239,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update with nothing to update should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": miner.ID,
 		}), false)

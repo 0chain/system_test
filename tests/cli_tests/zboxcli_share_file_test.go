@@ -47,7 +47,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -102,7 +102,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -156,7 +156,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -220,7 +220,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -278,7 +278,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -334,7 +334,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -397,7 +397,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -480,7 +480,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -558,7 +558,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -624,7 +624,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -689,7 +689,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -754,7 +754,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -831,7 +831,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -878,7 +878,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err := registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -909,13 +909,13 @@ func TestShareFile(t *testing.T) {
 		sharerWallet := escapedTestName(t) + "_sharer"
 
 		output, err := registerWalletForName(t, configPath, sharerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_receiver"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -998,7 +998,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1023,10 +1023,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, initialReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
 		require.Equal(t, 0.4*1e10, float64(initialReadPool[0].Balance))
@@ -1045,6 +1047,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -1069,10 +1072,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 
@@ -1117,7 +1122,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -1134,10 +1139,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, initialReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
 		require.Equal(t, 0.4*1e10, float64(initialReadPool[0].Balance))
@@ -1156,6 +1163,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -1183,10 +1191,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
@@ -1231,7 +1241,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 		require.Len(t, output, 4, strings.Join(output, "\n"))
 		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
 		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
@@ -1257,7 +1267,7 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		output, err = executeFaucetWithTokensForWallet(t, receiverWallet, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		readPoolParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1272,10 +1282,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, initialReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
 		require.InEpsilon(t, 0.4*1e10, initialReadPool[0].Balance, epsilon, "read pool balance did not match expected")
@@ -1294,6 +1306,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": file,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -1322,10 +1335,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool after download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, finalReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
 		require.LessOrEqual(t, float64(finalReadPool[0].Balance), 0.4*1e10)
@@ -1371,7 +1386,7 @@ func TestShareFile(t *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 		require.Len(t, output, 4, strings.Join(output, "\n"))
 		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
 		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
@@ -1389,7 +1404,7 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		output, err = executeFaucetWithTokensForWallet(t, receiverWallet, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		readPoolParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1404,10 +1419,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, initialReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
 		require.InEpsilon(t, 0.4*1e10, initialReadPool[0].Balance, epsilon, "read pool balance did not match expected")
@@ -1426,6 +1443,7 @@ func TestShareFile(t *testing.T) {
 			"remotepath": filename,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
@@ -1451,10 +1469,12 @@ func TestShareFile(t *testing.T) {
 		// Read pool after download
 		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, finalReadPool)
 
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
 		require.LessOrEqual(t, float64(finalReadPool[0].Balance), 0.4*1e10)
@@ -1502,13 +1522,13 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 	// 		[2]:"Read pool created successfully"
 	// 		[3]:"Wallet registered"
 	output, err := registerWalletForName(t, configPath, wallet)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 	require.Len(t, output, 4, strings.Join(output, "\n"))
 	require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
 	require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,
