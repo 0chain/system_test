@@ -1355,7 +1355,6 @@ func TestShareFile(t *testing.T) {
 			finalBal := finalReadPool[0].Blobber[i].Balance
 			require.Greater(t, initialBal, finalBal, "Blobber [%v] initial balance: [%v] and final balance: [%v]",
 				i, initialBal, finalBal)
-
 		}
 	})
 
