@@ -36,6 +36,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	var oldSharderInfo climodel.Node
 	err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
+	require.NotEmpty(t, oldSharderInfo)
 
 	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
 
@@ -64,6 +65,8 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	}()
+
+	t.Parallel()
 
 	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{

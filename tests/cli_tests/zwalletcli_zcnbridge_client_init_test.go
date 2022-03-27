@@ -82,6 +82,7 @@ func TestBridgeClientInit(t *testing.T) {
 		defaultPath := filepath.Join(getZCNDir(), DefaultConfigBridgeFileName)
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", defaultPath), output[len(output)-1])
 	})
 
@@ -114,6 +115,7 @@ func TestBridgeClientInit(t *testing.T) {
 		customPath := filepath.Join(customPath, DefaultConfigBridgeFileName)
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 
@@ -145,6 +147,7 @@ func TestBridgeClientInit(t *testing.T) {
 		customPath := filepath.Join(customPath, "customName.yaml")
 
 		require.Nil(t, err, "error trying to create an initial client bridge config", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 }
@@ -167,6 +170,7 @@ func TestBridgeOwnerInit(t *testing.T) {
 		defaultPath := filepath.Join(getZCNDir(), DefaultConfigOwnerFileName)
 
 		require.Nil(t, err, "error trying to create an initial owner config", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Equal(t, fmt.Sprintf("Owner config file was saved to %s", defaultPath), output[len(output)-1])
 	})
 }

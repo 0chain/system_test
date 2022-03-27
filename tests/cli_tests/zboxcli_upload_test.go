@@ -272,7 +272,7 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := cliutils.RunCommandWithoutRetry("wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4")
+		output, err := cliutils.RunCommand(t, "wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4", 3, 2*time.Second)
 		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
@@ -379,6 +379,7 @@ func TestUpload(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)
@@ -421,6 +422,7 @@ func TestUpload(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)

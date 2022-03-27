@@ -412,7 +412,7 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"json":       "",
-		}), false)
+		}), true)
 
 		require.Nil(t, err, "List files after delete failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)

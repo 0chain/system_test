@@ -90,6 +90,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 		// Use first sharder from map.
+		require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
 		sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get base URL for API calls.
@@ -241,6 +242,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 		// Use first sharder from map.
+		require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
 		selectedSharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get sharder's node details (this has the total_stake and pools populated).

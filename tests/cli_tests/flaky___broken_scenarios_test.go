@@ -532,7 +532,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -576,7 +576,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))

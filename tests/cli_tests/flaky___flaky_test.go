@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -340,7 +339,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
@@ -512,7 +511,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 	// register assigner wallet
 	output, err = registerWalletForName(t, configPath, assigner)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	// Open the wallet file themselves to get private key for signing data
 	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
@@ -520,7 +519,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
 	output, err = registerWallet(t, configPath)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	configKeyDataShards := "free_allocation_settings.data_shards"
 	configKeyParityShards := "free_allocation_settings.parity_shards"
@@ -607,7 +606,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -669,7 +668,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
@@ -685,7 +684,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
@@ -703,7 +702,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -738,14 +737,14 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 		// register correct recipient wallet
 		output, err = registerWalletForName(t, configPath, recipientCorrect)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipientCorrect)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
 		// register this wallet
 		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
@@ -779,7 +778,7 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")

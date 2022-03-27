@@ -444,6 +444,7 @@ func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePoo
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
+		require.NotEmpty(t, poolsInfo)
 
 		if poolsInfo.Status == "ACTIVE" {
 			return poolsInfo, nil
