@@ -86,6 +86,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
@@ -162,6 +163,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool before download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		initialReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
@@ -185,12 +187,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			"remotepath": "/" + filename,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
+		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
 
 		// Download the file
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -205,16 +208,22 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
 
+		// Wait for blobber to redeem read-tokens
+		// Blobber runs worker in the interval of usually 10 seconds.
+		time.Sleep(time.Second * 20)
+
 		// Read pool after download
 		output, err = readPoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		finalReadPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
+		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInZCN*1e10
 		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.Less(t, intToZCN(finalReadPool[0].Balance), 0.4)
+		require.InEpsilon(t, float64(finalReadPool[0].Balance), expectedRPBalance, epsilon)
 		require.IsType(t, int64(1), finalReadPool[0].ExpireAt)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
 		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
@@ -223,11 +232,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
 			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
-
-			// amount deducted
-			diff := intToZCN(initialReadPool[0].Blobber[i].Balance) - intToZCN(finalReadPool[0].Blobber[i].Balance)
-			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			require.InEpsilon(t, expectedDownloadCostInZCN, diff, epsilon, "blobber [%v] read pool was deducted by [%v] rather than the expected [%v]", i, diff, expectedDownloadCostInZCN)
+			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
 		}
 	})
 }
@@ -280,9 +285,6 @@ func unitToZCN(unitCost float64, unit string) float64 {
 		return unitCost
 	case "mZCN", "mzcn":
 		unitCost /= 1e3
-		return unitCost
-	case "ZCN", "zcn":
-		unitCost /= 1e0
 		return unitCost
 	}
 	return unitCost
