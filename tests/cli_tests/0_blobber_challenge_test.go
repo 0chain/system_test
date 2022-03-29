@@ -462,7 +462,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
 	t.Log("Checking for open challenges in 30 seconds...")
-	cliutils.Wait(t, 40*time.Second)
+	cliutils.Wait(t, 30*time.Second)
 	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 	for _, blobber := range openChallengesAfter {
