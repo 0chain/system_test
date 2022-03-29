@@ -112,10 +112,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+		require.Error(t, err)
+		require.True(t, strings.Contains(output[0], "failed to update variables: cannot conver key min_lock"), output[0])
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -159,10 +157,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": 1,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+		require.Error(t, err, strings.Join(output, "\n"))
+		require.Equal(t, "failed to update variables: config setting \\\"unknown_key\\\" not found", output[0])
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
