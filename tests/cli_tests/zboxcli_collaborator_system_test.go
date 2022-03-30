@@ -644,16 +644,16 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		localpath = generateRandomTestFileName(t)
+		updatedLocalPath := generateRandomTestFileName(t)
 		err = createFileWithSize(localpath, 128*KB)
 		require.Nil(t, err)
 
 		output, err = updateFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpath,
+			"localpath":  updatedLocalPath,
 		}, false)
-		defer os.Remove(localpath)
+		defer os.Remove(updatedLocalPath)
 		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
