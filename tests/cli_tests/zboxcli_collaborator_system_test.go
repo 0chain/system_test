@@ -652,7 +652,8 @@ func TestCollaborator(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  updatedLocalPath,
-		}, false)
+		}, true)
+
 		defer os.Remove(updatedLocalPath)
 		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
