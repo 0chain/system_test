@@ -516,24 +516,10 @@ func TestListFileSystem(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
-		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
-		totalFiles := 0
-		totalFolders := 0
-		expectedTotalEntries := totalFolders + totalFiles
-		require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
-
-		var numFile, numFolder int
-		for _, lr := range listResults {
-			if lr.Type == "f" {
-				numFile++
-			} else if lr.Type == "d" {
-				numFolder++
-			}
-		}
-		require.Equal(t, totalFiles, numFile)
-		require.Equal(t, totalFolders, numFolder)
+		err = json.Unmarshal([]byte(output[0]), &listResults)
+		require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+		require.Empty(t, listResults)
 	})
 }
 
