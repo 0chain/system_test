@@ -645,7 +645,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		updatedLocalPath := generateRandomTestFileName(t)
-		err = createFileWithSize(localpath, 128*KB)
+		err = createFileWithSize(updatedLocalPath, 128*KB)
 		require.Nil(t, err)
 
 		output, err = updateFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
