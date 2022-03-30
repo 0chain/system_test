@@ -503,6 +503,38 @@ func TestListFileSystem(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
+
+	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}), true)
+		require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var listResults []climodel.ListFileResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
+		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
+
+		totalFiles := 0
+		totalFolders := 0
+		expectedTotalEntries := totalFolders + totalFiles
+		require.Len(t, listResults, expectedTotalEntries, "number of files from output [%v] do not mach expected", output)
+
+		var numFile, numFolder int
+		for _, lr := range listResults {
+			if lr.Type == "f" {
+				numFile++
+			} else if lr.Type == "d" {
+				numFolder++
+			}
+		}
+		require.Equal(t, totalFiles, numFile)
+		require.Equal(t, totalFolders, numFolder)
+	})
 }
 
 func extractAuthToken(str string) (string, error) {
