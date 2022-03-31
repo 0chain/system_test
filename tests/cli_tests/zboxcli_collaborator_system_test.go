@@ -612,7 +612,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "Unexpected output when removing the file", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Collaborator _ collaborator should NOT be able to update the file", func(t *testing.T) {
+	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
 		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
@@ -644,19 +644,20 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		localpath = generateRandomTestFileName(t)
-		err = createFileWithSize(localpath, 128*KB)
+		updatedLocalPath := generateRandomTestFileName(t)
+		err = createFileWithSize(updatedLocalPath, 128*KB)
 		require.Nil(t, err)
 
 		output, err = updateFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpath,
-		}, false)
-		defer os.Remove(localpath)
-		require.NotNil(t, err, "Unexpected success in updating the file as collaborator", strings.Join(output, "\n"))
+			"localpath":  updatedLocalPath,
+		}, true)
+
+		defer os.Remove(updatedLocalPath)
+		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus"
+		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
 
