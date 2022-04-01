@@ -20,6 +20,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 	miners := getMinersList(t)
 	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
@@ -205,6 +206,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		output, err = readPoolInfo(t, configPath, allocationId)
 		require.Nil(t, err, "error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		readPool := []climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "error unmarshalling read pool", strings.Join(output, "\n"))
@@ -275,6 +277,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		output, err = writePoolInfo(t, configPath, true)
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
@@ -318,6 +321,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -417,10 +421,10 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 
 func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
-		if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
+		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []apimodel.Transfer
 			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output:", txn.TransactionOutput)
+			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output: %v\n, txn data: %v\n txn status: %v", txn.TransactionOutput, txn.TransactionData, txn.TransactionStatus)
 
 			for _, transfer := range transfers {
 				// Transfer needs to be from Miner Smart contract to Generator miner

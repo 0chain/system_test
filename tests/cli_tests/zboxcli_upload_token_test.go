@@ -36,15 +36,18 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		allocationID := strings.Fields(output[0])[2]
 
 		output, err = challengePoolInfo(t, configPath, allocationID)
 		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		challengePool := climodel.ChallengePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &challengePool)
 		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+		require.NotEmpty(t, challengePool)
 
 		require.Regexp(t, regexp.MustCompile(fmt.Sprintf("([a-f0-9]{64}):challengepool:%s", allocationID)), challengePool.Id)
 		require.IsType(t, int64(0), challengePool.StartTime)
@@ -82,6 +85,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		writePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePool)
 		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, writePool)
 
 		require.Equal(t, allocationID, writePool[0].Id)
 		require.InDelta(t, 0.8, intToZCN(writePool[0].Balance), epsilon)
@@ -113,8 +117,8 @@ func writePoolInfo(t *testing.T, cliConfigFilename string, retry bool) ([]string
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
 	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-	require.Len(t, output, 1)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 	return output, err
 }
 
