@@ -24,6 +24,7 @@ func TestBridgeMint(t *testing.T) {
 
 		output, err := mintWrappedZcnTokens(t, TransactionHash, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 
@@ -33,6 +34,7 @@ func TestBridgeMint(t *testing.T) {
 
 		output, err := mintZcnTokens(t, TransactionHash, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 }

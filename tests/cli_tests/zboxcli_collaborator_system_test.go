@@ -50,7 +50,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 	})
 
@@ -79,7 +79,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": dirName,
 			"json":       "",
 		})
-		require.Equal(t, 0, len(meta.Collaborators), "Directory collaborators list expected to be empty")
+		require.Len(t, meta.Collaborators, 0, "Directory collaborators list expected to be empty")
 
 		// Add collaborator to directory
 		output, err = addCollaborator(t, createParams(map[string]interface{}{
@@ -122,7 +122,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -146,7 +146,7 @@ func TestCollaborator(t *testing.T) {
 
 		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
 		defer os.Remove("tmp" + remotepath)
-		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
@@ -180,7 +180,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = shareFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
@@ -224,7 +224,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = removeCollaborator(t, createParams(map[string]interface{}{
@@ -242,7 +242,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
+		require.Len(t, meta.Collaborators, 0, "Collaborator must be removed from file collaborators list")
 	})
 
 	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *testing.T) {
@@ -274,7 +274,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		// Lock tokens in read pool
@@ -299,7 +299,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 0, len(meta.Collaborators), "Collaborator must be removed from file collaborators list")
+		require.Len(t, meta.Collaborators, 0, "Collaborator must be removed from file collaborators list")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -307,7 +307,7 @@ func TestCollaborator(t *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
-		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -324,7 +324,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		anotherWallet, err := getWalletForName(t, configPath, anotherWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
@@ -338,7 +338,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 		}), false)
 		require.NotNil(t, err, "Add collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
-		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -355,7 +355,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, anotherWalletName, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		localpath := uploadRandomlyGeneratedFileWithWallet(t, ownerWalletName, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -377,7 +377,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, thirdPersonWalletAddress, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		// Now we test if another wallet can remove from collaborators' list
@@ -387,7 +387,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 		}), false)
 		require.NotNil(t, err, "Remove collaborator must fail since the wallet is not the file owner", strings.Join(output, "\n"))
-		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "remove_collaborator_failed: Failed to remove collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -406,7 +406,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "error in getting wallet", err, strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -428,7 +428,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		// Now we test if collaborator can add another collaborator to filr
@@ -438,7 +438,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 		}), false)
 		require.NotNil(t, err, "Add collaborator must fail since the collaborator is not the file owner", strings.Join(output, "\n"))
-		require.Equal(t, 1, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -471,7 +471,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = updateFileAttributesWithWallet(t, configPath, collaboratorWalletName, map[string]interface{}{
@@ -514,7 +514,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = renameFileWithWallet(t, configPath, collaboratorWalletName, map[string]interface{}{
@@ -557,7 +557,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = deleteFile(t, collaboratorWalletName, createParams(map[string]interface{}{
@@ -598,7 +598,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = moveFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
@@ -612,7 +612,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "Unexpected output when removing the file", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Collaborator _ collaborator should NOT be able to update the file", func(t *testing.T) {
+	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
 		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
@@ -641,22 +641,23 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		localpath = generateRandomTestFileName(t)
-		err = createFileWithSize(localpath, 128*KB)
+		updatedLocalPath := generateRandomTestFileName(t)
+		err = createFileWithSize(updatedLocalPath, 128*KB)
 		require.Nil(t, err)
 
 		output, err = updateFileWithWallet(t, collaboratorWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpath,
-		}, false)
-		defer os.Remove(localpath)
-		require.NotNil(t, err, "Unexpected success in updating the file as collaborator", strings.Join(output, "\n"))
+			"localpath":  updatedLocalPath,
+		}, true)
+
+		defer os.Remove(updatedLocalPath)
+		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus"
+		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -689,7 +690,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = copyFileForWallet(t, configPath, collaboratorWalletName, map[string]interface{}{
@@ -729,7 +730,7 @@ func TestCollaborator(t *testing.T) {
 			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, 2, len(output))
+		require.Len(t, output, 2)
 		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
 
 		remotepath := "/" + filepath.Base(localpath)
@@ -746,7 +747,7 @@ func TestCollaborator(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		})
-		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
+		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -768,7 +769,7 @@ func TestCollaborator(t *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.NotNil(t, err, "Unexpected success in downloading the file as collaborator", strings.Join(output, "\n"))
-		require.Equal(t, 2, len(output), "Unexpected number of output lines", strings.Join(output, "\n"))
+		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
 		expectedOutput := "Error in file operation: File content didn't match with uploaded file"
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
@@ -777,6 +778,7 @@ func TestCollaborator(t *testing.T) {
 func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo {
 	output, err := readPoolInfo(t, configPath, allocationID)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
 	readPool := []climodel.ReadPoolInfo{}
 	err = json.Unmarshal([]byte(output[0]), &readPool)
