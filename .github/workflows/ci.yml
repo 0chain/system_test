@@ -127,9 +127,8 @@ jobs:
           explorer_image: ${{ env.EXPLORER_TAG }}
           zproxy_image: staging
           zsearch_image: staging
-          zbox_cli_branch: ${{github.event.inputs.zbox_cli_branch}}
-          zwallet_cli_branch: ${{github.event.inputs.zwallet_cli_branch}}
-          custom_go_sdk_version: staging
+          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@feature/add-config-to-repo
