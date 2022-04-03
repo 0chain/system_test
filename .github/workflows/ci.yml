@@ -64,7 +64,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite05 ]
+    runs-on: [ tests-suite04 ]
     timeout-minutes: 90
     steps:
       - name: "Get current PR"
