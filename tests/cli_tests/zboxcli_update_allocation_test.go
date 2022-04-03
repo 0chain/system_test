@@ -206,7 +206,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: allocation size becomes too small")
+		require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1000 < 1024")
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
