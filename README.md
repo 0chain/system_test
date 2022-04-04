@@ -115,8 +115,6 @@ Edit the line `block_worker: https://dev.0chain.net/dns` to the appropriate sett
 ```yaml
 block_worker: http://192.168.1.100:9091
 ```
-Finally, you need to add a `system_test/tests/cli_tests/config/sc_owner_wallet.json` file, with
-the default 0chain owner wallet information. PM the system test team for a copy of the wallet.json file. 
 
 Now open the system_test project in [GoLand](https://www.jetbrains.com/go/),
 you should now be able to run any of the `cli_tests` in debug.
