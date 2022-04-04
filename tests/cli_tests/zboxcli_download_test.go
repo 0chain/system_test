@@ -152,7 +152,7 @@ func TestDownload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
-			"rx_pay":     true,
+			"rx_pay":     false,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
