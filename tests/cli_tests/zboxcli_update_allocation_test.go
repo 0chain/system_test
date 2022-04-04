@@ -180,6 +180,42 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
+	t.Run("Update Size to less than occupied size should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, 2048) // uploading a file of size 2048
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/dir/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		size := int64(-9000) // reducing it by 9000 should fail since 2048 is being used
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+		output, err = updateAllocation(t, configPath, params, false)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1000 < 1024")
+
+		allocations := parseListAllocations(t, configPath)
+		ac, ok := allocations[allocationID]
+		require.True(t, ok, "current allocation not found", allocationID, allocations)
+		require.Equal(t, allocationBeforeUpdate.Size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
+		) // size should be unaffected
+	})
+
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *testing.T) {
 		t.Parallel()
