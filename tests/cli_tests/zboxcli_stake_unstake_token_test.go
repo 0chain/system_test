@@ -31,6 +31,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -53,6 +54,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Use sp-info to check the staked tokens in blobber's stake pool
@@ -61,10 +63,12 @@ func TestStakeUnstakeTokens(t *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		stakePool := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
+		require.NotEmpty(t, stakePool)
 
 		delegates := stakePool.Delegate
 
@@ -93,6 +97,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Pool Id must be deleted from stake pool now
@@ -101,9 +106,11 @@ func TestStakeUnstakeTokens(t *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
+		require.NotEmpty(t, stakePool)
 
 		delegates = stakePool.Delegate
 
@@ -159,11 +166,13 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance before staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -184,6 +193,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -199,11 +209,13 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance before staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -224,6 +236,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -239,11 +252,13 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance before staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -264,6 +279,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 }
@@ -297,6 +313,7 @@ func getBlobbersList(t *testing.T) []climodel.BlobberInfo {
 	blobbers := []climodel.BlobberInfo{}
 	output, err := listBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
 	err = json.Unmarshal([]byte(output[0]), &blobbers)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))

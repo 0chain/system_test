@@ -180,6 +180,42 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
+	t.Run("Update Size to less than occupied size should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, 2048) // uploading a file of size 2048
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/dir/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		size := int64(-9000) // reducing it by 9000 should fail since 2048 is being used
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+		output, err = updateAllocation(t, configPath, params, false)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1000 < 1024")
+
+		allocations := parseListAllocations(t, configPath)
+		ac, ok := allocations[allocationID]
+		require.True(t, ok, "current allocation not found", allocationID, allocations)
+		require.Equal(t, allocationBeforeUpdate.Size, ac.Size,
+			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
+		) // size should be unaffected
+	})
+
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *testing.T) {
 		t.Parallel()
@@ -329,6 +365,7 @@ func TestUpdateAllocation(t *testing.T) {
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed: can't find allocation in client's allocations list: [a-z0-9]{64} \(1\)`)
 		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
@@ -436,17 +473,18 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 	}
 	// First create a wallet and run faucet command
 	output, err := registerWalletForName(t, cliConfigFilename, walletName)
-	require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(allocParam))
-	require.Nil(t, err, "create new allocation failed", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
 	// Get the allocation ID and return it
 	allocationID, err := getAllocationID(output[0])
-	require.Nil(t, err, "could not get allocation ID", err, strings.Join(output, "\n"))
+	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID
 }

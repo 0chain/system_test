@@ -33,21 +33,24 @@ func TestFileUpdate(t *testing.T) {
 		thumbnailFile, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
 		//nolint: errcheck
-		os.Remove(thumbnailFile)
+		defer os.Remove(thumbnailFile)
+
+		downloadThumbnailFile := thumbnailFile + ".down"
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  thumbnailFile,
+			"localpath":  downloadThumbnailFile,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stats, err := os.Stat(thumbnailFile)
+		stats, err := os.Stat(downloadThumbnailFile)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, thumbnailSize, int(stats.Size()))
+		defer os.Remove(downloadThumbnailFile) //nolint: errcheck
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -63,7 +66,7 @@ func TestFileUpdate(t *testing.T) {
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		thumbnail := "upload_thumbnail_test.png"
+		thumbnail := escapedTestName(t) + "thumbnail.png"
 		//nolint
 		generateThumbnail(t, thumbnail)
 
@@ -78,7 +81,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localFilePath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -98,7 +101,7 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  localThumbnailPath,
 			"thumbnail":  true,
-		}), false)
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -211,6 +214,7 @@ func TestFileUpdate(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, filesize, commitResp.MetaData.Size)
@@ -221,28 +225,6 @@ func TestFileUpdate(t *testing.T) {
 
 		originalFileChecksum := generateChecksum(t, localFilePath)
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("update file that does not exists should fail", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
-
-		filesize := int64(0.5 * MB)
-		localfile := generateRandomTestFileName(t)
-		err := createFileWithSize(localfile, filesize)
-		require.Nil(t, err)
-
-		output, err := updateFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(localfile),
-			"localpath":  localfile,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -388,6 +370,28 @@ func TestFileUpdate(t *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
+	t.Run("update file that does not exists should fail", func(t *testing.T) {
+		t.Parallel()
+
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+
+		filesize := int64(0.5 * MB)
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, filesize)
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localfile),
+			"localpath":  localfile,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 	t.Run("update with another file of size larger than allocation should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -408,8 +412,11 @@ func TestFileUpdate(t *testing.T) {
 			"remotepath": "/" + filepath.Base(localFilePath),
 			"localpath":  localfile,
 		}, false)
+
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
+			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
+			strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -426,7 +433,7 @@ func generateThumbnail(t *testing.T, localpath string) int {
 
 //nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
-	thumbnail := "upload_thumbnail_test.png"
+	thumbnail := escapedTestName(t) + "thumbnail.png"
 
 	thumbnailSize := generateThumbnail(t, thumbnail)
 

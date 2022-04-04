@@ -123,7 +123,7 @@ func TestCreateDir(t *testing.T) {
 		require.Len(t, files, 0)
 	})
 
-	t.Run("create dir with existing dirname should fail", func(t *testing.T) {
+	t.Run("create dir with existing dirname should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocID := setupAllocation(t, configPath)
@@ -135,9 +135,9 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, dirname+" directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, dirname, false)
-		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`), "Expected create dir failure but got output: ", strings.Join(output, "\n"))
+		require.Equal(t, dirname+" directory created", output[0])
 	})
 
 	t.Run("create dir with no leading slash should work", func(t *testing.T) {
@@ -163,7 +163,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, dirname, files[0].Name, "Directory must be created", files)
 	})
 
-	t.Run("create dir with no leading slash should not create duplicate dir", func(t *testing.T) {
+	t.Run("create dir with no leading slash should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocID := setupAllocation(t, configPath)
@@ -176,9 +176,9 @@ func TestCreateDir(t *testing.T) {
 
 		dirname = "noleadingslash"
 		output, err = createDir(t, configPath, allocID, dirname, false)
-		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
+		require.Equal(t, dirname+" directory created", output[0])
 	})
 
 	t.Run("create with existing dir but different case", func(t *testing.T) {
@@ -291,10 +291,10 @@ func TestCreateDir(t *testing.T) {
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createDirForWallet(t, configPath, wallet, false, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
@@ -308,10 +308,10 @@ func TestCreateDir(t *testing.T) {
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
@@ -323,10 +323,10 @@ func TestCreateDir(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createDir(t, configPath, "invalidallocation", "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
@@ -343,7 +343,7 @@ func TestCreateDir(t *testing.T) {
 		allocID := setupAllocation(t, configPath)
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))

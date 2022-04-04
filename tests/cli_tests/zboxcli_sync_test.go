@@ -770,13 +770,10 @@ func TestSyncWithBlobbers(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
-		require.GreaterOrEqual(t, len(output), 4, "unexpected number of lines in output", strings.Join(output, "\n"))
-
-		require.Contains(t, output[len(output)-3], "Error in file operation: Upload failed:", output[len(output)-4])
-		require.Contains(t, output[len(output)-2], "Upload failed", output[len(output)-3])
-
-		// FIXME! It says sync completed while it's actually failed
-		require.Contains(t, output[len(output)-1], "Sync Complete", output[len(output)-1])
+		require.True(t,
+			strings.Contains(strings.Join(output, ""),
+				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
+			strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
