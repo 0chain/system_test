@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	zcnscOwner                    = "zcnsc_owner"
-	scOwnerWallet                 = "sc_owner"
-	blobberOwnerWallet            = "blobber_owner"
-	minerNodeDelegateWalletName   = "miner_node_delegate"
-	sharderNodeDelegateWalletName = "sharder_node_delegate"
+	zcnscOwner                    = "wallets/zcnsc_owner"
+	scOwnerWallet                 = "wallets/sc_owner"
+	blobberOwnerWallet            = "wallets/blobber_owner"
+	minerNodeDelegateWalletName   = "wallets/miner_node_delegate"
+	sharderNodeDelegateWalletName = "wallets/sharder_node_delegate"
 )
 
 var (
