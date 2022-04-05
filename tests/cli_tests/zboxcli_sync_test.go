@@ -772,7 +772,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.True(t,
 			strings.Contains(strings.Join(output, ""),
-				`{"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
 			strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)

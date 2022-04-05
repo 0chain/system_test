@@ -114,8 +114,6 @@ func TestMultisigWallet(t *testing.T) {
 			"--config %s", 3, escapedTestName(t)+"_wallet.json", configPath))
 
 		require.NotNil(t, err, "expected command to fail", strings.Join(output, "\n"))
-		require.True(t, len(output) > 4, "Output was less than number "+
-			"of assertions", strings.Join(output, "\n"))
 
 		require.Contains(t, output, "Error: threshold flag is missing")
 	})
