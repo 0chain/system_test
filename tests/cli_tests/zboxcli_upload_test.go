@@ -325,7 +325,6 @@ func TestUpload(t *testing.T) {
 
 		allocSize := int64(500 * MB)
 		fileSize := int64(99 * MB)
-		chunkSize := int64(99 * MB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
