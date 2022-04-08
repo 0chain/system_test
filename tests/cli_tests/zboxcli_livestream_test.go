@@ -170,7 +170,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		}
 	})
 
-	t.Run("Upload from feed with a different chunksize must work", func(t *testing.T) {
+	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
 		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -193,13 +193,12 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		chunksize := 655360
 		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  localpath,
-			"feed":       feed,
-			"chunksize":  chunksize,
+			"allocation":  allocationID,
+			"remotepath":  remotepath,
+			"localpath":   localpath,
+			"feed":        feed,
+			"chunknumber": 10,
 		}))
 		require.Nil(t, err, "error in killing upload command")
 		KillFFMPEG()
@@ -377,7 +376,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		}
 	})
 
-	t.Run("Upload local webcam feed with a different chunksize must work", func(t *testing.T) {
+	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
 		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -400,12 +399,11 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		chunksize := 655360
 		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  localpath,
-			"chunksize":  chunksize,
+			"allocation":  allocationID,
+			"remotepath":  remotepath,
+			"localpath":   localpath,
+			"chunknumber": 10,
 		}))
 		require.Nil(t, err, "error in killing upload command")
 		KillFFMPEG()

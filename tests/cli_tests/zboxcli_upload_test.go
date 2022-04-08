@@ -336,10 +336,10 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-			"chunksize":  chunkSize,
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, //64KB * 1024 = 64M
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -771,30 +771,6 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	t.Run("Upload Encrypted File With Too Small Chunksize Should Fail", func(t *testing.T) {
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   20480,
-			"data":   1,
-			"parity": 1,
-		})
-
-		fileName := generateRandomTestFileName(t)
-		err := createFileWithSize(fileName, 20480)
-		require.Nil(t, err)
-
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(fileName),
-			"localpath":  fileName,
-			"chunksize":  271,
-			"encrypt":    "",
-		})
-
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		require.Equal(t, "Upload failed. chunk: chunk size is too small. it must greater than 272 if file is uploaded with encryption", output[0])
-	})
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
