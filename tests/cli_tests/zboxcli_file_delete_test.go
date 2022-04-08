@@ -270,7 +270,7 @@ func TestFileDelete(t *testing.T) {
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
+		require.Equal(t, fmt.Sprintf("%s deleted", remotepath+"doesnotexist"), output[0])
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
