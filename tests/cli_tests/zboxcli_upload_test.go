@@ -338,7 +338,7 @@ func TestUpload(t *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 1024, //64KB * 1024 = 64M
+			"chunknumber": 1024, // 64KB * 1024 = 64M
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
