@@ -256,7 +256,7 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete file that does not exist should fail", func(t *testing.T) {
+	t.Run("delete file that does not exist should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -268,9 +268,9 @@ func TestFileDelete(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": remotepath + "doesnotexist",
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
