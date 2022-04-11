@@ -343,8 +343,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	})
 
 	t.Run("update no params should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -371,8 +369,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	})
 
 	t.Run("update without blobber ID should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -386,8 +382,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	})
 
 	t.Run("update with invalid blobber ID should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -401,8 +395,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	})
 
 	t.Run("update with invalid blobber wallet/owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
