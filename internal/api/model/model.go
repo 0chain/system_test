@@ -113,20 +113,16 @@ type ChallengeResponse struct {
 }
 
 type StorageChallenge struct {
-	Created        int64              `json:"created"`
-	ID             string             `json:"id"`
-	PrevID         string             `json:"prev_id"`
-	Validators     []*ValidationNode  `json:"validators"`
-	RandomNumber   int64              `json:"seed"`
-	AllocationID   string             `json:"allocation_id"`
-	Blobber        *StorageNode       `json:"blobber"`
-	AllocationRoot string             `json:"allocation_root"`
-	Response       *ChallengeResponse `json:"challenge_response,omitempty"`
+	Created         int64  `json:"created"`
+	ID              string `json:"id"`
+	TotalValidators int    `json:"total_validators"`
+	AllocationID    string `json:"allocation_id"`
+	BlobberID       string `json:"blobber_id"`
+	Responded       bool   `json:"responded"`
 }
 
 type BlobberChallenge struct {
-	BlobberID                string                       `json:"blobber_id"`
-	Challenges               []*StorageChallenge          `json:"challenges"`
-	ChallengeMap             map[string]*StorageChallenge `json:"-"`
-	LatestCompletedChallenge *StorageChallenge            `json:"lastest_completed_challenge"`
+	BlobberID                string            `json:"blobber_id"`
+	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
+	ChallengeIDs             []string          `json:"challenge_ids"`
 }
