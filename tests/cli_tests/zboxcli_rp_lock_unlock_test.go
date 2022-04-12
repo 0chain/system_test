@@ -117,7 +117,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
-	return
+
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *testing.T) {
 		t.Parallel()
 
