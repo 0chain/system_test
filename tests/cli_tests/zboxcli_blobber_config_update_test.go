@@ -18,20 +18,24 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
 
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+	output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 1, strings.Join(output, "\n"))
+
+	var blobberList []climodel.BlobberDetails
+	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(blobberList), 0, "blobber list is empty")
+
+	intialBlobberInfo := blobberList[0]
+
 	t.Cleanup(func() {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -68,20 +72,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		// register wallet for blobber owner
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newCapacity := 99 * GB
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
@@ -103,19 +93,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newChallengeCompletionTIme := 110 * time.Second
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "cct": newChallengeCompletionTIme}))
@@ -137,19 +114,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newMaxOfferDuration := 2668400 * time.Second
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "max_offer_duration": newMaxOfferDuration}))
@@ -170,20 +134,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	t.Run("update blobber max stake should work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 
 		oldMaxStake := intialBlobberInfo.StakePoolSettings.MaxStake
 		newMaxStake := intToZCN(oldMaxStake) - 1
@@ -207,20 +157,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
-
 		oldMinStake := intialBlobberInfo.StakePoolSettings.MinStake
 		newMinStake := intToZCN(oldMinStake) + 1
 
@@ -243,19 +179,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newMinLockDemand := 0.2
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": newMinLockDemand}))
@@ -278,19 +201,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newNumberOfDelegates := 15
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": newNumberOfDelegates}))
@@ -312,19 +222,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 		newServiceCharge := 0.1
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": newServiceCharge}))
@@ -346,20 +243,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
-
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -372,9 +255,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
 		output, err = updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 25)
@@ -384,9 +264,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	t.Run("update with invalid blobber ID should fail", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -398,17 +275,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
-
 		output, err = cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}), escapedTestName(t), configPath), 1, time.Second*2)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -419,19 +285,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	t.Run("update blobber read price should work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		intialBlobberInfo := blobberList[0]
 
 		oldReadPrice := intialBlobberInfo.Terms.Read_price
 		newReadPrice := intToZCN(oldReadPrice) + 1
@@ -456,19 +309,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		intialBlobberInfo := blobberList[0]
-
 		oldWritePrice := intialBlobberInfo.Terms.Write_price
 		newWritePrice := intToZCN(oldWritePrice) + 1
 
@@ -491,20 +331,6 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	t.Run("update all params at once should work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-		intialBlobberInfo := blobberList[0]
 
 		newWritePrice := intToZCN(intialBlobberInfo.Terms.Write_price) + 1
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
