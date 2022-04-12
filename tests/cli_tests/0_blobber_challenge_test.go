@@ -64,7 +64,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -89,7 +88,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -145,7 +143,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -201,7 +198,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -256,7 +252,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -312,7 +307,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
@@ -348,7 +342,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remoteFilepath,
 			"localpath":  localfile,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -373,7 +366,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-			"chunksize":  2 * MB,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
