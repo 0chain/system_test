@@ -26,7 +26,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 	require.Len(t, output, 1, strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberDetails
-	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
@@ -83,7 +83,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, int64(newCapacity), finalBlobberInfo.Capacity)
@@ -104,7 +104,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
@@ -125,7 +125,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
@@ -147,7 +147,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, float64(newMaxStake), intToZCN(finalBlobberInfo.StakePoolSettings.MaxStake))
@@ -169,7 +169,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, float64(newMinStake), intToZCN(finalBlobberInfo.StakePoolSettings.MinStake))
@@ -191,7 +191,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
@@ -212,7 +212,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
@@ -233,7 +233,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
@@ -299,7 +299,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
@@ -322,7 +322,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
@@ -353,7 +353,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Len(t, output, 1)
 
 		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
