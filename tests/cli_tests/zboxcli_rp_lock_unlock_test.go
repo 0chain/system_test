@@ -53,9 +53,10 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Equal(t, "no tokens locked", output[0])
 
 		// Lock 1 token in read pool distributed amongst all blobbers
+		lockAmount := 1.0
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"tokens":     1,
+			"tokens":     lockAmount,
 			"duration":   "1m",
 		})
 		output, err = readPoolLock(t, configPath, params, true)
@@ -88,14 +89,34 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Less(t, 0, len(readPool[0].Blobber))
 		require.Equal(t, true, readPool[0].Locked)
 
-		// Blobber read pool balance should be 1/num(blobbers) ZCN in each
+		/*
+		**	Total read pool balance should be divided as per read_price ratio amongst each blobber
+		 */
+
+		// Get total
+		blobbersInAllocation := map[string]climodel.BlobberDetails{}
+		var total float64
+		for i := 0; i < len(readPool[0].Blobber); i++ {
+			output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": readPool[0].Blobber[i].BlobberID}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			var blobberInfo climodel.BlobberDetails
+			err = json.Unmarshal([]byte(output[0]), &blobberInfo)
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			total += intToZCN(blobberInfo.Terms.Read_price)
+			blobbersInAllocation[readPool[0].Blobber[i].BlobberID] = blobberInfo
+		}
+
+		// Assert token are distributed as per ratio
 		for i := 0; i < len(readPool[0].Blobber); i++ {
 			t.Log("For Blobber ID ", readPool[0].Blobber[i].BlobberID, ": ")
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
+			ratio := intToZCN(blobbersInAllocation[readPool[0].Blobber[i].BlobberID].Terms.Read_price) / total
 
 			t.Log("\tActual blobber read pool balance: ", intToZCN(readPool[0].Blobber[i].Balance))
-			t.Log("\tExpected blobber read pool balance")
-			assert.InEpsilon(t, 1.0/float64(len(readPool[0].Blobber)), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
+			t.Log("\tExpected blobber read pool balance: ", lockAmount*ratio)
+			assert.InEpsilon(t, (lockAmount * ratio), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
 		}
 
 		// Wait until timer expirted
