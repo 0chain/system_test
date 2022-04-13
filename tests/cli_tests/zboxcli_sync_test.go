@@ -532,7 +532,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 		require.Equal(t, 128*KB, foundItem.Size, "The original file doesn't exist anymore", files)
 	})
 
-	t.Run("Sync path with chunk size specified should work", func(t *testing.T) {
+	t.Run("Sync path with chunk number specified should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -561,9 +561,9 @@ func TestSyncWithBlobbers(t *testing.T) {
 		defer os.RemoveAll(localpath)
 
 		output, err := syncFolder(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"chunksize":  128 * KB,
-			"localpath":  localpath,
+			"allocation":  allocationID,
+			"chunknumber": 2,
+			"localpath":   localpath,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
@@ -772,7 +772,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.True(t,
 			strings.Contains(strings.Join(output, ""),
-				`{"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
 			strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
