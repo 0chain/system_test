@@ -75,7 +75,7 @@ jobs:
 
       - name: "Set PR status as pending"
         uses: niteoweb/pull_request_status_action@v1.0.0
-        if: steps.findPr.outputs.number
+        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests running with default config..."
@@ -146,7 +146,7 @@ jobs:
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
 
       - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number }}
+        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
         uses: niteoweb/pull_request_status_action@v1.0.0
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
