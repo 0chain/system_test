@@ -43,7 +43,7 @@ on:
         default: 'staging'
         required: false
       test_file_filter:
-        description: 'Subset of test files to run, (eg. zwalletcli_register_wallet_test.go) if blank, all tests will be ran'
+        description: 'Comma separated list of test files to run (eg. zwalletcli_register_wallet_test.go, zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
         required: false
 
