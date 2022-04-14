@@ -131,7 +131,7 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feature/test-subset
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -140,7 +140,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: true
-          retry_failures: true
+          test_file_filter: "zwalletcli_register_wallet_test.go, zwalletcli_send_and_balance_test.go"
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number }}
