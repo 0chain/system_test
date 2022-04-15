@@ -4,6 +4,39 @@ import (
 	"time"
 )
 
+type Provider int
+
+const (
+	ProviderMiner Provider = iota
+	ProviderSharder
+	ProviderBlobber
+	ProviderValidator
+	ProviderAuthorizer
+)
+
+var providerString = []string{"miner", "sharder", "blobber", "validator", "authorizer"}
+
+func (p Provider) String() string {
+	return providerString[p]
+}
+
+type PoolStatus int
+
+const (
+	Active PoolStatus = iota
+	Pending
+	Inactive
+	Unstaking
+	Deleting
+	Deleted
+)
+
+var poolString = []string{"active", "pending", "inactive", "unstaking", "deleting"}
+
+func (p PoolStatus) String() string {
+	return poolString[p]
+}
+
 type Wallet struct {
 	ClientID            string `json:"client_id"`
 	ClientPublicKey     string `json:"client_public_key"`
@@ -259,8 +292,24 @@ type NodeList struct {
 	Nodes []Node `json:"Nodes"`
 }
 
+type DelegatePool struct {
+	Balance      int64  `json:"balance"`
+	Reward       int64  `json:"reward"`
+	Status       int    `json:"status"`
+	RoundCreated int64  `json:"round_created"` // used for cool down
+	DelegateID   string `json:"delegate_id"`
+}
+
+type StakePool struct {
+	Pools    map[string]*DelegatePool `json:"pools"`
+	Reward   int64                    `json:"rewards"`
+	Settings StakePoolSettings        `json:"settings"`
+	Minter   int                      `json:"minter"`
+}
+
 type Node struct {
-	SimpleNode `json:"simple_miner"`
+	SimpleNode `json:"simple_miner" :"simple_node" :"simple_node" :"simple_node"`
+	StakePool  `json:"stake_pool"`
 }
 
 type SimpleNode struct {
@@ -424,7 +473,9 @@ type ZCNLockingPool struct {
 	TokenPool `json:"pool"`
 }
 
+/*
 type DelegatePool struct {
 	*PoolStats     `json:"stats"`
 	ZCNLockingPool `json:"pool"`
 }
+*/
