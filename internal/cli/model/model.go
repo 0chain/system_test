@@ -467,10 +467,3 @@ type TokenPool struct {
 type ZCNLockingPool struct {
 	TokenPool `json:"pool"`
 }
-
-/*
-type DelegatePool struct {
-	*PoolStats     `json:"stats"`
-	ZCNLockingPool `json:"pool"`
-}
-*/
