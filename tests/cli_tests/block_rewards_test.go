@@ -240,8 +240,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.NotEmpty(t, sharder, "No node found: %v", strings.Join(output, "\n"))
 
-		//sharder := nodeRes.SimpleNode
-
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
