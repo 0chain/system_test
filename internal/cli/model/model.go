@@ -282,8 +282,8 @@ type StakePoolSettings struct {
 	MinStake int64 `json:"min_stake"`
 	// MaxStake allowed.
 	MaxStake int64 `json:"max_stake"`
-	// NumDelegates maximum allowed.
-	NumDelegates int `json:"num_delegates"`
+	// MaxNumDelegates maximum allowed.
+	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
 	ServiceCharge float64 `json:"service_charge"`
 }

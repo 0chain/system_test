@@ -54,7 +54,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": intialBlobberInfo.Terms.Min_lock_demand}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.NumDelegates}))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
@@ -215,7 +215,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 	})
 
 	t.Run("update blobber service charge should work", func(t *testing.T) {
@@ -335,7 +335,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		newWritePrice := intToZCN(intialBlobberInfo.Terms.Write_price) + 1
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
 		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price) + 1
-		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.NumDelegates + 1
+		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
@@ -359,7 +359,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
-		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)

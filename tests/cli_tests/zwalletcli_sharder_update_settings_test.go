@@ -53,7 +53,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	defer func() {
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
-			"num_delegates": oldSharderInfo.Settings.NumDelegates,
+			"num_delegates": len(oldSharderInfo.Pools),
 			"max_stake":     intToZCN(oldSharderInfo.Settings.MaxStake),
 			"min_stake":     intToZCN(oldSharderInfo.Settings.MinStake),
 		}), true)
@@ -106,7 +106,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarhsalling sharder node info")
-		require.Equal(t, 5, sharderInfo.Settings.NumDelegates)
+		require.Equal(t, 5, len(sharderInfo.Pools))
 	})
 
 	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
@@ -152,7 +152,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 8, sharderInfo.Settings.NumDelegates)
+		require.Equal(t, 8, len(sharderInfo.Pools))
 		require.Equal(t, 2, int(intToZCN(sharderInfo.Settings.MinStake)))
 		require.Equal(t, 98, int(intToZCN(sharderInfo.Settings.MaxStake)))
 	})

@@ -50,7 +50,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	t.Cleanup(func() {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
-			"num_delegates": miner.Settings.NumDelegates,
+			"num_delegates": miner.Settings.MaxNumDelegates,
 			"min_stake":     miner.Settings.MinStake / 1e10,
 			"max_stake":     miner.Settings.MaxStake / 1e10,
 		}), true)
@@ -144,7 +144,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 5, minerInfo.Settings.NumDelegates)
+		require.Equal(t, 5, len(minerInfo.Pools))
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
@@ -220,7 +220,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 5, minerInfo.Settings.NumDelegates)
+		require.Equal(t, 5, len(minerInfo.Pools))
 		require.Equal(t, float64(99), intToZCN(minerInfo.Settings.MaxStake))
 		require.Equal(t, float64(1), intToZCN(minerInfo.Settings.MinStake))
 	})
