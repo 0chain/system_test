@@ -406,7 +406,7 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 	// In case of no stakeholders, miner gets:
 	// Fee * minerShare
 	minerFee := ConvertToValue(fee * minerShare)
-	minerServiceCharge := int64(float64(minerFee) * blockMiner.SimpleNode.ServiceCharge)
+	minerServiceCharge := int64(float64(minerFee) * blockMiner.Settings.ServiceCharge)
 	expectedMinerFee = minerServiceCharge
 	minerFeeRemaining := minerFee - minerServiceCharge
 

@@ -65,12 +65,10 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "get node %s failed", selectedMiner.ID, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var nodeRes climodel.Node
-		err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
+		var miner climodel.Node
+		err = json.Unmarshal([]byte(strings.Join(output, "")), &miner)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
-
-		miner := nodeRes.SimpleNode
+		require.NotEmpty(t, miner, "No node found: %v", strings.Join(output, "\n"))
 
 		// Get sharder list.
 		output, err = getSharders(t, configPath)
@@ -175,14 +173,14 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			generatorRewards := blockRewardMint * configAsFloat[shareRatioConfigKey]
 
 			// generator reward service charge = generator rewards * service charge
-			generatorRewardServiceCharge := generatorRewards * miner.ServiceCharge
+			generatorRewardServiceCharge := generatorRewards * miner.Settings.ServiceCharge
 			generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
 
 			// generator fees = block fees * share ratio
 			generatorFees := float64(blockFees) * configAsFloat[shareRatioConfigKey]
 
 			// generator fee service charge = generator fees * service charge
-			generatorFeeServiceCharge := generatorFees * miner.ServiceCharge
+			generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
 			generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
 
 			totalRewardsAndFees += int64(generatorRewardServiceCharge)
@@ -237,12 +235,12 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "get node %s failed", selectedSharder.ID, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var nodeRes climodel.Node
-		err = json.Unmarshal([]byte(strings.Join(output, "")), &nodeRes)
+		var sharder climodel.Node
+		err = json.Unmarshal([]byte(strings.Join(output, "")), &sharder)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
+		require.NotEmpty(t, sharder, "No node found: %v", strings.Join(output, "\n"))
 
-		sharder := nodeRes.SimpleNode
+		//sharder := nodeRes.SimpleNode
 
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -329,7 +327,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			sharderRewardsShare := sharderRewards / float64(len(sharders))
 
 			// sharder reward service charge = sharders rewards * service charge
-			sharderRewardServiceCharge := sharderRewardsShare * sharder.ServiceCharge
+			sharderRewardServiceCharge := sharderRewardsShare * sharder.Settings.ServiceCharge
 			sharderRewardsRemaining := sharderRewardsShare - sharderRewardServiceCharge
 
 			// generator fees = block fees * share ratio
@@ -338,7 +336,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			sharderFeesShare := sharderFees / float64(len(sharders))
 
 			// sharder fee service charge = sharders fees * service charge
-			sharderFeeServiceCharge := sharderFeesShare * sharder.ServiceCharge
+			sharderFeeServiceCharge := sharderFeesShare * sharder.Settings.ServiceCharge
 			sharderFeeRemaining := sharderFeesShare - sharderFeeServiceCharge
 
 			totalRewardsAndFees += int64(sharderRewardServiceCharge)
