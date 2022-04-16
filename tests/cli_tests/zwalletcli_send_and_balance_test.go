@@ -1,12 +1,9 @@
 package cli_tests
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"math"
-	"math/big"
+	"io"
 	"reflect"
 	"regexp"
 	"strings"
@@ -315,19 +312,9 @@ func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string, r
 	}
 }
 
-func getRandomUniformFloat64(t *testing.T) float64 {
-	random, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
-	var randomF big.Float
-	randomBigFloat := *randomF.SetInt(random)
-	randomFloat, _ := randomBigFloat.Float64()
-	randomFloat /= float64(math.MaxInt64)
-	require.Nil(t, err, "error generating random number from crypto/rand")
-	return randomFloat
-}
-
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
 	t.Logf("Sending ZCN...")
-	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc "%s" --to_client_id %s `, tokens, desc, toClientID)
+	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc %q --to_client_id %s `, tokens, desc, toClientID)
 
 	if fee > 0 {
 		cmd += fmt.Sprintf(" --fee %v ", fee)
@@ -348,7 +335,7 @@ func getRoundBlockFromASharder(t *testing.T, round int64) apimodel.Block {
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body: %v", err)
 
 	var block apimodel.Block
@@ -367,7 +354,7 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 
 	var startBalance apimodel.Balance
@@ -380,10 +367,14 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 }
 
 func getShardersList(t *testing.T) map[string]climodel.Sharder {
+	return getShardersListForWallet(t, escapedTestName(t))
+}
+
+func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
-	output, err := getSharders(t, configPath)
+	output, err := getShardersForWallet(t, configPath, wallet)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
-	require.Greater(t, len(output), 1)
+	require.Greater(t, len(output), 0)
 	require.Equal(t, "MagicBlock Sharders", output[0])
 
 	var sharders map[string]climodel.Sharder
@@ -411,11 +402,11 @@ func getMinersList(t *testing.T) *climodel.NodeList {
 	// Get miner list.
 	output, err := getMiners(t, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
 
 	var miners climodel.NodeList
-	err = json.Unmarshal([]byte(output[0]), &miners)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	err = json.Unmarshal([]byte(output[len(output)-1]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[len(output)-1], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 	return &miners
 }

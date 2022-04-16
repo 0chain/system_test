@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -14,386 +15,12 @@ import (
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func Test___FlakyScenariosMinerFees(t *testing.T) {
-	t.Parallel()
-
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
-
-	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 7)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		mconfig := getMinerSCConfiguration(t)
-		minerShare := mconfig["share_ratio"]
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-
-		// Create an allocation to use rp-lock on
-		allocParams := createParams(map[string]interface{}{
-			"expire": "5m",
-			"size":   "1024",
-			"lock":   "0.5",
-		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fee := 3.0
-
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		// Use rp-lock with fees
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1m",
-			"fee":        fee,
-		})
-		output, err = readPoolLock(t, configPath, params, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
-		cliutils.Wait(t, 2*time.Minute)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		output, err = readPoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-
-		readPool := []climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &readPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "read_pool_lock")
-		blockMinerId := block.Block.MinerId
-		block_miner := getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		params = createParams(map[string]interface{}{
-			"pool_id": readPool[0].Id,
-			"fee":     fee,
-		})
-		output, err = readPoolUnlock(t, configPath, params, true)
-		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
-		require.Equal(t, "unlocked", output[0])
-
-		cliutils.Wait(t, time.Minute)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "read_pool_unlock")
-		blockMinerId = block.Block.MinerId
-		block_miner = getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
-
-	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 7)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		mconfig := getMinerSCConfiguration(t)
-		minerShare := mconfig["share_ratio"]
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-
-		// Create an allocation to use rp-lock on
-		allocParams := createParams(map[string]interface{}{
-			"expire": "5m",
-			"size":   "1024",
-			"lock":   "0.5",
-		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fee := 3.0
-
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		// Lock 1 token in Write pool amongst all blobbers
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"duration":   "2m",
-			"tokens":     1,
-			"fee":        fee,
-		})
-		output, err = writePoolLock(t, configPath, params, true)
-		lockTimer := time.NewTimer(time.Minute * 2)
-		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
-		require.Equal(t, "locked", output[0])
-
-		output, err = writePoolInfo(t, configPath, true)
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		writePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &writePool)
-		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
-
-		cliutils.Wait(t, time.Minute)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "write_pool_lock")
-		blockMinerId := block.Block.MinerId
-		block_miner := getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-
-		<-lockTimer.C
-
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		params = createParams(map[string]interface{}{
-			"pool_id": writePool[0].Id,
-			"fee":     fee,
-		})
-		output, err = writePoolUnlock(t, configPath, params, true)
-		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "unlocked", output[0])
-
-		cliutils.Wait(t, time.Minute)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "write_pool_unlock")
-		blockMinerId = block.Block.MinerId
-		block_miner = getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
-
-	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 7)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-		mconfig := getMinerSCConfiguration(t)
-		minerShare := mconfig["share_ratio"]
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-
-		// Get miner's start balance
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		// lock tokens
-		fee := 3.0
-		params := createParams(map[string]interface{}{
-			"durationMin": 1,
-			"fee":         fee,
-			"tokens":      0.5,
-		})
-		output, err = lockInterest(t, configPath, params, true)
-		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
-
-		lockTimer := time.NewTimer(time.Minute)
-
-		cliutils.Wait(t, 2*time.Minute)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		output, err = getLockedTokens(t, configPath)
-		require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Locked tokens:", output[0])
-
-		var stats climodel.LockedInterestPoolStats
-		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
-
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "lock")
-		blockMinerId := block.Block.MinerId
-		block_miner := getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-
-		// Wait until lock expires.
-		<-lockTimer.C
-
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		// unlock
-		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": stats.Stats[0].ID,
-			"fee":     fee,
-		}), true)
-		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Unlock tokens success", output[0])
-
-		cliutils.Wait(t, time.Minute)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "unlock")
-		blockMinerId = block.Block.MinerId
-		block_miner = getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
-
-	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 7)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		mconfig := getMinerSCConfiguration(t)
-		minerShare := mconfig["share_ratio"]
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-
-		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-
-		err = json.Unmarshal([]byte(output[0]), &blobbers)
-		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-
-		// Pick a random blobber
-		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-
-		// Get miner's start balance
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		// Stake tokens against this blobber
-		fee := 3.0
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"tokens":     0.5,
-			"fee":        fee,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
-		stakePoolID := strings.Fields(output[0])[4]
-		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 2*time.Minute)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "stake_pool_lock")
-		blockMinerId := block.Block.MinerId
-		block_miner := getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		// Unstake the tokens
-		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolID,
-			"fee":        fee,
-		}))
-		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
-
-		cliutils.Wait(t, time.Minute)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &minerNode, "stake_pool_unlock")
-		blockMinerId = block.Block.MinerId
-		block_miner = getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, block_miner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
-}
-
 func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
-	t.Parallel()
-
 	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
 		t.Parallel()
 
@@ -671,139 +298,8 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 	})
 }
 
-func Test___FlakyScenariosSendAndBalance(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Send ZCN between wallets - Fee must be paid to miners", func(t *testing.T) {
-		t.Parallel()
-
-		targetWalletName := escapedTestName(t) + "_TARGET"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "Error occurred when retrieving target wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
-		mconfig := getMinerSCConfiguration(t)
-		minerShare := mconfig["share_ratio"]
-
-		miners := getMinersList(t)
-		minerNode := miners.Nodes[0].SimpleNode
-		miner := getMinersDetail(t, minerNode.ID).SimpleNode
-
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		// Set a random fee in range [0.01, 0.02) (crypto/rand used for linting fix)
-		send_fee := 0.01 + getRandomUniformFloat64(t)*0.01
-
-		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, "{}", send_fee)
-		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
-
-		cliutils.Wait(t, time.Minute*2)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		var block_miner *climodel.Node
-		var block_miner_id string
-		var transactionRound int64
-
-		var expectedMinerFee int64
-
-		for round := startBalance.Round + 1; round <= endBalance.Round; round++ {
-			block := getRoundBlockFromASharder(t, round)
-
-			for i := range block.Block.Transactions {
-				txn := block.Block.Transactions[i]
-				// Find the generator miner of the block on which this transaction was recorded
-				if block_miner_id == "" {
-					if txn.ToClientId == targetWallet.ClientID {
-						block_miner_id = block.Block.MinerId // Generator miner
-						transactionRound = block.Block.Round
-						block_miner = getMinersDetail(t, minerNode.ID)
-
-						// Expected miner fee is calculating using this formula:
-						// Fee * minerShare * miner.ServiceCharge
-						// Stakeholders' reward is:
-						// Fee * minerShare * (1 - miner.ServiceCharge)
-						// In case of no stakeholders, miner gets:
-						// Fee * minerShare
-						minerFee := ConvertToValue(send_fee * minerShare)
-						minerServiceCharge := int64(float64(minerFee) * block_miner.SimpleNode.ServiceCharge)
-						expectedMinerFee = minerServiceCharge
-						minerFeeRemaining := minerFee - minerServiceCharge
-
-						// If there is no stake, the miner gets entire fee.
-						// Else "Remaining" portion would be distributed to stake holders
-						// And hence not go the miner
-						if miner.TotalStake == 0 {
-							expectedMinerFee += minerFeeRemaining
-						}
-						t.Logf("Expected miner fee: %v", expectedMinerFee)
-						t.Logf("Miner ID: %v", block_miner_id)
-					}
-				} else {
-					// Search for the fee payment to generator miner in "payFee" transaction output
-					if strings.ContainsAny(txn.TransactionData, "payFees") && strings.ContainsAny(txn.TransactionData, fmt.Sprintf("%d", transactionRound)) {
-						var transfers []apimodel.Transfer
-						err = json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
-						require.Nil(t, err, "Cannot unmarshal the transfers from transaction output")
-
-						for _, transfer := range transfers {
-							// Transfer needs to be from Miner Smart contract to Generator miner
-							if transfer.From != MINER_SC_ADDRESS || transfer.To != block_miner_id {
-								continue
-							} else {
-								t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)
-								require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
-								// Transfer fee must be equal to miner fee
-								require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
-								return // test passed
-							}
-						}
-					}
-				}
-			}
-		}
-	})
-}
-
 func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 	t.Parallel()
-
-	t.Run("transfer allocation by owner should fail", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
-		})
-
-		newOwner := escapedTestName(t) + "_NEW_OWNER"
-
-		output, err := registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
-			"allocation":    allocationID,
-			"new_owner_key": newOwnerWallet.ClientPublicKey,
-			"new_owner":     newOwnerWallet.ClientID,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
-			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
-	})
 
 	t.Run("transfer allocation accounting test", func(t *testing.T) {
 		t.Parallel()
@@ -844,7 +340,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
@@ -925,7 +421,6 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		//FIXME: there should be client side positive integer validation here
 		configKey := "max_read_price"
 		newValue := "x"
 
@@ -942,19 +437,18 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 			"values": newValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
 	t.Run("should allow update of max_read_price", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
 		configKey := "max_read_price"
-		newValue := "110"
+		newValue := "99"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
@@ -1002,5 +496,320 @@ func Test___FlakyScenariosUpdateScSettings(t *testing.T) {
 		// test transaction to verify chain is still working
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	})
+}
+
+func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
+	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+	}
+
+	assigner := escapedTestName(t) + "_ASSIGNER"
+
+	// register SC owner wallet
+	output, err := registerWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+	// register assigner wallet
+	output, err = registerWalletForName(t, configPath, assigner)
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+	// Open the wallet file themselves to get private key for signing data
+	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
+	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
+
+	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
+	output, err = registerWallet(t, configPath)
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+	configKeyDataShards := "free_allocation_settings.data_shards"
+	configKeyParityShards := "free_allocation_settings.parity_shards"
+	configKeySize := "free_allocation_settings.size"
+	configKeyDuration := "free_allocation_settings.duration"
+
+	// nolint:gocritic
+	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
+
+	keys := strings.Join([]string{
+		configKeyDataShards,
+		configKeyParityShards,
+		configKeySize,
+		configKeyDuration,
+	}, ",")
+
+	output, err = getStorageSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+	cfgBefore, _ := keyValuePairStringToMap(t, output)
+
+	// ensure revert in config is run regardless of test result
+	defer func() {
+		oldValues := strings.Join([]string{
+			cfgBefore[configKeyDataShards],
+			cfgBefore[configKeyParityShards],
+			cfgBefore[configKeySize],
+			cfgBefore[configKeyDuration],
+		}, ",")
+
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   keys,
+			"values": oldValues,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	}()
+
+	newValues := strings.Join([]string{
+		"1",    // decreasing data shards from default 10
+		"1",    // decreasing parity shards from default 5
+		"1024", // decreasing size from default 10000000000
+		"5m",   // reduce free allocation duration from 50h to 5m
+	}, ",")
+
+	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		"keys":   keys,
+		"values": newValues,
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+
+	// miners list
+	output, err = getMiners(t, configPath)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
+	err = sendTxn(miners, freeAllocAssignerTxn)
+	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
+
+	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
+	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
+	require.Len(t, output, 3)
+	require.Equal(t, "Transaction verification success", output[0])
+	require.Equal(t, "TransactionStatus: 1", output[1])
+	require.Greater(t, len(output[2]), 0, output[2])
+
+	t.Parallel()
+
+	// FIXME not working at the moment
+	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
+		recipient := escapedTestName(t)
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		// FIXME disabled as not working as expected
+		// require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		// require.Len(t, output, 1)
+		// matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		// require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+		// allocationID := strings.Fields(output[0])[2]
+		//
+		// readPoolFraction, err := strconv.ParseFloat(cfgBefore[configKeyReadPoolFraction], 64)
+		// require.Nil(t, err, "Read pool fraction config is not float: %s", cfgBefore[configKeyReadPoolFraction])
+		//
+		// wantReadPoolFraction := marker.FreeTokens * readPoolFraction
+		// wantWritePoolToken := marker.FreeTokens - wantReadPoolFraction
+		//
+		// // Verify write and read pools are set with tokens
+		// output, err = writePoolInfo(t, configPath, true)
+		// require.Len(t, output, 1, strings.Join(output, "\n"))
+		// require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		//
+		// writePool := []climodel.WritePoolInfo{}
+		// err = json.Unmarshal([]byte(output[0]), &writePool)
+		// require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		// require.Len(t, writePool, 1, "More than 1 write pool found", strings.Join(output, "\n"))
+		// require.Equal(t, ConvertToValue(wantWritePoolToken), writePool[0].Balance, "Expected write pool amount not met", strings.Join(output, "\n"))
+		//
+		// readPool := getReadPoolInfo(t, allocationID)
+		// require.Len(t, readPool, 1, "Read pool must exist")
+		// require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+	})
+
+	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
+		// register recipient wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, []byte("bad marker json"), 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
+	})
+
+	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
+		// register recipient wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, []byte(`{"invalid_marker":true}`), 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: error getting assigner details: value not present", output[0])
+	})
+
+	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
+		recipient := escapedTestName(t)
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		marker.Signature = "badsignature"
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1)
+		// TODO test can differ one of just sort it out
+		// require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
+		// require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: marker timestamped in the future: 1642693108"", output[0])
+	})
+
+	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
+		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
+
+		// register correct recipient wallet
+		output, err = registerWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		// register this wallet
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 5,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipientCorrect + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Error creating free allocation: free_allocation_failed: marker verification failed: marker timestamped in the future: ([0-9]{10})"), output[0])
+	})
+
+	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
+		recipient := escapedTestName(t)
+
+		// register recipient wallet
+		output, err = registerWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		recipientWallet, err := getWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		marker := climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: freeTokensIndividualLimit + 1,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err := json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data := hex.EncodeToString(forSignatureBytes)
+		marker.Signature = sign(t, data, assignerWallet)
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err := json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile := "./config/" + recipient + "_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1)
+		// TODO sort out why message changes
+		// require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
+		// require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: marker timestamped in the future: 1642693167", output[0])
 	})
 }

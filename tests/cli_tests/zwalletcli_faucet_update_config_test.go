@@ -142,7 +142,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: key max_pour_amount, unable to convert x to state.balance", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update owner id then update max_pour_amount with old owner should fail", func(t *testing.T) {
@@ -207,7 +207,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
@@ -226,14 +226,14 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		// register SC owner wallet
 		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		//nolint:misspell
+		require.Equal(t, "update_settings: key unknown_key not recognised as setting", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {

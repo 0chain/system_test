@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -15,7 +16,7 @@ import (
 func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Parallel()
 
-	t.Run("transfer allocation by curator", func(t *testing.T) {
+	t.Run("transfer allocation by curator should work", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -37,7 +38,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -53,6 +54,31 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
+	t.Run("transfer allocation by owner should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": int64(2048),
+		})
+
+		newOwner := escapedTestName(t) + "_NEW_OWNER"
+
+		output, err := registerWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": newOwnerWallet.ClientPublicKey,
+			"new_owner":     newOwnerWallet.ClientID,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
+	})
+
 	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -63,7 +89,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		nonOwner := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		nonOwnerWallet, err := getWalletForName(t, configPath, nonOwner)
 		require.Nil(t, err, "Error occurred when retrieving non-owner wallet")
@@ -74,8 +100,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"new_owner":     nonOwnerWallet.ClientID,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		reg := regexp.MustCompile("Error adding curator:curator_transfer_allocation_failed: only curators or the owner can transfer allocations; [a-z0-9]{64} is neither")
+		require.Regexp(t, reg, output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -143,7 +170,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -187,7 +214,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -234,14 +261,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		// FIXME this does not work at the moment
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Len(t, output, 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0],
 			"finalize allocation - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -297,7 +324,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -382,7 +409,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -467,6 +494,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"remotepath": remotePath,
 		})
 		require.Nil(t, err, "Error:", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		authTicket, err := extractAuthToken(output[0])
 		require.Nil(t, err, "Error extracting auth token")
@@ -475,7 +503,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -526,6 +554,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
+		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"localpath":  downloadFilePath,
 			"authticket": authTicket,
@@ -534,6 +563,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
+		*/
 	})
 
 	t.Run("transfer allocation and update allocation", func(t *testing.T) {
@@ -575,7 +605,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -687,7 +717,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -698,8 +728,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"new_owner":     newOwnerWallet.ClientID,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0],
+		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Error adding curator:curator_transfer_allocation_failed: value not present", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -726,7 +756,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -765,7 +795,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -820,7 +850,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
 		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))

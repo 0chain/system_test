@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -39,7 +38,7 @@ func TestListFileSystem(t *testing.T) {
 			"remotepath": "/",
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
@@ -60,7 +59,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 
@@ -112,7 +111,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 
@@ -149,7 +148,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -183,7 +182,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -216,7 +215,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -260,7 +259,7 @@ func TestListFileSystem(t *testing.T) {
 			"remotepath": remotepath,
 			"lookuphash": lookupHash,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -319,7 +318,7 @@ func TestListFileSystem(t *testing.T) {
 			"authticket": authTicket,
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
@@ -375,7 +374,7 @@ func TestListFileSystem(t *testing.T) {
 
 		// Just register a wallet so that we can work further
 		_, err := registerWallet(t, configPath)
-		require.Nil(t, err, err)
+		require.Nil(t, err)
 
 		// Listing contents of allocationID: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -434,6 +433,8 @@ func TestListFileSystem(t *testing.T) {
 			"List files with no parameter failed due to error", err,
 			strings.Join(output, "\n"))
 
+		require.Greater(t, len(output), 0)
+
 		require.Equal(t,
 			"Error: remotepath / authticket flag is missing",
 			output[len(output)-1],
@@ -462,7 +463,7 @@ func TestListFileSystem(t *testing.T) {
 				"json":       "",
 				"remotepath": remotepath,
 			}), true)
-			require.Nil(t, err, err)
+			require.Nil(t, err)
 			require.Len(t, output, 1)
 			require.NotEqual(t, "null", output[0], strings.Join(output, "\n"))
 		})
@@ -476,7 +477,7 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), true)
-		require.Nil(t, err, "List file failed due to error ", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "List file failed due to error ", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
 
@@ -502,6 +503,24 @@ func TestListFileSystem(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
+
+	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}), true)
+		require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var listResults []climodel.ListFileResult
+
+		err = json.Unmarshal([]byte(output[0]), &listResults)
+		require.Nil(t, err, "list files failed", strings.Join(output, "\n"))
+		require.Empty(t, listResults)
+	})
 }
 
 func extractAuthToken(str string) (string, error) {
@@ -515,7 +534,7 @@ func extractAuthToken(str string) (string, error) {
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
 	rand.Read(buffer) //nolint:gosec,revive
-	return ioutil.WriteFile(name, buffer, os.ModePerm)
+	return os.WriteFile(name, buffer, os.ModePerm)
 }
 
 func generateRandomTestFileName(t *testing.T) string {
@@ -529,23 +548,31 @@ func generateRandomTestFileName(t *testing.T) string {
 }
 
 func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+	return shareFolderInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param)
+}
+
+func shareFolderInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Sharing file/folder...")
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
 func listFilesInAllocation(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+	return listFilesInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func listFilesInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 15*time.Second) // TODO replace with poller
 	t.Logf("Listing individual file in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
-		escapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	if retry {

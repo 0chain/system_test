@@ -133,7 +133,7 @@ func TestFileMetadata(t *testing.T) {
 			require.Len(t, output, 1)
 
 			authTicket, err = extractAuthToken(output[0])
-			require.Nil(t, err, err)
+			require.Nil(t, err)
 			require.NotEqual(t, "", authTicket)
 
 			h := sha3.Sum256([]byte(fmt.Sprintf("%s:%s%s", allocationID, remotepath, filepath.Base(filename))))
@@ -390,6 +390,7 @@ func TestFileMetadata(t *testing.T) {
 
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
 
 		require.Equal(t,
 			"Error: remotepath / authticket flag is missing",

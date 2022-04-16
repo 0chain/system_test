@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -526,181 +527,27 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
-	t.Run("update file with thumbnail", func(t *testing.T) {
+	t.Run("delete existing file in root directory with commit should work", func(t *testing.T) {
 		t.Parallel()
 
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
 
-		filesize := int64(0.5 * MB)
 		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
 
-		thumbnailFile := updateFileWithThumbnailURL(t, "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
+			"remotepath": remoteFilePath,
+			"commit":     true,
+		}), true)
+
+		// FIXME: error in deleting file with commit
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		defer func() {
-			// Delete the downloaded thumbnail file
-			err = os.Remove(thumbnailFile)
-			require.Nil(t, err)
-		}()
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("update thumbnail of uploaded file", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		thumbnail := "upload_thumbnail_test.png"
-		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("wget %s -O %s", "https://en.wikipedia.org/static/images/project-logos/enwiki-2x.png", thumbnail))
-		require.Nil(t, err, "Failed to download thumbnail png file: ", strings.Join(output, "\n"))
-
-		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
-
-		// Update with new thumbnail
-		thumbnail = updateFileWithThumbnailURL(t, "https://icons-for-free.com/iconfiles/png/512/eps+file+format+png+file+icon-1320167140989998942.png", allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"thumbnail":  true,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		err = os.Remove(thumbnail)
-		require.Nil(t, err)
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("update blobber read price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber read price not working.")
-		}
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		intialBlobberInfo := blobberList[0]
-
-		oldReadPrice := intialBlobberInfo.Terms.Read_price
-		defer func() {
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": oldReadPrice}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-		}()
-
-		newReadPrice := oldReadPrice + 1
-
-		// BUG: read price is not being updated
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		time.Sleep(30 * time.Second)
-		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
-		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
-		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		// BUG: read price is not being updated
-		require.NotEqual(t, newReadPrice, finalBlobberInfo.Terms.Read_price)
-	})
-
-	t.Run("update blobber write price should work", func(t *testing.T) {
-		if testing.Short() {
-			t.Skip("update blobber write price not working.")
-		}
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
-
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-
-		var blobberList []climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		intialBlobberInfo := blobberList[0]
-
-		oldWritePrice := intialBlobberInfo.Terms.Write_price
-		defer func() {
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": oldWritePrice}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-		}()
-
-		newWritePrice := oldWritePrice + 1
-
-		// BUG: write price is not being updated
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		time.Sleep(30 * time.Second)
-		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var finalBlobberInfo climodel.BlobberDetails
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&finalBlobberInfo)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		// BUG: write price is not being updated
-		require.NotEqual(t, newWritePrice, finalBlobberInfo.Terms.Write_price)
 	})
 
 	// FIXME: Commented out because these cases hang the broken test suite till timeout

@@ -198,7 +198,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		t.Parallel()
 
-		configKey := "interest_rate"
+		configKey := "reward_rate"
 		newValue := "0.1"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
@@ -211,7 +211,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
@@ -281,7 +281,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys": "interest_rate",
+			"keys": "reward_rate",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))

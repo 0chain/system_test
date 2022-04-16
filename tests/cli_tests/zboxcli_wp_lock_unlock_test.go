@@ -51,6 +51,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 1.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in Write pool amongst all blobbers
@@ -61,6 +62,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		})
 		output, err = writePoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
 		lockTimer := time.NewTimer(time.Minute * 2)
@@ -68,6 +70,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should decrement from 1.5 to 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Write pool balance should increment to 1
@@ -78,6 +81,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		writePools := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePools)
 		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, writePools)
 
 		// We will have two write pools, one created autmatically by newallocation command
 		// And one created by wp-lock. We are interested in the latter.
@@ -106,15 +110,36 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			require.Less(t, 0, len(writePool.Blobber))
 			require.Equal(t, true, writePool.Locked)
 
-			// Blobber write pool balance should be (pool Balance)/num(blobbers) ZCN in each
+			/*
+			**	Total write pool balance should be divided as per read_price ratio amongst each blobber
+			 */
+
+			// Get total
+			blobbersInAllocation := map[string]climodel.BlobberDetails{}
+			var total float64
 			for i := 0; i < len(writePool.Blobber); i++ {
-				t.Logf("\tThe following information is for Blobber Id [%v]", writePool.Blobber[i].BlobberID)
+				output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": writePool.Blobber[i].BlobberID}))
+				require.Nil(t, err, strings.Join(output, "\n"))
+				require.Len(t, output, 1)
+
+				var blobberInfo climodel.BlobberDetails
+				err = json.Unmarshal([]byte(output[0]), &blobberInfo)
+				require.Nil(t, err, strings.Join(output, "\n"))
+
+				total += intToZCN(blobberInfo.Terms.Write_price)
+				blobbersInAllocation[writePool.Blobber[i].BlobberID] = blobberInfo
+			}
+
+			// Blobber write pool balance should be (pool Balance)/blobber.Terms.WritePrice ZCN in each
+			for i := 0; i < len(writePool.Blobber); i++ {
 				t.Logf("\t\tThe following information is for Blobber Id [%v]", writePool.Blobber[i].BlobberID)
-				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), writePool.Blobber[i].BlobberID)
+				t.Log("For Blobber ID ", writePool.Blobber[i].BlobberID, ": ")
+
+				ratio := intToZCN(blobbersInAllocation[writePool.Blobber[i].BlobberID].Terms.Write_price) / total
 
 				t.Log("\t\t\tActual Write Pool Blobber Balance: ", intToZCN(writePool.Blobber[i].Balance))
 				t.Log("\t\t\tExpected: Write Pool Blobber Balance", intToZCN(writePool.Balance)/float64(len(writePool.Blobber)))
-				assert.InEpsilon(t, intToZCN(writePool.Balance)/float64(len(writePool.Blobber)), intToZCN(writePool.Blobber[i].Balance), epsilon)
+				assert.InEpsilon(t, intToZCN(writePool.Balance)*ratio, intToZCN(writePool.Blobber[i].Balance), epsilon)
 			}
 		}
 
@@ -133,6 +158,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should increment from 0.5 to 1.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -161,6 +187,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in write pool distributed amongst all blobbers
@@ -172,11 +199,12 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Failed to lock tokens in write pool: write_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -205,6 +233,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in write pool should not succeed
@@ -221,6 +250,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -249,6 +279,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		// Wallet balance before lock should be 0.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in write pool should not succeed
@@ -260,11 +291,12 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Failed to lock tokens in write pool: write_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
@@ -377,6 +409,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		writePools := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &writePools)
 		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, writePools)
 
 		// Unlock without waiting till expiration should result in error
 		require.True(t, len(writePools) >= 2, "number of write pools did not math expected")
@@ -391,7 +424,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.NotNil(t, err, "Write pool tokens unlocked before expired", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to unlock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "Failed to unlock tokens in write pool: write_pool_unlock_failed: the pool is not expired yet", output[0])
 	})
 
 	// Possible FIXME: Locking write tokens for duration more than allocation's duration

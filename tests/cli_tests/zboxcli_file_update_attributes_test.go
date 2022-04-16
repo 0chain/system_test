@@ -177,6 +177,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, fileSize, commitResp.MetaData.Size)
@@ -187,8 +188,10 @@ func TestFileUpdateAttributes(t *testing.T) {
 		// verify commit txn
 		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
 		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
+		require.Equal(t, "TransactionStatus: 1", output[1])
+		require.Greater(t, len(output[2]), 0, output[2])
 
 		// check if file attributes was updated
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -230,7 +233,7 @@ func TestFileUpdateAttributes(t *testing.T) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)

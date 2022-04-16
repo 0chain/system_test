@@ -3,10 +3,11 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -83,6 +84,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 		// Use first sharder from map.
+		require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
 		sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get base URL for API calls.
@@ -94,7 +96,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
@@ -113,8 +115,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		for i := 0; i < 5; i++ {
 			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			require.Len(t, output, 1)
+			require.Len(t, output, 2)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		// Get the ending balance for miner's delegate wallet.
@@ -123,7 +126,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", miner.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err = ioutil.ReadAll(res.Body)
+		resBody, err = io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
@@ -142,7 +145,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			resBody, err = ioutil.ReadAll(res.Body)
+			resBody, err = io.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
@@ -226,6 +229,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 		// Use first sharder from map.
+		require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
 		selectedSharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 		// Get sharder's node details (this has the total_stake and pools populated).
@@ -249,7 +253,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var startBalance apimodel.Balance
@@ -268,8 +272,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		for i := 0; i < 5; i++ {
 			output, err = lockInterest(t, configPath, params, true)
 			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			require.Len(t, output, 1)
+			require.Len(t, output, 2)
 			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		// Get the ending balance for sharder's delegate wallet.
@@ -278,7 +283,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check sharder %s balance: %d", sharder.ID, res.StatusCode)
 		require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-		resBody, err = ioutil.ReadAll(res.Body)
+		resBody, err = io.ReadAll(res.Body)
 		require.Nil(t, err, "Error reading response body")
 
 		var endBalance apimodel.Balance
@@ -297,7 +302,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 			require.NotNil(t, res.Body, "Balance API response must not be nil")
 
-			resBody, err = ioutil.ReadAll(res.Body)
+			resBody, err = io.ReadAll(res.Body)
 			require.Nil(t, err, "Error reading response body: %v", err)
 
 			var block apimodel.Block
@@ -370,8 +375,6 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 		float, err := strconv.ParseFloat(val, 64)
 		if err == nil {
 			floatMap[key] = float
-		} else {
-			t.Logf("Value [%s] for key [%s] is not a float so will not be added to the float map", val, key)
 		}
 		stringMap[key] = val
 	}
@@ -387,7 +390,11 @@ func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
 }
 
 func getSharders(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return getShardersForWallet(t, cliConfigFilename, escapedTestName(t))
+}
+
+func getShardersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
 func getNodeBaseURL(host string, port int) string {

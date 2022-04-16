@@ -124,7 +124,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
@@ -367,6 +367,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		var commitResp climodel.CommitResponse
 		err = json.Unmarshal([]byte(match[1]), &commitResp)
 		require.Nil(t, err)
+		require.NotEmpty(t, commitResp)
 
 		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
 		require.Equal(t, fileSize, commitResp.MetaData.Size)
@@ -377,8 +378,10 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		// verify commit txn
 		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
 		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 3)
 		require.Equal(t, "Transaction verification success", output[0])
+		require.Equal(t, "TransactionStatus: 1", output[1])
+		require.Greater(t, len(output[2]), 0, output[2])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -436,7 +439,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", err, strings.Join(output, "\n"))
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)

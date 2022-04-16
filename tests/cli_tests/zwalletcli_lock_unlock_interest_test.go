@@ -49,8 +49,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		lockTimer := time.NewTimer(time.Minute)
 
@@ -71,7 +72,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var statsBeforeExpire climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &statsBeforeExpire)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
+		require.NotEmpty(t, statsBeforeExpire)
 		require.Len(t, statsBeforeExpire.Stats, 1)
 		require.NotEqual(t, "", statsBeforeExpire.Stats[0].ID)
 		require.True(t, statsBeforeExpire.Stats[0].Locked)
@@ -99,7 +101,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var statsAfterExpire climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &statsAfterExpire)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, statsAfterExpire.Stats, 1)
 		require.NotEqual(t, "", statsAfterExpire.Stats[0].ID)
 		require.False(t, statsAfterExpire.Stats[0].Locked)
@@ -117,8 +119,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 			"pool_id": statsAfterExpire.Stats[0].ID,
 		}), true)
 		require.Nil(t, err, "unlock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Unlock tokens success", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Get balance AFTER locked tokens are unlocked. Would show rounded off to highest (ZCN).
 		output, err = getBalance(t, configPath)
@@ -171,8 +174,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.800000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -204,8 +208,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.500000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -223,7 +228,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 2)
 
 		// check locked tokens. Order retrieved can be different so search appropriate lock
@@ -284,8 +289,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.951123) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -304,7 +310,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -344,8 +350,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.750000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -364,7 +371,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -407,8 +414,9 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Equal(t, "Tokens (0.250000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -427,7 +435,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -467,9 +475,10 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		})
 		output, err = lockInterest(t, configPath, params, true)
 		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		// FIXME precision is lost - should say  `Tokens (0.000000001) locked successfully`
 		require.Equal(t, "Tokens (0.000000) locked successfully", output[0])
+		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		// Sleep for a bit before checking balance so there is balance already from interest.
 		cliutil.Wait(t, time.Second)
@@ -488,7 +497,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 
 		var stats climodel.LockedInterestPoolStats
 		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1])
 		require.Len(t, stats.Stats, 1)
 		require.NotEqual(t, "", stats.Stats[0].ID)
 		require.True(t, stats.Stats[0].Locked)
@@ -516,7 +525,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "failed locking tokens: lock amount is greater than balance", output[0])
 	})
 
 	t.Run("Lock attempt with missing durationHr and durationMin params should fail", func(t *testing.T) {
@@ -592,7 +601,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "failed locking tokens: duration (8784h1m0s) is longer than max lock period (8784h0m0s)", output[0])
 	})
 
 	t.Run("Lock attempt with durationHr over 1 year", func(t *testing.T) {
@@ -613,7 +622,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "failed locking tokens: duration (8785h0m0s) is longer than max lock period (8784h0m0s)", output[0])
 	})
 
 	t.Run("Lock attempt with both 0 durationHr and 0 durationMin params should fail", func(t *testing.T) {
@@ -670,7 +679,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		//nolint:misspell
+		require.Equal(t, "failed locking tokens: insufficent amount to dig an interest pool", output[0])
 	})
 
 	t.Run("Lock attempt with tokens param below minimum allowed should fail", func(t *testing.T) {
@@ -689,7 +699,8 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
+		//nolint:misspell
+		require.Equal(t, "failed locking tokens: insufficent amount to dig an interest pool", output[0])
 	})
 
 	t.Run("Lock attempt with negative tokens param should fail", func(t *testing.T) {
@@ -727,188 +738,7 @@ func TestLockAndUnlockInterest(t *testing.T) {
 		output, err = lockInterest(t, configPath, params, false)
 		require.NotNil(t, err, "Missing expected lock interest failure", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Failed to lock tokens. {"error": "verify transaction failed"}`, output[0])
-	})
-
-	t.Run("Unlock attempt with missing pool_id param should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = unlockInterest(t, configPath, "", false)
-		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `Error: pool_id flag is missing`, output[0])
-	})
-
-	t.Run("Unlock attempt with empty pool_id param should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": `""`,
-		}), false)
-		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
-	})
-
-	t.Run("Unlock attempt with bad pool_id param should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": "abcdef",
-		}), false)
-		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
-	})
-
-	t.Run("Unlock attempt with pool_id not yet expired should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-
-		// lock 1 token for 1 min
-		params := createParams(map[string]interface{}{
-			"durationMin": 1,
-			"tokens":      1,
-		})
-		output, err = lockInterest(t, configPath, params, true)
-		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
-
-		// Sleep for a bit before checking balance so there is balance already from interest.
-		cliutil.Wait(t, time.Second)
-
-		// Get balance BEFORE locked tokens expire.
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: \d{1,4} SAS \(\d*\.?\d+ USD\)$`), output[0])
-
-		// Get locked tokens BEFORE locked tokens expire.
-		output, err = getLockedTokens(t, configPath)
-		require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Locked tokens:", output[0])
-
-		var stats climodel.LockedInterestPoolStats
-		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
-		require.Len(t, stats.Stats, 1)
-		require.NotEqual(t, "", stats.Stats[0].ID)
-		require.True(t, stats.Stats[0].Locked)
-		require.Equal(t, time.Minute, stats.Stats[0].Duration)
-		require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Minute)
-		require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-		require.Equal(t, apr, stats.Stats[0].APR)
-		require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-		require.Equal(t, int64(10_000_000_000), stats.Stats[0].Balance)
-
-		// Unlock BEFORE locked tokens expire.
-		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": stats.Stats[0].ID,
-		}), false)
-		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
-	})
-
-	t.Run("Unlock attempt with pool_id from someone else should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-
-		// lock 1 token for 1 min
-		params := createParams(map[string]interface{}{
-			"durationMin": 1,
-			"tokens":      1,
-		})
-		output, err = lockInterest(t, configPath, params, true)
-		require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Tokens (1.000000) locked successfully", output[0])
-
-		lockTimer := time.NewTimer(time.Minute)
-
-		// Sleep for a bit before checking balance so there is balance already from interest.
-		cliutil.Wait(t, time.Second)
-
-		// Get balance BEFORE locked tokens expire.
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "get balance failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: \d{1,4} SAS \(\d*\.?\d+ USD\)$`), output[0])
-
-		// Get locked tokens BEFORE locked tokens expire.
-		output, err = getLockedTokens(t, configPath)
-		require.Nil(t, err, "get locked tokens failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Locked tokens:", output[0])
-
-		var stats climodel.LockedInterestPoolStats
-		err = json.Unmarshal([]byte(output[1]), &stats)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[1], err)
-		require.Len(t, stats.Stats, 1)
-		require.NotEqual(t, "", stats.Stats[0].ID)
-		require.True(t, stats.Stats[0].Locked)
-		require.Equal(t, time.Minute, stats.Stats[0].Duration)
-		require.LessOrEqual(t, stats.Stats[0].TimeLeft, time.Minute)
-		require.LessOrEqual(t, stats.Stats[0].StartTime, time.Now().Unix())
-		require.Equal(t, apr, stats.Stats[0].APR)
-		require.GreaterOrEqual(t, stats.Stats[0].TokensEarned, int64(0))
-		require.Equal(t, int64(10_000_000_000), stats.Stats[0].Balance)
-
-		thirdPartyWallet := escapedTestName(t) + "_THIRDPARTY"
-
-		output, err = registerWalletForName(t, configPath, thirdPartyWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		// Wait until lock expires.
-		<-lockTimer.C
-
-		// Unlock attempt by third party wallet.
-		output, err = unlockInterestForWallet(t, thirdPartyWallet, configPath, createParams(map[string]interface{}{
-			"pool_id": stats.Stats[0].ID,
-		}), false)
-		require.NotNil(t, err, "Missing expected unlock interest failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, `Failed to unlock tokens. {"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "failed locking tokens: lock amount is greater than balance", output[0])
 	})
 }
 
