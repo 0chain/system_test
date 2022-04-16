@@ -308,7 +308,7 @@ type StakePool struct {
 }
 
 type Node struct {
-	SimpleNode `json:"simple_miner" :"simple_node" :"simple_node" :"simple_node"`
+	SimpleNode `json:"simple_miner"`
 	StakePool  `json:"stake_pool"`
 }
 
