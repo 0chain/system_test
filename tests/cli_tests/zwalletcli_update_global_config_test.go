@@ -13,6 +13,8 @@ import (
 )
 
 func TestUpdateGlobalConfig(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Get Global Config Should Work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
