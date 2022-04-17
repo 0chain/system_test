@@ -13,11 +13,7 @@ import (
 )
 
 func TestUpdateGlobalConfig(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Get Global Config Should Work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -46,10 +42,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue := cfgBefore[configKey]
 		if oldValue == newValue {
@@ -67,7 +59,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -99,10 +91,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue1 := cfgBefore[configKey1].(string)
 		if oldValue1 == newValue1 {
@@ -125,7 +113,7 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
-		}, false)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -144,8 +132,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - Update immutable config must fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -159,10 +145,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 		configKey := "server_chain.owner"
 		newValue := wallet.ClientID
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
@@ -173,18 +155,12 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
@@ -250,8 +226,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - update with invalid key must fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -276,8 +250,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config - update with invalid value must fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -302,8 +274,6 @@ func TestUpdateGlobalConfig(t *testing.T) {
 	})
 
 	t.Run("Update Global Config with a non-owner wallet Should Fail ", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "215"
 
