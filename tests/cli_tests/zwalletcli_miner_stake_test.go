@@ -238,7 +238,7 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		wg := &sync.WaitGroup{}
-		for i := 0; i < len(newMiner.Pools); i++ {
+		for i := 0; i < newMiner.Settings.MaxNumDelegates; i++ {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
@@ -257,10 +257,9 @@ func TestMinerStake(t *testing.T) {
 			}(i)
 		}
 		wg.Wait()
-		require.NotEqual(t, len(newMiner.Pools), 0, "no miner delegates")
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     newMiner.ID,
-			"tokens": 9.0 / len(newMiner.Pools),
+			"tokens": 9.0 / newMiner.Settings.MaxNumDelegates,
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
