@@ -257,6 +257,7 @@ func TestMinerStake(t *testing.T) {
 			}(i)
 		}
 		wg.Wait()
+		require.NotEqual(t, 0, newMiner.Settings.MaxNumDelegates)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     newMiner.ID,
 			"tokens": 9.0 / newMiner.Settings.MaxNumDelegates,
