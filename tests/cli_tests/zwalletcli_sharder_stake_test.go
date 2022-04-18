@@ -75,7 +75,7 @@ func TestSharderStake(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Equal(t, "DELETING", poolsInfo.Status)
+		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
 	t.Run("Multiple stakes against a sharder should create multiple pools", func(t *testing.T) {

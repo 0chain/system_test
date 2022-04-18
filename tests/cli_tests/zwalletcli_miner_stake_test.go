@@ -89,7 +89,7 @@ func TestMinerStake(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Equal(t, "DELETING", poolsInfo.Status)
+		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
 	t.Run("Multiple stakes against a miner should create multiple pools", func(t *testing.T) {
@@ -264,7 +264,7 @@ func TestMinerStake(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", len(newMiner.Pools), newMiner.Settings.MaxNumDelegates), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.Settings.MaxNumDelegates, newMiner.Settings.MaxNumDelegates), output[0])
 	})
 
 	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
