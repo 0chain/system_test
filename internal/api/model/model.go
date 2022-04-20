@@ -122,7 +122,6 @@ type StorageChallenge struct {
 }
 
 type BlobberChallenge struct {
-	BlobberID                string            `json:"blobber_id"`
-	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
-	ChallengeIDs             []string          `json:"challenge_ids"`
+	BlobberID  string              `json:"blobber_id"`
+	Challenges []*StorageChallenge `json:"challenges"`
 }

@@ -458,7 +458,7 @@ func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, op
 	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
 	for _, blobber := range openChallengesAfter {
-		if len(blobber.ChallengeIDs) > len(openChallengesBefore[blobber.BlobberID].ChallengeIDs) {
+		if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
 			return true
 		}
 	}
