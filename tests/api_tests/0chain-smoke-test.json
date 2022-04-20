@@ -166,7 +166,7 @@
 									"*/",
 									"async function isServiceUp(endpoint){",
 									"    return await new Promise((resolve, reject) => {",
-									"    pm.sendRequest(endpoint + \"/health\" , function (err, response){",
+									"    pm.sendRequest(endpoint + \"/v1/chain/get/stats\" , function (err, response){",
 									"    resolve(response.code)",
 									"});",
 									" }).then(function(code) {",
