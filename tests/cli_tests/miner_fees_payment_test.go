@@ -47,7 +47,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, escapedTestName(t))
@@ -90,7 +90,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "vestingpool")
@@ -129,7 +129,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "lock")
@@ -154,7 +154,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "unlock")
@@ -193,7 +193,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "read_pool_lock")
@@ -224,7 +224,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "read_pool_unlock")
@@ -264,7 +264,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "write_pool_lock")
@@ -296,7 +296,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
 
-		//require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "write_pool_unlock")
@@ -346,7 +346,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 		endBalance := getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block := getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "stake_pool_lock")
@@ -369,7 +369,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 		endBalance = getNodeBalanceFromASharder(t, miner.ID)
-		//require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
+		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
 		block = getBlockContainingTransaction(t, startBalance, endBalance, wallet, &miner, "stake_pool_unlock")

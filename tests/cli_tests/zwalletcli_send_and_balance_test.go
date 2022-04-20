@@ -363,8 +363,8 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 	require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
 	require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
-	// Piers test
-	// require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
+
+	require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 	return &startBalance
 }
 
