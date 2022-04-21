@@ -62,6 +62,16 @@ type Block struct {
 	} `json:"block"`
 }
 
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
+
 type Transfer struct {
 	Minter string `json:"minter"`
 	From   string `json:"from"`
