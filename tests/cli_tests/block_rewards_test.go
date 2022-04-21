@@ -100,9 +100,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		var startBalance apimodel.Balance
 		err = json.Unmarshal(resBody, &startBalance)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-		require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-		require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
-		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
 		params := createParams(map[string]interface{}{
@@ -130,10 +127,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		var endBalance apimodel.Balance
 		err = json.Unmarshal(resBody, &endBalance)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-		require.NotEmpty(t, endBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 
 		totalRewardsAndFees := int64(0)
 		// Calculate the total rewards and fees for this miner.
@@ -256,9 +249,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		var startBalance apimodel.Balance
 		err = json.Unmarshal(resBody, &startBalance)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-		require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-		require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
-		require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
 
 		// Do 5 lock transactions with fees
 		params := createParams(map[string]interface{}{
@@ -286,10 +276,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		var endBalance apimodel.Balance
 		err = json.Unmarshal(resBody, &endBalance)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-		require.NotEmpty(t, endBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
-
-		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 
 		totalRewardsAndFees := int64(0)
 		// Calculate the total rewards and fees for this sharder.
