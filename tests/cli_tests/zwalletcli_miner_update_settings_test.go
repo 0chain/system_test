@@ -3,14 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -66,16 +64,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 	lastRoundOfSettingUpdate := int64(0)
 
 	// Get base URL for API calls.
-	sharders := getShardersList(t)
-	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		break
-	}
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		// Get the starting balance for miner's delegate wallet.
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -83,7 +74,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -92,7 +83,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake": 1,
 		}), true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 2)
@@ -112,7 +103,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -120,7 +111,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -129,7 +120,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": 5,
 		}), true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating num_delegates in miner node")
 		require.Len(t, output, 2)
@@ -148,7 +139,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -156,7 +147,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -165,7 +156,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake": 99,
 		}), true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
 		require.Len(t, output, 2)
@@ -185,7 +176,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -193,7 +184,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -204,7 +195,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake":     1,
 		}), true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
 		require.Len(t, output, 2)
@@ -375,17 +366,6 @@ func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]st
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
-func getCurrentRound(t *testing.T, sharderBaseUrl, minerID string) int64 {
-	res, err := apiGetBalance(sharderBaseUrl, minerID)
-	require.Nil(t, err, "Error retrieving miner %s balance", minerID)
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", minerID, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body")
-
-	var balance apimodel.Balance
-	err = json.Unmarshal(resBody, &balance)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	return balance.Round
+func getCurrentRound(t *testing.T) int64 {
+	return getLatestFinalizedBlock(t).Round
 }
