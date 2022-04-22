@@ -1346,8 +1346,9 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
 	t.Run("Download File using Expired Allocation Should Fail", func(t *testing.T) {
