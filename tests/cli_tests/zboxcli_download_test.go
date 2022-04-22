@@ -987,11 +987,10 @@ func TestDownload(t *testing.T) {
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// An empty File is downloaded instead of first 5 blocks.
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+		require.NotNil(t, err)
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should fail", func(t *testing.T) {
