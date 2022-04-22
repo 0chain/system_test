@@ -26,6 +26,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
+		t.Skipf("fee payments cannot be confirmed at the momment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -61,6 +62,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("Vp-add with fee should pay fee to the miners", func(t *testing.T) {
+		t.Skipf("fee payments cannot be confirmed at the momment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -102,6 +104,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
+		t.Skipf("fee payments cannot be confirmed at the momment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -162,6 +165,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
+		t.Skipf("fee payments cannot be confirmed at the momment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -295,6 +299,7 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
+		t.Skipf("fee payments cannot be confirmed at the momment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -371,6 +376,7 @@ func getBlockContainingTransaction(
 	txnData string,
 ) (block apimodel.Block) {
 	for round := startBlock.Round + 1; round <= endBlock.Round; round++ {
+		fmt.Println("piers getBlockContainingTransaction round start", startBlock.Round, "round", round, "rel", round-endBlock.Round, "end", endBlock.Round)
 		block := getRoundBlockFromASharder(t, round)
 
 		for i := range block.Block.Transactions {
