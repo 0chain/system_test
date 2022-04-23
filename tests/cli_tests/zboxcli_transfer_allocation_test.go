@@ -550,9 +550,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"authticket": authTicket,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "owner id mismatch")
 
 		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{

@@ -640,18 +640,17 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//FIXME: POSSIBLE BUG: Can't download by self-paying for shared file (rx-pay)
 	t.Run("Download Shared File by Paying Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename string
+		var allocationID, authTicket, filename string
 
 		filesize := int64(10)
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
 			})
@@ -677,22 +676,19 @@ func TestDownload(t *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * 1024,
-			"tokens": 1,
-		})
-
+		err = registerWalletAndLockReadTokens(t, configPath, allocationID)
+		require.Nil(t, err)
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 			"rx_pay":     "",
 		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
 
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
 
 	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
@@ -836,7 +832,7 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64((data.NumOfBlocks-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
 	})
 
-	t.Run("Download File With Only endblock Should Work", func(t *testing.T) {
+	t.Run("Download File With Only endblock Should Not Work", func(t *testing.T) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -855,46 +851,18 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(filename),
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
-		var data climodel.FileStats
-		for _, data = range stats {
-			break
-		}
-
-		endBlock := int64(5) // blocks 1 to 5 should be downloaded
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		endBlock := int64(5)
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 			"endblock":   endBlock,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		}), false)
 
-		// FIXME: Type = application/octet-stream.
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = . Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		info, err := os.Stat("tmp/" + filepath.Base(filename))
-		require.Nil(t, err, "error getting file stats")
-		// downloaded file size should equal to ratio of block downloaded by original file size
-		// FIXME: giving only endblock should download from block 1 to that endblock.
-		// Instead, empty file is downloaded.
-		require.NotEqual(t, float64(info.Size()), (float64(endBlock)/float64(data.NumOfBlocks))*float64((filesize)))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
@@ -987,11 +955,10 @@ func TestDownload(t *testing.T) {
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// An empty File is downloaded instead of first 5 blocks.
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+		require.NotNil(t, err)
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should fail", func(t *testing.T) {
@@ -1023,11 +990,11 @@ func TestDownload(t *testing.T) {
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// 40 blocks cannot be downloaded as that many blocks don't exist.
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "Invalid block number")
 	})
 
 	t.Run("Download with endblock less than startblock should fail", func(t *testing.T) {
@@ -1054,15 +1021,15 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
+			"localpath":  "/tmp",
 			"startblock": startBlock,
 			"endblock":   endBlock,
-		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// An empty file is downloaded.
-		require.Nil(t, err, strings.Join(output, "\n"))
+		}), false)
+
+		require.NotNil(t, err)
 		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
 	t.Run("Download with negative startblock should fail", func(t *testing.T) {
@@ -1091,11 +1058,11 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 			"startblock": startBlock,
 		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// An unexpected amount of blocks are downloaded.
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *testing.T) {
@@ -1118,17 +1085,19 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		endBlock := -6
+		startBlock := 1
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 			"endblock":   endBlock,
-		}), true)
-		// FIXME: error should not be nil, as this is unexpected behavior.
-		// An empty file is downloaded.
-		require.Nil(t, err, strings.Join(output, "\n"))
+			"startblock": startBlock,
+		}), false)
+
+		require.NotNil(t, err)
 		require.Len(t, output, 2)
-		require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
@@ -1346,8 +1315,9 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1])
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
 	t.Run("Download File using Expired Allocation Should Fail", func(t *testing.T) {
