@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -109,7 +108,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 			// _ = file.Truncate(0)
 			// _, _ = file.Seek(0, 0)
 			// _, _ = fmt.Fprint(file, newOwnerWallet)
-			output, err = updateStorageSCConfig(t, filepath.Join(".", "config", escapedTestName(t)), map[string]interface{}{
+			output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
 			}, true)
