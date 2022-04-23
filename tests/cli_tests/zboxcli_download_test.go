@@ -687,6 +687,8 @@ func TestDownload(t *testing.T) {
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
 
 	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
@@ -855,7 +857,7 @@ func TestDownload(t *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 			"endblock":   endBlock,
-		}), true)
+		}), false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
@@ -1083,7 +1085,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err)
 
 		endBlock := -6
-		startBlock := -10
+		startBlock := 1
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -1093,9 +1095,9 @@ func TestDownload(t *testing.T) {
 		}), false)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 3)
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
