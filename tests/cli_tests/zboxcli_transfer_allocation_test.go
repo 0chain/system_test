@@ -553,7 +553,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
 		require.Contains(t, aggregatedOutput, "owner id mismatch")
-		// require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 		// 	"download file - Unexpected output", strings.Join(output, "\n"))
 
 		/* Authticket is redundant for owner and collaborator

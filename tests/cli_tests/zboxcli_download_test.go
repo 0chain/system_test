@@ -1096,7 +1096,6 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 3)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
-		// require.NotEqual(t, output[0], "invalid startblock. Please input greater than or equal to 1")
 	})
 
 	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
