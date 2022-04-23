@@ -1,0 +1,28 @@
+package api_tests
+
+import (
+	"github.com/sirupsen/logrus"
+	"os"
+	"strings"
+)
+
+type FallbackLogger struct {
+	logger logrus.Logger
+}
+
+func (l *FallbackLogger) init() {
+	logger := logrus.New()
+	logger.Out = os.Stdout
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("DEBUG")), "true") {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+}
+
+func (l *FallbackLogger) Infof(format string, args ...interface{}) {
+	l.logger.Infof(format, args...)
+}
