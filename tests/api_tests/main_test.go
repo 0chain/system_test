@@ -2,19 +2,20 @@ package api_tests
 
 import (
 	"encoding/json"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/go-resty/resty/v2"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
-	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
 var (
 	config     Config
 	network    Network
-	restClient *resty.Client
+	restClient = resty.New()
+	logger     = getLogger()
 )
 
 type Config struct {
@@ -30,55 +31,80 @@ func TestMain(m *testing.M) {
 	var configPath = os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		configPath = "./config/api_tests_config.yaml"
-		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
+		logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 	config = getConf(configPath)
 
-	restClient = resty.New()
-
 	resp, err := restClient.R().Get(config.NetworkEntrypoint)
 
-	var network Network
 	err = json.Unmarshal(resp.Body(), &network)
 	if err != nil {
-		log.Fatalf("yamlFile.Get err   #%v ", err)
+		panic("0dns call failed!")
 	}
 
-	performHealthcheck(network)
+	healthyMiners, healthySharders := performHealthcheck(network)
+	network.Miners = healthyMiners
+	network.Sharders = healthySharders
+
+	exitRun := m.Run()
+	os.Exit(exitRun)
 }
 
-func performHealthcheck(network Network) {
-	for _, miner := range network.Miners {
-		healthResponse, err := restClient.R().Get(miner + "/v1/chain/get/stats")
+func performHealthcheck(network Network) ([]string, []string) {
+	healthyMiners := getHealthyNodes(network.Miners)
+	healthySharders := getHealthyNodes(network.Sharders)
+
+	if len(healthyMiners) == 0 {
+		panic("No healthy miners found!")
+	}
+	if len(healthySharders) == 0 {
+		panic("No healthy sharders found!")
+	}
+
+	return healthyMiners, healthySharders
+}
+
+func getHealthyNodes(nodes []string) []string {
+	var healthyNodes []string
+	for _, node := range nodes {
+		healthResponse, err := restClient.R().Get(node + "/v1/chain/get/stats")
 
 		if err == nil && healthResponse.IsSuccess() {
-			println(miner + " is success!")
+			println(node + " is UP!")
+			healthyNodes = append(healthyNodes, node)
 		} else {
-			println(miner + " is NOT success!")
+			println(node + " is DOWN!")
 		}
 	}
 
-	for _, sharder := range network.Sharders {
-		healthResponse, err := restClient.R().Get(sharder + "/v1/chain/get/stats")
-
-		if err == nil && healthResponse.IsSuccess() {
-			println(sharder + " is success!")
-		} else {
-			println(sharder + " is NOT success!")
-		}
-	}
+	return healthyNodes
 }
 
 func getConf(path string) Config {
 	var config Config
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatalf("yamlFile.Get err   #%v ", err)
+		panic("Failed to read config file!")
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		log.Fatalf("ERR0R: %v", err)
+		panic("failed to deserialise config file!")
 	}
 
 	return config
+}
+
+func getLogger() *logrus.Logger {
+	logger := logrus.New()
+	logger.Out = os.Stdout
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("DEBUG")), "true") {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+
+	return logger
 }
