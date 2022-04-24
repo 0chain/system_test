@@ -13,11 +13,7 @@ import (
 )
 
 func TestFaucetUpdateConfig(t *testing.T) {
-	t.Parallel()
-
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -73,10 +69,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
-	
-	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
 
+	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -102,8 +96,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update owner id then update max_pour_amount with old owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -148,8 +140,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "max_pour_amount"
 		newValue := "15"
 
@@ -167,8 +157,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -193,8 +181,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -216,8 +202,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
