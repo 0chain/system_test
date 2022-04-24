@@ -777,6 +777,52 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 	})
 
+	t.Run("should allow update of owner", func(t *testing.T) {
+		ownerKey := "owner_id"
+		newOwner := "22e412a350036944f9762a3d6b5687ee4f64d20d2cf6faf2571a490defd10f17"
+		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
+
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   ownerKey,
+			"values": newOwner,
+		}, true)
+		defer func() {
+			output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
+				"keys":   ownerKey,
+				"values": oldOwner,
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2, strings.Join(output, "\n"))
+		}()
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
+
+		output, err = getVestingPoolSCConfig(t, configPath, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+		cfgAfter, _ := keyValuePairStringToMap(t, output)
+
+		require.Equal(t, newOwner, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwner)
+
+		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   ownerKey,
+			"values": oldOwner,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
+	})
+
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
 
 	// FIXME: add param validation
