@@ -131,7 +131,7 @@ func TestSharderStake(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, `delegate_pool_add: digging delegate pool: no tokens to lock`, output[0])
 	})
 
 	t.Run("Staking negative tokens against valid sharder should fail", func(t *testing.T) {
