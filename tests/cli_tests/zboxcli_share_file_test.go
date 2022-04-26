@@ -125,9 +125,9 @@ func TestShareFile(t *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "invalid ed25519 curve point")
 	})
 
 	t.Run("Revoke auth ticket on publicly-shared unencrypted file should fail to download", func(t *testing.T) {
@@ -189,9 +189,9 @@ func TestShareFile(t *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.NotNil(t, err, "Expected error to be present but was not.", strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
 	t.Run("Expired auth ticket of a publicly-shared file should fail to download", func(t *testing.T) {
@@ -526,9 +526,9 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
 	t.Run("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", func(t *testing.T) {

@@ -110,15 +110,36 @@ func TestWritePoolLockUnlock(t *testing.T) {
 			require.Less(t, 0, len(writePool.Blobber))
 			require.Equal(t, true, writePool.Locked)
 
-			// Blobber write pool balance should be (pool Balance)/num(blobbers) ZCN in each
+			/*
+			**	Total write pool balance should be divided as per read_price ratio amongst each blobber
+			 */
+
+			// Get total
+			blobbersInAllocation := map[string]climodel.BlobberDetails{}
+			var total float64
 			for i := 0; i < len(writePool.Blobber); i++ {
-				t.Logf("\tThe following information is for Blobber Id [%v]", writePool.Blobber[i].BlobberID)
+				output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": writePool.Blobber[i].BlobberID}))
+				require.Nil(t, err, strings.Join(output, "\n"))
+				require.Len(t, output, 1)
+
+				var blobberInfo climodel.BlobberDetails
+				err = json.Unmarshal([]byte(output[0]), &blobberInfo)
+				require.Nil(t, err, strings.Join(output, "\n"))
+
+				total += intToZCN(blobberInfo.Terms.Write_price)
+				blobbersInAllocation[writePool.Blobber[i].BlobberID] = blobberInfo
+			}
+
+			// Blobber write pool balance should be (pool Balance)/blobber.Terms.WritePrice ZCN in each
+			for i := 0; i < len(writePool.Blobber); i++ {
 				t.Logf("\t\tThe following information is for Blobber Id [%v]", writePool.Blobber[i].BlobberID)
-				require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), writePool.Blobber[i].BlobberID)
+				t.Log("For Blobber ID ", writePool.Blobber[i].BlobberID, ": ")
+
+				ratio := intToZCN(blobbersInAllocation[writePool.Blobber[i].BlobberID].Terms.Write_price) / total
 
 				t.Log("\t\t\tActual Write Pool Blobber Balance: ", intToZCN(writePool.Blobber[i].Balance))
 				t.Log("\t\t\tExpected: Write Pool Blobber Balance", intToZCN(writePool.Balance)/float64(len(writePool.Blobber)))
-				assert.InEpsilon(t, intToZCN(writePool.Balance)/float64(len(writePool.Blobber)), intToZCN(writePool.Blobber[i].Balance), epsilon)
+				assert.InEpsilon(t, intToZCN(writePool.Balance)*ratio, intToZCN(writePool.Blobber[i].Balance), epsilon)
 			}
 		}
 

@@ -80,6 +80,27 @@ func TestRegisterWallet(t *testing.T) {
 	})
 }
 
+func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename, allocationID string) error {
+	_, err := registerWalletForName(t, cliConfigFilename, escapedTestName(t))
+	if err != nil {
+		return err
+	}
+	var tokens float64 = 2
+	_, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
+	if err != nil {
+		return err
+	}
+
+	// Lock half the tokens for read pool
+	_, err = readPoolLock(t, cliConfigFilename, createParams(map[string]interface{}{
+		"allocation": allocationID,
+		"tokens":     tokens / 2,
+		"duration":   "10m",
+	}), true)
+
+	return err
+}
+
 func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 }

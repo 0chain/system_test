@@ -24,7 +24,7 @@ func TestUpload(t *testing.T) {
 
 	// Success Scenarios
 
-	t.Run("Upload File With half Size of the Allocation Should Work ", func(t *testing.T) {
+	t.Run("Upload File With half Size of the Allocation Should Work", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(1 * MB)
@@ -53,6 +53,39 @@ func TestUpload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Upload multiple files less than size of the Allocation Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(256 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   1,
+		})
+
+		for i := 0; i < 2; i++ {
+			filename := generateRandomTestFileName(t)
+			err := createFileWithSize(filename, fileSize)
+			require.Nil(t, err)
+
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": "/",
+				"localpath":  filename,
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1])
+		}
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
@@ -292,7 +325,6 @@ func TestUpload(t *testing.T) {
 
 		allocSize := int64(500 * MB)
 		fileSize := int64(99 * MB)
-		chunkSize := int64(99 * MB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -303,10 +335,10 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-			"chunksize":  chunkSize,
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -653,7 +685,7 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
 			strings.HasSuffix(strings.Join(output, ""),
-				`bad request: {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`),
+				`bad request: {"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
 			strings.Join(output, "\n"))
 	})
 
@@ -736,31 +768,6 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
-	})
-
-	t.Run("Upload Encrypted File With Too Small Chunksize Should Fail", func(t *testing.T) {
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   20480,
-			"data":   1,
-			"parity": 1,
-		})
-
-		fileName := generateRandomTestFileName(t)
-		err := createFileWithSize(fileName, 20480)
-		require.Nil(t, err)
-
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(fileName),
-			"localpath":  fileName,
-			"chunksize":  271,
-			"encrypt":    "",
-		})
-
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		require.Equal(t, "Upload failed. chunk: chunk size is too small. it must greater than 272 if file is uploaded with encryption", output[0])
 	})
 }
 
