@@ -135,7 +135,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 5, len(minerInfo.Pools))
+		require.Equal(t, 5, minerInfo.Settings.MaxNumDelegates)
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
