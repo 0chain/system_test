@@ -372,6 +372,15 @@ func getShardersList(t *testing.T) map[string]climodel.Sharder {
 func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
+	found := false
+	for index, line := range output {
+		if line == "MagicBlock Sharders" {
+			found = true
+			output = output[index:]
+			break
+		}
+	}
+	require.True(t, found, "MagicBlock Sharders not found in getShardersForWallet output")
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 	require.Equal(t, "MagicBlock Sharders", output[0])
