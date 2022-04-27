@@ -186,7 +186,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
-		t.Skip("no longer ture, rewards are not paid to wallet until a collect reward transaction")
+		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

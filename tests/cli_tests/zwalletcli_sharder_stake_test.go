@@ -153,6 +153,7 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
+		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
