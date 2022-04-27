@@ -407,8 +407,7 @@ func getLatestFinalizedBlock(t *testing.T) *apimodel.LatestFinalizedBlock {
 
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
-	strBody := string(resBody)
-	strBody = strBody
+
 	var block apimodel.LatestFinalizedBlock
 	err = json.Unmarshal(resBody, &block)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
