@@ -186,6 +186,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
+		t.Skip("no longer ture, rewards are not paid to wallet until a collect reward transaction")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -475,6 +476,9 @@ func getBalanceFromSharders(t *testing.T, clientId string) int64 {
 	res, err := apiGetBalance(sharderBaseURLs[0], clientId)
 	require.Nil(t, err, "error getting balance")
 
+	if res.StatusCode == 400 {
+		return 0
+	}
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get balance")
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
