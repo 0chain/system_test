@@ -16,8 +16,8 @@ func TestRegisterWallet(t *testing.T) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonic(t)
-		expectedPublicKey, _ := crypto.GenerateKeys(t, mnemonic)
-		publicKeyBytes, _ := hex.DecodeString(expectedPublicKey)
+		keyPair := crypto.GenerateKeys(t, mnemonic)
+		publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
 		expectedClientId := crypto.Sha3256(publicKeyBytes)
 
 		registeredWallet, rawHttpResponse, err := registerWalletForMnemonic(t, mnemonic)
@@ -26,22 +26,17 @@ func TestRegisterWallet(t *testing.T) {
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
 		require.Equal(t, "200 OK", rawHttpResponse.Status())
 		require.Equal(t, registeredWallet.Id, expectedClientId)
-		require.Equal(t, registeredWallet.PublicKey, expectedPublicKey)
+		require.Equal(t, registeredWallet.PublicKey, keyPair.PublicKey)
 		require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
 		require.NotNil(t, registeredWallet.Version)
 	})
 }
 
-func registerNewWallet(t *testing.T) (*model.Wallet, *resty.Response, error) {
-	mnemonic := crypto.GenerateMnemonic(t)
-	return registerWalletForMnemonic(t, mnemonic)
-}
-
 func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, *resty.Response, error) {
-	publicKeyHex, _ := crypto.GenerateKeys(t, mnemonic)
-	publicKeyBytes, _ := hex.DecodeString(publicKeyHex)
+	keyPair := crypto.GenerateKeys(t, mnemonic)
+	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
 	clientId := crypto.Sha3256(publicKeyBytes)
-	walletRequest := model.Wallet{Id: clientId, PublicKey: publicKeyHex}
+	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey}
 
 	walletResponse, httpResponse, httpError := v1ClientPut(t, walletRequest)
 

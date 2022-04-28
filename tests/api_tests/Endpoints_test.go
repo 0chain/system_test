@@ -12,3 +12,9 @@ func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *rest
 	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/client/put", walletRequest, &walletResponse)
 	return walletResponse, httpResponse, httpError
 }
+func v1TransactionPut(t *testing.T, walletRequest model.Transaction) (*model.Transaction, *resty.Response, error) {
+	var transactionResponse *model.Transaction
+
+	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/transaction/put", walletRequest, &transactionResponse)
+	return transactionResponse, httpResponse, httpError
+}

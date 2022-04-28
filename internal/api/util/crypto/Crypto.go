@@ -3,6 +3,7 @@ package crypto
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/sha3"
@@ -28,7 +29,7 @@ func GenerateMnemonic(t *testing.T) string {
 	return mnemonic
 }
 
-func GenerateKeys(t *testing.T, mnemonic string) (string, string) {
+func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
@@ -47,5 +48,5 @@ func GenerateKeys(t *testing.T, mnemonic string) (string, string) {
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
-	return publicKeyHex, secretKeyHex
+	return model.KeyPair{PublicKey: publicKeyHex, PrivateKey: secretKeyHex}
 }
