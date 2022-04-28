@@ -1,4 +1,5 @@
 //nolint:gocritic
+//nolint:gocyclo
 package api_tests
 
 import (
@@ -12,9 +13,6 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
-
-//nolint:gocyclo
-
 func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 	t.Parallel()
 
