@@ -167,7 +167,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
@@ -179,7 +179,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
@@ -191,7 +191,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *testing.T) {
@@ -203,7 +203,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *testing.T) {
@@ -215,7 +215,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with expire smaller than limit (expire < 5m) Should Fail", func(t *testing.T) {
@@ -227,7 +227,7 @@ func TestCreateAllocation(t *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation duration", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: Blobbers provided are not enough to honour the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *testing.T) {
