@@ -171,9 +171,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			}
 
 		}
-		eplsilon := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
+		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		assert.InEpsilonf(t, minTotalRewardsAndFees, rewardEarned, eplsilon, "total share difference %d is not within range %d", rewardEarned, eplsilon)
+		assert.InDeltaf(t, minTotalRewardsAndFees, rewardEarned, delta, "total share difference %d is not within range %d", rewardEarned, delta)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -304,9 +304,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 				}
 			}
 		}
-		eplsilon := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
+		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		assert.InEpsilonf(t, minTotalRewardsAndFees, rewardEarned, eplsilon, "total share difference %d is not within range %d", rewardEarned, eplsilon)
+		assert.InDelta(t, minTotalRewardsAndFees, rewardEarned, delta, "total share difference %d is not within range %d", rewardEarned, delta)
 	})
 }
 
