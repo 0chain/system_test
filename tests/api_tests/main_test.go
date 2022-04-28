@@ -1,15 +1,15 @@
 package api_tests
 
 import (
-	apiutils "github.com/0chain/system_test/internal/api/util"
+	"github.com/0chain/system_test/internal/api/util"
 	"os"
 	"testing"
 )
 
 var (
-	config         apiutils.Config
-	zeroChain      apiutils.Zerochain
-	fallbackLogger apiutils.FallbackLogger
+	config         util.Config
+	zeroChain      util.Zerochain
+	fallbackLogger util.FallbackLogger
 )
 
 func TestMain(m *testing.M) {
