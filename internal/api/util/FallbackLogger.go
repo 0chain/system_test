@@ -1,4 +1,4 @@
-package api_tests
+package util
 
 import (
 	"github.com/sirupsen/logrus"
@@ -10,7 +10,7 @@ type FallbackLogger struct {
 	logger logrus.Logger
 }
 
-func (l *FallbackLogger) init() {
+func (l *FallbackLogger) Init() {
 	logger := logrus.New()
 	logger.Out = os.Stdout
 

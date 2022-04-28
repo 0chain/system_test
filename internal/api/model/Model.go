@@ -1,6 +1,7 @@
-package apimodel
+package model
 
 import (
+	"encoding/json"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
@@ -125,4 +126,20 @@ type BlobberChallenge struct {
 	BlobberID                string            `json:"blobber_id"`
 	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
 	ChallengeIDs             []string          `json:"challenge_ids"`
+}
+
+type Wallet struct {
+	Id           string `json:"id"`
+	Version      string `json:"version"`
+	CreationDate *int   `json:"creation_date"`
+	PublicKey    string `json:"public_key"`
+}
+
+func (w Wallet) String() string {
+	out, err := json.Marshal(w)
+	if err != nil {
+		return "failed to serialise wallet object"
+	}
+
+	return string(out)
 }

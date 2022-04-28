@@ -1,4 +1,4 @@
-package api_tests
+package util
 
 import (
 	"gopkg.in/yaml.v3"
@@ -9,7 +9,7 @@ type Config struct {
 	NetworkEntrypoint string `yaml:"network_entrypoint"`
 }
 
-func (config *Config) init(path string) {
+func (config *Config) Init(path string) {
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic("Failed to read config file!")
