@@ -12,7 +12,7 @@ import (
 )
 
 func TestSharderStake(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
@@ -36,7 +36,7 @@ func TestSharderStake(t *testing.T) {
 	)
 
 	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -120,8 +120,8 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
-		t.Parallel()
-		t.Skip("piers")
+		//t.Parallel()
+		//t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -135,7 +135,7 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Staking negative tokens against valid sharder should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -154,7 +154,7 @@ func TestSharderStake(t *testing.T) {
 
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -190,8 +190,8 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-		t.Skip("piers")
+		//t.Parallel()
+		//t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

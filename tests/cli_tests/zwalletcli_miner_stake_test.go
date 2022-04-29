@@ -19,7 +19,7 @@ import (
 )
 
 func TestMinerStake(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 
 	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
@@ -50,7 +50,7 @@ func TestMinerStake(t *testing.T) {
 	)
 
 	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -134,7 +134,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -151,7 +151,7 @@ func TestMinerStake(t *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Staking tokens against invalid node id should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -169,7 +169,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -188,7 +188,7 @@ func TestMinerStake(t *testing.T) {
 
 	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -224,7 +224,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
@@ -270,7 +270,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -298,7 +298,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -332,7 +332,7 @@ func TestMinerStake(t *testing.T) {
 
 	// FIXME: This does not fail. Is this by design or a bug?
 	t.Run("Staking tokens more than max_stake of a miner node through multiple stakes should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -368,7 +368,7 @@ func TestMinerStake(t *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Unlock tokens with invalid node id should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -404,7 +404,7 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
