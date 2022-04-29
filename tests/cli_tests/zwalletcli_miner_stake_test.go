@@ -101,11 +101,19 @@ func TestMinerStake(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
+		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.Len(t, output, 1)
+		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
+		beforeNumPools := len(poolsInfoBefore.Pools)
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": 1,
 		}), true)
-		require.Nil(t, err, "error staking tokens against node")
+		require.Nil(t, err,
+			"error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 		poolId1 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
@@ -127,10 +135,10 @@ func TestMinerStake(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[miner.ID], 2)
-		require.Equal(t, poolId1, poolsInfo.Pools[miner.ID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
-		require.Equal(t, poolId2, poolsInfo.Pools[miner.ID][1].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][1].Balance))
+		require.Equal(t, poolId1, poolsInfo.Pools[miner.ID][beforeNumPools].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][beforeNumPools].Balance))
+		require.Equal(t, poolId2, poolsInfo.Pools[miner.ID][1+beforeNumPools].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][1+beforeNumPools].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
