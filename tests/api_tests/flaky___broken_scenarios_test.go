@@ -20,12 +20,12 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonic(t)
-		expectedPublicKey, _ := crypto.GenerateKeys(t, mnemonic)
-		publicKeyBytes, _ := hex.DecodeString(expectedPublicKey)
+		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
+		publicKeyBytes, _ := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
 		expectedClientId := crypto.Sha3256(publicKeyBytes)
 		invalidCreationDate := -1
 
-		walletRequest := model.Wallet{Id: expectedClientId, PublicKey: expectedPublicKey, CreationDate: &invalidCreationDate}
+		walletRequest := model.Wallet{Id: expectedClientId, PublicKey: expectedKeyPair.PublicKey.SerializeToHexStr(), CreationDate: &invalidCreationDate}
 
 		registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest)
 
@@ -33,7 +33,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
 		require.Equal(t, "200 OK", httpResponse.Status())
 		require.Equal(t, registeredWallet.Id, expectedClientId)
-		require.Equal(t, registeredWallet.PublicKey, expectedPublicKey)
+		require.Equal(t, registeredWallet.PublicKey, expectedKeyPair.PublicKey)
 		require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
 		require.NotNil(t, registeredWallet.Version)
 	})
@@ -42,8 +42,8 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonic(t)
-		publicKeyHex, _ := crypto.GenerateKeys(t, mnemonic)
-		walletRequest := model.Wallet{Id: "invalid", PublicKey: publicKeyHex}
+		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
+		walletRequest := model.Wallet{Id: "invalid", PublicKey: expectedKeyPair.PublicKey.SerializeToHexStr()}
 
 		walletResponse, httpResponse, err := v1ClientPut(t, walletRequest)
 
@@ -56,8 +56,8 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonic(t)
-		publicKeyHex, _ := crypto.GenerateKeys(t, mnemonic)
-		publicKeyBytes, _ := hex.DecodeString(publicKeyHex)
+		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
+		publicKeyBytes, _ := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
 		clientId := crypto.Sha3256(publicKeyBytes)
 		walletRequest := model.Wallet{Id: clientId, PublicKey: "invalid"}
 

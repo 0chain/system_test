@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/herumi/bls-go-binary/bls"
 )
 
 type Balance struct {
@@ -126,6 +127,11 @@ type BlobberChallenge struct {
 	BlobberID                string            `json:"blobber_id"`
 	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
 	ChallengeIDs             []string          `json:"challenge_ids"`
+}
+
+type KeyPair struct {
+	PublicKey  bls.PublicKey
+	PrivateKey bls.SecretKey
 }
 
 type Wallet struct {

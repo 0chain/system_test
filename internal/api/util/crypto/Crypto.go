@@ -48,5 +48,5 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
-	return model.KeyPair{PublicKey: publicKeyHex, PrivateKey: secretKeyHex}
+	return model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
