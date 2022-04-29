@@ -127,7 +127,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 	t.Run("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *testing.T) {
 		//t.Parallel()
-
+		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
