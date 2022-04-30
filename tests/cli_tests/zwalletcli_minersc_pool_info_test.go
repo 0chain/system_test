@@ -15,8 +15,6 @@ import (
 )
 
 func TestMinerSCUserPoolInfo(t *testing.T) {
-	//t.Parallel()
-
 	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
 	}
@@ -28,8 +26,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 	require.Nil(t, err, "error fetching wallet")
 
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *testing.T) {
-		//t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -77,8 +73,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 	})
 
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *testing.T) {
-		//t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -126,7 +120,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 	})
 
 	t.Run("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *testing.T) {
-		//t.Parallel()
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
