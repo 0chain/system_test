@@ -9,15 +9,25 @@ import (
 const FAUCET_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
 
 func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *resty.Response, error) {
-	var walletResponse *model.Wallet
+	var wallet *model.Wallet
 
-	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/client/put", walletRequest, &walletResponse)
-	return walletResponse, httpResponse, httpError
+	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/client/put", walletRequest, &wallet)
+
+	return wallet, httpResponse, httpError
 }
 
-func v1TransactionPut(t *testing.T, walletRequest model.Transaction) (*model.Transaction, *resty.Response, error) {
-	var transactionResponse *model.Transaction
+func v1TransactionPut(t *testing.T, walletRequest *model.Transaction) (*model.TransactionResponse, *resty.Response, error) {
+	var transaction *model.TransactionResponse
 
-	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/transaction/put", walletRequest, &transactionResponse)
-	return transactionResponse, httpResponse, httpError
+	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/transaction/put", walletRequest, &transaction)
+
+	return transaction, httpResponse, httpError
+}
+
+func v1TransactionGetConfirmation(t *testing.T, hash string) (*model.Confirmation, *resty.Response, error) {
+	var confirmation *model.Confirmation
+
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/transaction/get/confirmation?hash="+hash, &confirmation)
+
+	return confirmation, httpResponse, httpError
 }

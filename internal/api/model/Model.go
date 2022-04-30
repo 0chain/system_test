@@ -12,6 +12,11 @@ type Balance struct {
 	Balance int64  `json:"balance"`
 }
 
+type TransactionResponse struct {
+	Async  bool        `json:"async"`
+	Entity Transaction `json:"entity"`
+}
+
 type Transaction struct {
 	Hash              string `json:"hash"`
 	Version           string `json:"version"`
@@ -132,6 +137,29 @@ type BlobberChallenge struct {
 type KeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
+}
+
+type Confirmation struct {
+	Version               string          `json:"version"`
+	Hash                  string          `json:"hash"`
+	BlockHash             string          `json:"block_hash"`
+	PreviousBlockHash     string          `json:"previous_block_hash"`
+	Transaction           *Transaction    `json:"txn,omitempty"`
+	CreationDate          int64           `json:"creation_date,omitempty"`
+	MinerID               string          `json:"miner_id"`
+	Round                 int64           `json:"round"`
+	Status                int             `json:"transaction_status"`
+	RoundRandomSeed       int64           `json:"round_random_seed"`
+	StateChangesCount     int             `json:"state_changes_count"`
+	MerkleTreeRoot        string          `json:"merkle_tree_root"`
+	MerkleTreePath        *MerkleTreePath `json:"merkle_tree_path"`
+	ReceiptMerkleTreeRoot string          `json:"receipt_merkle_tree_root"`
+	ReceiptMerkleTreePath *MerkleTreePath `json:"receipt_merkle_tree_path"`
+}
+
+type MerkleTreePath struct {
+	Nodes     []string `json:"nodes"`
+	LeafIndex int      `json:"leaf_index"`
 }
 
 type Wallet struct {

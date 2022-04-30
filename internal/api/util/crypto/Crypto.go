@@ -3,6 +3,7 @@ package crypto
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39"
@@ -49,4 +50,28 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	bls.SetRandFunc(nil)
 
 	return model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
+}
+
+func Hash(request *model.Transaction) {
+	var transactionDataHash = Sha3256([]byte(request.TransactionData))
+
+	var hashData = blankIfNil(request.CreationDate) + ":" +
+		blankIfNil(request.ClientId) + ":" +
+		blankIfNil(request.ToClientId) + ":" +
+		blankIfNil(request.TransactionValue) + ":" +
+		transactionDataHash
+
+	request.Hash = Sha3256([]byte(hashData))
+}
+
+func Sign(request *model.Transaction, pair model.KeyPair) {
+	hashToSign, _ := hex.DecodeString(request.Hash)
+	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
+}
+
+func blankIfNil(obj interface{}) string {
+	if obj == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", obj)
 }

@@ -32,6 +32,15 @@ func TestRegisterWallet(t *testing.T) {
 	})
 }
 
+func registerWallet(t *testing.T) (string, *model.Wallet, *resty.Response) {
+	mnemonic := crypto.GenerateMnemonic(t)
+	registeredWallet, rawHttpResponse, err := registerWalletForMnemonic(t, mnemonic)
+	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, rawHttpResponse)
+	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
+
+	return mnemonic, registeredWallet, rawHttpResponse
+}
+
 func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, *resty.Response, error) {
 	keyPair := crypto.GenerateKeys(t, mnemonic)
 	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
