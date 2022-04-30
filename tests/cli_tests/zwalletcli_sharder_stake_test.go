@@ -75,7 +75,6 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Multiple stakes against a sharder should create multiple pools", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
