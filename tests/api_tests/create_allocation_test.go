@@ -1,12 +1,13 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2"
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/model"
+	"github.com/go-resty/resty/v2"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateAllocation(t *testing.T) {
@@ -25,7 +26,6 @@ func TestCreateAllocation(t *testing.T) {
 }
 
 func createAllocation(t *testing.T, clientId string, keyPair model.KeyPair) *model.TransactionResponse {
-
 	allocationRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",

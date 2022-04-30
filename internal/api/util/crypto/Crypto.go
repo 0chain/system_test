@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"sync"
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/sha3"
-	"sync"
-	"testing"
 )
 
 var blsLock sync.Mutex

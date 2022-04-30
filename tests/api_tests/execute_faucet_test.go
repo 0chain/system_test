@@ -1,13 +1,14 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestExecuteFaucet(t *testing.T) {
@@ -62,7 +63,6 @@ func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, 
 }
 
 func executeFaucet(t *testing.T, clientId string, keyPair model.KeyPair) *model.TransactionResponse {
-
 	faucetRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",

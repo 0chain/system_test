@@ -2,11 +2,12 @@ package api_tests
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestRegisterWallet(t *testing.T) {

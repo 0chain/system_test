@@ -2,9 +2,10 @@ package model
 
 import (
 	"encoding/json"
+	"time"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"time"
 )
 
 type Balance struct {
@@ -240,7 +241,7 @@ type Wallet struct {
 func (w Wallet) String() string {
 	out, err := json.Marshal(w)
 	if err != nil {
-		return "failed to serialise wallet object"
+		return "failed to serialize wallet object"
 	}
 
 	return string(out)

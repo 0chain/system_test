@@ -2,8 +2,9 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/go-resty/resty/v2"
 	"testing"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type Zerochain struct {
@@ -18,7 +19,7 @@ func (z *Zerochain) Init(config Config) {
 
 	err = json.Unmarshal(resp.Body(), z)
 	if err != nil {
-		panic("0dns call failed!: encountered error [" + err.Error() + "] when trying to serialise body [" + resp.String() + "]")
+		panic("0dns call failed!: encountered error [" + err.Error() + "] when trying to serialize body [" + resp.String() + "]")
 	}
 
 	healthyMiners, healthySharders := z.performHealthcheck()

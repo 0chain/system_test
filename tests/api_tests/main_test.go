@@ -1,9 +1,10 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util"
 	"os"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util"
 )
 
 var (
