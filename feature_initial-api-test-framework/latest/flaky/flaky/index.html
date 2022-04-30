@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [feature_initial-api-test-framework/e3b20ac4] ran against [dev-2.devnet-0chain.net] at [2022-04-30_21.27.47]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [feature_initial-api-test-framework/e3b20ac4] ran against [dev-2.devnet-0chain.net] at [2022-04-30_21.27.47]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>25</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>10</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>15</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">April 30, 2022 22:19:38</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup failed " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup failed " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup failed " id="11"></div>
+            
+                <div class="testResultGroup failed " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup failed " id="18"></div>
+            
+                <div class="testResultGroup failed " id="19"></div>
+            
+                <div class="testResultGroup failed " id="20"></div>
+            
+                <div class="testResultGroup failed " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup failed " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":27,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":316.61,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:132: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Execute faucet smart contract failed. {\"error\": \"verify transaction failed\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Execute faucet smart contract failed. {\"error\": \"verify transaction failed\"}]\n","    utils.go:58: \u001b[32mCommand passed on retry [3/3]. Output: [Execute faucet smart contract success with txn :  91621020f3ef57bd673f91082633060cb3a65e083bd6697148fadec039bfe556]\n","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","    zboxcli_upload_test.go:798: Uploading file...\n","    zboxcli_download_token_test.go:269: Getting download cost...\n","    zboxcli_collaborator_system_test.go:809: Adding collaborator...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_file_meta_test.go:408: Getting file metadata...\n","    zboxcli_download_token_test.go:255: Locking read tokens...\n","    utils.go:133: Waiting 30s...\n","","    zboxcli_download_token_test.go:246: Getting read pool info...\n","    utils.go:133: Waiting 15s...\n","    zboxcli_download_test.go:1418: Downloading file...\n","    utils.go:133: Waiting 5s...\n","    utils.go:133: Waiting 30s...\n","","    zboxcli_download_token_test.go:246: Getting read pool info...\n","    flaky___broken_scenarios_test.go:418: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:418\n","        \tError:      \tRelative error is too high: 1e-06 (expected)\n","        \t            \t        \u003c 0.00043061910215939214 (actual)\n","        \tTest:       \tTest___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads\n","        \tMessages:   \tRead Pool balance must be equal to (initial balace-download cost)\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.38,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=4a62acd08a5d953d1be505dfed4a6c2d6014f662ef0bb1bba8432c601ce8d2eb: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 4a62acd08a5d953d1be505dfed4a6c2d6014f662ef0bb1bba8432c601ce8d2eb\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=4a62acd08a5d953d1be505dfed4a6c2d6014f662ef0bb1bba8432c601ce8d2eb: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 4a62acd08a5d953d1be505dfed4a6c2d6014f662ef0bb1bba8432c601ce8d2eb\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=ecc6255bb2f30132507f48a68ad505526a38e46d692e09b973ba62a28c7d335c: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ecc6255bb2f30132507f48a68ad505526a38e46d692e09b973ba62a28c7d335c\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=ecc6255bb2f30132507f48a68ad505526a38e46d692e09b973ba62a28c7d335c: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ecc6255bb2f30132507f48a68ad505526a38e46d692e09b973ba62a28c7d335c\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --size 2097152 --expire 1h --lock 0.5 --silent --wallet Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=3f1430d4a8eec4a0a9dba68070984971","6e89f9d956fcc10230a4a91c300001f8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.872540 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.872569 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.971266 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.050211 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.764640 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=95fe3778bccda7f74f5c47c1981274d109e09ab71a8eb8cc4a1a5c3e3855dd1f: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 95fe3778bccda7f74f5c47c1981274d109e09ab71a8eb8cc4a1a5c3e3855dd1f\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=95fe3778bccda7f74f5c47c1981274d109e09ab71a8eb8cc4a1a5c3e3855dd1f: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 95fe3778bccda7f74f5c47c1981274d109e09ab71a8eb8cc4a1a5c3e3855dd1f\"}\n","    utils.go:72: \u001b[31m95fe3778bccda7f74f5c47c1981274d109e09ab71a8eb8cc4a1a5c3e3855dd1f\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    zboxcli_update_allocation_test.go:512: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:512\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:479\n","        \t            \t\t\t\tflaky___broken_scenarios_test.go:229\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00035c090), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 3f1430d4a8eec4a0a9dba680709849716e89f9d956fcc10230a4a91c300001f8\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.35,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=db46fee4772b8def407cef95d4964daedfac58fa21aa8b6ec88b92a2d87a6ad6: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = db46fee4772b8def407cef95d4964daedfac58fa21aa8b6ec88b92a2d87a6ad6\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=db46fee4772b8def407cef95d4964daedfac58fa21aa8b6ec88b92a2d87a6ad6: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = db46fee4772b8def407cef95d4964daedfac58fa21aa8b6ec88b92a2d87a6ad6\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=d84976ca2d78c9b1f324a80211678d2d510632d61aca42e7929c038203d52777: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = d84976ca2d78c9b1f324a80211678d2d510632d61aca42e7929c038203d52777\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=d84976ca2d78c9b1f324a80211678d2d510632d61aca42e7929c038203d52777: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = d84976ca2d78c9b1f324a80211678d2d510632d61aca42e7929c038203d52777\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --lock 0.5 --size 2097152 --expire 1h --silent --wallet Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_locally_updated_files_-in_root-_must_be_updated_in_allocation_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_locally_updated_files_-in_root-_must_be_updated_in_allocation_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02","/v1/transaction/get/confirmation?hash=ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.862387 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.862447 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.958573 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.038299 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.732869 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=98441194a1ad9c40d0ccf1d0d82fd3c87ca469a2f3a45a85259380ee6f0f3eea: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 98441194a1ad9c40d0ccf1d0d82fd3c87ca469a2f3a45a85259380ee6f0f3eea\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=98441194a1ad9c40d0ccf1d0d82fd3c87ca469a2f3a45a85259380ee6f0f3eea: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 98441194a1ad9c40d0ccf1d0d82fd3c87ca469a2f3a45a85259380ee6f0f3eea\"}\n","    utils.go:72: \u001b[31m98441194a1ad9c40d0ccf1d0d82fd3c87ca469a2f3a45a85259380ee6f0f3eea\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    zboxcli_update_allocation_test.go:512: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:512\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:479\n","        \t            \t\t\t\tflaky___broken_scenarios_test.go:39\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000f2018), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ce5973c5b84bbc7b8df39b24114cb57d0eb97cda8710a8d8cc33a6733da7c8e8\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.34,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=0940e0101a3935f809cb069166b5def86c7e2541aef0d96a5bda4abbce3d64ee: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 0940e0101a3935f809cb069166b5def86c7e2541aef0d96a5bda4abbce3d64ee\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=0940e0101a3935f809cb069166b5def86c7e2541aef0d96a5bda4abbce3d64ee: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 0940e0101a3935f809cb069166b5def86c7e2541aef0d96a5bda4abbce3d64ee\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=b90b10193870815db9af85909292db04daa45858afa23286d31829390b907d1a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = b90b10193870815db9af85909292db04daa45858afa23286d31829390b907d1a\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=b90b10193870815db9af85909292db04daa45858afa23286d31829390b907d1a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = b90b10193870815db9af85909292db04daa45858afa23286d31829390b907d1a\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --lock 0.5 --size 2097152 --expire 1h --silent --wallet Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_locally_updated_files_-in_sub_folder-_must_be_updated_in_allocation_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyBrokenScenarios-Sync_path_to_non-empty_allocation_-_locally_updated_files_-in_sub_folder-_must_be_updated_in_allocation_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.n","et/sharder02/v1/transaction/get/confirmation?hash=9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.845291 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.845330 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.940029 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.020246 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.726504 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=340e387bf9ea4062ad536a8428c3df8df41b4e91891e54249fd4508e4079db27: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 340e387bf9ea4062ad536a8428c3df8df41b4e91891e54249fd4508e4079db27\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=340e387bf9ea4062ad536a8428c3df8df41b4e91891e54249fd4508e4079db27: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 340e387bf9ea4062ad536a8428c3df8df41b4e91891e54249fd4508e4079db27\"}\n","    utils.go:72: \u001b[31m340e387bf9ea4062ad536a8428c3df8df41b4e91891e54249fd4508e4079db27\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    zboxcli_update_allocation_test.go:512: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:512\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:479\n","        \t            \t\t\t\tflaky___broken_scenarios_test.go:124\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00035c000), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9b701748f98acf0ec7a1aa325c227a62eaf3d9586b5731de51115e5acf17c151\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.35,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=2c6f6da41f177c92233b1c5bbd904fd5ef4e9f0cc2a74a87c26ef17603a08169: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 2c6f6da41f177c92233b1c5bbd904fd5ef4e9f0cc2a74a87c26ef17603a08169\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=2c6f6da41f177c92233b1c5bbd904fd5ef4e9f0cc2a74a87c26ef17603a08169: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 2c6f6da41f177c92233b1c5bbd904fd5ef4e9f0cc2a74a87c26ef17603a08169\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=9500098d4f3f9c2da49c220a8f911f5c81c945324a813ae8fdba83cbad946e9b: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9500098d4f3f9c2da49c220a8f911f5c81c945324a813ae8fdba83cbad946e9b\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=9500098d4f3f9c2da49c220a8f911f5c81c945324a813ae8fdba83cbad946e9b: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 9500098d4f3f9c2da49c220a8f911f5c81c945324a813ae8fdba83cbad946e9b\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --lock 0.8 --size 10485760 --expire 1h --silent --wallet Test___FlakyBrokenScenarios-Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyBrokenScenarios-Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction","/get/confirmation?hash=734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.871492 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.871543 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.966193 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.045300 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.738818 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=56f0a6502191a83f802c05119be38323aeefda5ddb19d640622dfe21bdb35dbc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 56f0a6502191a83f802c05119be38323aeefda5ddb19d640622dfe21bdb35dbc\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=56f0a6502191a83f802c05119be38323aeefda5ddb19d640622dfe21bdb35dbc: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 56f0a6502191a83f802c05119be38323aeefda5ddb19d640622dfe21bdb35dbc\"}\n","    utils.go:72: \u001b[31m56f0a6502191a83f802c05119be38323aeefda5ddb19d640622dfe21bdb35dbc\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    flaky___broken_scenarios_test.go:437: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:437\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000516000), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost\n","        \tMessages:   \tFailed to create new allocation%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 734757b599688fa0fe7dceae6b9813cdd9c016c5da8858f943330cc0923616d8\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/delete_existing_file_in_root_directory_with_commit_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.42,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=040bda92177b111ff605646da1e2f8e9ceaf73e238d7ec0fcb8aa982108e28c2: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 040bda92177b111ff605646da1e2f8e9ceaf73e238d7ec0fcb8aa982108e28c2\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=040bda92177b111ff605646da1e2f8e9ceaf73e238d7ec0fcb8aa982108e28c2: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 040bda92177b111ff605646da1e2f8e9ceaf73e238d7ec0fcb8aa982108e28c2\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=c4d905e67cdfe309234f2bae0e7b633d6ad668fd5e31aa393f26e9ebeeabf414: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c4d905e67cdfe309234f2bae0e7b633d6ad668fd5e31aa393f26e9ebeeabf414\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=c4d905e67cdfe309234f2bae0e7b633d6ad668fd5e31aa393f26e9ebeeabf414: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c4d905e67cdfe309234f2bae0e7b633d6ad668fd5e31aa393f26e9ebeeabf414\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --lock 0.5 --size 10000 --expire 1h --silent --wallet Test___FlakyBrokenScenarios-delete_existing_file_in_root_directory_with_commit_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyBrokenScenarios-delete_existing_file_in_root_directory_with_commit_should_work_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=37debead01b218f88ab334678d643fe4b1","57add58496e75b44e817b2dafbe813: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.866343 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.866369 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.966830 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.048356 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.804617 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=c397385b2b16b3152874407baf1e73f12175bba4feea3a5c992e6961d691ba72: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c397385b2b16b3152874407baf1e73f12175bba4feea3a5c992e6961d691ba72\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=c397385b2b16b3152874407baf1e73f12175bba4feea3a5c992e6961d691ba72: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c397385b2b16b3152874407baf1e73f12175bba4feea3a5c992e6961d691ba72\"}\n","    utils.go:72: \u001b[31mc397385b2b16b3152874407baf1e73f12175bba4feea3a5c992e6961d691ba72\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    zboxcli_update_allocation_test.go:512: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:512\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:479\n","        \t            \t\t\t\tflaky___broken_scenarios_test.go:533\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000254000), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/delete_existing_file_in_root_directory_with_commit_should_work\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 37debead01b218f88ab334678d643fe4b157add58496e75b44e817b2dafbe813\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":23,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":75.81,"Output":["","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:798: Uploading file...\n","","    utils.go:133: Waiting 30s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","","    utils.go:133: Waiting 30s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:134: Initital blobber[0] balance: [1249885234], final balance: [1249885234]\n","    flaky___flaky_test.go:134: Initital blobber[1] balance: [1249885234], final balance: [1249885234]\n","    flaky___flaky_test.go:134: Initital blobber[2] balance: [1249885234], final balance: [1249885234]\n","    flaky___flaky_test.go:134: Initital blobber[3] balance: [1249885234], final balance: [1249885234]\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyScenariosCommonUserFunctions/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file (75.81s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":136.25,"Output":["","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:798: Uploading file...\n","","    zboxcli_upload_token_test.go:118: Getting upload cost...\n","","    utils.go:133: Waiting 1m0s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:253: Write pool Balance after upload expected to be [0.5] but was [0.4999770494]\n","    zboxcli_common_user_functions_test.go:188: Updating file...\n","","    utils.go:133: Waiting 1m0s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:276: Write pool Balance after upload expected to be [0.49997704925] but was [0.4999770494]\n","    flaky___flaky_test.go:291: Blobber [0] write pool has decreased by [5.738100000013402e-06] tokens after upload when it was expected to decrease by [5.7376875e-06]\n","    flaky___flaky_test.go:291: Blobber [1] write pool has decreased by [5.738100000013402e-06] tokens after upload when it was expected to decrease by [5.7376875e-06]\n","    flaky___flaky_test.go:291: Blobber [2] write pool has decreased by [5.738100000013402e-06] tokens after upload when it was expected to decrease by [5.7376875e-06]\n","    flaky___flaky_test.go:291: Blobber [3] write pool has decreased by [5.735500000006444e-06] tokens after upload when it was expected to decrease by [5.7376875e-06]\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size (136.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_Update_with_same_size_-_Users_should_not_be_charged,_blobber_should_not_be_paid","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":76.23,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:798: Uploading file...\n","","    utils.go:133: Waiting 30s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","","    zboxcli_common_user_functions_test.go:188: Updating file...\n","","    utils.go:133: Waiting 30s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:194: Initital blobber[0] balance: [1250028413], final balance: [1250028413]\n","    flaky___flaky_test.go:194: Initital blobber[1] balance: [1250028413], final balance: [1250028413]\n","    flaky___flaky_test.go:194: Initital blobber[2] balance: [1250028413], final balance: [1250028413]\n","    flaky___flaky_test.go:194: Initital blobber[3] balance: [1249455747], final balance: [1249455747]\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyScenariosCommonUserFunctions/File_Update_with_same_size_-_Users_should_not_be_charged,_blobber_should_not_be_paid (76.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_move_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":33.05,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:798: Uploading file...\n","","    utils.go:133: Waiting 10s...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    zboxcli_file_move_test.go:566: Moving file...\n","    utils.go:133: Waiting 10s...\n","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:72: \n","        \tError Trace:\tflaky___flaky_test.go:72\n","        \tError:      \tNot equal: \n","        \t            \texpected: 4999770520\n","        \t            \tactual  : 4999311509\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_move_-_Users_should_not_be_charged_for_moving_a_file_\n","        \tMessages:   \tWrite pool balance expected to be unchanged\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":328.33,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    utils.go:133: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:114: Retrieving storage config...\n","    zwalletcli_storage_update_config_test.go:126: Updating storage config...\n","    zwalletcli_register_wallet_test.go:154: Verifying transaction...\n","","","","    zwalletcli_storage_update_config_test.go:126: Updating storage config...\n",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":502,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":172.65,"Output":["","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:132: Getting wallet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating free allocation: free_allocation_failed: marker verification failed: marker timestamped in the future: 1651349665]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=ca1f4b8e11713cae84353c1669d2a7c8c9f0c8a7bddf901696e20c692b2ac8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ca1f4b8e11713cae84353c1669d2a7c8c9f0c8a7bddf901696e20c692b2ac8e8\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=ca1f4b8e11713cae84353c1669d2a7c8c9f0c8a7bddf901696e20c692b2ac8e8: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = ca1f4b8e11713cae84353c1669d2a7c8c9f0c8a7bddf901696e20c692b2ac8e8\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --free_storage ./config/Test___FlakyScenariosCreateAllocationFreeStorage-Create_free_storage_from_marker_with_accounting_MARKER.json --silent --wallet Test___FlakyScenariosCreateAllocationFreeStorage-Create_free_storage_from_marker_with_accounting_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyScenariosCreateAllocationFreeStorage-Create_free_storage_from_marker_with_accounting_allocation.txt] Output: [Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=53996d19abc156e935b7fefa8336d782466d0865c70722a86feeb1384c8b1382: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 53996d19abc156e935b7fefa8336d782466d0865c70722a86feeb1384c8b1382\"} -\u003cNEWLINE\u003e-"," https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=53996d19abc156e935b7fefa8336d782466d0865c70722a86feeb1384c8b1382: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 53996d19abc156e935b7fefa8336d782466d0865c70722a86feeb1384c8b1382\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:16:22.162406 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:16:22.162443 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:16:22.257543 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:16:22.337748 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner01\",\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:17:14.030667 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=2c34c53728fd02b0c382f2161f8eeeb6c738e85d3986e0a333888774a471eb3a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 2c34c53728fd02b0c382f2161f8eeeb6c738e85d3986e0a333888774a471eb3a\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=2c34c53728fd02b0c382f2161f8eeeb6c738e85d3986e0a333888774a471eb3a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 2c34c53728fd02b0c382f2161f8eeeb6c738e85d3986e0a333888774a471eb3a\"}\n","    utils.go:72: \u001b[31m2c34c53728fd02b0c382f2161f8eeeb6c738e85d3986e0a333888774a471eb3a\u001b[0m\n","    utils.go:72: \u001b[31mError creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","--- PASS: Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting (172.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.67,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","--- PASS: Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail (6.67s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.86,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:132: Getting wallet...\n","--- PASS: Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail (6.86s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":54.37,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [ZCN wallet created -\u003cNEWLINE\u003e- Creating related read pool for storage smart-contract... -\u003cNEWLINE\u003e- Failed to create read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=fa1407bccd939bdc62cc21b5d228c1e2422b6d5e118b74e8bb11389773c86b07: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = fa1407bccd939bdc62cc21b5d228c1e2422b6d5e118b74e8bb11389773c86b07\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=fa1407bccd939bdc62cc21b5d228c1e2422b6d5e118b74e8bb11389773c86b07: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = fa1407bccd939bdc62cc21b5d228c1e2422b6d5e118b74e8bb11389773c86b07\"}]\n","    utils.go:58: \u001b[32mCommand passed on retry [2/3]. Output: [Wallet registered]\n","--- PASS: Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail (54.37s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.88,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:132: Getting wallet...\n","--- PASS: Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail (6.88s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":58.83,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:132: Getting wallet...\n","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    flaky___flaky_test.go:773: \n","        \tError Trace:\tflaky___flaky_test.go:773\n","        \tError:      \tNot equal: \n","        \t            \texpected: 1\n","        \t            \tactual  : 3\n","        \tTest:       \tTest___FlakyScenariosCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail\n","        \tMessages:   \tError creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=8a66937064dcde3f67b07ef2f715b6998157e019a8f77f4af8bdd24434c5674a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 8a66937064dcde3f67b07ef2f715b6998157e019a8f77f4af8bdd24434c5674a\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=8a66937064dcde3f67b07ef2f715b6998157e019a8f77f4af8bdd24434c5674a: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 8a66937064dcde3f67b07ef2f715b6998157e019a8f77f4af8bdd24434c5674a\"}\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":301,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":224.36,"Output":["","","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=c8f3f226b3a2d9e89ec854365007098d1e5857bf4668624776594e55a14d54ef: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c8f3f226b3a2d9e89ec854365007098d1e5857bf4668624776594e55a14d54ef\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=c8f3f226b3a2d9e89ec854365007098d1e5857bf4668624776594e55a14d54ef: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = c8f3f226b3a2d9e89ec854365007098d1e5857bf4668624776594e55a14d54ef\"}]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=7ff7acf2d9bc02d6986482b656eb02b3702017f8dbfa73fc1481153ecdb26767: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 7ff7acf2d9bc02d6986482b656eb02b3702017f8dbfa73fc1481153ecdb26767\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=7ff7acf2d9bc02d6986482b656eb02b3702017f8dbfa73fc1481153ecdb26767: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 7ff7acf2d9bc02d6986482b656eb02b3702017f8dbfa73fc1481153ecdb26767\"}]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --size 1024000 --expire 1h --lock 0.5 --silent --wallet Test___FlakyScenariosTransferAllocation-transfer_allocation_accounting_test_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName Test___FlakyScenariosTransferAllocation-transfer_allocation_accounting_test_allocation.txt] Output: [Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce\"} -\u003cNEWLINE\u003e- https://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57d","ce: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.872066 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/04/30 22:17:13.872093 sdk.go:73: ******* Storage SDK Version: v1.7.2-2-g3237f5c-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/04/30 22:17:13.968252 wallet.go:410: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/04/30 22:17:14.047986 networkworker.go:103: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/04/30 22:18:05.746654 sdk.go:1157: Error verifying the transaction[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=da6a163db0d91ec8d89289bbf495cb2344f69d89973f3ea76947f6a67d5536c2: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = da6a163db0d91ec8d89289bbf495cb2344f69d89973f3ea76947f6a67d5536c2\"}\n","    utils.go:72: \u001b[31mhttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=da6a163db0d91ec8d89289bbf495cb2344f69d89973f3ea76947f6a67d5536c2: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = da6a163db0d91ec8d89289bbf495cb2344f69d89973f3ea76947f6a67d5536c2\"}\n","    utils.go:72: \u001b[31mda6a163db0d91ec8d89289bbf495cb2344f69d89973f3ea76947f6a67d5536c2\u001b[0m\n","    utils.go:72: \u001b[31mError creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    zboxcli_update_allocation_test.go:512: \n","        \tError Trace:\tzboxcli_update_allocation_test.go:512\n","        \t            \t\t\t\tzboxcli_update_allocation_test.go:479\n","        \t            \t\t\t\tflaky___flaky_test.go:307\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0005160d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyScenariosTransferAllocation/transfer_allocation_accounting_test\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=Error creating allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce\"}\n","        \t            \thttps://dev-2.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce: [400] {\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 59998f094d78ee87bb29bdb7f6e7be742e0dad9776d1807ab8da2fa31fa57dce\"})\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosUpdateScSettings","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.58,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":416,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosUpdateScSettings/should_allow_update_of_max_read_price","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.58,"Output":["","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    utils.go:133: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:114: Retrieving storage config...\n","    zwalletcli_storage_update_config_test.go:126: Updating storage config...\n","    utils.go:133: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:114: Retrieving storage config...\n","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","    zwalletcli_storage_update_config_test.go:126: Updating storage config...\n","--- PASS: Test___FlakyScenariosUpdateScSettings/should_allow_update_of_max_read_price (23.58s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosUpdateScSettings/update_max_read_price_to_invalid_value_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.84,"Output":["","","","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_register_wallet_test.go:112: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:126: Updating storage config...\n","    flaky___flaky_test.go:439: \n","        \tError Trace:\tflaky___flaky_test.go:439\n","        \tError:      \tExpected value not to be nil.\n","        \tTest:       \tTest___FlakyScenariosUpdateScSettings/update_max_read_price_to_invalid_value_should_fail\n","        \tMessages:   \tstoragesc smart contract settings updated\n","        \t            \tHash: 8306caf0670968df8dd05957296adc831362c955b4920ac01f114b1315c4d103\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyUnhealthyBlobberScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyUnhealthyBlobberScenarios (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unhealthy_blobber_test.go","TestFunctionDetail":{"Line":10,"Col":1}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
