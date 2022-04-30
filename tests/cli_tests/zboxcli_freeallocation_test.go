@@ -113,8 +113,6 @@ func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
 	require.Equal(t, "TransactionStatus: 1", output[1])
 	require.Greater(t, len(output[2]), 0, output[2])
 
-	t.Parallel()
-
 	// FIXME not working at the moment
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
 		recipient := escapedTestName(t)
