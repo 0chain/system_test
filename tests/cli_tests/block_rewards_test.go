@@ -173,7 +173,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
