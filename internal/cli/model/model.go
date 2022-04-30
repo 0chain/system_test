@@ -13,6 +13,7 @@ type Wallet struct {
 type Allocation struct {
 	ID             string    `json:"id"`
 	Tx             string    `json:"tx"`
+	Name           string    `json:"name"`
 	ExpirationDate int64     `json:"expiration_date"`
 	DataShards     int       `json:"data_shards"`
 	ParityShards   int       `json:"parity_shards"`
