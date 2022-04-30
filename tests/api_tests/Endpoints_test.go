@@ -7,6 +7,7 @@ import (
 )
 
 const FAUCET_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
+const STORAGE_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 
 func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *resty.Response, error) {
 	var wallet *model.Wallet
@@ -30,4 +31,20 @@ func v1TransactionGetConfirmation(t *testing.T, hash string) (*model.Confirmatio
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/transaction/get/confirmation?hash="+hash, &confirmation)
 
 	return confirmation, httpResponse, httpError
+}
+
+func v1ClientGetBalance(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) {
+	var balance *model.Balance
+
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/client/get/balance?client_id="+clientId, &balance)
+
+	return balance, httpResponse, httpError
+}
+
+func v1ScrestAllocation(t *testing.T, clientId string) (*model.Allocation, *resty.Response, error) {
+	var allocation *model.Allocation
+
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/allocation?allocation="+clientId, &allocation)
+
+	return allocation, httpResponse, httpError
 }

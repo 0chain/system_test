@@ -16,12 +16,11 @@ func TestRegisterWallet(t *testing.T) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonic(t)
-		keyPair := crypto.GenerateKeys(t, mnemonic)
+
+		registeredWallet, keyPair, rawHttpResponse, err := registerWalletForMnemonicWithoutAssertion(t, mnemonic)
+
 		publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
 		expectedClientId := crypto.Sha3256(publicKeyBytes)
-
-		registeredWallet, rawHttpResponse, err := registerWalletForMnemonic(t, mnemonic)
-
 		require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, rawHttpResponse)
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
 		require.Equal(t, "200 OK", rawHttpResponse.Status())
@@ -32,22 +31,36 @@ func TestRegisterWallet(t *testing.T) {
 	})
 }
 
-func registerWallet(t *testing.T) (string, *model.Wallet, *resty.Response) {
+func registerWallet(t *testing.T) (*model.Wallet, model.KeyPair) {
 	mnemonic := crypto.GenerateMnemonic(t)
-	registeredWallet, rawHttpResponse, err := registerWalletForMnemonic(t, mnemonic)
-	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, rawHttpResponse)
-	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
 
-	return mnemonic, registeredWallet, rawHttpResponse
+	return registerWalletForMnemonic(t, mnemonic)
 }
 
-func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, *resty.Response, error) {
+func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair) {
+	registeredWallet, keyPair, httpResponse, err := registerWalletForMnemonicWithoutAssertion(t, mnemonic)
+
+	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
+	clientId := crypto.Sha3256(publicKeyBytes)
+
+	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
+	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
+	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, registeredWallet.Id, clientId)
+	require.Equal(t, registeredWallet.PublicKey, keyPair.PublicKey.SerializeToHexStr())
+	require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
+	require.NotNil(t, registeredWallet.Version)
+
+	return registeredWallet, keyPair
+}
+
+func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair, *resty.Response, error) {
 	keyPair := crypto.GenerateKeys(t, mnemonic)
 	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
 	clientId := crypto.Sha3256(publicKeyBytes)
 	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
-	walletResponse, httpResponse, httpError := v1ClientPut(t, walletRequest)
+	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest)
 
-	return walletResponse, httpResponse, httpError
+	return registeredWallet, keyPair, httpResponse, err
 }

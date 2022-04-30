@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
+	"time"
 )
 
 type Balance struct {
@@ -160,6 +161,73 @@ type Confirmation struct {
 type MerkleTreePath struct {
 	Nodes     []string `json:"nodes"`
 	LeafIndex int      `json:"leaf_index"`
+}
+
+type Allocation struct {
+	ID             string           `json:"id"`
+	Tx             string           `json:"tx"`
+	DataShards     int              `json:"data_shards"`
+	ParityShards   int              `json:"parity_shards"`
+	Size           int64            `json:"size"`
+	Expiration     int64            `json:"expiration_date"`
+	Owner          string           `json:"owner_id"`
+	OwnerPublicKey string           `json:"owner_public_key"`
+	Payer          string           `json:"payer_id"`
+	Blobbers       []*StorageNode   `json:"blobbers"`
+	Stats          *AllocationStats `json:"stats"`
+	TimeUnit       time.Duration    `json:"time_unit"`
+	IsImmutable    bool             `json:"is_immutable"`
+
+	BlobberDetails []*BlobberAllocation `json:"blobber_details"`
+
+	ReadPriceRange  PriceRange `json:"read_price_range"`
+	WritePriceRange PriceRange `json:"write_price_range"`
+
+	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+	StartTime               int64         `json:"start_time"`
+	Finalized               bool          `json:"finalized,omitempty"`
+	Canceled                bool          `json:"canceled,omitempty"`
+	MovedToChallenge        int64         `json:"moved_to_challenge,omitempty"`
+	MovedBack               int64         `json:"moved_back,omitempty"`
+	MovedToValidators       int64         `json:"moved_to_validators,omitempty"`
+	Curators                []string      `json:"curators"`
+}
+
+type AllocationStats struct {
+	UsedSize                  int64  `json:"used_size"`
+	NumWrites                 int64  `json:"num_of_writes"`
+	NumReads                  int64  `json:"num_of_reads"`
+	TotalChallenges           int64  `json:"total_challenges"`
+	OpenChallenges            int64  `json:"num_open_challenges"`
+	SuccessChallenges         int64  `json:"num_success_challenges"`
+	FailedChallenges          int64  `json:"num_failed_challenges"`
+	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
+}
+
+type BlobberAllocation struct {
+	BlobberID       string `json:"blobber_id"`
+	Size            int64  `json:"size"`
+	Terms           Terms  `json:"terms"`
+	MinLockDemand   int64  `json:"min_lock_demand"`
+	Spent           int64  `json:"spent"`
+	Penalty         int64  `json:"penalty"`
+	ReadReward      int64  `json:"read_reward"`
+	Returned        int64  `json:"returned"`
+	ChallengeReward int64  `json:"challenge_reward"`
+	FinalReward     int64  `json:"final_reward"`
+}
+
+type Terms struct {
+	ReadPrice               int64         `json:"read_price"`
+	WritePrice              int64         `json:"write_price"`
+	MinLockDemand           float64       `json:"min_lock_demand"`
+	MaxOfferDuration        time.Duration `json:"max_offer_duration"`
+	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+}
+
+type PriceRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
 }
 
 type Wallet struct {
