@@ -163,11 +163,11 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"expire":       "1h",
+			"expire":       "5m",
 			"size":         "1024",
 			"lock":         "0.5",
 		}))
-		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
 		// FIXME disabled as not working as expected
