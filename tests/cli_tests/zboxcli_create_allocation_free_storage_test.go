@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -422,7 +421,7 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	require.Nil(t, err, "error marshaling smart contract data")
 
 	txn.TransactionData = string(snBytes)
-	txn.Hash = txnHash(txn)
+	txn.Hash = txnHash(txn.TransactionOutput)
 	txn.Signature = sign(t, txn.Hash, from)
 
 	return txn
@@ -443,10 +442,8 @@ func sign(t *testing.T, data string, wallet *climodel.WalletFile) string {
 	return sig.SerializeToHexStr()
 }
 
-func txnHash(txn *apimodel.Transaction) string {
-	hashdata := fmt.Sprintf("%v:%v:%v:%v:%v", txn.CreationDate, txn.ClientId,
-		txn.ToClientId, txn.TransactionValue, hash(txn.TransactionData))
-	return hash(hashdata)
+func txnHash(txnoutput string) string {
+	return hash(txnoutput)
 }
 
 func hash(data string) string {
