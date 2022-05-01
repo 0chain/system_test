@@ -16,6 +16,7 @@ import (
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -233,7 +234,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 
 		beforeAfterRound := getCurrentRound(t)
+		cliutils.Wait(t, 2*time.Second)
 		endReward := getMinersDetail(t, sharder.ID).Reward
+		cliutils.Wait(t, 2*time.Second)
 		endAfterRound := getCurrentRound(t)
 
 		maxTotalRewardsAndFees := int64(0)
