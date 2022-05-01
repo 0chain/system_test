@@ -52,61 +52,61 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	output, err = registerWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	configKeyDataShards := "free_allocation_settings.data_shards"
-	configKeyParityShards := "free_allocation_settings.parity_shards"
-	configKeySize := "free_allocation_settings.size"
-	configKeyDuration := "free_allocation_settings.duration"
+	// configKeyDataShards := "free_allocation_settings.data_shards"
+	// configKeyParityShards := "free_allocation_settings.parity_shards"
+	// configKeySize := "free_allocation_settings.size"
+	// configKeyDuration := "free_allocation_settings.duration"
 
 	// nolint:gocritic
 	// configKeyReadPoolFraction := "free_allocation_settings.read_pool_fraction"
 
-	keys := strings.Join([]string{
-		configKeyDataShards,
-		configKeyParityShards,
-		configKeySize,
-		configKeyDuration,
-	}, ",")
+	// keys := strings.Join([]string{
+	// 	configKeyDataShards,
+	// 	configKeyParityShards,
+	// 	configKeySize,
+	// 	configKeyDuration,
+	// }, ",")
 
-	output, err = getStorageSCConfig(t, configPath, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+	// output, err = getStorageSCConfig(t, configPath, true)
+	// require.Nil(t, err, strings.Join(output, "\n"))
+	// require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfgBefore, _ := keyValuePairStringToMap(t, output)
+	// cfgBefore, _ := keyValuePairStringToMap(t, output)
 
 	// ensure revert in config is run regardless of test result
-	defer func() {
-		oldValues := strings.Join([]string{
-			cfgBefore[configKeyDataShards],
-			cfgBefore[configKeyParityShards],
-			cfgBefore[configKeySize],
-			cfgBefore[configKeyDuration],
-		}, ",")
+	// defer func() {
+	// 	oldValues := strings.Join([]string{
+	// 		cfgBefore[configKeyDataShards],
+	// 		cfgBefore[configKeyParityShards],
+	// 		cfgBefore[configKeySize],
+	// 		cfgBefore[configKeyDuration],
+	// 	}, ",")
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   keys,
-			"values": oldValues,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-	}()
+	// 	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+	// 		"keys":   keys,
+	// 		"values": oldValues,
+	// 	}, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2, strings.Join(output, "\n"))
+	// 	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	// 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	// }()
 
-	newValues := strings.Join([]string{
-		"2",    // decreasing data shards from default 10
-		"2",    // decreasing parity shards from default 5
-		"1024", // decreasing size from default 10000000000
-		"5m",   // reduce free allocation duration from 50h to 5m
-	}, ",")
+	// newValues := strings.Join([]string{
+	// 	"2",    // decreasing data shards from default 10
+	// 	"2",    // decreasing parity shards from default 5
+	// 	"1024", // decreasing size from default 10000000000
+	// 	"5m",   // reduce free allocation duration from 50h to 5m
+	// }, ",")
 
-	output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-		"keys":   keys,
-		"values": newValues,
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2, strings.Join(output, "\n"))
-	require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	// output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+	// 	"keys":   keys,
+	// 	"values": newValues,
+	// }, true)
+	// require.Nil(t, err, strings.Join(output, "\n"))
+	// require.Len(t, output, 2, strings.Join(output, "\n"))
+	// require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	// require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
 	// miners list
 	output, err = getMiners(t, configPath)
@@ -161,7 +161,12 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"expire":       "1h",
+			"size":         "1024",
+			"lock":         "0.5",
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
