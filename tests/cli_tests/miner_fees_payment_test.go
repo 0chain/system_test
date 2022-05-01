@@ -377,7 +377,6 @@ func getBlockContainingTransaction(
 	txnData string,
 ) (block apimodel.Block) {
 	for round := startBlock.Round + 1; round <= endBlock.Round; round++ {
-		fmt.Println("piers getBlockContainingTransaction round start", startBlock.Round, "round", round, "rel", round-endBlock.Round, "end", endBlock.Round)
 		block := getRoundBlockFromASharder(t, round)
 
 		for i := range block.Block.Transactions {

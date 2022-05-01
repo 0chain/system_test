@@ -216,7 +216,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
 		startBeforeRound := getCurrentRound(t)
+		cliutils.Wait(t, time.Second)
 		startReward := getMinersDetail(t, sharder.ID).Reward
+		cliutils.Wait(t, time.Second)
 		startAfterRound := getCurrentRound(t)
 
 		// Do 5 lock transactions with fees
@@ -234,9 +236,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 
 		beforeAfterRound := getCurrentRound(t)
-		cliutils.Wait(t, 2*time.Second)
+		cliutils.Wait(t, time.Second)
 		endReward := getMinersDetail(t, sharder.ID).Reward
-		cliutils.Wait(t, 2*time.Second)
+		cliutils.Wait(t, time.Second)
 		endAfterRound := getCurrentRound(t)
 
 		maxTotalRewardsAndFees := int64(0)
