@@ -182,6 +182,7 @@ func TestMinerStake(t *testing.T) {
 		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
 	})
 
+	// todo rewards not transferred to wallet until a collect reward transaction
 	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
