@@ -15,8 +15,11 @@ import (
 )
 
 func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t.Parallel()
 
 	t.Run("rename file", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -86,6 +89,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 
 	t.Run("rename file to same filename (no change)", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -149,6 +154,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 
 	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -224,6 +231,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 
 	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -299,6 +308,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 
 	t.Run("rename file to containing special characters", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -369,6 +380,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 
 	t.Run("rename file with commit param", func(t *testing.T) {
+		t.Parallel()
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
