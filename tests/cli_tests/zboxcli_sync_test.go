@@ -811,7 +811,9 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.GreaterOrEqual(t, len(output), 4, "unexpected number of lines in output", strings.Join(output, "\n"))
 
-		require.Contains(t, output[3], "entity_not_found: txn_summary not found", strings.Join(output, "\n"))
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: "+
+			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: "+
+			"invalid-allocation-id, error: record not found", output[3], strings.Join(output, "\n"))
 	})
 }
 
