@@ -33,7 +33,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 
 		// FIXME: CLI shows error requesting "read" pool info when it should show "write"
 		require.Equal(t, "Failed to get write pool info: error requesting read pool info:", output[0])
-		require.Equal(t, "consensus_failed: consensus failed on sharders", output[1])
+		require.Equal(t, "resource_not_found: can't get write pool: value not present", output[1])
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{

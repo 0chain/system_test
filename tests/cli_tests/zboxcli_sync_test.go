@@ -811,7 +811,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		require.GreaterOrEqual(t, len(output), 4, "unexpected number of lines in output", strings.Join(output, "\n"))
 
-		require.Equal(t, output[3], "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", strings.Join(output, "\n"))
+		require.Contains(t, output[3], "entity_not_found: txn_summary not found", strings.Join(output, "\n"))
 	})
 }
 
