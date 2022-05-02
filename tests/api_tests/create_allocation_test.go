@@ -21,7 +21,7 @@ func TestCreateAllocation(t *testing.T) {
 		transactionResponse := createAllocation(t, registeredWallet.Id, keyPair)
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 
-		require.Nil(t, allocation)
+		require.NotNil(t, allocation)
 	})
 }
 
@@ -40,7 +40,7 @@ func createAllocation(t *testing.T, clientId string, keyPair model.KeyPair) *mod
 	}
 
 	allocationTransaction := executeTransaction(t, &allocationRequest, keyPair)
-	confirmTransaction(t, allocationTransaction.Entity.Hash, 1*time.Minute)
+	confirmTransaction(t, allocationTransaction.Entity, 1*time.Minute)
 
 	return allocationTransaction
 }

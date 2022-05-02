@@ -25,12 +25,31 @@ func TestExecuteFaucet(t *testing.T) {
 	})
 }
 
-func confirmTransaction(t *testing.T, hash string, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) {
-	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, hash, maxPollDuration)
+func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) {
+	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, sentTransaction.Hash, maxPollDuration)
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred confirming transaction with http response [%s]", err, httpResponse)
 	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, "1.0", confirmation.Version, "version did not match expected")
+	require.Equal(t, sentTransaction.Hash, confirmation.Hash, "hash did not match expected")
+	require.NotNil(t, confirmation.BlockHash)
+	require.NotNil(t, confirmation.PreviousBlockHash)
+	require.Greater(t, confirmation.CreationDate, int64(0))
+	require.NotNil(t, confirmation.MinerID)
+	require.Greater(t, confirmation.Round, int64(0))
+	require.Equal(t, 1, confirmation.Status)
+	require.NotNil(t, confirmation.RoundRandomSeed)
+	require.Equal(t, confirmation.StateChangesCount, 0)
+	require.NotNil(t, confirmation.MerkleTreeRoot)
+	require.NotNil(t, confirmation.MerkleTreePath)
+	require.NotNil(t, confirmation.ReceiptMerkleTreeRoot)
+	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
+	require.NotNil(t, confirmation.Transaction.TransactionOutput)
+	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
+	require.Equal(t, 1, confirmation.Transaction.TransactionStatus)
+
+	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
 
 	return confirmation, httpResponse
 }
@@ -77,7 +96,7 @@ func executeFaucet(t *testing.T, clientId string, keyPair model.KeyPair) *model.
 	}
 
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
-	confirmTransaction(t, faucetTransaction.Entity.Hash, 1*time.Minute)
+	confirmTransaction(t, faucetTransaction.Entity, 1*time.Minute)
 
 	return faucetTransaction
 }
@@ -90,23 +109,26 @@ func executeTransaction(t *testing.T, txnRequest *model.Transaction, keyPair mod
 	require.Equal(t, "200 OK", httpResponse.Status())
 	require.True(t, transactionResponse.Async)
 	require.NotNil(t, transactionResponse.Entity, "Transaction entity was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, txnRequest.Hash, transactionResponse.Entity.Hash)
-	require.Equal(t, txnRequest.Version, transactionResponse.Entity.Version)
-	require.Equal(t, txnRequest.ClientId, transactionResponse.Entity.ClientId)
-	require.Equal(t, txnRequest.ToClientId, transactionResponse.Entity.ToClientId)
 	require.NotNil(t, transactionResponse.Entity.ChainId)
-	require.Equal(t, txnRequest.PublicKey, transactionResponse.Entity.PublicKey)
-	require.Equal(t, txnRequest.TransactionData, transactionResponse.Entity.TransactionData)
-	require.Equal(t, txnRequest.TransactionValue, transactionResponse.Entity.TransactionValue)
-	require.Equal(t, txnRequest.Signature, transactionResponse.Entity.Signature)
-	require.Equal(t, txnRequest.CreationDate, transactionResponse.Entity.CreationDate)
-	require.Equal(t, txnRequest.TransactionFee, transactionResponse.Entity.TransactionFee)
-	require.Equal(t, txnRequest.TransactionType, transactionResponse.Entity.TransactionType)
-	require.Equal(t, txnRequest.TransactionOutput, transactionResponse.Entity.TransactionOutput)
-	require.Equal(t, txnRequest.TxnOutputHash, transactionResponse.Entity.TxnOutputHash)
-	require.Equal(t, txnRequest.TransactionStatus, transactionResponse.Entity.TransactionStatus)
+	require.Equal(t, "", txnRequest.TransactionOutput)
+	assertTransactionEquals(t, txnRequest, &transactionResponse.Entity)
+	require.Equal(t, 0, txnRequest.TransactionStatus)
 
 	return transactionResponse
+}
+
+func assertTransactionEquals(t *testing.T, txnRequest *model.Transaction, transactionResponse *model.Transaction) {
+	require.Equal(t, txnRequest.Hash, transactionResponse.Hash)
+	require.Equal(t, txnRequest.Version, transactionResponse.Version)
+	require.Equal(t, txnRequest.ClientId, transactionResponse.ClientId)
+	require.Equal(t, txnRequest.ToClientId, transactionResponse.ToClientId)
+	require.Equal(t, txnRequest.PublicKey, transactionResponse.PublicKey)
+	require.Equal(t, txnRequest.TransactionData, transactionResponse.TransactionData)
+	require.Equal(t, txnRequest.TransactionValue, transactionResponse.TransactionValue)
+	require.Equal(t, txnRequest.Signature, transactionResponse.Signature)
+	require.Equal(t, txnRequest.CreationDate, transactionResponse.CreationDate)
+	require.Equal(t, txnRequest.TransactionFee, transactionResponse.TransactionFee)
+	require.Equal(t, txnRequest.TransactionType, transactionResponse.TransactionType)
 }
 
 func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transaction, keyPair model.KeyPair) (*model.TransactionResponse, *resty.Response, error) {
