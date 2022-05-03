@@ -107,7 +107,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		require.Equal(t, time.Duration(newChallengeCompletionTIme), finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 
 	t.Run("update blobber max offer duration should work", func(t *testing.T) {
@@ -364,7 +364,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
 		require.Equal(t, newMinStake, intToZCN(finalBlobberInfo.StakePoolSettings.MinStake))
-		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		require.Equal(t, time.Duration(newChallengeCompletionTIme), finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 }
 
