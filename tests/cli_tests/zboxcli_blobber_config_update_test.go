@@ -287,7 +287,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		oldReadPrice := intialBlobberInfo.Terms.Read_price
-		newReadPrice := intToZCN(oldReadPrice) + 1
+		newReadPrice := intToZCN(oldReadPrice + 1)
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -310,7 +310,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		oldWritePrice := intialBlobberInfo.Terms.Write_price
-		newWritePrice := intToZCN(oldWritePrice) + 1
+		newWritePrice := intToZCN(oldWritePrice + 1)
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -332,9 +332,9 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		newWritePrice := intToZCN(intialBlobberInfo.Terms.Write_price) + 1
+		newWritePrice := intToZCN(intialBlobberInfo.Terms.Write_price + 1)
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
-		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price) + 1
+		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price + 1)
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.NumDelegates + 1
 		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
