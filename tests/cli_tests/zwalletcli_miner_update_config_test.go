@@ -57,7 +57,7 @@ func TestMinerUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings: unsupported key interest_rate", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unsupported key unknown_key", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
