@@ -45,7 +45,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 15*time.Second)
+		cliutils.Wait(t, 1*time.Minute)
 
 		output, err = getStorageSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
