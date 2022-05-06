@@ -46,7 +46,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		// Updating config with old owner should fail
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   "max_read_price",
-			"values": "99",
+			"values": 99,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -69,7 +69,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		}
 
 		configKey := "max_read_price"
-		newValue := "99"
+		newValue := 99
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
