@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/go-resty/resty/v2"
+	"github.com/go-resty/resty/v2" //nolint
 )
 
 type Zerochain struct {
-	Miners     []string `json:"miners"`
-	Sharders   []string `json:"sharders"`
-	restClient resty.Client
+	Miners     []string     `json:"miners"`
+	Sharders   []string     `json:"sharders"`
+	restClient resty.Client //nolint
 }
 
 func (z *Zerochain) Init(config Config) {
@@ -35,7 +35,7 @@ func (z *Zerochain) getRandomSharder() string {
 	return z.Sharders[0]
 }
 
-func (z *Zerochain) getFromMiners(t *testing.T, endpoint string) (*resty.Response, error) {
+func (z *Zerochain) getFromMiners(t *testing.T, endpoint string) (*resty.Response, error) { //nolint
 	miner := z.getRandomMiner()
 	resp, err := z.restClient.R().Get(miner + endpoint)
 	t.Logf("GET on miner [" + miner + "] endpoint  [" + endpoint + "] resulted in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
@@ -43,7 +43,7 @@ func (z *Zerochain) getFromMiners(t *testing.T, endpoint string) (*resty.Respons
 	return resp, err
 }
 
-func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, body interface{}, targetObject interface{}) (*resty.Response, error) {
+func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
 	miner := z.getRandomMiner()
 	resp, err := z.restClient.R().SetBody(body).Post(miner + endpoint)
 

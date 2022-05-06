@@ -3,7 +3,7 @@ package util
 import (
 	"io/ioutil"
 
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3" //nolint
 )
 
 type Config struct {
@@ -15,7 +15,7 @@ func (config *Config) Init(path string) {
 	if err != nil {
 		panic("Failed to read config file!")
 	}
-	err = yaml.Unmarshal(yamlFile, config)
+	err = yaml.Unmarshal(yamlFile, config) //nolint
 	if err != nil {
 		panic("failed to deserialise config file!")
 	}

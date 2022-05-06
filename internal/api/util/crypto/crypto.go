@@ -9,7 +9,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/tyler-smith/go-bip39"
+	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
 )
 
@@ -24,8 +24,8 @@ func Sha3256(publicKeyBytes []byte) string {
 }
 
 func GenerateMnemonic(t *testing.T) string {
-	entropy, _ := bip39.NewEntropy(256)
-	mnemonic, _ := bip39.NewMnemonic(entropy)
+	entropy, _ := bip39.NewEntropy(256)       //nolint
+	mnemonic, _ := bip39.NewMnemonic(entropy) //nolint
 	t.Logf("Generated mnemonic [%s]", mnemonic)
 
 	return mnemonic
@@ -36,7 +36,7 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	defer blsLock.Unlock()
 
 	_ = bls.Init(bls.CurveFp254BNb)
-	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key")
+	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
 	bls.SetRandFunc(random)
 
