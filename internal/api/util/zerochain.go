@@ -14,7 +14,7 @@ type Zerochain struct {
 }
 
 func (z *Zerochain) Init(config Config) {
-	z.restClient = *resty.New()
+	z.restClient = *resty.New() //nolint
 	resp, err := z.restClient.R().Get(config.NetworkEntrypoint)
 
 	err = json.Unmarshal(resp.Body(), z)
@@ -65,7 +65,7 @@ func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, body interface{}
 	}
 }
 
-func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject interface{}) (*resty.Response, error) {
+func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject interface{}) (*resty.Response, error) { //nolint
 	sharder := z.getRandomSharder()
 	resp, err := z.restClient.R().Get(sharder + endpoint)
 
