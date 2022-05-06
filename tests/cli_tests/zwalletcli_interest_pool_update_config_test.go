@@ -45,9 +45,9 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_variables: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
 			output, err := updateInterestPoolSCConfig(t, escapedTestName(t), map[string]interface{}{

@@ -52,7 +52,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
 			output, err := updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
