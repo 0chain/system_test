@@ -10,7 +10,7 @@ import (
 const FAUCET_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
 const STORAGE_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 
-func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *resty.Response, error) {
+func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *resty.Response, error) { //nolint
 	var wallet *model.Wallet
 
 	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/client/put", walletRequest, &wallet)
@@ -18,7 +18,7 @@ func v1ClientPut(t *testing.T, walletRequest model.Wallet) (*model.Wallet, *rest
 	return wallet, httpResponse, httpError
 }
 
-func v1TransactionPut(t *testing.T, walletRequest *model.Transaction) (*model.TransactionResponse, *resty.Response, error) {
+func v1TransactionPut(t *testing.T, walletRequest *model.Transaction) (*model.TransactionResponse, *resty.Response, error) { //nolint
 	var transaction *model.TransactionResponse
 
 	httpResponse, httpError := zeroChain.PostToMiners(t, "/v1/transaction/put", walletRequest, &transaction)
@@ -26,7 +26,7 @@ func v1TransactionPut(t *testing.T, walletRequest *model.Transaction) (*model.Tr
 	return transaction, httpResponse, httpError
 }
 
-func v1TransactionGetConfirmation(t *testing.T, hash string) (*model.Confirmation, *resty.Response, error) {
+func v1TransactionGetConfirmation(t *testing.T, hash string) (*model.Confirmation, *resty.Response, error) { //nolint
 	var confirmation *model.Confirmation
 
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/transaction/get/confirmation?hash="+hash, &confirmation)
@@ -34,7 +34,7 @@ func v1TransactionGetConfirmation(t *testing.T, hash string) (*model.Confirmatio
 	return confirmation, httpResponse, httpError
 }
 
-func v1ClientGetBalance(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) {
+func v1ClientGetBalance(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) { //nolint
 	var balance *model.Balance
 
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/client/get/balance?client_id="+clientId, &balance)
@@ -42,7 +42,7 @@ func v1ClientGetBalance(t *testing.T, clientId string) (*model.Balance, *resty.R
 	return balance, httpResponse, httpError
 }
 
-func v1ScrestAllocation(t *testing.T, clientId string) (*model.Allocation, *resty.Response, error) {
+func v1ScrestAllocation(t *testing.T, clientId string) (*model.Allocation, *resty.Response, error) { //nolint
 	var allocation *model.Allocation
 
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/allocation?allocation="+clientId, &allocation)
