@@ -103,9 +103,11 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
 
 		// Should fail update with old owner
+		configKey := "max_pour_amount"
+		newValue := "15"
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   ownerKey,
-			"values": oldOwner,
+			"keys":   configKey,
+			"values": newValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
