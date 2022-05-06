@@ -15,60 +15,6 @@ import (
 func TestMinerUpdateConfig(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should allow update of owner", func(t *testing.T) {
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
-
-		ownerKey := "owner_id"
-		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
-
-		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   ownerKey,
-			"values": newOwnerWallet.ClientID,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 1*time.Minute)
-
-		output, err = getMinerSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
-
-		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
-
-		// Should fail update with old owner
-		configKey := "interest_rate"
-		newValue := "0.1"
-		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newValue,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			output, err := updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
-				"keys":   ownerKey,
-				"values": oldOwner,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			cliutils.Wait(t, 1*time.Minute)
-		})
-	})
-
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		t.Parallel()
 

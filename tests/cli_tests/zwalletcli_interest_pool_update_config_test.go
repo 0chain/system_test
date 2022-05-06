@@ -14,53 +14,11 @@ import (
 )
 
 func TestInterestPoolUpdateConfig(t *testing.T) {
-	t.Run("update owner and update min_lock after with old owner should fail", func(t *testing.T) {
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
-		ownerKey := "owner_id"
-		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
-
-		configKey := "min_lock"
-		newValue := "8"
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
-
-		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   ownerKey,
-			"values": newOwnerWallet.ClientID,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 1*time.Minute)
-
-		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newValue,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_variables: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			output, err := updateInterestPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
-				"keys":   ownerKey,
-				"values": oldOwner,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			cliutils.Wait(t, 1*time.Minute)
-		})
-	})
+	t.Parallel()
 
 	t.Run("should allow update of min_lock", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -133,6 +91,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 	// FIXME should fail given config key value is not valid and not actually updated
 	t.Run("update min_lock to invalid value should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -157,6 +117,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
+		t.Parallel()
+
 		configKey := "min_lock"
 		newValue := "15"
 
@@ -174,6 +136,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -197,6 +161,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -218,6 +184,8 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
