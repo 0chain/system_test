@@ -55,7 +55,7 @@ func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 	return allocation
 }
 
-func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) {
+func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) { //nolint
 	balance, httpResponse, err := v1ScrestAllocation(t, allocationId)
 	return balance, httpResponse, err
 }
