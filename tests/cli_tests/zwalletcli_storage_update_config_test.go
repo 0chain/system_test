@@ -27,10 +27,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 		newOwnerWallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error fetching wallet")
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
