@@ -15,8 +15,6 @@ import (
 
 func TestInterestPoolUpdateConfig(t *testing.T) {
 	t.Run("update owner and update min_lock after with old owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -135,7 +133,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 	// FIXME should fail given config key value is not valid and not actually updated
 	t.Run("update min_lock to invalid value should fail", func(t *testing.T) {
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -160,7 +157,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-
 		configKey := "min_lock"
 		newValue := "15"
 
@@ -177,9 +173,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_variables: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	// FIXME should fail given config key is not recognized
 	t.Run("update with bad config key", func(t *testing.T) {
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -203,7 +197,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -225,7 +218,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
