@@ -112,7 +112,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
-			output, err := updateStorageSCConfig(t, escapedTestName(t), map[string]interface{}{
+			output, err := updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
 			}, true)
