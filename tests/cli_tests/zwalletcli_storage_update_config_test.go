@@ -45,8 +45,8 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		// Updating config with old owner should fail
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newOwnerWallet.ClientID,
+			"keys":   "max_read_price",
+			"values": "99",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
