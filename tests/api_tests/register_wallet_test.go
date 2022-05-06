@@ -55,7 +55,7 @@ func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, mo
 	return registeredWallet, keyPair
 }
 
-func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair, *resty.Response, error) {
+func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair, *resty.Response, error) { //nolint
 	keyPair := crypto.GenerateKeys(t, mnemonic)
 	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
 	clientId := crypto.Sha3256(publicKeyBytes)

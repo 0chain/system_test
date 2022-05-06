@@ -25,7 +25,7 @@ func TestExecuteFaucet(t *testing.T) {
 	})
 }
 
-func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) {
+func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) { //nolint
 	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, sentTransaction.Hash, maxPollDuration)
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
@@ -54,7 +54,7 @@ func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPoll
 	return confirmation, httpResponse
 }
 
-func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response, error) {
+func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response, error) { //nolint
 	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash)
 
 	startPollTime := time.Now()
@@ -76,7 +76,7 @@ func getBalance(t *testing.T, clientId string) *model.Balance {
 	return balance
 }
 
-func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) {
+func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) { //nolint
 	balance, httpResponse, err := v1ClientGetBalance(t, clientId)
 	return balance, httpResponse, err
 }
@@ -131,7 +131,7 @@ func assertTransactionEquals(t *testing.T, txnRequest *model.Transaction, transa
 	require.Equal(t, txnRequest.TransactionType, transactionResponse.TransactionType)
 }
 
-func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transaction, keyPair model.KeyPair) (*model.TransactionResponse, *resty.Response, error) {
+func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transaction, keyPair model.KeyPair) (*model.TransactionResponse, *resty.Response, error) { //nolint
 	crypto.Hash(txnRequest)
 	crypto.Sign(txnRequest, keyPair)
 
