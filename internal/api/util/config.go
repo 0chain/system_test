@@ -1,9 +1,8 @@
 package util
 
 import (
-	"io/ioutil"
-
 	"gopkg.in/yaml.v3"
+	"io/ioutil"
 )
 
 type Config struct {
