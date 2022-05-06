@@ -38,7 +38,7 @@ jobs:
 
       - name: "Run Smoke Tests"
         run: |
-          cd tests/api_tests
+          cd tests/api_tests/postman
           custom_network=$(echo ${{ matrix.network }} | xargs | sed -E 's/^\s*.*:\/\///g' | sed 's:/*$::') && sed -i "0,/REPLACE/s//$custom_network/" './Environments/custom.postman_environment.json'
 
           counter=1;
