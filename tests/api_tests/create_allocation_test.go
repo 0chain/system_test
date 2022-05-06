@@ -1,12 +1,12 @@
 package api_tests
 
 import (
+	"github.com/go-resty/resty/v2" //nolint
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
 

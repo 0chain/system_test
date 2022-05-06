@@ -1,13 +1,13 @@
 package api_tests
 
 import (
+	"github.com/go-resty/resty/v2" //nolint
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util"
 	"github.com/0chain/system_test/internal/api/util/crypto"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
 
