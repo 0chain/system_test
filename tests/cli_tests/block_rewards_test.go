@@ -29,6 +29,7 @@ const (
 )
 
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t.Skip("Skipped till Piers's code is merged")
 	t.Parallel()
 
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
