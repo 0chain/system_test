@@ -54,13 +54,12 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 }
 
 func Hash(request *model.Transaction) {
-	var transactionDataHash = Sha3256([]byte(request.TransactionData))
-
 	var hashData = blankIfNil(request.CreationDate) + ":" +
+		blankIfNil(request.Nonce) + ":" +
 		blankIfNil(request.ClientId) + ":" +
 		blankIfNil(request.ToClientId) + ":" +
 		blankIfNil(request.TransactionValue) + ":" +
-		transactionDataHash
+		Sha3256([]byte(request.TransactionData))
 
 	request.Hash = Sha3256([]byte(hashData))
 }
