@@ -61,9 +61,9 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[minerNodeDelegateWallet.ClientID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[minerNodeDelegateWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeDelegateWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[minerNodeWallet.ClientID], 1)
+		require.Equal(t, poolId, poolsInfo.Pools[minerNodeWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeWallet.ClientID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
@@ -108,9 +108,9 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[sharderNodeDelegateWallet.ClientID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[sharderNodeDelegateWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeDelegateWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[sharderNodeWallet.ClientID], 1)
+		require.Equal(t, poolId, poolsInfo.Pools[sharderNodeWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeWallet.ClientID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
@@ -165,13 +165,13 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pools")
 
-		require.Len(t, poolsInfo.Pools[minerNodeDelegateWallet.ClientID], 1)
-		require.Equal(t, minerPoolId, poolsInfo.Pools[minerNodeDelegateWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeDelegateWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[minerNodeWallet.ClientID], 1)
+		require.Equal(t, minerPoolId, poolsInfo.Pools[minerNodeWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeWallet.ClientID][0].Balance))
 
-		require.Len(t, poolsInfo.Pools[sharderNodeDelegateWallet.ClientID], 1)
-		require.Equal(t, sharderPoolId, poolsInfo.Pools[sharderNodeDelegateWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeDelegateWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[sharderNodeWallet.ClientID], 1)
+		require.Equal(t, sharderPoolId, poolsInfo.Pools[sharderNodeWallet.ClientID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeWallet.ClientID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
