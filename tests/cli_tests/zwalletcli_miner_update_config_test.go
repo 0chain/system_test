@@ -13,11 +13,7 @@ import (
 )
 
 func TestMinerUpdateConfig(t *testing.T) {
-	t.Parallel()
-
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "reward_rate"
 		newValue := "0.1"
 
@@ -61,8 +57,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -84,8 +78,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
