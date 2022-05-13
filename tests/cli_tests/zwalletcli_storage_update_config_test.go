@@ -22,10 +22,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 	t.Run("should allow update of max_read_price", func(t *testing.T) {
 		t.Parallel()
 
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "max_read_price"
 		newValue := 99
 

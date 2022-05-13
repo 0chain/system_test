@@ -3,9 +3,7 @@ package cli_tests
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -21,16 +19,16 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
+	// ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+	// require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	// nonceStr := strings.Split(ret[0], ":")[1]
+	// nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	// require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
 		t.Parallel()
 
-		n := atomic.AddInt64(&nonce, 2)
+		// n := atomic.AddInt64(&nonce, 2)
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -55,7 +53,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			}, n, true)
+				// }, n, true)
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -65,7 +64,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n-1, true)
+			// }, n-1, true)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -86,7 +86,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 
 	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
 		t.Parallel()
-		n := atomic.AddInt64(&nonce, 1)
+		// n := atomic.AddInt64(&nonce, 1)
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -97,7 +97,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n, false)
+			// }, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: key max_pour_amount, unable to convert x to state.balance", output[0], strings.Join(output, "\n"))
@@ -116,7 +117,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, 0, false)
+			// }, 0, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -128,14 +130,15 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
+		// n := atomic.AddInt64(&nonce, 1)
 
 		configKey := "unknown_key"
 
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		}, n, false)
+			// }, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		//nolint:misspell
@@ -148,12 +151,13 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
+		// n := atomic.AddInt64(&nonce, 1)
 
 		//important: we use random nonce here, since this transaction won't be sent
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, n, false)
+			// }, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -165,12 +169,13 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
+		// n := atomic.AddInt64(&nonce, 1)
 
 		//we use random nonce here since this transaction won't be sent to network
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
-		}, n, false)
+			// }, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -190,14 +195,15 @@ func getFaucetSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]st
 	}
 }
 
-func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+// func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating faucet config...")
 	p := createParams(param)
-	println(t.Name(), nonce)
+	// println(t.Name(), nonce)
 	cmd := fmt.Sprintf(
 		"./zwallet fc-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
 		p,
-		nonce,
+		// nonce,
 		walletName+"_wallet.json",
 		configPath,
 	)
