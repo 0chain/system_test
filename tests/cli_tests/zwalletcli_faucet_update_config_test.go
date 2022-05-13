@@ -201,7 +201,8 @@ func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]inte
 	p := createParams(param)
 	// println(t.Name(), nonce)
 	cmd := fmt.Sprintf(
-		"./zwallet fc-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
+		// "./zwallet fc-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
+		"./zwallet fc-update-config %s --silent --wallet %s --configDir ./config --config %s",
 		p,
 		// nonce,
 		walletName+"_wallet.json",

@@ -219,13 +219,13 @@ func TestOwnerUpdate(t *testing.T) {
 
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
 
-		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-		nonceStr := strings.Split(ret[0], ":")[1]
-		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-		require.Nil(t, err, "error converting nonce to in")
+		// ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		// require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		// nonceStr := strings.Split(ret[0], ":")[1]
+		// nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		// require.Nil(t, err, "error converting nonce to in")
 
-		n := atomic.AddInt64(&nonce, 1)
+		// n := atomic.AddInt64(&nonce, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -239,7 +239,8 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
-		}, n, true)
+			// }, n, true)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -260,22 +261,24 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n+1, false)
+			// }, n+1, false)
+		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
-			ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
-			require.Nil(t, err, "error fetching wallet nonce")
-			nonceStr := strings.Split(ret[0], ":")[1]
-			nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-			require.Nil(t, err, "error converting nonce to in")
-			n := atomic.AddInt64(&nonce, 1)
+			// ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
+			// require.Nil(t, err, "error fetching wallet nonce")
+			// nonceStr := strings.Split(ret[0], ":")[1]
+			// nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+			// require.Nil(t, err, "error converting nonce to in")
+			// n := atomic.AddInt64(&nonce, 1)
 			output, err := updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
-			}, n, true)
+				// }, n, true)
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			cliutils.Wait(t, 1*time.Minute)
