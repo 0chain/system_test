@@ -2,7 +2,9 @@ package cli_tests
 
 import (
 	"os"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -65,6 +67,14 @@ func TestOwnerUpdate(t *testing.T) {
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
+		n := atomic.AddInt64(&nonce, 1)
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -74,7 +84,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
-		}, true)
+		}, n, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -93,7 +103,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   "max_destinations",
 			"values": 25,
-		}, false)
+		}, n+1, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -102,7 +112,7 @@ func TestOwnerUpdate(t *testing.T) {
 			output, err := updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
-			}, true)
+			}, n+2, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			cliutils.Wait(t, 1*time.Minute)
@@ -202,9 +212,14 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
+
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
+		n := atomic.AddInt64(&nonce, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -218,7 +233,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
-		}, true)
+		}, n, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -239,7 +254,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, false)
+		}, n+1, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -248,7 +263,7 @@ func TestOwnerUpdate(t *testing.T) {
 			output, err := updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
-			}, true)
+			}, n+2, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			cliutils.Wait(t, 1*time.Minute)

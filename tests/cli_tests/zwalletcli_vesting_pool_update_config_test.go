@@ -15,7 +15,8 @@ import (
 )
 
 func TestVestingPoolUpdateConfig(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -23,23 +24,16 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
 		t.Parallel()
 
-	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
 
-	t.Run("should allow update of max_destinations", func(t *testing.T) {
-    t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-    
 		configKey := "max_destinations"
 		newValue := "4"
 		n := atomic.AddInt64(&nonce, 2)
@@ -85,13 +79,19 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_destinations to invalid value should fail", func(t *testing.T) {
-    t.Parallel()
+		t.Parallel()
+
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
 
 		configKey := "max_destinations"
 		newValue := "x"
 		n := atomic.AddInt64(&nonce, 1)
 
-		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, n, false)
@@ -102,7 +102,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-    t.Parallel()
+		t.Parallel()
 
 		configKey := "max_destinations"
 		newValue := "4"
@@ -121,12 +121,18 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-    t.Parallel()
+		t.Parallel()
 
 		configKey := "unknown_key"
 
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
 		n := atomic.AddInt64(&nonce, 1)
-		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
 		}, n, false)
@@ -136,8 +142,14 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-    t.Parallel()
-    
+		t.Parallel()
+
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -156,7 +168,13 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-    t.Parallel()
+		t.Parallel()
+
+		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
