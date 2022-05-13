@@ -109,10 +109,16 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
+			ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
+			require.Nil(t, err, "error fetching wallet nonce")
+			nonceStr := strings.Split(ret[0], ":")[1]
+			nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+			require.Nil(t, err, "error converting nonce to in")
+			n := atomic.AddInt64(&nonce, 1)
 			output, err := updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
-			}, n+2, true)
+			}, n, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			cliutils.Wait(t, 1*time.Minute)
@@ -260,10 +266,16 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
+			ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
+			require.Nil(t, err, "error fetching wallet nonce")
+			nonceStr := strings.Split(ret[0], ":")[1]
+			nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+			require.Nil(t, err, "error converting nonce to in")
+			n := atomic.AddInt64(&nonce, 1)
 			output, err := updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
-			}, n+2, true)
+			}, n, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			cliutils.Wait(t, 1*time.Minute)
