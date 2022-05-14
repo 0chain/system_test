@@ -307,6 +307,10 @@ func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string, r
 }
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
+	return sendTokensFromWallet(t, cliConfigFilename, toClientID, tokens, desc, fee, escapedTestName(t))
+}
+
+func sendTokensFromWallet(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64, wallet string) ([]string, error) {
 	t.Logf("Sending ZCN...")
 	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc %q --to_client_id %s `, tokens, desc, toClientID)
 
@@ -314,7 +318,7 @@ func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float
 		cmd += fmt.Sprintf(" --fee %v ", fee)
 	}
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", cliConfigFilename)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", wallet+"_wallet.json", cliConfigFilename)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 

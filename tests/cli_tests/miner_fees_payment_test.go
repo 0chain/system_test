@@ -42,13 +42,13 @@ func TestMinerFeesPayment(t *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
-		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
+		output, err = sendTokensFromWallet(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
@@ -85,19 +85,19 @@ func TestMinerFeesPayment(t *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
-		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
+		output, err = vestingPoolAddForWallet(t, configPath, createParams(map[string]interface{}{
 			"d":           targetWallet.ClientID + ":0.1",
 			"lock":        0.1,
 			"duration":    "10m",
 			"fee":         fee,
 			"description": "vestingpool",
-		}), true)
+		}), true, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error adding vesting pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
@@ -127,18 +127,18 @@ func TestMinerFeesPayment(t *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		// lock with fee
 		fee := 0.1
-		output, err = lockInterest(t, configPath, createParams(map[string]interface{}{
+		output, err = lockInterestForWallet(t, configPath, createParams(map[string]interface{}{
 			"durationMin": 1,
 			"tokens":      0.1,
 			"fee":         fee,
-		}), true)
+		}), true, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error locking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		lockId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[1])
@@ -197,10 +197,10 @@ func TestMinerFeesPayment(t *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		allocationId := setupAllocation(t, configPath)
+		allocationId := setupAllocationWithWallet(t, minerNodeDelegateWalletName, configPath)
 
 		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
@@ -267,7 +267,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 7)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
@@ -351,7 +351,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 7)
+		output, err = executeFaucetWithTokensForWallet(t, minerNodeDelegateWalletName, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		blobbers := []climodel.BlobberInfo{}
