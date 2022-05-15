@@ -40,7 +40,7 @@ func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPoll
 	require.Greater(t, confirmation.Round, int64(0))
 	require.Equal(t, 1, confirmation.Status)
 	require.NotNil(t, confirmation.RoundRandomSeed)
-	require.Equal(t, confirmation.StateChangesCount, 0)
+	require.NotNil(t, confirmation.StateChangesCount)
 	require.NotNil(t, confirmation.MerkleTreeRoot)
 	require.NotNil(t, confirmation.MerkleTreePath)
 	require.NotNil(t, confirmation.ReceiptMerkleTreeRoot)
@@ -93,6 +93,7 @@ func executeFaucet(t *testing.T, clientId string, keyPair model.KeyPair) *model.
 		CreationDate:     time.Now().Unix(),
 		ClientId:         clientId,
 		Version:          "1.0",
+		Nonce:            1,
 	}
 
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
