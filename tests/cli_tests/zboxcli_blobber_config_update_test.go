@@ -364,7 +364,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
 		require.Equal(t, newMinStake, intToZCN(finalBlobberInfo.StakePoolSettings.MinStake))
-		require.Equal(t, time.Duration(newChallengeCompletionTIme), finalBlobberInfo.Terms.Challenge_completion_time)
+		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 }
 

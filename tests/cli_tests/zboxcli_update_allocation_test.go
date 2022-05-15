@@ -482,7 +482,7 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 1.0
 	// Then create new allocation
-	options := map[string]interface{}{"expire": "10m", "size": "256000", "lock": "0.5"}
+	options := map[string]interface{}{"expire": "10m", "size": "10000", "lock": "0.5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
