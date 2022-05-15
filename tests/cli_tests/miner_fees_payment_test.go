@@ -36,17 +36,23 @@ func TestMinerFeesPayment(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -55,7 +61,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -73,10 +79,16 @@ func TestMinerFeesPayment(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet")
 
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
@@ -89,7 +101,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "error adding vesting pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -98,7 +110,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -109,10 +121,16 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		// lock with fee
 		fee := 0.1
@@ -128,7 +146,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		lockTimer := time.NewTimer(time.Minute)
 		cliutils.Wait(t, 30*time.Second)
 
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -137,7 +155,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		<-lockTimer.C
@@ -153,7 +171,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		endBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -162,7 +180,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -173,12 +191,18 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		allocationId := setupAllocation(t, configPath)
 
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -192,7 +216,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		lockTimer := time.NewTimer(time.Minute)
 		cliutils.Wait(t, 30*time.Second)
 
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -201,7 +225,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		output, err = readPoolInfo(t, configPath, allocationId)
@@ -213,7 +237,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		<-lockTimer.C
 
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+		startBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		output, err = readPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": readPool[0].Id,
@@ -223,7 +247,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		cliutils.Wait(t, 30*time.Second)
 
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		endBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -232,7 +256,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -246,9 +270,15 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		allocationId := setupAllocation(t, configPath)
 
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		// Lock 1 token in Write pool amongst all blobbers
 		fee := 0.1
@@ -263,7 +293,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		lockTimer := time.NewTimer(time.Minute * 2)
 		cliutils.Wait(t, 30*time.Second)
 
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -272,7 +302,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		output, err = writePoolInfo(t, configPath, true)
@@ -285,7 +315,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		<-lockTimer.C
 
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+		startBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": writePool[0].Id,
@@ -294,7 +324,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		endBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		require.Greater(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greater(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
@@ -304,7 +334,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -314,6 +344,12 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
+
+		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -331,7 +367,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
 		// Get miner's start balance
-		startBalance := getNodeBalanceFromASharder(t, miner.ID)
+		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		// Stake tokens against this blobber
 		fee := 0.1
@@ -345,7 +381,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		stakePoolID := regexp.MustCompile("[a-f0-9]{64}").FindString(output[0])
 
 		cliutils.Wait(t, 30*time.Second)
-		endBalance := getNodeBalanceFromASharder(t, miner.ID)
+		endBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -354,11 +390,11 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		// Unstake with fee
-		startBalance = getNodeBalanceFromASharder(t, miner.ID)
+		startBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -368,7 +404,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBalance = getNodeBalanceFromASharder(t, miner.ID)
+		endBalance = getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 		require.Greaterf(t, endBalance.Round, startBalance.Round, "Round of balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Round, endBalance.Round)
 		require.Greaterf(t, endBalance.Balance, startBalance.Balance, "Balance is unexpectedly unchanged since last balance check: last %d, retrieved %d", startBalance.Balance, endBalance.Balance)
 
@@ -377,7 +413,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }
@@ -419,7 +455,7 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 	return expectedMinerFee
 }
 
-func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFee int64) bool {
+func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, delegateWallet string, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
 		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []apimodel.Transfer
@@ -428,7 +464,7 @@ func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFe
 
 			for _, transfer := range transfers {
 				// Transfer needs to be from Miner Smart contract to Generator miner
-				if transfer.From != MINER_SC_ADDRESS || transfer.To != block.Block.MinerId {
+				if transfer.From != MINER_SC_ADDRESS || transfer.To != block.Block.MinerId && transfer.To != delegateWallet {
 					continue
 				}
 				t.Logf("--- FOUND IN ROUND: %d ---", block.Block.Round)

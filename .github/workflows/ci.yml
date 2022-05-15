@@ -1,6 +1,6 @@
 name: "0Chain System Tests"
 concurrency:
-  group: "system-tests-${{ github.ref }}"
+  group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
   push:

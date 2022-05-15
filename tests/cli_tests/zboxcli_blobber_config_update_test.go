@@ -257,7 +257,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 
 		output, err = updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 25)
+		require.Len(t, output, 26)
 		require.Equal(t, "Error: required flag(s) \"blobber_id\" not set", output[0])
 	})
 
@@ -302,7 +302,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-9)
 	})
 
 	t.Run("update blobber write price should work", func(t *testing.T) {
@@ -325,7 +326,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-9)
 	})
 
 	t.Run("update all params at once should work", func(t *testing.T) {
@@ -356,9 +358,11 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-9)
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
-		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-9)
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)

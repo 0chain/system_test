@@ -20,12 +20,15 @@ func TestSharderUpdateSettings(t *testing.T) {
 	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
 	}
+	if _, err := os.Stat("./config/" + sharderNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeWalletName+"_wallet.json")
+	}
 
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharderNodeDelegateWalletName)
+	sharderNodeWallet, err := getWalletForName(t, configPath, sharderNodeWalletName)
 	require.Nil(t, err, "error fetching sharder wallet")
 
 	output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
-		"id": sharderNodeDelegateWallet.ClientID,
+		"id": sharderNodeWallet.ClientID,
 	}), true)
 	require.Nil(t, err, "error fetching sharder settings")
 	require.Len(t, output, 1)
@@ -40,7 +43,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	found := false
 	var sharder climodel.Sharder
 	for _, sharder = range sharders {
-		if sharder.ID == sharderNodeDelegateWallet.ClientID {
+		if sharder.ID == sharderNodeWallet.ClientID {
 			break
 		}
 	}
