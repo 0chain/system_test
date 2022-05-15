@@ -349,6 +349,13 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	// Get the starting balance for miner's delegate wallet.
 	res, err := apiGetBalance(sharderBaseUrl, client_id)
 	require.Nil(t, err, "Error retrieving client %s balance", client_id)
+	if res.StatusCode == 400 {
+		return &apimodel.Balance{
+			Txn:     "",
+			Round:   0,
+			Balance: 0,
+		}
+	}
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
