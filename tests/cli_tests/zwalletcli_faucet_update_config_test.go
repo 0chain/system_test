@@ -15,8 +15,6 @@ import (
 )
 
 func TestFaucetUpdateConfig(t *testing.T) {
-	t.Parallel()
-
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -28,8 +26,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
-		t.Parallel()
-
 		n := atomic.AddInt64(&nonce, 2)
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -85,7 +81,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
 		n := atomic.AddInt64(&nonce, 1)
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -104,8 +99,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "max_pour_amount"
 		newValue := "15"
 
@@ -123,8 +116,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -143,8 +134,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -160,8 +149,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
