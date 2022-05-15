@@ -30,16 +30,10 @@ const (
 
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
-		//check https://0chain.slack.com/archives/C0276HLCN5S/p1652353147948079?thread_ts=1652258568.233289&cid=C0276HLCN5S
-		t.Skip("Until Shahnawaz resolved different delegate wallets issue")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		delegateWallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -95,7 +89,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		startBeforeRound := getCurrentRound(t)
 		//TODO use delegate wallets instead
-		startReward := getMinersDetail(t, delegateWallet.ClientID).Reward
+		require.NotNil(t, delegateWallets[miner.ID], "Miner id is not from delegate wallet list")
+		delegateId := delegateWallets[miner.ID].ClientID
+		startReward := getMinersDetail(t, delegateId).Reward
 		startAfterRound := getCurrentRound(t)
 		// Do 5 lock transactions with fees
 		params := createParams(map[string]interface{}{
@@ -112,7 +108,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 
 		beforeAfterRound := getCurrentRound(t)
-		endRewardStr, err := getBalanceForWallet(t, configPath, minerNodeDelegateWalletName)
+		endRewardStr, err := getBalanceForWallet(t, configPath, delegateId)
 		require.NoError(t, err)
 		endReward, err := strconv.ParseInt(endRewardStr[0], 10, 64)
 		require.NoError(t, err)
@@ -124,7 +120,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		for round := startBeforeRound + 1; round <= endAfterRound; round++ {
 			block := getBlock(t, sharderBaseUrl, round)
 			// No expected rewards for this miner if not the generator of block.
-			if block.Block.MinerId != miner.ID && block.Block.MinerId != delegateWallet.ClientID {
+			if block.Block.MinerId != miner.ID && block.Block.MinerId != delegateId {
 				continue
 			}
 
@@ -190,11 +186,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		delegateWallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -235,7 +227,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
 		startBeforeRound := getCurrentRound(t)
-		startReward := getMinersDetail(t, delegateWallet.ClientID).Reward
+		require.NotNil(t, delegateWallets[sharder.ID], "Sharder id is not from delegate wallet list")
+		startReward := getMinersDetail(t, delegateWallets[sharder.ID].ClientID).Reward
 		startAfterRound := getCurrentRound(t)
 
 		// Do 5 lock transactions with fees

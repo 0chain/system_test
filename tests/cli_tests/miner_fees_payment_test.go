@@ -40,11 +40,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -63,7 +59,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, wallets[blockMinerId].ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -82,11 +78,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet")
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -111,7 +103,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, wallets[blockMinerId].ClientID, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -123,11 +115,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -155,7 +143,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		delegateId := wallets[blockMinerId].ClientID
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		<-lockTimer.C
@@ -178,7 +167,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -190,11 +179,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -222,7 +207,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		deledateId := wallets[blockMinerId].ClientID
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, deledateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		output, err = readPoolInfo(t, configPath, allocationId)
@@ -251,7 +237,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, deledateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -266,11 +252,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		allocationId := setupAllocation(t, configPath)
 
@@ -296,7 +278,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		delegateId := wallets[blockMinerId].ClientID
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		output, err = writePoolInfo(t, configPath, true)
@@ -325,7 +308,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
@@ -337,11 +320,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		output, err = registerWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-		delegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		wallets := loadDelegateWallets(t)
 
 		output, err = executeFaucetWithTokens(t, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -380,7 +359,8 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner := getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		delegateId := wallets[blockMinerId].ClientID
+		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		// Unstake with fee
@@ -401,7 +381,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		blockMiner = getMinersDetail(t, blockMinerId)
 
 		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateWallet.ClientID, expectedMinerFee)
+		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, delegateId, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 }

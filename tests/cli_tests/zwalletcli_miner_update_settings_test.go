@@ -17,8 +17,8 @@ import (
 )
 
 func TestMinerUpdateSettings(t *testing.T) {
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
@@ -30,7 +30,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Len(t, output, 1)
 
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	ret, err := getNonceForWallet(t, configPath, minerNodeDelegateWalletName, true)
+	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
 	nonceStr := strings.Split(ret[0], ":")[1]
 	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
@@ -432,11 +432,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
 func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, nonce int64, retry bool) ([]string, error) {
-	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWalletName, nonce, retry)
+	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, miner01NodeDelegateWalletName, nonce, retry)
 }
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, nonce int64, retry bool) ([]string, error) {
@@ -461,7 +461,7 @@ func getNonceForWallet(t *testing.T, cliConfigFilename, wallet string, retry boo
 
 func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Fetching miner node info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
 func getCurrentRound(t *testing.T) int64 {

@@ -15,8 +15,8 @@ import (
 )
 
 func TestMinerSCUserPoolInfo(t *testing.T) {
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")

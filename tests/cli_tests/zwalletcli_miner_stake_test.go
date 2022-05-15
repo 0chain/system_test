@@ -20,8 +20,8 @@ import (
 )
 
 func TestMinerStake(t *testing.T) {
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
@@ -32,7 +32,7 @@ func TestMinerStake(t *testing.T) {
 	require.Len(t, output, 1)
 
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	ret, err := getNonceForWallet(t, configPath, minerNodeDelegateWalletName, true)
+	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
 	nonceStr := strings.Split(ret[0], ":")[1]
 	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)

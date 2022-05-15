@@ -17,8 +17,8 @@ import (
 func TestSharderUpdateSettings(t *testing.T) {
 	mnConfig := getMinerSCConfiguration(t)
 
-	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + sharderNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeWalletName+"_wallet.json")
@@ -38,7 +38,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
 	require.NotEmpty(t, oldSharderInfo)
 
-	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
+	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
 	found := false
 	var sharder climodel.Sharder
@@ -282,7 +282,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharderNodeDelegateWalletName, retry)
+	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharder01NodeDelegateWalletName, retry)
 }
 
 func sharderUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
