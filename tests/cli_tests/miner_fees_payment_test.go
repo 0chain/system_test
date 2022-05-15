@@ -205,7 +205,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		startBalance := getNodeBalanceFromASharder(t, delegateWallet.ClientID)
 
 		fee := 0.1
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
+		output, err = readPoolLockWithWallet(t, minerNodeDelegateWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
 			"tokens":     0.5,
 			"duration":   "1m",
