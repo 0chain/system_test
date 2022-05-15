@@ -15,7 +15,6 @@ import (
 )
 
 func TestFaucetUpdateConfig(t *testing.T) {
-	t.Parallel()
 
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
@@ -148,12 +147,11 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
 
 		//important: we use random nonce here, since this transaction won't be sent
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, n, false)
+		}, 0, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -165,12 +163,11 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
 
 		//we use random nonce here since this transaction won't be sent to network
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
-		}, n, false)
+		}, 0, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
