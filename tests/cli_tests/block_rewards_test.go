@@ -89,8 +89,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		startBeforeRound := getCurrentRound(t)
 		//TODO use delegate wallets instead
-		require.NotNil(t, delegateWallets[miner.ID], "Miner id is not from delegate wallet list")
-		delegateId := delegateWallets[miner.ID].ClientID
+		require.NotNil(t, delegateWallets[miner.Settings.DelegateWallet], "Miner id is not from delegate wallet list")
+		delegateId := delegateWallets[miner.Settings.DelegateWallet].ClientID
 		startReward := getMinersDetail(t, delegateId).Reward
 		startAfterRound := getCurrentRound(t)
 		// Do 5 lock transactions with fees
@@ -227,8 +227,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
 		startBeforeRound := getCurrentRound(t)
-		require.NotNil(t, delegateWallets[sharder.ID], "Sharder id is not from delegate wallet list")
-		startReward := getMinersDetail(t, delegateWallets[sharder.ID].ClientID).Reward
+		require.NotNil(t, delegateWallets[sharder.Settings.DelegateWallet], "Sharder id is not from delegate wallet list")
+		startReward := getMinersDetail(t, delegateWallets[sharder.Settings.DelegateWallet].ClientID).Reward
 		startAfterRound := getCurrentRound(t)
 
 		// Do 5 lock transactions with fees
