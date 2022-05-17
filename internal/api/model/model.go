@@ -141,9 +141,19 @@ type StorageChallenge struct {
 }
 
 type BlobberChallenge struct {
-	BlobberID                string            `json:"blobber_id"`
-	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
-	ChallengeIDs             []string          `json:"challenge_ids"`
+	BlobberID  string       `json:"blobber_id"`
+	Challenges []Challenges `json:"challenges"`
+}
+
+type Challenges struct {
+	ID             string            `json:"id"`
+	Created        int64             `json:"created"`
+	Validators     []*ValidationNode `json:"validators"`
+	RandomNumber   int64             `json:"seed"`
+	AllocationID   string            `json:"allocation_id"`
+	AllocationRoot string            `json:"allocation_root"`
+	BlobberID      string            `json:"blobber_id"`
+	Responded      bool              `json:"responded"`
 }
 
 type KeyPair struct {
