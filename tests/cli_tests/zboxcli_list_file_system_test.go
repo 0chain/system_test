@@ -30,7 +30,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("No Files in Allocation Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -45,7 +45,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List Files in Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the root directory
@@ -80,7 +80,7 @@ func TestListFileSystem(t *testing.T) {
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
 	t.Run("List Encrypted Files Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -131,7 +131,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List Files and Check Lookup Hash Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		filesize := int64(2)
@@ -167,7 +167,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List Files in a Directory Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the a directory
@@ -200,7 +200,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List Files in Nested Directory Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the a directory
@@ -282,7 +282,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List Shared Files Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -336,7 +336,7 @@ func TestListFileSystem(t *testing.T) {
 	//FIXME: POSSIBLE BUG: Listing shared files with lookuphash doesn't list any files
 	t.Run("List Shared Files Using Lookup Hash Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		var authTicket, filename, lookupHash string
 
 		filesize := int64(2)
@@ -390,7 +390,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List All Files Should Work", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		generateFileAndUpload(t, allocationID, "/", int64(10))
@@ -427,7 +427,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("No Parameter Should Fail", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
 			"List files with no parameter failed due to error", err,
@@ -445,7 +445,7 @@ func TestListFileSystem(t *testing.T) {
 	// any errors. Good thing is that the contents are not shown.
 	t.Run("List Files in Other's Wallet Should Fail", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
 
@@ -506,7 +506,7 @@ func TestListFileSystem(t *testing.T) {
 
 	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {
 		t.Parallel()
-
+		t.Skip("piers")
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{

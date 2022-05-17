@@ -14,6 +14,7 @@ import (
 )
 
 func TestInterestPoolUpdateConfig(t *testing.T) {
+	t.Skip("interest pool smart contract is deprecated")
 	t.Parallel()
 
 	t.Run("should allow update of min_lock", func(t *testing.T) {
