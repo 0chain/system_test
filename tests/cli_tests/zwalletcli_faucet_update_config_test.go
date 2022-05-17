@@ -15,7 +15,6 @@ import (
 )
 
 func TestFaucetUpdateConfig(t *testing.T) {
-
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
