@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -12,15 +11,14 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMinerUpdateSettings(t *testing.T) {
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
@@ -32,7 +30,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Len(t, output, 1)
 
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	ret, err := getNonceForWallet(t, configPath, minerNodeDelegateWalletName, true)
+	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
 	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
 	nonceStr := strings.Split(ret[0], ":")[1]
 	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
@@ -64,9 +62,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Log("start revert")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
-			"num_delegates": miner.NumberOfDelegates,
-			"min_stake":     miner.MinStake / 1e10,
-			"max_stake":     miner.MaxStake / 1e10,
+			"num_delegates": miner.Settings.MaxNumDelegates,
+			"min_stake":     miner.Settings.MinStake / 1e10,
+			"max_stake":     miner.Settings.MaxStake / 1e10,
 		}), nonce, true)
 		require.Nil(t, err, "error reverting miner settings after test")
 		require.Len(t, output, 2)
@@ -79,16 +77,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 	lastRoundOfSettingUpdate := int64(0)
 
 	// Get base URL for API calls.
-	sharders := getShardersList(t)
-	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		break
-	}
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
 	t.Run("Miner update min_stake by delegate wallet should work", func(t *testing.T) {
 		// Get the starting balance for miner's delegate wallet.
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -96,7 +87,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -110,7 +101,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake": 1,
 		}), n, true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating min stake in miner node")
 		require.Len(t, output, 2)
@@ -126,13 +117,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 1, int(intToZCN(minerInfo.MinStake)))
-
-		t.Log("end test")
+		require.Equal(t, 1, int(intToZCN(minerInfo.Settings.MinStake)))
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -140,7 +129,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -152,7 +141,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": 5,
 		}), n, true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating num_delegates in miner node")
 		require.Len(t, output, 2)
@@ -167,12 +156,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 5, minerInfo.NumberOfDelegates)
-		t.Log("end test")
+		require.Equal(t, 5, minerInfo.Settings.MaxNumDelegates)
 	})
 
 	t.Run("Miner update max_stake with delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -180,7 +168,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -192,7 +180,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"max_stake": 99,
 		}), n, true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating max_stake in miner node")
 		require.Len(t, output, 2)
@@ -208,12 +196,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 99, int(intToZCN(minerInfo.MaxStake)))
-		t.Log("end test")
+		require.Equal(t, 99, int(intToZCN(minerInfo.Settings.MaxStake)))
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
-		currRound := getCurrentRound(t, sharderBaseUrl, miner.ID)
+		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -221,7 +208,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t, sharderBaseUrl, miner.ID)
+				currRound = getCurrentRound(t)
 			}
 		}
 
@@ -235,7 +222,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"min_stake":     1,
 		}), n, true)
 
-		lastRoundOfSettingUpdate = getCurrentRound(t, sharderBaseUrl, miner.ID)
+		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.Nil(t, err, "error updating multiple settings with delegate wallet")
 		require.Len(t, output, 2)
@@ -251,10 +238,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 5, minerInfo.NumberOfDelegates)
-		require.Equal(t, float64(99), intToZCN(minerInfo.MaxStake))
-		require.Equal(t, float64(1), intToZCN(minerInfo.MinStake))
-		t.Log("end test")
+		require.Equal(t, 5, minerInfo.Settings.MaxNumDelegates)
+		require.Equal(t, float64(99), intToZCN(minerInfo.Settings.MaxStake))
+		require.Equal(t, float64(1), intToZCN(minerInfo.Settings.MinStake))
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {
@@ -446,11 +432,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 }
 
 func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
 func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, nonce int64, retry bool) ([]string, error) {
-	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, minerNodeDelegateWalletName, nonce, retry)
+	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, miner01NodeDelegateWalletName, nonce, retry)
 }
 
 func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, nonce int64, retry bool) ([]string, error) {
@@ -475,20 +461,9 @@ func getNonceForWallet(t *testing.T, cliConfigFilename, wallet string, retry boo
 
 func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Fetching miner node info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, minerNodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
-func getCurrentRound(t *testing.T, sharderBaseUrl, minerID string) int64 {
-	res, err := apiGetBalance(sharderBaseUrl, minerID)
-	require.Nil(t, err, "Error retrieving miner %s balance", minerID)
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check miner %s balance: %d", minerID, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body")
-
-	var balance apimodel.Balance
-	err = json.Unmarshal(resBody, &balance)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	return balance.Round
+func getCurrentRound(t *testing.T) int64 {
+	return getLatestFinalizedBlock(t).Round
 }

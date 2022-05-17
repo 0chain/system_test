@@ -164,7 +164,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, filesize, meta.Size)
 	})
 
-	//FIXME: POSSIBLE BUG: Using lookuphash with remotepath causes no effects. lookuphash
+	// FIXME: POSSIBLE BUG: Using lookuphash with remotepath causes no effects. lookuphash
 	// is simply ignored
 	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *testing.T) {
 		t.Parallel()

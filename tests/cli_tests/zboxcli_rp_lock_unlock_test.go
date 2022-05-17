@@ -367,6 +367,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 	})
 
 	t.Run("Should not be able to unlock unexpired read tokens", func(t *testing.T) {
+		t.Skip("made redundant by https://github.com/0chain/0chain/issues/1062")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

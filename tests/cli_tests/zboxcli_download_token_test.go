@@ -21,6 +21,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 	balance := 0.4 // 400.000 mZCN
 	t.Run("Read pool must have no tokens locked for a newly created allocation", func(t *testing.T) {
+		t.Skip("made redundant by https://github.com/0chain/0chain/issues/1062")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

@@ -4,6 +4,39 @@ import (
 	"time"
 )
 
+type Provider int
+
+const (
+	ProviderMiner Provider = iota
+	ProviderSharder
+	ProviderBlobber
+	ProviderValidator
+	ProviderAuthorizer
+)
+
+var providerString = []string{"miner", "sharder", "blobber", "validator", "authorizer"}
+
+func (p Provider) String() string {
+	return providerString[p]
+}
+
+type PoolStatus int
+
+const (
+	Active PoolStatus = iota
+	Pending
+	Inactive
+	Unstaking
+	Deleting
+	Deleted
+)
+
+var poolString = []string{"active", "pending", "inactive", "unstaking", "deleting"}
+
+func (p PoolStatus) String() string {
+	return poolString[p]
+}
+
 type Wallet struct {
 	ClientID            string `json:"client_id"`
 	ClientPublicKey     string `json:"client_public_key"`
@@ -250,8 +283,8 @@ type StakePoolSettings struct {
 	MinStake int64 `json:"min_stake"`
 	// MaxStake allowed.
 	MaxStake int64 `json:"max_stake"`
-	// NumDelegates maximum allowed.
-	NumDelegates int `json:"num_delegates"`
+	// MaxNumDelegates maximum allowed.
+	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
 	ServiceCharge float64 `json:"service_charge"`
 }
@@ -260,25 +293,36 @@ type NodeList struct {
 	Nodes []Node `json:"Nodes"`
 }
 
+type DelegatePool struct {
+	Balance      int64  `json:"balance"`
+	Reward       int64  `json:"reward"`
+	Status       int    `json:"status"`
+	RoundCreated int64  `json:"round_created"` // used for cool down
+	DelegateID   string `json:"delegate_id"`
+}
+
+type StakePool struct {
+	Pools    map[string]*DelegatePool `json:"pools"`
+	Reward   int64                    `json:"rewards"`
+	Settings StakePoolSettings        `json:"settings"`
+	Minter   int                      `json:"minter"`
+}
+
 type Node struct {
 	SimpleNode `json:"simple_miner"`
+	StakePool  `json:"stake_pool"`
 }
 
 type SimpleNode struct {
-	ID                string      `json:"id"`
-	N2NHost           string      `json:"n2n_host"`
-	Host              string      `json:"host"`
-	Port              int         `json:"port"`
-	PublicKey         string      `json:"public_key"`
-	ShortName         string      `json:"short_name"`
-	BuildTag          string      `json:"build_tag"`
-	TotalStake        int64       `json:"total_stake"`
-	DelegateWallet    string      `json:"delegate_wallet"`
-	ServiceCharge     float64     `json:"service_charge"`
-	NumberOfDelegates int         `json:"number_of_delegates"`
-	MinStake          int64       `json:"min_stake"`
-	MaxStake          int64       `json:"max_stake"`
-	Stat              interface{} `json:"stat"`
+	ID         string      `json:"id"`
+	N2NHost    string      `json:"n2n_host"`
+	Host       string      `json:"host"`
+	Port       int         `json:"port"`
+	PublicKey  string      `json:"public_key"`
+	ShortName  string      `json:"short_name"`
+	BuildTag   string      `json:"build_tag"`
+	TotalStake int64       `json:"total_stake"`
+	Stat       interface{} `json:"stat"`
 }
 
 type Sharder struct {
@@ -381,13 +425,11 @@ type MinerSCNodes struct {
 }
 
 type MinerSCDelegatePoolInfo struct {
-	ID           string `json:"id"`
-	Balance      int64  `json:"balance"`
-	InterestPaid int64  `json:"interest_paid"`
-	RewardPaid   int64  `json:"reward_paid"`
-	Status       string `json:"status"`
-	High         int64  `json:"high"`
-	Low          int64  `json:"low"`
+	ID         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	Reward     int64  `json:"reward"`      // uncollected reread
+	RewardPaid int64  `json:"reward_paid"` // total reward all time
+	Status     string `json:"status"`
 }
 
 type LockConfig struct {
@@ -405,7 +447,7 @@ type SimpleGlobalNode struct {
 }
 
 type MinerSCUserPoolsInfo struct {
-	Pools map[string]map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
+	Pools map[string][]*MinerSCDelegatePoolInfo `json:"pools"`
 }
 
 type PoolStats struct {
@@ -425,9 +467,4 @@ type TokenPool struct {
 
 type ZCNLockingPool struct {
 	TokenPool `json:"pool"`
-}
-
-type DelegatePool struct {
-	*PoolStats     `json:"stats"`
-	ZCNLockingPool `json:"pool"`
 }

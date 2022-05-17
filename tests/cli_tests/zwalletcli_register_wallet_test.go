@@ -116,6 +116,27 @@ func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
+func loadDelegateWallets(t *testing.T) map[string]*climodel.Wallet {
+	wallets := []string{miner01NodeDelegateWalletName, miner02NodeDelegateWalletName, miner03NodeDelegateWalletName,
+		sharder01NodeDelegateWalletName, sharder02NodeDelegateWalletName}
+	m := make(map[string]*climodel.Wallet)
+	for _, w := range wallets {
+		wallet := loadWallet(t, w)
+		m[wallet.ClientID] = wallet
+	}
+	return m
+}
+
+func loadWallet(t *testing.T, name string) *climodel.Wallet {
+	output, err := registerWalletForName(t, configPath, name)
+	require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+	forName, err := getWalletForName(t, configPath, name)
+	require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+	return forName
+
+}
+
 func ensureZeroBalance(t *testing.T, output []string, err error) {
 	if err != nil {
 		require.Len(t, output, 1)

@@ -16,11 +16,8 @@ import (
 )
 
 func TestCollaborator(t *testing.T) {
-	t.Parallel()
 
 	t.Run("Add Collaborator _ collaborator client id must be added to file collaborators list", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -55,8 +52,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator can NOT be added to a directory", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -94,8 +89,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator must be able to read the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -152,8 +145,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator must not be able to share the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -193,8 +184,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -246,8 +235,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -312,8 +299,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *testing.T) {
-		t.Parallel()
-
 		ownerWalletName := escapedTestName(t) + "_owner"
 		anotherWalletName := escapedTestName(t) + "_another"
 
@@ -343,8 +328,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator from a file owned by somebody else must fail", func(t *testing.T) {
-		t.Parallel()
-
 		ownerWalletName := escapedTestName(t) + "_owner"
 		anotherWalletName := escapedTestName(t) + "_another"
 
@@ -392,8 +375,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ Collaborator should NOT be able to add another collaborator", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -443,8 +424,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to update the file attributes", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -486,8 +465,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to rename the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -529,8 +506,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to delete the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -570,8 +545,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to move the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -613,8 +586,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -662,8 +633,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to copy the file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -705,8 +674,6 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *testing.T) {
-		t.Parallel()
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
