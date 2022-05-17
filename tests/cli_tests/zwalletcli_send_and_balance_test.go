@@ -361,13 +361,12 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
-
+	strBody := string(resBody)
+	strBody = strBody
 	var startBalance apimodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-	require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
-	require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
+
 	return &startBalance
 }
 
@@ -378,6 +377,15 @@ func getShardersList(t *testing.T) map[string]climodel.Sharder {
 func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
+	found := false
+	for index, line := range output {
+		if line == "MagicBlock Sharders" {
+			found = true
+			output = output[index:]
+			break
+		}
+	}
+	require.True(t, found, "MagicBlock Sharders not found in getShardersForWallet output")
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 	require.Equal(t, "MagicBlock Sharders", output[0])
