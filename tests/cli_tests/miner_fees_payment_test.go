@@ -23,7 +23,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -67,7 +66,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("Vp-add with fee should pay fee to the miners", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -117,7 +115,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -264,7 +261,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -343,7 +339,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
-		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
