@@ -364,7 +364,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 		// FIXME: Change InDelta to Equal
 		require.InDelta(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-9)
-		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
