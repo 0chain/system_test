@@ -482,11 +482,8 @@ func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[
 func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 1.0
 	// Then create new allocation
-	allocParam := map[string]interface{}{
-		"lock":   0.5,
-		"size":   10000,
-		"expire": "1h",
-	}
+	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
+
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
 	for _, params := range extraParams {
@@ -498,7 +495,7 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 			delete(params, "tokens")
 		}
 		for k, v := range params {
-			allocParam[k] = v
+			options[k] = v
 		}
 	}
 	// First create a wallet and run faucet command
@@ -508,7 +505,7 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(allocParam))
+	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 

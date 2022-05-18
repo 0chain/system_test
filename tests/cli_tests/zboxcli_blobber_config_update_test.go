@@ -108,7 +108,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		require.Equal(t, time.Duration(newChallengeCompletionTIme), finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 
 	t.Run("update blobber max offer duration should work", func(t *testing.T) {
@@ -269,7 +269,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "consensus_failed: consensus failed on sharders", output[1])
+		require.Equal(t, "resource_not_found: can't get blobber: value not present", output[1])
 	})
 
 	t.Run("update with invalid blobber wallet/owner should fail", func(t *testing.T) {

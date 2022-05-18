@@ -1206,7 +1206,8 @@ func TestDownload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: "+
+			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: 12334qe, error: record not found", output[0])
 	})
 
 	t.Run("Download File from Other's Allocation Should Fail", func(t *testing.T) {

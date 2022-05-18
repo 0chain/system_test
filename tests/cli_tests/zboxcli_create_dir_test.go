@@ -316,7 +316,8 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: "+
+			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: , error: record not found", output[0])
 	})
 
 	t.Run("create attempt with invalid allocation", func(t *testing.T) {
@@ -331,8 +332,8 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDir(t, configPath, "invalidallocation", "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error fetching the allocation allocation_fetch_error: "+
-			"Error fetching the allocation.consensus_failed: consensus failed on sharders", output[0])
+		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.internal_error: "+
+			"can't get allocation: error retrieving allocation: invalidallocation, error: record not found", output[0])
 	})
 
 	t.Run("create attempt with someone else's allocation", func(t *testing.T) {
