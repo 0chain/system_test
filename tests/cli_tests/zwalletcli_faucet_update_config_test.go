@@ -26,6 +26,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
+		t.Parallel()
+
 		n := atomic.AddInt64(&nonce, 2)
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -81,6 +83,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
+		t.Parallel()
 		n := atomic.AddInt64(&nonce, 1)
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -99,6 +102,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
+		t.Parallel()
+
 		configKey := "max_pour_amount"
 		newValue := "15"
 
@@ -116,6 +121,8 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -134,30 +141,32 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
 
 		//important: we use random nonce here, since this transaction won't be sent
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, n, false)
+		}, 0, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
+		t.Parallel()
+
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
-		n := atomic.AddInt64(&nonce, 1)
 
 		//we use random nonce here since this transaction won't be sent to network
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
-		}, n, false)
+		}, 0, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
