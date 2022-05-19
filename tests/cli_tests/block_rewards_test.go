@@ -7,7 +7,6 @@ import (
 	"math"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -35,6 +34,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
 		// Get MinerSC Global Config
 		output, err = getMinerSCConfig(t, configPath, true)
@@ -87,18 +93,16 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		startBeforeRound := getCurrentRound(t)
 		startReward := getMinersDetail(t, miner.ID).Reward
 		startAfterRound := getCurrentRound(t)
-		// Do 5 lock transactions with fees
-		params := createParams(map[string]interface{}{
-			"durationMin": 1,
-			"tokens":      0.1,
-			"fee":         0.1,
-		})
+		// Do 5 send transactions with fees
+		fee := 0.1
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, params, true)
-			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			require.Len(t, output, 2)
-			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
-			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
+			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			// output, err = lockInterest(t, configPath, params, true)
+			// require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
+			// require.Len(t, output, 2)
+			// require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			// require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		beforeAfterRound := getCurrentRound(t)
@@ -180,6 +184,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err = registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
 		// Get MinerSC Global Config
 		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
@@ -219,18 +230,16 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		startReward := getMinersDetail(t, sharder.ID).Reward
 		startAfterRound := getCurrentRound(t)
 
-		// Do 5 lock transactions with fees
-		params := createParams(map[string]interface{}{
-			"durationMin": 1,
-			"tokens":      0.1,
-			"fee":         0.1,
-		})
+		// Do 5 send transactions with fees
+		fee := 0.1
 		for i := 0; i < 5; i++ {
-			output, err = lockInterest(t, configPath, params, true)
-			require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			require.Len(t, output, 2)
-			require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
-			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
+			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			// output, err = lockInterest(t, configPath, params, true)
+			// require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
+			// require.Len(t, output, 2)
+			// require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
+			// require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		beforeAfterRound := getCurrentRound(t)
