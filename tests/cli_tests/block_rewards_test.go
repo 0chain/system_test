@@ -32,7 +32,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
+		output, err = executeFaucetWithTokens(t, configPath, 3)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
@@ -181,7 +181,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
+		output, err = executeFaucetWithTokens(t, configPath, 3)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
