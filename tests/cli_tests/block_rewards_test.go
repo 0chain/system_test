@@ -98,11 +98,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		for i := 0; i < 5; i++ {
 			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
-			// output, err = lockInterest(t, configPath, params, true)
-			// require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			// require.Len(t, output, 2)
-			// require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
-			// require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		beforeAfterRound := getCurrentRound(t)
@@ -235,11 +230,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		for i := 0; i < 5; i++ {
 			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
-			// output, err = lockInterest(t, configPath, params, true)
-			// require.Nil(t, err, "lock interest failed", strings.Join(output, "\n"))
-			// require.Len(t, output, 2)
-			// require.Equal(t, "Tokens (0.100000) locked successfully", output[0])
-			// require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		}
 
 		beforeAfterRound := getCurrentRound(t)
