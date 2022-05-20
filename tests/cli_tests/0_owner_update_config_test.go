@@ -225,7 +225,7 @@ func TestOwnerUpdate(t *testing.T) {
 		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
 		require.Nil(t, err, "error converting nonce to in")
 
-		n := atomic.AddInt64(&nonce, 1)
+		n := atomic.AddInt64(&nonce, 2)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -239,7 +239,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
-		}, n, true)
+		}, n-2, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -260,7 +260,7 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n+1, false)
+		}, n-1, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
