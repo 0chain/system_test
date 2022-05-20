@@ -73,7 +73,7 @@ func TestOwnerUpdate(t *testing.T) {
 		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
 		require.Nil(t, err, "error converting nonce to in")
 
-		n := atomic.AddInt64(&nonce, 2)
+		n := atomic.AddInt64(&nonce, 3)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -109,6 +109,12 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 
 		t.Cleanup(func() {
+			ret, err := getNonceForWallet(t, configPath, escapedTestName(t), true)
+			require.Nil(t, err, "error fetching wallet nonce")
+			nonceStr := strings.Split(ret[0], ":")[1]
+			nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+			require.Nil(t, err, "error converting nonce to in")
+			n := atomic.AddInt64(&nonce, 1)
 			output, err := updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 				"keys":   ownerKey,
 				"values": oldOwner,
@@ -227,7 +233,7 @@ func TestOwnerUpdate(t *testing.T) {
 		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
 		require.Nil(t, err, "error converting nonce to in")
 
-		n := atomic.AddInt64(&nonce, 2)
+		n := atomic.AddInt64(&nonce, 3)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
