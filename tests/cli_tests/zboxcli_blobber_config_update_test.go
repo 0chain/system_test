@@ -14,6 +14,7 @@ import (
 )
 
 func TestBlobberConfigUpdate(t *testing.T) {
+	const delta = 0.000000001
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
@@ -54,7 +55,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": intialBlobberInfo.Terms.Min_lock_demand}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.NumDelegates}))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
@@ -107,7 +108,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newChallengeCompletionTIme, finalBlobberInfo.Terms.Challenge_completion_time)
+		require.Equal(t, time.Duration(newChallengeCompletionTIme), finalBlobberInfo.Terms.Challenge_completion_time)
 	})
 
 	t.Run("update blobber max offer duration should work", func(t *testing.T) {
@@ -215,7 +216,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 	})
 
 	t.Run("update blobber service charge should work", func(t *testing.T) {
@@ -268,7 +269,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "consensus_failed: consensus failed on sharders", output[1])
+		require.Equal(t, "resource_not_found: can't get blobber: value not present", output[1])
 	})
 
 	t.Run("update with invalid blobber wallet/owner should fail", func(t *testing.T) {
@@ -302,7 +303,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.InEpsilon(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-10)
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-9)
 	})
 
 	t.Run("update blobber write price should work", func(t *testing.T) {
@@ -325,7 +327,8 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.InEpsilon(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-10)
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-9)
 	})
 
 	t.Run("update all params at once should work", func(t *testing.T) {
@@ -335,7 +338,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		newWritePrice := intToZCN(intialBlobberInfo.Terms.Write_price) + 1
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
 		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price) + 1
-		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.NumDelegates + 1
+		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
@@ -356,10 +359,12 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.InEpsilon(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-10)
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price), 1e-9)
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
-		require.InEpsilon(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-10)
-		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.NumDelegates)
+		// FIXME: Change InDelta to Equal
+		require.InDelta(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price), 1e-9)
+		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)

@@ -635,7 +635,8 @@ func TestUpload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expected := "Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.consensus_failed: consensus failed on sharders"
+		expected := "Error fetching the allocation. allocation_fetch_error: " +
+			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: ab12mn34as90, error: record not found"
 		require.Equal(t, expected, output[0])
 	})
 
