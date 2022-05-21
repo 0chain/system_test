@@ -35,7 +35,7 @@ type Transaction struct {
 	TransactionOutput string `json:"transaction_output,omitempty"`
 	TxnOutputHash     string `json:"txn_output_hash"`
 	TransactionStatus int    `json:"transaction_status"`
-	Nonce             int64  `json:"transaction_nonce"`
+	TransactionNonce  int    `json:"transaction_nonce"`
 }
 
 type SmartContractTxnData struct {
@@ -237,6 +237,7 @@ type Wallet struct {
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
 	PublicKey    string `json:"public_key"`
+	Nonce        int
 }
 
 func (w Wallet) String() string {

@@ -55,7 +55,7 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 
 func Hash(request *model.Transaction) {
 	var hashData = blankIfNil(request.CreationDate) + ":" +
-		blankIfNil(request.Nonce) + ":" +
+		blankIfNil(request.TransactionNonce) + ":" +
 		blankIfNil(request.ClientId) + ":" +
 		blankIfNil(request.ToClientId) + ":" +
 		blankIfNil(request.TransactionValue) + ":" +

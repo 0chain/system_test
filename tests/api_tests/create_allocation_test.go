@@ -17,30 +17,31 @@ func TestCreateAllocation(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucet(t, registeredWallet.Id, keyPair)
-		transactionResponse := createAllocation(t, registeredWallet.Id, keyPair)
+		executeFaucet(t, registeredWallet, keyPair)
+		transactionResponse := createAllocation(t, registeredWallet, keyPair)
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 
 		require.NotNil(t, allocation)
 	})
 }
 
-func createAllocation(t *testing.T, clientId string, keyPair model.KeyPair) *model.TransactionResponse {
+func createAllocation(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
 	allocationRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",
 		TransactionValue: 1000000000,
 		TransactionType:  1000,
 		TransactionFee:   0,
-		TransactionData:  "{\"name\":\"new_allocation_request\",\"input\":{\"data_shards\":2,\"expiration_date\":" + strconv.FormatInt(time.Now().Add(time.Hour*1).Unix(), 10) + ",\"max_challenge_completion_time\":3600000000000,\"owner_id\":\"" + clientId + "\",\"owner_public_key\":\"" + keyPair.PublicKey.SerializeToHexStr() + "\",\"parity_shards\":2,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"size\":2147483648,\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}}",
+		TransactionData:  "{\"name\":\"new_allocation_request\",\"input\":{\"data_shards\":2,\"expiration_date\":" + strconv.FormatInt(time.Now().Add(time.Hour*1).Unix(), 10) + ",\"max_challenge_completion_time\":3600000000000,\"owner_id\":\"" + wallet.Id + "\",\"owner_public_key\":\"" + keyPair.PublicKey.SerializeToHexStr() + "\",\"parity_shards\":2,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"size\":2147483648,\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}}",
 		ToClientId:       STORAGE_SMART_CONTRACT_ADDRESS,
 		CreationDate:     time.Now().Unix(),
-		ClientId:         clientId,
+		ClientId:         wallet.Id,
 		Version:          "1.0",
+		TransactionNonce: wallet.Nonce + 1,
 	}
 
 	allocationTransaction := executeTransaction(t, &allocationRequest, keyPair)
-	confirmTransaction(t, allocationTransaction.Entity, 1*time.Minute)
+	confirmTransaction(t, wallet, allocationTransaction.Entity, 1*time.Minute)
 
 	return allocationTransaction
 }
