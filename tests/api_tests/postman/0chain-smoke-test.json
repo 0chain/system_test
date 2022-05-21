@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e85fd23c-3a49-4334-bb39-490bb81beeda",
+		"_postman_id": "08fd27c3-cafd-431f-85b2-73c4e4d37607",
 		"name": "API Smoke test",
 		"description": "The following is a set of API system / regression / user acceptance tests.\n\nTODO:   \nCOLLAB UPDATE   (CURRENTLY BROKEN)    \nAUTH TICKET    \nALLOCATION RESIZE (CURRENTLY BROKEN)   \nALLOCATION DELETION (CURRENTLY BROKEN)   \nALLOCATION FINALIZATION (CURRENTLY BROKEN)   \nTOKEN STAKE/UNSTAKE   (CURRENTLY BROKEN)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -221,6 +221,7 @@
 									"mnemonic = mnemonic.trim();",
 									"",
 									"pm.environment.set(\"mnemonic\", mnemonic);",
+									"pm.environment.set(\"nonce\", 1);",
 									"console.log(\"generated mnemonic is [\" + mnemonic + \"]\")"
 								],
 								"type": "text/javascript"
@@ -437,6 +438,7 @@
 									"",
 									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
 									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
+									"    var nonce = requestBody.transaction_nonce",
 									"    var creationDate = requestBody.creation_date",
 									"    var clientId = requestBody.client_id;",
 									"    var toClientId = requestBody.to_client_id;",
@@ -447,6 +449,7 @@
 									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
 									"    var overallHashData = (",
 									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (nonce == undefined ? \"\" : nonce) + \":\" +",
 									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
 									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
 									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
@@ -507,7 +510,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{faucet_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 10000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{faucet_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 10000000000,\n    \"txn_output_hash\": \"\",\n    \"transaction_nonce\": {{nonce}},\n    \"public_key\": \"{{public_key}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -537,6 +540,7 @@
 							"script": {
 								"exec": [
 									"utils.test.runConditionally(\"execute_faucet_txn_sent\", \"Response code is 200\", function () {",
+									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"faucet_executed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"});"
@@ -667,6 +671,7 @@
 									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
 									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
 									"    var creationDate = requestBody.creation_date",
+									"    var nonce = requestBody.transaction_nonce",
 									"    var clientId = requestBody.client_id;",
 									"    var toClientId = requestBody.to_client_id;",
 									"    var transactionValue = requestBody.transaction_value;",
@@ -676,6 +681,7 @@
 									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
 									"    var overallHashData = (",
 									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (nonce == undefined ? \"\" : nonce) + \":\" +",
 									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
 									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
 									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
@@ -757,7 +763,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_5_mins_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"public_key\": \"{{public_key}}\"\n}",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_5_mins_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"transaction_nonce\": {{nonce}},\n    \"public_key\": \"{{public_key}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -787,6 +793,7 @@
 							"script": {
 								"exec": [
 									"utils.test.runConditionally(\"create_allocation_txn_sent\", \"Response code is 200\", function () {",
+									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"create_allocation_confirmed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"    var response = JSON.parse(responseBody);",
@@ -856,6 +863,7 @@
 									"    // postman boilerplate to retrieve the request body, we need data from here for the hash",
 									"    var requestBody = JSON.parse(Property.replaceSubstitutions(pm.request.body.raw, pm.variables.toObject()))",
 									"    var creationDate = requestBody.creation_date",
+									"    var nonce = requestBody.transaction_nonce",
 									"    var clientId = requestBody.client_id;",
 									"    var toClientId = requestBody.to_client_id;",
 									"    var transactionValue = requestBody.transaction_value;",
@@ -865,6 +873,7 @@
 									"    //if hash data is not available, we insert a blank string rather than hashing one less item",
 									"    var overallHashData = (",
 									"        (creationDate == undefined ? \"\" : creationDate) + \":\" +",
+									"        (nonce == undefined ? \"\" : nonce) + \":\" +",
 									"        (clientId == undefined ? \"\" : clientId) + \":\" +",
 									"        (toClientId == undefined ? \"\" : toClientId) + \":\" +",
 									"        (transactionValue == undefined ? \"\" : transactionValue) + \":\" +",
@@ -943,7 +952,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"public_key\": \"{{public_key}}\",\n    \"signature\": \"{{signature}}\",\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"update_allocation_request\\\",\\\"input\\\":{\\\"expiration_date\\\":0,\\\"id\\\":\\\"{{allocation_id}}\\\",\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"size\\\":30}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 0,\n    \"txn_output_hash\": \"\",\n    \"version\": \"1.0\"\n}",
+							"raw": "{\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"public_key\": \"{{public_key}}\",\n    \"signature\": \"{{signature}}\",\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"update_allocation_request\\\",\\\"input\\\":{\\\"expiration_date\\\":0,\\\"id\\\":\\\"{{allocation_id}}\\\",\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"size\\\":30}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 0,\n    \"txn_output_hash\": \"\",\n    \"transaction_nonce\": {{nonce}},\n    \"version\": \"1.0\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1090,6 +1099,14 @@
 				"type": "text/javascript",
 				"exec": [
 					"utils = {",
+					"    incrementNonce: function (pm){",
+					"        if(pm.response.code == 200) {",
+					"            nonce = parseInt(pm.environment.get(\"nonce\")) + 1;",
+					"            console.log(\"Incrementing nonce to\" + nonce)",
+					"            pm.environment.set(\"nonce\", nonce);",
+					"        }",
+					"        console.log(\"NOT Incrementing nonce as response code was not 200\" + nonce)",
+					"    },",
 					"    test : {",
 					"        runConditionally: function (runCondition, testName, test){",
 					"",
