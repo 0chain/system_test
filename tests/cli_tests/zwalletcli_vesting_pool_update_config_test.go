@@ -15,7 +15,6 @@ import (
 )
 
 func TestVestingPoolUpdateConfig(t *testing.T) {
-	//t.Parallel
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -31,10 +30,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "max_destinations"
 		newValue := "4"
 		n := atomic.AddInt64(&nonce, 2)
@@ -80,12 +75,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_destinations to invalid value should fail", func(t *testing.T) {
-		//t.Parallel
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "max_destinations"
 		newValue := "x"
 		n := atomic.AddInt64(&nonce, 1)
@@ -101,8 +90,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		//t.Parallel
-
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -120,12 +107,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		//t.Parallel
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "unknown_key"
 
 		n := atomic.AddInt64(&nonce, 1)
@@ -139,12 +120,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		//t.Parallel
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
@@ -155,18 +130,8 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		//t.Parallel
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		n := atomic.AddInt64(&nonce, 1)
