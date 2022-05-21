@@ -38,7 +38,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	require.Greater(t, confirmation.CreationDate, int64(0))
 	require.NotNil(t, confirmation.MinerID)
 	require.Greater(t, confirmation.Round, int64(0))
-	require.Equal(t, 1, confirmation.Status)
+	require.NotNil(t, confirmation.Status)
 	require.NotNil(t, confirmation.RoundRandomSeed)
 	require.NotNil(t, confirmation.StateChangesCount)
 	require.NotNil(t, confirmation.MerkleTreeRoot)
@@ -47,7 +47,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
 	require.NotNil(t, confirmation.Transaction.TransactionOutput)
 	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
-	require.Equal(t, 1, confirmation.Transaction.TransactionStatus)
+	require.NotNil(t, confirmation.Transaction.TransactionStatus)
 
 	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
 
@@ -95,7 +95,7 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *m
 		CreationDate:     time.Now().Unix(),
 		ClientId:         wallet.Id,
 		Version:          "1.0",
-		TransactionNonce: 1,
+		TransactionNonce: wallet.Nonce + 1,
 	}
 
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)

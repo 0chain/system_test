@@ -49,7 +49,7 @@ func createAllocation(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair)
 func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 	allocation, httpResponse, err := getAllocationWithoutAssertion(t, allocationId)
 
-	require.NotNil(t, allocation, "Balance was unexpectedly nil! with http response [%s]", httpResponse)
+	require.NotNil(t, allocation, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
 	require.Equal(t, "200 OK", httpResponse.Status())
 
