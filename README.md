@@ -8,6 +8,8 @@ The tests require a full 0Chain network to be deployed and running in a healthy 
 
 ### Deploy a new 0Chain network and run tests with the system tests pipeline (RECOMMENDED)
 
+![system-tests drawio(1) drawio](https://user-images.githubusercontent.com/42718091/168160360-624d83ec-deb2-4e32-95c8-575341a71fc4.png)
+
 The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can deploy a new 0Chain network with a custom set of docker images then run tests:    
 <details>
   <summary><b>[Click to show screenshot]</b></summary>
