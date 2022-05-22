@@ -1,7 +1,9 @@
 package api_tests
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2" //nolint
+	"strconv"
 	"testing"
 	"time"
 
@@ -47,7 +49,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
 	require.NotNil(t, confirmation.Transaction.TransactionOutput)
 	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
-	require.NotNil(t, confirmation.Transaction.TransactionStatus)
+	require.Equal(t, 1, confirmation.Transaction.TransactionStatus, "Confirmation suggests original transaction was unsuccessful. Transaction output: [%s]", confirmation.Transaction.TransactionOutput)
 
 	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
 
@@ -84,6 +86,8 @@ func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, 
 }
 
 func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
+	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
+	require.Nil(t, err)
 	faucetRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",
@@ -97,6 +101,9 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *m
 		Version:          "1.0",
 		TransactionNonce: wallet.Nonce + 1,
 	}
+
+	println(string(txnDataString))
+	println(strconv.Quote(string(txnDataString)))
 
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
 	confirmTransaction(t, wallet, faucetTransaction.Entity, 1*time.Minute)

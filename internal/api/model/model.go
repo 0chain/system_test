@@ -232,6 +232,19 @@ type PriceRange struct {
 	Max int64 `json:"max"`
 }
 
+type BlobberRequirements struct {
+	Blobbers                   *[]string  `json:"blobbers"`
+	DataShards                 int64      `json:"data_shards"`
+	ParityShards               int64      `json:"parity_shards"`
+	Size                       int64      `json:"size"`
+	OwnerId                    string     `json:"owner_id"`
+	OwnerPublicKey             string     `json:"owner_public_key"`
+	ExpirationDate             int64      `json:"expiration_date"`
+	ReadPriceRange             PriceRange `json:"read_price_range"`
+	WritePriceRange            PriceRange `json:"write_price_range"`
+	MaxChallengeCompletionTime int64      `json:"max_challenge_completion_time"`
+}
+
 type Wallet struct {
 	Id           string `json:"id"`
 	Version      string `json:"version"`
