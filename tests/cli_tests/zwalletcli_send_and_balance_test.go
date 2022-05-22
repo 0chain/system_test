@@ -307,6 +307,10 @@ func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc string, r
 }
 
 func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
+	return sendTokensFromWallet(t, cliConfigFilename, toClientID, tokens, desc, fee, escapedTestName(t))
+}
+
+func sendTokensFromWallet(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64, wallet string) ([]string, error) {
 	t.Logf("Sending ZCN...")
 	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc %q --to_client_id %s `, tokens, desc, toClientID)
 
@@ -314,7 +318,7 @@ func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float
 		cmd += fmt.Sprintf(" --fee %v ", fee)
 	}
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", cliConfigFilename)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", wallet+"_wallet.json", cliConfigFilename)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
@@ -345,18 +349,24 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	// Get the starting balance for miner's delegate wallet.
 	res, err := apiGetBalance(sharderBaseUrl, client_id)
 	require.Nil(t, err, "Error retrieving client %s balance", client_id)
+	if res.StatusCode == 400 {
+		return &apimodel.Balance{
+			Txn:     "",
+			Round:   0,
+			Balance: 0,
+		}
+	}
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
-
+	strBody := string(resBody)
+	strBody = strBody
 	var startBalance apimodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	require.NotEmpty(t, startBalance.Txn, "Balance txn is unexpectedly empty: %s", string(resBody))
-	require.Positive(t, startBalance.Balance, "Balance is unexpectedly zero or negative: %d", startBalance.Balance)
-	require.Positive(t, startBalance.Round, "Round of balance is unexpectedly zero or negative: %d", startBalance.Round)
+
 	return &startBalance
 }
 
@@ -367,6 +377,15 @@ func getShardersList(t *testing.T) map[string]climodel.Sharder {
 func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
+	found := false
+	for index, line := range output {
+		if line == "MagicBlock Sharders" {
+			found = true
+			output = output[index:]
+			break
+		}
+	}
+	require.True(t, found, "MagicBlock Sharders not found in getShardersForWallet output")
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 	require.Equal(t, "MagicBlock Sharders", output[0])
