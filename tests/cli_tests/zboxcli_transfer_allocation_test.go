@@ -101,7 +101,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		reg := regexp.MustCompile("Error adding curator:curator_transfer_allocation_failed: only curators or the owner can transfer allocations; [a-z0-9]{64} is neither")
+		reg := regexp.MustCompile("Error transferring allocation:curator_transfer_allocation_failed: only curators or the owner can transfer allocations; [a-z0-9]{64} is neither")
 		require.Regexp(t, reg, output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
@@ -660,8 +660,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		// FIXME error should be missing allocation param
-		require.Equal(t, "Error: curator flag is missing", output[0],
+		require.Equal(t, "Error: allocation flag is missing", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -681,8 +680,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		// FIXME error should be missing new_owner_key param
-		require.Equal(t, "Error: curator flag is missing", output[0],
+		require.Equal(t, "Error: new_owner_key flag is missing", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -702,8 +700,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		// FIXME error should be missing new_owner param
-		require.Equal(t, "Error: curator flag is missing", output[0],
+		require.Equal(t, "Error: new_owner flag is missing", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -729,7 +726,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error adding curator:curator_transfer_allocation_failed: value not present", output[0],
+		require.Equal(t, "Error transferring allocation:curator_transfer_allocation_failed: value not present", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
