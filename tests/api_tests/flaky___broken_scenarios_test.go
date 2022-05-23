@@ -34,7 +34,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
 		require.Equal(t, "200 OK", httpResponse.Status())
 		require.Equal(t, registeredWallet.Id, expectedClientId)
-		require.Equal(t, registeredWallet.PublicKey, expectedKeyPair.PublicKey)
+		require.Equal(t, registeredWallet.PublicKey, expectedKeyPair.PublicKey.SerializeToHexStr())
 		require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
 		require.NotNil(t, registeredWallet.Version)
 	})
