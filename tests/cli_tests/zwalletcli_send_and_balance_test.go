@@ -44,7 +44,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Contains(t, "Send tokens success", output[0])
+		require.Contains(t, output[0], "Send tokens success")
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
@@ -82,7 +82,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Contains(t, "Send tokens success", output[0])
+		require.Contains(t, output[0], "Send tokens success")
 
 		// After send balance checks
 		output, err = getBalance(t, configPath)
@@ -181,7 +181,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Contains(t, "Send tokens success", output[0])
+		require.Contains(t, output[0], "Send tokens success")
 	})
 
 	t.Run("Send attempt to exceeding balance should fail", func(t *testing.T) {
