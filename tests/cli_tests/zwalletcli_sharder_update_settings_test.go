@@ -17,8 +17,8 @@ import (
 func TestSharderUpdateSettings(t *testing.T) {
 	mnConfig := getMinerSCConfiguration(t)
 
-	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 	if _, err := os.Stat("./config/" + sharderNodeWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharderNodeWalletName+"_wallet.json")
@@ -38,7 +38,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
 	require.NotEmpty(t, oldSharderInfo)
 
-	sharders := getShardersListForWallet(t, sharderNodeDelegateWalletName)
+	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
 	found := false
 	var sharder climodel.Sharder
@@ -56,9 +56,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 	defer func() {
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
-			"num_delegates": oldSharderInfo.NumberOfDelegates,
-			"max_stake":     intToZCN(oldSharderInfo.MaxStake),
-			"min_stake":     intToZCN(oldSharderInfo.MinStake),
+			"num_delegates": len(oldSharderInfo.Pools),
+			"max_stake":     intToZCN(oldSharderInfo.Settings.MaxStake),
+			"min_stake":     intToZCN(oldSharderInfo.Settings.MinStake),
 		}), true)
 		require.Nil(t, err, "error reverting sharder settings after test")
 		require.Len(t, output, 2)
@@ -87,7 +87,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 1, int(intToZCN(sharderInfo.MinStake)))
+		require.Equal(t, 1, int(intToZCN(sharderInfo.Settings.MinStake)))
 	})
 
 	t.Run("Sharder update num_delegates by delegate wallet should work", func(t *testing.T) {
@@ -109,7 +109,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarhsalling sharder node info")
-		require.Equal(t, 5, sharderInfo.NumberOfDelegates)
+		require.Equal(t, 5, len(sharderInfo.Pools))
 	})
 
 	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
@@ -131,7 +131,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 99, int(intToZCN(sharderInfo.MaxStake)))
+		require.Equal(t, 99, int(intToZCN(sharderInfo.Settings.MaxStake)))
 	})
 
 	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
@@ -155,9 +155,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 8, sharderInfo.NumberOfDelegates)
-		require.Equal(t, 2, int(intToZCN(sharderInfo.MinStake)))
-		require.Equal(t, 98, int(intToZCN(sharderInfo.MaxStake)))
+		require.Equal(t, 8, len(sharderInfo.Pools))
+		require.Equal(t, 2, int(intToZCN(sharderInfo.Settings.MinStake)))
+		require.Equal(t, 98, int(intToZCN(sharderInfo.Settings.MaxStake)))
 	})
 
 	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {
@@ -282,7 +282,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 }
 
 func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharderNodeDelegateWalletName, retry)
+	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharder01NodeDelegateWalletName, retry)
 }
 
 func sharderUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
