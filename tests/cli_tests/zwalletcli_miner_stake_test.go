@@ -23,9 +23,6 @@ func TestMinerStake(t *testing.T) {
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
-	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
-	}
 
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
