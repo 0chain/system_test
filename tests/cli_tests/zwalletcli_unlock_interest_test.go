@@ -13,6 +13,7 @@ import (
 )
 
 func TestUnlockInterest(t *testing.T) {
+	t.Skip("interest pool smart contract is deprecated")
 	t.Parallel()
 
 	t.Run("Unlock attempt with missing pool_id param should fail", func(t *testing.T) {
