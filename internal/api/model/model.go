@@ -72,6 +72,16 @@ type Block struct {
 	} `json:"block"`
 }
 
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
+
 type Transfer struct {
 	Minter string `json:"minter"`
 	From   string `json:"from"`
@@ -132,9 +142,19 @@ type StorageChallenge struct {
 }
 
 type BlobberChallenge struct {
-	BlobberID                string            `json:"blobber_id"`
-	LatestCompletedChallenge *StorageChallenge `json:"lastest_completed_challenge"`
-	ChallengeIDs             []string          `json:"challenge_ids"`
+	BlobberID  string       `json:"blobber_id"`
+	Challenges []Challenges `json:"challenges"`
+}
+
+type Challenges struct {
+	ID             string            `json:"id"`
+	Created        int64             `json:"created"`
+	Validators     []*ValidationNode `json:"validators"`
+	RandomNumber   int64             `json:"seed"`
+	AllocationID   string            `json:"allocation_id"`
+	AllocationRoot string            `json:"allocation_root"`
+	BlobberID      string            `json:"blobber_id"`
+	Responded      bool              `json:"responded"`
 }
 
 type KeyPair struct {

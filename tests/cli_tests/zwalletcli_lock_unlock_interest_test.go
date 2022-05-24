@@ -19,6 +19,7 @@ const (
 )
 
 func TestLockAndUnlockInterest(t *testing.T) {
+	t.Skip("interest pool smart contract is deprecated")
 	t.Parallel()
 
 	t.Run("Lock and unlock tokens", func(t *testing.T) {
@@ -743,7 +744,10 @@ func TestLockAndUnlockInterest(t *testing.T) {
 }
 
 func lockInterest(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
-	cmd := "./zwallet lock " + params + " --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
+	return lockInterestForWallet(t, cliConfigFilename, params, retry, escapedTestName(t))
+}
+func lockInterestForWallet(t *testing.T, cliConfigFilename, params string, retry bool, wallet string) ([]string, error) {
+	cmd := "./zwallet lock " + params + " --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if retry {
 		return cliutil.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
