@@ -19,6 +19,7 @@ const (
 )
 
 func TestLockAndUnlockInterest(t *testing.T) {
+	t.Skip("interest pool smart contract is deprecated")
 	t.Parallel()
 
 	t.Run("Lock and unlock tokens", func(t *testing.T) {
