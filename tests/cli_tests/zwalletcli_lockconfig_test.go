@@ -13,6 +13,7 @@ import (
 )
 
 func TestLockConfig(t *testing.T) {
+	t.Skip("interest pool smart contract is deprecated")
 	t.Parallel()
 
 	t.Run("get lock config should work", func(t *testing.T) {
