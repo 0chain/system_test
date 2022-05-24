@@ -23,16 +23,23 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
+		curatorWalletName := escapedTestName(t) + "CURATOR"
+		output, err := registerWalletForName(t, configPath, curatorWalletName)
+		require.Nil(t, err, "Error occurred when retrieving owner wallet", strings.Join(output, "\n"))
 
-		output, err := addCurator(t, createParams(map[string]interface{}{
+		ownerWallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting owner wallet")
+
+		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
+		require.Nil(t, err, "error getting curator wallet")
+
+		output, err = addCurator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
+			"curator":    curatorWallet.ClientID,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
+		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, curatorWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -43,7 +50,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
+		output, err = transferAllocationOwnershipWithWallet(t, curatorWalletName, map[string]interface{}{
 			"allocation":    allocationID,
 			"new_owner_key": newOwnerWallet.ClientPublicKey,
 			"new_owner":     newOwnerWallet.ClientID,
