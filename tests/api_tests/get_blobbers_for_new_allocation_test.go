@@ -3,7 +3,7 @@ package api_tests
 import (
 	"encoding/json"
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2"
+	"github.com/go-resty/resty/v2" //nolint
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
