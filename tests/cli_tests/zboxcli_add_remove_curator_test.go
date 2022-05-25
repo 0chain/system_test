@@ -315,7 +315,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error adding curator:curator_transfer_allocation_failed: only curators or the owner can transfer allocations;", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error transferring allocation:curator_transfer_allocation_failed: only curators or the owner can transfer allocations;", strings.Join(output, "\n"))
 	})
 
 	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *testing.T) {

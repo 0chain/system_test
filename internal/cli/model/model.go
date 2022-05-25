@@ -464,3 +464,9 @@ type TokenPool struct {
 type ZCNLockingPool struct {
 	TokenPool `json:"pool"`
 }
+
+type SendTransaction struct {
+	Status string `json:"status"`
+	Txn    string `json:"tx"`
+	Nonce  string `json:"nonce"`
+}
