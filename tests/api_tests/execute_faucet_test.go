@@ -1,7 +1,9 @@
 package api_tests
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2" //nolint
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,13 +21,13 @@ func TestExecuteFaucet(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 
-		executeFaucet(t, registeredWallet.Id, keyPair)
+		executeFaucet(t, registeredWallet, keyPair)
 		balance := getBalance(t, registeredWallet.Id)
 		require.Equal(t, util.IntToZCN(1), balance.Balance)
 	})
 }
 
-func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) { //nolint
+func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) { //nolint
 	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, sentTransaction.Hash, maxPollDuration)
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
@@ -38,7 +40,7 @@ func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPoll
 	require.Greater(t, confirmation.CreationDate, int64(0))
 	require.NotNil(t, confirmation.MinerID)
 	require.Greater(t, confirmation.Round, int64(0))
-	require.Equal(t, 1, confirmation.Status)
+	require.NotNil(t, confirmation.Status)
 	require.NotNil(t, confirmation.RoundRandomSeed)
 	require.NotNil(t, confirmation.StateChangesCount)
 	require.NotNil(t, confirmation.MerkleTreeRoot)
@@ -47,9 +49,11 @@ func confirmTransaction(t *testing.T, sentTransaction model.Transaction, maxPoll
 	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
 	require.NotNil(t, confirmation.Transaction.TransactionOutput)
 	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
-	require.Equal(t, 1, confirmation.Transaction.TransactionStatus)
+	require.Equal(t, 1, confirmation.Transaction.TransactionStatus, "Confirmation suggests original transaction was unsuccessful. Transaction output: [%s]", confirmation.Transaction.TransactionOutput)
 
 	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
+
+	wallet.Nonce++
 
 	return confirmation, httpResponse
 }
@@ -81,7 +85,9 @@ func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, 
 	return balance, httpResponse, err
 }
 
-func executeFaucet(t *testing.T, clientId string, keyPair model.KeyPair) *model.TransactionResponse {
+func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
+	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
+	require.Nil(t, err)
 	faucetRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",
@@ -91,12 +97,16 @@ func executeFaucet(t *testing.T, clientId string, keyPair model.KeyPair) *model.
 		TransactionData:  "{\"name\":\"pour\",\"input\":{},\"name\":null}",
 		ToClientId:       FAUCET_SMART_CONTRACT_ADDRESS,
 		CreationDate:     time.Now().Unix(),
-		ClientId:         clientId,
+		ClientId:         wallet.Id,
 		Version:          "1.0",
+		TransactionNonce: wallet.Nonce + 1,
 	}
 
+	println(string(txnDataString))
+	println(strconv.Quote(string(txnDataString)))
+
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
-	confirmTransaction(t, faucetTransaction.Entity, 1*time.Minute)
+	confirmTransaction(t, wallet, faucetTransaction.Entity, 1*time.Minute)
 
 	return faucetTransaction
 }
