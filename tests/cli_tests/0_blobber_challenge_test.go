@@ -20,7 +20,7 @@ import (
 )
 
 func TestBlobberChallenge(t *testing.T) {
-	t.Skip("Skipped till re-done")
+
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
