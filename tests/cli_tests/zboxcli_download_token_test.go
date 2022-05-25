@@ -19,98 +19,6 @@ import (
 func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Parallel()
 
-	balance := 0.4 // 400.000 mZCN
-	t.Run("Read pool must have no tokens locked for a newly created allocation", func(t *testing.T) {
-		t.Skip("made redundant by https://github.com/0chain/0chain/issues/1062")
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
-
-		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10485760,
-			"expire": "1h",
-		})
-		output, err = createNewAllocation(t, configPath, allocParam)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
-
-		allocationID := strings.Fields(output[0])[2]
-
-		output, err = readPoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "no tokens locked", output[0])
-	})
-
-	t.Run("Locked read pool tokens should equal total blobber balance in read pool", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
-
-		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10485760,
-			"expire": "1h",
-		})
-		output, err = createNewAllocation(t, configPath, allocParam)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
-
-		allocationID := strings.Fields(output[0])[2]
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "900s",
-		})
-		output, err = readPoolLock(t, configPath, params, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
-		output, err = readPoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		readPool := []climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &readPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon, "Read pool balance [%v] did not match amount locked [%v]", intToZCN(readPool[0].Balance), 0.4)
-		require.IsType(t, int64(1), readPool[0].ExpireAt)
-		require.Equal(t, allocationID, readPool[0].AllocationId)
-		require.Less(t, 0, len(readPool[0].Blobber))
-		require.Equal(t, true, readPool[0].Locked)
-
-		balanceInTotal := float64(0)
-		for i := 0; i < len(readPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), readPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] read pool balance is [%v]", i, intToZCN(readPool[0].Blobber[i].Balance))
-			balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
-		}
-
-		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers [%v] did not match expected [%v]", balanceInTotal, 0.4)
-	})
-
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
 		t.Skip("Skipped for nonce merge")
 		t.Parallel()
@@ -151,10 +59,9 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		})
 
 		// Lock read pool tokens
+		lockedTokens := 0.4
 		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "5m",
+			"tokens": lockedTokens,
 		})
 		output, err = readPoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -163,26 +70,15 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		initialReadPool := []climodel.ReadPoolInfo{}
+		initialReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.InEpsilon(t, 0.4, intToZCN(initialReadPool[0].Balance), epsilon, "read pool balance did not match expected")
-		require.IsType(t, int64(1), initialReadPool[0].ExpireAt)
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] balance is [%v]", i, intToZCN(initialReadPool[0].Blobber[i].Balance))
-		}
+		require.Equal(t, lockedTokens, initialReadPool.OwnerBalance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -215,38 +111,27 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		// Read pool after download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		finalReadPool := []climodel.ReadPoolInfo{}
+		finalReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 
-		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInZCN*1e10
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.InEpsilon(t, float64(finalReadPool[0].Balance), expectedRPBalance, epsilon)
-		require.IsType(t, int64(1), finalReadPool[0].ExpireAt)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
-			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
-		}
+		expectedRPBalance := lockedTokens*1e10 - expectedDownloadCostInZCN*1e10
+		require.InEpsilon(t, float64(finalReadPool.OwnerBalance), expectedRPBalance, epsilon)
 	})
 }
 
-func readPoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
-	return readPoolInfoWithwallet(t, escapedTestName(t), cliConfigFilename, allocationID)
+func readPoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+	return readPoolInfoWithwallet(t, escapedTestName(t), cliConfigFilename)
 }
 
-func readPoolInfoWithwallet(t *testing.T, wallet, cliConfigFilename, allocationID string) ([]string, error) {
+func readPoolInfoWithwallet(t *testing.T, wallet, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
-	return cliutils.RunCommand(t, "./zbox rp-info --allocation "+allocationID+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {

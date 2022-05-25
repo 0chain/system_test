@@ -393,9 +393,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		readPool := getReadPoolInfo(t, allocationID)
+		readPool := getReadPoolInfo(t)
 		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -411,12 +411,12 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		// Wait for read markers to be redeemed
 		cliutils.Wait(t, 5*time.Second)
 
-		readPool = getReadPoolInfo(t, allocationID)
+		readPool = getReadPoolInfo(t)
 		require.Len(t, readPool, 1, "Read pool must exist")
 		// expected download cost times to the number of blobbers
-		expectedPoolBalance := ConvertToValue(0.4) - int64(len(readPool[0].Blobber))*expectedDownloadCost
-		require.InEpsilon(t, expectedPoolBalance, readPool[0].Balance, 0.000001, "Read Pool balance must be equal to (initial balace-download cost)")
-		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool[0].Balance)
+		expectedPoolBalance := ConvertToValue(0.4) - expectedDownloadCost
+		require.InEpsilon(t, expectedPoolBalance, readPool.OwnerBalance, 0.000001, "Read Pool balance must be equal to (initial balace-download cost)")
+		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool.OwnerBalance)
 	})
 
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {

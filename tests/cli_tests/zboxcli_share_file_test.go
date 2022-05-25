@@ -1022,26 +1022,17 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Read pool before download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		initialReadPool := []climodel.ReadPoolInfo{}
+		initialReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(initialReadPool[0].Balance))
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", initialReadPool[0].Balance)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-		}
+		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
+		t.Logf("Read pool balance: %v", initialReadPool.OwnerBalance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1071,29 +1062,18 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Read pool after download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		finalReadPool := []climodel.ReadPoolInfo{}
+		finalReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
-
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", finalReadPool[0].Balance)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
-		}
+		// todo: finalReadPool.OwnerBalance might be in ZCN format
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool.OwnerBalance), epsilon)
 	})
 
 	// FIXME download cost is not affecting read pool if downloading through auth ticket
@@ -1139,26 +1119,16 @@ func TestShareFile(t *testing.T) {
 		require.NotEqual(t, "", authTicket)
 
 		// Read pool before download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		initialReadPool := []climodel.ReadPoolInfo{}
+		initialReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.Equal(t, 0.4*1e10, float64(initialReadPool[0].Balance))
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", initialReadPool[0].Balance)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-		}
+		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1191,28 +1161,18 @@ func TestShareFile(t *testing.T) {
 		// Blobber runs worker in the interval of usually 10 seconds.
 		time.Sleep(time.Second * 20)
 		// Read pool after download
-		output, err = readPoolInfo(t, configPath, allocationID)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		finalReadPool := []climodel.ReadPoolInfo{}
+		finalReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool[0].Balance), epsilon)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", finalReadPool[0].Balance)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
-		}
+		// todo: finalReadPool.OwnerBalance might be in ZCN format
+		require.InEpsilon(t, expectedRPBalance, float64(finalReadPool.OwnerBalance), epsilon)
 	})
 
 	t.Run("Share encrypted file using auth ticket - download accounting test where 3rd party pays - proxy re-encryption ", func(t *testing.T) {
@@ -1283,26 +1243,16 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
+		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		initialReadPool := []climodel.ReadPoolInfo{}
+		initialReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.InEpsilon(t, 0.4*1e10, initialReadPool[0].Balance, epsilon, "read pool balance did not match expected")
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", initialReadPool[0].Balance)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-		}
+		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1336,29 +1286,17 @@ func TestShareFile(t *testing.T) {
 		// Blobber runs worker in the interval of usually 10 seconds.
 		time.Sleep(time.Second * 20)
 		// Read pool after download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
+		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		finalReadPool := []climodel.ReadPoolInfo{}
+		finalReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.LessOrEqual(t, float64(finalReadPool[0].Balance), 0.4*1e10)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", finalReadPool[0].Balance)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			initialBal := initialReadPool[0].Blobber[i].Balance
-			finalBal := finalReadPool[0].Blobber[i].Balance
-			require.Greater(t, initialBal, finalBal, "Blobber [%v] initial balance: [%v] and final balance: [%v]",
-				i, initialBal, finalBal)
-		}
+		// todo: finalReadPool.OwnerBalance might be in ZCN format
+		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.OwnerBalance))
 	})
 
 	t.Run("Share unencrypted file using auth ticket - download accounting test where 3rd party pays ", func(t *testing.T) {
@@ -1420,26 +1358,16 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
+		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		initialReadPool := []climodel.ReadPoolInfo{}
+		initialReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Id)
-		require.InEpsilon(t, 0.4*1e10, initialReadPool[0].Balance, epsilon, "read pool balance did not match expected")
-		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
-		require.Equal(t, true, initialReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", initialReadPool[0].Balance)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			t.Logf("Blobber [%v] balance is [%v]", i, initialReadPool[0].Blobber[i].Balance)
-		}
+		require.InEpsilon(t, 0.4*1e10, initialReadPool.OwnerBalance, epsilon, "read pool balance did not match expected")
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1470,32 +1398,17 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Read pool after download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath, allocationID)
+		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		finalReadPool := []climodel.ReadPoolInfo{}
+		finalReadPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Id)
-		require.LessOrEqual(t, float64(finalReadPool[0].Balance), 0.4*1e10)
-		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
-		require.True(t, finalReadPool[0].Locked)
-		t.Logf("Read pool balance: %v", finalReadPool[0].Balance)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-
-			// amount deducted
-			diff := initialReadPool[0].Blobber[i].Balance - finalReadPool[0].Blobber[i].Balance
-			t.Logf("blobber [%v] read pool was deducted by [%v]", i, diff)
-			initialBalance := initialReadPool[0].Blobber[i].Balance
-			finalBalance := finalReadPool[0].Blobber[i].Balance
-			require.Greater(t, initialBalance, finalBalance, "blobber [%v] initial balance was [%v] and final balance is [%v]", i, initialBalance, finalBalance)
-		}
+		// todo: finalReadPool.OwnerBalance might be in ZCN format
+		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.OwnerBalance))
 	})
 }
 

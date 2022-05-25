@@ -119,17 +119,15 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
+			"tokens": 0.4,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		readPool := getReadPoolInfo(t, allocationID)
+		readPool := getReadPoolInfo(t)
 		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -726,9 +724,9 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		readPool := getReadPoolInfo(t, allocationID)
+		readPool := getReadPoolInfo(t)
 		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -742,12 +740,12 @@ func TestCollaborator(t *testing.T) {
 	})
 }
 
-func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo {
-	output, err := readPoolInfo(t, configPath, allocationID)
+func getReadPoolInfo(t *testing.T) climodel.ReadPoolInfo {
+	output, err := readPoolInfo(t, configPath)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	readPool := []climodel.ReadPoolInfo{}
+	readPool := climodel.ReadPoolInfo{}
 	err = json.Unmarshal([]byte(output[0]), &readPool)
 	require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 	return readPool
