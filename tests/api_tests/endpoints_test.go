@@ -49,3 +49,11 @@ func v1ScrestAllocation(t *testing.T, clientId string) (*model.Allocation, *rest
 
 	return allocation, httpResponse, httpError
 }
+
+func v1ScrestAllocBlobbers(t *testing.T, allocationData string) (*[]string, *resty.Response, error) { //nolint
+	var blobbers *[]string
+
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/alloc_blobbers?allocation_data="+allocationData, &blobbers)
+
+	return blobbers, httpResponse, httpError
+}
