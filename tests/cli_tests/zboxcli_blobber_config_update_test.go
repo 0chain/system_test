@@ -269,7 +269,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, "resource_not_found: can't get blobber: value not present", output[1])
+		require.Equal(t, "internal_error: missing blobber: invalid-blobber-id", output[1])
 	})
 
 	t.Run("update with invalid blobber wallet/owner should fail", func(t *testing.T) {

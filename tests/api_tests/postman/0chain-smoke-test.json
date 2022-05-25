@@ -397,33 +397,6 @@
 					"name": "1. Execute Faucet",
 					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Response code is 200\", function () {",
-									"    pm.globals.set(\"execute_faucet_txn_sent\", pm.response.code == 200);",
-									"    pm.expect(responseCode.code).to.eql(200);",
-									"    var response = JSON.parse(responseBody);",
-									"",
-									"    pm.globals.set(\"faucet_txn_hash\", response.entity.hash);",
-									"",
-									"    pm.test(\"Wallet id matches expected\", function () {",
-									"        pm.expect(response.entity.client_id).to.eql(pm.variables.get(\"wallet_id\"));",
-									"    });",
-									"",
-									"    pm.test(\"to_client_id matches expected\", function () {",
-									"        pm.expect(response.entity.to_client_id).to.eql(pm.variables.get(\"faucet_smart_contract_address\"));",
-									"    });",
-									"",
-									"    pm.test(\"signature matches expected\", function () {",
-									"     pm.expect(response.entity.signature).to.eql(pm.variables.get(\"signature\"));",
-									"    });",
-									"});    "
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
 							"listen": "prerequest",
 							"script": {
 								"exec": [
@@ -494,6 +467,33 @@
 									"        return finalResult;",
 									"    })",
 									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response code is 200\", function () {",
+									"    pm.globals.set(\"execute_faucet_txn_sent\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"    var response = JSON.parse(responseBody);",
+									"",
+									"    pm.globals.set(\"faucet_txn_hash\", response.entity.hash);",
+									"",
+									"    pm.test(\"Wallet id matches expected\", function () {",
+									"        pm.expect(response.entity.client_id).to.eql(pm.variables.get(\"wallet_id\"));",
+									"    });",
+									"",
+									"    pm.test(\"to_client_id matches expected\", function () {",
+									"        pm.expect(response.entity.to_client_id).to.eql(pm.variables.get(\"faucet_smart_contract_address\"));",
+									"    });",
+									"",
+									"    pm.test(\"signature matches expected\", function () {",
+									"     pm.expect(response.entity.signature).to.eql(pm.variables.get(\"signature\"));",
+									"    });",
+									"});    "
 								],
 								"type": "text/javascript"
 							}
@@ -651,7 +651,89 @@
 			"name": "Create Allocation",
 			"item": [
 				{
-					"name": "1. Create storage allocation with 60 min expiry",
+					"name": "1. Retrieve blobbers that can fulfill requirements",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var Property = require('postman-collection').Property;",
+									"",
+									"async function main() {",
+									"    // postman boilerplate     ",
+									"    const interval = setTimeout(() => {}, 30000);",
+									"",
+									"    // timestamp is in the unix epoch (seconds) format",
+									"    var now = Math.round(Date.now() / 1000);",
+									"    pm.globals.set(\"current_timestamp\", now);",
+									"    pm.globals.set(\"expire_5_mins_from_now\", now + 300);",
+									"",
+									"    clearTimeout(interval)",
+									"}",
+									"main()",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"    pm.globals.set(\"blobbers_retrieved\", pm.response.code == 200);",
+									"    pm.expect(responseCode.code).to.eql(200);",
+									"",
+									"    pm.globals.unset(\"current_timestamp\");",
+									"    pm.globals.unset(\"hash_of_request_data\");",
+									"    pm.globals.unset(\"current_timestamp\");",
+									"    pm.globals.unset(\"expire_60_mins_from_now\");",
+									"    pm.globals.unset(\"signature\");",
+									"",
+									"    pm.globals.set(\"blobbers_for_allocation\", esc_quot(responseBody));",
+									"});    ",
+									"",
+									"function esc_quot(text){",
+									"    return text.toString().replaceAll(\"\\\"\", \"\\\\\\\"\").trim();",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{test_case_sharder}}/v1/screst/{{storage_smart_contract_address}}/alloc_blobbers?allocation_data={\"data_shards\":2,\"expiration_date\":{{expire_5_mins_from_now}},\"max_challenge_completion_time\":3600000000000,\"owner_id\":\"{{wallet_id}}\",\"owner_public_key\":\"{{public_key}}\",\"parity_shards\":1,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"size\":2147483648,\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}",
+							"host": [
+								"{{test_case_sharder}}"
+							],
+							"path": [
+								"v1",
+								"screst",
+								"{{storage_smart_contract_address}}",
+								"alloc_blobbers"
+							],
+							"query": [
+								{
+									"key": "allocation_data",
+									"value": "{\"data_shards\":2,\"expiration_date\":{{expire_5_mins_from_now}},\"max_challenge_completion_time\":3600000000000,\"owner_id\":\"{{wallet_id}}\",\"owner_public_key\":\"{{public_key}}\",\"parity_shards\":1,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"size\":2147483648,\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}"
+								}
+							]
+						},
+						"description": "Create a storage allocation, used in the remaining storage SC tests"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Create storage allocation with 60 min expiry",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -734,7 +816,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"utils.test.runConditionally(\"blobbers_retrieved\", \"Response code is 200\", function () {",
 									"    pm.globals.set(\"create_allocation_txn_sent\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"",
@@ -763,7 +845,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_5_mins_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"transaction_nonce\": {{nonce}},\n    \"public_key\": \"{{public_key}}\"\n}",
+							"raw": "{\n    \"hash\": \"{{hash_of_request_data}}\",\n    \"signature\": \"{{signature}}\",\n    \"version\": \"1.0\",\n    \"client_id\": \"{{wallet_id}}\",\n    \"creation_date\": {{current_timestamp}},\n    \"to_client_id\": \"{{storage_smart_contract_address}}\",\n    \"transaction_data\": \"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"blobbers\\\":{{blobbers_for_allocation}},\\\"data_shards\\\":2,\\\"expiration_date\\\":{{expire_5_mins_from_now}},\\\"max_challenge_completion_time\\\":3600000000000,\\\"name\\\": \\\"\\\",\\\"owner_id\\\":\\\"{{wallet_id}}\\\",\\\"owner_public_key\\\":\\\"{{public_key}}\\\",\\\"parity_shards\\\":1,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"size\\\":2147483648,\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\n    \"transaction_fee\": 0,\n    \"transaction_type\": 1000,\n    \"transaction_value\": 1000000000,\n    \"txn_output_hash\": \"\",\n    \"transaction_nonce\": {{nonce}},\n    \"public_key\": \"{{public_key}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -786,7 +868,7 @@
 					"response": []
 				},
 				{
-					"name": "2. Confirm allocation creation",
+					"name": "3. Confirm allocation creation",
 					"event": [
 						{
 							"listen": "test",
@@ -843,7 +925,7 @@
 					"response": []
 				},
 				{
-					"name": "3. Expire storage allocation",
+					"name": "4. Expire storage allocation",
 					"event": [
 						{
 							"listen": "prerequest",
