@@ -362,10 +362,9 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 	strBody := string(resBody)
-	strBody = strBody
 	var startBalance apimodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strBody, err)
 
 	return &startBalance
 }
