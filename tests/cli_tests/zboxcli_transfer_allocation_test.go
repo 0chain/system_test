@@ -292,7 +292,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -365,7 +365,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -447,7 +447,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -537,7 +537,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -743,7 +743,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -788,30 +788,60 @@ func transferAllocationOwnershipWithWallet(t *testing.T, walletName string, para
 	}
 }
 
-func pollForAllocationTransferToEffectOnBlobber(t *testing.T, newOwner, allocationID string) bool {
-	t.Logf("Polling for 5 minutes until allocation ownership changed...")
-	timeout := time.After(time.Minute * 5)
+func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID string) bool {
+	t.Log("Polling for 5 minutes until allocation ownership change shows in new user's wallet...")
+	timeout1 := time.After(time.Minute * 5)
+	timeout2 := time.After(time.Minute * 5)
+
+	result := make(chan bool)
 
 	// this requires the allocation has file uploaded to work properly.
-	for {
-		// using `list all` to verify transfer as this check blobber content as opposed to `get allocation` which is based on sharder
-		output, err := listAllWithWallet(t, newOwner, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+	go func() {
+		for {
+			// using `list all` to verify transfer as this check blobber content as opposed to `get allocation` which is based on sharder
+			output, err := listAllWithWallet(t, newOwner, configPath, allocationID, true)
+			require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
 
-		// if not empty, the transfer of allocation contents has occurred on blobbers.
-		// there is only one content expected so once it is no longer empty, transfer is deemed complete.
-		if output[0] != "[]" {
-			return true
-		}
+			// if not empty, the transfer of allocation contents has occurred on blobbers.
+			// there is only one content expected so once it is no longer empty, transfer is deemed complete.
+			if output[0] != "[]" {
+				result <- true
+			}
 
-		// on timeout, exit with failed transfer allocation.
-		// otherwise, wait and try again
-		select {
-		case <-timeout:
-			return false
-		default:
-			cliutils.Wait(t, time.Second*10)
+			// on timeout, exit with failed transfer allocation.
+			// otherwise, wait and try again
+			select {
+			case <-timeout1:
+				result <- false
+			default:
+				cliutils.Wait(t, time.Second*10)
+			}
 		}
+	}()
+	go func() {
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+		for {
+			// use get allocation to fetch allocation obj from sharder
+			allocation := getAllocation(t, allocationID)
+
+			if allocation.Owner == newOwnerWallet.ClientID {
+				result <- true
+			}
+
+			select {
+			case <-timeout2:
+				result <- false
+			default:
+				cliutils.Wait(t, time.Second*10)
+			}
+		}
+	}()
+
+	effectOnBlobber, effectOnSharder := <-result, <-result
+	if effectOnBlobber && effectOnSharder {
+		return true
 	}
+	return false
 }

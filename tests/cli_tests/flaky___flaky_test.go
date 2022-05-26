@@ -371,7 +371,7 @@ func Test___FlakyScenariosTransferAllocation(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		// balance of old owner should be unchanged
