@@ -44,17 +44,16 @@ type Wallet struct {
 }
 
 type Allocation struct {
-	ID             string    `json:"id"`
-	Tx             string    `json:"tx"`
-	Name           string    `json:"name"`
-	ExpirationDate int64     `json:"expiration_date"`
-	DataShards     int       `json:"data_shards"`
-	ParityShards   int       `json:"parity_shards"`
-	Size           int64     `json:"size"`
-	Owner          string    `json:"owner_id"`
-	OwnerPublicKey string    `json:"owner_public_key"`
-	Payer          string    `json:"payer_id"`
-	Blobbers       []Blobber `json:"blobbers"`
+	ID             string `json:"id"`
+	Tx             string `json:"tx"`
+	Name           string `json:"name"`
+	ExpirationDate int64  `json:"expiration_date"`
+	DataShards     int    `json:"data_shards"`
+	ParityShards   int    `json:"parity_shards"`
+	Size           int64  `json:"size"`
+	Owner          string `json:"owner_id"`
+	OwnerPublicKey string `json:"owner_public_key"`
+	Payer          string `json:"payer_id"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
@@ -88,27 +87,21 @@ type AllocationFile struct {
 	Size int    `json:"size"`
 	Hash string `json:"hash"`
 }
-type Blobber struct {
-	BlobberID string `json:"blobber_id"`
-	Balance   int64  `json:"balance"`
-}
 
 type ReadPoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
+	Id           string `json:"id"`
+	Balance      int64  `json:"balance"`
+	ExpireAt     int64  `json:"expire_at"`
+	AllocationId string `json:"allocation_id"`
+	Locked       bool   `json:"locked"`
 }
 
 type WritePoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
+	Id           string `json:"id"`
+	Balance      int64  `json:"balance"`
+	ExpireAt     int64  `json:"expire_at"`
+	AllocationId string `json:"allocation_id"`
+	Locked       bool   `json:"locked"`
 }
 
 type Attributes struct {
