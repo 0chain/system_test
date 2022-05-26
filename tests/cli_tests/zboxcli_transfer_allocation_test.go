@@ -254,26 +254,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -304,7 +292,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -338,26 +326,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(204800),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 25600) // cannot be a small file when uploading with encrypt
+		err := createFileWithSize(file, 25600) // cannot be a small file when uploading with encrypt
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -389,7 +365,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -421,26 +397,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -483,7 +447,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
@@ -535,26 +499,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(4096),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -585,7 +537,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -700,21 +652,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -739,21 +679,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -777,26 +705,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"size": int64(20480),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -827,14 +743,14 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		transferred := pollForAllocationTransferToEffectOnBlobber(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.5,
 			"duration":   "24h",
-		}), false)
+		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "write pool lock - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0], "write pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -872,7 +788,7 @@ func transferAllocationOwnershipWithWallet(t *testing.T, walletName string, para
 	}
 }
 
-func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID string) bool {
+func pollForAllocationTransferToEffectOnBlobber(t *testing.T, newOwner, allocationID string) bool {
 	t.Logf("Polling for 5 minutes until allocation ownership changed...")
 	timeout := time.After(time.Minute * 5)
 
