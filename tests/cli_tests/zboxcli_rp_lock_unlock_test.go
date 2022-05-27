@@ -93,7 +93,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokens(t, configPath, 0.5)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 0.5 ZCN
