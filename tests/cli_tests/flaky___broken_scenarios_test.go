@@ -4,6 +4,9 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,11 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
-
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 )
 
 /*
@@ -385,16 +383,13 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
+			"tokens": 0.4,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Len(t, readPool, 1, "Read pool must exist")
 		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
@@ -408,15 +403,12 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 
-		// Wait for read markers to be redeemed
-		cliutils.Wait(t, 5*time.Second)
-
-		readPool = getReadPoolInfo(t)
-		require.Len(t, readPool, 1, "Read pool must exist")
 		// expected download cost times to the number of blobbers
 		expectedPoolBalance := ConvertToValue(0.4) - expectedDownloadCost
-		require.InEpsilon(t, expectedPoolBalance, readPool.OwnerBalance, 0.000001, "Read Pool balance must be equal to (initial balace-download cost)")
-		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool.OwnerBalance)
+
+		updatedReadPool, err := getReadPoolUpdate(t, readPool, 5)
+		require.NoError(t, err)
+		require.Equal(t, expectedPoolBalance, updatedReadPool.OwnerBalance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
 
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {

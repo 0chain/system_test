@@ -126,7 +126,6 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Len(t, readPool, 1, "Read pool must exist")
 		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
@@ -715,18 +714,16 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
+		lockedTokens := 0.4
 		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
+			"tokens": lockedTokens,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(lockedTokens), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -740,14 +737,33 @@ func TestCollaborator(t *testing.T) {
 	})
 }
 
+func getReadPoolUpdate(t *testing.T, erp climodel.ReadPoolInfo, retry int) (climodel.ReadPoolInfo, error) {
+	if retry == 0 {
+		retry = 1
+	}
+	// Wait for read markers to be redeemed
+	for i := 0; i < retry; i++ {
+		readPool := getReadPoolInfo(t)
+		if (erp.OwnerBalance > 0 && readPool.OwnerBalance == erp.OwnerBalance) ||
+			(erp.VisitorBalance > 0 && readPool.VisitorBalance == erp.VisitorBalance) {
+			continue
+		}
+
+		cliutils.Wait(t, time.Second*30)
+		return getReadPoolInfo(t), nil
+	}
+
+	return erp, fmt.Errorf("no update found in readpool")
+}
+
 func getReadPoolInfo(t *testing.T) climodel.ReadPoolInfo {
 	output, err := readPoolInfo(t, configPath)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	readPool := climodel.ReadPoolInfo{}
+	var readPool climodel.ReadPoolInfo
 	err = json.Unmarshal([]byte(output[0]), &readPool)
-	require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+	require.Nil(t, err, "Error unmarshalling read pool %s", strings.Join(output, "\n"))
 	return readPool
 }
 

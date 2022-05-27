@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -70,15 +68,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfo(t, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		initialReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		require.Equal(t, lockedTokens, initialReadPool.OwnerBalance)
+		initialReadPool := getReadPoolInfo(t)
+		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.OwnerBalance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -111,16 +102,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		// Read pool after download
-		output, err = readPoolInfo(t, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		finalReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-
-		expectedRPBalance := lockedTokens*1e10 - expectedDownloadCostInZCN*1e10
-		require.InEpsilon(t, float64(finalReadPool.OwnerBalance), expectedRPBalance, epsilon)
+		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
+		updatedReadPool, err := getReadPoolUpdate(t, initialReadPool, 5)
+		require.NoError(t, err)
+		require.Equal(t, expectedPoolBalance, updatedReadPool.OwnerBalance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
 }
 
