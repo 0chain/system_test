@@ -346,9 +346,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -431,9 +429,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -524,19 +520,13 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
-		}), true)
+		output, err = readPoolLock(t, configPath, "--tokens 0.5", true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0], "read pool lock - Unexpected output", strings.Join(output, "\n"))
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))

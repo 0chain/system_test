@@ -58,10 +58,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		// Lock read pool tokens
 		lockedTokens := 0.4
-		params := createParams(map[string]interface{}{
-			"tokens": lockedTokens,
-		})
-		output, err = readPoolLock(t, configPath, params, true)
+		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v", lockedTokens), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -110,10 +107,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 }
 
 func readPoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
-	return readPoolInfoWithwallet(t, escapedTestName(t), cliConfigFilename)
+	return readPoolInfoWithWallet(t, escapedTestName(t), cliConfigFilename)
 }
 
-func readPoolInfoWithwallet(t *testing.T, wallet, cliConfigFilename string) ([]string, error) {
+func readPoolInfoWithWallet(t *testing.T, wallet, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)

@@ -1233,9 +1233,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		readPoolParams := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
+			"tokens": 0.4,
 		})
 		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -1243,7 +1241,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
+		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -1286,7 +1284,7 @@ func TestShareFile(t *testing.T) {
 		// Blobber runs worker in the interval of usually 10 seconds.
 		time.Sleep(time.Second * 20)
 		// Read pool after download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
+		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -1348,9 +1346,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		readPoolParams := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
+			"tokens": 0.4,
 		})
 		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
@@ -1358,7 +1354,7 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		// Read pool before download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
+		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -1398,7 +1394,7 @@ func TestShareFile(t *testing.T) {
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Read pool after download
-		output, err = readPoolInfoWithwallet(t, receiverWallet, configPath)
+		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -1466,9 +1462,7 @@ func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (strin
 
 	// locking tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"tokens":     0.4,
-		"duration":   "1h",
+		"tokens": 0.4,
 	})
 	output, err = readPoolLockWithWallet(t, wallet, configPath, readPoolParams, true)
 	require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))

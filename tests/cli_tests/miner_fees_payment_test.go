@@ -180,10 +180,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		startBlock := getLatestFinalizedBlock(t)
 
 		fee := 0.1
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.5,
-			"fee":    fee,
-		}), true)
+		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v --fee %v", 0.5, fee), true)
 		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
 
 		lockTimer := time.NewTimer(time.Minute)

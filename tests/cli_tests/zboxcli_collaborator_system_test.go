@@ -118,9 +118,7 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.4,
-		}), true)
+		output, err = readPoolLock(t, configPath, "--tokens 0.4", true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
@@ -262,11 +260,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		// Lock tokens in read pool
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
-		}), true)
+		output, err = readPoolLock(t, configPath, "--tokens 0.4", true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
@@ -715,9 +709,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		lockedTokens := 0.4
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": lockedTokens,
-		}), true)
+		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v", lockedTokens), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])

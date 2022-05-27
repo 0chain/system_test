@@ -382,9 +382,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, 1, len(meta.Collaborators), "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.4,
-		}), true)
+		output, err = readPoolLock(t, configPath, "--tokens 0.4", true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])

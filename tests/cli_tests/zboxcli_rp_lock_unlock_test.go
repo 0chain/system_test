@@ -75,7 +75,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens 1.5"), false)
+		output, err = readPoolLock(t, configPath, "--tokens 1.5", false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
@@ -103,7 +103,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in read pool should not succeed
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens -1"), false)
+		output, err = readPoolLock(t, configPath, "--tokens -1", false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -131,7 +131,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in read pool should not succeed
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens 0"), false)
+		output, err = readPoolLock(t, configPath, "--tokens 0", false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
