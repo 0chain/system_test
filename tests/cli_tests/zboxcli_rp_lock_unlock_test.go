@@ -10,7 +10,6 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,38 +85,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.InEpsilon(t, 1, intToZCN(readPool[0].Balance), epsilon, "Read pool balance did not match amount locked")
 		require.GreaterOrEqual(t, time.Now().Add(time.Minute*5).Unix(), readPool[0].ExpireAt)
 		require.Equal(t, allocationID, readPool[0].AllocationId)
-		require.Less(t, 0, len(readPool[0].Blobber))
 		require.Equal(t, true, readPool[0].Locked)
-
-		/*
-		**	Total read pool balance should be divided as per read_price ratio amongst each blobber
-		 */
-
-		// Get total
-		blobbersInAllocation := map[string]climodel.BlobberDetails{}
-		var total float64
-		for i := 0; i < len(readPool[0].Blobber); i++ {
-			output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": readPool[0].Blobber[i].BlobberID}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-
-			var blobberInfo climodel.BlobberDetails
-			err = json.Unmarshal([]byte(output[0]), &blobberInfo)
-			require.Nil(t, err, strings.Join(output, "\n"))
-
-			total += intToZCN(blobberInfo.Terms.Read_price)
-			blobbersInAllocation[readPool[0].Blobber[i].BlobberID] = blobberInfo
-		}
-
-		// Assert token are distributed as per ratio
-		for i := 0; i < len(readPool[0].Blobber); i++ {
-			t.Log("For Blobber ID ", readPool[0].Blobber[i].BlobberID, ": ")
-			ratio := intToZCN(blobbersInAllocation[readPool[0].Blobber[i].BlobberID].Terms.Read_price) / total
-
-			t.Log("\tActual blobber read pool balance: ", intToZCN(readPool[0].Blobber[i].Balance))
-			t.Log("\tExpected blobber read pool balance: ", lockAmount*ratio)
-			assert.InEpsilon(t, (lockAmount * ratio), intToZCN(readPool[0].Blobber[i].Balance), epsilon)
-		}
 
 		// Wait until timer expirted
 		<-lockTimer.C

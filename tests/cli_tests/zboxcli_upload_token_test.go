@@ -91,15 +91,7 @@ func TestFileUploadTokenMovement(t *testing.T) {
 		require.InDelta(t, 0.8, intToZCN(writePool[0].Balance), epsilon)
 		require.IsType(t, int64(1), writePool[0].ExpireAt)
 		require.Equal(t, allocationID, writePool[0].AllocationId)
-		require.Less(t, 0, len(writePool[0].Blobber))
 		require.Equal(t, true, writePool[0].Locked)
-
-		totalBalanceInBlobbers := float64(0)
-		for _, blobber := range writePool[0].Blobber {
-			t.Logf("Blobber [%v] balance is [%v]", blobber.BlobberID, intToZCN(blobber.Balance))
-			totalBalanceInBlobbers += intToZCN(blobber.Balance)
-		}
-		require.InDelta(t, 0.8, totalBalanceInBlobbers, epsilon, "Sum of balances should be [%v] but was [%v]", 0.8, totalBalanceInBlobbers)
 	})
 }
 

@@ -97,17 +97,9 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.InEpsilon(t, 0.4, intToZCN(readPool[0].Balance), epsilon, "Read pool balance [%v] did not match amount locked [%v]", intToZCN(readPool[0].Balance), 0.4)
 		require.IsType(t, int64(1), readPool[0].ExpireAt)
 		require.Equal(t, allocationID, readPool[0].AllocationId)
-		require.Less(t, 0, len(readPool[0].Blobber))
 		require.Equal(t, true, readPool[0].Locked)
 
 		balanceInTotal := float64(0)
-		for i := 0; i < len(readPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), readPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), readPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] read pool balance is [%v]", i, intToZCN(readPool[0].Blobber[i].Balance))
-			balanceInTotal += intToZCN(readPool[0].Blobber[i].Balance)
-		}
-
 		require.InEpsilon(t, 0.4, balanceInTotal, epsilon, "Combined balance of blobbers [%v] did not match expected [%v]", balanceInTotal, 0.4)
 	})
 
@@ -175,14 +167,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.InEpsilon(t, 0.4, intToZCN(initialReadPool[0].Balance), epsilon, "read pool balance did not match expected")
 		require.IsType(t, int64(1), initialReadPool[0].ExpireAt)
 		require.Equal(t, allocationID, initialReadPool[0].AllocationId)
-		require.Less(t, 0, len(initialReadPool[0].Blobber))
 		require.Equal(t, true, initialReadPool[0].Locked)
-
-		for i := 0; i < len(initialReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), initialReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), initialReadPool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] balance is [%v]", i, intToZCN(initialReadPool[0].Blobber[i].Balance))
-		}
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -228,14 +213,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.InEpsilon(t, float64(finalReadPool[0].Balance), expectedRPBalance, epsilon)
 		require.IsType(t, int64(1), finalReadPool[0].ExpireAt)
 		require.Equal(t, allocationID, finalReadPool[0].AllocationId)
-		require.Equal(t, len(initialReadPool[0].Blobber), len(finalReadPool[0].Blobber))
 		require.True(t, finalReadPool[0].Locked)
-
-		for i := 0; i < len(finalReadPool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalReadPool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalReadPool[0].Blobber[i].Balance)
-			require.Greater(t, initialReadPool[0].Blobber[i].Balance, finalReadPool[0].Blobber[i].Balance)
-		}
 	})
 }
 
