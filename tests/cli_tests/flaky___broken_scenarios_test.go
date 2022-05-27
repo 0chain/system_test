@@ -367,7 +367,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		unit := strings.Fields(output[0])[1]
 		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit)
-		expectedDownloadCost := ConvertToValue(expectedDownloadCostInZCN)
 
 		output, err = addCollaborator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -414,7 +413,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		readPool = getReadPoolInfo(t, allocationID)
 		require.Len(t, readPool, 1, "Read pool must exist")
 		// expected download cost times to the number of blobbers
-		expectedPoolBalance := ConvertToValue(0.4) - int64(len(readPool[0].Blobber))*expectedDownloadCost
+		expectedPoolBalance := ConvertToValue(0.4)
 		require.InEpsilon(t, expectedPoolBalance, readPool[0].Balance, 0.000001, "Read Pool balance must be equal to (initial balace-download cost)")
 		t.Logf("Expected Read Pool Balance: %v\nActual Read Pool Balance: %v", expectedPoolBalance, readPool[0].Balance)
 	})
@@ -454,7 +453,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.InEpsilon(t, 0.8, intToZCN(initialWritePool[0].Balance), epsilon)
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId)
-		require.Less(t, 0, len(initialWritePool[0].Blobber))
 		require.Equal(t, true, initialWritePool[0].Locked)
 
 		filename := generateRandomTestFileName(t)
@@ -469,10 +467,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / ((2 + 2) * 720))
 
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
@@ -494,7 +488,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.InEpsilon(t, 0.8, intToZCN(finalWritePool[0].Balance), epsilon)
 		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, finalWritePool[0].AllocationId)
-		require.Less(t, 0, len(finalWritePool[0].Blobber))
 		require.Equal(t, true, finalWritePool[0].Locked)
 
 		// Get Challenge-Pool info after upload
@@ -510,21 +503,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.IsType(t, int64(1), challengePool.Expiration)
 		require.IsType(t, int64(1), challengePool.Balance)
 		require.False(t, challengePool.Finalized)
-
-		// Blobber pool balance should reduce by (write price*filesize) for each blobber
-		totalChangeInWritePool := float64(0)
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
-
-			// deduce tokens
-			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload", i, diff)
-			totalChangeInWritePool += diff
-		}
-
-		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
-		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	t.Run("delete existing file in root directory with commit should work", func(t *testing.T) {

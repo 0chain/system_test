@@ -16,7 +16,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,11 +70,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -129,11 +123,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -189,11 +178,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -254,7 +238,6 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		require.InEpsilonf(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
 		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
 		remotepath := "/" + filepath.Base(localpath)
@@ -277,22 +260,10 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		require.InEpsilon(t, (0.5 - 2*actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
-		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
 		require.Equal(t, true, initialWritePool[0].Locked, "tokens should not have expired by now")
 
 		// Blobber pool balance should reduce by expected cost of 0.5 MB for each blobber
 		totalChangeInWritePool := float64(0)
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
-
-			// deduce tokens
-			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
-			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
-			assert.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
-			totalChangeInWritePool += diff
-		}
-
 		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})
