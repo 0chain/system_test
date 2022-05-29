@@ -183,12 +183,9 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
-		t.Skip("Skip till fixed")
+		//t.Skip("Skip till fixed")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
 
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
