@@ -3,7 +3,9 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -86,6 +88,64 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}
 		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock": "0.5",
+			"size": 4 * MB,
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+		fileSize := int64(math.Floor(1 * MB))
+
+		// Upload 1 MB file
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+
+		// Get initial write pool
+		cliutils.Wait(t, 10*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		initialWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+
+		// Move file
+		remotepath := filepath.Base(localpath)
+		moveAllocationFile(t, allocationID, remotepath, "newDir")
+
+		cliutils.Wait(t, 10*time.Second)
+		output, err = writePoolInfo(t, configPath, true)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+
+		// Get final write pool, no deduction should have been done
+		finalWritePool := []climodel.WritePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+
+		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
+			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
+			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
+			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
+		}
+		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *testing.T) {
