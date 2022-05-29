@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -20,17 +19,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
-
 	t.Run("should allow update of min_lock", func(t *testing.T) {
-		t.Parallel()
-
-		n := atomic.AddInt64(&nonce, 2)
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -68,7 +57,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 			output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValueFormatted,
-			}, n, true)
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -78,7 +67,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValueFormatted,
-		}, n, true)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -99,9 +88,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 	// FIXME should fail given config key value is not valid and not actually updated
 	t.Run("update min_lock to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
-		n := atomic.AddInt64(&nonce, 1)
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -120,14 +106,12 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n, false)
+		}, false)
 		require.Error(t, err)
 		require.True(t, strings.Contains(output[0], "failed to update variables: cannot conver key min_lock"), output[0])
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "min_lock"
 		newValue := "15"
 
@@ -138,7 +122,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, 0, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_variables: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -146,9 +130,6 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 	// FIXME should fail given config key is not recognized
 	t.Run("update with bad config key", func(t *testing.T) {
-		t.Parallel()
-		n := atomic.AddInt64(&nonce, 1)
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -166,7 +147,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		}, n, false)
+		}, false)
 		require.Error(t, err, strings.Join(output, "\n"))
 		require.Equal(t, "failed to update variables: config setting \\\"unknown_key\\\" not found", output[0])
 	})
@@ -188,7 +169,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, 0, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -211,7 +192,7 @@ func TestInterestPoolUpdateConfig(t *testing.T) {
 
 		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "min_lock",
-		}, 0, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -231,13 +212,12 @@ func getInterestPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool)
 	}
 }
 
-func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+func updateInterestPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating interest pool config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zwallet ip-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
+		"./zwallet ip-update-config %s --silent --wallet %s --configDir ./config --config %s",
 		p,
-		nonce,
 		walletName+"_wallet.json",
 		configPath,
 	)
