@@ -13,10 +13,10 @@ type Config struct {
 func (config *Config) Init(path string) {
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic("Failed to read config file!")
+		panic("Failed to read config file! due to error: " + err.Error())
 	}
 	err = yaml.Unmarshal(yamlFile, config) //nolint
 	if err != nil {
-		panic("failed to deserialise config file!")
+		panic("failed to deserialise config file due to error: " + err.Error())
 	}
 }

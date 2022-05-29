@@ -18,6 +18,8 @@ func TestOwnerUpdate(t *testing.T) {
 	}
 
 	t.Run("should allow update of owner: StorageSC", func(t *testing.T) {
+		t.Skip("Emergent, remove after fix is merged")
+
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -64,6 +66,8 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: VestingSC", func(t *testing.T) {
+		t.Skip("Emergent, remove after fix is merged")
+
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -126,6 +130,8 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: MinerSC", func(t *testing.T) {
+		t.Skip("Emergent, remove after fix is merged")
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -227,6 +233,7 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
+		t.Skip("Emergent, remove after fix is merged")
 		ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
 		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
 		nonceStr := strings.Split(ret[0], ":")[1]
