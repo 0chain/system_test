@@ -3,9 +3,7 @@ package cli_tests
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -23,16 +21,9 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
-
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
 		configKey := "max_destinations"
 		newValue := "4"
-		n := atomic.AddInt64(&nonce, 2)
 
 		output, err = getVestingPoolSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -46,7 +37,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 			output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
-			}, n, true)
+			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 			require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -56,7 +47,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n-1, true)
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "vesting smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -77,12 +68,11 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	t.Run("update max_destinations to invalid value should fail", func(t *testing.T) {
 		configKey := "max_destinations"
 		newValue := "x"
-		n := atomic.AddInt64(&nonce, 1)
 
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: value x cannot be converted to time.Duration, failing to set config key max_destinations",
@@ -100,7 +90,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err = updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, 2, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -108,22 +98,19 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
 		configKey := "unknown_key"
-
-		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		}, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_config: config setting unknown_key not found", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -134,10 +121,9 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		n := atomic.AddInt64(&nonce, 1)
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_destinations",
-		}, n, false)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -157,13 +143,12 @@ func getVestingPoolSCConfig(t *testing.T, cliConfigFilename string, retry bool) 
 	}
 }
 
-func updateVestingPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+func updateVestingPoolSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating vesting config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
-		"./zwallet vp-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
+		"./zwallet vp-update-config %s --silent --wallet %s --configDir ./config --config %s",
 		p,
-		nonce,
 		walletName+"_wallet.json",
 		configPath,
 	)
