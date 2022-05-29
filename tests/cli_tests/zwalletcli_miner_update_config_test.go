@@ -31,8 +31,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -128,20 +126,20 @@ func updateMinerSCConfig(t *testing.T, walletName string, param map[string]inter
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
-func updateMinerSCConfigWithNonce(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
-	t.Logf("Updating miner config...")
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zwallet mn-update-config %s --silent --withNonce %v --wallet %s --configDir ./config --config %s",
-		p,
-		nonce,
-		walletName+"_wallet.json",
-		configPath,
-	)
 
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
+// func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+// 	t.Logf("Updating miner config...")
+// 	p := createParams(param)
+// 	cmd := fmt.Sprintf(
+// 		"./zwallet mn-update-config %s --silent --wallet %s --configDir ./config --config %s",
+// 		p,
+// 		walletName+"_wallet.json",
+// 		configPath,
+// 	)
+
+// 	if retry {
+// 		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+// 	} else {
+// 		return cliutils.RunCommandWithoutRetry(cmd)
+// 	}
+// }
