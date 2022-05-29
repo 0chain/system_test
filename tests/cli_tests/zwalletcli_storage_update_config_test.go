@@ -3,7 +3,9 @@ package cli_tests
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -18,6 +20,12 @@ func TestStorageUpdateConfig(t *testing.T) {
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
+
+	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	nonceStr := strings.Split(ret[0], ":")[1]
+	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	require.Nil(t, err, "error converting nonce to in")
 
 	t.Run("should allow update of max_read_price", func(t *testing.T) {
 		t.Parallel()
@@ -38,11 +46,24 @@ func TestStorageUpdateConfig(t *testing.T) {
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
 		cfgBefore, _ := keyValuePairStringToMap(t, output)
+		n := atomic.AddInt64(&nonce, 2)
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		t.Cleanup(func() {
+			oldValue := cfgBefore[configKey]
+			output, err = updateStorageSCConfigWithNonce(t, scOwnerWallet, map[string]interface{}{
+				"keys":   configKey,
+				"values": oldValue,
+			}, n, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2, strings.Join(output, "\n"))
+			require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+		})
+
+		output, err = updateStorageSCConfigWithNonce(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, true)
+		}, n-1, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
@@ -61,18 +82,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 		// test transaction to verify chain is still working
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			oldValue := cfgBefore[configKey]
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys":   configKey,
-				"values": oldValue,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-		})
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -85,10 +94,12 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]interface{}{
+		n := atomic.AddInt64(&nonce, 1)
+
+		output, err = updateStorageSCConfigWithNonce(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
-		}, false)
+		}, n, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
@@ -103,10 +114,12 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		n := atomic.AddInt64(&nonce, 1)
+
+		output, err = updateStorageSCConfigWithNonce(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
-		}, false)
+		}, n, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings, updating settings: unknown key unknown_key, can't set value 1", output[0], strings.Join(output, "\n"))
@@ -119,9 +132,11 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		n := atomic.AddInt64(&nonce, 1)
+
+		output, err = updateStorageSCConfigWithNonce(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
-		}, false)
+		}, n, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
@@ -134,9 +149,11 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
+		n := atomic.AddInt64(&nonce, 1)
+
+		output, err = updateStorageSCConfigWithNonce(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_read_price",
-		}, false)
+		}, n, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
