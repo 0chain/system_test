@@ -156,7 +156,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_settings, updating settings: cannot convert key max_read_price value x to state.balance: strconv.ParseFloat: parsing \"x\": invalid syntax", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings, updating settings: cannot convert key max_read_price value x to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 }
