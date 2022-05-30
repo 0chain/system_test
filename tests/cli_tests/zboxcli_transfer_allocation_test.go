@@ -130,7 +130,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		// balance of old owner should be unchanged
-		// FIXME should this contain the released pool balances given the change of ownership?
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
 		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
@@ -148,7 +147,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		expectedTransferCost := int64(0)
 
 		// write lock pool of old owner should remain locked
-		// FIXME should this be unlocked given the change of ownership?
 		cliutils.Wait(t, 2*time.Minute)
 		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
