@@ -45,7 +45,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response code is 200\", function () {",
+									"utils.test(\"Response code is 200\", function () {",
 									"     if(pm.response.code != 200) {",
 									"        postman.setNextRequest(null)",
 									"    }",
@@ -85,14 +85,14 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Valid miner found\", function () {",
+									"utils.test(\"Valid miner found\", function () {",
 									"    if(pm.variables.get(\"test_case_miner\") == undefined){",
 									"        postman.setNextRequest(null)",
 									"    }",
 									"    pm.expect(pm.variables.get(\"test_case_miner\")).not.eq(undefined);",
 									"});",
 									"",
-									"pm.test(\"Valid sharder found\", function () {",
+									"utils.test(\"Valid sharder found\", function () {",
 									"     if(pm.variables.get(\"test_case_sharder\") == undefined){",
 									"        postman.setNextRequest(null)",
 									"    }",
@@ -231,7 +231,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Mnemonic generated\", function () {",
+									"utils.test(\"Mnemonic generated\", function () {",
 									"    pm.expect(pm.variables.get(\"mnemonic\")).not.eq(undefined);",
 									"});"
 								],
@@ -275,16 +275,16 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response code is 200\", function () {",
+									"utils.test(\"Response code is 200\", function () {",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"});",
 									"",
-									"pm.test(\"Wallet id matches expected\", function () {",
+									"utils.test(\"Wallet id matches expected\", function () {",
 									"    var response = JSON.parse(responseBody);",
 									"    pm.expect(response.id).to.eql(pm.variables.get(\"wallet_id\"));",
 									"});",
 									"",
-									"pm.test(\"public key matches expected\", function () {",
+									"utils.test(\"public key matches expected\", function () {",
 									"    var response = JSON.parse(responseBody);",
 									"    pm.expect(response.public_key).to.eql(pm.variables.get(\"public_key\"));",
 									"});"
@@ -475,22 +475,22 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response code is 200\", function () {",
+									"utils.test(\"Response code is 200\", function () {",
 									"    pm.globals.set(\"execute_faucet_txn_sent\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"    var response = JSON.parse(responseBody);",
 									"",
 									"    pm.globals.set(\"faucet_txn_hash\", response.entity.hash);",
 									"",
-									"    pm.test(\"Wallet id matches expected\", function () {",
+									"    utils.test(\"Wallet id matches expected\", function () {",
 									"        pm.expect(response.entity.client_id).to.eql(pm.variables.get(\"wallet_id\"));",
 									"    });",
 									"",
-									"    pm.test(\"to_client_id matches expected\", function () {",
+									"    utils.test(\"to_client_id matches expected\", function () {",
 									"        pm.expect(response.entity.to_client_id).to.eql(pm.variables.get(\"faucet_smart_contract_address\"));",
 									"    });",
 									"",
-									"    pm.test(\"signature matches expected\", function () {",
+									"    utils.test(\"signature matches expected\", function () {",
 									"     pm.expect(response.entity.signature).to.eql(pm.variables.get(\"signature\"));",
 									"    });",
 									"});    "
@@ -539,7 +539,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"execute_faucet_txn_sent\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"execute_faucet_txn_sent\", \"Response code is 200\", function () {",
 									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"faucet_executed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
@@ -597,21 +597,21 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"faucet_executed\", \"Response code is 200\", function () {",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"});",
 									"",
-									"utils.test.runConditionally(\"faucet_executed\",\"Balance matches expected\", function () {",
+									"utils.conditionalTest(\"faucet_executed\",\"Balance matches expected\", function () {",
 									"    var response = JSON.parse(responseBody);",
 									"    pm.expect(response.balance).to.eql(10000000000);",
 									"});",
 									"",
-									"utils.test.runConditionally(\"faucet_executed\", \"txn matches faucet txn hash\", function () {",
+									"utils.conditionalTest(\"faucet_executed\", \"txn matches faucet txn hash\", function () {",
 									"    var response = JSON.parse(responseBody);",
 									"    pm.expect(response.txn).to.eql(pm.variables.get(\"faucet_txn_hash\"));",
 									"});",
 									"",
-									"utils.test.runConditionally(\"faucet_executed\", \"Round present\", function () {",
+									"utils.conditionalTest(\"faucet_executed\", \"Round present\", function () {",
 									"    var response = JSON.parse(responseBody);",
 									"    pm.expect(response.round).to.not.equal(null);",
 									"});"
@@ -680,7 +680,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"faucet_executed\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"faucet_executed\", \"Response code is 200\", function () {",
 									"    pm.globals.set(\"blobbers_retrieved\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"",
@@ -816,7 +816,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"blobbers_retrieved\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"blobbers_retrieved\", \"Response code is 200\", function () {",
 									"    pm.globals.set(\"create_allocation_txn_sent\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"",
@@ -874,7 +874,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"create_allocation_txn_sent\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"create_allocation_txn_sent\", \"Response code is 200\", function () {",
 									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"create_allocation_confirmed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
@@ -1008,7 +1008,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.test.runConditionally(\"create_allocation_confirmed\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"create_allocation_confirmed\", \"Response code is 200\", function () {",
 									"    pm.globals.set(\"update_allocation_txn_sent\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"    var response = JSON.parse(responseBody);",
@@ -1182,27 +1182,34 @@
 				"exec": [
 					"utils = {",
 					"    incrementNonce: function (pm){",
-					"        if(pm.response.code == 200) {",
+					"        if([200,201].includes(pm.response.code)){",
 					"            nonce = parseInt(pm.environment.get(\"nonce\")) + 1;",
-					"            console.log(\"Incrementing nonce to\" + nonce)",
+					"            console.log(\"Incremented nonce to [\" + nonce + \"]\")",
 					"            pm.environment.set(\"nonce\", nonce);",
+					"        } else {",
+					"        console.warn(\"NOT Incrementing nonce as response code was not 200 or 201. Nonce remains at [\" + nonce + \"]\")",
 					"        }",
-					"        console.log(\"NOT Incrementing nonce as response code was not 200\" + nonce)",
 					"    },",
-					"    test : {",
-					"        runConditionally: function (runCondition, testName, test){",
+					"    test : function (testName, test){",
+					"        try {",
+					"            pm.test(testName, test)",
+					"            test() // run test a second time to figure out whether it passed or not, the first run is swallowed by postman...",
+					"        } catch (e){",
+					"            console.error(\"Test FAILED. Response Body:\\n\" + responseBody)",
+					"        }",
+					"    },",
+					"    conditionalTest: function (runCondition, testName, test){",
 					"",
 					"           var runConditionValue = (typeof runCondition === \"boolean\") ? runCondition : (String(pm.variables.get(runCondition)).toLowerCase()  == \"true\")",
 					"",
 					"           var forceRunTests = (String(pm.variables.get(\"force_run_tests\")).toLowerCase()  == \"true\")",
 					"        ",
 					"            if(forceRunTests || runConditionValue){",
-					"                pm.test(testName, test)",
+					"                utils.test(testName, test)",
 					"            } else {",
 					"                pm.test.skip(testName + \" - skipped as test setup condition [\" + runCondition + \"] failed\")",
 					"            }",
 					"        }",
-					"    }",
 					"}"
 				]
 			}
