@@ -597,7 +597,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"utils.tconditionalTest(\"faucet_executed\", \"Response code is 200\", function () {",
+									"utils.conditionalTest(\"faucet_executed\", \"Response code is 200\", function () {",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"});",
 									"",
