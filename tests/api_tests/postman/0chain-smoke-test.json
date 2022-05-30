@@ -1182,12 +1182,13 @@
 				"exec": [
 					"utils = {",
 					"    incrementNonce: function (pm){",
-					"        if(pm.response.code == 200) {",
+					"        if([200,201].includes(pm.response.code)){",
 					"            nonce = parseInt(pm.environment.get(\"nonce\")) + 1;",
-					"            console.log(\"Incrementing nonce to\" + nonce)",
+					"            console.log(\"Incremented nonce to [\" + nonce + \"]\")",
 					"            pm.environment.set(\"nonce\", nonce);",
+					"        } else {",
+					"        console.warn(\"NOT Incrementing nonce as response code was not 200 or 201. Nonce remains at [\" + nonce + \"]\")",
 					"        }",
-					"        console.log(\"NOT Incrementing nonce as response code was not 200\" + nonce)",
 					"    },",
 					"    test : {",
 					"        runConditionally: function (runCondition, testName, test){",
@@ -1203,6 +1204,9 @@
 					"            }",
 					"        }",
 					"    }",
+					"}",
+					"if(![200,201].includes(pm.response.code)){",
+					"    console.error(\"Response body from failed request:\\n\" + responseBody)",
 					"}"
 				]
 			}
