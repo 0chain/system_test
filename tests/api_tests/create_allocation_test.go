@@ -28,6 +28,7 @@ func TestCreateAllocation(t *testing.T) {
 }
 
 func createAllocation(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, blobberRequirements model.BlobberRequirements) (*model.TransactionResponse, *model.Confirmation) {
+	t.Logf("Creating allocation...")
 	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "new_allocation_request", InputArgs: blobberRequirements})
 	require.Nil(t, err)
 	allocationRequest := model.Transaction{
@@ -61,6 +62,7 @@ func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 }
 
 func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) { //nolint
+	t.Logf("Retrieving allocation...")
 	balance, httpResponse, err := v1ScrestAllocation(t, allocationId)
 	return balance, httpResponse, err
 }
