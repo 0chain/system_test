@@ -540,10 +540,10 @@
 							"script": {
 								"exec": [
 									"utils.conditionalTest(\"execute_faucet_txn_sent\", \"Response code is 200\", function () {",
-									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"faucet_executed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
-									"});"
+									"});",
+									"utils.incrementNonce(pm)"
 								],
 								"type": "text/javascript"
 							}
@@ -875,14 +875,13 @@
 							"script": {
 								"exec": [
 									"utils.conditionalTest(\"create_allocation_txn_sent\", \"Response code is 200\", function () {",
-									"    utils.incrementNonce(pm)",
 									"    pm.globals.set(\"create_allocation_confirmed\", pm.response.code == 200);",
 									"    pm.expect(responseCode.code).to.eql(200);",
 									"    var response = JSON.parse(responseBody);",
 									"    var txn_output = JSON.parse(response.txn.transaction_output)",
 									"    pm.globals.set(\"allocation_id\", txn_output.id);",
 									"});   ",
-									""
+									"utils.incrementNonce(pm)"
 								],
 								"type": "text/javascript"
 							}
