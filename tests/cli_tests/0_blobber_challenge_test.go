@@ -20,7 +20,6 @@ import (
 )
 
 func TestBlobberChallenge(t *testing.T) {
-
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -454,25 +453,28 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 }
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
-	t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
-	timeout := time.After(time.Minute * 5)
+	// t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
+	// timeout := time.After(time.Minute * 5)
+	t.Log("Waiting for 2 minutes before checking for challenges...")
+	cliutils.Wait(t, time.Minute*2)
+	// for {
 
-	for {
-		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
+	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 
-		for _, blobber := range openChallengesAfter {
-			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
-				return true
-			}
-		}
-
-		// on timeout, exit
-		// otherwise, wait and try again
-		select {
-		case <-timeout:
-			return false
-		default:
-			cliutils.Wait(t, time.Second*5)
+	for _, blobber := range openChallengesAfter {
+		if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
+			return true
 		}
 	}
+
+	// on timeout, exit
+	// otherwise, wait and try again
+	// 	select {
+	// 	case <-timeout:
+	// 		return false
+	// 	default:
+	// 		cliutils.Wait(t, time.Second*5)
+	// 	}
+	// }
+	return false
 }
