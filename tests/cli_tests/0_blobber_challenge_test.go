@@ -455,7 +455,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
 	t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
-	timeout := time.After(time.Minute * 2)
+	timeout := time.After(time.Minute * 5)
 
 	for {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -472,7 +472,7 @@ func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, op
 		case <-timeout:
 			return false
 		default:
-			cliutils.Wait(t, time.Second*30)
+			cliutils.Wait(t, time.Second*5)
 		}
 	}
 }
