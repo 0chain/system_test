@@ -59,6 +59,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 }
 
 func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response, error) { //nolint
+	t.Logf("Confirming transaction...")
 	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash)
 
 	startPollTime := time.Now()
@@ -81,11 +82,13 @@ func getBalance(t *testing.T, clientId string) *model.Balance {
 }
 
 func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) { //nolint
+	t.Logf("Getting balance...")
 	balance, httpResponse, err := v1ClientGetBalance(t, clientId)
 	return balance, httpResponse, err
 }
 
 func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
+	t.Logf("Executing faucet...")
 	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
 	require.Nil(t, err)
 	faucetRequest := model.Transaction{
