@@ -175,12 +175,14 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		//allocationId := setupAllocation(t, configPath)
-
 		startBlock := getLatestFinalizedBlock(t)
 
 		fee := 0.1
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v --fee %v", 0.5, fee), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.5,
+			"fee": fee,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
 
 		lockTimer := time.NewTimer(time.Minute)

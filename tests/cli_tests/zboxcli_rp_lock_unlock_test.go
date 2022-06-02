@@ -31,7 +31,10 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v", lockAmount), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": lockAmount,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -75,7 +78,10 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		output, err = readPoolLock(t, configPath, "--tokens 1.5", false)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 1.5,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
@@ -103,7 +109,10 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in read pool should not succeed
-		output, err = readPoolLock(t, configPath, "--tokens -1", false)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": -1,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
@@ -131,7 +140,10 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in read pool should not succeed
-		output, err = readPoolLock(t, configPath, "--tokens 0", false)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
@@ -159,7 +171,8 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Not specifying amount to lock should not succeed
-		output, err = readPoolLock(t, configPath, "", false)
+		readPoolParams := createParams(map[string]interface{}{})
+		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])

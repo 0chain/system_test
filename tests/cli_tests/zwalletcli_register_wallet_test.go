@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -93,7 +92,15 @@ func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename string, isO
 	}
 
 	// Lock half the tokens for read pool
-	_, err = readPoolLock(t, cliConfigFilename, fmt.Sprintf("--tokens %v --owner=%v", tokens/2, isOwner), true)
+	owner := "false"
+	if isOwner{
+		owner = "true"
+	}
+	readPoolParams := createParams(map[string]interface{}{
+		"tokens": tokens/2,
+		"owner": owner,
+	})
+	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
 
 	return err
 }

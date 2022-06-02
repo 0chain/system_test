@@ -631,7 +631,10 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
-		output, err = readPoolLock(t, configPath, "--tokens 0.5", true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.5,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0], "read pool lock - Unexpected output", strings.Join(output, "\n"))

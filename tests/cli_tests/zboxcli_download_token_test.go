@@ -58,7 +58,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		// Lock read pool tokens
 		lockedTokens := 0.4
-		output, err = readPoolLock(t, configPath, fmt.Sprintf("--tokens %v", lockedTokens), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": lockedTokens,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
