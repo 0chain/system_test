@@ -92,13 +92,9 @@ func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename string, isO
 	}
 
 	// Lock half the tokens for read pool
-	owner := "false"
-	if isOwner{
-		owner = "true"
-	}
 	readPoolParams := createParams(map[string]interface{}{
 		"tokens": tokens/2,
-		"owner": owner,
+		"owner": isOwner,
 	})
 	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
 
