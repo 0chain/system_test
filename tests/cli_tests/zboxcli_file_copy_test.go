@@ -203,7 +203,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
@@ -352,7 +352,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
@@ -501,7 +501,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 	})
@@ -548,7 +548,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
 
@@ -592,7 +592,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"remotepath": "/abc.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
@@ -608,7 +608,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
@@ -624,7 +624,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code
+		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see <tbd>
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})

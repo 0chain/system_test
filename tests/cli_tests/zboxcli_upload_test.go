@@ -148,6 +148,7 @@ func TestUpload(t *testing.T) {
 
 	//FIXME: POSSIBLE BUG: Uploading file to a remote directory without
 	// filename causes the file to be renamed to directory's name and upload to root
+	// see <tbd>
 	t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -769,6 +770,63 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
+	})
+
+	//FIXME: Filenames longer than 100 characters are rejected https://github.com/0chain/zboxcli/issues/249
+	t.Run("BROKEN Upload File longer than 99 chars should fail gracefully but does not see zboxcli/issues/249", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(512 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   1,
+		})
+
+		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		randomFilename := cliutils.RandomAlphaNumericString(100)
+		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+
+		require.Len(t, output, 2)
+		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[1])
+	})
+
+	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(1 * MB)
+		fileSize := int64(512 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"parity": 1,
+			"data":   1,
+		})
+
+		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		randomFilename := cliutils.RandomAlphaNumericString(167)
+		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+
+		require.Len(t, output, 3)
+		require.True(t, strings.HasSuffix(strings.Join(output, ""), `file name too long"}`), strings.Join(output, "\n"))
 	})
 }
 

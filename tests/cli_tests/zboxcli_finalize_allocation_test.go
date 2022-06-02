@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -13,8 +14,7 @@ import (
 func TestFinalizeAllocation(t *testing.T) {
 	t.Parallel()
 
-	//FIXME: POSSIBLE BUG: Error obtained on finalizing allocation says the allocation has not expired but it has
-	t.Run("Finalize Expired Allocation Should Work", func(t *testing.T) {
+	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
@@ -35,11 +35,14 @@ func TestFinalizeAllocation(t *testing.T) {
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
+		cliutils.Wait(t, 4*time.Minute)
+
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 
-		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
+		matcher := regexp.MustCompile("Allocation finalized with txId ([a-f0-9]{64})$")
+		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *testing.T) {
