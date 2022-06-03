@@ -30,7 +30,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
-	// FIXME The test is failling due to sync function inability to detect the file changes in local folder see <tbd>
+	// FIXME The test is failing due to sync function inability to detect the file changes in local folder see https://github.com/0chain/zboxcli/issues/250
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
 		t.Parallel()
 
@@ -115,7 +115,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	// FIXME The test is failling due to sync function inability to detect the file changes in local folder see <tbd>
-	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation", func(t *testing.T) {
+	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
