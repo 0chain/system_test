@@ -145,43 +145,6 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Should allow update owner: InterestSC", func(t *testing.T) {
-		t.Skip("Interest pool is deprecated...")
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		ownerKey := "owner_id"
-		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
-
-		t.Cleanup(func() {
-			output, err := updateInterestPoolSCConfig(t, newOwnerName, map[string]interface{}{
-				"keys":   ownerKey,
-				"values": oldOwner,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-		})
-
-		configKey := "min_lock"
-		newValue := "8"
-
-		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   ownerKey,
-			"values": newOwnerWallet.ClientID,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "interest pool smart contract settings updated", output[0], strings.Join(output, "\n"))
-
-		output, err = updateInterestPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newValue,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "update_variables: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
-	})
-
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
 		t.Skip("Skip till fixed")
 		output, err := registerWallet(t, configPath)
