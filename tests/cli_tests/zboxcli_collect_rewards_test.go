@@ -48,7 +48,7 @@ func TestCollectRewards(t *testing.T) {
 
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
-		cliutils.Wait(t, 30*time.Second)
+		cliutils.Wait(t, 2*time.Minute)
 		output, err = collectRewards(t, configPath, stakePoolID, true)
 		require.Equal(t, "transferred reward tokens", output[0])
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
