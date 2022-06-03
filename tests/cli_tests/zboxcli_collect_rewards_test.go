@@ -47,7 +47,6 @@ func TestCollectRewards(t *testing.T) {
 		stakePoolID := strings.Fields(output[0])[4]
 		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		output, err = collectRewards(t, configPath, stakePoolID, true)
@@ -77,7 +76,6 @@ func TestCollectRewards(t *testing.T) {
 	})
 
 }
-
 
 func collectRewards(t *testing.T, cliConfigFilename, poolId string, retry bool) ([]string, error) {
 	t.Log("collecting rewards...")
