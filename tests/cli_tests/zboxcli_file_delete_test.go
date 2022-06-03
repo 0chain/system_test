@@ -45,6 +45,39 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
+	t.Run("delete existing file with commit should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+		defer createAllocationTestTeardown(t, allocationID)
+
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"commit":     "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
+		require.Equal(t, "Commiting changes to blockchain ...", output[1])
+		require.Regexp(t, "Commit Metadata successful.*", output[2])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+	})
+
 	t.Run("delete existing file in sub directory should work", func(t *testing.T) {
 		t.Parallel()
 

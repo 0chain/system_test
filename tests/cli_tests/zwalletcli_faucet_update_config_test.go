@@ -13,11 +13,11 @@ import (
 )
 
 func TestFaucetUpdateConfig(t *testing.T) {
-	t.Parallel()
+	// register SC owner wallet
+	output, err := registerWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -27,10 +27,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = getFaucetSCConfig(t, configPath, true)
@@ -75,8 +71,6 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -84,15 +78,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		configKey := "max_pour_amount"
 		newValue := "x"
 
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -121,22 +107,13 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
 		configKey := "unknown_key"
 
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
 		}, false)
@@ -147,21 +124,12 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+		//important: we use random nonce here, since this transaction won't be sent
+		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -170,21 +138,12 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+		//we use random nonce here since this transaction won't be sent to network
+		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))

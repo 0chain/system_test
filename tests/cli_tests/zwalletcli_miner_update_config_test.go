@@ -13,11 +13,7 @@ import (
 )
 
 func TestMinerUpdateConfig(t *testing.T) {
-	t.Parallel()
-
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "reward_rate"
 		newValue := "0.1"
 
@@ -35,10 +31,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
-		t.Skip("Skipping test for now as it causes miners to restart and cause test failures to others")
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -59,12 +51,10 @@ func TestMinerUpdateConfig(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "fatal:{\"error\": \"verify transaction failed\"}", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unsupported key unknown_key", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -86,8 +76,6 @@ func TestMinerUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -138,3 +126,20 @@ func updateMinerSCConfig(t *testing.T, walletName string, param map[string]inter
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
+
+// func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+// 	t.Logf("Updating miner config...")
+// 	p := createParams(param)
+// 	cmd := fmt.Sprintf(
+// 		"./zwallet mn-update-config %s --silent --wallet %s --configDir ./config --config %s",
+// 		p,
+// 		walletName+"_wallet.json",
+// 		configPath,
+// 	)
+
+// 	if retry {
+// 		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+// 	} else {
+// 		return cliutils.RunCommandWithoutRetry(cmd)
+// 	}
+// }

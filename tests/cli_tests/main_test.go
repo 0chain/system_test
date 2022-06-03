@@ -10,11 +10,16 @@ import (
 )
 
 const (
-	zcnscOwner                    = "wallets/zcnsc_owner"
-	scOwnerWallet                 = "wallets/sc_owner"
-	blobberOwnerWallet            = "wallets/blobber_owner"
-	minerNodeDelegateWalletName   = "wallets/miner_node_delegate"
-	sharderNodeDelegateWalletName = "wallets/sharder_node_delegate"
+	zcnscOwner                      = "wallets/zcnsc_owner"
+	scOwnerWallet                   = "wallets/sc_owner"
+	blobberOwnerWallet              = "wallets/blobber_owner"
+	miner01NodeDelegateWalletName   = "wallets/miner01_node_delegate"
+	miner02NodeDelegateWalletName   = "wallets/miner02_node_delegate"
+	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
+	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
+	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
+	minerNodeWalletName             = "wallets/miner_node"
+	sharderNodeWalletName           = "wallets/sharder_node"
 )
 
 var (
@@ -56,8 +61,13 @@ func TestMain(m *testing.M) {
 				if strings.HasSuffix(f, zcnscOwner+"_wallet.json") ||
 					strings.HasSuffix(f, scOwnerWallet+"_wallet.json") ||
 					strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
-					strings.HasSuffix(f, minerNodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharderNodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, miner01NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, minerNodeWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, sharderNodeWalletName+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)

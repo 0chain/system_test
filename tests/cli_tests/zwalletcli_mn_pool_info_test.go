@@ -14,18 +14,24 @@ import (
 func TestMinerSharderPoolInfo(t *testing.T) {
 	t.Parallel()
 
-	if _, err := os.Stat("./config/" + sharderNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharderNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
+	}
+	if _, err := os.Stat("./config/" + sharderNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharderNodeWalletName+"_wallet.json")
 	}
 
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
+	}
+	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
 	}
 
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharderNodeDelegateWalletName)
+	sharderNodeWallet, err := getWalletForName(t, configPath, sharderNodeWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var (
@@ -43,7 +49,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeDelegateWallet.ClientID,
+			"id":     minerNodeWallet.ClientID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
@@ -53,7 +59,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      minerNodeDelegateWallet.ClientID,
+			"id":      minerNodeWallet.ClientID,
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
@@ -73,7 +79,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharderNodeDelegateWallet.ClientID,
+			"id":     sharderNodeWallet.ClientID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
@@ -83,7 +89,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      sharderNodeDelegateWallet.ClientID,
+			"id":      sharderNodeWallet.ClientID,
 			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
@@ -115,7 +121,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      minerNodeDelegateWallet.ClientID,
+			"id":      minerNodeWallet.ClientID,
 			"pool_id": "dummy pool id",
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
@@ -130,7 +136,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      sharderNodeDelegateWallet.ClientID,
+			"id":      sharderNodeWallet.ClientID,
 			"pool_id": "dummy pool id",
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")

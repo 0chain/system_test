@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -19,27 +20,35 @@ import (
 )
 
 func TestMinerStake(t *testing.T) {
-	t.Parallel()
-
-	if _, err := os.Stat("./config/" + minerNodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
+	}
+	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
 	}
 
 	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	nonceStr := strings.Split(ret[0], ":")[1]
+	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	require.Nil(t, err, "error converting nonce to in")
+
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 
 	// Use the miner node not used in TestMinerSCUserPoolInfo
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, minerNodeDelegateWalletName)
+	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID != minerNodeDelegateWallet.ClientID {
+		if miner.ID != minerNodeWallet.ClientID {
 			break
 		}
 	}
@@ -50,8 +59,6 @@ func TestMinerStake(t *testing.T) {
 	)
 
 	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -89,23 +96,29 @@ func TestMinerStake(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Equal(t, "DELETING", poolsInfo.Status)
+		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
 	t.Run("Multiple stakes against a miner should create multiple pools", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
+		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.Len(t, output, 1)
+		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
+		beforeNumPools := len(poolsInfoBefore.Pools)
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": 1,
 		}), true)
-		require.Nil(t, err, "error staking tokens against node")
+		require.Nil(t, err,
+			"error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 		poolId1 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
@@ -126,16 +139,14 @@ func TestMinerStake(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools["miner"][miner.ID], 2)
-		require.Equal(t, poolId1, poolsInfo.Pools["miner"][miner.ID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["miner"][miner.ID][0].Balance))
-		require.Equal(t, poolId2, poolsInfo.Pools["miner"][miner.ID][1].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools["miner"][miner.ID][1].Balance))
+		require.Len(t, poolsInfo.Pools[miner.ID], 2)
+		require.Equal(t, poolId1, poolsInfo.Pools[miner.ID][beforeNumPools].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][beforeNumPools].Balance))
+		require.Equal(t, poolId2, poolsInfo.Pools[miner.ID][1+beforeNumPools].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][1+beforeNumPools].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -145,13 +156,12 @@ func TestMinerStake(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"error": "verify transaction failed"}`, output[0])
+		require.Equal(t, "delegate_pool_add: digging delegate pool: no tokens to lock", output[0])
+
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Staking tokens against invalid node id should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -168,8 +178,6 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -185,8 +193,9 @@ func TestMinerStake(t *testing.T) {
 		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
 	})
 
+	// todo rewards not transferred to wallet until a collect reward transaction
 	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
-		t.Parallel()
+		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -209,7 +218,7 @@ func TestMinerStake(t *testing.T) {
 		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.GreaterOrEqual(t, balance, poolsInfo.RewardPaid)
+		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
@@ -222,11 +231,9 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
-		t.Parallel()
-
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
-			if newMiner.ID != minerNodeDelegateWallet.ClientID && newMiner.ID != miner.ID {
+			if newMiner.ID != minerNodeWallet.ClientID && newMiner.ID != miner.ID {
 				break
 			}
 		}
@@ -238,7 +245,7 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		wg := &sync.WaitGroup{}
-		for i := 0; i < newMiner.NumberOfDelegates; i++ {
+		for i := 0; i < newMiner.Settings.MaxNumDelegates; i++ {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
@@ -257,25 +264,24 @@ func TestMinerStake(t *testing.T) {
 			}(i)
 		}
 		wg.Wait()
+		require.NotEqual(t, 0, newMiner.Settings.MaxNumDelegates)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     newMiner.ID,
-			"tokens": 9.0 / newMiner.NumberOfDelegates,
+			"tokens": 9.0 / newMiner.Settings.MaxNumDelegates,
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.NumberOfDelegates, newMiner.NumberOfDelegates), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.Settings.MaxNumDelegates, newMiner.Settings.MaxNumDelegates), output[0])
 	})
 
 	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		maxStake := intToZCN(miner.MaxStake)
+		maxStake := intToZCN(miner.Settings.MaxStake)
 
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9.0)
@@ -283,43 +289,43 @@ func TestMinerStake(t *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, miner.MaxStake)
+		require.Greater(t, balance, miner.Settings.MaxStake)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.MaxStake) + 1,
+			"tokens": intToZCN(miner.Settings.MaxStake) + 1,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.MaxStake+1e10, miner.MaxStake), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.Settings.MaxStake+1e10, miner.Settings.MaxStake), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		nonce++
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeDelegateWallet.ClientID,
+			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
-		}), true)
+		}), nonce, true)
 		require.Nil(t, err)
 
 		defer func() {
+			nonce++
 			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        minerNodeDelegateWallet.ClientID,
+				"id":        minerNodeWallet.ClientID,
 				"min_stake": 0,
-			}), true)
+			}), nonce, true)
 			require.Nil(t, err)
 		}()
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeDelegateWallet.ClientID,
+			"id":     minerNodeWallet.ClientID,
 			"tokens": 0.5,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
@@ -329,15 +335,13 @@ func TestMinerStake(t *testing.T) {
 
 	// FIXME: This does not fail. Is this by design or a bug?
 	t.Run("Staking tokens more than max_stake of a miner node through multiple stakes should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		maxStake := intToZCN(miner.MaxStake)
+		maxStake := intToZCN(miner.Settings.MaxStake)
 
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9.0)
@@ -345,28 +349,26 @@ func TestMinerStake(t *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, miner.MaxStake)
+		require.Greater(t, balance, miner.Settings.MaxStake)
 
 		_, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.MaxStake) / 2,
+			"tokens": intToZCN(miner.Settings.MaxStake) / 2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.MaxStake)/2 + 1,
+			"tokens": intToZCN(miner.Settings.MaxStake)/2 + 1,
 		}), true)
 
 		// FIXME: Change to NotNil and Equal post-fix
 		require.Nil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.MaxStake+1e10, miner.MaxStake), output[0])
+		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.Settings.MaxStake+1e10, miner.Settings.MaxStake), output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Unlock tokens with invalid node id should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -401,8 +403,6 @@ func TestMinerStake(t *testing.T) {
 	})
 
 	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -433,7 +433,7 @@ func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePoo
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 		require.NotEmpty(t, poolsInfo)
 
-		if poolsInfo.Status == "ACTIVE" {
+		if poolsInfo.Status == int(climodel.Active) {
 			return poolsInfo, nil
 		}
 		select {
@@ -474,6 +474,9 @@ func getBalanceFromSharders(t *testing.T, clientId string) int64 {
 	res, err := apiGetBalance(sharderBaseURLs[0], clientId)
 	require.Nil(t, err, "error getting balance")
 
+	if res.StatusCode == 400 {
+		return 0
+	}
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get balance")
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
 

@@ -13,25 +13,17 @@ import (
 )
 
 func TestVestingPoolUpdateConfig(t *testing.T) {
-	t.Parallel()
+	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+	}
+
+	// unused wallet, just added to avoid having the creating new wallet outputs
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	t.Run("should allow update of max_destinations", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "max_destinations"
 		newValue := "4"
-
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = getVestingPoolSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -74,22 +66,8 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update max_destinations to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "max_destinations"
 		newValue := "x"
-
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
@@ -102,8 +80,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -121,22 +97,7 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with bad config key should fail", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		configKey := "unknown_key"
-
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
@@ -147,20 +108,6 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing keys param should fail", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
-		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
 		}, false)
@@ -170,18 +117,8 @@ func TestVestingPoolUpdateConfig(t *testing.T) {
 	})
 
 	t.Run("update with missing values param should fail", func(t *testing.T) {
-		t.Parallel()
-
-		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-		}
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
