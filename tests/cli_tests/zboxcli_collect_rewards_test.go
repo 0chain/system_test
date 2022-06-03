@@ -13,7 +13,6 @@ import (
 )
 
 func TestCollectRewards(t *testing.T) {
-
 	t.Run("Test Collect Reward", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -49,11 +48,11 @@ func TestCollectRewards(t *testing.T) {
 
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
+		cliutils.Wait(t, 30*time.Second)
 		output, err = collectRewards(t, configPath, stakePoolID, true)
 		require.Equal(t, "transferred reward tokens", output[0])
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 30*time.Second)
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
 		require.Greater(t, balanceAfter, balanceBefore)
 
@@ -74,7 +73,6 @@ func TestCollectRewards(t *testing.T) {
 		//require.NotEmpty(t, stakePoolAfter)
 		//require.Greater(t, stakePoolAfter.Rewards, stakePoolBefore.Rewards)
 	})
-
 }
 
 func collectRewards(t *testing.T, cliConfigFilename, poolId string, retry bool) ([]string, error) {
