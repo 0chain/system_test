@@ -41,7 +41,7 @@ func TestFinalizeAllocation(t *testing.T) {
 
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		matcher := regexp.MustCompile("Allocation finalized with txId ([a-f0-9]{64})$")
+		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
