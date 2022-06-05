@@ -146,10 +146,8 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	//FIXME: POSSIBLE BUG: Uploading file to a remote directory without
-	// filename causes the file to be renamed to directory's name and upload to root
-	// see <tbd>
-	t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
+	//FIXME: Confusing syntax means the direcotry name is taken as the filename see https://github.com/0chain/blobber/issues/715
+	t.Run("Upload File to a Directory without Filename Should Work but does not see blobber/issues/715", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
