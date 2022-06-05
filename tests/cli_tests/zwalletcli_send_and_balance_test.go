@@ -157,7 +157,7 @@ func TestSendAndBalance(t *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
+		wantFailureMsg := "Insufficient balance for this transaction."
 
 		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
@@ -186,10 +186,6 @@ func TestSendAndBalance(t *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	/* FIXME - this and the exceeding balance test takes a long time to run because the CLI sends the txn and has to wait for it to fail
-	   it would be more efficient for the CLI to first run a balance check internally before sending the txn in order to fail fast
-	   https://github.com/0chain/zwalletcli/issues/52
-	*/
 	t.Run("Send with zero token should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -232,7 +228,7 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		wantFailureMsg := "Send tokens failed. {\"error\": \"verify transaction failed\"}"
+		wantFailureMsg := "Insufficient balance for this transaction."
 
 		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
