@@ -29,6 +29,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "expected error on adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
+		//  FIXME: Incorrect error message see https://github.com/0chain/zboxcli/issues/240`
 		require.Contains(t, output[0], "Error adding curator:alloc_cancel_failed: value not present", strings.Join(output, "\n"))
 	})
 
@@ -227,6 +228,9 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = registerWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
+		ownerWallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error fetching owner wallet")
+
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
@@ -248,7 +252,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, true)
 		require.Nil(t, err, "error in adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("%s added %s as a curator to allocation %s", curatorWallet.ClientID, curatorWallet.ClientID, allocationID)
+		expectedOutput := fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, curatorWallet.ClientID, allocationID)
 		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 5*time.Second)

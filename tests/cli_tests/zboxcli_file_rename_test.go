@@ -335,7 +335,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		//  FIXME: Should be `Renamed failed`
+		//  FIXME: Should be `Renamed failed see https://github.com/0chain/zboxcli/issues/240`
 		require.Equal(t, "Delete failed: Commit consensus failed", output[0])
 
 		// list-all
