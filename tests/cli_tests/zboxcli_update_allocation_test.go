@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -535,6 +536,8 @@ func createParams(params map[string]interface{}) string {
 	for k, v := range params {
 		if v == nil {
 			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
+		} else if reflect.TypeOf(v).String() == "bool" {
+			_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
 		} else {
 			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
 		}
