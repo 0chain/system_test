@@ -650,7 +650,7 @@ func TestDownload(t *testing.T) {
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *testing.T) {
-			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID = setupAllocation(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
 			})
@@ -670,13 +670,12 @@ func TestDownload(t *testing.T) {
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
-
 			authTicket, err = extractAuthToken(output[0])
 			require.Nil(t, err, "extract auth token failed")
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		err = registerWalletAndLockReadTokens(t, configPath, allocationID)
+		err = registerWalletAndLockReadTokens(t, configPath, false)
 		require.Nil(t, err)
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1398,11 +1397,10 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 	allocationID := setupAllocation(t, cliConfigFilename, extraParam)
 
 	// Lock half the tokens for read pool
-	output, err := readPoolLock(t, cliConfigFilename, createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"tokens":     tokens / 2,
-		"duration":   "10m",
-	}), true)
+	readPoolParams := createParams(map[string]interface{}{
+		"tokens": tokens/2,
+	})
+	output, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, "locked", output[0])
