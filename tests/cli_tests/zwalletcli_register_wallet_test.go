@@ -80,7 +80,7 @@ func TestRegisterWallet(t *testing.T) {
 	})
 }
 
-func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename, allocationID string) error {
+func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename string, isOwner bool) error {
 	_, err := registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 	if err != nil {
 		return err
@@ -92,11 +92,11 @@ func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename, allocation
 	}
 
 	// Lock half the tokens for read pool
-	_, err = readPoolLock(t, cliConfigFilename, createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"tokens":     tokens / 2,
-		"duration":   "10m",
-	}), true)
+	readPoolParams := createParams(map[string]interface{}{
+		"tokens": tokens/2,
+		"owner": isOwner,
+	})
+	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
 
 	return err
 }

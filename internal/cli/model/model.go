@@ -94,12 +94,8 @@ type Blobber struct {
 }
 
 type ReadPoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
+	OwnerBalance   int64 `json:"owner_balance"`
+	VisitorBalance int64 `json:"visitor_balance"`
 }
 
 type WritePoolInfo struct {
