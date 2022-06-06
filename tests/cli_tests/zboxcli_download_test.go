@@ -137,8 +137,8 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//TODO: Directory download seems broken
-	t.Run("Download Entire Directory Should Work", func(t *testing.T) {
+	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
+	t.Run("Download Entire Directory Should Work but does not see blobber/issues/588", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -166,8 +166,8 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
-	//TODO: Directory share seems broken
-	t.Run("Download File From Shared Folder Should Work", func(t *testing.T) {
+	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
+	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *testing.T) {
 		t.Parallel()
 
 		var authTicket, filename string
