@@ -30,8 +30,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 	t.Parallel()
 
-	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
-	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
+	// FIXME The test is failing due to sync function inability to detect the file changes in local folder see https://github.com/0chain/zboxcli/issues/250
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
 		t.Parallel()
 
@@ -115,9 +114,8 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
 	})
 
-	// FIXME The test is failling due to sync function inability to detect the file changes in local folder
-	// https://0chain.slack.com/archives/G014PQ61WNT/p1638477374103000
-	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation", func(t *testing.T) {
+	// FIXME The test is failling due to sync function inability to detect the file changes in local folder see <tbd>
+	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -220,8 +218,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
 	})
 
-	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync.
-	// So this is failing due to the whole update in sync is failing.
+	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync. see <tbd>
 	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *testing.T) {
 		t.Parallel()
 
