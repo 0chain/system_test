@@ -68,7 +68,7 @@ func TestCancelAllocation(t *testing.T) {
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		//FIXME: error is incorrect, should be error canceling allocation
+		//FIXME: error is incorrect, should be error canceling allocation see https://github.com/0chain/zboxcli/issues/240
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
 	})
 

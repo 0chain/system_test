@@ -479,8 +479,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	// FIXME was expecting it to work given the change of allocation ownership
-	t.Run("transfer allocation and download encrypted file should fail", func(t *testing.T) {
+	// FIXME: New owner cannot download encrypted file after allocation ownership is transferred https://github.com/0chain/blobber/issues/711
+	t.Run("BROKEN transfer allocation and download encrypted file should work but does not see 0chain/blobber/issues/711", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{

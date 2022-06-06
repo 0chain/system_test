@@ -29,6 +29,7 @@ func TestAddRemoveCurator(t *testing.T) {
 		output, err = addCurator(t, params, false)
 		require.NotNil(t, err, "expected error on adding curator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
+		//  FIXME: Incorrect error message see https://github.com/0chain/zboxcli/issues/240`
 		require.Contains(t, output[0], "Error adding curator:alloc_cancel_failed: value not present", strings.Join(output, "\n"))
 	})
 

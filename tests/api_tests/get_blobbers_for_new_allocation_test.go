@@ -21,9 +21,10 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 		require.NotNil(t, blobberRequirements)
 	})
 
-	t.Run("Alloc blobbers API call should fail gracefully given valid request", func(t *testing.T) {
+	// FIXME lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319
+	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *testing.T) {
 		t.Parallel()
-		t.Skip("FIXME: lack of field validation leads to error")
+		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
 		blobbers, response, err := v1ScrestAllocBlobbers(t, "{}")
 		require.NotNil(t, blobbers)
 		require.NotNil(t, response)

@@ -441,9 +441,8 @@ func TestListFileSystem(t *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	//FIXME: POSSIBLE BUG: Listing contents of another wallet's allocation doesn't throw
-	// any errors. Good thing is that the contents are not shown.
-	t.Run("List Files in Other's Wallet Should Fail", func(t *testing.T) {
+	//FIXME: Listing a file in another allocation does not fail but returns no output see https://github.com/0chain/zboxcli/issues/246
+	t.Run("BROKEN List Files in Other's Wallet Should Fail but does not see zboxcli/issues/246", func(t *testing.T) {
 		t.Parallel()
 
 		var otherAllocationID string
@@ -498,7 +497,7 @@ func TestListFileSystem(t *testing.T) {
 			"allocation": otherAllocationID,
 			"json":       "",
 			"remotepath": remotepath,
-		}), false) //FIXME: error should be thrown here but is not
+		}), false)
 		require.Nil(t, err, err)
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
@@ -540,9 +539,7 @@ func createFileWithSize(name string, size int64) error {
 func generateRandomTestFileName(t *testing.T) string {
 	path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
 
-	//FIXME: POSSIBLE BUG: when the name of the file is too long, the upload
-	// consensus fails. So we are generating files with random (but short)
-	// name here.
+	//FIXME: Filenames longer than 100 characters are rejected see https://github.com/0chain/zboxcli/issues/249
 	randomFilename := cliutils.RandomAlphaNumericString(10)
 	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 }
