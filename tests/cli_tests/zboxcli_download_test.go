@@ -683,6 +683,7 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 			"rx_pay":     "",
 		}), false)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
@@ -1314,10 +1315,9 @@ func TestDownload(t *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		t.Log("len(output):", len(output))
-		require.Len(t, output, 5)
+		require.Len(t, output, 3)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Download failed")
+		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
 	t.Run("Download File using Expired Allocation Should Fail", func(t *testing.T) {
