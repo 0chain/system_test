@@ -46,6 +46,21 @@ func TestBlobberChallenge(t *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
+	// Do 5 send transactions
+	output, err = executeFaucetWithTokens(t, configPath, 9)
+	require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+	targetWalletName := escapedTestName(t) + "_TARGET"
+	output, err = registerWalletForName(t, configPath, targetWalletName)
+	require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+	targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+	require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+	for i := 0; i < 5; i++ {
+		output, err = sendTokens(t, configPath, targetWallet.ClientID, 1, escapedTestName(t), 0)
+		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+	}
+
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -72,24 +87,6 @@ func TestBlobberChallenge(t *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		go func() {
-			// Do 5 send transactions with fees
-			output, err = executeFaucetWithTokens(t, configPath, 9)
-			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-			targetWalletName := escapedTestName(t) + "_TARGET"
-			output, err = registerWalletForName(t, configPath, targetWalletName)
-			require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-			targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-			require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-			fee := 0.1
-			for i := 0; i < 5; i++ {
-				output, err = sendTokens(t, configPath, targetWallet.ClientID, 1, escapedTestName(t), fee)
-				require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
-			}
-		}()
 
 		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
