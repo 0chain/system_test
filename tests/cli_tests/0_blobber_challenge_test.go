@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -375,20 +376,29 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Res
 
 func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
-	for _, blobberId := range blobbers {
-		res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
-		require.Nil(t, err, "error getting challenges", res)
-		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
+	wg := sync.WaitGroup{}
+	mutex := &sync.RWMutex{}
+	for index, blobberId := range blobbers {
+		wg.Add(1)
+		go func(index int, blobberId string) {
+			defer wg.Done()
+			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
+			require.Nil(t, err, "error getting challenges", res)
+			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
+			require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
-		resBody, err := io.ReadAll(res.Body)
-		require.Nil(t, err, "Error reading response body")
-		var openChallengesInBlobber apimodel.BlobberChallenge
-		err = json.Unmarshal(resBody, &openChallengesInBlobber)
-		require.Nil(t, err, "error unmarshalling response body")
+			resBody, err := io.ReadAll(res.Body)
+			require.Nil(t, err, "Error reading response body")
+			var openChallengesInBlobber apimodel.BlobberChallenge
+			err = json.Unmarshal(resBody, &openChallengesInBlobber)
+			require.Nil(t, err, "error unmarshalling response body")
 
-		openChallenges[blobberId] = openChallengesInBlobber
+			mutex.Lock()
+			openChallenges[blobberId] = openChallengesInBlobber
+			mutex.Unlock()
+		}(index, blobberId)
 	}
+	wg.Wait()
 	return openChallenges
 }
 
