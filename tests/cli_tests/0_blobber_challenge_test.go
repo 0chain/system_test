@@ -73,18 +73,23 @@ func TestBlobberChallenge(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		// Do 5 send transactions with fees
-		targetWalletName := escapedTestName(t) + "_TARGET"
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		go func() {
+			// Do 5 send transactions with fees
+			output, err = executeFaucetWithTokens(t, configPath, 9)
+			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-		fee := 0.1
-		for i := 0; i < 5; i++ {
-			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
-			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
-		}
+			targetWalletName := escapedTestName(t) + "_TARGET"
+			output, err = registerWalletForName(t, configPath, targetWalletName)
+			require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+
+			targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+			require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+			fee := 0.1
+			for i := 0; i < 5; i++ {
+				output, err = sendTokens(t, configPath, targetWallet.ClientID, 1, escapedTestName(t), fee)
+				require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			}
+		}()
 
 		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
@@ -393,7 +398,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
 	// t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
 	t.Log("Checking for new challenges to open...")
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 		for _, blobber := range openChallengesAfter {
 			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
