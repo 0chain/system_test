@@ -14,7 +14,6 @@ import (
 )
 
 func TestBlobberConfigUpdate(t *testing.T) {
-	const delta = 0.000000001
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
