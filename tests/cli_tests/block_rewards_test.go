@@ -15,7 +15,6 @@ import (
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,7 +167,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		assert.InDeltaf(t, minTotalRewardsAndFees, rewardEarned, delta, "total share difference %d is not within range %d", rewardEarned, delta)
+		require.Equalf(t, minTotalRewardsAndFees, rewardEarned, "total share difference %d is not within range %d", rewardEarned, delta)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -300,7 +299,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		assert.InDelta(t, minTotalRewardsAndFees, rewardEarned, delta, "total share difference %d is not within range %d", rewardEarned, delta)
+		require.Equalf(t, minTotalRewardsAndFees, rewardEarned, "total share difference %d is not within range %d", rewardEarned, delta)
 	})
 }
 
