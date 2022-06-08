@@ -62,7 +62,6 @@ func TestBlobberChallenge(t *testing.T) {
 	}
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
-		t.Skip()
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -397,7 +396,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
 	// t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
 	t.Log("Checking for new challenges to open...")
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 		for _, blobber := range openChallengesAfter {
 			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
