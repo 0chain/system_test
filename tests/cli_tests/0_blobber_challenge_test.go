@@ -62,6 +62,7 @@ func TestBlobberChallenge(t *testing.T) {
 	}
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
+		t.Skip()
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
