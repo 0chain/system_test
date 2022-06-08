@@ -22,7 +22,7 @@ func TestRecoverWallet(t *testing.T) {
 		output, err := recoverWalletFromMnemonic(t, configPath, validMnemonic, true)
 
 		require.Nil(t, err, "error occurred recovering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		require.Equal(t, "Wallet recovered!!", output[len(output)-1])
 	})
 
