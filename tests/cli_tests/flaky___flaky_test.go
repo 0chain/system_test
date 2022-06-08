@@ -74,7 +74,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 
 		require.Equal(t, allocationID, initialWritePool[0].Id)
 		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
-		require.InEpsilonf(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
+		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance), "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
 		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
@@ -97,7 +97,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 
 		require.Equal(t, allocationID, finalWritePool[0].Id)
 		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
-		require.InEpsilon(t, (0.5 - 2*actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), epsilon, "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
+		require.Equal(t, (0.5 - 2*actualExpectedUploadCostInZCN), intToZCN(finalWritePool[0].Balance), "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
 		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
@@ -112,11 +112,11 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 			// deduce tokens
 			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
 			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload when it was expected to decrease by [%v]", i, diff, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)))
-			assert.InEpsilon(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, epsilon, "Blobber balance should have deduced by expected cost divided number of blobbers")
+			assert.Equal(t, actualExpectedUploadCostInZCN/float64(len(finalWritePool[0].Blobber)), diff, "Blobber balance should have deduced by expected cost divided number of blobbers")
 			totalChangeInWritePool += diff
 		}
 
-		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
+		require.Equal(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})
 }

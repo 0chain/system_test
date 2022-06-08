@@ -119,7 +119,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		fee := 0.1
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": 0.5,
-			"fee": fee,
+			"fee":    fee,
 		})
 		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
@@ -384,7 +384,7 @@ func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFe
 				require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 				// Transfer fee must be equal to miner fee
 				t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-				require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+				require.Equal(t, expectedMinerFee, transfer.Amount, "Transfer fee must be equal to miner fee")
 				return true
 			}
 		}
