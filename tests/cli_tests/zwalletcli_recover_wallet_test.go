@@ -50,7 +50,7 @@ func TestRecoverWallet(t *testing.T) {
 
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error: Mnemonic not provided", output[4])
+		require.Equal(t, "Error: Mnemonic not provided", output[0])
 	})
 }
 
