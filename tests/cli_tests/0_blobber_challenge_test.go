@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -45,21 +46,6 @@ func TestBlobberChallenge(t *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
-
-	// Do 5 send transactions
-	output, err = executeFaucetWithTokens(t, configPath, 9)
-	require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-	targetWalletName := escapedTestName(t) + "_TARGET"
-	output, err = registerWalletForName(t, configPath, targetWalletName)
-	require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-	targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-	require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-	for i := 0; i < 5; i++ {
-		output, err = sendTokens(t, configPath, targetWallet.ClientID, 1, escapedTestName(t), 0)
-		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
-	}
 
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -375,28 +361,35 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Res
 
 func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
-	for _, blobberId := range blobbers {
-		res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
-		require.Nil(t, err, "error getting challenges", res)
-		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
+	wg := sync.WaitGroup{}
+	mutex := &sync.RWMutex{}
+	for index, blobberId := range blobbers {
+		wg.Add(1)
+		go func(index int, blobberId string) {
+			defer wg.Done()
+			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
+			require.Nil(t, err, "error getting challenges", res)
+			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
+			require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
-		resBody, err := io.ReadAll(res.Body)
-		require.Nil(t, err, "Error reading response body")
-		var openChallengesInBlobber apimodel.BlobberChallenge
-		err = json.Unmarshal(resBody, &openChallengesInBlobber)
-		require.Nil(t, err, "error unmarshalling response body")
+			resBody, err := io.ReadAll(res.Body)
+			require.Nil(t, err, "Error reading response body")
+			var openChallengesInBlobber apimodel.BlobberChallenge
+			err = json.Unmarshal(resBody, &openChallengesInBlobber)
+			require.Nil(t, err, "error unmarshalling response body")
 
-		openChallenges[blobberId] = openChallengesInBlobber
+			mutex.Lock()
+			openChallenges[blobberId] = openChallengesInBlobber
+			mutex.Unlock()
+		}(index, blobberId)
 	}
-
+	wg.Wait()
 	return openChallenges
 }
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
-	// t.Log("Polling for open challenges every 30 seconds for 2 minutes...")
 	t.Log("Checking for new challenges to open...")
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 150; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
 		for _, blobber := range openChallengesAfter {
 			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
