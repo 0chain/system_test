@@ -20,7 +20,6 @@ import (
 )
 
 func TestBlobberChallenge(t *testing.T) {
-	t.Skip("Skipped till re-done")
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -39,17 +38,24 @@ func TestBlobberChallenge(t *testing.T) {
 	sharderBaseURLs := getAllSharderBaseURLs(sharders)
 	require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
 
+	blobberList := []climodel.BlobberInfo{}
+	output, err = listBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
 	t.Run("Uploading a file greater than 1 MB should generate randomized challenges", func(t *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
 		})
 
-		allocation := getAllocation(t, allocationId)
-
 		var blobbers []string
-		for _, blobber := range allocation.BlobberDetails {
-			blobbers = append(blobbers, blobber.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -97,21 +103,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -152,21 +146,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -207,21 +189,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -261,21 +231,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -316,21 +274,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -375,21 +321,9 @@ func TestBlobberChallenge(t *testing.T) {
 
 		remoteFilepath := remotepath + filepath.Base(filename)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error getting file stats")
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err, "error unmarshalling file stats json")
-
 		var blobbers []string
-		for _, stat := range stats {
-			blobbers = append(blobbers, stat.BlobberID)
+		for _, blobber := range blobberList {
+			blobbers = append(blobbers, blobber.Id)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -454,15 +388,15 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 }
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
-	t.Log("Checking for open challenges in 30 seconds...")
-	cliutils.Wait(t, 30*time.Second)
-	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-
-	for _, blobber := range openChallengesAfter {
-		if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
-			return true
+	t.Log("Checking for new challenges to open...")
+	for i := 0; i < 150; i++ {
+		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
+		for _, blobber := range openChallengesAfter {
+			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
+				return true
+			}
 		}
+		cliutils.Wait(t, time.Second*1)
 	}
-
 	return false
 }
