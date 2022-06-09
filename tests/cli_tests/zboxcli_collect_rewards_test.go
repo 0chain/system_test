@@ -3,17 +3,22 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCollectRewards(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Test Collect Reward Successfully", func(t *testing.T) {
+		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
