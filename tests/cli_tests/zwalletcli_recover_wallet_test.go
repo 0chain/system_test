@@ -22,7 +22,7 @@ func TestRecoverWallet(t *testing.T) {
 		output, err := recoverWalletFromMnemonic(t, configPath, validMnemonic, true)
 
 		require.Nil(t, err, "error occurred recovering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		require.Equal(t, "Wallet recovered!!", output[len(output)-1])
 	})
 
@@ -36,14 +36,9 @@ func TestRecoverWallet(t *testing.T) {
 		output, err := recoverWalletFromMnemonic(t, configPath, inValidMnemonic, false)
 
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
-		require.Equal(t, "No wallet in path"+
-			"  ./config/TestRecoverWallet-Recover_wallet_invalid_mnemonic_wallet.json found."+
-			" Creating wallet...", output[0])
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
-		require.Equal(t, "Error: Invalid mnemonic", output[4])
+		require.Len(t, output, 1)
+
+		require.Equal(t, "Error: Invalid mnemonic", output[0])
 	})
 
 	t.Run("Recover wallet no mnemonic", func(t *testing.T) {
@@ -54,12 +49,8 @@ func TestRecoverWallet(t *testing.T) {
 			"--configDir ./config --config " + configPath)
 
 		require.NotNil(t, err, "expected error to occur recovering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
-		require.Equal(t, "No wallet in path  ./config/TestRecoverWallet-Recover_wallet_no_mnemonic_wallet.json found. Creating wallet...", output[0])
-		require.Equal(t, "ZCN wallet created!!", output[1])
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[2])
-		require.Equal(t, "Read pool created successfully", output[3])
-		require.Equal(t, "Error: Mnemonic not provided", output[4])
+		require.Len(t, output, 1)
+		require.Equal(t, "Error: Mnemonic not provided", output[0])
 	})
 }
 
