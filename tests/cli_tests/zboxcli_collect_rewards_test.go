@@ -61,11 +61,12 @@ func TestCollectRewards(t *testing.T) {
 			}
 		}
 
+		cliutils.Wait(t, 40*time.Second)
 		output, err = collectRewards(t, configPath, stakePoolID, true)
 		require.Equal(t, "transferred reward tokens", output[0])
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 30*time.Second)
+		cliutils.Wait(t, 40*time.Second)
 		stackPoolOutputAfter, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"json":       "",
