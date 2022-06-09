@@ -13,7 +13,7 @@ import (
 )
 
 func TestCollectRewards(t *testing.T) {
-	t.Run("Test Collect Reward", func(t *testing.T) {
+	t.Run("Test Collect Reward Successfully", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
