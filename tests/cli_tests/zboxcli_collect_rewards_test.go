@@ -36,7 +36,8 @@ func TestCollectRewards(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
 
-		blobber := blobbers[0]
+		// Pick a random blobber
+		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
