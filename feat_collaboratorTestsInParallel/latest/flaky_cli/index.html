@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [feat_collaboratorTestsInParallel/e70dac1e] ran against [dev-3.devnet-0chain.net] at [2022-06-10_23.08.47]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [feat_collaboratorTestsInParallel/e70dac1e] ran against [dev-3.devnet-0chain.net] at [2022-06-10_23.08.47]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>9</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>9</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 10, 2022 23:47:29</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup failed " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup failed " id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":163.94,"Output":["","","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:159: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:855: Uploading file...\n","    zboxcli_download_token_test.go:141: Getting download cost...\n","    zboxcli_collaborator_system_test.go:824: Adding collaborator...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_file_meta_test.go:408: Getting file metadata...\n","    zboxcli_download_token_test.go:127: Locking read tokens...\n","    utils.go:133: Waiting 30s...\n","    zboxcli_download_token_test.go:118: Getting read pool info...\n","    utils.go:133: Waiting 15s...\n","    zboxcli_download_test.go:1417: Downloading file...\n","    utils.go:133: Waiting 30s...\n","    zboxcli_download_token_test.go:118: Getting read pool info...\n","    utils.go:133: Waiting 30s...\n","    utils.go:133: Waiting 30s...\n","    zboxcli_download_token_test.go:118: Getting read pool info...\n","    flaky___broken_scenarios_test.go:408: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:408\n","        \tError:      \tNot equal: \n","        \t            \texpected: 3999755860\n","        \t            \tactual  : 3999816895\n","        \tTest:       \tTest___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads\n","        \tMessages:   \tRead Pool balance must be equal to (initial balance-download cost)\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/BROKEN_Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation_but_is_not_see_zboxcli/issues/250","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.98,"Output":["","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:382: Listing all...\n","","    zboxcli_sync_test.go:866: Get Differences...\n","","    flaky___broken_scenarios_test.go:184: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:184\n","        \tError:      \t\"[]\" should have 2 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/BROKEN_Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation_but_is_not_see_zboxcli/issues/250\n","        \tMessages:   \tSince we updated 2 files we expect 2 differences but we got 0%!(EXTRA []climodel.FileDiff=[])\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.52,"Output":["","","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:382: Listing all...\n","","    zboxcli_sync_test.go:866: Get Differences...\n","    flaky___broken_scenarios_test.go:298: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:298\n","        \tError:      \t\"[]\" should have 2 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work\n","        \tMessages:   \tSince we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got 0\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.66,"Output":["","","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:382: Listing all...\n","","    zboxcli_sync_test.go:866: Get Differences...\n","","    flaky___broken_scenarios_test.go:86: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:86\n","        \tError:      \t\"[]\" should have 1 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation\n","        \tMessages:   \twe updated a file, we except 1 change but we got 0%!(EXTRA []climodel.FileDiff=[])\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.16,"Output":["","","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","","    zboxcli_upload_token_test.go:118: Getting upload cost...\n","    zboxcli_upload_test.go:855: Uploading file...\n","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","","    zboxcli_upload_token_test.go:126: Getting challenge pool info...\n","    flaky___broken_scenarios_test.go:511: Blobber [0] write pool has decreased by [0] tokens after upload\n","    flaky___broken_scenarios_test.go:511: Blobber [1] write pool has decreased by [0] tokens after upload\n","    flaky___broken_scenarios_test.go:511: Blobber [2] write pool has decreased by [0] tokens after upload\n","    flaky___broken_scenarios_test.go:511: Blobber [3] write pool has decreased by [0] tokens after upload\n","    flaky___broken_scenarios_test.go:515: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:515\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost\n","        \tMessages:   \texpected write pool balance to decrease by [1.323611111111111e-10] but has actually decreased by [0]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":132.93,"Output":["","","","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","    zboxcli_update_allocation_test.go:589: Executing faucet...\n","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","    zboxcli_upload_test.go:855: Uploading file...\n","    zboxcli_upload_token_test.go:118: Getting upload cost...\n","    utils.go:133: Waiting 1m0s...\n","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:76: Write pool Balance after upload expected to be [0.5] but was [0.5]\n","    zboxcli_common_user_functions_test.go:188: Updating file...\n","    utils.go:133: Waiting 1m0s...\n","    zboxcli_upload_token_test.go:107: Getting write pool info...\n","    flaky___flaky_test.go:99: Write pool Balance after upload expected to be [0.4999902345] but was [0.5]\n","    flaky___flaky_test.go:114: Blobber [0] write pool has decreased by [0] tokens after upload when it was expected to decrease by [2.441375e-06]\n","    flaky___flaky_test.go:115: \n","        \tError Trace:\tflaky___flaky_test.go:115\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n","        \tMessages:   \tBlobber balance should have deduced by expected cost divided number of blobbers\n","    flaky___flaky_test.go:114: Blobber [1] write pool has decreased by [0] tokens after upload when it was expected to decrease by [2.441375e-06]\n","    flaky___flaky_test.go:115: \n","        \tError Trace:\tflaky___flaky_test.go:115\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n","        \tMessages:   \tBlobber balance should have deduced by expected cost divided number of blobbers\n","    flaky___flaky_test.go:114: Blobber [2] write pool has decreased by [0] tokens after upload when it was expected to decrease by [2.441375e-06]\n","    flaky___flaky_test.go:115: \n","        \tError Trace:\tflaky___flaky_test.go:115\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n","        \tMessages:   \tBlobber balance should have deduced by expected cost divided number of blobbers\n","    flaky___flaky_test.go:114: Blobber [3] write pool has decreased by [0] tokens after upload when it was expected to decrease by [2.441375e-06]\n","    flaky___flaky_test.go:115: \n","        \tError Trace:\tflaky___flaky_test.go:115\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n","        \tMessages:   \tBlobber balance should have deduced by expected cost divided number of blobbers\n","    flaky___flaky_test.go:119: \n","        \tError Trace:\tflaky___flaky_test.go:119\n","        \tError:      \tRelative error is too high: 0.1 (expected)\n","        \t            \t        \u003c 1 (actual)\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n","        \tMessages:   \texpected write pool balance to decrease by [9.7655e-06] but has actually decreased by [0]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":275.3,"Output":["","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","    zwalletcli_register_wallet_test.go:109: Registering wallet...\n","    utils.go:133: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:164: Retrieving storage config...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_register_wallet_test.go:181: Verifying transaction...\n","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Verification failed.{\"error\": \"verify transaction failed\"}]\n","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Verification failed.{\"error\": \"verify transaction failed\"}]\n","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet verify --silent --wallet Test___FlakyScenariosCreateAllocationFreeStorage_wallet.json --hash babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251 --configDir ./config --config ./zbox_config.yaml] Output: [Verification failed.{\"error\": \"verify transaction failed\"}]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:37.161162 wallet.go:292: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:37.278302 wallet.go:415: ******* Wallet SDK Version:v1.7.2-2-g3237f5c-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:37.278489 transaction.go:397: New transaction interface\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:37.305039 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:37.409073 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:37.435240 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897416,\"hash\":\"4242d61386bc59b7e7b01eada013336f5640e19fd6679d132fea7b736f32cdbd\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11121,\"round_random_seed\":-8812379764018683772,\"state_changes_count\":31,\"merkle_tree_root\":\"1ffac9e920cbd1a8be4961e55bb82523ff1b4a28f14bff700f9e3ff069c1b79c\",\"state_hash\":\"QVBqIhWZs/igRi8ySmSCCnfCwTf1T5vBSBqzqEZ9Wk4=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:37.435285 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:37.435390 transaction.go:1043: zcn: transaction not confirmed now: 1654897417, LFB creation time:1654897416\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:40.437500 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:40.465838 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:40.511195 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897419,\"hash\":\"183c5537d16991db7d10d6ee836b8fb5a138b05e286e12f849af3392e6fbb576\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11136,\"round_random_seed\":-3012236169253556188,\"state_changes_count\":35,\"merkle_tree_root\":\"ae413a1b61d545afff5e715ac0daa398601ff106ad9257c36858661c5f568b27\",\"state_hash\":\"3/MD+8kVSeQMs6dc+xKShnpDn5Uo3o4tYYySZ9PNxfI=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:40.511246 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:40.511287 transaction.go:1043: zcn: transaction not confirmed now: 1654897420, LFB creation time:1654897419\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:43.512311 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:43.538484 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:43.578326 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897422,\"hash\":\"4389063059a1d43d93c409585975cae338e3cacc2ec9c315c5011ab143127672\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11150,\"round_random_seed\":3448847535967717209,\"state_changes_count\":36,\"merkle_tree_root\":\"33bc380b52e9a123a76e8a50f6a2595672d2908395f52c3ef83218ef394abdd6\",\"state_hash\":\"z0EFiYBBMmV06yOTm+RnzD5WLB7w5kbfLOcPBDzK8Kk=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:43.578377 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:43.578405 transaction.go:1043: zcn: transaction not confirmed now: 1654897423, LFB creation time:1654897422\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:46.580478 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:46.607172 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:46.633545 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897425,\"hash\":\"3a5839d86921ca51155e8edd697951effa13af484935e3e364072be21540d4e4\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11164,\"round_random_seed\":9195045411962747609,\"state_changes_count\":32,\"merkle_tree_root\":\"28a72173476ed96d7319b4e700fd5565ba628029f070bed2742352378617f22f\",\"state_hash\":\"w/JR535vrzxN0oZ2NKvgz7lABqKDWuAck5TjdQ4ODJc=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:46.633599 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:46.633622 transaction.go:1043: zcn: transaction not confirmed now: 1654897426, LFB creation time:1654897425\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:49.635611 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:49.661793 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:49.688019 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897428,\"hash\":\"aa1d367ca9936f228b9e11fc0005c10a2f07a24915cb750d6c406a7608f56280\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11177,\"round_random_seed\":-6957701116086782751,\"state_changes_count\":32,\"merkle_tree_root\":\"2fe663ca6ac7809be2fa65d9b5d2c75f8d12c0c5487676367dd9a85a987939cf\",\"state_hash\":\"w9C21nHZ6KDpGF8wDS9j4DJ7Dc86vkwXkIYUpnZ+tfk=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:49.688069 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:49.688096 transaction.go:1043: zcn: transaction not confirmed now: 1654897429, LFB creation time:1654897428\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:52.689154 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:52.717588 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:52.743632 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897431,\"hash\":\"325b06d317cffa1d13c9e28633639221c5bf168fd5426f012ac7ba1616ccf847\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11192,\"round_random_seed\":4484214197037807149,\"state_changes_count\":36,\"merkle_tree_root\":\"f408d8eaa8990538ece2efc4553fc505dc903d9b232ecb7bad94300f51640523\",\"state_hash\":\"ROXbXU6mSIH59IwJzFvEtseZq2Tcpu7dN5R9LpeT62E=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:52.743678 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:52.743705 transaction.go:1043: zcn: transaction not confirmed now: 1654897432, LFB creation time:1654897431\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:55.744209 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:55.770887 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:55.797283 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897434,\"hash\":\"cbae4c1e44f923bd8c255fb3d93de117f79c4aff88c7ca56a79ea0c6d90b8c87\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11206,\"round_random_seed\":2277219487176472387,\"state_changes_count\":40,\"merkle_tree_root\":\"52ba17ee5e41c695bc8e5976c01ce55876a6a0216454df1eddfe6649639becba\",\"state_hash\":\"zOXlyb5zEXJQa8Ql+kF8WkG/ulB2Ff4wl7v1LFcugm4=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:55.797327 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:55.797355 transaction.go:1043: zcn: transaction not confirmed now: 1654897435, LFB creation time:1654897434\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:58.798329 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:58.824455 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:43:58.850801 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897437,\"hash\":\"2aa3c6b990318b38319c9adbb5604595830dbaeaf8fbee5930c659f3f8c94050\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11219,\"round_random_seed\":-6880245327926013504,\"state_changes_count\":56,\"merkle_tree_root\":\"ed7f53441ad5baff8d2b2b7310ecff9ae8b7df9db7919808dab963bafc46c825\",\"state_hash\":\"gOGC2BMNhQD/HzaFoTOYKYjFBlfVNk+aGApG/HqY/qY=\",\"receipt_merkle_tree_root\":\"4cbcda1ee388e4418fc75fe934b886ad5c40ff595a2e749ec23d7bcd21dafd98\",\"num_txns\":4}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:43:58.850860 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:43:58.850891 transaction.go:1043: zcn: transaction not confirmed now: 1654897438, LFB creation time:1654897437\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:01.852962 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:01.879544 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:01.905733 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897440,\"hash\":\"d8f09f61a1ea431a301ebf6a7d733d13628416f0523931f45e6ef38e8b55003d\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11233,\"round_random_seed\":-4624614810794717957,\"state_changes_count\":33,\"merkle_tree_root\":\"c77e1a8d0afe1248d04e006adcf43ad923bec46eb527bb8cd9c792123598a6a4\",\"state_hash\":\"LgKFrAaGAKHPVuvI0w67C1KmXdvQMs2Wo5dUUyvqJgk=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:01.905775 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:01.905801 transaction.go:1043: zcn: transaction not confirmed now: 1654897441, LFB creation time:1654897440\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:04.907862 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:04.934050 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:04.960550 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897443,\"hash\":\"fe25893d13793da93724b8b8c837d32980a7a7fb0a08ad87f8150ce79715cb4b\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11247,\"round_random_seed\":3053171499961722048,\"state_changes_count\":33,\"merkle_tree_root\":\"fab60e64ae0fef3c3b2574ae0984e76aaabb7c4e1b321f31e25b6c0e80f14a44\",\"state_hash\":\"raNVi/d8ocp/iQJS6o6uXdvGlAW2/U+ZXwQl0ASFO5c=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:04.960604 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:04.960636 transaction.go:1043: zcn: transaction not confirmed now: 1654897444, LFB creation time:1654897443\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:07.961706 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:07.993089 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:08.026843 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897447,\"hash\":\"875fa45532d4a106168321d8fb95b860bf84d76add95e369168fcb0961734206\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11262,\"round_random_seed\":4508480658515401869,\"state_changes_count\":35,\"merkle_tree_root\":\"443cd75a85dccbef41c3dcbe616740df473bc461d1a7e7fbd8e73e6ea63026c6\",\"state_hash\":\"xEHVE97w93mau4WAcxyUmzsAeAOMg3ucyPhNvmRwUVE=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:08.026897 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:08.026924 transaction.go:1043: zcn: transaction not confirmed now: 1654897448, LFB creation time:1654897447\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:11.028992 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:11.055658 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:11.081861 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897449,\"hash\":\"7bc6e883c1e0708cb9db8c6ded4987eff5f671d6903487c3cc698b13161afba4\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11275,\"round_random_seed\":2840170414964438490,\"state_changes_count\":32,\"merkle_tree_root\":\"6140446e3a42da00dd34b3a9f5f17d960d4fb4c06e723c59022bdb6c83bc2735\",\"state_hash\":\"LMJA7ZpSImKWWQXd6p0ZvFQKKkwIiUi1RJ6krzzLWJM=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:11.081907 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:11.081937 transaction.go:1043: zcn: transaction not confirmed now: 1654897451, LFB creation time:1654897449\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:14.083909 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:14.109996 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:14.135952 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897453,\"hash\":\"48830d3691e804eeace868ac26bb466c8a55a9d267478856c7ab34144a25f96a\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11290,\"round_random_seed\":-4753745826290957241,\"state_changes_count\":35,\"merkle_tree_root\":\"0227e4f48254be95ba3e9fdd2524f4f97fc704a6a57e0d0586478d7750425344\",\"state_hash\":\"Hj+eExS5QaNcoicgM1lyIT9jYyydzc4oUGyXF5zSBYA=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:14.136001 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:14.136032 transaction.go:1043: zcn: transaction not confirmed now: 1654897454, LFB creation time:1654897453\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:17.138104 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:17.215596 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:17.246976 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897456,\"hash\":\"07c45f4e9b67d2958c8600b71b470169b347adb3ebf13d071b6ff1029fa85c8e\",\"miner_id\":\"c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937\",\"round\":11304,\"round_random_seed\":-389364713682467877,\"state_changes_count\":43,\"merkle_tree_root\":\"a279d29d9c884244f57962808f11c7bfd3623f67d5572a31d2c253cc45fadc3d\",\"state_hash\":\"cIW5ueavhTomOmE3mELOz3bFWyxf18xSk/MR36MdzZY=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:17.247017 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:17.247043 transaction.go:1043: zcn: transaction not confirmed now: 1654897457, LFB creation time:1654897456\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:20.247207 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:20.273438 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:20.299881 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897459,\"hash\":\"37331f8d166b21e435ba457a438d79f99dd66bc208fc814eb12a7493f3216f58\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11319,\"round_random_seed\":7621290079976403461,\"state_changes_count\":40,\"merkle_tree_root\":\"b0ac798b8235c705467d6f3ccc9cd280396c4c60fbf5431b74445466ef260c3e\",\"state_hash\":\"+QdGYYaiTrTOtDLBeUDAWYz7x5Nq7zF/cuTOB4Bsll8=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:20.299929 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:20.299955 transaction.go:1043: zcn: transaction not confirmed now: 1654897460, LFB creation time:1654897459\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:23.300584 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:23.326917 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:23.355864 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897462,\"hash\":\"1652d991e2d276fa414a39291c3bf9834dfcf9b51297f47c97b1766dabfcf3f5\",\"miner_id\":\"c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937\",\"round\":11333,\"round_random_seed\":-6905206844483060025,\"state_changes_count\":35,\"merkle_tree_root\":\"3f835a597d90dc2f035edf8eab5050412a6dcc2d4d89a83288bf72282180a2cc\",\"state_hash\":\"hsjMFoLPqQbhpsUd9flYNa7O4aDlDD0KDMfp+d6883U=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:23.355913 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:23.355951 transaction.go:1043: zcn: transaction not confirmed now: 1654897463, LFB creation time:1654897462\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:26.356232 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:26.382762 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:26.409103 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897465,\"hash\":\"2ce93dfa97172f2a5e45e3fb969c88fc007f4aea3f45617be39df7b57248ac7b\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11347,\"round_random_seed\":-292824636568156644,\"state_changes_count\":35,\"merkle_tree_root\":\"8f7d65175306b196755b68e9470b05aa1b322f2d53eadd3ff0b462f315a5dea6\",\"state_hash\":\"Bu33MD6cKb1b8bm5vvZxdhD23VvvUSJJgxurn2OII5w=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:26.409150 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:26.409178 transaction.go:1043: zcn: transaction not confirmed now: 1654897466, LFB creation time:1654897465\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:29.411155 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:29.437254 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:29.463623 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897468,\"hash\":\"98b2636db2f931fcc866bb2ff3f4cea2a2300450ac28391a7b4f89f21ac08a50\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11362,\"round_random_seed\":-7207852580248417111,\"state_changes_count\":33,\"merkle_tree_root\":\"2721d60dd866de60bfbf708602fee278c7a699808e6c7c2fc6c19d98349f48e0\",\"state_hash\":\"rGyV5WqVxQniBaUK/e4mEl8+woGHPQ8jB95ARl+uv/A=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:29.463669 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:29.463696 transaction.go:1043: zcn: transaction not confirmed now: 1654897469, LFB creation time:1654897468\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:32.464795 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:32.491069 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:32.517926 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897471,\"hash\":\"de399a0b0bc02b9b4c734d2825fabb6a48859a3f5d4dd0900a5af7e91b11355e\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11376,\"round_random_seed\":8129249051193568810,\"state_changes_count\":35,\"merkle_tree_root\":\"fcd62f19d59c4b2582a829c21709530359188396884dcdd8fb8fa2174b3f0039\",\"state_hash\":\"RuUaAI5Lub3lr/nwDke7Lw/BpnGqjfmHHNz4BkpWm6o=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:32.517986 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:32.518018 transaction.go:1043: zcn: transaction not confirmed now: 1654897472, LFB creation time:1654897471\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:35.520096 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:35.546317 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:35.572626 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897474,\"hash\":\"5e52ae39bc9289f16cad5767fa93a9ed0b619848dda956dd552a84607a2e1218\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11390,\"round_random_seed\":-3934204684477950997,\"state_changes_count\":34,\"merkle_tree_root\":\"231925655eb92d7301adc6a51521d176bb7200e235fafc09076dfebbfc928658\",\"state_hash\":\"ciheSFWM8OY19i/zpCXy0Ixp7rfz5hu9DV5yGUE4Us8=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:35.572669 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:35.572695 transaction.go:1043: zcn: transaction not confirmed now: 1654897475, LFB creation time:1654897474\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:38.573749 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder01/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.600059 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.627426 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897477,\"hash\":\"eaad64c1c097cd83f84dc6ac22845134365adaf00e3bc3765e4bd36b949fab13\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11404,\"round_random_seed\":-1950678468338189058,\"state_changes_count\":38,\"merkle_tree_root\":\"d4b6c60b8dd07dba90f3d513dd24809f5442b834a33a27394ba311a187f18fda\",\"state_hash\":\"bGUaoz2CuNYm0KiJsJr8zCLrGFeUVdg/HwAFfRkCjxo=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:38.627475 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:38.627506 transaction.go:1043: zcn: transaction not confirmed now: 1654897478, LFB creation time:1654897477\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:38.627517 wallet.go:262: Minimum sharders used for verify :1\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:38.627526 transaction.go:1048: falling back to 1 of 2 Sharders\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:38.627536 wallet.go:262: Minimum sharders used for verify :1\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.655213 transaction_query.go:256: https://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb 200 OK\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.655231 transaction_query.go:257: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897477,\"hash\":\"eaad64c1c097cd83f84dc6ac22845134365adaf00e3bc3765e4bd36b949fab13\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11404,\"round_random_seed\":-1950678468338189058,\"state_changes_count\":38,\"merkle_tree_root\":\"d4b6c60b8dd07dba90f3d513dd24809f5442b834a33a27394ba311a187f18fda\",\"state_hash\":\"bGUaoz2CuNYm0KiJsJr8zCLrGFeUVdg/HwAFfRkCjxo=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:38.655271 transaction_query.go:353: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.655957 transaction_query.go:256: https://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb 200 OK\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:38.655974 transaction_query.go:257: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897477,\"hash\":\"eaad64c1c097cd83f84dc6ac22845134365adaf00e3bc3765e4bd36b949fab13\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":11404,\"round_random_seed\":-1950678468338189058,\"state_changes_count\":38,\"merkle_tree_root\":\"d4b6c60b8dd07dba90f3d513dd24809f5442b834a33a27394ba311a187f18fda\",\"state_hash\":\"bGUaoz2CuNYm0KiJsJr8zCLrGFeUVdg/HwAFfRkCjxo=\",\"receipt_merkle_tree_root\":\"a9e5d8b060cf9c30ca5c4737ad97227fdc6d0389ad1403b1918708d1b8f2ad5d\",\"num_txns\":3}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:38.656004 transaction_query.go:353: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:41.658104 transaction_query.go:117: zcn: check health https://dev-3.devnet-0chain.net/sharder02/_health_check\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.692830 transaction_query.go:204: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.719663 transaction_query.go:214: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897480,\"hash\":\"a279ffd5fb280bbcea166961ea189ef7675ddefa6f918c2c8e6252a7b5c38b15\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11419,\"round_random_seed\":1701841857414194972,\"state_changes_count\":50,\"merkle_tree_root\":\"33681db0a28cae14d7d7e5b432f355fbf11c88b614996722cb87af6c72455f68\",\"state_hash\":\"UfLCSPmS+cpLg/jElbpd4RYQaZrkMyV6R6VT8gJo95g=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:41.719711 transaction_query.go:304: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:41.719741 transaction.go:1043: zcn: transaction not confirmed now: 1654897481, LFB creation time:1654897480\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:41.719750 wallet.go:262: Minimum sharders used for verify :1\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:41.719759 transaction.go:1048: falling back to 1 of 2 Sharders\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/06/10 23:44:41.719769 wallet.go:262: Minimum sharders used for verify :1\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.745920 transaction_query.go:256: https://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb 200 OK\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.745937 transaction_query.go:257: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897480,\"hash\":\"a279ffd5fb280bbcea166961ea189ef7675ddefa6f918c2c8e6252a7b5c38b15\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11419,\"round_random_seed\":1701841857414194972,\"state_changes_count\":50,\"merkle_tree_root\":\"33681db0a28cae14d7d7e5b432f355fbf11c88b614996722cb87af6c72455f68\",\"state_hash\":\"UfLCSPmS+cpLg/jElbpd4RYQaZrkMyV6R6VT8gJo95g=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:41.745969 transaction_query.go:353: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.746097 transaction_query.go:256: https://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\u0026content=lfb 200 OK\n","    utils.go:72: \u001b[31m0chain-core-sdk [DEBUG]  2022/06/10 23:44:41.746111 transaction_query.go:257: {\"error\":{\"code\":\"entity_not_found\",\"msg\":\"txn_summary not found with id = babad8a53571b929326da8cc115596ac59c0dbfff6ed08a30ee47a886c49d251\"},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1654897480,\"hash\":\"a279ffd5fb280bbcea166961ea189ef7675ddefa6f918c2c8e6252a7b5c38b15\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":11419,\"round_random_seed\":1701841857414194972,\"state_changes_count\":50,\"merkle_tree_root\":\"33681db0a28cae14d7d7e5b432f355fbf11c88b614996722cb87af6c72455f68\",\"state_hash\":\"UfLCSPmS+cpLg/jElbpd4RYQaZrkMyV6R6VT8gJo95g=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:72: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2022/06/10 23:44:41.746131 transaction_query.go:353: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:72: \u001b[31mVerification failed.{\"error\": \"verify transaction failed\"}\n","    flaky___flaky_test.go:218: \n","        \tError Trace:\tflaky___flaky_test.go:218\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000092078), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyScenariosCreateAllocationFreeStorage\n","        \tMessages:   \tCould not verify commit transaction%!(EXTRA string=Verification failed.{\"error\": \"verify transaction failed\"})\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":124,"Col":1}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
