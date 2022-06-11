@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const epsilon float64 = 1e-01
 const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(t *testing.T) {
