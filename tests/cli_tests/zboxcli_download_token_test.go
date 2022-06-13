@@ -69,7 +69,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		// Read pool before download
 		initialReadPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.OwnerBalance)
+		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -105,7 +105,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
 		updatedReadPool, err := getReadPoolUpdate(t, initialReadPool, 5)
 		require.NoError(t, err)
-		require.Equal(t, expectedPoolBalance, updatedReadPool.OwnerBalance, "Read Pool balance must be equal to (initial balance-download cost)")
+		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
 }
 

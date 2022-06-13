@@ -675,7 +675,7 @@ func TestDownload(t *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		err = registerWalletAndLockReadTokens(t, configPath, false)
+		err = registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -828,7 +828,7 @@ func TestDownload(t *testing.T) {
 		info, err := os.Stat("tmp/" + filepath.Base(filename))
 		require.Nil(t, err, "error getting file stats")
 		// downloaded file size should equal to ratio of block downloaded by original file size
-		require.Equal(t, float64(info.Size()), (float64((data.NumOfBlocks-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
+		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
 	t.Run("Download File With Only endblock Should Not Work", func(t *testing.T) {
@@ -922,7 +922,7 @@ func TestDownload(t *testing.T) {
 		info, err := os.Stat("tmp/" + filepath.Base(filename))
 		require.Nil(t, err, "error getting file stats")
 		// downloaded file size should equal to ratio of block downloaded by original file size
-		require.Equal(t, float64(info.Size()), (float64((endBlock-(startBlock-1)))/float64(data.NumOfBlocks))*float64((filesize)))
+		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
 	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *testing.T) {
@@ -1398,7 +1398,7 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 
 	// Lock half the tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens/2,
+		"tokens": tokens / 2,
 	})
 	output, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
