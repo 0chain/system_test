@@ -84,7 +84,7 @@ func TestCollectRewards(t *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
-		require.Len(t, output, 1)
+		require.Len(t, stackPoolOutputAfter, 1)
 		stakePoolAfter := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(stackPoolOutputAfter[0]), &stakePoolAfter)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(stackPoolOutputAfter, "\n"))
