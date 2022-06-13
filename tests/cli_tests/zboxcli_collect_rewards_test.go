@@ -79,24 +79,27 @@ func TestCollectRewards(t *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		stackPoolOutputAfter, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+		cliutils.Wait(t, 30*time.Second)
+
+		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
-		require.Len(t, stackPoolOutputAfter, 1)
+		require.Len(t, output, 1)
 		stakePoolAfter := climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(stackPoolOutputAfter[0]), &stakePoolAfter)
-		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(stackPoolOutputAfter, "\n"))
+		err = json.Unmarshal([]byte(output[0]), &stakePoolAfter)
+		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotEmpty(t, stakePoolAfter)
 
-		rewardsAfter := int64(0)
+		rewards := int64(0)
 		for _, poolDelegateInfo := range stakePoolAfter.Delegate {
 			if poolDelegateInfo.DelegateID == wallet.ClientID {
-				rewardsAfter = poolDelegateInfo.TotalReward
+				rewards = poolDelegateInfo.TotalReward
 				break
 			}
 		}
+		require.Greater(t, rewards, int64(0))
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"pool_id":       stakePoolID,
@@ -108,7 +111,7 @@ func TestCollectRewards(t *testing.T) {
 		require.Equal(t, "transferred reward tokens", output[0])
 
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
-		require.Equal(t, balanceBefore+rewardsAfter, balanceAfter)
+		require.GreaterOrEqual(t, balanceBefore+rewards, balanceAfter) // greater or equal since more rewards can accumulate after we check stakepool
 	})
 
 	t.Run("Test collect reward with invalid pool id should fail", func(t *testing.T) {
