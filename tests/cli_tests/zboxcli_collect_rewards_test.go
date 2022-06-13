@@ -97,7 +97,11 @@ func TestCollectRewards(t *testing.T) {
 			}
 		}
 
-		output, err = collectRewards(t, configPath, stakePoolID, true)
+		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+			"pool_id":       stakePoolID,
+			"provider_type": "blobber",
+			"provider_id":   blobber.Id,
+		}), true)
 		require.Equal(t, "transferred reward tokens", output[0])
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 
