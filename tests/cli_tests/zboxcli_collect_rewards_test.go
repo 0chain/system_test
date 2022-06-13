@@ -3,6 +3,8 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -48,35 +50,40 @@ func TestCollectRewards(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
 		stakePoolID := strings.Fields(output[0])[4]
-		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
 
-		stackPoolOutputBefore, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"json":       "",
-		}))
-		stakePoolBefore := climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(stackPoolOutputBefore[0]), &stakePoolBefore)
-		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(stackPoolOutputBefore, "\n"))
-		require.NotEmpty(t, stakePoolBefore)
+		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
-		rewardsBefore := int64(0)
-		for _, poolDelegateInfo := range stakePoolBefore.Delegate {
-			if poolDelegateInfo.DelegateID == wallet.ClientID {
-				rewardsBefore = poolDelegateInfo.TotalReward
-				break
-			}
-		}
+		// Upload and download a file so blobber can accumulate rewards
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
 
-		cliutils.Wait(t, 40*time.Second)
-		output, err = collectRewards(t, configPath, stakePoolID, true)
-		require.Equal(t, "transferred reward tokens", output[0])
-		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
+		// Use all 6 blobbers
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+			"data":   5,
+			"parity": 1,
+		})
 
-		cliutils.Wait(t, 40*time.Second)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
 		stackPoolOutputAfter, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"json":       "",
 		}))
+		require.Nil(t, err, "error getting stake pool info")
 		stakePoolAfter := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(stackPoolOutputAfter[0]), &stakePoolAfter)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(stackPoolOutputAfter, "\n"))
@@ -89,7 +96,13 @@ func TestCollectRewards(t *testing.T) {
 				break
 			}
 		}
-		require.Greater(t, rewardsAfter, rewardsBefore)
+
+		output, err = collectRewards(t, configPath, stakePoolID, true)
+		require.Equal(t, "transferred reward tokens", output[0])
+		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
+
+		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
+		require.Equal(t, balanceBefore+rewardsAfter, balanceAfter)
 	})
 }
 
