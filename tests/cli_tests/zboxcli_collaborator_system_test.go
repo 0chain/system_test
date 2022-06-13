@@ -134,7 +134,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(0.4), readPool.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -757,7 +757,7 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockedTokens), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(lockedTokens), readPool.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -778,8 +778,7 @@ func getReadPoolUpdate(t *testing.T, erp climodel.ReadPoolInfo, retry int) (clim
 	// Wait for read markers to be redeemed
 	for i := 0; i < retry; i++ {
 		readPool := getReadPoolInfo(t)
-		if (erp.OwnerBalance > 0 && readPool.OwnerBalance == erp.OwnerBalance) ||
-			(erp.VisitorBalance > 0 && readPool.VisitorBalance == erp.VisitorBalance) {
+		if readPool.Balance == erp.Balance {
 			continue
 		}
 

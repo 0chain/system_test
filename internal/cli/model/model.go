@@ -94,8 +94,7 @@ type Blobber struct {
 }
 
 type ReadPoolInfo struct {
-	OwnerBalance   int64 `json:"owner_balance"`
-	VisitorBalance int64 `json:"visitor_balance"`
+	Balance int64 `json:"balance"`
 }
 
 type WritePoolInfo struct {

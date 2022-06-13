@@ -387,7 +387,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, "locked", output[0])
 
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(0.4), readPool.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -405,7 +405,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		updatedReadPool, err := getReadPoolUpdate(t, readPool, 5)
 		require.NoError(t, err)
-		require.Equal(t, expectedPoolBalance, updatedReadPool.OwnerBalance, "Read Pool balance must be equal to (initial balance-download cost)")
+		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
 
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
@@ -461,7 +461,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		// Expected cost is given in "per 720 hours", we need 1 hour
 		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / ((2 + 2) * 720))
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
 
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
