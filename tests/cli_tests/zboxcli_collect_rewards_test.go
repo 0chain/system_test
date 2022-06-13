@@ -84,6 +84,7 @@ func TestCollectRewards(t *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
+		require.Len(t, output, 1)
 		stakePoolAfter := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(stackPoolOutputAfter[0]), &stakePoolAfter)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(stackPoolOutputAfter, "\n"))
@@ -102,8 +103,9 @@ func TestCollectRewards(t *testing.T) {
 			"provider_type": "blobber",
 			"provider_id":   blobber.Id,
 		}), true)
-		require.Equal(t, "transferred reward tokens", output[0])
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "transferred reward tokens", output[0])
 
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
 		require.Equal(t, balanceBefore+rewardsAfter, balanceAfter)
@@ -135,6 +137,7 @@ func TestCollectRewards(t *testing.T) {
 			"provider_id":   blobber.Id,
 		}), false)
 		require.NotNil(t, err)
+		require.Len(t, output, 1)
 		require.Contains(t, output[0], "can't get related user stake pools")
 	})
 
@@ -176,6 +179,7 @@ func TestCollectRewards(t *testing.T) {
 		}), false)
 		fmt.Println(output)
 		require.NotNil(t, err)
+		require.Len(t, output, 1)
 		require.Contains(t, output[0], "collect_reward_failed")
 	})
 
@@ -216,6 +220,7 @@ func TestCollectRewards(t *testing.T) {
 		}), false)
 		fmt.Println(output)
 		require.NotNil(t, err)
+		require.Len(t, output, 1)
 		require.Contains(t, output[0], "collect_reward_failed")
 	})
 
@@ -256,6 +261,7 @@ func TestCollectRewards(t *testing.T) {
 			"provider_id":   blobber.Id,
 		}), false)
 		require.NotNil(t, err)
+		require.Len(t, output, 1)
 		require.Contains(t, output[0], "provider type must be blobber or validator")
 	})
 }
