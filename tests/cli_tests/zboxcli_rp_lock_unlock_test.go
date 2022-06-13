@@ -48,7 +48,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		// Read pool balance should increment to 1
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockAmount), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(lockAmount), readPool.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = readPoolUnlock(t, configPath, "", true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
