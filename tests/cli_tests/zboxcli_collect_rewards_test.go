@@ -111,7 +111,7 @@ func TestCollectRewards(t *testing.T) {
 		require.Equal(t, "transferred reward tokens", output[0])
 
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
-		require.GreaterOrEqual(t, balanceBefore+rewards, balanceAfter) // greater or equal since more rewards can accumulate after we check stakepool
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
 	})
 
 	t.Run("Test collect reward with invalid pool id should fail", func(t *testing.T) {
