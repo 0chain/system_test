@@ -16,8 +16,11 @@ import (
 )
 
 func TestCollaborator(t *testing.T) {
+	t.Parallel()
 
 	t.Run("Add Collaborator _ collaborator client id must be added to file collaborators list", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -52,6 +55,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator can NOT be added to a directory", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -89,6 +94,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator must be able to read the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -118,18 +125,16 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
-		}), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.4,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		readPool := getReadPoolInfo(t, allocationID)
-		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		readPool := getReadPoolInfo(t)
+		require.Equal(t, ConvertToValue(0.4), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -145,6 +150,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator must not be able to share the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -184,6 +191,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator _ collaborator client id must be removed from file collaborators list", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -235,6 +244,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -265,11 +276,10 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
 		// Lock tokens in read pool
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
-		}), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.4,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
@@ -299,6 +309,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *testing.T) {
+		t.Parallel()
+
 		ownerWalletName := escapedTestName(t) + "_owner"
 		anotherWalletName := escapedTestName(t) + "_another"
 
@@ -328,6 +340,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Remove Collaborator from a file owned by somebody else must fail", func(t *testing.T) {
+		t.Parallel()
+
 		ownerWalletName := escapedTestName(t) + "_owner"
 		anotherWalletName := escapedTestName(t) + "_another"
 
@@ -375,6 +389,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ Collaborator should NOT be able to add another collaborator", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -424,6 +440,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to update the file attributes", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -465,6 +483,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to rename the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -506,6 +526,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to delete the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -545,6 +567,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to move the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -586,6 +610,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -633,6 +659,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to copy the file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -674,6 +702,8 @@ func TestCollaborator(t *testing.T) {
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *testing.T) {
+		t.Parallel()
+
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -717,18 +747,17 @@ func TestCollaborator(t *testing.T) {
 		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
 		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.4,
-			"duration":   "1h",
-		}), true)
+		lockedTokens := 0.4
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": lockedTokens,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0])
 
-		readPool := getReadPoolInfo(t, allocationID)
-		require.Len(t, readPool, 1, "Read pool must exist")
-		require.Equal(t, ConvertToValue(0.4), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		readPool := getReadPoolInfo(t)
+		require.Equal(t, ConvertToValue(lockedTokens), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
 
 		output, err = downloadFileForWallet(t, collaboratorWalletName, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -742,14 +771,33 @@ func TestCollaborator(t *testing.T) {
 	})
 }
 
-func getReadPoolInfo(t *testing.T, allocationID string) []climodel.ReadPoolInfo {
-	output, err := readPoolInfo(t, configPath, allocationID)
+func getReadPoolUpdate(t *testing.T, erp climodel.ReadPoolInfo, retry int) (climodel.ReadPoolInfo, error) {
+	if retry == 0 {
+		retry = 1
+	}
+	// Wait for read markers to be redeemed
+	for i := 0; i < retry; i++ {
+		readPool := getReadPoolInfo(t)
+		if (erp.OwnerBalance > 0 && readPool.OwnerBalance == erp.OwnerBalance) ||
+			(erp.VisitorBalance > 0 && readPool.VisitorBalance == erp.VisitorBalance) {
+			continue
+		}
+
+		cliutils.Wait(t, time.Second*30)
+		return getReadPoolInfo(t), nil
+	}
+
+	return erp, fmt.Errorf("no update found in readpool")
+}
+
+func getReadPoolInfo(t *testing.T) climodel.ReadPoolInfo {
+	output, err := readPoolInfo(t, configPath)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	readPool := []climodel.ReadPoolInfo{}
+	var readPool climodel.ReadPoolInfo
 	err = json.Unmarshal([]byte(output[0]), &readPool)
-	require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+	require.Nil(t, err, "Error unmarshalling read pool %s", strings.Join(output, "\n"))
 	return readPool
 }
 

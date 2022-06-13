@@ -103,67 +103,6 @@ func TestMinerFeesPayment(t *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("zwallet lock and unlock command with fee flag - Fees must be paid to the miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		startBlock := getLatestFinalizedBlock(t)
-
-		// lock with fee
-		fee := 0.1
-		output, err = lockInterest(t, configPath, createParams(map[string]interface{}{
-			"durationMin": 1,
-			"tokens":      0.1,
-			"fee":         fee,
-		}), true)
-		require.Nil(t, err, "error locking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		lockId := regexp.MustCompile("[a-f0-9]{64}").FindString(output[1])
-
-		lockTimer := time.NewTimer(time.Minute)
-		cliutils.Wait(t, 30*time.Second)
-
-		endBlock := getLatestFinalizedBlock(t)
-
-		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, "lock")
-		blockMinerId := block.Block.MinerId
-		blockMiner := getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee := getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-
-		<-lockTimer.C
-
-		// Unlock with fee
-		startBlock = getLatestFinalizedBlock(t)
-
-		output, err = unlockInterest(t, configPath, createParams(map[string]interface{}{
-			"pool_id": lockId,
-			"fee":     fee,
-		}), true)
-		require.Nil(t, err, "error unlocking tokens", strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 30*time.Second)
-
-		endBlock = getLatestFinalizedBlock(t)
-
-		block = getBlockContainingTransaction(t, startBlock, endBlock, wallet, "unlock")
-		blockMinerId = block.Block.MinerId
-		blockMiner = getMinersDetail(t, blockMinerId)
-
-		expectedMinerFee = getExpectedMinerFees(t, fee, minerShare, blockMiner)
-		areMinerFeesPaidCorrectly = verifyMinerFeesPayment(t, &block, expectedMinerFee)
-		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
-	})
-
 	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
 		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
@@ -175,17 +114,14 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		allocationId := setupAllocation(t, configPath)
-
 		startBlock := getLatestFinalizedBlock(t)
 
 		fee := 0.1
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"tokens":     0.5,
-			"duration":   "1m",
-			"fee":        fee,
-		}), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.5,
+			"fee": fee,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
 
 		lockTimer := time.NewTimer(time.Minute)
@@ -201,10 +137,10 @@ func TestMinerFeesPayment(t *testing.T) {
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
-		output, err = readPoolInfo(t, configPath, allocationId)
+		output, err = readPoolInfo(t, configPath)
 		require.Nil(t, err, "error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		readPool := []climodel.ReadPoolInfo{}
+		readPool := climodel.ReadPoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &readPool)
 		require.Nil(t, err, "error unmarshalling read pool", strings.Join(output, "\n"))
 
@@ -212,10 +148,7 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		startBlock = getLatestFinalizedBlock(t)
 
-		output, err = readPoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"pool_id": readPool[0].Id,
-			"fee":     fee,
-		}), true)
+		output, err = readPoolUnlock(t, configPath, createParams(map[string]interface{}{}), true)
 		require.Nil(t, err, "error unlocking read pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)

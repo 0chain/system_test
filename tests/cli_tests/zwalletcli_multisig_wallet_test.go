@@ -21,8 +21,6 @@ func TestMultisigWallet(t *testing.T) {
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 
-		// FIXME: POSSIBLE BUG - blank wallet being created despite it not being used in the multisig create process
-		// Total registered wallets = numsigners + 1 (additional wallet for multi-sig)
 		require.True(t, len(output) > 1, "Output was less than number of assertions", strings.Join(output, "\n"))
 		require.Contains(t, output, fmt.Sprintf("registering %d wallets", numSigners+1))
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
@@ -49,7 +47,6 @@ func TestMultisigWallet(t *testing.T) {
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
-		//FIXME: BUG - panic: runtime error: index out of range [0] with length 0
 		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 
@@ -62,7 +59,6 @@ func TestMultisigWallet(t *testing.T) {
 		require.NotNil(t, err, "expected error to occur creating a multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "Output was less than number of assertions", strings.Join(output, "\n"))
 
-		//FIXME: BUG - panic: runtime error: makeslice: len out of range
 		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 

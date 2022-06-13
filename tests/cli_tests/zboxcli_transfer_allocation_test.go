@@ -457,9 +457,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -479,8 +477,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	// FIXME was expecting it to work given the change of allocation ownership
-	t.Run("transfer allocation and download encrypted file should fail", func(t *testing.T) {
+	// FIXME: New owner cannot download encrypted file after allocation ownership is transferred https://github.com/0chain/blobber/issues/711
+	t.Run("BROKEN transfer allocation and download encrypted file should work but does not see 0chain/blobber/issues/711", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -542,9 +540,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -635,19 +631,16 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
-		output, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
-		}), true)
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 0.5,
+		})
+		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "locked", output[0], "read pool lock - Unexpected output", strings.Join(output, "\n"))
 
 		output, err = readPoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-			"duration":   "1h",
+			"tokens": 0.5,
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "read pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -663,7 +656,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
-		require.Contains(t, aggregatedOutput, "owner id mismatch")
+		require.Contains(t, aggregatedOutput, "download failed")
 
 		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{

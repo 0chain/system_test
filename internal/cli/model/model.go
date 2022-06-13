@@ -94,12 +94,8 @@ type Blobber struct {
 }
 
 type ReadPoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
+	OwnerBalance   int64 `json:"owner_balance"`
+	VisitorBalance int64 `json:"visitor_balance"`
 }
 
 type WritePoolInfo struct {
@@ -213,21 +209,6 @@ type CommitResponse struct {
 		Collaborators   []Collaborator  `json:"Collaborators"`
 		Attributes      Attributes      `json:"Attributes"`
 	} `json:"MetaData"`
-}
-
-type LockedInterestPoolStats struct {
-	Stats []LockedInterestPoolStat `json:"stats"`
-}
-
-type LockedInterestPoolStat struct {
-	ID           string        `json:"pool_id"`
-	StartTime    int64         `json:"start_time"`
-	Duration     time.Duration `json:"duration"`
-	TimeLeft     time.Duration `json:"time_left"`
-	Locked       bool          `json:"locked"`
-	APR          float64       `json:"apr"`
-	TokensEarned int64         `json:"tokens_earned"`
-	Balance      int64         `json:"balance"`
 }
 
 type PriceRange struct {
