@@ -1073,7 +1073,7 @@ func TestShareFile(t *testing.T) {
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 
 		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.OwnerBalance))
+		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 
 	// FIXME download cost is not affecting read pool if downloading through auth ticket
@@ -1173,7 +1173,7 @@ func TestShareFile(t *testing.T) {
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
 
 		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.OwnerBalance))
+		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 
 	t.Run("Share encrypted file using auth ticket - download accounting test where 3rd party pays - proxy re-encryption ", func(t *testing.T) {
@@ -1364,7 +1364,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4*1e10, initialReadPool.OwnerBalance, "read pool balance did not match expected")
+		require.Equal(t, 0.4*1e10, initialReadPool.Balance, "read pool balance did not match expected")
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
