@@ -1031,8 +1031,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
-		t.Logf("Read pool balance: %v", initialReadPool.OwnerBalance)
+		require.Equal(t, 0.4, initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1072,6 +1071,7 @@ func TestShareFile(t *testing.T) {
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
+
 		// todo: finalReadPool.OwnerBalance might be in ZCN format
 		require.Equal(t, expectedRPBalance, float64(finalReadPool.OwnerBalance))
 	})
@@ -1128,7 +1128,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
+		require.Equal(t, 0.4, initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1171,6 +1171,7 @@ func TestShareFile(t *testing.T) {
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.4*1e10 - expectedDownloadCostInSas
+
 		// todo: finalReadPool.OwnerBalance might be in ZCN format
 		require.Equal(t, expectedRPBalance, float64(finalReadPool.OwnerBalance))
 	})
@@ -1250,7 +1251,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.OwnerBalance)
+		require.Equal(t, 0.4, initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1293,8 +1294,8 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.OwnerBalance))
+		// todo: finalReadPool.Balance might be in ZCN format
+		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.Balance))
 	})
 
 	t.Run("Share unencrypted file using auth ticket - download accounting test where 3rd party pays ", func(t *testing.T) {
@@ -1403,8 +1404,8 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.OwnerBalance))
+		// todo: finalReadPool.Balance might be in ZCN format
+		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.Balance))
 	})
 }
 
