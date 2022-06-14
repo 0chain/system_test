@@ -165,13 +165,11 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			}
 
 		}
-		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		require.Equalf(t, minTotalRewardsAndFees, rewardEarned, "total share difference %d is not within range %d", rewardEarned, delta)
+		require.Equal(t, minTotalRewardsAndFees, rewardEarned)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
-		t.Skip("fails too often needs investigation")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -297,9 +295,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 				}
 			}
 		}
-		delta := float64(maxTotalRewardsAndFees - minTotalRewardsAndFees)
 		rewardEarned := endReward - startReward
-		require.Equalf(t, minTotalRewardsAndFees, rewardEarned, "total share difference %d is not within range %d", rewardEarned, delta)
+		require.Equal(t, minTotalRewardsAndFees, rewardEarned)
 	})
 }
 
