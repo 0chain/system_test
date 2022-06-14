@@ -74,7 +74,7 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 
 		require.Equal(t, allocationID, initialWritePool[0].Id)
 		t.Logf("Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
-		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance), "Write pool Balance after upload expected to be [%v] but was [%v]", 0.5, intToZCN(initialWritePool[0].Balance))
+		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId, "Check allocation of write pool matches created allocation id")
 		require.Less(t, 0, len(initialWritePool[0].Blobber), "Minimum 1 blobber should exist")
