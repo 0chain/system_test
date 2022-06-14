@@ -146,8 +146,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	//FIXME: Confusing syntax means the direcotry name is taken as the filename see https://github.com/0chain/blobber/issues/715
-	t.Run("BROKEN Upload File to a Directory without Filename Should Work but does not see blobber/issues/715", func(t *testing.T) {
+	t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -181,14 +180,6 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0])
 
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
 		var listResults []climodel.ListFileResult
 		err = json.Unmarshal([]byte(output[0]), &listResults)
 		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
@@ -196,8 +187,8 @@ func TestUpload(t *testing.T) {
 		require.Len(t, listResults, 1)
 		result := listResults[0]
 
-		require.Equal(t, "dir", result.Name)
-		require.Equal(t, "/dir", result.Path)
+		require.Equal(t, filepath.Base(filename), result.Name)
+		require.Equal(t, "/dir/"+filepath.Base(filename), result.Path)
 		require.Equal(t, fileSize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
 		require.Equal(t, "", result.EncryptionKey)
