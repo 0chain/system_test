@@ -178,7 +178,6 @@ func TestUpload(t *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0])
 
 		var listResults []climodel.ListFileResult
 		err = json.Unmarshal([]byte(output[0]), &listResults)
