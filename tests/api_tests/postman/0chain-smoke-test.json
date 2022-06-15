@@ -694,7 +694,7 @@
 									"});    ",
 									"",
 									"function esc_quot(text){",
-									"    return text.toString().replaceAll(\"\\\"\", \"\\\\\\\"\").trim();",
+									"    return text.toString().replace(/\"/g, \"\\\\\\\"\").trim();",
 									"}"
 								],
 								"type": "text/javascript"
@@ -1194,7 +1194,9 @@
 					"            pm.test(testName, test)",
 					"            test() // run test a second time to figure out whether it passed or not, the first run is swallowed by postman...",
 					"        } catch (e){",
-					"            console.error(\"Test FAILED with HTTP [\" + responseCode.code + \"]. Response Body:\\n\" + responseBody)",
+					"            console.error(\"Test FAILED\")",
+					"            console.error(e)",
+					"            console.error(\"HTTP [\" + responseCode.code + \"]. Response Body:\\n[\" + responseBody + \"]\")",
 					"        }",
 					"    },",
 					"    conditionalTest: function (runCondition, testName, test){",
