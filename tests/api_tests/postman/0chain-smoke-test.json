@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "08fd27c3-cafd-431f-85b2-73c4e4d37607",
+		"_postman_id": "abaf440d-ebbc-4052-bf99-46acf0b24811",
 		"name": "API Smoke test",
 		"description": "The following is a set of API system / regression / user acceptance tests.\n\nTODO:   \nCOLLAB UPDATE   (CURRENTLY BROKEN)    \nAUTH TICKET    \nALLOCATION RESIZE (CURRENTLY BROKEN)   \nALLOCATION DELETION (CURRENTLY BROKEN)   \nALLOCATION FINALIZATION (CURRENTLY BROKEN)   \nTOKEN STAKE/UNSTAKE   (CURRENTLY BROKEN)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1194,7 +1194,7 @@
 					"            pm.test(testName, test)",
 					"            test() // run test a second time to figure out whether it passed or not, the first run is swallowed by postman...",
 					"        } catch (e){",
-					"            console.error(\"Test FAILED. Response Body:\\n\" + responseBody)",
+					"            console.error(\"Test FAILED with HTTP [\" + responseCode.code + \"]. Response Body:\\n\" + responseBody)",
 					"        }",
 					"    },",
 					"    conditionalTest: function (runCondition, testName, test){",
