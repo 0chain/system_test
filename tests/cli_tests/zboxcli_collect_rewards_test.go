@@ -227,9 +227,6 @@ func TestCollectRewards(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
@@ -240,15 +237,6 @@ func TestCollectRewards(t *testing.T) {
 
 		// Pick a random blobber
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-
-		// Stake tokens against this blobber
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"tokens":     0.5,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
@@ -265,32 +253,8 @@ func TestCollectRewards(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &blobbers)
-		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-
-		// Pick a random blobber
-		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-
-		// Stake tokens against this blobber
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"tokens":     0.5,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
-		stakePoolID := strings.Fields(output[0])[4]
-
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-			"pool_id": stakePoolID,
+			"pool_id": "pool-id",
 		}), false)
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
