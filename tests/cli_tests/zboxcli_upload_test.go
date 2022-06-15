@@ -168,7 +168,7 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = dir"
+		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
