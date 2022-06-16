@@ -2,11 +2,12 @@ package api_tests
 
 import (
 	"encoding/json"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/go-resty/resty/v2" //nolint
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestGetBlobbersForNewAllocation(t *testing.T) {
@@ -33,8 +34,8 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 
 }
 
-func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, maxChallengeCompletionTime int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
-	blobbers, blobberRequirements, httpResponse, err := getBlobbersMatchingRequirementsWithoutAssertion(t, wallet, keyPair, size, dataShards, parityShards, maxChallengeCompletionTime, expiresIn)
+func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
+	blobbers, blobberRequirements, httpResponse, err := getBlobbersMatchingRequirementsWithoutAssertion(t, wallet, keyPair, size, dataShards, parityShards, expiresIn)
 
 	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
@@ -43,14 +44,13 @@ func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair
 	return blobbers, blobberRequirements
 }
 
-func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, maxChallengeCompletionTime int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
+func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
 	t.Logf("Get blobbers for allocation...")
 	blobberRequirements := model.BlobberRequirements{
-		Size:                       size,
-		DataShards:                 dataShards,
-		ParityShards:               parityShards,
-		ExpirationDate:             time.Now().Add(expiresIn).Unix(),
-		MaxChallengeCompletionTime: 3600000000000,
+		Size:           size,
+		DataShards:     dataShards,
+		ParityShards:   parityShards,
+		ExpirationDate: time.Now().Add(expiresIn).Unix(),
 		ReadPriceRange: model.PriceRange{
 			Min: 0,
 			Max: 9223372036854775807,
