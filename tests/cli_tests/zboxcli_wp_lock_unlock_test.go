@@ -245,7 +245,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "invalid token amount: negative", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)

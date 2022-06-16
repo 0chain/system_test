@@ -274,7 +274,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking negative tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
+		require.Equal(t, "invalid token amount: negative", output[0])
 
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
