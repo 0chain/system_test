@@ -18,6 +18,7 @@ import (
 )
 
 func TestMinerFeesPayment(t *testing.T) {
+	t.Skip("Skipped till re-done")
 	mnconfig := getMinerSCConfiguration(t)
 	minerShare := mnconfig["share_ratio"]
 
