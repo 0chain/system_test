@@ -18,6 +18,7 @@ import (
 )
 
 func TestMinerFeesPayment(t *testing.T) {
+	t.Skip("Skipped till re-done")
 	mnconfig := getMinerSCConfiguration(t)
 	minerShare := mnconfig["share_ratio"]
 
@@ -26,7 +27,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -62,7 +62,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("Vp-add with fee should pay fee to the miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -104,7 +103,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -119,7 +117,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		fee := 0.1
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": 0.5,
-			"fee": fee,
+			"fee":    fee,
 		})
 		output, err = readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "error locking read pool tokens", strings.Join(output, "\n"))
@@ -165,7 +163,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -233,7 +230,6 @@ func TestMinerFeesPayment(t *testing.T) {
 	})
 
 	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
-		t.Skipf("fee payments skipped, as cannot find exact time of reward payment")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -384,7 +380,7 @@ func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFe
 				require.NotNil(t, transfer, "The transfer of fee to miner could not be found")
 				// Transfer fee must be equal to miner fee
 				t.Log("Actual fee transfer: ", transfer.Amount, "Expected fee transfer:", expectedMinerFee)
-				require.InEpsilon(t, expectedMinerFee, transfer.Amount, 0.00000001, "Transfer fee must be equal to miner fee")
+				require.Equal(t, expectedMinerFee, transfer.Amount, "Transfer fee must be equal to miner fee")
 				return true
 			}
 		}
