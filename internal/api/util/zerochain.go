@@ -3,8 +3,6 @@ package util
 import (
 	"encoding/json"
 	"testing"
-
-	"github.com/go-resty/resty/v2" //nolint
 )
 
 type Zerochain struct {
@@ -85,6 +83,20 @@ func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject 
 
 		return resp, nil
 	}
+}
+
+func (z *Zerochain) GetOpenChallenges(t *testing.T, storageSmartContractAddress string, blobberId string) (*resty.Response, error) { //nolint
+	endpoint := "/v1/screst/" + storageSmartContractAddress + "/openchallenges?blobber=" + blobberId
+	resp, err := z.restClient.R().Get(endpoint)
+
+	if resp != nil && resp.IsError() {
+		t.Logf("GET open challenges endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("GET open challenges endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	}
+	return resp, nil
 }
 
 func (z *Zerochain) performHealthcheck() ([]string, []string) {
