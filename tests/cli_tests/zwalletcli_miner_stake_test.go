@@ -111,6 +111,7 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
+		require.Nil(t, err, "error unmarshalling Miner SC user pool info")
 		beforeNumPools := len(poolsInfoBefore.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{

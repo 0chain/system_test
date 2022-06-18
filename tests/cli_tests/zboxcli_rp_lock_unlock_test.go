@@ -48,7 +48,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 
 		// Read pool balance should increment to 1
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockAmount), readPool.OwnerBalance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(lockAmount), readPool.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = readPoolUnlock(t, configPath, "", true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
@@ -115,7 +115,7 @@ func TestReadPoolLockUnlock(t *testing.T) {
 		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in read pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "invalid token amount: negative", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)

@@ -254,8 +254,7 @@ func TestSendAndBalance(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
-			"\"error\":\"invalid_request: Invalid request (value must be greater than or equal to zero)\"}"
+		wantFailureMsg := "invalid token amount: negative"
 
 		output, err = sendZCN(t, configPath, target.ClientID, "-1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))

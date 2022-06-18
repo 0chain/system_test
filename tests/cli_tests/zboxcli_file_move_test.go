@@ -91,6 +91,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
+		t.Skip("re-do till https://github.com/0chain/0chain/pull/1373 merges")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -143,7 +144,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
 			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
 			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance, epsilon)
+			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance)
 		}
 		createAllocationTestTeardown(t, allocationID)
 	})
