@@ -4,15 +4,16 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 /*
@@ -440,7 +441,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		require.Equal(t, allocationID, initialWritePool[0].Id)
-		require.InEpsilon(t, 0.8, intToZCN(initialWritePool[0].Balance), epsilon)
+		require.Equal(t, 0.8, intToZCN(initialWritePool[0].Balance))
 		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, initialWritePool[0].AllocationId)
 		require.Less(t, 0, len(initialWritePool[0].Blobber))
@@ -480,7 +481,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		require.Equal(t, allocationID, finalWritePool[0].Id)
-		require.InEpsilon(t, 0.8, intToZCN(finalWritePool[0].Balance), epsilon)
+		require.Equal(t, 0.8, intToZCN(finalWritePool[0].Balance))
 		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
 		require.Equal(t, allocationID, finalWritePool[0].AllocationId)
 		require.Less(t, 0, len(finalWritePool[0].Blobber))
@@ -512,8 +513,8 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			totalChangeInWritePool += diff
 		}
 
-		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, epsilon, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
-		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), epsilon, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
+		require.Equal(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
+		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
