@@ -376,7 +376,7 @@ func TestListFileSystem(t *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *testing.T) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -417,12 +417,10 @@ func TestListFileSystem(t *testing.T) {
 		result := listResults[0]
 
 		require.Equal(t, fname, result.Name)
-		require.Equal(t, filepath.Join(remotepath, fname), result.Path)
 		require.Equal(t, filesize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
 	})
 
-	//FIXME: POSSIBLE BUG: Listing shared files with lookuphash doesn't list any files
 	t.Run("List Shared Files Using Lookup Hash Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -472,9 +470,18 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 		}), true)
 		require.Nil(t, err, "list files using auth ticket [%v] failed: [%v]", authTicket, strings.Join(output, "\n"))
-
 		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+
+		var listResults []climodel.ListFileResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
+		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
+
+		require.Len(t, listResults, 1)
+		result := listResults[0]
+
+		require.Equal(t, filepath.Base(filename), result.Name)
+		require.Equal(t, filesize, result.ActualSize)
+		require.Equal(t, "f", result.Type)
 	})
 
 	t.Run("List All Files Should Work", func(t *testing.T) {
