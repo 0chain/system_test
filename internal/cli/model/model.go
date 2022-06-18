@@ -128,11 +128,10 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price                int64         `json:"read_price"`
-	Write_price               int64         `json:"write_price"`
-	Min_lock_demand           float64       `json:"min_lock_demand"`
-	Max_offer_duration        time.Duration `json:"max_offer_duration"`
-	Challenge_completion_time time.Duration `json:"challenge_completion_time"`
+	Read_price         int64         `json:"read_price"`
+	Write_price        int64         `json:"write_price"`
+	Min_lock_demand    float64       `json:"min_lock_demand"`
+	Max_offer_duration time.Duration `json:"max_offer_duration"`
 }
 
 type Settings struct {

@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -369,11 +370,10 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		// FIXME this does not work at the moment
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0],
+		require.Contains(t, output[0], "Allocation finalized with txId : ",
 			"finalize allocation - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"

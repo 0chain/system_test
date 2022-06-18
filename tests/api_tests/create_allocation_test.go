@@ -2,9 +2,10 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/go-resty/resty/v2" //nolint
 	"testing"
 	"time"
+
+	"github.com/go-resty/resty/v2" //nolint
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,7 @@ func TestCreateAllocation(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucet(t, registeredWallet, keyPair)
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 2147483648, 2, 2, 3600000000000, time.Minute*5)
+		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 2147483648, 2, 2, time.Minute*5)
 		blobberRequirements.Blobbers = blobbers
 		transactionResponse, _ := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)

@@ -240,11 +240,10 @@ type BlobberAllocation struct {
 }
 
 type Terms struct {
-	ReadPrice               int64         `json:"read_price"`
-	WritePrice              int64         `json:"write_price"`
-	MinLockDemand           float64       `json:"min_lock_demand"`
-	MaxOfferDuration        time.Duration `json:"max_offer_duration"`
-	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+	ReadPrice        int64         `json:"read_price"`
+	WritePrice       int64         `json:"write_price"`
+	MinLockDemand    float64       `json:"min_lock_demand"`
+	MaxOfferDuration time.Duration `json:"max_offer_duration"`
 }
 
 type PriceRange struct {
@@ -253,16 +252,15 @@ type PriceRange struct {
 }
 
 type BlobberRequirements struct {
-	Blobbers                   *[]string  `json:"blobbers"`
-	DataShards                 int64      `json:"data_shards"`
-	ParityShards               int64      `json:"parity_shards"`
-	Size                       int64      `json:"size"`
-	OwnerId                    string     `json:"owner_id"`
-	OwnerPublicKey             string     `json:"owner_public_key"`
-	ExpirationDate             int64      `json:"expiration_date"`
-	ReadPriceRange             PriceRange `json:"read_price_range"`
-	WritePriceRange            PriceRange `json:"write_price_range"`
-	MaxChallengeCompletionTime int64      `json:"max_challenge_completion_time"`
+	Blobbers        *[]string  `json:"blobbers"`
+	DataShards      int64      `json:"data_shards"`
+	ParityShards    int64      `json:"parity_shards"`
+	Size            int64      `json:"size"`
+	OwnerId         string     `json:"owner_id"`
+	OwnerPublicKey  string     `json:"owner_public_key"`
+	ExpirationDate  int64      `json:"expiration_date"`
+	ReadPriceRange  PriceRange `json:"read_price_range"`
+	WritePriceRange PriceRange `json:"write_price_range"`
 }
 
 type Wallet struct {
