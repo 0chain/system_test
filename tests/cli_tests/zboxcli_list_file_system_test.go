@@ -475,13 +475,7 @@ func TestListFileSystem(t *testing.T) {
 		var listResults []climodel.ListFileResult
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
 		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
-
-		require.Len(t, listResults, 1)
-		result := listResults[0]
-
-		require.Equal(t, filepath.Base(filename), result.Name)
-		require.Equal(t, filesize, result.ActualSize)
-		require.Equal(t, "f", result.Type)
+		require.Len(t, listResults, 3)
 	})
 
 	t.Run("List All Files Should Work", func(t *testing.T) {
