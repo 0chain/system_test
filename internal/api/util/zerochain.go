@@ -3,6 +3,8 @@ package util
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/go-resty/resty/v2" //nolint
 )
 
 type Zerochain struct {
@@ -14,6 +16,9 @@ type Zerochain struct {
 func (z *Zerochain) Init(config Config) {
 	z.restClient = *resty.New() //nolint
 	resp, err := z.restClient.R().Get(config.NetworkEntrypoint)
+	if err != nil {
+		panic("0dns call failed!: encountered error [" + err.Error() + "]")
+	}
 
 	err = json.Unmarshal(resp.Body(), z)
 	if err != nil {
