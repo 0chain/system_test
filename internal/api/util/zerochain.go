@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/go-resty/resty/v2" //nolint
+	resty "github.com/go-resty/resty/v2"
 )
 
 type Zerochain struct {
@@ -91,8 +91,9 @@ func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject 
 }
 
 func (z *Zerochain) GetOpenChallenges(t *testing.T, storageSmartContractAddress string, blobberId string) (*resty.Response, error) { //nolint
+	sharder := z.getRandomSharder()
 	endpoint := "/v1/screst/" + storageSmartContractAddress + "/openchallenges?blobber=" + blobberId
-	resp, err := z.restClient.R().Get(endpoint)
+	resp, err := z.restClient.R().Get(sharder + endpoint)
 
 	if resp != nil && resp.IsError() {
 		t.Logf("GET open challenges endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
