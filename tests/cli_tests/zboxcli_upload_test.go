@@ -146,8 +146,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	//FIXME: Confusing syntax means the direcotry name is taken as the filename see https://github.com/0chain/blobber/issues/715
-	t.Run("BROKEN Upload File to a Directory without Filename Should Work but does not see blobber/issues/715", func(t *testing.T) {
+	t.Run("Upload File to a Directory without Filename Should Work", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -169,21 +168,12 @@ func TestUpload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = dir"
+		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/dir/",
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0])
-
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
 			"json":       "",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -196,8 +186,8 @@ func TestUpload(t *testing.T) {
 		require.Len(t, listResults, 1)
 		result := listResults[0]
 
-		require.Equal(t, "dir", result.Name)
-		require.Equal(t, "/dir", result.Path)
+		require.Equal(t, filepath.Base(filename), result.Name)
+		require.Equal(t, "/dir/"+filepath.Base(filename), result.Path)
 		require.Equal(t, fileSize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
 		require.Equal(t, "", result.EncryptionKey)
@@ -794,7 +784,7 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		}, false)
-
+		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 2)
 		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[1])
 	})
@@ -822,7 +812,7 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		}, false)
-
+		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 3)
 		require.True(t, strings.HasSuffix(strings.Join(output, ""), `file name too long"}`), strings.Join(output, "\n"))
 	})

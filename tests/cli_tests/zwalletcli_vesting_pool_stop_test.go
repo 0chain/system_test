@@ -95,6 +95,7 @@ func TestVestingPoolStop(t *testing.T) {
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		newBalanceInZCN := unitToZCN(newBalanceValue, strings.Fields(newBalance)[1])
+		// Post-mainnet: turn to equal
 		require.InEpsilonf(t, 0.9+canUnlockAmount, newBalanceInZCN, 0.00000000001, "expected balance to be [%v] but was [%v]", 0.9+canUnlockAmount, newBalanceInZCN)
 	})
 
@@ -180,6 +181,7 @@ func TestVestingPoolStop(t *testing.T) {
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		newBalanceInZCN := unitToZCN(newBalanceValue, strings.Fields(newBalance)[1])
+		// Post-mainnet: turn to equal
 		require.InEpsilonf(t, 0.4+canUnlockAmount, newBalanceInZCN, 0.00000000001, "expected balance to be [%v] but was [%v]", 0.9+canUnlockAmount, newBalanceInZCN)
 	})
 
