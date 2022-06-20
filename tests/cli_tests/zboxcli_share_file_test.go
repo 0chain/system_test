@@ -1190,11 +1190,10 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err)
 
 		uploadParams := map[string]interface{}{
-			"allocation":              allocationID,
-			"localpath":               file,
-			"remotepath":              file,
-			"encrypt":                 "",
-			"attr-who-pays-for-reads": "3rd_party",
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": file,
+			"encrypt":    "",
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1312,10 +1311,9 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err)
 
 		uploadParams := map[string]interface{}{
-			"allocation":              allocationID,
-			"localpath":               filename,
-			"remotepath":              filename,
-			"attr-who-pays-for-reads": "3rd_party",
+			"allocation": allocationID,
+			"localpath":  filename,
+			"remotepath": filename,
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
