@@ -14,6 +14,7 @@ import (
 )
 
 func TestValidatorConfigUpdate(t *testing.T) {
+	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
@@ -28,7 +29,7 @@ func TestValidatorConfigUpdate(t *testing.T) {
 	var validatorList []climodel.Validator
 	err = json.Unmarshal([]byte(output[0]), &validatorList)
 	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(validatorList), 0, "blobber list is empty")
+	require.Greater(t, len(validatorList), 0, "validator list is empty")
 
 	intialValidatorInfo := validatorList[0]
 
@@ -39,7 +40,13 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "max_stake": intToZCN(intialValidatorInfo.MaxStake)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
@@ -85,6 +92,48 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, float64(newMinStake), intToZCN(finalValidatorInfo.MinStake))
+	})
+
+	t.Run("update validator number of delegates should work", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		newNumberOfDelegates := 15
+
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": newNumberOfDelegates}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = getValidatorInfo(t, configPath, createParams(map[string]interface{}{"json": "", "validator_id": intialValidatorInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalValidatorInfo climodel.Validator
+		err = json.Unmarshal([]byte(output[0]), &finalValidatorInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Equal(t, newNumberOfDelegates, finalValidatorInfo.NumDelegates)
+	})
+
+	t.Run("update blobber service charge should work", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
+		newServiceCharge := 0.1
+
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": newServiceCharge}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = getValidatorInfo(t, configPath, createParams(map[string]interface{}{"json": "", "validator_id": intialValidatorInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalValidatorInfo climodel.Validator
+		err = json.Unmarshal([]byte(output[0]), &finalValidatorInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Equal(t, newServiceCharge, finalValidatorInfo.ServiceCharge)
 	})
 }
 
