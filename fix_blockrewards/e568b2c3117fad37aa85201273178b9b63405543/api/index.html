@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain API System test suite [fix_blockrewards/e568b2c3] ran against [dev-3.devnet-0chain.net] at [2022-06-21_20.52.34]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain API System test suite [fix_blockrewards/e568b2c3] ran against [dev-3.devnet-0chain.net] at [2022-06-21_20.52.34]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>9</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>8</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>1</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 21, 2022 20:52:45</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  skipped" id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestCreateAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"create_allocation_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":6.26,"Output":["","","","","    crypto.go:29: Generated mnemonic [thrive alien bounce snap post phone six whisper message shadow certain runway portion track rally stick settle senior aspect retreat usage bronze casino piano]\n","    register_wallet_test.go:59: Registering wallet...\n","","    crypto.go:50: Generated public key [001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b] and secret key [9bfb37f1f342996d7cf2a7dcd6ed5172f0eefb672dc43ec67f2dda3e34d5a101]\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/client/put] processed without error, resulting in HTTP [200 OK] with body [{\"id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"version\":\"\",\"creation_date\":1655837559,\"public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\"}]\n","    execute_faucet_test.go:91: Executing faucet...\n","{\"name\":\"pour\",\"input\":null}\n","\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":null}\"\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/transaction/put] processed without error, resulting in HTTP [200 OK] with body [{\"async\":true,\"entity\":{\"hash\":\"56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82\",\"version\":\"1.0\",\"client_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\"transaction_value\":10000000000,\"signature\":\"bcd736dc3c574a4648de28e6e23d772415ee8074bec2b73225fa905023644419\",\"creation_date\":1655837559,\"transaction_fee\":0,\"transaction_nonce\":1,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}]\n","    execute_faucet_test.go:62: Confirming transaction...\n","","    zerochain.go:73: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82] was unsuccessful, resulting in HTTP [400 Bad Request] and body [{\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82\"}]\n","    execute_faucet_test.go:67: Confirmation for txn hash [56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82] failed. Will poll until specified duration [1m0s] has been reached...\n","","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82] processed without error, resulting in HTTP [200 OK] with body [{\"version\":\"1.0\",\"hash\":\"56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82\",\"block_hash\":\"98cd7da248f7a328f033424c3d243f0a48a154f6460eeeb992b46b00166d845d\",\"previous_block_hash\":\"f7e1f642c8d7c4e1810c096b6cef8128dc493f8819b649c56156fe2854e05b0f\",\"txn\":{\"hash\":\"56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82\",\"version\":\"1.0\",\"client_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name","\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\"transaction_value\":10000000000,\"signature\":\"bcd736dc3c574a4648de28e6e23d772415ee8074bec2b73225fa905023644419\",\"creation_date\":1655837559,\"transaction_fee\":0,\"transaction_nonce\":1,\"transaction_type\":1000,\"transaction_output\":\"{\\\"from\\\":\\\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\\\",\\\"to\\\":\\\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\\\",\\\"amount\\\":10000000000}\",\"txn_output_hash\":\"42a81f1ceef93c24d5c998777f4309f1dc91a9db1f614f9909ceb075e66b21cf\",\"transaction_status\":1},\"creation_date\":1655837560,\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":1252,\"transaction_status\":1,\"round_random_seed\":982988407190283795,\"state_changes_count\":28,\"merkle_tree_root\":\"99cfe5f3dc32ddef130d8c054693a7982e0e6e2fcc26b295ceae3ae67917eadd\",\"merkle_tree_path\":{\"nodes\":[\"e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\",\"292dce8d0ae07bb80ad716900705ec0f773b3b03b9e549d3e2047c17e7cc5ccb\"],\"leaf_index\":","1},\"receipt_merkle_tree_root\":\"47b7ae2def1f8d2d6fa27cd339488b2f9f19fc434efb8ab617acfb7f34dbfb52\",\"receipt_merkle_tree_path\":{\"nodes\":[\"3624c6bb798ceae3b455afde3f4cd727daaa8fdc01ff7f07ff35dd05cc88910a\",\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\"],\"leaf_index\":1}}]\n","    get_blobbers_for_new_allocation_test.go:48: Get blobbers for allocation...\n","","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/alloc_blobbers?allocation_data={\"blobbers\":null,\"data_shards\":2,\"parity_shards\":2,\"size\":2147483648,\"owner_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"owner_public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"expiration_date\":1655837862,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}] processed without error, resulting in HTTP [200 OK] with body [[\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\",\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\",\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\",\"8eb730fd0ce9a9688723db4134333a9f5413da0624332a767b3f3ea","310a8827a\",\"501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933\"]]\n","    create_allocation_test.go:32: Creating allocation...\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/transaction/put] processed without error, resulting in HTTP [200 OK] with body [{\"async\":true,\"entity\":{\"hash\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"version\":\"1.0\",\"client_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"blobbers\\\":[\\\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\\\",\\\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\\\",\\\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\\\",\\\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\\","\",\\\"8eb730fd0ce9a9688723db4134333a9f5413da0624332a767b3f3ea310a8827a\\\",\\\"501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933\\\"],\\\"data_shards\\\":2,\\\"parity_shards\\\":2,\\\"size\\\":2147483648,\\\"owner_id\\\":\\\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\\\",\\\"owner_public_key\\\":\\\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\\\",\\\"expiration_date\\\":1655837862,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\"transaction_value\":1000000000,\"signature\":\"8e5897cd0cc07ac5b0ad9c01035283ab344de625c28f934d9a45830d5fe59888\",\"creation_date\":1655837562,\"transaction_fee\":0,\"transaction_nonce\":2,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}]\n","    execute_faucet_test.go:62: Confirming transaction...\n","    zerochain.go:73: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5] was unsuccessful, resulting in HTTP [400 Bad Request] and body [{\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = 55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\"}]\n","    execute_faucet_test.go:67: Confirmation for txn hash [55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5] failed. Will poll until specified duration [1m0s] has been reached...\n","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5] processed without error, resulting in HTTP [200 OK] with body [{\"version\":\"1.0\",\"hash\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"block_hash\":\"fcaf59e094aba5fdebddd0a6f5c467b266960d6eca761c03ff36bfca4124d27b\",\"previous_block_hash\":\"43baa8388646376afd08570795fc9dfe276da80bb3ce25daae94a762383633e6\",\"txn\":{\"hash\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"version\":\"1.0\",\"client_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name","\\\":\\\"new_allocation_request\\\",\\\"input\\\":{\\\"blobbers\\\":[\\\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\\\",\\\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\\\",\\\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\\\",\\\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\\\",\\\"8eb730fd0ce9a9688723db4134333a9f5413da0624332a767b3f3ea310a8827a\\\",\\\"501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933\\\"],\\\"data_shards\\\":2,\\\"parity_shards\\\":2,\\\"size\\\":2147483648,\\\"owner_id\\\":\\\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\\\",\\\"owner_public_key\\\":\\\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\\\",\\\"expiration_date\\\":1655837862,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807}}}\",\"transaction_value\":1000000000,\"signature\":\"8e5897cd0cc07ac5b0ad9c01035283ab344de625c28f934d9a45830d5fe","59888\",\"creation_date\":1655837562,\"transaction_fee\":0,\"transaction_nonce\":2,\"transaction_type\":1000,\"transaction_output\":\"{\\\"id\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"tx\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"data_shards\\\":2,\\\"parity_shards\\\":2,\\\"size\\\":2147483648,\\\"expiration_date\\\":1655837862,\\\"owner_id\\\":\\\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\\\",\\\"owner_public_key\\\":\\\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\\\",\\\"stats\\\":{\\\"used_size\\\":0,\\\"num_of_writes\\\":0,\\\"num_of_reads\\\":0,\\\"total_challenges\\\":0,\\\"num_open_challenges\\\":0,\\\"num_success_challenges\\\":0,\\\"num_failed_challenges\\\":0,\\\"latest_closed_challenge\\\":\\\"\\\"},\\\"diverse_blobbers\\\":false,\\\"preferred_blobbers\\\":[\\\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\\\",\\\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\\\",\\\"2db4a8b828f9af1a82c52559c32","055ce3e54eda0940fd430e8ece194c29e4456\\\",\\\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\\\",\\\"8eb730fd0ce9a9688723db4134333a9f5413da0624332a767b3f3ea310a8827a\\\",\\\"501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933\\\"],\\\"blobber_details\\\":[{\\\"blobber_id\\\":\\\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\\\",\\\"allocation_id\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"size\\\":536870912,\\\"allocation_root\\\":\\\"\\\",\\\"write_marker\\\":null,\\\"stats\\\":{\\\"used_size\\\":0,\\\"num_of_writes\\\":0,\\\"num_of_reads\\\":0,\\\"total_challenges\\\":0,\\\"num_open_challenges\\\":0,\\\"num_success_challenges\\\":0,\\\"num_failed_challenges\\\":0,\\\"latest_closed_challenge\\\":\\\"\\\"},\\\"terms\\\":{\\\"read_price\\\":100000000,\\\"write_price\\\":1000000000,\\\"min_lock_demand\\\":0.1,\\\"max_offer_duration\\\":2678400000000000},\\\"min_lock_demand\\\":5787,\\\"spent\\\":0,\\\"penalty\\\":0,\\\"read_reward\\\":0,\\\"returned\\\":0,\\\"challenge_reward\\\":0,\\\"final_reward\\\":0,\\\"challenge_pool_integral_value\\\":0,\\\"blobber_allocs_part","ition_loc\\\":null},{\\\"blobber_id\\\":\\\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\\\",\\\"allocation_id\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"size\\\":536870912,\\\"allocation_root\\\":\\\"\\\",\\\"write_marker\\\":null,\\\"stats\\\":{\\\"used_size\\\":0,\\\"num_of_writes\\\":0,\\\"num_of_reads\\\":0,\\\"total_challenges\\\":0,\\\"num_open_challenges\\\":0,\\\"num_success_challenges\\\":0,\\\"num_failed_challenges\\\":0,\\\"latest_closed_challenge\\\":\\\"\\\"},\\\"terms\\\":{\\\"read_price\\\":100000000,\\\"write_price\\\":1000000000,\\\"min_lock_demand\\\":0.1,\\\"max_offer_duration\\\":2678400000000000},\\\"min_lock_demand\\\":5787,\\\"spent\\\":0,\\\"penalty\\\":0,\\\"read_reward\\\":0,\\\"returned\\\":0,\\\"challenge_reward\\\":0,\\\"final_reward\\\":0,\\\"challenge_pool_integral_value\\\":0,\\\"blobber_allocs_partition_loc\\\":null},{\\\"blobber_id\\\":\\\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\\\",\\\"allocation_id\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"size\\\":536870912,\\\"allocation_root\\\":\\\"\\\",\\\"write_marker\\\":","null,\\\"stats\\\":{\\\"used_size\\\":0,\\\"num_of_writes\\\":0,\\\"num_of_reads\\\":0,\\\"total_challenges\\\":0,\\\"num_open_challenges\\\":0,\\\"num_success_challenges\\\":0,\\\"num_failed_challenges\\\":0,\\\"latest_closed_challenge\\\":\\\"\\\"},\\\"terms\\\":{\\\"read_price\\\":100000000,\\\"write_price\\\":1000000000,\\\"min_lock_demand\\\":0.1,\\\"max_offer_duration\\\":2678400000000000},\\\"min_lock_demand\\\":5787,\\\"spent\\\":0,\\\"penalty\\\":0,\\\"read_reward\\\":0,\\\"returned\\\":0,\\\"challenge_reward\\\":0,\\\"final_reward\\\":0,\\\"challenge_pool_integral_value\\\":0,\\\"blobber_allocs_partition_loc\\\":null},{\\\"blobber_id\\\":\\\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\\\",\\\"allocation_id\\\":\\\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\\\",\\\"size\\\":536870912,\\\"allocation_root\\\":\\\"\\\",\\\"write_marker\\\":null,\\\"stats\\\":{\\\"used_size\\\":0,\\\"num_of_writes\\\":0,\\\"num_of_reads\\\":0,\\\"total_challenges\\\":0,\\\"num_open_challenges\\\":0,\\\"num_success_challenges\\\":0,\\\"num_failed_challenges\\\":0,\\\"latest_closed_challenge\\\":\\\"\\\"},\\\"terms\\\":{\\\"read_price\\\":100000000,\\\"wr","ite_price\\\":1000000000,\\\"min_lock_demand\\\":0.1,\\\"max_offer_duration\\\":2678400000000000},\\\"min_lock_demand\\\":5787,\\\"spent\\\":0,\\\"penalty\\\":0,\\\"read_reward\\\":0,\\\"returned\\\":0,\\\"challenge_reward\\\":0,\\\"final_reward\\\":0,\\\"challenge_pool_integral_value\\\":0,\\\"blobber_allocs_partition_loc\\\":null}],\\\"is_immutable\\\":false,\\\"read_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"write_price_range\\\":{\\\"min\\\":0,\\\"max\\\":9223372036854775807},\\\"write_pool_owners\\\":[\\\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\\\"],\\\"challenge_completion_time\\\":0,\\\"start_time\\\":1655837562,\\\"time_unit\\\":2592000000000000,\\\"curators\\\":null,\\\"name\\\":\\\"\\\"}\",\"txn_output_hash\":\"52d99960be79fa1f2f5fee9e72a8d1e34b924b2a9f71a5a3da467469deb5db62\",\"transaction_status\":1},\"creation_date\":1655837562,\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":1266,\"transaction_status\":1,\"round_random_seed\":3339900488191759921,\"state_changes_count\":44,\"merkle_tree_root\":\"8af1495255b60fc708fa9f08ce99ee876efd7","ee187ed2a2a2217d4be63ec98c6\",\"merkle_tree_path\":{\"nodes\":[\"7f4511e79f9d0b97b62b4b69e835425a56ed16a4b084454cad3954e18b9a7efc\",\"5d62993c0d6fc32042686b8bbd9c92a0a2d5a2a19894a7daddc1e6e65db6fbdf\"],\"leaf_index\":0},\"receipt_merkle_tree_root\":\"e2dba0dd375180d5555fe5157e93aa49d357d5de2912bf5e6b4dae68d8f84ac8\",\"receipt_merkle_tree_path\":{\"nodes\":[\"a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a\",\"db5d4c756620d1925922fbbe62375181bdafb98795a8199e214b8d5f1c004d22\"],\"leaf_index\":0}}]\n","    create_allocation_test.go:66: Retrieving allocation...\n","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5] processed without error, resulting in HTTP [200 OK] with body [{\"id\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"tx\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"data_shards\":2,\"parity_shards\":2,\"size\":2147483648,\"expiration_date\":1655837862,\"owner_id\":\"1d3e194fb0b264fcffb171cba4f23ce0311abd4de8d3c2f5e3f67fdca45b80d0\",\"owner_public_key\":\"001a8a2751759e13087f72044c172b41d45c4dffed4eb1bc0d8e389b82c69f22a0d82cc5a8234c4b3fdc4df7ec883fa586b037e0e1a6af37fbaf74bd2fee179b\",\"stats\":{\"used_size\":0,\"num_of_writes\":0,\"num_of_reads\":0,\"total_challenges\":0,\"num_open_challenges\":0,\"num_success_challenges\":0,\"num_failed_challenges\":0,\"latest_closed_challenge\":\"\"},\"diverse_blobbers\":false,\"preferred_blobbers\":null,\"blobber_details","\":[{\"blobber_id\":\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\",\"allocation_id\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"size\":0,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":5787,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"final_reward\":0,\"challenge_pool_integral_value\":0,\"blobber_allocs_partition_loc\":null},{\"blobber_id\":\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\",\"allocation_id\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"size\":0,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":5787,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"final_reward\":0,\"challenge_pool_integral_value\":0,\"b","lobber_allocs_partition_loc\":null},{\"blobber_id\":\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\",\"allocation_id\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"size\":0,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":5787,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"final_reward\":0,\"challenge_pool_integral_value\":0,\"blobber_allocs_partition_loc\":null},{\"blobber_id\":\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"allocation_id\":\"55a52c4d709aa4ed0129e9df174e668a7e4ea4326ea73d4737665c14adb1b7b5\",\"size\":0,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":5787,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"final_reward\":0,\"cha","llenge_pool_integral_value\":0,\"blobber_allocs_partition_loc\":null}],\"is_immutable\":false,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"write_price_range\":{\"min\":0,\"max\":9223372036854775807},\"write_pool_owners\":null,\"challenge_completion_time\":0,\"start_time\":1655837562,\"time_unit\":2592000000000000,\"curators\":[],\"name\":\"\",\"blobbers\":[{\"id\":\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\",\"url\":\"https://dev-3.devnet-0chain.net/blobber02\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475788947456,\"allocated\":0,\"bytes_written\":0,\"data_read\":0,\"last_health_check\":1655837550,\"saved_data\":0,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.3},\"reward_partition","\":{\"index\":0,\"start_round\":0,\"timestamp\":0},\"info\":{\"name\":\"\",\"website_url\":\"\",\"logo_url\":\"\",\"description\":\"\"}},{\"id\":\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\",\"url\":\"https://dev-3.devnet-0chain.net/blobber03\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475744018432,\"allocated\":0,\"bytes_written\":0,\"data_read\":0,\"last_health_check\":1655837553,\"saved_data\":0,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.3},\"reward_partition\":{\"index\":0,\"start_round\":0,\"timestamp\":0},\"info\":{\"name\":\"\",\"website_url\":\"\",\"logo_url\":\"\",\"description\":\"\"}},{\"id\":\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\",\"url\":\"https://dev-3.devnet-0chain.net/blobber0","1\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475719221248,\"allocated\":0,\"bytes_written\":0,\"data_read\":0,\"last_health_check\":1655837506,\"saved_data\":0,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.3},\"reward_partition\":{\"index\":0,\"start_round\":0,\"timestamp\":0},\"info\":{\"name\":\"\",\"website_url\":\"\",\"logo_url\":\"\",\"description\":\"\"}},{\"id\":\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"url\":\"https://dev-3.devnet-0chain.net/blobber05\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475704655872,\"allocated\":0,\"bytes_written\":0,\"data_read\":","0,\"last_health_check\":1655837513,\"saved_data\":0,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.3},\"reward_partition\":{\"index\":0,\"start_round\":0,\"timestamp\":0},\"info\":{\"name\":\"\",\"website_url\":\"\",\"logo_url\":\"\",\"description\":\"\"}}]}]\n","--- PASS: TestCreateAllocation/Create_allocation_API_call_should_be_successful_given_a_valid_request (6.26s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExecuteFaucet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestExecuteFaucet (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"execute_faucet_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExecuteFaucet/Execute_Faucet_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":3.14,"Output":["","","","","    crypto.go:29: Generated mnemonic [rebuild typical wolf sibling room tail rubber tomato draw throw chalk main drip true crystal mystery vintage faculty surround odor hurdle ten lunch else]\n","    register_wallet_test.go:59: Registering wallet...\n","","    crypto.go:50: Generated public key [5357e5f7c0a324f4aa4ffa389dd2abd1104250f4e4acd53d7fe12d44b06c160282a9fd7ba63cf3cd08450ce02178de0caa46b7caaca61f067e025c2c7d446912] and secret key [be99b9069a2571a2aa4cc879f0840c44c2e7071d3b9cea0208f288995c1e7813]\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/client/put] processed without error, resulting in HTTP [200 OK] with body [{\"id\":\"1da2581b19a60f29415a9cb299cb4bfaac7fe0355e834b84c6bc70c9632f9ae4\",\"version\":\"\",\"creation_date\":1655837559,\"public_key\":\"5357e5f7c0a324f4aa4ffa389dd2abd1104250f4e4acd53d7fe12d44b06c160282a9fd7ba63cf3cd08450ce02178de0caa46b7caaca61f067e025c2c7d446912\"}]\n","    execute_faucet_test.go:91: Executing faucet...\n","{\"name\":\"pour\",\"input\":null}\n","\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":null}\"\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/transaction/put] processed without error, resulting in HTTP [200 OK] with body [{\"async\":true,\"entity\":{\"hash\":\"e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\",\"version\":\"1.0\",\"client_id\":\"1da2581b19a60f29415a9cb299cb4bfaac7fe0355e834b84c6bc70c9632f9ae4\",\"public_key\":\"5357e5f7c0a324f4aa4ffa389dd2abd1104250f4e4acd53d7fe12d44b06c160282a9fd7ba63cf3cd08450ce02178de0caa46b7caaca61f067e025c2c7d446912\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\"transaction_value\":10000000000,\"signature\":\"8240f70fd8f5a5f857fe402d3c9fc8a5bddbac78aabe793d6e3e40f1cef5f283\",\"creation_date\":1655837559,\"transaction_fee\":0,\"transaction_nonce\":1,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}]\n","    execute_faucet_test.go:62: Confirming transaction...\n","","    zerochain.go:73: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471] was unsuccessful, resulting in HTTP [400 Bad Request] and body [{\"code\":\"entity_not_found\",\"error\":\"entity_not_found: txn_summary not found with id = e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\"}]\n","    execute_faucet_test.go:67: Confirmation for txn hash [e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471] failed. Will poll until specified duration [1m0s] has been reached...\n","","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/transaction/get/confirmation?hash=e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471] processed without error, resulting in HTTP [200 OK] with body [{\"version\":\"1.0\",\"hash\":\"e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\",\"block_hash\":\"98cd7da248f7a328f033424c3d243f0a48a154f6460eeeb992b46b00166d845d\",\"previous_block_hash\":\"f7e1f642c8d7c4e1810c096b6cef8128dc493f8819b649c56156fe2854e05b0f\",\"txn\":{\"hash\":\"e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\",\"version\":\"1.0\",\"client_id\":\"1da2581b19a60f29415a9cb299cb4bfaac7fe0355e834b84c6bc70c9632f9ae4\",\"public_key\":\"5357e5f7c0a324f4aa4ffa389dd2abd1104250f4e4acd53d7fe12d44b06c160282a9fd7ba63cf3cd08450ce02178de0caa46b7caaca61f067e025c2c7d446912\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name","\\\":\\\"pour\\\",\\\"input\\\":{},\\\"name\\\":null}\",\"transaction_value\":10000000000,\"signature\":\"8240f70fd8f5a5f857fe402d3c9fc8a5bddbac78aabe793d6e3e40f1cef5f283\",\"creation_date\":1655837559,\"transaction_fee\":0,\"transaction_nonce\":1,\"transaction_type\":1000,\"transaction_output\":\"{\\\"from\\\":\\\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\\\",\\\"to\\\":\\\"1da2581b19a60f29415a9cb299cb4bfaac7fe0355e834b84c6bc70c9632f9ae4\\\",\\\"amount\\\":10000000000}\",\"txn_output_hash\":\"3624c6bb798ceae3b455afde3f4cd727daaa8fdc01ff7f07ff35dd05cc88910a\",\"transaction_status\":1},\"creation_date\":1655837560,\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":1252,\"transaction_status\":1,\"round_random_seed\":982988407190283795,\"state_changes_count\":28,\"merkle_tree_root\":\"99cfe5f3dc32ddef130d8c054693a7982e0e6e2fcc26b295ceae3ae67917eadd\",\"merkle_tree_path\":{\"nodes\":[\"56b46885629bf763a6b6473107076cd47eee8110efcef4332b6212e1307ebf82\",\"292dce8d0ae07bb80ad716900705ec0f773b3b03b9e549d3e2047c17e7cc5ccb\"],\"leaf_index\":","0},\"receipt_merkle_tree_root\":\"47b7ae2def1f8d2d6fa27cd339488b2f9f19fc434efb8ab617acfb7f34dbfb52\",\"receipt_merkle_tree_path\":{\"nodes\":[\"42a81f1ceef93c24d5c998777f4309f1dc91a9db1f614f9909ceb075e66b21cf\",\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\"],\"leaf_index\":0}}]\n","    execute_faucet_test.go:85: Getting balance...\n","","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/client/get/balance?client_id=1da2581b19a60f29415a9cb299cb4bfaac7fe0355e834b84c6bc70c9632f9ae4] processed without error, resulting in HTTP [200 OK] with body [{\"txn\":\"e2fe087057722a5ec15de807811d05bc99701aec5239c55ebac159bdaaab9471\",\"round\":1252,\"balance\":10000000000,\"nonce\":1}]\n","--- PASS: TestExecuteFaucet/Execute_Faucet_API_call_should_be_successful_given_a_valid_request (3.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestGetBlobbersForNewAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_blobbers_for_new_allocation_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation/Alloc_blobbers_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.06,"Output":["","","","","    crypto.go:29: Generated mnemonic [ostrich lawn worth auction wrestle govern chaos ahead worth hedgehog supreme float cradle end race hint damp retreat zoo rigid brown hero pitch fossil]\n","    register_wallet_test.go:59: Registering wallet...\n","","    crypto.go:50: Generated public key [896384fb0d72d9218c252a39bcc9dd6c26d4c03c1bdcec80b4853862f76f031968e54a27dfc2e8527880a6a054e6abf6b57f11df0f43dae1609b8e9fd487611a] and secret key [f33a4783382145d91a5424b1e59cc686b3bd311d45d0a7fb12e8bd0ee8af0317]\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/client/put] processed without error, resulting in HTTP [200 OK] with body [{\"id\":\"c81fbdb13fac386d9293f96a17b858df6a29a9e0a8120fb9bd0080be94d11afa\",\"version\":\"\",\"creation_date\":1655837559,\"public_key\":\"896384fb0d72d9218c252a39bcc9dd6c26d4c03c1bdcec80b4853862f76f031968e54a27dfc2e8527880a6a054e6abf6b57f11df0f43dae1609b8e9fd487611a\"}]\n","    get_blobbers_for_new_allocation_test.go:48: Get blobbers for allocation...\n","","    zerochain.go:79: GET on sharder [https://dev-3.devnet-0chain.net/sharder02] endpoint [/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/alloc_blobbers?allocation_data={\"blobbers\":null,\"data_shards\":2,\"parity_shards\":2,\"size\":2147483648,\"owner_id\":\"c81fbdb13fac386d9293f96a17b858df6a29a9e0a8120fb9bd0080be94d11afa\",\"owner_public_key\":\"896384fb0d72d9218c252a39bcc9dd6c26d4c03c1bdcec80b4853862f76f031968e54a27dfc2e8527880a6a054e6abf6b57f11df0f43dae1609b8e9fd487611a\",\"expiration_date\":1655837679,\"read_price_range\":{\"min\":0,\"max\":9223372036854775807},\"write_price_range\":{\"min\":0,\"max\":9223372036854775807}}] processed without error, resulting in HTTP [200 OK] with body [[\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\",\"2db4a8b828f9af1a82c52559c32055ce3e54eda0940fd430e8ece194c29e4456\",\"08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b\",\"8eb730fd0ce9a9688723db4134333a9f5413da0624332a767b3f3ea","310a8827a\",\"501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933\"]]\n","--- PASS: TestGetBlobbersForNewAllocation/Alloc_blobbers_API_call_should_be_successful_given_a_valid_request (0.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation/BROKEN_Alloc_blobbers_API_call_should_fail_gracefully_given_valid_request_but_does_not_see_0chain/issues/1319","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","","    get_blobbers_for_new_allocation_test.go:28: FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319\n","    --- SKIP: TestGetBlobbersForNewAllocation/BROKEN_Alloc_blobbers_API_call_should_fail_gracefully_given_valid_request_but_does_not_see_0chain/issues/1319 (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestRegisterWallet (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"register_wallet_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/Register_wallet_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.05,"Output":["","","","","    crypto.go:29: Generated mnemonic [address dove empower oxygen light inmate vital blast addict kiss primary lend run language proof innocent grace grow silk cannon bridge method enhance pyramid]\n","","    register_wallet_test.go:59: Registering wallet...\n","","    crypto.go:50: Generated public key [b69e984de3b7138380fbc51426873cdb7b950518dcfef0a84c32701ad129ac2410402d0b9a414528e2aafa4e98212ad3713de1364e5c653886925fd409003590] and secret key [b4345fd08bcf5d62337f3e7c0580c8cffbb9ada26f47e661ea72668522a07e0c]\n","","    zerochain.go:57: POST on miner [https://dev-3.devnet-0chain.net/miner02] endpoint [/v1/client/put] processed without error, resulting in HTTP [200 OK] with body [{\"id\":\"6be319a18236c38e74638c6ea1046f62e5c3d6cb538481eb40809cc537d838cb\",\"version\":\"\",\"creation_date\":1655837559,\"public_key\":\"b69e984de3b7138380fbc51426873cdb7b950518dcfef0a84c32701ad129ac2410402d0b9a414528e2aafa4e98212ad3713de1364e5c653886925fd409003590\"}]\n","--- PASS: TestRegisterWallet/Register_wallet_API_call_should_be_successful_given_a_valid_request (0.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
