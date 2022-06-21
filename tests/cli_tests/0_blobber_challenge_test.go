@@ -350,7 +350,7 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 
 func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Response, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
-		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId))
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId + "&limit=10000"))
 		if res.StatusCode < 200 || res.StatusCode >= 300 || err != nil {
 			continue
 		}
