@@ -681,7 +681,6 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-			"rx_pay":     "",
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
