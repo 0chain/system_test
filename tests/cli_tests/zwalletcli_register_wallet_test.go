@@ -110,6 +110,23 @@ func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]stri
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
+func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, name string) error {
+	_, err := registerWalletForName(t, cliConfigFilename, name)
+	if err != nil {
+		return err
+	}
+	var tokens float64 = 2
+	_, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
+	if err != nil {
+		return err
+	}
+	readPoolParams := createParams(map[string]interface{}{
+		"tokens": tokens / 2,
+	})
+	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
+	return err
+}
+
 func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))

@@ -46,8 +46,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -101,8 +101,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -277,8 +277,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -333,8 +333,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -396,8 +396,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -623,8 +623,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -688,8 +688,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -753,8 +753,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -998,8 +998,8 @@ func TestShareFile(t *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		err = registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		require.Nil(t, err)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)

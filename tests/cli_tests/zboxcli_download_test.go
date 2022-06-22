@@ -310,7 +310,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -559,7 +559,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -581,7 +581,7 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared File without Paying Should Work", func(t *testing.T) {
+	t.Run("Download Shared File without Paying Should Not Work", func(t *testing.T) {
 		t.Parallel()
 
 		var authTicket, filename, originalFileChecksum string
@@ -627,7 +627,7 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(

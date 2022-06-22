@@ -98,8 +98,8 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
+		require.Nil(t, err)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
@@ -110,7 +110,7 @@ func TestCollaborator(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
 
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
+		output, err := addCollaborator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
@@ -663,8 +663,8 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
+		require.Nil(t, err)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
@@ -677,7 +677,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err)
 		defer os.Remove(localpath)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(localpath),
 			"localpath":  localpath,
