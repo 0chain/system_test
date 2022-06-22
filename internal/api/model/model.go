@@ -106,9 +106,9 @@ type StorageNode struct {
 	ID              string                 `json:"id"`
 	BaseURL         string                 `json:"url"`
 	Geolocation     StorageNodeGeolocation `json:"geolocation"`
-	Terms           climodel.Terms         `json:"terms"`    // terms
-	Capacity        int64                  `json:"capacity"` // total blobber capacity
-	Used            int64                  `json:"used"`     // allocated capacity
+	Terms           climodel.Terms         `json:"terms"`     // terms
+	Capacity        int64                  `json:"capacity"`  // total blobber capacity
+	Allocated       int64                  `json:"allocated"` // allocated capacity
 	LastHealthCheck int64                  `json:"last_health_check"`
 	PublicKey       string                 `json:"-"`
 	// StakePoolSettings used initially to create and setup stake pool.
