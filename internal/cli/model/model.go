@@ -7,14 +7,14 @@ import (
 type Provider int
 
 const (
-	ProviderMiner Provider = iota
+	ProviderMiner Provider = iota + 1
 	ProviderSharder
 	ProviderBlobber
 	ProviderValidator
 	ProviderAuthorizer
 )
 
-var providerString = []string{"miner", "sharder", "blobber", "validator", "authorizer"}
+var providerString = []string{"unknown", "miner", "sharder", "blobber", "validator", "authorizer"}
 
 func (p Provider) String() string {
 	return providerString[p]
