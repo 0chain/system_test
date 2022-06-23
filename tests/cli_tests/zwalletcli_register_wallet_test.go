@@ -116,7 +116,7 @@ func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, nam
 		return err
 	}
 	var tokens float64 = 2
-	_, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
+	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
 	if err != nil {
 		return err
 	}
