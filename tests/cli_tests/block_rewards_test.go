@@ -166,7 +166,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 		}
 		rewardEarned := endReward - startReward
-		require.Equal(t, minTotalRewardsAndFees, rewardEarned)
+		require.GreaterOrEqual(t, rewardEarned, minTotalRewardsAndFees)
+		require.LessOrEqual(t, rewardEarned, maxTotalRewardsAndFees)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
