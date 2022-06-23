@@ -7,14 +7,14 @@ import (
 type Provider int
 
 const (
-	ProviderMiner Provider = iota
+	ProviderMiner Provider = iota + 1
 	ProviderSharder
 	ProviderBlobber
 	ProviderValidator
 	ProviderAuthorizer
 )
 
-var providerString = []string{"miner", "sharder", "blobber", "validator", "authorizer"}
+var providerString = []string{"unknown", "miner", "sharder", "blobber", "validator", "authorizer"}
 
 func (p Provider) String() string {
 	return providerString[p]
@@ -128,11 +128,10 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price                int64         `json:"read_price"`
-	Write_price               int64         `json:"write_price"`
-	Min_lock_demand           float64       `json:"min_lock_demand"`
-	Max_offer_duration        time.Duration `json:"max_offer_duration"`
-	Challenge_completion_time time.Duration `json:"challenge_completion_time"`
+	Read_price         int64         `json:"read_price"`
+	Write_price        int64         `json:"write_price"`
+	Min_lock_demand    float64       `json:"min_lock_demand"`
+	Max_offer_duration time.Duration `json:"max_offer_duration"`
 }
 
 type Settings struct {
@@ -148,7 +147,7 @@ type BlobberInfo struct {
 	Url                 string   `json:"url"`
 	Capacity            int      `json:"capacity"`
 	Last_health_check   int      `json:"last_health_check"`
-	Used                int      `json:"used"`
+	Allocated           int      `json:"allocated"`
 	Terms               Terms    `json:"terms"`
 	Stake_pool_settings Settings `json:"stake_pool_settings"`
 }
@@ -348,7 +347,7 @@ type BlobberDetails struct {
 	BaseURL           string            `json:"url"`
 	Terms             Terms             `json:"terms"`
 	Capacity          int64             `json:"capacity"`
-	Used              int64             `json:"used"`
+	Allocated         int64             `json:"allocated"`
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
