@@ -104,6 +104,9 @@ func TestCollaborator(t *testing.T) {
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
+		err = lockReadTokensForWalletName(t, configPath, collaboratorWalletName, 2)
+		require.Nil(t, err)
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -668,6 +671,9 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		err = lockReadTokensForWalletName(t, configPath, collaboratorWalletName, 2)
+		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)

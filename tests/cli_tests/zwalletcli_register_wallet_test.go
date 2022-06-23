@@ -123,7 +123,20 @@ func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, nam
 	readPoolParams := createParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
-	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
+	_, err = readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
+	return err
+}
+
+func lockReadTokensForWalletName(t *testing.T, cliConfigFilename, wallet string, tokens float64) error {
+	_, err := executeFaucetWithTokensForWallet(t, wallet, cliConfigFilename, tokens)
+	if err != nil {
+		return err
+	}
+
+	readPoolParams := createParams(map[string]interface{}{
+		"tokens": tokens / 2,
+	})
+	_, err = readPoolLockWithWallet(t, wallet, cliConfigFilename, readPoolParams, true)
 	return err
 }
 
