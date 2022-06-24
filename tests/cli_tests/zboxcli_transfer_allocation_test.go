@@ -158,6 +158,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 		require.Len(t, finalWritePool, 1)
 
+		t.Logf("Initial WP balance: %v. Final WP balance: %v",
+			initialWritePool[0].Balance, finalWritePool[0].Balance)
+
 		actualCost := initialWritePool[0].Balance - finalWritePool[0].Balance
 
 		require.Equal(t, expectedTransferCost, actualCost)
