@@ -24,7 +24,7 @@ func TestOpenChallenges(t *testing.T) {
 		require.NotNil(t, blobberRequirements)
 
 		blobberId := (*blobbers)[0]
-		response, err := zeroChain.GetOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId)
+		response, err := v1ScresOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId)
 		require.Nil(t, err)
 		bytesReader := bytes.NewBuffer(response.Body())
 		d := json.NewDecoder(bytesReader)

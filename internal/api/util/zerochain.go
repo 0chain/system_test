@@ -79,30 +79,16 @@ func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject 
 		t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
 		return resp, err
 	} else {
-		t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
-		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
-
-		if unmarshalError != nil {
-			return resp, unmarshalError
+		if targetObject != nil {
+			t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+			unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+			if unmarshalError != nil {
+				return resp, unmarshalError
+			}
+			return resp, nil
 		}
-
 		return resp, nil
 	}
-}
-
-func (z *Zerochain) GetOpenChallenges(t *testing.T, storageSmartContractAddress string, blobberId string) (*resty.Response, error) { //nolint
-	sharder := z.getRandomSharder()
-	endpoint := "/v1/screst/" + storageSmartContractAddress + "/openchallenges?blobber=" + blobberId
-	resp, err := z.restClient.R().Get(sharder + endpoint)
-
-	if resp != nil && resp.IsError() {
-		t.Logf("GET open challenges endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
-		return resp, nil
-	} else if err != nil {
-		t.Logf("GET open challenges endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
-		return resp, err
-	}
-	return resp, nil
 }
 
 func (z *Zerochain) performHealthcheck() ([]string, []string) {
