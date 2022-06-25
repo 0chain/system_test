@@ -104,6 +104,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
+		time.Sleep(time.Second * 10) // Wait for 10 seconds before retrieving wp info
 		output, _ = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
 		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
