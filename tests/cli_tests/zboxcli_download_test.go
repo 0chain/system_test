@@ -619,7 +619,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
