@@ -584,7 +584,7 @@ func TestDownload(t *testing.T) {
 	t.Run("Download Shared File without Paying Should Not Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename, originalFileChecksum string
+		var authTicket, filename string
 
 		filesize := int64(10)
 		remotepath := "/"
@@ -596,7 +596,6 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-			originalFileChecksum = generateChecksum(t, filename)
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -619,7 +618,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -627,17 +626,8 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}), true)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err)
 		require.Len(t, output, 3)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download Shared File by Paying Should Work", func(t *testing.T) {
