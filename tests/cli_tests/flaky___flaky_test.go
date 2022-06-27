@@ -14,7 +14,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -61,15 +60,10 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := (expectedUploadCostInZCN / (2 + 2))
 
-		// Wait for write pool blobber balances to be deduced for initial 0.5 MB
+		// Wait for write pool balance to be deduced for initial 0.5 MB
 		cliutils.Wait(t, time.Minute)
 
 		initialAllocation := getAllocation(t, allocationID)
-		initialWritePool := map[string]int64{}
-
-		for _, blobber := range initialAllocation.Blobbers {
-			initialWritePool[blobber.BlobberID] = blobber.Balance
-		}
 
 		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialAllocation.WritePool))
 
@@ -82,15 +76,8 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, (0.5 - 2*actualExpectedUploadCostInZCN), intToZCN(finalAllocation.WritePool))
 
-		// Blobber pool balance should reduce by expected cost of 0.5 MB for each blobber
-		totalChangeInWritePool := float64(0)
-		for _, blobber := range finalAllocation.Blobbers {
-			// deduce tokens
-			diff := intToZCN(initialWritePool[blobber.BlobberID]) - intToZCN(blobber.Balance)
-			assert.Equal(t, actualExpectedUploadCostInZCN/float64(len(finalAllocation.Blobbers)), diff)
-			totalChangeInWritePool += diff
-		}
-
+		// Blobber pool balance should reduce by expected cost of 0.5 MB
+		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
 		require.Equal(t, actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})

@@ -102,11 +102,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
 		initialAllocation := getAllocation(t, allocationID)
-		initialWritePool := map[string]int64{}
-
-		for _, blobber := range initialAllocation.Blobbers {
-			initialWritePool[blobber.BlobberID] = blobber.Balance
-		}
 
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,

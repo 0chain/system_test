@@ -119,11 +119,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		cliutils.Wait(t, 10*time.Second)
 
 		initialAllocation := getAllocation(t, allocationID)
-		initialWritePool := map[string]int64{}
-
-		for _, blobber := range initialAllocation.Blobbers {
-			initialWritePool[blobber.BlobberID] = blobber.Balance
-		}
 
 		// Move file
 		remotepath := filepath.Base(localpath)
@@ -134,9 +129,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
-		for _, blobber := range finalAllocation.Blobbers {
-			require.Equal(t, initialWritePool[blobber.BlobberID], blobber.Balance)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 

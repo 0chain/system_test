@@ -79,12 +79,6 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 0.8, intToZCN(allocation.WritePool))
-
-		totalBalanceInBlobbers := float64(0)
-		for _, blobber := range allocation.Blobbers {
-			totalBalanceInBlobbers += intToZCN(blobber.Balance)
-		}
-		require.Equalf(t, 0.8, totalBalanceInBlobbers, "Sum of balances should be [%v] but was [%v]", 0.8, totalBalanceInBlobbers)
 	})
 }
 

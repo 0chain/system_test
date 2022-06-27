@@ -436,11 +436,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		// Write pool balance should increment to 1
 		initialAllocation := getAllocation(t, allocationID)
 		require.Equal(t, 0.8, intToZCN(initialAllocation.WritePool))
-		initialWritePool := map[string]int64{}
-
-		for _, blobber := range initialAllocation.Blobbers {
-			initialWritePool[blobber.BlobberID] = blobber.Balance
-		}
 
 		filename := generateRandomTestFileName(t)
 		err = createFileWithSize(filename, 1024*5)
@@ -485,13 +480,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		// FIXME: Blobber details are empty
 		// Blobber pool balance should reduce by (write price*filesize) for each blobber
-		totalChangeInWritePool := float64(0)
-		for i, blobber := range finalAllocation.Blobbers {
-			// deduce tokens
-			diff := intToZCN(blobber.Balance) - intToZCN(initialWritePool[blobber.BlobberID])
-			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload", i, diff)
-			totalChangeInWritePool += diff
-		}
+		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
 
 		require.Equal(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))

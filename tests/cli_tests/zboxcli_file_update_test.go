@@ -91,11 +91,6 @@ func TestFileUpdate(t *testing.T) {
 
 		// initial write pool
 		initialAllocation := getAllocation(t, allocationID)
-		initialWritePool := map[string]int64{}
-
-		for _, blobber := range initialAllocation.Blobbers {
-			initialWritePool[blobber.BlobberID] = blobber.Balance
-		}
 
 		// Update with same size
 		remotepath := "/" + filepath.Base(localpath)
@@ -106,9 +101,6 @@ func TestFileUpdate(t *testing.T) {
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
-		for _, blobber := range finalAllocation.Blobbers {
-			require.Equal(t, initialWritePool[blobber.BlobberID], blobber.Balance)
-		}
 		createAllocationTestTeardown(t, allocationID)
 	})
 

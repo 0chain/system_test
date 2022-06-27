@@ -91,8 +91,8 @@ type AllocationFile struct {
 	Hash string `json:"hash"`
 }
 type Blobber struct {
-	BlobberID string `json:"blobber_id"`
-	Balance   int64  `json:"balance"`
+	ID      string `json:"id"`
+	Baseurl string `json:"url"`
 }
 
 type ReadPoolInfo struct {
