@@ -466,7 +466,6 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"remotepath": "/",
 		})
 
-		// Write pool balance should increment to 1
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, 0.8, intToZCN(finalAllocation.WritePool))
 
