@@ -91,7 +91,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
-		t.Skip("re-do till https://github.com/0chain/0chain/pull/1373 merges")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
