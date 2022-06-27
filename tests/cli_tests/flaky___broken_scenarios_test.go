@@ -409,6 +409,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
 
+	// FIXME: WRITEPOOL TOKEN ACCOUNTING
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
 		t.Parallel()
 
@@ -432,20 +433,14 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		// Write pool balance should increment to 1
+		initialAllocation := getAllocation(t, allocationID)
+		require.Equal(t, 0.8, intToZCN(initialAllocation.WritePool))
+		initialWritePool := map[string]int64{}
 
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-
-		require.Equal(t, allocationID, initialWritePool[0].Id)
-		require.Equal(t, 0.8, intToZCN(initialWritePool[0].Balance))
-		require.IsType(t, int64(1), initialWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId)
-		require.Less(t, 0, len(initialWritePool[0].Blobber))
-		require.Equal(t, true, initialWritePool[0].Locked)
+		for _, blobber := range initialAllocation.Blobbers {
+			initialWritePool[blobber.BlobberID] = blobber.Balance
+		}
 
 		filename := generateRandomTestFileName(t)
 		err = createFileWithSize(filename, 1024*5)
@@ -463,7 +458,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		// Expected cost is given in "per 720 hours", we need 1 hour
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
-
+		fmt.Print(actualExpectedUploadCostInZCN)
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -471,21 +466,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 			"remotepath": "/",
 		})
 
-		// Get the new Write-Pool info after upload
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-
-		require.Equal(t, allocationID, finalWritePool[0].Id)
-		require.Equal(t, 0.8, intToZCN(finalWritePool[0].Balance))
-		require.IsType(t, int64(1), finalWritePool[0].ExpireAt)
-		require.Equal(t, allocationID, finalWritePool[0].AllocationId)
-		require.Less(t, 0, len(finalWritePool[0].Blobber))
-		require.Equal(t, true, finalWritePool[0].Locked)
+		// Write pool balance should increment to 1
+		finalAllocation := getAllocation(t, allocationID)
+		require.Equal(t, 0.8, intToZCN(finalAllocation.WritePool))
 
 		// Get Challenge-Pool info after upload
 		output, err = challengePoolInfo(t, configPath, allocationID)
@@ -501,14 +484,12 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.IsType(t, int64(1), challengePool.Balance)
 		require.False(t, challengePool.Finalized)
 
+		// FIXME: Blobber details are empty
 		// Blobber pool balance should reduce by (write price*filesize) for each blobber
 		totalChangeInWritePool := float64(0)
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			require.IsType(t, int64(1), finalWritePool[0].Blobber[i].Balance)
-
+		for i, blobber := range finalAllocation.Blobbers {
 			// deduce tokens
-			diff := intToZCN(initialWritePool[0].Blobber[i].Balance) - intToZCN(finalWritePool[0].Blobber[i].Balance)
+			diff := intToZCN(blobber.Balance) - intToZCN(initialWritePool[blobber.BlobberID])
 			t.Logf("Blobber [%v] write pool has decreased by [%v] tokens after upload", i, diff)
 			totalChangeInWritePool += diff
 		}
