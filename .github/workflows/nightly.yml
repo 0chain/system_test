@@ -1,0 +1,95 @@
+name: "0Chain Nightly Tests"
+concurrency:
+  group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+on:
+  schedule:
+    # Runs every morning at 2am
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  system-tests:
+    name: "System Tests"
+    runs-on: [ tests-suite ]
+    timeout-minutes: 90
+    steps:
+      - name: "Get current PR"
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ github.token }}
+
+      - name: "Set PR status as pending"
+        uses: niteoweb/pull_request_status_action@v1.0.0
+        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: "System tests running with default config..."
+          state: "pending"
+          repository: ${{ github.repository }}
+          context: "0Chain System Tests"
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
+          echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
+
+          echo "MINER_TAG=staging" >> $GITHUB_ENV
+          echo "SHARDER_TAG=staging" >> $GITHUB_ENV
+          echo "BLOBBER_TAG=staging" >> $GITHUB_ENV
+          echo "VALIDATOR_TAG=staging" >> $GITHUB_ENV
+          echo "ZBOX_TAG=staging" >> $GITHUB_ENV
+          echo "ZBLOCK_TAG=staging" >> $GITHUB_ENV
+          echo "ZDNS_TAG=staging" >> $GITHUB_ENV
+          echo "EXPLORER_TAG=staging" >> $GITHUB_ENV
+
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain@master
+        with:
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          miner_image: ${{ env.MINER_TAG }}
+          sharder_image: ${{ env.SHARDER_TAG }}
+          blobber_image: ${{ env.BLOBBER_TAG }}
+          validator_image: ${{ env.VALIDATOR_TAG }}
+          zbox_image: ${{ env.ZBOX_TAG }}
+          zblock_image: ${{ env.ZBLOCK_TAG }}
+          zdns_image: ${{ env.ZDNS_TAG }}
+          explorer_image: staging
+          zproxy_image: staging
+          zsearch_image: staging
+          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+
+      - name: "Run System tests"
+        uses: 0chain/actions/run-system-tests@master
+        with:
+          network: ${{ env.NETWORK_URL }}
+          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          test_file_filter: ""
+
+      - name: "Check if should send slack notification"
+        if: failure()
+        id: send-slack-notification
+        uses: peter-murray/value-as-flag-action@0.0.1
+        with:
+          value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
+          default: false
+
+      - name: "Notify Slack"
+        if: failure() && steps.send-slack-notification.outputs.value == 'true'
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly run failed against staging. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
