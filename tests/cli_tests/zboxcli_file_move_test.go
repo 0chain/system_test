@@ -118,33 +118,25 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 
 		// Get initial write pool
 		cliutils.Wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		initialAllocation := getAllocation(t, allocationID)
+		initialWritePool := map[string]int64{}
+
+		for _, blobber := range initialAllocation.Blobbers {
+			initialWritePool[blobber.BlobberID] = blobber.Balance
+		}
 
 		// Move file
 		remotepath := filepath.Base(localpath)
 		moveAllocationFile(t, allocationID, remotepath, "newDir")
 
 		cliutils.Wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
-		// Get final write pool, no deduction should have been done
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+		finalAllocation := getAllocation(t, allocationID)
+		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance)
+		for _, blobber := range finalAllocation.Blobbers {
+			require.Equal(t, initialWritePool[blobber.BlobberID], blobber.Balance)
 		}
 		createAllocationTestTeardown(t, allocationID)
 	})
