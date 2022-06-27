@@ -82,6 +82,77 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
+	t.Run("Unlocking tokens from finalized allocation should work", func(t *testing.T) {
+		t.Parallel()
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"expire": "5m",
+			"size":   "1024",
+			"lock":   "0.5",
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		// Wallet balance before lock should be 1.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+
+		// Lock 1 token in Write pool amongst all blobbers
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"tokens":     1,
+		})
+		output, err = writePoolLock(t, configPath, params, true)
+		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "locked", output[0])
+
+		// Wallet balance should decrement from 1.5 to 0.5 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+
+		// Write pool balance should increment to 1
+		allocation := getAllocation(t, allocationID)
+		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
+
+		// Wait for allocation to expire
+		cliutils.Wait(t, time.Minute*5)
+
+		output, err = finalizeAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
+
+		// Unlock pool
+		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}), true)
+		require.Nil(t, err)
+		require.Len(t, output, 1)
+		require.Equal(t, "unlocked", output[0])
+
+		// Wallet balance should increment from 0.5 to 2.0 ZCN
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+	})
+
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *testing.T) {
 		t.Parallel()
 
