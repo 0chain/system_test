@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -348,9 +347,9 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	return sharderURLs
 }
 
-func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Response, error) {
+func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string, offset int) (*http.Response, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
-		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId + "&limit=10000"))
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId + "&offset=" + string(offset)))
 		if res.StatusCode < 200 || res.StatusCode >= 300 || err != nil {
 			continue
 		}
@@ -361,13 +360,24 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string) (*http.Res
 
 func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
-	wg := sync.WaitGroup{}
-	mutex := &sync.RWMutex{}
-	for index, blobberId := range blobbers {
-		wg.Add(1)
-		go func(index int, blobberId string) {
-			defer wg.Done()
-			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId)
+	for _, blobberId := range blobbers {
+		offset := 1
+		res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset)
+		require.Nil(t, err, "error getting challenges", res)
+		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
+		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
+
+		resBody, err := io.ReadAll(res.Body)
+		require.Nil(t, err, "Error reading response body")
+		var openChallengesInBlobber apimodel.BlobberChallenge
+		err = json.Unmarshal(resBody, &openChallengesInBlobber)
+		require.Nil(t, err, "error unmarshalling response body")
+
+		openChallenges[blobberId] = openChallengesInBlobber
+
+		for openChallengesInBlobber.Challenges != nil {
+			offset++
+			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset)
 			require.Nil(t, err, "error getting challenges", res)
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 			require.NotNil(t, res.Body, "Open challenges API response must not be nil")
@@ -378,12 +388,10 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 			err = json.Unmarshal(resBody, &openChallengesInBlobber)
 			require.Nil(t, err, "error unmarshalling response body")
 
-			mutex.Lock()
 			openChallenges[blobberId] = openChallengesInBlobber
-			mutex.Unlock()
-		}(index, blobberId)
+		}
 	}
-	wg.Wait()
+
 	return openChallenges
 }
 
