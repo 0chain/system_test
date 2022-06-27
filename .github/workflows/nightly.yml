@@ -1,4 +1,4 @@
-name: "0Chain Nighty Tests"
+name: "0Chain Nightly Tests"
 concurrency:
   group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
@@ -92,4 +92,4 @@ jobs:
       - name: "Notify Slack"
         if: failure() && steps.send-slack-notification.outputs.value == 'true'
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> System tests nightly run failed against staging. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly run failed against staging. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
