@@ -77,40 +77,15 @@ func TestFileUploadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		writePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &writePool)
-		require.Nil(t, err, "Error unmarshalling write pool", strings.Join(output, "\n"))
-		require.NotEmpty(t, writePool)
-
-		require.Equal(t, allocationID, writePool[0].Id)
-		require.Equal(t, 0.8, intToZCN(writePool[0].Balance))
-		require.IsType(t, int64(1), writePool[0].ExpireAt)
-		require.Equal(t, allocationID, writePool[0].AllocationId)
-		require.Less(t, 0, len(writePool[0].Blobber))
-		require.Equal(t, true, writePool[0].Locked)
+		allocation := getAllocation(t, allocationID)
+		require.Equal(t, 0.8, intToZCN(allocation.WritePool))
 
 		totalBalanceInBlobbers := float64(0)
-		for _, blobber := range writePool[0].Blobber {
-			t.Logf("Blobber [%v] balance is [%v]", blobber.BlobberID, intToZCN(blobber.Balance))
+		for _, blobber := range allocation.Blobbers {
 			totalBalanceInBlobbers += intToZCN(blobber.Balance)
 		}
-		require.Equalf(t, 0.8, totalBalanceInBlobbers,"Sum of balances should be [%v] but was [%v]", 0.8, totalBalanceInBlobbers)
+		require.Equalf(t, 0.8, totalBalanceInBlobbers, "Sum of balances should be [%v] but was [%v]", 0.8, totalBalanceInBlobbers)
 	})
-}
-
-func writePoolInfo(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
-	t.Logf("Getting write pool info...")
-	cmd := "./zbox wp-info --json --silent --wallet " + escapedTestName(t) + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
 }
 
 func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
