@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"math"
 	"os"
 	"path/filepath"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -88,33 +88,26 @@ func TestFileUpdate(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		cliutils.Wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		// initial write pool
+		initialAllocation := getAllocation(t, allocationID)
+		initialWritePool := map[string]int64{}
+
+		for _, blobber := range initialAllocation.Blobbers {
+			initialWritePool[blobber.BlobberID] = blobber.Balance
+		}
 
 		// Update with same size
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		cliutils.Wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		
+		finalAllocation := getAllocation(t, allocationID)
+		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
-		// Get final write pool, no deduction should have been made
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
-
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance)
+		for _, blobber := range finalAllocation.Blobbers {
+			require.Equal(t, initialWritePool[blobber.BlobberID], blobber.Balance)
 		}
 		createAllocationTestTeardown(t, allocationID)
 	})
