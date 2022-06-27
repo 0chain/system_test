@@ -9,20 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  golangci:
-    if: github.event_name == 'push'
-    name: "lint"
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.42
-          skip-build-cache: true
-          skip-pkg-cache: true
-          only-new-issues: true
-
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
