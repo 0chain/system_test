@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/go-resty/resty/v2" //nolint
+	resty "github.com/go-resty/resty/v2"
 )
 
 type Zerochain struct {
@@ -16,6 +16,9 @@ type Zerochain struct {
 func (z *Zerochain) Init(config Config) {
 	z.restClient = *resty.New() //nolint
 	resp, err := z.restClient.R().Get(config.NetworkEntrypoint)
+	if err != nil {
+		panic("0dns call failed!: encountered error [" + err.Error() + "]")
+	}
 
 	err = json.Unmarshal(resp.Body(), z)
 	if err != nil {
@@ -76,13 +79,14 @@ func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, targetObject 
 		t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
 		return resp, err
 	} else {
-		t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
-		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
-
-		if unmarshalError != nil {
-			return resp, unmarshalError
+		if targetObject != nil {
+			t.Logf("GET on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+			unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+			if unmarshalError != nil {
+				return resp, unmarshalError
+			}
+			return resp, nil
 		}
-
 		return resp, nil
 	}
 }
