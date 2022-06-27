@@ -1,10 +1,10 @@
 package api_tests
 
 import (
+	resty "github.com/go-resty/resty/v2"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2" //nolint
 )
 
 const FAUCET_SMART_CONTRACT_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
@@ -56,4 +56,9 @@ func v1ScrestAllocBlobbers(t *testing.T, allocationData string) (*[]string, *res
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/alloc_blobbers?allocation_data="+allocationData, &blobbers)
 
 	return blobbers, httpResponse, httpError
+}
+
+func v1ScresOpenChallenges(t *testing.T, storageSmartContractAddress string, blobberId string) (*resty.Response, error) { //nolint
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+storageSmartContractAddress+"/openchallenges?blobber="+blobberId, nil)
+	return httpResponse, httpError
 }
