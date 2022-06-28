@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -347,9 +348,10 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	return sharderURLs
 }
 
-func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string, offset int) (*http.Response, error) {
+func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string, offset int, limit int) (*http.Response, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
-		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/openchallenges" + "?blobber=" + blobberId + "&offset=" + string(offset)))
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
+			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)))
 		if res.StatusCode < 200 || res.StatusCode >= 300 || err != nil {
 			continue
 		}
@@ -361,8 +363,9 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string, offset int
 func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
 	openChallenges = make(map[string]apimodel.BlobberChallenge)
 	for _, blobberId := range blobbers {
-		offset := 1
-		res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset)
+		offset := 0
+		limit := 20
+		res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset, limit)
 		require.Nil(t, err, "error getting challenges", res)
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
@@ -376,8 +379,8 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 		openChallenges[blobberId] = openChallengesInBlobber
 
 		for openChallengesInBlobber.Challenges != nil {
-			offset++
-			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset)
+			offset += limit
+			res, err := apiGetOpenChallenges(sharderBaseURLs, blobberId, offset, limit)
 			require.Nil(t, err, "error getting challenges", res)
 			require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 			require.NotNil(t, res.Body, "Open challenges API response must not be nil")
