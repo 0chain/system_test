@@ -352,7 +352,7 @@ func apiGetOpenChallenges(sharderBaseURLs []string, blobberId string, offset int
 	for _, sharderBaseURL := range sharderBaseURLs {
 		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
 			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)))
-		if res.StatusCode < 200 || res.StatusCode >= 300 || err != nil {
+		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
 			continue
 		}
 		return res, err
