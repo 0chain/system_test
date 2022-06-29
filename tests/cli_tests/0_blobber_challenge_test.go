@@ -367,7 +367,7 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 		err = json.Unmarshal(resBody, &openChallengesInBlobber)
 		require.Nil(t, err, "error unmarshalling response body")
 
-		return nil
+		return &openChallengesInBlobber
 	}
 	t.Errorf("all sharders gave an error at endpoint /openchallenges")
 
