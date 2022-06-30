@@ -374,37 +374,46 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	return nil
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
-	openChallenges = make(map[string]apimodel.BlobberChallenge)
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges []string) {
 	for _, blobberId := range blobbers {
 		offset := 0
 		limit := 20
-		var challenges []apimodel.Challenges
 		for {
 			openChallengesInBlobber := apiGetOpenChallenges(t, sharderBaseURLs, blobberId, offset, limit)
 			if openChallengesInBlobber == nil || len(openChallengesInBlobber.Challenges) == 0 {
 				break
 			}
-			challenges = append(challenges, openChallengesInBlobber.Challenges...)
+			for _, challenge := range openChallengesInBlobber.Challenges {
+				openChallenges = append(openChallenges, challenge.ID)
+			}
 			offset += limit
 		}
-
-		openChallenges[blobberId] = apimodel.BlobberChallenge{BlobberID: blobberId, Challenges: challenges}
 	}
 
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore []string) bool {
 	t.Log("Checking for new challenges to open...")
 	for i := 0; i < 150; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-		for _, blobber := range openChallengesAfter {
-			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
-				return true
+		for _, id := range openChallengesAfter {
+			if contains(id, openChallengesBefore) {
+				continue // this challenge already existed before we made a commit_connection
+			} else {
+				return true // this challenge was generated after we
 			}
 		}
 		cliutils.Wait(t, time.Second*1)
 	}
 	return false
+}
+
+func contains(id string, challenges []string) bool {
+    for _, challenge := range challenges {
+        if challenge == id {
+            return true
+        }
+    }
+    return false
 }
