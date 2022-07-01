@@ -10,10 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -395,13 +397,14 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 
 func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]model.Challenges) bool {
 	t.Log("Checking for new challenges to open...")
-
-	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-	for _, challenge := range openChallengesAfter {
-		if _, ok := openChallengesBefore[challenge.ID]; !ok {
-			return true
+	for i := 0; i < 150; i++ {
+		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
+		for _, challenge := range openChallengesAfter {
+			if _, ok := openChallengesBefore[challenge.ID]; !ok {
+				return true
+			}
 		}
+		cliutils.Wait(t, time.Second)
 	}
-
 	return false
 }
