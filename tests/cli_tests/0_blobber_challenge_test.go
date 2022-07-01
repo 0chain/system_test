@@ -10,11 +10,10 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
+	"github.com/0chain/system_test/internal/api/model"
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -374,7 +373,8 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	return nil
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges []string) {
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]model.Challenges) {
+	openChallenges = make(map[string]apimodel.Challenges)
 	for _, blobberId := range blobbers {
 		offset := 0
 		limit := 20
@@ -384,7 +384,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 				break
 			}
 			for _, challenge := range openChallengesInBlobber.Challenges {
-				openChallenges = append(openChallenges, challenge.ID)
+				openChallenges[challenge.ID] = challenge
 			}
 			offset += limit
 		}
@@ -393,27 +393,15 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore []string) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]model.Challenges) bool {
 	t.Log("Checking for new challenges to open...")
-	for i := 0; i < 150; i++ {
-		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-		for _, id := range openChallengesAfter {
-			if contains(id, openChallengesBefore) {
-				continue // this challenge already existed before we made a commit_connection
-			} else {
-				return true // this challenge was generated after we
-			}
-		}
-		cliutils.Wait(t, time.Second*1)
-	}
-	return false
-}
 
-func contains(id string, challenges []string) bool {
-    for _, challenge := range challenges {
-        if challenge == id {
-            return true
-        }
-    }
-    return false
+	openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
+	for _, challenge := range openChallengesAfter {
+		if _, ok := openChallengesBefore[challenge.ID]; !ok {
+			return true
+		}
+	}
+
+	return false
 }
