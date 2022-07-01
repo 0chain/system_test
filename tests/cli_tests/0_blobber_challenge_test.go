@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/system_test/internal/api/model"
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -375,7 +374,7 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	return nil
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]model.Challenges) {
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.Challenges) {
 	openChallenges = make(map[string]apimodel.Challenges)
 	for _, blobberId := range blobbers {
 		offset := 0
@@ -395,7 +394,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]model.Challenges) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.Challenges) bool {
 	t.Log("Checking for new challenges to open...")
 	for i := 0; i < 150; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
