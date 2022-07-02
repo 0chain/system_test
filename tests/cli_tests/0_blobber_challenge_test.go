@@ -374,37 +374,36 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	return nil
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.BlobberChallenge) {
-	openChallenges = make(map[string]apimodel.BlobberChallenge)
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.Challenges) {
+	openChallenges = make(map[string]apimodel.Challenges)
 	for _, blobberId := range blobbers {
 		offset := 0
 		limit := 20
-		var challenges []apimodel.Challenges
 		for {
 			openChallengesInBlobber := apiGetOpenChallenges(t, sharderBaseURLs, blobberId, offset, limit)
 			if openChallengesInBlobber == nil || len(openChallengesInBlobber.Challenges) == 0 {
 				break
 			}
-			challenges = append(challenges, openChallengesInBlobber.Challenges...)
+			for _, challenge := range openChallengesInBlobber.Challenges {
+				openChallenges[challenge.ID] = challenge
+			}
 			offset += limit
 		}
-
-		openChallenges[blobberId] = apimodel.BlobberChallenge{BlobberID: blobberId, Challenges: challenges}
 	}
 
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.BlobberChallenge) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.Challenges) bool {
 	t.Log("Checking for new challenges to open...")
 	for i := 0; i < 150; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-		for _, blobber := range openChallengesAfter {
-			if len(blobber.Challenges) > len(openChallengesBefore[blobber.BlobberID].Challenges) {
+		for _, challenge := range openChallengesAfter {
+			if _, ok := openChallengesBefore[challenge.ID]; !ok {
 				return true
 			}
 		}
-		cliutils.Wait(t, time.Second*1)
+		cliutils.Wait(t, time.Second)
 	}
 	return false
 }
