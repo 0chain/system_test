@@ -310,7 +310,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -388,7 +388,7 @@ func TestDownload(t *testing.T) {
 
 		// register viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		_, err = registerWalletForName(t, configPath, viewerWalletName)
+		err = registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 		require.Nil(t, err)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
@@ -495,7 +495,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -559,7 +559,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -581,10 +581,10 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared File without Paying Should Work", func(t *testing.T) {
+	t.Run("Download Shared File without Paying Should Not Work", func(t *testing.T) {
 		t.Parallel()
 
-		var authTicket, filename, originalFileChecksum string
+		var authTicket, filename string
 
 		filesize := int64(10)
 		remotepath := "/"
@@ -596,7 +596,6 @@ func TestDownload(t *testing.T) {
 				"tokens": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-			originalFileChecksum = generateChecksum(t, filename)
 			require.NotEqual(t, "", filename)
 
 			// Delete the uploaded file from tmp folder if it exist,
@@ -627,17 +626,8 @@ func TestDownload(t *testing.T) {
 			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+		require.NotNil(t, err)
+		require.Len(t, output, 3)
 	})
 
 	t.Run("Download Shared File by Paying Should Work", func(t *testing.T) {
@@ -681,7 +671,6 @@ func TestDownload(t *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-			"rx_pay":     "",
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
