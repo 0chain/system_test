@@ -2896,13 +2896,12 @@
                   "            merkle_root: uploadResult.merkle_root,",
                   "            actual_file_hash: uploadRequest.actual_hash,",
                   "            actual_file_size: uploadRequest.actual_size,",
-                  "            attributes: uploadRequest.attributes,",
                   "            hash: undefined,",
                   "            path_hash: undefined",
                   "        }",
                   "",
                   "",
-                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash, JSON.stringify(metaData.attributes)].join(\":\"))",
+                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash].join(\":\"))",
                   "",
                   "        metaData.path_hash = await sha3256([allocationId, metaData.path].join(\":\"))",
                   "",
@@ -3418,13 +3417,12 @@
                   "            merkle_root: uploadResult.merkle_root,",
                   "            actual_file_hash: uploadRequest.actual_hash,",
                   "            actual_file_size: uploadRequest.actual_size,",
-                  "            attributes: uploadRequest.attributes,",
                   "            hash: undefined,",
                   "            path_hash: undefined",
                   "        }",
                   "",
                   "",
-                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash, JSON.stringify(metaData.attributes)].join(\":\"))",
+                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash].join(\":\"))",
                   "",
                   "        metaData.path_hash = await sha3256([allocationId, metaData.path].join(\":\"))",
                   "",
@@ -3940,13 +3938,12 @@
                   "            merkle_root: uploadResult.merkle_root,",
                   "            actual_file_hash: uploadRequest.actual_hash,",
                   "            actual_file_size: uploadRequest.actual_size,",
-                  "            attributes: uploadRequest.attributes,",
                   "            hash: undefined,",
                   "            path_hash: undefined",
                   "        }",
                   "",
                   "",
-                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash, JSON.stringify(metaData.attributes)].join(\":\"))",
+                  "        metaData.hash = await sha3256([allocationId, metaData.type, metaData.name, metaData.path, metaData.size, metaData.content_hash, metaData.merkle_root, metaData.actual_file_size, metaData.actual_file_hash].join(\":\"))",
                   "",
                   "        metaData.path_hash = await sha3256([allocationId, metaData.path].join(\":\"))",
                   "",
@@ -5181,283 +5178,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "Update File Attributes",
-      "item": [
-        {
-          "name": "1. Update file attributes - owner pays for reads",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "var Property = require('postman-collection').Property;",
-                  "",
-                  "async function main() {",
-                  "    // postman boilerplate     ",
-                  "    const interval = setTimeout(() => {}, 30000);",
-                  "",
-                  "   var allocationId = pm.variables.get(\"allocation_id\")",
-                  "   var mnemonic = pm.variables.get(\"mnemonic\")",
-                  "",
-                  "    var allocationIdHash = await sha3256(allocationId)",
-                  "    pm.globals.set(\"signature\", await sign(allocationIdHash, mnemonic, \"0chain-client-split-key\"))",
-                  "",
-                  "    clearTimeout(interval)",
-                  "}",
-                  "main()",
-                  "",
-                  "/*",
-                  "Ensure your SHA3-256 impl uses the SHA3 standard, not keccak-256 (which is what CryptoJS uses)",
-                  "*/",
-                  "async function sha3256(data) {",
-                  "    return await new Promise((resolve, reject) => {",
-                  "",
-                  "        pm.sendRequest((\"https://api.hashify.net/hash/SHA3-256/hex?value=\" + data), function(err, response) {",
-                  "",
-                  "            var hashResponse = JSON.parse(response.text())",
-                  "            resolve(hashResponse.Digest)",
-                  "        });",
-                  "    }).then(function(finalResult) {",
-                  "        return finalResult;",
-                  "    })",
-                  "}",
-                  "",
-                  "/*",
-                  "    This function is for illustration/testing purposes only.",
-                  "    The API called within is not suitable for production calls and is provided without warranty.",
-                  "*/",
-                  "async function sign(data, mnemonics, passphrase) {",
-                  "    return await new Promise((resolve, reject) => {",
-                  "",
-                  "        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sign?data=\" + data + \"&mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
-                  "",
-                  "            var hashResponse = JSON.parse(response.text())",
-                  "            resolve(hashResponse.hexString)",
-                  "        });",
-                  "    }).then(function(finalResult) {",
-                  "        return finalResult;",
-                  "    })",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "utils.test.runConditionally(\"blobber0_commit_success\", \"Response code is 200\", function () {",
-                  "    pm.expect(responseCode.code).to.eql(200);",
-                  "});",
-                  "",
-                  "utils.test.runConditionally(\"blobber0_commit_success\", \"Output matches expected\", function () {",
-                  "    var response = JSON.parse(responseBody);",
-                  "    pm.expect(response.who_pays_for_reads).to.eql(1);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data"
-              },
-              {
-                "description": "(Required) Client ID i.e. Wallet ID",
-                "key": "X-App-Client-Id",
-                "value": "{{wallet_id}}"
-              },
-              {
-                "description": "(Required) ",
-                "key": "X-App-Client-Key",
-                "value": "{{public_key}}"
-              },
-              {
-                "key": "X-App-Client-Signature",
-                "value": "{{signature}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "connection_id",
-                  "value": "{{connection_id_for_current_blobber}}",
-                  "description": "undefined",
-                  "type": "text"
-                },
-                {
-                  "key": "attributes",
-                  "value": "{\"who_pays_for_reads\":1}",
-                  "description": "undefined",
-                  "type": "text"
-                },
-                {
-                  "key": "path",
-                  "value": "{{remote_filepath}}",
-                  "description": "undefined",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{blobber0_url}}/v1/file/attributes/{{allocation_id}}",
-              "host": [
-                "{{blobber0_url}}"
-              ],
-              "path": [
-                "v1",
-                "file",
-                "attributes",
-                "{{allocation_id}}"
-              ]
-            },
-            "description": "**Request Definition**  \n0 = owner pays for reads  \n1 = consumer pays for reads"
-          },
-          "response": []
-        },
-        {
-          "name": "2. Update file attributes - user pays for reads",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "var Property = require('postman-collection').Property;",
-                  "",
-                  "async function main() {",
-                  "    // postman boilerplate     ",
-                  "    const interval = setTimeout(() => {}, 30000);",
-                  "",
-                  "   var allocationId = pm.variables.get(\"allocation_id\")",
-                  "   var mnemonic = pm.variables.get(\"mnemonic\")",
-                  "",
-                  "    var allocationIdHash = await sha3256(allocationId)",
-                  "    pm.globals.set(\"signature\", await sign(allocationIdHash, mnemonic, \"0chain-client-split-key\"))",
-                  "",
-                  "    clearTimeout(interval)",
-                  "}",
-                  "main()",
-                  "",
-                  "/*",
-                  "Ensure your SHA3-256 impl uses the SHA3 standard, not keccak-256 (which is what CryptoJS uses)",
-                  "*/",
-                  "async function sha3256(data) {",
-                  "    return await new Promise((resolve, reject) => {",
-                  "",
-                  "        pm.sendRequest((\"https://api.hashify.net/hash/SHA3-256/hex?value=\" + data), function(err, response) {",
-                  "",
-                  "            var hashResponse = JSON.parse(response.text())",
-                  "            resolve(hashResponse.Digest)",
-                  "        });",
-                  "    }).then(function(finalResult) {",
-                  "        return finalResult;",
-                  "    })",
-                  "}",
-                  "",
-                  "/*",
-                  "    This function is for illustration/testing purposes only.",
-                  "    The API called within is not suitable for production calls and is provided without warranty.",
-                  "*/",
-                  "async function sign(data, mnemonics, passphrase) {",
-                  "    return await new Promise((resolve, reject) => {",
-                  "",
-                  "        pm.sendRequest((\"https://example-0chain-crypto.herokuapp.com/sign?data=\" + data + \"&mnemonics=\" + mnemonics + \"&passphrase=\" + passphrase), function(err, response) {",
-                  "",
-                  "            var hashResponse = JSON.parse(response.text())",
-                  "            resolve(hashResponse.hexString)",
-                  "        });",
-                  "    }).then(function(finalResult) {",
-                  "        return finalResult;",
-                  "    })",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "utils.test.runConditionally(\"blobber0_commit_success\", \"Response code is 200\", function () {",
-                  "    pm.expect(responseCode.code).to.eql(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data"
-              },
-              {
-                "description": "(Required) Client ID i.e. Wallet ID",
-                "key": "X-App-Client-Id",
-                "value": "{{wallet_id}}"
-              },
-              {
-                "description": "(Required) ",
-                "key": "X-App-Client-Key",
-                "value": "{{public_key}}"
-              },
-              {
-                "key": "X-App-Client-Signature",
-                "value": "{{signature}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "connection_id",
-                  "value": "{{connection_id_for_current_blobber}}",
-                  "description": "undefined",
-                  "type": "text"
-                },
-                {
-                  "key": "attributes",
-                  "value": "{\"who_pays_for_reads\":0}",
-                  "description": "undefined",
-                  "type": "text"
-                },
-                {
-                  "key": "path",
-                  "value": "{{remote_filepath}}",
-                  "description": "undefined",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{blobber0_url}}/v1/file/attributes/{{allocation_id}}",
-              "host": [
-                "{{blobber0_url}}"
-              ],
-              "path": [
-                "v1",
-                "file",
-                "attributes",
-                "{{allocation_id}}"
-              ]
-            },
-            "description": "**Request Definition**  \n0 = owner pays for reads  \n1 = consumer pays for reads"
-          },
-          "response": []
-        }
-      ],
-      "description": "observations: will likely be removed as the feature has been superseded"
     },
     {
       "name": "Download a file",
@@ -9872,7 +9592,7 @@
   "variable": [
     {
       "key": "upload-metadata",
-      "value": "{ \"attributes\": {}, \"filename\": \"{{filename}}\", \"filepath\": \"{{remote_filepath}}\", \"actual_hash\": \"{{fileHash}}\", \"actual_size\": {{fileSize}}, \"connection_id\": \"{{connection_id_for_current_blobber}}\" }"
+      "value": "{ \"filename\": \"{{filename}}\", \"filepath\": \"{{remote_filepath}}\", \"actual_hash\": \"{{fileHash}}\", \"actual_size\": {{fileSize}}, \"connection_id\": \"{{connection_id_for_current_blobber}}\" }"
     },
     {
       "key": "upload-request",

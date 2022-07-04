@@ -98,11 +98,14 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
+		require.Nil(t, err)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		err = lockReadTokensForWalletName(t, configPath, collaboratorWalletName, 2)
+		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -110,7 +113,7 @@ func TestCollaborator(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
 
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
+		output, err := addCollaborator(t, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"collabid":   collaboratorWallet.ClientID,
 			"remotepath": remotepath,
@@ -439,49 +442,6 @@ func TestCollaborator(t *testing.T) {
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Collaborator _ collaborator should NOT be able to update the file attributes", func(t *testing.T) {
-		t.Parallel()
-
-		collaboratorWalletName := escapedTestName(t) + "_collaborator"
-
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
-
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
-		remotepath := "/tmp/" + filepath.Base(localpath)
-
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"collabid":   collaboratorWallet.ClientID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
-
-		meta := getMetaData(t, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		})
-		require.Len(t, meta.Collaborators, 1, "Collaborator must be added in file collaborators list")
-		require.Equal(t, collaboratorWallet.ClientID, meta.Collaborators[0].ClientID, "Collaborator must be added in file collaborators list")
-
-		output, err = updateFileAttributesWithWallet(t, configPath, collaboratorWalletName, map[string]interface{}{
-			"allocation":         allocationID,
-			"remotepath":         remotepath,
-			"who-pays-for-reads": "3rd_party",
-		}, false)
-		require.NotNil(t, err, "Unexpected success in updating the file attributes as collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "updating file attributes: Update attributes failed: request failed, operation failed"
-		require.Equal(t, expectedOutput, output[0], "Unexpected output when updating the file attributes", strings.Join(output, "\n"))
-	})
-
 	t.Run("Add Collaborator _ collaborator should NOT be able to rename the file", func(t *testing.T) {
 		t.Parallel()
 
@@ -706,11 +666,14 @@ func TestCollaborator(t *testing.T) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
+		require.Nil(t, err)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
+
+		err = lockReadTokensForWalletName(t, configPath, collaboratorWalletName, 2)
+		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -720,7 +683,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err)
 		defer os.Remove(localpath)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/" + filepath.Base(localpath),
 			"localpath":  localpath,

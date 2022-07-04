@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -451,7 +452,8 @@ func TestFileUpdate(t *testing.T) {
 			"localpath":  localfile,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "does not exist")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
