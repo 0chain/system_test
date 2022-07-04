@@ -1223,7 +1223,7 @@
 	"variable": [
 		{
 			"key": "upload-metadata",
-			"value": "{ \"attributes\": {}, \"filename\": \"{{filename}}\", \"filepath\": \"{{remote_filepath}}\", \"actual_hash\": \"{{fileHash}}\", \"actual_size\": {{fileSize}}, \"connection_id\": \"{{connection_id_for_current_blobber}}\" }"
+			"value": "{ \"filename\": \"{{filename}}\", \"filepath\": \"{{remote_filepath}}\", \"actual_hash\": \"{{fileHash}}\", \"actual_size\": {{fileSize}}, \"connection_id\": \"{{connection_id_for_current_blobber}}\" }"
 		},
 		{
 			"key": "upload-request",
