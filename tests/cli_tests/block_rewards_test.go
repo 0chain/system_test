@@ -89,9 +89,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
-		startBeforeRound := getCurrentRound(t)
+		startRound := getCurrentRound(t)
 		startReward := getMinersDetail(t, miner.ID).Reward
-		startAfterRound := getCurrentRound(t)
+
 		// Do 5 send transactions with fees
 		fee := 0.1
 		for i := 0; i < 5; i++ {
@@ -103,68 +103,8 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		endReward := getMinersDetail(t, miner.ID).Reward
 		endAfterRound := getCurrentRound(t)
 
-		maxTotalRewardsAndFees := int64(0)
-		minTotalRewardsAndFees := int64(0)
-		// Calculate the total rewards and fees for this miner.
-		for round := startBeforeRound + 1; round <= endAfterRound; round++ {
-			block := getBlock(t, sharderBaseUrl, round)
-			// No expected rewards for this miner if not the generator of block.
-			if block.Block.MinerId != miner.ID {
-				continue
-			}
+		calculatedReward := calculateBlockRewards(configAsFloat, startBeforeRound, startAfterRound)
 
-			// Get total block fees
-			blockFees := int64(0)
-			for _, txn := range block.Block.Transactions {
-				blockFees += txn.TransactionFee
-			}
-
-			// reward rate declines per epoch
-			// new reward ratio = current reward rate * (1.0 - reward decline rate)
-			epochs := round / int64(configAsFloat[epochConfigKey])
-			rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
-
-			// block reward (mint) = block reward (configured) * reward rate
-			blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
-
-			// generator rewards = block reward * share ratio
-			generatorRewards := blockRewardMint * configAsFloat[shareRatioConfigKey]
-
-			// generator reward service charge = generator rewards * service charge
-			generatorRewardServiceCharge := generatorRewards * miner.Settings.ServiceCharge
-			generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
-
-			// generator fees = block fees * share ratio
-			generatorFees := float64(blockFees) * configAsFloat[shareRatioConfigKey]
-
-			// generator fee service charge = generator fees * service charge
-			generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
-			generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
-
-			maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-			maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-			minTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-			minTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-			// if none staked at node, node gets all rewards.
-			// otherwise, then remaining are distributed to stake holders.
-			if miner.TotalStake == 0 {
-				maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-				maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-				minTotalRewardsAndFees += int64(generatorRewardsRemaining)
-				minTotalRewardsAndFees += int64(generatorFeeRemaining)
-			}
-			if round < startAfterRound || beforeAfterRound < round {
-				maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-				maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-				// if none staked at node, node gets all rewards.
-				// otherwise, then remaining are distributed to stake holders.
-				if miner.TotalStake == 0 {
-					maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-					maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-				}
-			}
-
-		}
 		rewardEarned := endReward - startReward
 		require.GreaterOrEqual(t, rewardEarned, minTotalRewardsAndFees)
 		require.LessOrEqual(t, rewardEarned, maxTotalRewardsAndFees)
@@ -367,4 +307,68 @@ func getBlock(t *testing.T, sharderBaseUrl string, round int64) apimodel.Block {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 
 	return block
+}
+
+func calculateBlockRewards(configAsFloat map[string]float64, ) {
+	maxTotalRewardsAndFees := int64(0)
+	minTotalRewardsAndFees := int64(0)
+	// Calculate the total rewards and fees for this miner.
+	for round := startBeforeRound + 1; round <= endAfterRound; round++ {
+		block := getBlock(t, sharderBaseUrl, round)
+		// No expected rewards for this miner if not the generator of block.
+		if block.Block.MinerId != miner.ID {
+			continue
+		}
+
+		// Get total block fees
+		blockFees := int64(0)
+		for _, txn := range block.Block.Transactions {
+			blockFees += txn.TransactionFee
+		}
+
+		// reward rate declines per epoch
+		// new reward ratio = current reward rate * (1.0 - reward decline rate)
+		epochs := round / int64(configAsFloat[epochConfigKey])
+		rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
+
+		// block reward (mint) = block reward (configured) * reward rate
+		blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
+
+		// generator rewards = block reward * share ratio
+		generatorRewards := blockRewardMint * configAsFloat[shareRatioConfigKey]
+
+		// generator reward service charge = generator rewards * service charge
+		generatorRewardServiceCharge := generatorRewards * miner.Settings.ServiceCharge
+		generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
+
+		// generator fees = block fees * share ratio
+		generatorFees := float64(blockFees) * configAsFloat[shareRatioConfigKey]
+
+		// generator fee service charge = generator fees * service charge
+		generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
+		generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
+
+		maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
+		maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
+		minTotalRewardsAndFees += int64(generatorRewardServiceCharge)
+		minTotalRewardsAndFees += int64(generatorFeeServiceCharge)
+		// if none staked at node, node gets all rewards.
+		// otherwise, then remaining are distributed to stake holders.
+		if miner.TotalStake == 0 {
+			maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
+			maxTotalRewardsAndFees += int64(generatorFeeRemaining)
+			minTotalRewardsAndFees += int64(generatorRewardsRemaining)
+			minTotalRewardsAndFees += int64(generatorFeeRemaining)
+		}
+		if round < startAfterRound || beforeAfterRound < round {
+			maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
+			maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
+			// if none staked at node, node gets all rewards.
+			// otherwise, then remaining are distributed to stake holders.
+			if miner.TotalStake == 0 {
+				maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
+				maxTotalRewardsAndFees += int64(generatorFeeRemaining)
+			}
+		}
+	}
 }
