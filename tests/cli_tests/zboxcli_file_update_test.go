@@ -16,7 +16,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -99,7 +98,7 @@ func TestFileUpdate(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		cliutils.Wait(t, 30*time.Second)
-		
+
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 

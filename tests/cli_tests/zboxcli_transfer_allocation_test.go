@@ -102,7 +102,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
 		time.Sleep(time.Second * 10) // Wait for 10 seconds before retrieving wp info
-		initialAllocation := getAllocation(t, allocaionID)
+		initialAllocation := getAllocation(t, allocationID)
 
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,
