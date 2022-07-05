@@ -163,6 +163,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 
 		actualCost := initialWritePool[0].Balance - finalWritePool[0].Balance
 
+		// If a challenge has passed for upload, writepool balance should reduce, else, remain same
 		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
 		require.True(t, finalWritePool[0].Locked, strings.Join(output, "\n"))
 		require.Equal(t, allocationID, finalWritePool[0].Id, strings.Join(output, "\n"))
