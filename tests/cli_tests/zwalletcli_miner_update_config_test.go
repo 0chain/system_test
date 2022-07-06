@@ -13,6 +13,7 @@ import (
 )
 
 func TestMinerUpdateConfig(t *testing.T) {
+	t.Skip()
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		configKey := "reward_rate"
 		newValue := "0.1"
