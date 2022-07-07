@@ -6,6 +6,7 @@ import (
 	"math"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -18,76 +19,76 @@ import (
 func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Parallel()
 
-	// t.Run("rename file", func(t *testing.T) {
-	// 	t.Parallel()
+	t.Run("rename file", func(t *testing.T) {
+		t.Parallel()
 
-	// 	allocSize := int64(2048)
-	// 	fileSize := int64(256)
+		allocSize := int64(2048)
+		fileSize := int64(256)
 
-	// 	file := generateRandomTestFileName(t)
-	// 	err := createFileWithSize(file, fileSize)
-	// 	require.Nil(t, err)
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
 
-	// 	filename := filepath.Base(file)
-	// 	remotePath := "/child/" + filename
-	// 	destName := "new_" + filename
-	// 	destPath := "/child/" + destName
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destName := "new_" + filename
+		destPath := "/child/" + destName
 
-	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
-	// 		"size": allocSize,
-	// 	})
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 
-	// 	output, err := uploadFile(t, configPath, map[string]interface{}{
-	// 		"allocation": allocationID,
-	// 		"remotepath": remotePath,
-	// 		"localpath":  file,
-	// 	}, true)
-	// 	require.Nil(t, err, strings.Join(output, "\n"))
-	// 	require.Len(t, output, 2)
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
-	// 	expected := fmt.Sprintf(
-	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
-	// 		filepath.Base(file),
-	// 	)
-	// 	require.Equal(t, expected, output[1])
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
 
-	// 	output, err = renameFile(t, configPath, map[string]interface{}{
-	// 		"allocation": allocationID,
-	// 		"remotepath": remotePath,
-	// 		"destname":   destName,
-	// 	}, true)
-	// 	require.Nil(t, err, strings.Join(output, "\n"))
-	// 	require.Len(t, output, 1)
-	// 	require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
+		output, err = renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destname":   destName,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
-	// 	// list-all
-	// 	output, err = listAll(t, configPath, allocationID, true)
-	// 	require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-	// 	require.Len(t, output, 1)
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
-	// 	var files []climodel.AllocationFile
-	// 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-	// 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-	// 	require.Len(t, files, 2)
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
 
-	// 	// check if expected file has been renamed
-	// 	foundAtSource := false
-	// 	foundAtDest := false
-	// 	for _, f := range files {
-	// 		if f.Path == remotePath {
-	// 			foundAtSource = true
-	// 		}
-	// 		if f.Path == destPath {
-	// 			foundAtDest = true
-	// 			require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-	// 			require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
-	// 			require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-	// 			require.NotEmpty(t, f.Hash)
-	// 		}
-	// 	}
-	// 	require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
-	// 	require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
-	// })
+		// check if expected file has been renamed
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destPath {
+				foundAtDest = true
+				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
 		t.Parallel()
@@ -121,14 +122,26 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		remotepath := filepath.Base(localpath)
 		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
 
-		cliutils.Wait(t, 30*time.Second)
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
 
 		finalAllocation := getAllocation(t, allocationID)
-		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
 		createAllocationTestTeardown(t, allocationID)
 	})
-	return
+
 	t.Run("rename file to same filename (no change)", func(t *testing.T) {
 		t.Parallel()
 
