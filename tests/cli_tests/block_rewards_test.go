@@ -99,15 +99,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
 
-		beforeAfterRound := getCurrentRound(t)
+		endRound := getCurrentRound(t)
 		endReward := getMinersDetail(t, miner.ID).Reward
-		endAfterRound := getCurrentRound(t)
 
-		calculatedReward := calculateBlockRewards(configAsFloat, startBeforeRound, startAfterRound)
+		calculatedReward := calculateBlockRewards(t, sharderBaseUrl, configAsFloat, startRound, endRound, miner)
 
 		rewardEarned := endReward - startReward
-		require.GreaterOrEqual(t, rewardEarned, minTotalRewardsAndFees)
-		require.LessOrEqual(t, rewardEarned, maxTotalRewardsAndFees)
+		require.Equal(t, rewardEarned, calculatedReward)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -309,11 +307,10 @@ func getBlock(t *testing.T, sharderBaseUrl string, round int64) apimodel.Block {
 	return block
 }
 
-func calculateBlockRewards(configAsFloat map[string]float64, ) {
-	maxTotalRewardsAndFees := int64(0)
-	minTotalRewardsAndFees := int64(0)
+func calculateBlockRewards(t *testing.T, sharderBaseUrl string, configAsFloat map[string]float64, startRound, endRound int64, miner climodel.Node) int64 {
 	// Calculate the total rewards and fees for this miner.
-	for round := startBeforeRound + 1; round <= endAfterRound; round++ {
+	totalRewardsAndFees := int64(0)
+	for round := startRound + 1; round <= endRound; round++ {
 		block := getBlock(t, sharderBaseUrl, round)
 		// No expected rewards for this miner if not the generator of block.
 		if block.Block.MinerId != miner.ID {
@@ -348,27 +345,15 @@ func calculateBlockRewards(configAsFloat map[string]float64, ) {
 		generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
 		generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
 
-		maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-		maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-		minTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-		minTotalRewardsAndFees += int64(generatorFeeServiceCharge)
+		totalRewardsAndFees += int64(generatorRewardServiceCharge)
+		totalRewardsAndFees += int64(generatorFeeServiceCharge)
+
 		// if none staked at node, node gets all rewards.
 		// otherwise, then remaining are distributed to stake holders.
 		if miner.TotalStake == 0 {
-			maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-			maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-			minTotalRewardsAndFees += int64(generatorRewardsRemaining)
-			minTotalRewardsAndFees += int64(generatorFeeRemaining)
-		}
-		if round < startAfterRound || beforeAfterRound < round {
-			maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-			maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-			// if none staked at node, node gets all rewards.
-			// otherwise, then remaining are distributed to stake holders.
-			if miner.TotalStake == 0 {
-				maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-				maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-			}
+			totalRewardsAndFees += int64(generatorRewardsRemaining)
+			totalRewardsAndFees += int64(generatorFeeRemaining)
 		}
 	}
+	return totalRewardsAndFees
 }
