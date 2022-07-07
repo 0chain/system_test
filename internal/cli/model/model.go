@@ -99,25 +99,20 @@ type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
 }
 
-type Attributes struct {
-	WhoPaysForReads int `json:"who_pays_for_reads,omitempty"`
-}
-
 type ListFileResult struct {
-	Name            string     `json:"name"`
-	Path            string     `json:"path"`
-	Type            string     `json:"type"`
-	Size            int64      `json:"size"`
-	Hash            string     `json:"hash"`
-	Mimetype        string     `json:"mimetype"`
-	NumBlocks       int        `json:"num_blocks"`
-	LookupHash      string     `json:"lookup_hash"`
-	EncryptionKey   string     `json:"encryption_key"`
-	ActualSize      int64      `json:"actual_size"`
-	ActualNumBlocks int        `json:"actual_num_blocks"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
-	Attribute       Attributes `json:"attributes"`
+	Name            string    `json:"name"`
+	Path            string    `json:"path"`
+	Type            string    `json:"type"`
+	Size            int64     `json:"size"`
+	Hash            string    `json:"hash"`
+	Mimetype        string    `json:"mimetype"`
+	NumBlocks       int       `json:"num_blocks"`
+	LookupHash      string    `json:"lookup_hash"`
+	EncryptionKey   string    `json:"encryption_key"`
+	ActualSize      int64     `json:"actual_size"`
+	ActualNumBlocks int       `json:"actual_num_blocks"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type Terms struct {
@@ -166,7 +161,6 @@ type FileMetaResult struct {
 	EncryptedKey    string          `json:"EncryptedKey"`
 	CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
 	Collaborators   []Collaborator  `json:"Collaborators"`
-	Attribute       Attributes      `json:"attributes"`
 }
 
 type CommitMetaTxn struct {
@@ -198,7 +192,6 @@ type CommitResponse struct {
 		EncryptedKey    string          `json:"EncryptedKey"`
 		CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
 		Collaborators   []Collaborator  `json:"Collaborators"`
-		Attributes      Attributes      `json:"Attributes"`
 	} `json:"MetaData"`
 }
 
@@ -346,11 +339,22 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
 
+type Validator struct {
+	ID             string  `json:"validator_id"`
+	BaseURL        string  `json:"url"`
+	PublicKey      string  `json:"-"`
+	DelegateWallet string  `json:"delegate_wallet"`
+	MinStake       int64   `json:"min_stake"`
+	MaxStake       int64   `json:"max_stake"`
+	NumDelegates   int     `json:"num_delegates"`
+	ServiceCharge  float64 `json:"service_charge"`
+	TotalStake     int64   `json:"stake"`
+}
+
 type FileDiff struct {
-	Op         string     `json:"operation"`
-	Path       string     `json:"path"`
-	Type       string     `json:"type"`
-	Attributes Attributes `json:"attributes"`
+	Op   string `json:"operation"`
+	Path string `json:"path"`
+	Type string `json:"type"`
 }
 
 type FreeStorageMarker struct {

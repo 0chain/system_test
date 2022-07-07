@@ -436,7 +436,8 @@ func TestFileUpdate(t *testing.T) {
 			"localpath":  localfile,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "does not exist")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
