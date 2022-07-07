@@ -96,10 +96,23 @@ func TestFileUpdate(t *testing.T) {
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
-		cliutils.Wait(t, 30*time.Second)
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
 
 		finalAllocation := getAllocation(t, allocationID)
-		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
+
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
