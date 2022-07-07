@@ -97,7 +97,7 @@ func TestFileUpdate(t *testing.T) {
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
 		cliutils.Wait(t, 30*time.Second)
-		
+
 		finalAllocation := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
 
