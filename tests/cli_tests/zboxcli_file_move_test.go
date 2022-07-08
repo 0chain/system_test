@@ -116,9 +116,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
-		// Get initial write pool
-		cliutils.Wait(t, 10*time.Second)
-
 		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
