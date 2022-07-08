@@ -131,7 +131,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
+		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
 
 		// Get expected upload cost
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
