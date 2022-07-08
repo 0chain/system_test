@@ -82,7 +82,6 @@ func TestListFileSystem(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath)
 
-		// First Upload a file to the root directory
 		filesize := int64(64)
 
 		filePath1 := "/" + filepath.Base(generateFileAndUpload(t, allocationID, "/", filesize))
