@@ -77,6 +77,48 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "", result.EncryptionKey)
 	})
 
+	t.Run("List Files and Directories in Root Should Work", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath)
+
+		// First Upload a file to the root directory
+		filesize := int64(64)
+
+		filePath1 := "/" + filepath.Base(generateFileAndUpload(t, allocationID, "/", filesize))
+		filePath2 := "/" + filepath.Base(generateFileAndUpload(t, allocationID, "/", filesize))
+		filepath.Base(generateFileAndUpload(t, allocationID, "/dir1/", filesize))
+		filepath.Base(generateFileAndUpload(t, allocationID, "/dir1/", filesize))
+		filepath.Base(generateFileAndUpload(t, allocationID, "/dir2/", filesize))
+		filepath.Base(generateFileAndUpload(t, allocationID, "/dir3/", filesize))
+		filepath.Base(generateFileAndUpload(t, allocationID, "/dir3/subdir/", filesize))
+
+		wantListResults := []string{filePath1, filePath2, "/dir1", "/dir2", "/dir3"}
+
+		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": "/",
+		}), true)
+		require.Nil(t, err, "List files failed", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+
+		var listResults []climodel.ListFileResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
+		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
+
+		require.Len(t, listResults, len(wantListResults))
+
+		gotRemoteFilePaths := []string{}
+
+		for _, got := range listResults {
+			gotRemoteFilePaths = append(gotRemoteFilePaths, got.Path)
+		}
+
+		require.EqualValues(t, wantListResults, gotRemoteFilePaths)
+	})
+
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
 	t.Run("List Encrypted Files Should Work", func(t *testing.T) {
 		t.Parallel()
