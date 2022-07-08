@@ -122,11 +122,11 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/" + remotepath,
+			"remotepath": remotepath,
 			"destpath":   "/newdir/",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))

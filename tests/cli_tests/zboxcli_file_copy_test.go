@@ -663,12 +663,12 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
-		remotepath := filepath.Base(localpath)
+		remotepath := "/" + filepath.Base(localpath)
 
 		// copy file
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/" + remotepath,
+			"remotepath": remotepath,
 			"destpath":   "/newdir/",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
