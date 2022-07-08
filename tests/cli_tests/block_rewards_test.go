@@ -27,6 +27,7 @@ const (
 )
 
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t.Skip("Skip till /nodeStat endpoint is modified")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
