@@ -397,7 +397,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed: can't get existing allocation: value not present`)
+		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed only owner can update the allocation`)
 		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
 	})
 
