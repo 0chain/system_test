@@ -397,8 +397,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		reg := regexp.MustCompile(`Error updating allocation:allocation_updating_failed only owner can update the allocation`)
-		require.Regexp(t, reg, output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: only owner can update the allocation", output[0])
 	})
 
 	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *testing.T) {
