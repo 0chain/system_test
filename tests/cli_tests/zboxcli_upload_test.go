@@ -287,7 +287,7 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload Video File Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(200 * 1024 * 1024)
+		allocSize := int64(400 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
