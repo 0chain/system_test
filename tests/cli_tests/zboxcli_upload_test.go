@@ -294,7 +294,7 @@ func TestUpload(t *testing.T) {
 			"tokens": 1,
 		})
 
-		output, err := cliutils.RunCommand(t, "wget https://docs.google.com/uc?export=download&id=15mxi2qUROBuTNrYKda6M2vDzfGiQYbQf -O test_video.mp4", 3, 2*time.Second)
+		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
 		require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
