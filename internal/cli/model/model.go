@@ -6,6 +6,8 @@ import (
 
 type Provider int
 
+type Timestamp int64
+
 const (
 	ProviderMiner Provider = iota + 1
 	ProviderSharder
@@ -118,8 +120,8 @@ type ListFileResult struct {
 	EncryptionKey   string    `json:"encryption_key"`
 	ActualSize      int64     `json:"actual_size"`
 	ActualNumBlocks int       `json:"actual_num_blocks"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       Timestamp `json:"created_at"`
+	UpdatedAt       Timestamp `json:"updated_at"`
 }
 
 type Terms struct {
