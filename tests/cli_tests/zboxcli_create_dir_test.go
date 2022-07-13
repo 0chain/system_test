@@ -140,45 +140,15 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, dirname+" directory created", output[0])
 	})
 
-	t.Run("create dir with no leading slash should work", func(t *testing.T) {
+	t.Run("create dir with no leading slash should not work", func(t *testing.T) {
 		t.Parallel()
 
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "noleadingslash"
-		output, err := createDir(t, configPath, allocID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
-
-		output, err = listAll(t, configPath, allocID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 1)
-		require.Equal(t, dirname, files[0].Name, "Directory must be created", files)
-	})
-
-	t.Run("create dir with no leading slash should work", func(t *testing.T) {
-		t.Parallel()
-
-		allocID := setupAllocation(t, configPath)
-
-		dirname := "/noleadingslash"
-		output, err := createDir(t, configPath, allocID, dirname, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
-
-		dirname = "noleadingslash"
-		output, err = createDir(t, configPath, allocID, dirname, false)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, dirname+" directory created", output[0])
+		_, err := createDir(t, configPath, allocID, dirname, false)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "not absolute")
 	})
 
 	t.Run("create with existing dir but different case", func(t *testing.T) {
