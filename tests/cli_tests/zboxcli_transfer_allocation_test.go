@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -89,7 +90,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		time.Sleep(time.Second * 10) // Wait for 10 seconds before retrieving wp info
 		initialAllocation := getAllocation(t, allocationID)
 
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
@@ -122,9 +122,24 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		// write lock pool of old owner should remain locked
 		cliutils.Wait(t, 2*time.Minute)
 
-		// 0 cost to tranfer
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, file)
+
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+
 		finalAllocation := getAllocation(t, allocationID)
-		require.Equal(t, initialAllocation.WritePool, finalAllocation.WritePool, "Write pool balance expected to be unchanged")
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+
+		// If a challenge has passed for upload, writepool balance should reduce, else, remain same
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
 	})
 
 	t.Run("transfer allocation by owner should work", func(t *testing.T) {

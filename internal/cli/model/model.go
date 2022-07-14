@@ -99,15 +99,6 @@ type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
 }
 
-type WritePoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
-}
-
 type ListFileResult struct {
 	Name            string    `json:"name"`
 	Path            string    `json:"path"`
