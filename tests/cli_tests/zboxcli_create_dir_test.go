@@ -110,8 +110,7 @@ func TestCreateDir(t *testing.T) {
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "consensus not met")
-		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"error":"ERROR: value too long for type character varying(100) (SQLSTATE 22001)"}`), "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
+		require.Contains(t, aggregatedOutput, "consensus failed")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -148,9 +147,10 @@ func TestCreateDir(t *testing.T) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "noleadingslash"
-		_, err := createDir(t, configPath, allocID, dirname, false)
+		output, err := createDir(t, configPath, allocID, dirname, false)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "not absolute")
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "not absolute")
 	})
 
 	t.Run("create with existing dir but different case", func(t *testing.T) {
@@ -321,7 +321,8 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], `consensus not met`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, `consensus not met`)
 	})
 }
 
