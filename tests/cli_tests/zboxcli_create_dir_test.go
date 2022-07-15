@@ -109,6 +109,8 @@ func TestCreateDir(t *testing.T) {
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "consensus not met")
 		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"error":"ERROR: value too long for type character varying(100) (SQLSTATE 22001)"}`), "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocID, true)
@@ -319,7 +321,7 @@ func TestCreateDir(t *testing.T) {
 		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], `CreateDir failed:  {"code":"invalid_signature","error":"invalid_signature: Invalid signature"}`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
+		require.True(t, strings.HasPrefix(output[0], `consensus not met`), "Expected create dir failure but got output: "+strings.Join(output, "\n"))
 	})
 }
 
