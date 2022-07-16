@@ -128,7 +128,6 @@ jobs:
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
-          zproxy_image: staging
           zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
