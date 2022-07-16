@@ -10,8 +10,6 @@ import (
 )
 
 func TestShutDownBlobber(t *testing.T) {
-	t.Parallel()
-
 	t.Run("shutting down blobber by blobber owner should work", func(t *testing.T) {
 		output, err := shutdownBlobberForWallet(t, configPath, "", blobberOwnerWallet)
 		require.Nil(t, err)
