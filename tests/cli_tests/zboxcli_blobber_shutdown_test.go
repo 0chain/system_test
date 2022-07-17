@@ -11,7 +11,7 @@ import (
 
 func TestShutDownBlobber(t *testing.T) {
 	t.Run("shutting down blobber by blobber owner should work", func(t *testing.T) {
-		output, err := shutdownBlobberForWallet(t, configPath, "", blobberOwnerWallet)
+		output, err := shutdownBlobberForWallet(t, configPath, "", "wallets/blobber02_owner_dev3")
 		require.Nil(t, err)
 		require.Len(t, output, 1)
 		require.Equal(t, "shut down blobber", output[0])
