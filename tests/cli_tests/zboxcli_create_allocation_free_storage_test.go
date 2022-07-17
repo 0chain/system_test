@@ -412,7 +412,7 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	nonceStr := strings.Split(ret[0], ":")[1]
 	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
 	require.Nil(t, err, "error converting nonce to in")
-	txn.TransactionNonce = int(nonce) + 1
+	txn.TransactionNonce = int(nonce)
 
 	input := map[string]interface{}{
 		"name":             assigner.ClientID,
