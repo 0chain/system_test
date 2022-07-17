@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -33,7 +34,7 @@ const (
 	freeTokensTotalLimit      = 100.0
 )
 
-func Test___FlakyScenariosCreateAllocationFreeStorage(t *testing.T) {
+func TestCreateAllocationFreeStorage(t *testing.T) {
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -406,6 +407,12 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	txn.TransactionType = txnTypeSmartContract
 	txn.ToClientId = storageSmartContractAddress
 	txn.TransactionValue = 0
+	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
+	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+	nonceStr := strings.Split(ret[0], ":")[1]
+	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+	require.Nil(t, err, "error converting nonce to in")
+	txn.TransactionNonce = int(nonce) + 1
 
 	input := map[string]interface{}{
 		"name":             assigner.ClientID,
