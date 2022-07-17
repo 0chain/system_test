@@ -1,0 +1,13 @@
+{
+    "client_id": "08287c463e5d381ddbf3dcfa1db26d5c8a76eed34a81046296d5661e05cde55b",
+    "client_key": "34f8e58bc19fa1639010e09939ff7b3ed7f5d73b0a5bc75b97351ef26283f90fa4ae285c1bf9fe5e3ed37a1af53bfb6a803b9bcb2f673e024a0a5597c82dcc96",
+    "keys": [
+        {
+            "public_key": "34f8e58bc19fa1639010e09939ff7b3ed7f5d73b0a5bc75b97351ef26283f90fa4ae285c1bf9fe5e3ed37a1af53bfb6a803b9bcb2f673e024a0a5597c82dcc96",
+            "private_key": "658963b4e52de8530b6b603d331ba4c0a2ecbbfa320a2495f876caf77e2d3006"
+        }
+    ],
+    "mnemonics": "economy day fan flower between rebuild valid bid catch bargain vivid hybrid room permit check manage mean twelve damage summer close churn boat either",
+    "version": "1.0",
+    "date_created": "2021-12-04T17:03:37Z"
+}
