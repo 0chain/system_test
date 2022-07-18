@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -15,13 +14,12 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/crypto/sha3"
-
 	"github.com/herumi/bls-go-binary/bls"
 
 	"github.com/stretchr/testify/require"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
+	crypto "github.com/0chain/system_test/internal/api/util/crypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
@@ -426,8 +424,9 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	require.Nil(t, err, "error marshaling smart contract data")
 
 	txn.TransactionData = string(snBytes)
-	txn.Hash = txnHash(txn)
-	txn.Signature = sign(t, txn.Hash, from)
+	crypto.Hash(txn)
+	keypair := crypto.GenerateKeys(t, assigner.Mnemonic)
+	crypto.Sign(txn, keypair)
 
 	return txn
 }
@@ -445,17 +444,4 @@ func sign(t *testing.T, data string, wallet *climodel.WalletFile) string {
 	sig := sk.Sign(string(rawHash))
 
 	return sig.SerializeToHexStr()
-}
-
-func txnHash(txn *apimodel.Transaction) string {
-	hashdata := fmt.Sprintf("%v:%v:%v:%v:%v", txn.CreationDate, txn.ClientId,
-		txn.ToClientId, txn.TransactionValue, hash(txn.TransactionData))
-	return hash(hashdata)
-}
-
-func hash(data string) string {
-	h := sha3.New256()
-	h.Write([]byte(data))
-	var buf []byte
-	return hex.EncodeToString(h.Sum(buf))
 }
