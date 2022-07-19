@@ -35,6 +35,14 @@ func TestShutDownBlobber(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "shut down blobber", output[0])
 	})
+
+	t.Run("shutted down blobber should not be listed", func(t *testing.T) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		blobbers := getBlobbersList(t)
+		require.NotContains(t, blobbers, blobber)
+	})
 }
 
 func shutdownBlobber(t *testing.T, cliConfigFilename, params string) ([]string, error) {
