@@ -28,7 +28,10 @@ func TestShutDownBlobber(t *testing.T) {
 	blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
 	t.Run("Shutting down blobber by blobber's delegate wallet should work", func(t *testing.T) {
-		output, err := shutdownBlobberForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = shutdownBlobberForWallet(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}), blobberOwnerWallet)
 		require.Nil(t, err)
@@ -67,7 +70,7 @@ func TestShutDownBlobber(t *testing.T) {
 		// Should throw error as one of the 6 blobbers is shutdown
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"size":   1024,
-			"tokens": 1,
+			"lock":   1,
 			"data":   5,
 			"parity": 1,
 		}))
