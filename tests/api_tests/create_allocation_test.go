@@ -19,7 +19,7 @@ func TestCreateAllocation(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucet(t, registeredWallet, keyPair)
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 2147483648, 2, 2, time.Minute*5)
+		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 1147483648, 2, 2, time.Minute*5)
 		blobberRequirements.Blobbers = blobbers
 		transactionResponse, _ := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
