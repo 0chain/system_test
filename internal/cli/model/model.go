@@ -145,6 +145,9 @@ type BlobberInfo struct {
 	Allocated           int      `json:"allocated"`
 	Terms               Terms    `json:"terms"`
 	Stake_pool_settings Settings `json:"stake_pool_settings"`
+	TotalStake          int64    `json:"total_stake"`
+	IsShutDown          bool     `json:"is_shut_down"`
+	IsKilled            bool     `json:"is_killed"`
 }
 
 type ChallengePoolInfo struct {
