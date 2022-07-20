@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/zboxcore/zboxutil"
+	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -38,14 +40,18 @@ func TestShutDownBlobber(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "shut down blobber", output[0])
 
-		blobbers := getBlobbersList(t)
-		var blobberNew climodel.BlobberInfo
-		for _, blobberNew := range blobbers {
-			if blobberNew.Id == blobber.Id {
-				break
-			}
-		}
-		require.Equal(t, true, blobberNew.IsShutDown)
+		// blobber.IsShutDown should be true
+		var b []byte
+		params := make(map[string]string)
+		params["id"] = blobber.Id
+		b, err = zboxutil.MakeSCRestAPICall(storageSmartContractAddress, "/blobber-status", params, nil)
+		require.Nil(t, err)
+		require.NotEmpty(t, b, "empty response from sharders")
+
+		var status *apimodel.ProviderStatus
+		err = json.Unmarshal(b, status)
+		require.Nil(t, err)
+		require.Equal(t, 3, status.Status)
 	})
 
 	t.Run("shutted down blobber should not be listed", func(t *testing.T) {
