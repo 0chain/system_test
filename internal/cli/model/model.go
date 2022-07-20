@@ -349,15 +349,18 @@ type BlobberDetails struct {
 }
 
 type Validator struct {
-	ID             string  `json:"validator_id"`
-	BaseURL        string  `json:"url"`
-	PublicKey      string  `json:"-"`
-	DelegateWallet string  `json:"delegate_wallet"`
-	MinStake       int64   `json:"min_stake"`
-	MaxStake       int64   `json:"max_stake"`
-	NumDelegates   int     `json:"num_delegates"`
-	ServiceCharge  float64 `json:"service_charge"`
-	TotalStake     int64   `json:"stake"`
+	ID              string  `json:"validator_id"`
+	BaseURL         string  `json:"url"`
+	PublicKey       string  `json:"-"`
+	DelegateWallet  string  `json:"delegate_wallet"`
+	MinStake        int64   `json:"min_stake"`
+	MaxStake        int64   `json:"max_stake"`
+	NumDelegates    int     `json:"num_delegates"`
+	ServiceCharge   float64 `json:"service_charge"`
+	TotalStake      int64   `json:"stake"`
+	LastHealthCheck int64   `json:"last_health_check"`
+	IsKilled        bool    `json:"is_killed"`
+	IsShutDown      bool    `json:"is_shut_down"`
 }
 
 type FileDiff struct {
