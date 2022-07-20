@@ -552,7 +552,7 @@ func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params 
 	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
-			"--configDir ./config --config %s",
+			"--configDir ./config --config %s --lock 0.5",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
