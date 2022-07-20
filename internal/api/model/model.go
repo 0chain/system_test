@@ -162,6 +162,21 @@ type KeyPair struct {
 	PrivateKey bls.SecretKey
 }
 
+type Status int
+
+const (
+	Active Status = iota
+	Inactive
+	ShutDown
+	Killed
+	NonExistent
+)
+
+type ProviderStatus struct {
+	Status Status `json:"status"`
+	Reason string `json:"reason"`
+}
+
 type Confirmation struct {
 	Version               string          `json:"version"`
 	Hash                  string          `json:"hash"`
