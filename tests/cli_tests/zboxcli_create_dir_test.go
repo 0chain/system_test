@@ -109,8 +109,9 @@ func TestCreateDir(t *testing.T) {
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "consensus failed")
+		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "directory creation failed")
+		require.Contains(t, aggregatedOutput, "consensus not met")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
