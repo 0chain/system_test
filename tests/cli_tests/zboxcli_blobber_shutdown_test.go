@@ -47,10 +47,12 @@ func TestShutDownBlobber(t *testing.T) {
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock":   1,
-			"data":   5,
+			"data":   4,
 			"parity": 1,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		output, err = writePoolInfo(t, configPath, true)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -59,9 +61,6 @@ func TestShutDownBlobber(t *testing.T) {
 		initialWritePool := []climodel.WritePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
 		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		filesize := int64(256)
 		remotepath := "/"
