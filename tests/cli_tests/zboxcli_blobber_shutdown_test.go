@@ -3,11 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -40,18 +41,17 @@ func TestShutDownBlobber(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "shut down blobber", output[0])
 
-		// blobber.IsShutDown should be true
-		var b []byte
-		params := make(map[string]string)
-		params["id"] = blobber.Id
-		b, err = zboxutil.MakeSCRestAPICall(storageSmartContractAddress, "/blobber-status", params, nil)
-		require.Nil(t, err)
-		require.NotEmpty(t, b, "empty response from sharders")
-
-		var status *apimodel.ProviderStatus
-		err = json.Unmarshal(b, status)
-		require.Nil(t, err)
-		require.Equal(t, 3, status.Status)
+		// blobber.IsShutDown should be true for > 25% sharders
+		statuses := blobberStatusFromEndpoint(t, blobber.Id)
+		
+		var count int
+		totalSharders := 2
+		for _, status := range statuses {
+			if status.Status == apimodel.ShutDown {
+				count++
+			}
+		}
+		require.GreaterOrEqual(t, float64(count)/float64(totalSharders), 0.25)
 	})
 
 	t.Run("shutted down blobber should not be listed", func(t *testing.T) {
@@ -93,4 +93,43 @@ func shutdownBlobber(t *testing.T, cliConfigFilename, params string) ([]string, 
 func shutdownBlobberForWallet(t *testing.T, cliConfigFilename, params, wallet string) ([]string, error) {
 	t.Log("Requesting blobber info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox shut-down-blobber %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+}
+
+func blobberStatusFromEndpoint(t *testing.T, blobberId string) []apimodel.ProviderStatus {
+	var statuses []apimodel.ProviderStatus
+
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]*climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	// Get base URL for API calls.
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+
+	for _, sharderBaseURL := range sharderBaseURLs {
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
+			"/blobber-status" + "?id=" + blobberId))
+
+		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
+			continue
+		}
+
+		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
+
+		resBody, err := io.ReadAll(res.Body)
+		defer res.Body.Close()
+
+		require.Nil(t, err, "Error reading response body")
+		var status apimodel.ProviderStatus
+		err = json.Unmarshal(resBody, &status)
+		require.Nil(t, err, "error unmarshalling response body")
+
+		statuses = append(statuses, status)
+	}
+	return statuses
 }
