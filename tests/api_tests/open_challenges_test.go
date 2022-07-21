@@ -18,7 +18,7 @@ func TestOpenChallenges(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 2147483648, 2, 2, time.Minute*2)
+		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
 		require.NotNil(t, blobbers)
 		require.Greater(t, len(*blobbers), 3)
 		require.NotNil(t, blobberRequirements)
