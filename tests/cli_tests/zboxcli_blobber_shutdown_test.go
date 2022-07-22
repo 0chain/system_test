@@ -74,18 +74,17 @@ func TestShutDownBlobber(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "shut down blobber", output[0])
 
-		// FIXME: Uncomment
-		// // blobber.IsShutDown should be true for > 25% sharders
-		// statuses := blobberStatusFromEndpoint(t, blobber.Id)
+		// blobber.IsShutDown should be true for >25% sharders
+		statuses := blobberStatusFromEndpoint(t, blobber.Id)
 
-		// var count int
-		// totalSharders := 2
-		// for _, status := range statuses {
-		// 	if status.Status == apimodel.ShutDown {
-		// 		count++
-		// 	}
-		// }
-		// require.GreaterOrEqual(t, float64(count)/float64(totalSharders), 0.25)
+		var count int
+		totalSharders := 2
+		for _, status := range statuses {
+			if status.Status == apimodel.ShutDown {
+				count++
+			}
+		}
+		require.GreaterOrEqual(t, float64(count)/float64(totalSharders), 0.25)
 
 		alloc := getAllocation(t, allocationID)
 		require.Equal(t, 6, len(alloc.Blobbers))
