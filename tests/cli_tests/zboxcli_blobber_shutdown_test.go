@@ -86,8 +86,9 @@ func TestShutDownBlobber(t *testing.T) {
 		}
 		require.GreaterOrEqual(t, float64(count)/float64(totalSharders), 0.25)
 
-		alloc := getAllocation(t, allocationID)
-		require.Equal(t, 6, len(alloc.Blobbers))
+		// TODO: assert after Piers resolves this conversation: https://0chain.slack.com/archives/C02AV6MKT36/p1658507922330339?thread_ts=1658420971.568409&cid=C02AV6MKT36
+		// alloc := getAllocation(t, allocationID)
+		// require.Equal(t, 6, len(alloc.Blobbers))
 
 		// Get the new Write-Pool info after upload
 		output, err = writePoolInfo(t, configPath, true)
