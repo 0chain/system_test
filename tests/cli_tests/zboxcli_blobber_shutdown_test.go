@@ -67,6 +67,10 @@ func TestShutDownBlobber(t *testing.T) {
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 		originalFileChecksum := generateChecksum(t, filename)
 
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
 		output, err = shutdownBlobberForWallet(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}), blobberOwnerWallet)
