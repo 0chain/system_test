@@ -106,11 +106,11 @@ func TestShutDownBlobber(t *testing.T) {
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath,
+			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		downloadedFileChecksum := generateChecksum(t, os.TempDir()+string(os.PathSeparator)+filepath.Base(filename))
+		downloadedFileChecksum := generateChecksum(t, filepath.Join("tmp", filepath.Base(filename)))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
