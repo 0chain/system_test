@@ -40,13 +40,12 @@ func TestHealthChecks(t *testing.T) {
 	})
 
 	t.Run("health check validators", func(t *testing.T) {
-		output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
+		output, err := listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		require.Nil(t, err)
 
 		var validatorList []climodel.Validator
-		err = json.Unmarshal([]byte(output[0]), &validatorList)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		err = json.Unmarshal([]byte(output[3]), &validatorList)
+		require.Nil(t, err)
 		require.Greater(t, len(validatorList), 0, "validator list is empty")
 
 		for _, validatorInfo := range validatorList {
