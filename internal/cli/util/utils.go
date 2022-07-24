@@ -2,9 +2,11 @@ package cliutils
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -209,4 +211,21 @@ func Contains(slice []string, val string) (int, bool) {
 		}
 	}
 	return -1, false
+}
+
+// GetSubPaths will return [/ /a /a/b /a/b/c /a/b/c/d /a/b/c/d/e] for
+// path /a/b/c/d/e
+func GetSubPaths(p string) (paths []string, err error) {
+	if !filepath.IsAbs(p) {
+		return nil, fmt.Errorf("path %s is not absolute", p)
+	}
+
+	p = filepath.Clean(p)
+	splittedPaths := strings.Split(p, "/")
+	for i := 0; i < len(splittedPaths); i++ {
+		subPath := filepath.Join("/", strings.Join(splittedPaths[0:i+1], "/"))
+		paths = append(paths, subPath)
+	}
+
+	return
 }
