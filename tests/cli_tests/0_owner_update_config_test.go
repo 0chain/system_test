@@ -42,10 +42,14 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
+		var storageSCCommitPeriod int64 = 200
+		lfb := getLatestFinalizedBlock(t)
+		lfbRound := lfb.Round
+		updateConfigRound := lfbRound + (storageSCCommitPeriod - (lfbRound % storageSCCommitPeriod))
 		for {
 			time.Sleep(2 * time.Second)
-			lfb := getLatestFinalizedBlock(t)
-			if lfb.Round%200 == 0 {
+			lfb = getLatestFinalizedBlock(t)
+			if lfb.Round >= updateConfigRound {
 				break
 			}
 		}
