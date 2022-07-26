@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -41,8 +42,16 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
+		for {
+			time.Sleep(2 * time.Second)
+			lfb := getLatestFinalizedBlock(t)
+			if lfb.Round%200 == 0 {
+				break
+			}
+		}
+
 		output, err = getStorageSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 		cfgAfter, _ := keyValuePairStringToMap(t, output)
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
