@@ -6,6 +6,7 @@ import (
 	"math"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -91,7 +92,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
-		t.Skip("re-do till https://github.com/0chain/0chain/pull/1373 merges")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -116,36 +116,38 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
-		// Get initial write pool
-		cliutils.Wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
-		remotepath := filepath.Base(localpath)
-		moveAllocationFile(t, allocationID, remotepath, "newDir")
+		remotepath := "/" + filepath.Base(localpath)
 
-		cliutils.Wait(t, 10*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"destpath":   "/newdir/",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
 
-		// Get final write pool, no deduction should have been done
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance)
-		}
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
+
 		createAllocationTestTeardown(t, allocationID)
 	})
 

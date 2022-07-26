@@ -13,9 +13,8 @@ import (
 	"testing"
 	"time"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -89,34 +88,32 @@ func TestFileUpdate(t *testing.T) {
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		cliutils.Wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		// initial write pool
+		initialAllocation := getAllocation(t, allocationID)
 
 		// Update with same size
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, fileSize)
 
-		cliutils.Wait(t, 30*time.Second)
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
 
-		// Get final write pool, no deduction should have been made
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Equal(t, initialWritePool[0].Balance, finalWritePool[0].Balance, "Write pool balance expected to be unchanged")
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
-		for i := 0; i < len(finalWritePool[0].Blobber); i++ {
-			require.Regexp(t, regexp.MustCompile("([a-f0-9]{64})"), finalWritePool[0].Blobber[i].BlobberID)
-			t.Logf("Initital blobber[%v] balance: [%v], final balance: [%v]", i, initialWritePool[0].Blobber[i].Balance, finalWritePool[0].Blobber[i].Balance)
-			require.Equal(t, finalWritePool[0].Blobber[i].Balance, initialWritePool[0].Blobber[i].Balance)
-		}
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
+
 		createAllocationTestTeardown(t, allocationID)
 	})
 
