@@ -46,13 +46,19 @@ func TestOwnerUpdate(t *testing.T) {
 		lfb := getLatestFinalizedBlock(t)
 		lfbRound := lfb.Round
 		updateConfigRound := lfbRound + (storageSCCommitPeriod - (lfbRound % storageSCCommitPeriod))
-		for {
-			time.Sleep(2 * time.Second)
+		var frequency time.Duration = 2
+		var found bool
+		for i := 0; i < int(storageSCCommitPeriod)/int(frequency); i++ {
+			t.Logf("fetching lfb in: %ds...", frequency)
+			time.Sleep(frequency * time.Second)
 			lfb = getLatestFinalizedBlock(t)
 			if lfb.Round >= updateConfigRound {
+				found = true
 				break
 			}
 		}
+
+		require.True(t, found, "operation timed out to reach valid round")
 
 		output, err = getStorageSCConfig(t, configPath, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
