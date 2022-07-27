@@ -180,7 +180,6 @@ func TestMinerFeesPayment(t *testing.T) {
 		fee := 0.1
 		output, err = writePoolLock(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
-			"duration":   "2m",
 			"tokens":     1,
 			"fee":        fee,
 		}), true)
@@ -199,20 +198,12 @@ func TestMinerFeesPayment(t *testing.T) {
 		areMinerFeesPaidCorrectly := verifyMinerFeesPayment(t, &block, expectedMinerFee)
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
-		output, err = writePoolInfo(t, configPath, true)
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		writePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &writePool)
-		require.Nil(t, err, "error unmarshalling write pool", strings.Join(output, "\n"))
-
 		<-lockTimer.C
 
 		startBlock = getLatestFinalizedBlock(t)
 
 		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"pool_id": writePool[0].Id,
+			"pool_id": allocationId,
 			"fee":     fee,
 		}), true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
