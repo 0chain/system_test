@@ -12,7 +12,6 @@ import (
 )
 
 func TestSharderStake(t *testing.T) {
-	t.Skip("till issue https://github.com/0chain/0chain/issues/1484")
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
