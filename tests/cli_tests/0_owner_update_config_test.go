@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +22,6 @@ func TestOwnerUpdate(t *testing.T) {
 	newOwnerName := escapedTestName(t)
 
 	t.Run("should allow update of owner: StorageSC", func(t *testing.T) {
-		t.Skip("Skip till fixed")
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -42,8 +42,26 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
+		var storageSCCommitPeriod int64 = 200
+		lfb := getLatestFinalizedBlock(t)
+		lfbRound := lfb.Round
+		updateConfigRound := lfbRound + (storageSCCommitPeriod - (lfbRound % storageSCCommitPeriod))
+		var frequency time.Duration = 2
+		var found bool
+		for i := 0; i < int(storageSCCommitPeriod)/int(frequency); i++ {
+			t.Logf("fetching lfb in: %ds...", frequency)
+			time.Sleep(frequency * time.Second)
+			lfb = getLatestFinalizedBlock(t)
+			if lfb.Round >= updateConfigRound {
+				found = true
+				break
+			}
+		}
+
+		require.True(t, found, "operation timed out to reach valid round")
+
 		output, err = getStorageSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 		cfgAfter, _ := keyValuePairStringToMap(t, output)
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
