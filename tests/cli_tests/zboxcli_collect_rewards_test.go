@@ -30,15 +30,8 @@ func TestCollectRewards(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &blobbers)
-		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-
 		// Pick a random blobber
+		blobbers := getBlobbersList(t)
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
 		// Stake tokens against this blobber
@@ -58,11 +51,11 @@ func TestCollectRewards(t *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		// Use all 6 blobbers
+		// Use all blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"data":   5,
+			"data":   len(blobbers) - 1,
 			"parity": 1,
 		})
 

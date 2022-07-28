@@ -351,12 +351,11 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	for _, sharderBaseURL := range sharderBaseURLs {
 		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
 			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)))
+
 		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
 			continue
 		}
 
-		require.Nil(t, err, "error getting challenges", res)
-		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
 		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
 		resBody, err := io.ReadAll(res.Body)
