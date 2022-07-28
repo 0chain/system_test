@@ -54,13 +54,13 @@ func TestShutDownBlobber(t *testing.T) {
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		//output, err = writePoolInfo(t, configPath, true)
+		//require.Len(t, output, 1, strings.Join(output, "\n"))
+		//require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		//initialWritePool := []climodel.WritePoolInfo{}
+		//err = json.Unmarshal([]byte(output[0]), &initialWritePool)
+		//require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		filesize := int64(256)
 		remotepath := "/"
@@ -95,14 +95,14 @@ func TestShutDownBlobber(t *testing.T) {
 		// require.Equal(t, 6, len(alloc.Blobbers))
 
 		// Get the new Write-Pool info after upload
-		output, err = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
+		//output, err = writePoolInfo(t, configPath, true)
+		//require.Len(t, output, 1, strings.Join(output, "\n"))
+		//require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
 
 		// TODO: Assert on writepool balance after https://github.com/0chain/0chain/pull/1373 is merged
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
+		//finalWritePool := []climodel.WritePoolInfo{}
+		//err = json.Unmarshal([]byte(output[0]), &finalWritePool)
+		//require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
