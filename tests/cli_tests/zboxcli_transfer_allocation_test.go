@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,8 +9,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	climodel "github.com/0chain/system_test/internal/cli/model"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -93,19 +90,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		time.Sleep(time.Second * 10) // Wait for 10 seconds before retrieving wp info
-		output, _ = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		initialWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Len(t, initialWritePool, 1)
-
-		require.True(t, initialWritePool[0].Locked, strings.Join(output, "\n"))
-		require.Equal(t, allocationID, initialWritePool[0].Id, strings.Join(output, "\n"))
-		require.Equal(t, allocationID, initialWritePool[0].AllocationId, strings.Join(output, "\n"))
+		initialAllocation := getAllocation(t, allocationID)
 
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,
@@ -134,6 +119,9 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0],
 			"get balance - Unexpected output", strings.Join(output, "\n"))
 
+		// write lock pool of old owner should remain locked
+		cliutils.Wait(t, 2*time.Minute)
+
 		// Get expected upload cost
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, file)
 
@@ -147,27 +135,11 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
 
-		// write lock pool of old owner should remain locked
-		cliutils.Wait(t, 2*time.Minute)
-		output, _ = writePoolInfo(t, configPath, true)
-		require.Len(t, output, 1, "write pool info - Unexpected output", strings.Join(output, "\n"))
-		require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-
-		finalWritePool := []climodel.WritePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalWritePool)
-		require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		require.Len(t, finalWritePool, 1)
-
-		t.Logf("Initial WP balance: %v. Final WP balance: %v",
-			initialWritePool[0].Balance, finalWritePool[0].Balance)
-
-		actualCost := initialWritePool[0].Balance - finalWritePool[0].Balance
+		finalAllocation := getAllocation(t, allocationID)
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
 
 		// If a challenge has passed for upload, writepool balance should reduce, else, remain same
 		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
-		require.True(t, finalWritePool[0].Locked, strings.Join(output, "\n"))
-		require.Equal(t, allocationID, finalWritePool[0].Id, strings.Join(output, "\n"))
-		require.Equal(t, allocationID, finalWritePool[0].AllocationId, strings.Join(output, "\n"))
 	})
 
 	t.Run("transfer allocation by owner should work", func(t *testing.T) {
@@ -737,7 +709,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.5,
-			"duration":   "1h",
 		}), true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "write pool lock - Unexpected output", strings.Join(output, "\n"))
@@ -979,7 +950,6 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     0.5,
-			"duration":   "24h",
 		}), false)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "write pool lock - Unexpected output", strings.Join(output, "\n"))
