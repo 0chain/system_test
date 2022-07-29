@@ -43,39 +43,8 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 	return output, err
 }
 
-func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
-	red := "\033[31m"
-	yellow := "\033[33m"
-	green := "\033[32m"
-
-	var count int
-	for {
-		count++
-		output, err := RunCommandWithoutRetry(commandString)
-
-		if err == nil {
-			if count > 1 {
-				t.Logf("%sCommand passed on retry [%v/%v]. Output: [%v]\n", green, count, maxAttempts, strings.Join(output, " -<NEWLINE>- "))
-			}
-			return output, nil
-		} else if count < maxAttempts {
-			t.Logf("%sCommand failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", yellow, count, maxAttempts, err, strings.Join(output, " -<NEWLINE>- "))
-			time.Sleep(backoff)
-		} else {
-			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
-
-			if err != nil {
-				t.Logf("%sThe verbose output for the command is:", red)
-				commandString = strings.Replace(commandString, "--silent", "", 1)
-				out, _ := RunCommandWithoutRetry(commandString) // Only for logging!
-				for _, line := range out {
-					t.Logf("%s%s", red, line)
-				}
-			}
-
-			return output, err
-		}
-	}
+func RunCommand(t *testing.T, commandString string, _ int, _ time.Duration) ([]string, error) {
+	return RunCommandWithoutRetry(commandString)
 }
 
 func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
