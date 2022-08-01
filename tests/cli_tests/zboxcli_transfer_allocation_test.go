@@ -227,8 +227,10 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 	t.Run("transfer an expired allocation", func(t *testing.T) {
 		t.Parallel()
 
+		expDuration := int64(15) // In secs
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": fmt.Sprintf("\"%ds\"", expDuration),
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -243,14 +245,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// Wait till the allocation expires
+		cliutils.Wait(t, time.Duration(expDuration*int64(time.Second)))
 
 		alloc := getAllocation(t, allocationID)
 		require.False(t, alloc.Finalized)
@@ -321,8 +317,10 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 	t.Run("transfer a finalized allocation", func(t *testing.T) {
 		t.Parallel()
 
+		expDuration := int64(15)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": fmt.Sprintf("\"%ds\"", expDuration),
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -337,14 +335,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation first
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// Wait till the allocation expires
+		cliutils.Wait(t, time.Duration(expDuration*int64(time.Second)))
 
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.Nil(t, err, strings.Join(output, "\n"))

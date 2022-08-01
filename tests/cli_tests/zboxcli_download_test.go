@@ -1315,11 +1315,12 @@ func TestDownload(t *testing.T) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
+		expDuration := int64(15) // in secs
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"expire": "1h",
+			"expire": fmt.Sprintf("\"%ds\"", expDuration),
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1328,14 +1329,9 @@ func TestDownload(t *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		// Wait for allocation to expire
+		cliutils.Wait(t, time.Duration(expDuration*int64(time.Second)))
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
