@@ -81,7 +81,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 5)
 
 		result := RecentlyAddedRefResult{}
 		err = json.Unmarshal([]byte(output[0]), &result)
@@ -134,7 +134,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 5)
 
 		result := RecentlyAddedRefResult{}
 		err = json.Unmarshal([]byte(output[0]), &result)
@@ -152,7 +152,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			"size": 10000,
 		})
 
-		_, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
+		output, err := listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
 			"from_date":  "6m",
@@ -160,9 +160,10 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}), true)
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid argument")
+		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "invalid argument")
 
-		_, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
+		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
 			"from_date":  "invalid string",
@@ -170,7 +171,8 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}), true)
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid argument")
+		aggregatedOutput = strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "invalid argument")
 	})
 
 }
