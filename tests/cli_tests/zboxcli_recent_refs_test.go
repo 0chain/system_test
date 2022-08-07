@@ -84,7 +84,8 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Len(t, output, 5)
 
 		result := RecentlyAddedRefResult{}
-		err = json.Unmarshal([]byte(output[0]), &result)
+
+		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
 		require.Nil(t, err)
 
 		paths, err := cliutils.GetSubPaths(remotePath)
@@ -96,7 +97,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 
 		for i := 0; i < len(paths); i++ {
 			expectedPath := paths[i]
-			actualPath := result.Refs[i]
+			actualPath := result.Refs[i].Path
 			require.Equal(t, expectedPath, actualPath)
 		}
 	})
@@ -137,7 +138,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Len(t, output, 5)
 
 		result := RecentlyAddedRefResult{}
-		err = json.Unmarshal([]byte(output[0]), &result)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
 		require.Nil(t, err)
 
 		require.Nil(t, err)
