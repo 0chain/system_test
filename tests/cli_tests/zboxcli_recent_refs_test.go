@@ -91,14 +91,14 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		paths, err := cliutils.GetSubPaths(remotePath)
 
 		require.Nil(t, err)
-		require.Equal(t, 1, result.TotalPages)
-		require.Equal(t, len(paths), result.Offset)
-		require.Len(t, result.Refs, len(paths))
+		require.Equal(t, 1, result.TotalPages, "output: ", strings.Join(output, "\n"))
+		require.Equal(t, len(paths), result.Offset, "output: ", strings.Join(output, "\n"))
+		require.Len(t, result.Refs, len(paths), "output: ", strings.Join(output, "\n"))
 
 		for i := 0; i < len(paths); i++ {
 			expectedPath := paths[i]
 			actualPath := result.Refs[i].Path
-			require.Equal(t, expectedPath, actualPath)
+			require.Equal(t, expectedPath, actualPath, "output: ", strings.Join(output, "\n"))
 		}
 	})
 
