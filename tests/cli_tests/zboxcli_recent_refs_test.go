@@ -56,7 +56,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			"size": 10000,
 		})
 
-		// t2 := time.Now()
+		t2 := time.Now()
 		fileSize := int64(10)
 		p := "/d1/d2/d3/d4/d5/d6/"
 		fPath := generateRandomTestFileName(t)
@@ -64,7 +64,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		remotePath := filepath.Join(p, fileName)
 		err := createFileWithSize(fPath, fileSize)
 		require.Nil(t, err)
-		t1 := time.Now()
+// 		t1 := time.Now()
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  fPath,
@@ -78,7 +78,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"from_date":  fmt.Sprintf("%v", time.Since(t1)),
+			"from_date":  fmt.Sprintf("%v", time.Since(t2)),
 			"page":       1,
 		}), true)
 
