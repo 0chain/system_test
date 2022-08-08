@@ -56,6 +56,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			"size": 10000,
 		})
 
+		// t2 := time.Now()
 		fileSize := int64(10)
 		p := "/d1/d2/d3/d4/d5/d6/"
 		fPath := generateRandomTestFileName(t)
@@ -73,6 +74,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
+		time.Sleep(time.Second * 30)
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
