@@ -15,9 +15,8 @@ import (
 )
 
 type RecentlyAddedRefResult struct {
-	TotalPages int    `json:"total_pages"`
-	Offset     int    `json:"offset"`
-	Refs       []ORef `json:"refs"`
+	Offset int    `json:"offset"`
+	Refs   []ORef `json:"refs"`
 }
 
 type ORef struct {
@@ -94,7 +93,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		paths, err := cliutils.GetSubPaths(remotePath)
 
 		require.Nil(t, err)
-		require.Equal(t, 1, result.TotalPages, "output: ", strings.Join(output, "\n"))
 		require.Equal(t, len(paths), result.Offset, "output: ", strings.Join(output, "\n"))
 		require.Len(t, result.Refs, len(paths), "output: ", strings.Join(output, "\n"))
 
@@ -145,7 +143,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err)
 
 		require.Nil(t, err)
-		require.Equal(t, 0, result.TotalPages)
 		require.Equal(t, 0, result.Offset)
 		require.Len(t, result.Refs, 0)
 
