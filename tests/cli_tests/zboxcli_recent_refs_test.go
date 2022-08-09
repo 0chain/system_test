@@ -64,7 +64,9 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		remotePath := filepath.Join(p, fileName)
 		err := createFileWithSize(fPath, fileSize)
 		require.Nil(t, err)
-// 		t1 := time.Now()
+
+		time.Sleep(time.Second * 30)
+
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  fPath,
@@ -74,7 +76,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		time.Sleep(time.Second * 30)
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
