@@ -67,6 +67,8 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 90
     steps:
+      - name: "Get current User"
+        run: echo "Kicked off by user ${{ github.actor }}]
       - name: "Get current PR"
         uses: jwalton/gh-find-current-pr@v1
         id: findPr
