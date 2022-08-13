@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -98,7 +99,11 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
+		require.Nil(t, err, "error parsing float from balance")
+		require.GreaterOrEqual(t, newBalanceValue, float64(1.0))
 
 		// Pool Id must be deleted from stake pool now
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
