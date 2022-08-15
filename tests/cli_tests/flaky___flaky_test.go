@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -11,7 +10,6 @@ import (
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
 
