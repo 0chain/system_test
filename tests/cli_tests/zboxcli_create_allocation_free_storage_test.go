@@ -30,6 +30,12 @@ const (
 
 	freeTokensIndividualLimit = 10.0
 	freeTokensTotalLimit      = 100.0
+
+	configKeyDataShards       = "free_allocation_settings.data_shards"
+	configKeyParityShards     = "free_allocation_settings.parity_shards"
+	configKeySize             = "free_allocation_settings.size"
+	configKeyDuration         = "free_allocation_settings.duration"
+	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
@@ -55,6 +61,12 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	output, err = registerWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
+	output, err = getStorageSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+	cfg, _ := keyValuePairStringToMap(t, output)
+
 	// miners list
 	output, err = getMiners(t, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
@@ -78,7 +90,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 
 	t.Parallel()
 
-	// FIXME not working at the moment
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
 		recipient := escapedTestName(t)
 
@@ -111,36 +122,23 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Nil(t, err, "Could not write file marker")
 
 		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
-		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders", output[0])
-		// FIXME disabled as not working as expected
-		// require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		// require.Len(t, output, 1)
-		// matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-		// require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
-		// allocationID := strings.Fields(output[0])[2]
-		//
-		// readPoolFraction, err := strconv.ParseFloat(cfgBefore[configKeyReadPoolFraction], 64)
-		// require.Nil(t, err, "Read pool fraction config is not float: %s", cfgBefore[configKeyReadPoolFraction])
-		//
-		// wantReadPoolFraction := marker.FreeTokens * readPoolFraction
-		// wantWritePoolToken := marker.FreeTokens - wantReadPoolFraction
-		//
-		// // Verify write and read pools are set with tokens
-		// output, err = writePoolInfo(t, configPath, true)
-		// require.Len(t, output, 1, strings.Join(output, "\n"))
-		// require.Nil(t, err, "error fetching write pool info", strings.Join(output, "\n"))
-		//
-		// writePool := []climodel.WritePoolInfo{}
-		// err = json.Unmarshal([]byte(output[0]), &writePool)
-		// require.Nil(t, err, "Error unmarshalling write pool info", strings.Join(output, "\n"))
-		// require.Len(t, writePool, 1, "More than 1 write pool found", strings.Join(output, "\n"))
-		// require.Equal(t, ConvertToValue(wantWritePoolToken), writePool[0].Balance, "Expected write pool amount not met", strings.Join(output, "\n"))
-		//
-		// readPool := getReadPoolInfo(t, allocationID)
-		// require.Len(t, readPool, 1, "Read pool must exist")
-		// require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool[0].Balance, "Read Pool balance must be equal to locked amount")
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		readPoolFraction, err := strconv.ParseFloat(cfg[configKeyReadPoolFraction], 64)
+		require.Nil(t, err, "Read pool fraction config is not float: %s", cfg[configKeyReadPoolFraction])
+
+		wantReadPoolFraction := marker.FreeTokens * readPoolFraction
+		wantWritePoolToken := marker.FreeTokens - wantReadPoolFraction
+
+		allocation := getAllocation(t, allocationID)
+		require.Equal(t, ConvertToValue(wantWritePoolToken),allocation.WritePool, "Expected write pool amount not met", strings.Join(output, "\n"))
+
+		readPool := getReadPoolInfo(t)
+		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
 	})
 
 	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
@@ -172,7 +170,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Equal(t, "Error creating free allocation: free_allocation_failed: error getting assigner details: value not present", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
 	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
@@ -205,7 +203,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
 	})
 
 	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
@@ -246,7 +244,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile("Error creating free allocation: free_allocation_failed: marker verification failed: marker timestamped in the future: ([0-9]{10})"), output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
 	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
@@ -283,7 +281,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: free_allocation_failed:marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
 	})
 }
 
