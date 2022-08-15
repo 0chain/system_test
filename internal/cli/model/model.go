@@ -6,6 +6,8 @@ import (
 
 type Provider int
 
+type Timestamp int64
+
 const (
 	ProviderMiner Provider = iota + 1
 	ProviderSharder
@@ -59,6 +61,8 @@ type Allocation struct {
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
 
+	WritePool int64 `json:"write_pool"`
+
 	// BlobberDetails contains real terms used for the allocation.
 	// If the allocation has updated, then terms calculated using
 	// weighted average values.
@@ -89,21 +93,12 @@ type AllocationFile struct {
 	Hash string `json:"hash"`
 }
 type Blobber struct {
-	BlobberID string `json:"blobber_id"`
-	Balance   int64  `json:"balance"`
+	ID      string `json:"id"`
+	Baseurl string `json:"url"`
 }
 
 type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
-}
-
-type WritePoolInfo struct {
-	Id           string    `json:"id"`
-	Balance      int64     `json:"balance"`
-	ExpireAt     int64     `json:"expire_at"`
-	AllocationId string    `json:"allocation_id"`
-	Blobber      []Blobber `json:"blobbers"`
-	Locked       bool      `json:"locked"`
 }
 
 type ListFileResult struct {
@@ -118,8 +113,8 @@ type ListFileResult struct {
 	EncryptionKey   string    `json:"encryption_key"`
 	ActualSize      int64     `json:"actual_size"`
 	ActualNumBlocks int       `json:"actual_num_blocks"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       Timestamp `json:"created_at"`
+	UpdatedAt       Timestamp `json:"updated_at"`
 }
 
 type Terms struct {
