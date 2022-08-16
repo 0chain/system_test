@@ -18,14 +18,15 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
-	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
+
+	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
+	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching wallet")
 
-	sharderNodeWallet, err := getWalletForName(t, configPath, sharderNodeWalletName)
+	sharderNodeWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching wallet")
 
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *testing.T) {

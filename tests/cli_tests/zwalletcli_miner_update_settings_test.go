@@ -20,9 +20,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
-	if _, err := os.Stat("./config/" + minerNodeWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+minerNodeWalletName+"_wallet.json")
-	}
 
 	mnConfig := getMinerSCConfiguration(t)
 	output, err := listMiners(t, configPath, "--json")
@@ -37,7 +34,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error converting nonce to in")
 
 	require.Nil(t, err, "error fetching minerNode wallet")
-	minerNodeWallet, err := getWalletForName(t, configPath, minerNodeWalletName)
+	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching minerNode wallet")
 
 	var miners climodel.MinerSCNodes
