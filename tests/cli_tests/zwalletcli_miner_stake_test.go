@@ -109,7 +109,6 @@ func TestMinerStake(t *testing.T) {
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
 		require.Nil(t, err, "error unmarshalling Miner SC user pool info")
-		beforeNumPools := len(poolsInfoBefore.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
@@ -138,10 +137,23 @@ func TestMinerStake(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[miner.ID], 2)
-		require.Equal(t, poolId1, poolsInfo.Pools[miner.ID][beforeNumPools].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][beforeNumPools].Balance))
-		require.Equal(t, poolId2, poolsInfo.Pools[miner.ID][1+beforeNumPools].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner.ID][1+beforeNumPools].Balance))
+
+		foundPool1 := false
+		foundPool2 := false
+		
+		for _, pool := range poolsInfo.Pools[miner.ID] {
+			if pool.ID == poolId1 {
+				require.Equal(t, float64(1), intToZCN(pool.Balance))
+				foundPool1 = true
+			}
+			if pool.ID == poolId2 {
+				require.Equal(t, float64(1), intToZCN(pool.Balance))
+				foundPool2 = true
+			}
+		}
+
+		require.True(t, foundPool1, "Created pool was not listed")
+		require.True(t, foundPool2, "Created pool was not listed")
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
