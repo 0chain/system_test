@@ -166,7 +166,7 @@ func TestMinerStake(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_add: digging delegate pool: no tokens to lock", output[0])
+		require.Equal(t, "delegate_pool_add: digging delegate pool: lock amount is greater than balance", output[0])
 
 	})
 
@@ -200,7 +200,7 @@ func TestMinerStake(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking negative tokens but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:submit transaction failed. {"code":"invalid_request","error":"invalid_request: Invalid request (value must be greater than or equal to zero)"}`, output[0])
+		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
 	// todo rewards not transferred to wallet until a collect reward transaction
