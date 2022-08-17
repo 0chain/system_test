@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -310,28 +309,12 @@ func TestMinerStake(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
-		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-		nonceStr := strings.Split(ret[0], ":")[1]
-		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-		require.Nil(t, err, "error converting nonce to in")
-
-		nonce++
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
-		}), nonce, true)
+		}), true)
 		require.Nil(t, err)
-
-		defer func() {
-			nonce++
-			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-				"id":        minerNodeWallet.ClientID,
-				"min_stake": 0,
-			}), nonce, true)
-			require.Nil(t, err)
-		}()
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     minerNodeWallet.ClientID,

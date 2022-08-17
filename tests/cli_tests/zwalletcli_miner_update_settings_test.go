@@ -62,7 +62,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": miner.Settings.MaxNumDelegates,
 			"min_stake":     miner.Settings.MinStake / 1e10,
 			"max_stake":     miner.Settings.MaxStake / 1e10,
-		}), nonce, true)
+		}), true)
 		require.Nil(t, err, "error reverting miner settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
@@ -96,7 +96,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
-		}), n, true)
+		}), true)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
@@ -136,7 +136,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
-		}), n, true)
+		}), true)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
@@ -175,7 +175,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": 99,
-		}), n, true)
+		}), true)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
@@ -217,7 +217,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"num_delegates": 5,
 			"max_stake":     99,
 			"min_stake":     1,
-		}), n, true)
+		}), true)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
@@ -249,7 +249,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -266,7 +266,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -283,7 +283,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error when updating max_stake to greater than global max but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -301,7 +301,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 51,
 			"max_stake": 48,
-		}), n, false)
+		}), false)
 		require.NotNil(t, err, "Expected error when trying to update max_stake to less than min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
@@ -317,7 +317,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": -1,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -334,7 +334,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": -1,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -351,7 +351,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": -1,
-		}), n, false)
+		}), false)
 
 		require.NotNil(t, err, "expected error on negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -366,7 +366,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		revertChanges(n)
 		t.Log("start test")
 		//doesn't matter what nonce is used
-		output, err := minerUpdateSettings(t, configPath, "", 0, false)
+		output, err := minerUpdateSettings(t, configPath, "", false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
@@ -381,7 +381,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		t.Log("start test")
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id": minerNodeWallet.ClientID,
-		}), n, false)
+		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
 		require.Len(t, output, 2)
@@ -401,7 +401,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            minerNodeWallet.ClientID,
 			"num_delegates": 5,
-		}), escapedTestName(t), n, false)
+		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
@@ -411,7 +411,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"min_stake": 1,
-		}), escapedTestName(t), n, false)
+		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
@@ -421,7 +421,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        minerNodeWallet.ClientID,
 			"max_stake": 99,
-		}), escapedTestName(t), n, false)
+		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
@@ -432,14 +432,13 @@ func listMiners(t *testing.T, cliConfigFilename, params string) ([]string, error
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
-func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, nonce int64, retry bool) ([]string, error) {
-	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, miner01NodeDelegateWalletName, nonce, retry)
+func minerUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return minerUpdateSettingsForWallet(t, cliConfigFilename, params, miner01NodeDelegateWalletName, retry)
 }
 
-func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, nonce int64, retry bool) ([]string, error) {
+func minerUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("Updating miner settings...")
-	t.Log(t.Name(), nonce)
-	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --withNonce %v --wallet %s_wallet.json --configDir ./config --config %s", params, nonce, wallet, cliConfigFilename)
+	cmd := fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*10)
 	} else {
