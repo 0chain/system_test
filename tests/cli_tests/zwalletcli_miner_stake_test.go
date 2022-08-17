@@ -28,13 +28,6 @@ func TestMinerStake(t *testing.T) {
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
-
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
@@ -43,12 +36,7 @@ func TestMinerStake(t *testing.T) {
 	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
-	var miner climodel.Node
-	for _, miner = range miners.Nodes {
-		if miner.ID != minerNodeWallet.ClientID {
-			break
-		}
-	}
+	miner := miners.Nodes[0]
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
@@ -317,10 +305,16 @@ func TestMinerStake(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		ret, err := getNonceForWallet(t, configPath, miner01NodeDelegateWalletName, true)
+		require.Nil(t, err, "error fetching minerNodeDelegate nonce")
+		nonceStr := strings.Split(ret[0], ":")[1]
+		nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
+		require.Nil(t, err, "error converting nonce to in")
+
 		nonce++
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": 1,
 		}), nonce, true)
 		require.Nil(t, err)
