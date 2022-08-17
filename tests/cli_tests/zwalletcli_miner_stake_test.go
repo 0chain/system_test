@@ -36,7 +36,12 @@ func TestMinerStake(t *testing.T) {
 	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
-	miner := miners.Nodes[0]
+	var miner climodel.Node
+	for _, miner = range miners.Nodes {
+		if miner.ID == minerNodeWallet.ClientID {
+			break
+		}
+	}
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
@@ -128,7 +133,7 @@ func TestMinerStake(t *testing.T) {
 
 		foundPool1 := false
 		foundPool2 := false
-		
+
 		for _, pool := range poolsInfo.Pools[miner.ID] {
 			if pool.ID == poolId1 {
 				require.Equal(t, float64(1), intToZCN(pool.Balance))

@@ -1,1 +1,14 @@
-{"client_id":"be284e8726fc5de9b19cb5b3d512226d6c17a82e2792f6e64182ded74c3bd97c","client_key":"7a1ee306e8a5d66906df19654bf9b848480434e30d7e419141f255118aa1c521bb325185156066df48b4e167b5823a20417ed76b9db71cc47798094e5f1ad313","keys":[{"public_key":"7a1ee306e8a5d66906df19654bf9b848480434e30d7e419141f255118aa1c521bb325185156066df48b4e167b5823a20417ed76b9db71cc47798094e5f1ad313","private_key":"ef6986cc46ebb6c1681e5bd4163fbb9ca1a743e5615ffeae456c6102195d4f11"}],"mnemonics":"forget grow border base swallow jaguar reflect giraffe common lift idea blame inherit truly letter repair pig usual snack diary early present anger expand","version":"1.0","date_created":"2022-05-15T23:13:45+03:00","nonce":0}
+{
+    "client_id": "73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949",
+    "client_key": "257acfae61512fb1f4a886b0dbe949dc94497132448d1674f37f912c00e3ba1c6d4555ac58b44d4f8fe7228fb55c1f888ae3aa7901068eefd022613f05999415",
+    "keys": [
+        {
+            "public_key": "257acfae61512fb1f4a886b0dbe949dc94497132448d1674f37f912c00e3ba1c6d4555ac58b44d4f8fe7228fb55c1f888ae3aa7901068eefd022613f05999415",
+            "private_key": "80cddf5b463584ed74d3208a3787592e06830ec7130de1df2362167d93563c1b"
+        }
+    ],
+    "mnemonics": "forget grow border base swallow jaguar reflect giraffe common lift idea blame inherit truly letter repair pig usual snack diary early present anger expand",
+    "version": "1.0",
+    "date_created": "2022-05-15T23:13:45+03:00",
+    "nonce": 0
+}

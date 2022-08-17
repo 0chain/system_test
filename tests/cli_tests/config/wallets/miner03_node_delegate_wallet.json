@@ -1,1 +1,14 @@
-{"client_id":"0e04879ca724d6e2f7554281cada2cf7e08174454d3798e9fb5beb7067fe8bf2","client_key":"1dc3a1e000d51726ace6fa7899e576cee30d04e92e1235cbfc126012be6baf18856308cf257e67e3bcab55bb03a6859ba4d58c0ddf29635bd740811df7acfa93","keys":[{"public_key":"1dc3a1e000d51726ace6fa7899e576cee30d04e92e1235cbfc126012be6baf18856308cf257e67e3bcab55bb03a6859ba4d58c0ddf29635bd740811df7acfa93","private_key":"083290f20f97e4171d6f3161fbcad2b06c93faf05187d2bc08ab944aa7cac211"}],"mnemonics":"key unlock phrase kidney accident swing sing picture pulp cover system myth price protect emotion comic oppose coach nose strategy better arctic tone mean","version":"1.0","date_created":"2022-05-15T23:44:36+03:00","nonce":0}
+{
+    "client_id": "c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937",
+    "client_key": "b5b91306a507aa0605be7a42cfc8a3a80e7747a95a9c5fe152836f6ae61666150a2d3f72fbf5368bd088740ae579eece77b798d79c00edc4ad63cdf3095b3424",
+    "keys": [
+        {
+            "public_key": "b5b91306a507aa0605be7a42cfc8a3a80e7747a95a9c5fe152836f6ae61666150a2d3f72fbf5368bd088740ae579eece77b798d79c00edc4ad63cdf3095b3424",
+            "private_key": "a61610b8f9286e334054835eda1d240256a48e93d64aee48cdf1a9a4b2f74d19"
+        }
+    ],
+    "mnemonics": "key unlock phrase kidney accident swing sing picture pulp cover system myth price protect emotion comic oppose coach nose strategy better arctic tone mean",
+    "version": "1.0",
+    "date_created": "2022-05-15T23:44:36+03:00",
+    "nonce": 0
+}
