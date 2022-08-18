@@ -91,6 +91,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
+		t.Parallel()
+
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -135,13 +137,15 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		wantWritePoolToken := marker.FreeTokens - wantReadPoolFraction
 
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, ConvertToValue(wantWritePoolToken),allocation.WritePool, "Expected write pool amount not met", strings.Join(output, "\n"))
+		require.Equal(t, ConvertToValue(wantWritePoolToken), allocation.WritePool, "Expected write pool amount not met", strings.Join(output, "\n"))
 
 		readPool := getReadPoolInfo(t)
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
 	})
 
 	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
+		t.Parallel()
+
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -158,6 +162,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 
 	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
+		t.Parallel()
+
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -174,6 +180,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 
 	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
+		t.Parallel()
+
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -207,6 +215,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 
 	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
+		t.Parallel()
+
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
 		// register correct recipient wallet
@@ -248,6 +258,8 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 
 	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
+		t.Parallel()
+
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
