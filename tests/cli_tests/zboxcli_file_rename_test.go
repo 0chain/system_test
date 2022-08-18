@@ -543,7 +543,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Equal(t, "rename failed: Rename request failed. Operation failed", output[0])
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *testing.T) {
@@ -591,7 +591,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Equal(t, "rename failed: Rename request failed. Operation failed", output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
