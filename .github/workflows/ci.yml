@@ -131,26 +131,26 @@ jobs:
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
 
-      - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@action-update
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+      # - name: "Run System tests"
+      #   uses: 0chain/actions/run-system-tests@action-update
+      #   with:
+      #     network: ${{ env.NETWORK_URL }}
+      #     zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+      #     zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+      #     svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+      #     deploy_report_page: true
+      #     archive_results: true
+      #     run_flaky_tests: true
+      #     test_file_filter: ${{ env.TEST_FILE_FILTER }}
 
-      - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@action-update
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests with default config ${{ job.status }}"
-          state: ${{ job.status }}
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
+      # - name: "Set PR status as ${{ job.status }}"
+      #   if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+      #   uses: 0chain/actions/set-pr-status@action-update
+      #   with:
+      #     pr_number: ${{ steps.findPr.outputs.pr }}
+      #     description: "System tests with default config ${{ job.status }}"
+      #     state: ${{ job.status }}
+      #     repository: ${{ github.repository }}
+      #     status_name: "0Chain System Tests"
+      #     target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      #     github_token: ${{ github.token }}
