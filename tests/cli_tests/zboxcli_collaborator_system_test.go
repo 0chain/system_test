@@ -481,7 +481,7 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.NotNil(t, err, "Unexpected success in renaming the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "rename failed: Rename request failed. Operation failed"
+		expectedOutput := "Rename failed: Rename request failed. Operation failed."
 		require.Equal(t, expectedOutput, output[0], "Unexpected output when renaming the file", strings.Join(output, "\n"))
 	})
 
