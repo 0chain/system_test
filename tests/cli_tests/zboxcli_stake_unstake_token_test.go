@@ -17,7 +17,7 @@ import (
 func TestStakeUnstakeTokens(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Staked tokens should move from wallet to Blobber's stake pool info, unstaking should move them back to wallet", func(t *testing.T) {
+	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -93,7 +93,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
+		require.Equal(t, "tokens unlocked, pool deleted", output[0])
 
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
@@ -130,19 +130,21 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.False(t, found, "Pool id found in blobber's sp-info even after unlocking tokens", strings.Join(output, "\n"))
 	})
 
-	t.Run("Staking tokens without specifying amout of tokens to lock should fail", func(t *testing.T) {
+	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = stakeTokens(t, configPath, "", false)
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": "-",
+		}), false)
 		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
 
-	t.Run("Staking tokens without specifying blobber lead to consensus failed on sharders", func(t *testing.T) {
+	t.Run("Staking tokens without specifying blobber or validator should generate corresponding error", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
