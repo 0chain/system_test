@@ -144,7 +144,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
 
-	t.Run("Staking tokens without specifying blobber or validator should generate corresponding error", func(t *testing.T) {
+	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -158,7 +158,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: can't get stake pool: value not present", output[0])
+		require.Equal(t, "missing flag: one of 'blobber_id' or 'validator_id' is required", output[0])
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *testing.T) {
