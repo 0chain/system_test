@@ -470,6 +470,28 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
+	t.Run("rename root path should fail", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+
+		remotePath := "/"
+		destName := "new_"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destname":   destName,
+		}, true)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
+	})
+
 	t.Run("rename non-existing file should fail", func(t *testing.T) {
 		t.Parallel()
 
