@@ -312,11 +312,13 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload Large File Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(500 * MB)
-		fileSize := int64(99 * MB)
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"tokens": 9,
 			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateRandomTestFileName(t)
