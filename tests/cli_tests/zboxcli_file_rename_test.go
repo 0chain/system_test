@@ -489,7 +489,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
 	})
 
 	t.Run("rename non-existing file should fail", func(t *testing.T) {
