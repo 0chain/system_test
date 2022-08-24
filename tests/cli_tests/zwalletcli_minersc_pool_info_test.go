@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -15,20 +14,6 @@ import (
 )
 
 func TestMinerSCUserPoolInfo(t *testing.T) {
-	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching wallet")
-
-	sharderNodeWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching wallet")
-
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -47,7 +32,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Empty(t, poolsInfo.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeWallet.ClientID,
+			"id":     miner01ID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
@@ -62,13 +47,13 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[minerNodeWallet.ClientID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[minerNodeWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[miner01ID], 1)
+		require.Equal(t, poolId, poolsInfo.Pools[miner01ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      minerNodeWallet.ClientID,
+			"id":      miner01ID,
 			"pool_id": poolId,
 		}), true)
 		if err != nil {
@@ -94,7 +79,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Empty(t, poolsInfo.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharderNodeWallet.ClientID,
+			"id":     sharder01ID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
@@ -109,13 +94,13 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[sharderNodeWallet.ClientID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[sharderNodeWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[sharder01ID], 1)
+		require.Equal(t, poolId, poolsInfo.Pools[sharder01ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharderNodeWallet.ClientID,
+			"id":      sharder01ID,
 			"pool_id": poolId,
 		}), true)
 		if err != nil {
@@ -139,7 +124,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeWallet.ClientID,
+			"id":     miner01ID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
@@ -148,7 +133,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		minerPoolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharderNodeWallet.ClientID,
+			"id":     sharder01ID,
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
@@ -166,17 +151,17 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pools")
 
-		require.Len(t, poolsInfo.Pools[minerNodeWallet.ClientID], 1)
-		require.Equal(t, minerPoolId, poolsInfo.Pools[minerNodeWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[minerNodeWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[miner01ID], 1)
+		require.Equal(t, minerPoolId, poolsInfo.Pools[miner01ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner01ID][0].Balance))
 
-		require.Len(t, poolsInfo.Pools[sharderNodeWallet.ClientID], 1)
-		require.Equal(t, sharderPoolId, poolsInfo.Pools[sharderNodeWallet.ClientID][0].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharderNodeWallet.ClientID][0].Balance))
+		require.Len(t, poolsInfo.Pools[sharder01ID], 1)
+		require.Equal(t, sharderPoolId, poolsInfo.Pools[sharder01ID][0].ID)
+		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      minerNodeWallet.ClientID,
+			"id":      miner01ID,
 			"pool_id": minerPoolId,
 		}), true)
 		if err != nil {
@@ -184,7 +169,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		}
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharderNodeWallet.ClientID,
+			"id":      sharder01ID,
 			"pool_id": sharderPoolId,
 		}), true)
 		if err != nil {

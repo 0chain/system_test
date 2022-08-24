@@ -37,7 +37,7 @@ func TestMinerStake(t *testing.T) {
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID == minerNodeWallet.ClientID {
+		if miner.ID == miner01ID {
 			break
 		}
 	}

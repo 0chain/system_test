@@ -34,7 +34,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 	found := false
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID == minerNodeWallet.ClientID {
+		if miner.ID == miner01ID {
 			found = true
 			break
 		}
