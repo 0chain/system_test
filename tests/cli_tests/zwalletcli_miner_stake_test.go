@@ -31,10 +31,6 @@ func TestMinerStake(t *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
 
-	// Use the miner node not used in TestMinerSCUserPoolInfo
-	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
-
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
 		if miner.ID == miner01ID {
@@ -235,7 +231,7 @@ func TestMinerStake(t *testing.T) {
 	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
-			if newMiner.ID != minerNodeWallet.ClientID && newMiner.ID != miner.ID {
+			if newMiner.ID != miner.ID {
 				break
 			}
 		}
@@ -317,7 +313,7 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     minerNodeWallet.ClientID,
+			"id":     miner01ID,
 			"tokens": 0.5,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
