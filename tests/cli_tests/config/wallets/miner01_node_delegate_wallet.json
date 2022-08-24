@@ -1,14 +1,14 @@
 {
-    "client_id": "73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949",
-    "client_key": "257acfae61512fb1f4a886b0dbe949dc94497132448d1674f37f912c00e3ba1c6d4555ac58b44d4f8fe7228fb55c1f888ae3aa7901068eefd022613f05999415",
+    "client_id": "9636ab821fd93a37740ab4c6a27d9e2cf3a4072b4bc8fd1c6048f9c3ef9cf2a8",
+    "client_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
     "keys": [
         {
-            "public_key": "257acfae61512fb1f4a886b0dbe949dc94497132448d1674f37f912c00e3ba1c6d4555ac58b44d4f8fe7228fb55c1f888ae3aa7901068eefd022613f05999415",
-            "private_key": "80cddf5b463584ed74d3208a3787592e06830ec7130de1df2362167d93563c1b"
+            "public_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
+            "private_key": "17627154df3d2a77a273c6b5caf71ca552d26addce0198c1126331eb71ef5c0a"
         }
     ],
-    "mnemonics": "forget grow border base swallow jaguar reflect giraffe common lift idea blame inherit truly letter repair pig usual snack diary early present anger expand",
+    "mnemonics": "family admit sound girl recall another rule hawk equip soccer action dance tumble style prepare face cluster endorse wonder raven unit vital hybrid mass",
     "version": "1.0",
-    "date_created": "2022-05-15T23:13:45+03:00",
+    "date_created": "1661370959",
     "nonce": 0
 }
