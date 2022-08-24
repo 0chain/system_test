@@ -69,16 +69,14 @@ func TestMinerStake(t *testing.T) {
 
 		// Unlock should work
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error unlocking tokens against a node")
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens will be unlocked next VC", output[0])
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
@@ -232,8 +230,7 @@ func TestMinerStake(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -398,11 +395,9 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      "abcdefgh",
-			"pool_id": poolId,
+			"id": "abcdefgh",
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
@@ -410,27 +405,11 @@ func TestMinerStake(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
-	})
-
-	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": "abcdefgh",
-		}), false)
-		require.NotNil(t, err, "expected error when using invalid node id")
-		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
 	})
 }
 
@@ -441,8 +420,7 @@ func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePoo
 	var poolsInfo climodel.DelegatePool
 	for {
 		output, err := minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      minerID,
-			"pool_id": poolId,
+			"id": minerID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)

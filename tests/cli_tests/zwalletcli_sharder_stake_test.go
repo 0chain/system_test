@@ -55,16 +55,14 @@ func TestSharderStake(t *testing.T) {
 
 		// unlock should work
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder.ID,
-			"pool_id": poolId,
+			"id": sharder.ID,
 		}), true)
 		require.Nil(t, err, "error unlocking tokens against a node")
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens will be unlocked next VC", output[0])
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder.ID,
-			"pool_id": poolId,
+			"id": sharder.ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
@@ -190,8 +188,7 @@ func TestSharderStake(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder.ID,
-			"pool_id": poolId,
+			"id": sharder.ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -203,8 +200,7 @@ func TestSharderStake(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder.ID,
-			"pool_id": "abcdefgh",
+			"id": sharder.ID,
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)

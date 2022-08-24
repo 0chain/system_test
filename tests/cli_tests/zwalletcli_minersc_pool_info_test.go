@@ -54,7 +54,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"id":      miner01ID,
-			"pool_id": poolId,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -101,7 +100,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"id":      sharder01ID,
-			"pool_id": poolId,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -161,7 +159,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"id":      miner01ID,
-			"pool_id": minerPoolId,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -169,7 +166,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"id":      sharder01ID,
-			"pool_id": sharderPoolId,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
