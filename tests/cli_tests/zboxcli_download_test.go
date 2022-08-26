@@ -25,7 +25,6 @@ func TestDownload(t *testing.T) {
 	require.Nil(t, err)
 
 	// Success Scenarios
-
 	t.Run("Download File from Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -61,6 +60,91 @@ func TestDownload(t *testing.T) {
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+	})
+
+	t.Run("Download File should work concurrently from two different directory", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotePathFirst := "/dir1/"
+		remotePathSecond := "/dir2/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remotePathFirst, filesize)
+		fileNameOfSecondDirectory := generateFileAndUpload(t, allocationID, remotePathSecond, filesize)
+		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
+		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
+ 
+		//deleting file from /dir1
+		err := os.Remove(fileNameOfFirstDirectory)
+		//deleting file from /dir2
+		err = os.Remove(fileNameOfSecondDirectory)
+		require.Nil(t, err)
+
+		downloadConfirmationFromFirstDirectory := make(chan string)
+		downloadConfirmationFromSecondDirectory := make(chan string)
+
+		var outputFirst []string
+		var errorFirst error 
+		var outputSecond []string 
+		var errorSecond error
+
+		// setting up a go routine to download file from /dir1
+		go func() {
+			op, error := downloadFile(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotePathFirst + filepath.Base(fileNameOfFirstDirectory),
+				"localpath":  "tmp/",
+			}), true)
+			outputFirst = op
+			errorFirst = error
+			downloadConfirmationFromFirstDirectory <- "File from dir1 download complete"
+		}()
+
+		// setting up a go routine to download file from /dir2
+		go func() {
+			op, error := downloadFile(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotePathSecond + filepath.Base(fileNameOfSecondDirectory),
+				"localpath":  "tmp/",
+			}), true)
+			downloadConfirmationFromSecondDirectory <- "File from dir2 download complete"
+			outputSecond = op
+			errorSecond = error
+		}()
+
+		//waiting for download confirmation from both file
+		<- downloadConfirmationFromFirstDirectory
+		<- downloadConfirmationFromSecondDirectory
+
+		require.Nil(t, errorFirst, strings.Join(outputFirst, "\n"))
+		require.Len(t, outputFirst, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(fileNameOfFirstDirectory),
+		)
+
+		require.Equal(t, expected, outputFirst[1])
+		downloadedFileFromFirstDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfFirstDirectory))
+
+		require.Equal(t, originalFirstFileChecksum, downloadedFileFromFirstDirectoryChecksum)
+		require.Nil(t, errorSecond, strings.Join(outputSecond, "\n"))
+		require.Len(t, outputSecond, 2)
+
+		expected = fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(fileNameOfSecondDirectory),
+		)
+		require.Equal(t, expected, outputSecond[1])
+		downloadedFileFromSecondDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfSecondDirectory))
+
+		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
 
 	t.Run("Download File from a Directory Should Work", func(t *testing.T) {
