@@ -48,9 +48,8 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
-		stakePoolID := strings.Fields(output[0])[4]
-		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
+		require.Nil(t, err, "Error extracting txn hash from sp-lock output", strings.Join(output, "\n"))
 
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
@@ -76,7 +75,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Pool Id returned by sp-lock should be found in sp-info with correct balance
 		found := false
 		for _, delegate := range delegates {
-			if delegate.ID == stakePoolID {
+			if delegate.ID == wallet.ClientID {
 				t.Log("Pool ID returned by sp-lock found in stake pool info...")
 				found = true
 				require.Equal(t, int64(5000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
@@ -84,12 +83,12 @@ func TestStakeUnstakeTokens(t *testing.T) {
 					"Delegate ID: ", delegate.DelegateID, "Wallet ID: ", wallet.ClientID)
 			}
 		}
-		require.True(t, found, "Pool id returned by sp-lock not found in blobber's sp-info", strings.Join(output, "\n"))
+		require.True(t, found, fmt.Sprintf("Pool id returned by sp-lock not found in blobber's sp-info: %s, clientID: %s",
+			strings.Join(output, "\n"), wallet.ClientID))
 
 		// Unstake the tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -122,7 +121,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Pool Id returned by sp-lock should be deleted from sp-info
 		found = false
 		for _, delegate := range delegates {
-			if delegate.ID == stakePoolID {
+			if delegate.ID == wallet.ClientID {
 				t.Log("Delegate ID found in stake pool information but it should have been deleted after unlocking staked tokens...")
 				found = true
 			}
