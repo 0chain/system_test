@@ -26,7 +26,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *testing.T) {
 		t.Parallel()
 		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
-		blobbers, response, err := v1ScrestAllocBlobbers(t, "{}")
+		blobbers, response, err := v1ScrestAllocBlobbers(t, "{}", nil)
 		require.NotNil(t, blobbers)
 		require.NotNil(t, response)
 		require.NotNil(t, err)
@@ -66,6 +66,6 @@ func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model
 	allocationData, err := json.Marshal(blobberRequirements)
 	require.Nil(t, err)
 
-	blobbers, httpResponse, err := v1ScrestAllocBlobbers(t, string(allocationData))
+	blobbers, httpResponse, err := v1ScrestAllocBlobbers(t, string(allocationData), nil)
 	return blobbers, blobberRequirements, httpResponse, err
 }
