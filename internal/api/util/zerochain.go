@@ -145,8 +145,8 @@ func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode 
 	responsesAsExpected := make([]*resty.Response, 0)
 	responsesNotAsExpected := make([]*resty.Response, 0)
 
-	for _, miner := range nodes {
-		httpResponse, httpError := callNode(miner)
+	for _, node := range nodes {
+		httpResponse, httpError := callNode(node)
 
 		if httpError != nil {
 			errors = append(errors, httpError)
