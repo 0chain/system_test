@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	resty "github.com/go-resty/resty/v2"
 	"testing"
+
+	resty "github.com/go-resty/resty/v2"
 
 	"github.com/0chain/system_test/internal/api/model"
 )
@@ -53,7 +54,7 @@ func v1ScrestAllocation(t *testing.T, clientId string) (*model.Allocation, *rest
 func v1ScrestAllocBlobbers(t *testing.T, allocationData string) (*[]string, *resty.Response, error) { //nolint
 	var blobbers *[]string
 
-	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/alloc_blobbers?allocation_data="+allocationData, &blobbers)
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/alloc-blobbers?allocation_data="+allocationData, &blobbers)
 
 	return blobbers, httpResponse, httpError
 }

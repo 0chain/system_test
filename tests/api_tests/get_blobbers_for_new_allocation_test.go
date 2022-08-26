@@ -59,8 +59,6 @@ func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model
 			Min: 0,
 			Max: 9223372036854775807,
 		},
-		OwnerId:        wallet.Id,
-		OwnerPublicKey: keyPair.PublicKey.SerializeToHexStr(),
 	}
 
 	allocationData, err := json.Marshal(blobberRequirements)
