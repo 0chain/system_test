@@ -24,9 +24,6 @@ func TestMinerUpdateSettings(t *testing.T) {
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
-	minerNodeWallet, err := getWalletForName(t, configPath, miner01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching minerNode wallet")
-
 	var miners climodel.MinerSCNodes
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "error unmarshalling ls-miners json output")
@@ -77,7 +74,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": 1,
 		}), true)
 
@@ -89,7 +86,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeWallet.ClientID,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -114,7 +111,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            minerNodeWallet.ClientID,
+			"id":            miner.ID,
 			"num_delegates": 5,
 		}), true)
 
@@ -125,7 +122,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeWallet.ClientID,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -150,7 +147,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"max_stake": 99,
 		}), true)
 
@@ -162,7 +159,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeWallet.ClientID,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -187,7 +184,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            minerNodeWallet.ClientID,
+			"id":            miner.ID,
 			"num_delegates": 5,
 			"max_stake":     99,
 			"min_stake":     1,
@@ -201,7 +198,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeWallet.ClientID,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching miner info")
 		require.Len(t, output, 1)
@@ -230,7 +227,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
 
@@ -253,7 +250,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            minerNodeWallet.ClientID,
+			"id":            miner.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
 
@@ -278,7 +275,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 
@@ -303,7 +300,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": 51,
 			"max_stake": 48,
 		}), false)
@@ -328,7 +325,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": -1,
 		}), false)
 
@@ -354,7 +351,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"max_stake": -1,
 		}), false)
 
@@ -379,7 +376,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            minerNodeWallet.ClientID,
+			"id":            miner.ID,
 			"num_delegates": -1,
 		}), false)
 
@@ -425,7 +422,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		}
 
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id": minerNodeWallet.ClientID,
+			"id": miner.ID,
 		}), false)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
@@ -443,7 +440,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":            minerNodeWallet.ClientID,
+			"id":            miner.ID,
 			"num_delegates": 5,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
@@ -451,7 +448,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"min_stake": 1,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
@@ -459,7 +456,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
 		output, err = minerUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        minerNodeWallet.ClientID,
+			"id":        miner.ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
