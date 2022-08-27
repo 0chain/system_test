@@ -2,7 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/go-resty/resty/v2" //nolint
+	resty "github.com/go-resty/resty/v2"
 	"strconv"
 	"testing"
 	"time"

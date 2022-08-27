@@ -39,11 +39,11 @@ func (z *Zerochain) Init(config Config) {
 	z.Sharders = healthySharders
 }
 
-func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusCategoriser ConsensusMetFunction) (*resty.Response, error) { //nolint
+func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction) (*resty.Response, error) { //nolint
 	getFromMiner := func(miner string) (*resty.Response, error) {
 		return z.GetFromMiner(t, miner, endpoint)
 	}
-	return z.executeWithConsensus(t, z.Miners, getFromMiner, nil, consensusCategoriser)
+	return z.executeWithConsensus(t, z.Miners, getFromMiner, nil, consensusMet)
 }
 
 func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string) (*resty.Response, error) { //nolint
@@ -53,11 +53,11 @@ func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string) (*resty.R
 	return resp, err
 }
 
-func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusCategoriser ConsensusMetFunction, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
+func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
 	postToMiner := func(miner string) (*resty.Response, error) {
 		return z.PostToMiner(t, miner, endpoint, body, targetObject)
 	}
-	return z.executeWithConsensus(t, z.Miners, postToMiner, targetObject, consensusCategoriser)
+	return z.executeWithConsensus(t, z.Miners, postToMiner, targetObject, consensusMet)
 }
 
 func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
@@ -81,11 +81,11 @@ func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body inter
 	}
 }
 
-func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, consensusCategoriser ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
+func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
 	getFromSharder := func(sharder string) (*resty.Response, error) {
 		return z.GetFromSharder(t, sharder, endpoint, targetObject)
 	}
-	return z.executeWithConsensus(t, z.Sharders, getFromSharder, targetObject, consensusCategoriser)
+	return z.executeWithConsensus(t, z.Sharders, getFromSharder, targetObject, consensusMet)
 }
 
 func (z *Zerochain) GetFromSharder(t *testing.T, sharder string, endpoint string, targetObject interface{}) (*resty.Response, error) { //nolint
@@ -140,7 +140,7 @@ func (z *Zerochain) getHealthyNodes(nodes []string) []string {
 	return healthyNodes
 }
 
-func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMetFunction ConsensusMetFunction) (*resty.Response, error) {
+func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMet ConsensusMetFunction) (*resty.Response, error) {
 	errors := make([]error, 0)
 	responsesAsExpected := make([]*resty.Response, 0)
 	responsesNotAsExpected := make([]*resty.Response, 0)
@@ -153,7 +153,7 @@ func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode 
 		}
 
 		if httpResponse != nil {
-			if consensusMetFunction == nil || consensusMetFunction(httpResponse, targetObject) {
+			if consensusMet == nil || consensusMet(httpResponse, targetObject) {
 				responsesAsExpected = append(responsesAsExpected, httpResponse)
 			} else {
 				responsesNotAsExpected = append(responsesNotAsExpected, httpResponse)
