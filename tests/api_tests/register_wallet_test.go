@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/hex"
+	"github.com/0chain/system_test/internal/api/util"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -62,7 +63,7 @@ func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*
 	clientId := crypto.Sha3256(publicKeyBytes)
 	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
-	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest)
+	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, util.ConsensusByHttpStatus("200 OK"))
 
 	return registeredWallet, keyPair, httpResponse, err
 }
