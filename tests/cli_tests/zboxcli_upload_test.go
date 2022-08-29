@@ -317,8 +317,8 @@ func TestUpload(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"tokens": 9,
-			"size": allocSize,
-			"lock": 9,
+			"size":   allocSize,
+			"lock":   9,
 		})
 
 		filename := generateRandomTestFileName(t)
