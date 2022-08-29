@@ -19,7 +19,7 @@ func TestCreateAllocation(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucet(t, registeredWallet, keyPair)
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*5)
+		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		blobberRequirements.Blobbers = blobbers
 		transactionResponse, _ := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
@@ -64,6 +64,6 @@ func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 
 func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) { //nolint
 	t.Logf("Retrieving allocation...")
-	balance, httpResponse, err := v1ScrestAllocation(t, allocationId)
+	balance, httpResponse, err := v1ScrestAllocation(t, allocationId, nil)
 	return balance, httpResponse, err
 }
