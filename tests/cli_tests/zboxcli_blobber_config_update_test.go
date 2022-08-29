@@ -159,7 +159,7 @@ func TestBlobberConfigUpdate(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		min_stake, err := intialBlobberInfo.StakePoolSettings.MinStake.Int64()
+		min_stake, err := finalBlobberInfo.StakePoolSettings.MinStake.Int64()
 		require.Nil(t, err)
 		require.Equal(t, float64(newMinStake), intToZCN(min_stake))
 	})
