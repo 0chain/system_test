@@ -341,7 +341,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
+		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
 		t.Log("end test")
 	})
 
