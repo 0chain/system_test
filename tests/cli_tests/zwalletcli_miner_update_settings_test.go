@@ -11,6 +11,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/0chain/system_test/internal/currency"
 	"github.com/stretchr/testify/require"
 )
 
@@ -234,9 +235,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
+		negativeCoin, err := currency.Float64ToCoin(mnConfig["min_stake"] - 1e-10)
+		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": mnConfig["min_stake"] - 1e-10,
+			"min_stake": negativeCoin,
 		}), false)
 
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
@@ -332,9 +335,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 			}
 		}
 
+		negativeCoin, err := currency.Int64ToCoin(-1)
+		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": -1,
+			"min_stake": negativeCoin,
 		}), false)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
@@ -358,9 +363,11 @@ func TestMinerUpdateSettings(t *testing.T) {
 			}
 		}
 
+		negativeCoin, err := currency.Int64ToCoin(-1)
+		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": -1,
+			"max_stake": negativeCoin,
 		}), false)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
