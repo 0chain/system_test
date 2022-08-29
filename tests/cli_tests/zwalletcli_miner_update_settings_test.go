@@ -94,7 +94,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 1, int(intToZCN(minerInfo.Settings.MinStake)))
+		min_stake, err := minerInfo.Settings.MinStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
 	t.Run("Miner update num_delegates by delegate wallet should work", func(t *testing.T) {
@@ -167,7 +169,9 @@ func TestMinerUpdateSettings(t *testing.T) {
 		var minerInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
-		require.Equal(t, 99, int(intToZCN(minerInfo.Settings.MaxStake)))
+		max_stake, err := minerInfo.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 99, int(intToZCN(max_stake)))
 	})
 
 	t.Run("Miner update multiple settings with delegate wallet should work", func(t *testing.T) {
@@ -207,8 +211,12 @@ func TestMinerUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &minerInfo)
 		require.Nil(t, err, "error unmarshalling miner info")
 		require.Equal(t, 5, minerInfo.Settings.MaxNumDelegates)
-		require.Equal(t, float64(99), intToZCN(minerInfo.Settings.MaxStake))
-		require.Equal(t, float64(1), intToZCN(minerInfo.Settings.MinStake))
+		max_stake, err := minerInfo.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 99, int(intToZCN(max_stake)))
+		min_stake, err := minerInfo.Settings.MinStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
 	t.Run("Miner update min_stake with less than global min stake should fail", func(t *testing.T) {

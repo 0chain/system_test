@@ -48,11 +48,15 @@ func TestSharderUpdateSettings(t *testing.T) {
 
 	// revert sharder node settings after test
 	defer func() {
+		old_max_stake, err := oldSharderInfo.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+		old_min_stake, err := oldSharderInfo.Settings.MinStake.Int64()
+		require.Nil(t, err)
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder.ID,
 			"num_delegates": len(oldSharderInfo.Pools),
-			"max_stake":     intToZCN(oldSharderInfo.Settings.MaxStake),
-			"min_stake":     intToZCN(oldSharderInfo.Settings.MinStake),
+			"max_stake":     intToZCN(old_max_stake),
+			"min_stake":     intToZCN(old_min_stake),
 		}), true)
 		require.Nil(t, err, "error reverting sharder settings after test")
 		require.Len(t, output, 2)
@@ -81,7 +85,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 1, int(intToZCN(sharderInfo.Settings.MinStake)))
+		min_stake, err := sharderInfo.Settings.MinStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
 	t.Run("Sharder update num_delegates by delegate wallet should work", func(t *testing.T) {
@@ -125,7 +131,9 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 99, int(intToZCN(sharderInfo.Settings.MaxStake)))
+		max_stake, err := sharderInfo.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 99, int(intToZCN(max_stake)))
 	})
 
 	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
@@ -150,8 +158,12 @@ func TestSharderUpdateSettings(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
 		require.Equal(t, 8, len(sharderInfo.Pools))
-		require.Equal(t, 2, int(intToZCN(sharderInfo.Settings.MinStake)))
-		require.Equal(t, 98, int(intToZCN(sharderInfo.Settings.MaxStake)))
+		min_stake, err := sharderInfo.Settings.MinStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 2, int(intToZCN(min_stake)))
+		max_stake, err := sharderInfo.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+		require.Equal(t, 98, int(intToZCN(max_stake)))
 	})
 
 	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {

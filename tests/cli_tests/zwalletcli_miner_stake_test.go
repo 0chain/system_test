@@ -279,7 +279,10 @@ func TestMinerStake(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		maxStake := intToZCN(miner.Settings.MaxStake)
+		max_stake, err := miner.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+
+		maxStake := intToZCN(max_stake)
 
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9.0)
@@ -287,15 +290,15 @@ func TestMinerStake(t *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, miner.Settings.MaxStake)
+		require.Greater(t, balance, max_stake)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.Settings.MaxStake) + 1,
+			"tokens": intToZCN(max_stake) + 1,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.Settings.MaxStake+1e10, miner.Settings.MaxStake), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
@@ -329,7 +332,10 @@ func TestMinerStake(t *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		maxStake := intToZCN(miner.Settings.MaxStake)
+		max_stake, err := miner.Settings.MaxStake.Int64()
+		require.Nil(t, err)
+
+		maxStake := intToZCN(max_stake)
 
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9.0)
@@ -337,22 +343,22 @@ func TestMinerStake(t *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, miner.Settings.MaxStake)
+		require.Greater(t, balance, max_stake)
 
 		_, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.Settings.MaxStake) / 2,
+			"tokens": intToZCN(max_stake) / 2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
-			"tokens": intToZCN(miner.Settings.MaxStake)/2 + 1,
+			"tokens": intToZCN(max_stake)/2 + 1,
 		}), true)
 
 		// FIXME: Change to NotNil and Equal post-fix
 		require.Nil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", miner.Settings.MaxStake+1e10, miner.Settings.MaxStake), output[0])
+		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
