@@ -63,7 +63,7 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download File should work concurrently from two different directory", func(t *testing.T) {
+	t.Run("Download File Concurrently Should Work from two Different Directory", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(4096)
@@ -80,17 +80,18 @@ func TestDownload(t *testing.T) {
 		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
 		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
  
-		//deleting file from /dir1
+		//deleting uploaded file from /dir1 since we will be downloading it now 
 		err := os.Remove(fileNameOfFirstDirectory)
 		require.Nil(t, err)
-		//deleting file from /dir2
+		
+		//deleting uploaded file from /dir2 since we will be downloading it now 
 		err = os.Remove(fileNameOfSecondDirectory)
 		require.Nil(t, err)
 
 		var outputList [2][]string
 		var errorList [2]error
-
 		var wg sync.WaitGroup
+
 		fileNames := [2]string{fileNameOfFirstDirectory, fileNameOfSecondDirectory}
 		for index, fileName := range fileNames {
 			wg.Add(1)
