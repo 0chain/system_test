@@ -235,16 +235,14 @@ func TestMinerUpdateSettings(t *testing.T) {
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
-		negativeCoin, err := currency.Float64ToCoin(mnConfig["min_stake"] - 1e-10)
-		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": negativeCoin,
+			"min_stake": mnConfig["min_stake"] - 1e-10, // Currency package makes this 0
 		}), false)
 
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -1 \\u003e 0", output[0])
+		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -1 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
 	})
 
 	t.Run("Miner update num_delegates greater than global max_delegates should fail", func(t *testing.T) {
@@ -335,18 +333,16 @@ func TestMinerUpdateSettings(t *testing.T) {
 			}
 		}
 
-		negativeCoin, err := currency.Int64ToCoin(-1)
-		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": negativeCoin,
+			"min_stake": -1,
 		}), false)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
+		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
 		t.Log("end test")
 	})
 
@@ -363,18 +359,16 @@ func TestMinerUpdateSettings(t *testing.T) {
 			}
 		}
 
-		negativeCoin, err := currency.Int64ToCoin(-1)
-		require.Nil(t, err)
 		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"max_stake": negativeCoin,
+			"max_stake": -1,
 		}), false)
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], "update_miner_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_miner_settings: invalid negative min_stake:]")
+		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
 	})
 
 	t.Run("Miner update num_delegate negative value should fail", func(t *testing.T) {
