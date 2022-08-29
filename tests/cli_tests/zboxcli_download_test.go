@@ -25,43 +25,43 @@ func TestDownload(t *testing.T) {
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	// // Success Scenarios
-	// t.Run("Download File from Root Directory Should Work", func(t *testing.T) {
-	// 	t.Parallel()
+	// Success Scenarios
+	t.Run("Download File from Root Directory Should Work", func(t *testing.T) {
+		t.Parallel()
 
-	// 	allocSize := int64(2048)
-	// 	filesize := int64(256)
-	// 	remotepath := "/"
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
 
-	// 	allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-	// 		"size":   allocSize,
-	// 		"tokens": 1,
-	// 	})
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
 
-	// 	filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-	// 	originalFileChecksum := generateChecksum(t, filename)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
 
-	// 	// Delete the uploaded file, since we will be downloading it now
-	// 	err := os.Remove(filename)
-	// 	require.Nil(t, err)
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
 
-	// 	output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-	// 		"allocation": allocationID,
-	// 		"remotepath": remotepath + filepath.Base(filename),
-	// 		"localpath":  "tmp/",
-	// 	}), true)
-	// 	require.Nil(t, err, strings.Join(output, "\n"))
-	// 	require.Len(t, output, 2)
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
-	// 	expected := fmt.Sprintf(
-	// 		"Status completed callback. Type = application/octet-stream. Name = %s",
-	// 		filepath.Base(filename),
-	// 	)
-	// 	require.Equal(t, expected, output[1])
-	// 	downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
-	// 	require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-	// })
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+	})
 
 	t.Run("Download File should work concurrently from two different directory", func(t *testing.T) {
 		t.Parallel()
@@ -87,60 +87,51 @@ func TestDownload(t *testing.T) {
 		err = os.Remove(fileNameOfSecondDirectory)
 		require.Nil(t, err)
 
-		// var outputList [2][]string
-		var outputListFirst []string
-		var outputListSecond []string
+		var outputList [2][]string
 		var errorList [2]error
 
-		wg := new(sync.WaitGroup)
+		var wg sync.WaitGroup
 		fileNames := [2]string{fileNameOfFirstDirectory, fileNameOfSecondDirectory}
-		wg.Add(2)
-
-		for index, currentFileName := range fileNames {
-			go func(currentFileName string, wg *sync.WaitGroup) {
+		for index, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
 				op, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": remoteFilePaths[index] + filepath.Base(currentFileName),
+					"remotepath": remoteFilePaths[currentIndex] + filepath.Base(currentFileName),
 					"localpath":  "tmp/",
 				}), true)
-				    errorList[index] = err
-					if index == 0 {
-						outputListFirst = op							
-					} else {
-						outputListSecond = op
-					}
-					defer wg.Done()
-			}(currentFileName, wg)
+				    errorList[currentIndex] = err
+					outputList[currentIndex] = op
+			}(fileName, index)
 		}
 
 		wg.Wait()
 
-		require.Nil(t, errorList[0], strings.Join(outputListFirst, "\n"))
-		// require.Len(t, outputListFirst, 2)
+		require.Nil(t, errorList[0], strings.Join(outputList[0], "\n"))
+		require.Len(t, outputList[0], 2)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(fileNameOfFirstDirectory),
 		)
 
-		require.Equal(t, expected, outputListFirst[1])
+		require.Equal(t, expected, outputList[0][1])
 		downloadedFileFromFirstDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfFirstDirectory))
 
 		require.Equal(t, originalFirstFileChecksum, downloadedFileFromFirstDirectoryChecksum)
-		require.Nil(t, errorList[1], strings.Join(outputListSecond, "\n"))
-		// require.Len(t, outputListSecond, 2)
+		require.Nil(t, errorList[1], strings.Join(outputList[1], "\n"))
+		require.Len(t, outputList[1], 2)
 
 		expected = fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(fileNameOfSecondDirectory),
 		)
 
-		require.Equal(t, expected, outputListSecond[1])
+		require.Equal(t, expected, outputList[1][1])
 		downloadedFileFromSecondDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfSecondDirectory))
 		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
-
-	return
 
 	t.Run("Download File from a Directory Should Work", func(t *testing.T) {
 		t.Parallel()
