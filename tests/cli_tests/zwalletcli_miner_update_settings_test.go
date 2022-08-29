@@ -11,7 +11,6 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/0chain/system_test/internal/currency"
 	"github.com/stretchr/testify/require"
 )
 
@@ -413,7 +412,7 @@ func TestMinerUpdateSettings(t *testing.T) {
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
-		
+
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 	})
 
