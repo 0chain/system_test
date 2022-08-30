@@ -2,7 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/go-resty/resty/v2" //nolint
+	resty "github.com/go-resty/resty/v2"
 	"strconv"
 	"testing"
 	"time"
@@ -28,7 +28,13 @@ func TestExecuteFaucet(t *testing.T) {
 }
 
 func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) { //nolint
-	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, sentTransaction.Hash, maxPollDuration)
+
+	var consensus util.ConsensusMetFunction = func(response *resty.Response, resolvedObject interface{}) bool {
+		var confirmation = resolvedObject.(**model.Confirmation)
+		return (*confirmation) != nil && (*confirmation).Transaction.TransactionStatus == 1
+	}
+
+	confirmation, httpResponse, err := confirmTransactionWithoutAssertion(t, sentTransaction.Hash, maxPollDuration, consensus)
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred confirming transaction with http response [%s]", err, httpResponse)
@@ -58,15 +64,15 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	return confirmation, httpResponse
 }
 
-func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response, error) { //nolint
+func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration, consensusCategoriser util.ConsensusMetFunction) (*model.Confirmation, *resty.Response, error) { //nolint
 	t.Logf("Confirming transaction...")
-	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash)
+	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash, consensusCategoriser)
 
 	startPollTime := time.Now()
 	for httpResponse.StatusCode() != 200 && time.Since(startPollTime) < maxPollDuration {
 		t.Logf("Confirmation for txn hash [%s] failed. Will poll until specified duration [%s] has been reached...", hash, maxPollDuration)
 		time.Sleep(maxPollDuration / 20)
-		confirmation, httpResponse, err = v1TransactionGetConfirmation(t, hash)
+		confirmation, httpResponse, err = v1TransactionGetConfirmation(t, hash, consensusCategoriser)
 	}
 	return confirmation, httpResponse, err
 }
@@ -83,7 +89,7 @@ func getBalance(t *testing.T, clientId string) *model.Balance {
 
 func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) { //nolint
 	t.Logf("Getting balance...")
-	balance, httpResponse, err := v1ClientGetBalance(t, clientId)
+	balance, httpResponse, err := v1ClientGetBalance(t, clientId, nil)
 	return balance, httpResponse, err
 }
 
@@ -148,7 +154,7 @@ func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transact
 	crypto.Hash(txnRequest)
 	crypto.Sign(txnRequest, keyPair)
 
-	transactionResponse, httpResponse, err := v1TransactionPut(t, txnRequest)
+	transactionResponse, httpResponse, err := v1TransactionPut(t, txnRequest, nil)
 
 	return transactionResponse, httpResponse, err
 }
