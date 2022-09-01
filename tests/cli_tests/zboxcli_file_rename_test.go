@@ -557,7 +557,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Equal(t, "Rename failed: Rename request failed. Consensus not met.", output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
