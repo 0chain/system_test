@@ -594,9 +594,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t,
-			strings.HasSuffix(strings.Join(output, ""), `Upload failed. bad request: {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *testing.T) {
