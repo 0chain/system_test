@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [feature_miner-sharder-get-stats/2a56c8e0] ran against [dev-3.devnet-0chain.net] at [2022-09-03_01.02.33]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [feature_miner-sharder-get-stats/2a56c8e0] ran against [dev-3.devnet-0chain.net] at [2022-09-03_01.02.33]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>16</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>14</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">September 3, 2022 01:35:19</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup failed " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup failed " id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+                <div class="testResultGroup failed " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup failed " id="12"></div>
+            
+                <div class="testResultGroup failed " id="13"></div>
+            
+                <div class="testResultGroup failed " id="14"></div>
+            
+                <div class="testResultGroup failed " id="15"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":25,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":79.48,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:847: Uploading file...\n","","    zboxcli_download_token_test.go:141: Getting download cost...\n","    zboxcli_collaborator_system_test.go:786: Adding collaborator...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_file_meta_test.go:408: Getting file metadata...\n","    zboxcli_download_token_test.go:127: Locking read tokens...\n","","    utils.go:133: Waiting 30s...\n","","    zboxcli_download_token_test.go:118: Getting read pool info...\n","    utils.go:133: Waiting 15s...\n","","    zboxcli_download_test.go:1477: Downloading file...\n","    utils.go:62: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 1048576    0.00% 0 / 1048576    0.00% 0s -\u003cNEWLINE\u003e- Error in file operation: Download failed for block 1. -\u003cNEWLINE\u003e- response_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber]\n","","    utils.go:62: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [0 / 1048576    0.00% 0 / 1048576    0.00% 0s -\u003cNEWLINE\u003e- Error in file operation: Download failed for block 1. -\u003cNEWLINE\u003e- response_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber]\n","","    utils.go:65: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox download --remotepath /2VUln1bZt9_test.txt --localpath tmp/ --allocation f142e8498e59fd456adc596ba9a64645dbf69652c5ba4250780593a83833ac3a --silent --wallet Test___FlakyBrokenScenarios-Add_Collaborator___file_owner_must_pay_for_collaborators'_reads_collaborator_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [0 / 1048576    0.00% 0 / 1048576    0.00% 0s -\u003cNEWLINE\u003e- Error in file operation: Download failed for block 1. -\u003cNEWLINE\u003e- response_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber]\n","    utils.go:68: \u001b[31mThe verbose output for the command is:\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/09/03 01:33:15.155135 wallet_base.go:261: ******* Wallet SDK Version:v1.8.6-11-g09a231dc-dirty ******* (SetLogFile)\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.155254 sdk.go:73: ******* Storage SDK Version: v1.8.6-11-g09a231dc-dirty *******\n","    utils.go:72: \u001b[31m0chain-core-sdk [INFO]   2022/09/03 01:33:15.260200 transaction.go:1332: ******* Wallet SDK Version:v1.8.6-11-g09a231dc-dirty ******* (InitZCNSDK)\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/09/03 01:33:15.341168 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.413342 allocation.go:249: received a download request for /2VUln1bZt9_test.txt\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.443690 filemetaworker.go:73: File Meta result:{\"actual_file_hash\":\"03c1031001ba93579b4726c44fa950f214ded84e31a5defac38935971f20faeb\",\"actual_file_size\":1048576,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"f142e8498e59fd456adc596ba9a64645dbf69652c5ba4250780593a83833ac3a\",\"chunk_size\":65536,\"collaborators\":[{\"ref_id\":396,\"client_id\":\"428392a841220b65e451161e65199392294a93a0e68289ab58ed4949eeced5e5\",\"created_at\":\"2022-09-02T23:32:15.649108Z\"}],\"commit_meta_txns\":[],\"content_hash\":\"7199abcf9dc8366e88909996d9090b9dcf6b508e4329d21129d156690d384c35\",\"created_at\":1662161534,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"97cd46db249547921793bdaa3bcae3c0a0f8a1343e2a233d45fd1f18a19a1043\",\"lookup_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"merkle_root\":\"55f50f7d5db7768277f2e6ce5db58452b4d7c8cef6b6965bd88fbdcad6baa101\",\"mimetype\":\"application/octet-stream\",\"name\":\"2VUln1bZt9_test.txt\",\"num_of_blocks\":8,\"o","n_cloud\":false,\"path\":\"/2VUln1bZt9_test.txt\",\"path_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"size\":524288,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1662161534}\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/09/03 01:33:15.443756 filemetaworker.go:74: File meta response status: 200 OK\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.459538 filemetaworker.go:73: File Meta result:{\"actual_file_hash\":\"03c1031001ba93579b4726c44fa950f214ded84e31a5defac38935971f20faeb\",\"actual_file_size\":1048576,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"f142e8498e59fd456adc596ba9a64645dbf69652c5ba4250780593a83833ac3a\",\"chunk_size\":65536,\"collaborators\":[{\"ref_id\":402,\"client_id\":\"428392a841220b65e451161e65199392294a93a0e68289ab58ed4949eeced5e5\",\"created_at\":\"2022-09-02T23:32:15.646605Z\"}],\"commit_meta_txns\":[],\"content_hash\":\"c661337bb4056e9a3c5ab0c0411f60d600b883e67f61356f91f42b3d689852c2\",\"created_at\":1662161534,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"65f358d06ac3dc0c34ce27b3a634d6d0cc8bd703b06016af21ce223c52937bd5\",\"lookup_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"merkle_root\":\"ea2fec0dfd288bdb7282a0b475bacdabd5c1fe34c672f758517e757d236b4a6b\",\"mimetype\":\"application/octet-stream\",\"name\":\"2VUln1bZt9_test.txt\",\"num_of_blocks\":8,\"o","n_cloud\":false,\"path\":\"/2VUln1bZt9_test.txt\",\"path_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"size\":524288,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1662161534}\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/09/03 01:33:15.459642 filemetaworker.go:74: File meta response status: 200 OK\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.473674 filemetaworker.go:73: File Meta result:{\"actual_file_hash\":\"03c1031001ba93579b4726c44fa950f214ded84e31a5defac38935971f20faeb\",\"actual_file_size\":1048576,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"f142e8498e59fd456adc596ba9a64645dbf69652c5ba4250780593a83833ac3a\",\"chunk_size\":65536,\"collaborators\":[{\"ref_id\":255,\"client_id\":\"428392a841220b65e451161e65199392294a93a0e68289ab58ed4949eeced5e5\",\"created_at\":\"2022-09-02T23:32:15.590834Z\"}],\"commit_meta_txns\":[],\"content_hash\":\"a2bfb9a4226192714580dd0a555988ac070b7df0da1152f1899fb2edb2e89fcd\",\"created_at\":1662161534,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"03e140462015b4764a5c0a4c0c942a4257cf2640ec45e586a42812f9054bd9dc\",\"lookup_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"merkle_root\":\"3a98d11492d8a81d48484fc269d115f2429d7dc476d809b0b0de61ed19ff3dd8\",\"mimetype\":\"application/octet-stream\",\"name\":\"2VUln1bZt9_test.txt\",\"num_of_blocks\":8,\"o","n_cloud\":false,\"path\":\"/2VUln1bZt9_test.txt\",\"path_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"size\":524288,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1662161534}\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/09/03 01:33:15.473725 filemetaworker.go:74: File meta response status: 200 OK\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.489036 filemetaworker.go:73: File Meta result:{\"actual_file_hash\":\"03c1031001ba93579b4726c44fa950f214ded84e31a5defac38935971f20faeb\",\"actual_file_size\":1048576,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"f142e8498e59fd456adc596ba9a64645dbf69652c5ba4250780593a83833ac3a\",\"chunk_size\":65536,\"collaborators\":[{\"ref_id\":260,\"client_id\":\"428392a841220b65e451161e65199392294a93a0e68289ab58ed4949eeced5e5\",\"created_at\":\"2022-09-02T23:32:15.593474Z\"}],\"commit_meta_txns\":[],\"content_hash\":\"08660b48dc1875324687a86199e6f5f1867ebe2dcf1f4a9cb324d2cfd742d049\",\"created_at\":1662161534,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"b2f299a8c110c7ca49b39ede0e8b43250ba5d20966701f34089977c8040e72f9\",\"lookup_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"merkle_root\":\"5f7b937f689da07ecff7c331491b9b08f08df5f87676f4988294e31e33f9c2c3\",\"mimetype\":\"application/octet-stream\",\"name\":\"2VUln1bZt9_test.txt\",\"num_of_blocks\":8,\"o","n_cloud\":false,\"path\":\"/2VUln1bZt9_test.txt\",\"path_hash\":\"6550243c1cc5c00108bae3e042aba3024643256dac16b785931436603de2875c\",\"size\":524288,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1662161534}\n","    utils.go:72: \u001b[31m0box-sdk        [DEBUG]  2022/09/03 01:33:15.489086 filemetaworker.go:74: File meta response status: 200 OK\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.489211 downloadworker.go:256: Encrypted key from fileref\n","    utils.go:72: \u001b[31m0 / 1048576    0.00%0box-sdk        [INFO]   2022/09/03 01:33:15.489524 downloadworker.go:295: Download Size:1048576 Shard:524288 chunks/shard:8\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.489538 downloadworker.go:296: Start block: 1 End block: 8 Num blocks: 10\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.489631 downloadworker.go:308: Downloading block 1\n","    utils.go:72: \u001b[31m0box-sdk        [INFO]   2022/09/03 01:33:15.489657 downloadworker.go:100: downloadBlock 1 numDownloads 4\n","    utils.go:72: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/09/03 01:33:15.591682 downloadworker.go:114: Download block : https://dev-3.devnet-0chain.net/blobber04 response_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber\u001b[0m\n","    utils.go:72: \u001b[31m0 / 1048576    0.00% 0s\n","    utils.go:72: \u001b[31mError in file operation: Download failed for block 1.\n","    utils.go:72: \u001b[31mresponse_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber\n","    flaky___broken_scenarios_test.go:398: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:398\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0001166f0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyBrokenScenarios/Add_Collaborator___file_owner_must_pay_for_collaborators'_reads\n","        \tMessages:   \tError in downloading the file as collaborator%!(EXTRA string=0 / 1048576    0.00% 0 / 1048576    0.00% 0s\n","        \t            \tError in file operation: Download failed for block 1.\n","        \t            \tresponse_error: download_file: pre-redeeming read marker: read_pre_redeem: not enough tokens in client's read pools associated with the allocation-\u003eblobber)\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/BROKEN_Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation_but_is_not_see_zboxcli/issues/250","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.16,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","","    zboxcli_sync_test.go:866: Get Differences...\n","","    flaky___broken_scenarios_test.go:185: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:185\n","        \tError:      \t\"[]\" should have 2 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/BROKEN_Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_sub_folder)_must_be_updated_in_allocation_but_is_not_see_zboxcli/issues/250\n","        \tMessages:   \tSince we updated 2 files we expect 2 differences but we got 0%!(EXTRA []climodel.FileDiff=[])\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.17,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","","    zboxcli_sync_test.go:866: Get Differences...\n","","    flaky___broken_scenarios_test.go:299: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:299\n","        \tError:      \t\"[]\" should have 2 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_exclude_a_path_should_work\n","        \tMessages:   \tSince we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got 0\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.56,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_sync_test.go:844: Syncing folder...\n","","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    zboxcli_sync_test.go:866: Get Differences...\n","","    flaky___broken_scenarios_test.go:87: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:87\n","        \tError:      \t\"[]\" should have 1 item(s), but has 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/Sync_path_to_non-empty_allocation_-_locally_updated_files_(in_root)_must_be_updated_in_allocation\n","        \tMessages:   \twe updated a file, we except 1 change but we got 0%!(EXTRA []climodel.FileDiff=[])\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.14,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","1.3243055555555557e-09    zboxcli_upload_test.go:847: Uploading file...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_upload_token_test.go:94: Getting challenge pool info...\n","","    flaky___broken_scenarios_test.go:485: \n","        \tError Trace:\tflaky___broken_scenarios_test.go:485\n","        \tError:      \tNot equal: \n","        \t            \texpected: 1.3243055555555557e-09\n","        \t            \tactual  : 0\n","        \tTest:       \tTest___FlakyBrokenScenarios/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost\n","        \tMessages:   \texpected write pool balance to decrease by [1.3243055555555557e-09] but has actually decreased by [0]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":231,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.18,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:847: Uploading file...\n","","    utils.go:133: Waiting 10s...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_file_copy_test.go:639: Copying file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:293: \n","        \tError Trace:\tflaky___flaky_test.go:293\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":299,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.96,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:847: Uploading file...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_file_move_test.go:566: Moving file...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    flaky___flaky_test.go:357: \n","        \tError Trace:\tflaky___flaky_test.go:357\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: Test___FlakyFileRename (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":175,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.1,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:847: Uploading file...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file (17.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":71.75,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","    zboxcli_upload_test.go:847: Uploading file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    utils.go:133: Waiting 1m0s...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:66: \n","        \tError Trace:\tflaky___flaky_test.go:66\n","        \tError:      \tNot equal: \n","        \t            \texpected: 0.49990234375\n","        \t            \tactual  : 0.499902344\n","        \tTest:       \tTest___FlakyScenariosCommonUserFunctions/File_Update_with_a_different_size_-_Blobbers_should_be_paid_for_the_extra_file_size\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":84,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":199.82,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_upload_test.go:847: Uploading file...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:887: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:904: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:133: Waiting 10s...\n","    utils.go:133: Waiting 5s...\n","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:133: Waiting 10s...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:133: Waiting 10s...\n","    utils.go:133: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","","    utils.go:133: Waiting 5s...\n","","    utils.go:133: Waiting 2m0s...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:171: \n","        \tError Trace:\tflaky___flaky_test.go:171\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyTransferAllocation/transfer_allocation_accounting_test\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
