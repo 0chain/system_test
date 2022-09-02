@@ -37,8 +37,8 @@ func TestGetStats(t *testing.T) {
 		require.Greater(t, stats.LastFinalizedRound, int64(0), httpResponse)
 		require.GreaterOrEqual(t, stats.StateHealth, int64(-1), httpResponse)
 		require.Greater(t, stats.AverageBlockSize, 0, httpResponse)
-		require.Greater(t, stats.PrevInvocationCount, uint64(0), httpResponse)
+		require.GreaterOrEqual(t, stats.PrevInvocationCount, uint64(0), httpResponse)
 		require.NotNil(t, stats.PrevInvocationScanTime, uint64(0), httpResponse)
-		require.Greater(t, stats.MeanScanBlockStatsTime, float64(0), httpResponse)
+		require.GreaterOrEqual(t, stats.MeanScanBlockStatsTime, float64(0), httpResponse)
 	})
 }
