@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -85,6 +86,114 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}
 		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("rename file concurrently", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		firstFile := generateRandomTestFileName(t)
+		secondFile := generateRandomTestFileName(t)
+		err := createFileWithSize(firstFile, fileSize)
+		require.Nil(t, err)
+
+		err = createFileWithSize(secondFile, fileSize)
+		require.Nil(t, err)
+
+		testFiles := []string{
+			firstFile, secondFile}
+
+		firstFilename := filepath.Base(firstFile)
+		secondFilename := filepath.Base(secondFile)
+		remotePathes := []string{"/child/" + firstFilename, "/child/" + secondFilename}
+
+		destNames := []string{
+			"new1_" + firstFilename, "new2_" + secondFilename}
+
+		destPathes := []string{
+			"/child/new1_" + firstFilename, "/child/new2_" + secondFilename,
+		}
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		for i := 0; i < 2; i++ {
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotePathes[i],
+				"localpath":  testFiles[i],
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(testFiles[i]),
+			)
+			require.Equal(t, expected, output[1])
+		}
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(i int, wg *sync.WaitGroup) {
+
+				output, err := renameFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remotePathes[i],
+					"destname":   destNames[i],
+				}, true)
+
+				errorList[i] = err
+				outputList[i] = output
+
+				wg.Done()
+			}(i, &wg)
+		}
+
+		wg.Wait()
+
+		require.Len(t, outputList, 2)
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Equal(t, fmt.Sprintf(remotePathes[i]+" renamed"), outputList[i][0])
+		}
+
+		// list-all
+		output, err := listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 3)
+
+		var foundAtSource, foundAtDest int
+		for _, f := range files {
+			if _, ok := cliutils.Contains(remotePathes, f.Path); ok {
+				foundAtSource++
+			}
+
+			if _, ok := cliutils.Contains(destPathes, f.Path); ok {
+				foundAtDest++
+
+				_, ok = cliutils.Contains(destNames, f.Name)
+				require.True(t, ok, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.Equal(t, foundAtSource, 0, "file is found at source: ", strings.Join(output, "\n"))
+		require.Greater(t, foundAtDest, 0, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("rename file to same filename (no change)", func(t *testing.T) {
