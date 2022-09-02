@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var config = viper.New()
-
 func setupDefaultConfig() {
 	viper.SetDefault("nodes.miner01ID", "73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949")
 	viper.SetDefault("nodes.miner02ID", "3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c")
@@ -22,16 +20,22 @@ func setupDefaultConfig() {
 }
 
 // SetupConfig setups the main configuration system.
-func SetupConfig(workdir string) {
+func setupConfig() {
 	setupDefaultConfig()
 	path := filepath.Join(".", "config")
 
-	viper.SetConfigName("config")
+	viper.SetConfigName("nodes")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(path)
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
+    
+	miner01ID   = viper.GetString("nodes.miner01ID")
+	miner02ID   = viper.GetString("nodes.miner02ID")
+	miner03ID   = viper.GetString("nodes.miner03ID")
+	sharder01ID = viper.GetString("nodes.sharder01ID")
+	sharder02ID = viper.GetString("nodes.sharder02ID")
 }
 
 const (
@@ -46,11 +50,11 @@ const (
 )
 
 var (
-	miner01ID   = viper.GetString("miner01ID")
-	miner02ID   = viper.GetString("miner02ID")
-	miner03ID   = viper.GetString("miner03ID")
-	sharder01ID = viper.GetString("sharder01ID")
-	sharder02ID = viper.GetString("sharder02ID")
+	miner01ID   string
+	miner02ID   string
+	miner03ID   string
+	sharder01ID string
+	sharder02ID string
 )
 
 var (
@@ -116,7 +120,7 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	SetupConfig();
+	setupConfig()
 
 	exitRun := m.Run()
 	os.Exit(exitRun)
