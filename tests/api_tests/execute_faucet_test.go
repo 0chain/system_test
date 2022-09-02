@@ -3,7 +3,6 @@ package api_tests
 import (
 	"encoding/json"
 	resty "github.com/go-resty/resty/v2"
-	"strconv"
 	"testing"
 	"time"
 
@@ -95,7 +94,7 @@ func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, 
 
 func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
 	t.Logf("Executing faucet...")
-	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
+	_, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
 	require.Nil(t, err)
 	faucetRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
@@ -110,10 +109,6 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *m
 		Version:          "1.0",
 		TransactionNonce: wallet.Nonce + 1,
 	}
-
-	println(string(txnDataString))
-	println(strconv.Quote(string(txnDataString)))
-
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
 	confirmTransaction(t, wallet, faucetTransaction.Entity, 1*time.Minute)
 
