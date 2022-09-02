@@ -10,6 +10,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,7 +33,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Empty(t, poolsInfo.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner01ID,
+			"id":     viper.GetString("miner01ID"),
 			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
