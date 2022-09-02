@@ -23,6 +23,7 @@ func setupDefaultConfig() {
 
 // SetupConfig setups the main configuration system.
 func SetupConfig(workdir string) {
+	setupDefaultConfig()
 	path := filepath.Join(".", "config")
 
 	viper.SetConfigName("config")
@@ -114,6 +115,8 @@ func TestMain(m *testing.M) {
 			}
 		}
 	}
+
+	SetupConfig();
 
 	exitRun := m.Run()
 	os.Exit(exitRun)
