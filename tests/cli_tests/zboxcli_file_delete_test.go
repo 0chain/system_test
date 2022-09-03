@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,7 @@ func TestFileDelete(t *testing.T) {
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
-		remotepath := "/"
+		const remotepath = "/"
 		filesize := int64(1 * KB)
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 		fname := filepath.Base(filename)
@@ -33,7 +34,6 @@ func TestFileDelete(t *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		fmt.Println(remotepath, remoteFilePath, output[0])
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -44,6 +44,68 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("Delete file concurrently in existing directory, should work", func(t *testing.T) {
+		t.Parallel()
+
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		var fileNames [2]string
+
+		const remotePathPrefix = "/"
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
+
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+				}), true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(fileName, i)
+		}
+
+		wg.Wait()
+
+		const expectedPattern = "%s deleted"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList, 2, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join(remotePathPrefix, fileNames[i]),
+				"json":       "",
+			}), true)
+
+			require.Nil(t, err, "List files returned nil", err, strings.Join(output, "\n"))
+			require.Len(t, output, 1, "Len of output is not enough")
+			require.Equal(t, "null", output[0], "Output is not 'null'", strings.Join(output, "\n"))
+		}
 	})
 
 	t.Run("delete existing file with commit should work", func(t *testing.T) {
