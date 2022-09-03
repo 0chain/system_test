@@ -25,8 +25,8 @@ func TestOpenChallenges(t *testing.T) {
 		require.NotNil(t, blobberRequirements)
 
 		blobberId := (*blobbers)[0]
-		response, err := v1ScrestOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId, util.ConsensusByHttpStatus("200 OK"))
-		require.Equal(t, "200 OK", response.Status())
+		response, err := v1ScrestOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId, util.ConsensusByHttpStatus(util.HttpOkStatus))
+		require.Equal(t, util.HttpOkStatus, response.Status())
 		require.Nil(t, err)
 		bytesReader := bytes.NewBuffer(response.Body())
 		d := json.NewDecoder(bytesReader)
