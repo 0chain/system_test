@@ -73,6 +73,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		foundAtSource := false
 		foundAtDest := false
 		for _, f := range files {
+			fmt.Println(f.Path, f.Name)
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))

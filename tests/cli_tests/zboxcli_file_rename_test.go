@@ -88,7 +88,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file concurrently", func(t *testing.T) {
+	t.Run("Rename file concurrently", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -191,8 +191,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.Equal(t, foundAtSource, 0, "file is found at source: ", strings.Join(output, "\n"))
-		require.Greater(t, foundAtDest, 0, "file not found at destination: ", strings.Join(output, "\n"))
+		require.Equal(t, 0, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.Equal(t, 2, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("rename file to same filename (no change)", func(t *testing.T) {

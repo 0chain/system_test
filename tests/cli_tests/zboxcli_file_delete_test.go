@@ -66,7 +66,7 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
-		require.Equal(t, "Commiting changes to blockchain ...", output[1])
+		require.Equal(t, "Committing changes to blockchain ...", output[1])
 		require.Regexp(t, "Commit Metadata successful.*", output[2])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
