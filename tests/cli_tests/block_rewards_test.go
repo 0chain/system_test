@@ -13,6 +13,7 @@ import (
 	"time"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -41,13 +42,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		// Get MinerSC Global Config
-		output, err = getMinerSCConfig(t, configPath, true)
-		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0)
-
-		_, configAsFloat := keyValuePairStringToMap(t, output)
-
 		// Get miner list.
 		output, err = getMiners(t, configPath)
 		require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
@@ -58,101 +52,64 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 		require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
-		// Use first miner
-		selectedMiner := miners.Nodes[0].SimpleNode
+		//var miner climodel.Node
+		//err = json.Unmarshal([]byte(strings.Join(output, "")), &miner)
+		//require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		//require.NotEmpty(t, miner, "No node found: %v", strings.Join(output, "\n"))
 
-		// Get miner's node details (this has the total_stake and pools populated).
-		output, err = getNode(t, configPath, selectedMiner.ID)
-		require.Nil(t, err, "get node %s failed", selectedMiner.ID, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		type minerChange struct {
+			id            string
+			before, after *climodel.Node
+		}
 
-		var miner climodel.Node
-		err = json.Unmarshal([]byte(strings.Join(output, "")), &miner)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.NotEmpty(t, miner, "No node found: %v", strings.Join(output, "\n"))
-
-		// Get sharder list.
-		output, err = getSharders(t, configPath)
-		require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 1)
-		require.Equal(t, "MagicBlock Sharders", output[0])
-
-		var sharders map[string]climodel.Sharder
-		err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
-		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
-
-		// Use first sharder from map.
-		require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
-		sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-
-		// Get base URL for API calls.
-		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
-		startNodeStat := getMinersDetail(t, miner.ID)
-		startReward := startNodeStat.Reward
-		startRound := startNodeStat.Round
-
-		// Do 5 send transactions with fees
+		var changes []*minerChange
+		for _, m := range miners.Nodes {
+			before := getMinersDetail(t, m.ID)
+			require.NotNil(t, before, "can't get information for miner ", m.ID)
+			changes = append(changes, &minerChange{
+				id:     m.ID,
+				before: before,
+			})
+		}
 		fee := 0.1
 		for i := 0; i < 5; i++ {
 			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
-
-		endNodeStat := getMinersDetail(t, miner.ID)
-		endReward := endNodeStat.Reward
-		endRound := endNodeStat.Round
-
-		totalRewardsAndFees := int64(0)
-		// Calculate the total rewards and fees for this miner.
-		for round := startRound + 1; round <= endRound; round++ {
-			block := getBlock(t, sharderBaseUrl, round)
-			// No expected rewards for this miner if not the generator of block.
-			if block.Block.MinerId != miner.ID {
-				continue
-			}
-
-			// Get total block fees
-			blockFees := int64(0)
-			for _, txn := range block.Block.Transactions {
-				blockFees += txn.TransactionFee
-			}
-
-			// reward rate declines per epoch
-			// new reward ratio = current reward rate * (1.0 - reward decline rate)
-			epochs := round / int64(configAsFloat[epochConfigKey])
-			rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
-
-			// block reward (mint) = block reward (configured) * reward rate
-			blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
-
-			// generator rewards = block reward * share ratio
-			generatorRewards := blockRewardMint * configAsFloat[shareRatioConfigKey]
-
-			// generator reward service charge = generator rewards * service charge
-			generatorRewardServiceCharge := generatorRewards * miner.Settings.ServiceCharge
-			generatorRewardsRemaining := generatorRewards - generatorRewardServiceCharge
-
-			// generator fees = block fees * share ratio
-			generatorFees := float64(blockFees) * configAsFloat[shareRatioConfigKey]
-
-			// generator fee service charge = generator fees * service charge
-			generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
-			generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
-
-			totalRewardsAndFees += int64(generatorRewardServiceCharge)
-			totalRewardsAndFees += int64(generatorFeeServiceCharge)
-
-			// if none staked at node, node gets all rewards.
-			// otherwise, then remaining are distributed to stake holders.
-			if miner.TotalStake == 0 {
-				totalRewardsAndFees += int64(generatorRewardsRemaining)
-				totalRewardsAndFees += int64(generatorFeeRemaining)
-			}
+		for _, c := range changes {
+			c.after = getMinersDetail(t, c.id)
+			require.NotNil(t, c.after, "can't get information for miner ", c.id)
 		}
-		rewardEarned := endReward - startReward
-		require.Equal(t, rewardEarned, totalRewardsAndFees)
+
+		minerScConfig := getMinerScMap(t)
+		history := cliutil.NewHistory(changes[0].before.Round, changes[len(changes)-1].after.Round)
+		history.ReadBlocks(t, getSharderUrl(t)) //  getNodeBaseURL(sharder.Host, sharder.Port))
+		history.DumpTransactions()
+		fmt.Println("-----------------------------------")
+		//sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+		//for round := changes[0].before.Round; round < changes[0].after.Round; round++ {
+		//	block := getBlock(t, sharderBaseUrl, round)
+		//	for _, tx := range block.Block.Transactions {
+		//		fmt.Println("tx round", round, "fee", tx.TransactionFee, "data", tx.TransactionData)
+		//	}
+		//}
+
+		for _, change := range changes {
+			minerBlockRewardPerRound, _ := blockRewards(t, change.after.Round, minerScConfig)
+			timesWon := history.TimesWonBestMiner(change.id, change.before.Round, change.after.Round)
+			expectedBlockRewards := timesWon * minerBlockRewardPerRound
+			recordedFees := history.TotalMinerFees(change.id, change.before.Round, change.after.Round)
+			expectedRewards := expectedBlockRewards + recordedFees
+			actualReward := change.after.Reward - change.before.Reward
+			difference := expectedRewards - actualReward
+
+			totalFees := history.TotalFees(change.after.Reward, change.before.Reward)
+			fmt.Println("expected Rewards", expectedRewards, "expected block rewards", expectedBlockRewards,
+				"recorded fees", recordedFees, "actual rewards", actualReward, "difference expected - actual", difference, "miner")
+			fmt.Println("total fees", totalFees)
+			require.EqualValues(t, expectedRewards, actualReward)
+		}
+
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -174,8 +131,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-
-		_, configAsFloat := keyValuePairStringToMap(t, output)
 
 		// Get sharder list.
 		output, err = getSharders(t, configPath)
@@ -202,74 +157,20 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 		require.NotEmpty(t, sharder, "No node found: %v", strings.Join(output, "\n"))
 
-		// Get base URL for API calls.
-		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
-		startNodeStat := getMinersDetail(t, sharder.ID)
-		startReward := startNodeStat.Reward
-		startRound := startNodeStat.Round
-
+		fromMiner := getMinersDetail(t, sharder.ID)
 		// Do 5 send transactions with fees
 		fee := 0.1
 		for i := 0; i < 5; i++ {
 			output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
+		toMiner := getMinersDetail(t, sharder.ID)
 
-		endNodeStat := getMinersDetail(t, sharder.ID)
-		endReward := endNodeStat.Reward
-		endRound := endNodeStat.Round
+		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+		history := cliutil.NewHistory(fromMiner.Round, toMiner.Round)
+		history.ReadBlocks(t, sharderBaseUrl)
+		//	history.TotalFees()
 
-		totalRewardsAndFees := int64(0)
-
-		// Calculate the total rewards and fees for this sharder.
-		for round := startRound + 1; round <= endRound; round++ {
-			block := getBlock(t, sharderBaseUrl, round)
-
-			// Get total block fees
-			blockFees := int64(0)
-			for _, txn := range block.Block.Transactions {
-				blockFees += txn.TransactionFee
-			}
-
-			// reward rate declines per epoch
-			// new reward ratio = current reward rate * (1.0 - reward decline rate)
-			epochs := round / int64(configAsFloat[epochConfigKey])
-			rewardRate := configAsFloat[rewardRateConfigKey] * math.Pow(1.0-configAsFloat[rewardDeclineRateConfigKey], float64(epochs))
-
-			// block reward (mint) = block reward (configured) * reward rate
-			blockRewardMint := configAsFloat[blockRewardConfigKey] * 1e10 * rewardRate
-
-			// generator rewards = block reward * share ratio
-			// sharders rewards  = block reward - generator rewards
-			sharderRewards := blockRewardMint * (1 - configAsFloat[shareRatioConfigKey])
-			sharderRewardsShare := sharderRewards / float64(len(sharders))
-
-			// sharder reward service charge = sharders rewards * service charge
-			sharderRewardServiceCharge := sharderRewardsShare * sharder.Settings.ServiceCharge
-			sharderRewardsRemaining := sharderRewardsShare - sharderRewardServiceCharge
-
-			// generator fees = block fees * share ratio
-			// sharders fees  = block fees - generator fees
-			sharderFees := float64(blockFees) * (1 - configAsFloat[shareRatioConfigKey])
-			sharderFeesShare := sharderFees / float64(len(sharders))
-
-			// sharder fee service charge = sharders fees * service charge
-			sharderFeeServiceCharge := sharderFeesShare * sharder.Settings.ServiceCharge
-			sharderFeeRemaining := sharderFeesShare - sharderFeeServiceCharge
-
-			totalRewardsAndFees += int64(sharderRewardServiceCharge)
-			totalRewardsAndFees += int64(sharderFeeServiceCharge)
-
-			// if none staked at node, node gets all rewards
-			// otherwise, then remaining are distributed to stake holders.
-			if sharder.TotalStake == 0 {
-				totalRewardsAndFees += int64(sharderRewardsRemaining)
-				totalRewardsAndFees += int64(sharderFeeRemaining)
-			}
-		}
-		rewardEarned := endReward - startReward
-		require.Equal(t, totalRewardsAndFees, rewardEarned)
 	})
 }
 
@@ -294,6 +195,41 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 		stringMap[key] = val
 	}
 	return
+}
+
+func getMinerScMap(t *testing.T) map[string]float64 {
+	output, err := getMinerSCConfig(t, configPath, true)
+	require.NoError(t, err, "get miners sc config failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0)
+	_, configAsFloat := keyValuePairStringToMap(t, output)
+	return configAsFloat
+}
+
+func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (int64, int64) {
+	epoch := round / int64(minerScConfig["epoch"])
+	declineRate := math.Pow(minerScConfig["reward_decline_rate"], float64(epoch))
+	blockReward := (minerScConfig["block_reward"] * float64(TOKEN_UNIT)) * declineRate
+	minerReward := int64(blockReward * minerScConfig["share_ratio"])
+	sharderReward := int64(blockReward) - minerReward
+	return minerReward, sharderReward
+}
+
+func getSharderUrl(t *testing.T) string {
+	// Get sharder list.
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	//require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+
+	return getNodeBaseURL(sharder.Host, sharder.Port)
 }
 
 func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
