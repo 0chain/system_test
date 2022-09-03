@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -148,7 +149,7 @@ func TestUpload(t *testing.T) {
 				defer wg.Done()
 				op, err := uploadFile(t, configPath, map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": currentFileName,
+					"remotepath": path.Join("/", currentFileName),
 					"localpath":  currentFileName,
 				}, true)
 				errorList[currentIndex] = err
@@ -172,6 +173,194 @@ func TestUpload(t *testing.T) {
 			_, ok := cliutils.Contains(expectedList, outputList[i][1])
 			require.True(t, ok, "Output is not appropriate")
 		}
+	})
+
+	t.Run("Upload file and delete concurrently to root directory, should work", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		firstFilename := generateRandomTestFileName(t)
+		err := createFileWithSize(firstFilename, fileSize)
+		require.Nil(t, err)
+
+		secondFilename := generateRandomTestFileName(t)
+		err = createFileWithSize(secondFilename, fileSize)
+		require.Nil(t, err)
+
+		fileNames := [2]string{firstFilename, secondFilename}
+
+		var uploadOutputList, deleteOutputList [2][]string
+		var uploadErrorList, deleteErrorList [2]error
+		var wg sync.WaitGroup
+
+		for i, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+
+				remotePath := path.Join("/", filepath.Base(currentFileName))
+
+				op, err := uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remotePath,
+					"localpath":  currentFileName,
+				}, true)
+				uploadErrorList[currentIndex] = err
+				uploadOutputList[currentIndex] = op
+
+				op, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remotePath,
+				}), true)
+
+				deleteErrorList[currentIndex] = err
+				deleteOutputList[currentIndex] = op
+			}(fileName, i)
+		}
+
+		wg.Wait()
+
+		uploadExpectedPattern := "Status completed callback. Type = application/octet-stream. Name = %s"
+
+		uploadExpectedList := []string{
+			fmt.Sprintf(uploadExpectedPattern, filepath.Base(firstFilename)),
+			fmt.Sprintf(uploadExpectedPattern, filepath.Base(secondFilename)),
+		}
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, uploadErrorList[i], strings.Join(uploadOutputList[i], "\n"))
+			require.Len(t, uploadOutputList[i], 2, strings.Join(uploadOutputList[i], "\n"))
+
+			_, ok := cliutils.Contains(uploadExpectedList, uploadOutputList[i][1])
+			require.True(t, ok, "Upload output is not appropriate")
+		}
+
+		deleteExpectedPattern := "%s deleted"
+
+		deleteExpectedList := []string{
+			fmt.Sprintf(deleteExpectedPattern, filepath.Base(firstFilename)),
+			fmt.Sprintf(deleteExpectedPattern, filepath.Base(secondFilename)),
+		}
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
+			require.Len(t, deleteOutputList, 2, strings.Join(deleteOutputList[i], "\n"))
+
+			_, ok := cliutils.Contains(deleteExpectedList, filepath.Base(deleteOutputList[i][0]))
+			require.True(t, ok, "Delete output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join("/", fileNames[i]),
+				"json":       "",
+			}), true)
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		}
+	})
+
+	t.Run("Upload file and copy concurrently to root directory, should work", func(t *testing.T) {
+		t.Skip()
+		t.Parallel()
+
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		firstFilename := generateRandomTestFileName(t)
+		err := createFileWithSize(firstFilename, fileSize)
+		require.Nil(t, err)
+
+		secondFilename := generateRandomTestFileName(t)
+		err = createFileWithSize(secondFilename, fileSize)
+		require.Nil(t, err)
+
+		fileNames := [2]string{firstFilename, secondFilename}
+
+		var uploadOutputList, copyOutputList [2][]string
+		var uploadErrorList, copyErrorList [2]error
+		var wg sync.WaitGroup
+
+		for i, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+
+				op, err := uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": path.Join("/", currentFileName),
+					"localpath":  currentFileName,
+				}, true)
+				uploadErrorList[currentIndex] = err
+				uploadOutputList[currentIndex] = op
+
+				op, err = copyFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": path.Join("/", currentFileName),
+					"destpath":   "",
+				}, true)
+
+				copyErrorList[currentIndex] = err
+				copyOutputList[currentIndex] = op
+			}(fileName, i)
+		}
+
+		wg.Wait()
+
+		uploadExpectedPattern := "Status completed callback. Type = application/octet-stream. Name = %s"
+
+		uploadExpectedList := []string{
+			fmt.Sprintf(uploadExpectedPattern, filepath.Base(firstFilename)),
+			fmt.Sprintf(uploadExpectedPattern, filepath.Base(secondFilename)),
+		}
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, uploadErrorList[i], strings.Join(uploadOutputList[i], "\n"))
+			require.Len(t, uploadOutputList[i], 2, strings.Join(uploadOutputList[i], "\n"))
+
+			_, ok := cliutils.Contains(uploadExpectedList, uploadOutputList[i][1])
+			require.True(t, ok, "Upload output is not appropriate")
+		}
+
+		//deleteExpectedPattern := "%s deleted"
+		//
+		//deleteExpectedList := []string{
+		//	fmt.Sprintf(deleteExpectedPattern, filepath.Base(firstFilename)),
+		//	fmt.Sprintf(deleteExpectedPattern, filepath.Base(secondFilename)),
+		//}
+
+		//for i := 0; i < 2; i++ {
+		//	require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
+		//	require.Len(t, deleteOutputList, 2, strings.Join(deleteOutputList[i], "\n"))
+		//
+		//	fmt.Println(filepath.Base(firstFilename))
+		//	_, ok := cliutils.Contains(deleteExpectedList, deleteOutputList[i][0])
+		//	fmt.Println(deleteExpectedList, deleteOutputList[i][0])
+		//	require.True(t, ok, "Delete output is not appropriate")
+		//}
+		//
+		//for i := 0; i < 2; i++ {
+		//	output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+		//		"allocation": allocationID,
+		//		"remotepath": path.Join("/", fileNames[i]),
+		//		"json":       "",
+		//	}), true)
+		//	require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		//	require.Len(t, output, 1)
+		//	require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		//}
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *testing.T) {

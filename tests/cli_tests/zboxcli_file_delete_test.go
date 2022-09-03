@@ -33,6 +33,7 @@ func TestFileDelete(t *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+		fmt.Println(remotepath, remoteFilePath, output[0])
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
