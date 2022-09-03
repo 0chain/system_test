@@ -8,6 +8,7 @@ import (
 	"github.com/go-resty/resty/v2" //nolint
 
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -57,7 +58,7 @@ func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 
 	require.NotNil(t, allocation, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 
 	return allocation
 }

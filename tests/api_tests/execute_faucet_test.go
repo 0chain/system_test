@@ -1,9 +1,7 @@
 package api_tests
 
 import (
-	"encoding/json"
 	resty "github.com/go-resty/resty/v2"
-	"strconv"
 	"testing"
 	"time"
 
@@ -38,7 +36,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred confirming transaction with http response [%s]", err, httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 	require.Equal(t, "1.0", confirmation.Version, "version did not match expected")
 	require.Equal(t, sentTransaction.Hash, confirmation.Hash, "hash did not match expected")
 	require.NotNil(t, confirmation.BlockHash)
@@ -82,7 +80,7 @@ func getBalance(t *testing.T, clientId string) *model.Balance {
 
 	require.NotNil(t, balance, "Balance was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 
 	return balance
 }
@@ -95,8 +93,7 @@ func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, 
 
 func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *model.TransactionResponse {
 	t.Logf("Executing faucet...")
-	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "pour"})
-	require.Nil(t, err)
+
 	faucetRequest := model.Transaction{
 		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
 		TxnOutputHash:    "",
@@ -110,10 +107,6 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair) *m
 		Version:          "1.0",
 		TransactionNonce: wallet.Nonce + 1,
 	}
-
-	println(string(txnDataString))
-	println(strconv.Quote(string(txnDataString)))
-
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
 	confirmTransaction(t, wallet, faucetTransaction.Entity, 1*time.Minute)
 
@@ -125,7 +118,7 @@ func executeTransaction(t *testing.T, txnRequest *model.Transaction, keyPair mod
 
 	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
 	require.NotNil(t, transactionResponse, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 	require.True(t, transactionResponse.Async)
 	require.NotNil(t, transactionResponse.Entity, "Transaction entity was unexpectedly nil! with http response [%s]", httpResponse)
 	require.NotNil(t, transactionResponse.Entity.ChainId)
