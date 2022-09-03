@@ -142,18 +142,17 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 
 		for i := 0; i < 2; i++ {
 			wg.Add(1)
-			go func(i int, wg *sync.WaitGroup) {
+			go func(currentIndex int, wg *sync.WaitGroup) {
+				defer wg.Done()
 
 				output, err := renameFile(t, configPath, map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": remotePathes[i],
-					"destname":   destNames[i],
+					"remotepath": remotePathes[currentIndex],
+					"destname":   destNames[currentIndex],
 				}, true)
 
-				errorList[i] = err
-				outputList[i] = output
-
-				wg.Done()
+				errorList[currentIndex] = err
+				outputList[currentIndex] = output
 			}(i, &wg)
 		}
 
