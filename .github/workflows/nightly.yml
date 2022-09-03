@@ -20,19 +20,6 @@ jobs:
         with:
           github-token: ${{ github.token }}
 
-      - name: "Set PR status as pending"
-        uses: niteoweb/pull_request_status_action@v1.0.0
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
-          state: "pending"
-          repository: ${{ github.repository }}
-          context: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
       - name: "Config: Deploy new 0Chain network then run tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
