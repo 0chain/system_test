@@ -70,7 +70,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err)
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
-			"num_delegates": len(oldSharderInfo.Pools),
+			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
 			"max_stake":     intToZCN(old_max_stake),
 			"min_stake":     intToZCN(old_min_stake),
 		}), true)
