@@ -179,33 +179,53 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		var renameErrorList, deleteErrorList [2]error
 		var wg sync.WaitGroup
 
+		fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		fileNames[0] = fileName
+
+		destFileName := filepath.Base(generateRandomTestFileName(t))
+		destFileNames[0] = destFileName
+
+		fileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		fileNames[1] = fileName
+
+		destFileName = filepath.Base(generateRandomTestFileName(t))
+		destFileNames[1] = destFileName
+
 		for i := 0; i < 2; i++ {
-			wg.Add(1)
+			wg.Add(2)
+
+			var mutex sync.Mutex
+
+			mutex.Lock()
 			go func(currentIndex int) {
 				defer wg.Done()
 
-				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-				fileNames[currentIndex] = fileName
-
-				destFileName := filepath.Base(generateRandomTestFileName(t))
-				destFileNames[currentIndex] = destFileName
-
 				op, err := renameFile(t, configPath, map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, fileName),
-					"destname":   destFileName,
+					"remotepath": filepath.Join(remotePathPrefix, fileNames[currentIndex]),
+					"destname":   destFileNames[currentIndex],
 				}, true)
 
 				renameErrorList[currentIndex] = err
 				renameOutputList[currentIndex] = op
 
-				op, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+				mutex.Unlock()
+			}(i)
+
+			go func(currentIndex int) {
+				mutex.Lock()
+
+				defer wg.Done()
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, destFileName),
+					"remotepath": filepath.Join(remotePathPrefix, destFileNames[currentIndex]),
 				}), true)
 
 				deleteErrorList[currentIndex] = err
 				deleteOutputList[currentIndex] = op
+
+				mutex.Unlock()
 			}(i)
 		}
 
