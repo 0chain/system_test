@@ -63,3 +63,19 @@ func v1ScrestOpenChallenges(t *testing.T, storageSmartContractAddress string, bl
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+storageSmartContractAddress+"/openchallenges?blobber="+blobberId, consensusCategoriser, nil)
 	return httpResponse, httpError
 }
+
+func v1MinerGetStats(t *testing.T, consensusCategoriser util.ConsensusMetFunction) (*model.MinerStats, *resty.Response, error) { //nolint
+	var stats *model.MinerStats
+
+	httpResponse, httpError := zeroChain.GetFromMiners(t, "/v1/miner/get/stats", consensusCategoriser, &stats)
+
+	return stats, httpResponse, httpError
+}
+
+func v1SharderGetStats(t *testing.T, consensusCategoriser util.ConsensusMetFunction) (*model.SharderStats, *resty.Response, error) { //nolint
+	var stats *model.SharderStats
+
+	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/sharder/get/stats", consensusCategoriser, &stats)
+
+	return stats, httpResponse, httpError
+}
