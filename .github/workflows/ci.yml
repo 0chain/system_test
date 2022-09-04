@@ -64,36 +64,37 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite ]
+    runs-on: [tests-suite]
     timeout-minutes: 90
     steps:
-      - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          github-token: ${{ github.token }}
 
-      - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
-          state: "pending"
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
+#      - name: "Get current PR"
+#        uses: jwalton/gh-find-current-pr@v1
+#        id: findPr
+#        with:
+#          github-token: ${{ github.token }}
 
-      - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
-        run: |
-          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+#      - name: "Set PR status as pending"
+#        uses: 0chain/actions/set-pr-status@master
+#        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+#        with:
+#          pr_number: ${{ steps.findPr.outputs.pr }}
+#          description: "System tests running with default config..."
+#          state: "pending"
+#          repository: ${{ github.repository }}
+#          status_name: "0Chain System Tests"
+#          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#          github_token: ${{ github.token }}
 
-          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
-
+#      - name: "Config: Run tests against existing 0Chain network"
+#        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+#        run: |
+#          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+#          echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
+#          echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+#
+#          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
@@ -131,26 +132,58 @@ jobs:
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
 
-      - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+#      - name: "Run System tests"
+#        uses: 0chain/actions/run-system-tests@master
+#        with:
+#          network: ${{ env.NETWORK_URL }}
+#          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+#          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+#          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+#          deploy_report_page: true
+#          archive_results: true
+#          run_flaky_tests: true
+#          test_file_filter: ${{ env.TEST_FILE_FILTER }}
 
-      - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@master
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v1
+        # Run benchmark with `go test -bench` and stores the output to a file
+      - name: Run benchmark
+        run: go test -bench=. ./... | tee output.txt
+        # Download previous benchmark result from cache (if exists)
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
         with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests with default config ${{ job.status }}"
-          state: ${{ job.status }}
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
+                    # What benchmark tool the output.txt came from
+          tool: 'go'
+          # Where the output from the benchmark tool is stored
+          output-file-path: output.txt
+          # Where the previous data file is stored
+
+          # Workflow will fail when an alert happens
+          fail-on-alert: true
+          github-token: ${{ github.token }}
+            # Enable alert commit comment
+          comment-on-alert: true
+          # Mention @rhysd in the commit comment
+          alert-comment-cc-users: '@rhysd'
+        # Upload the updated cache file for the next job by actions/cache
+
+#      - name: "Run benchmarks"
+#        uses: bobheadxi/gobenchdata@v1
+#        with:
+#          CHECKS: true
+#          GO_TEST_FLAGS: -cpu 1,2
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+
+#      - name: "Set PR status as ${{ job.status }}"
+#        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+#        uses: 0chain/actions/set-pr-status@master
+#        with:
+#          pr_number: ${{ steps.findPr.outputs.pr }}
+#          description: "System tests with default config ${{ job.status }}"
+#          state: ${{ job.status }}
+#          repository: ${{ github.repository }}
+#          status_name: "0Chain System Tests"
+#          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#          github_token: ${{ github.token }}

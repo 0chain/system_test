@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -106,6 +107,7 @@ func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
 
 func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]string, error) {
 	t.Logf("Registering wallet...")
+	fmt.Println(name)
 	return cliutils.RunCommand(t, "./zbox register --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
