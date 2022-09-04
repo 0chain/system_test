@@ -15,7 +15,6 @@ import (
 )
 
 func TestSharderUpdateSettings(t *testing.T) {
-	t.Skip("Skip till fixed")
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -52,7 +51,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 	lastRoundOfSettingUpdate := int64(0)
 
 	// revert sharder node settings after test
-	defer func() {
+	t.Cleanup(func() {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -70,7 +69,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		old_min_stake, err := oldSharderInfo.Settings.MinStake.Int64()
 		require.Nil(t, err)
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": len(oldSharderInfo.Pools),
 			"max_stake":     intToZCN(old_max_stake),
 			"min_stake":     intToZCN(old_min_stake),
@@ -79,9 +78,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-	}()
-
-	t.Parallel()
+	})
 
 	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {
 		currRound := getCurrentRound(t)
@@ -97,7 +94,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"min_stake": 1,
 		}), true)
 		require.Nil(t, err, "error reverting sharder node settings after test")
@@ -106,7 +103,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder.ID,
+			"id": sharder01ID,
 		}), true)
 		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
@@ -133,7 +130,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": 5,
 		}), true)
 		require.Nil(t, err, "error updating num_delegated in sharder node")
@@ -142,7 +139,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder.ID,
+			"id": sharder01ID,
 		}), true)
 		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
@@ -167,7 +164,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"max_stake": 99,
 		}), true)
 		require.Nil(t, err, "error updating max_stake in sharder node")
@@ -176,7 +173,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder.ID,
+			"id": sharder01ID,
 		}), true)
 		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
@@ -203,7 +200,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": 8,
 			"min_stake":     2,
 			"max_stake":     98,
@@ -214,7 +211,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
 		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder.ID,
+			"id": sharder01ID,
 		}), true)
 		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
@@ -245,7 +242,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 		}), false)
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
@@ -267,7 +264,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
@@ -289,7 +286,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
 		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
@@ -311,7 +308,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"max_stake": 48,
 			"min_stake": 51,
 		}), false)
@@ -334,7 +331,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"min_stake": -1,
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
@@ -356,7 +353,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"max_stake": -1,
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
@@ -378,7 +375,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": -1,
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
@@ -419,7 +416,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id": sharder.ID,
+			"id": sharder01ID,
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
@@ -445,7 +442,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder.ID,
+			"id":            sharder01ID,
 			"num_delegates": 5,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
@@ -453,7 +450,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_sharder_settings: access denied", output[0])
 
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
@@ -461,7 +458,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		require.Equal(t, "update_sharder_settings: access denied", output[0])
 
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder.ID,
+			"id":        sharder01ID,
 			"min_stake": 1,
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
