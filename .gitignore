@@ -23,6 +23,7 @@ tests/cli_tests/config/*.json
 tests/cli_tests/config/*allocation.txt
 tests/cli_tests/tmp/
 **/cmdlog.log
+**/bridge.log
 **/zbox
 **/zwallet
 **/allocation.txt

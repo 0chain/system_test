@@ -1,13 +1,42 @@
 package cli_tests
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/spf13/viper"
 )
+
+func setupDefaultConfig() {
+	viper.SetDefault("nodes.miner01ID", "73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949")
+	viper.SetDefault("nodes.miner02ID", "3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c")
+	viper.SetDefault("nodes.miner03ID", "c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937")
+	viper.SetDefault("nodes.sharder01ID", "ea26431f8adb7061766f1d6bbcc3b292d70dd59960d857f04b8a75e6a5bbe04f")
+	viper.SetDefault("nodes.sharder02ID", "30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1")
+}
+
+// SetupConfig setups the main configuration system.
+func setupConfig() {
+	setupDefaultConfig()
+	path := filepath.Join(".", "config")
+
+	viper.SetConfigName("nodes")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(path)
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("fatal error config file: %s", err))
+	}
+    
+	miner01ID   = viper.GetString("nodes.miner01ID")
+	miner02ID   = viper.GetString("nodes.miner02ID")
+	miner03ID   = viper.GetString("nodes.miner03ID")
+	sharder01ID = viper.GetString("nodes.sharder01ID")
+	sharder02ID = viper.GetString("nodes.sharder02ID")
+}
 
 const (
 	zcnscOwner                      = "wallets/zcnsc_owner"
@@ -18,8 +47,14 @@ const (
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
 	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
 	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
-	minerNodeWalletName             = "wallets/miner_node"
-	sharderNodeWalletName           = "wallets/sharder_node"
+)
+
+var (
+	miner01ID   string
+	miner02ID   string
+	miner03ID   string
+	sharder01ID string
+	sharder02ID string
 )
 
 var (
@@ -65,9 +100,7 @@ func TestMain(m *testing.M) {
 					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, minerNodeWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharderNodeWalletName+"_wallet.json") {
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
@@ -86,6 +119,8 @@ func TestMain(m *testing.M) {
 			}
 		}
 	}
+
+	setupConfig()
 
 	exitRun := m.Run()
 	os.Exit(exitRun)

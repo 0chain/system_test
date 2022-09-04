@@ -2,6 +2,7 @@ package climodel
 
 import (
 	"time"
+	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
@@ -247,9 +248,9 @@ type StakePoolSettings struct {
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
 	// MinStake allowed.
-	MinStake int64 `json:"min_stake"`
+	MinStake currency.Coin `json:"min_stake"`
 	// MaxStake allowed.
-	MaxStake int64 `json:"max_stake"`
+	MaxStake currency.Coin `json:"max_stake"`
 	// MaxNumDelegates maximum allowed.
 	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
