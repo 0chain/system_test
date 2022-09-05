@@ -292,6 +292,27 @@ type BCChallengeResponse struct {
 	Challenges []*ChallengeEntity `json:"challenges"`
 }
 
+type MinerStats struct {
+	BlockFinality      float64                  `json:"block_finality"`
+	LastFinalizedRound int64                    `json:"last_finalized_round"`
+	BlocksFinalized    int64                    `json:"blocks_finalized"`
+	StateHealth        int64                    `json:"state_health"`
+	CurrentRound       int64                    `json:"current_round"`
+	RoundTimeout       int64                    `json:"round_timeout"`
+	Timeouts           int64                    `json:"timeouts"`
+	AverageBlockSize   int                      `json:"average_block_size"`
+	NetworkTime        map[string]time.Duration `json:"network_times"`
+}
+
+type SharderStats struct {
+	LastFinalizedRound     int64   `json:"last_finalized_round"`
+	StateHealth            int64   `json:"state_health"`
+	AverageBlockSize       int     `json:"average_block_size"`
+	PrevInvocationCount    uint64  `json:"pervious_invocation_count"`
+	PrevInvocationScanTime string  `json:"previous_incovcation_scan_time"`
+	MeanScanBlockStatsTime float64 `json:"mean_scan_block_stats_time"`
+}
+
 func (w Wallet) String() string {
 	out, err := json.Marshal(w)
 	if err != nil {
