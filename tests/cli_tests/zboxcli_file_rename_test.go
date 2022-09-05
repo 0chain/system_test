@@ -170,8 +170,10 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			"size": allocSize,
 		})
 
-		var fileNames [2]string
+		var renameFileNames [2]string
 		var destFileNames [2]string
+
+		var deleteFileNames [2]string
 
 		const remotePathPrefix = "/"
 
@@ -179,53 +181,50 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		var renameErrorList, deleteErrorList [2]error
 		var wg sync.WaitGroup
 
-		fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		fileNames[0] = fileName
+		renameFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[0] = renameFileName
 
 		destFileName := filepath.Base(generateRandomTestFileName(t))
 		destFileNames[0] = destFileName
 
-		fileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		fileNames[1] = fileName
+		renameFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[1] = renameFileName
 
 		destFileName = filepath.Base(generateRandomTestFileName(t))
 		destFileNames[1] = destFileName
 
+		deleteFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[0] = deleteFileName
+
+		deleteFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[1] = deleteFileName
+
 		for i := 0; i < 2; i++ {
 			wg.Add(2)
 
-			var mutex sync.Mutex
-
-			mutex.Lock()
 			go func(currentIndex int) {
 				defer wg.Done()
 
 				op, err := renameFile(t, configPath, map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, fileNames[currentIndex]),
+					"remotepath": filepath.Join(remotePathPrefix, renameFileNames[currentIndex]),
 					"destname":   destFileNames[currentIndex],
 				}, true)
 
 				renameErrorList[currentIndex] = err
 				renameOutputList[currentIndex] = op
-
-				mutex.Unlock()
 			}(i)
 
 			go func(currentIndex int) {
-				mutex.Lock()
-
 				defer wg.Done()
 
 				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, destFileNames[currentIndex]),
+					"remotepath": filepath.Join(remotePathPrefix, deleteFileNames[currentIndex]),
 				}), true)
 
 				deleteErrorList[currentIndex] = err
 				deleteOutputList[currentIndex] = op
-
-				mutex.Unlock()
 			}(i)
 		}
 
@@ -237,7 +236,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			require.Nil(t, renameErrorList[i], strings.Join(renameOutputList[i], "\n"))
 			require.Len(t, renameOutputList[i], 1, strings.Join(renameOutputList[i], "\n"))
 
-			require.Equal(t, fmt.Sprintf(renameExpectedPattern, fileNames[i]), filepath.Base(renameOutputList[i][0]), "Rename output is not appropriate")
+			require.Equal(t, fmt.Sprintf(renameExpectedPattern, renameFileNames[i]), filepath.Base(renameOutputList[i][0]), "Rename output is not appropriate")
 		}
 
 		const deleteExpectedPattern = "%s deleted"
@@ -246,13 +245,13 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 			require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
 			require.Len(t, deleteOutputList[i], 1, strings.Join(deleteOutputList[i], "\n"))
 
-			require.Equal(t, fmt.Sprintf(deleteExpectedPattern, destFileNames[i]), filepath.Base(deleteOutputList[i][0]), "Delete output is not appropriate")
+			require.Equal(t, fmt.Sprintf(deleteExpectedPattern, deleteFileNames[i]), filepath.Base(deleteOutputList[i][0]), "Delete output is not appropriate")
 		}
 
 		for i := 0; i < 2; i++ {
 			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
-				"remotepath": path.Join(remotePathPrefix, destFileNames[i]),
+				"remotepath": path.Join(remotePathPrefix, deleteFileNames[i]),
 				"json":       "",
 			}), true)
 			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
