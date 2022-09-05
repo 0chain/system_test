@@ -147,7 +147,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarhsalling sharder node info")
-		require.Equal(t, 5, len(sharderInfo.Pools))
+		require.Equal(t, 5, sharderInfo.Settings.MaxNumDelegates)
 	})
 
 	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
