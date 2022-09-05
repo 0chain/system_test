@@ -39,18 +39,31 @@ func (z *Zerochain) Init(config Config) {
 	z.Sharders = healthySharders
 }
 
-func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction) (*resty.Response, error) { //nolint
+func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
 	getFromMiner := func(miner string) (*resty.Response, error) {
-		return z.GetFromMiner(t, miner, endpoint)
+		return z.GetFromMiner(t, miner, endpoint, targetObject)
 	}
-	return z.executeWithConsensus(t, z.Miners, getFromMiner, nil, consensusMet)
+	return z.executeWithConsensus(t, z.Miners, getFromMiner, targetObject, consensusMet)
 }
 
-func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string) (*resty.Response, error) { //nolint
+func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string, targetObject interface{}) (*resty.Response, error) { //nolint
 	resp, err := z.restClient.R().Get(miner + endpoint)
-	t.Logf("GET on miner [" + miner + "] endpoint  [" + endpoint + "] resulted in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+	if resp != nil && resp.IsError() {
+		t.Logf("GET on miner [" + miner + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("GET on miner [" + miner + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	} else {
+		t.Logf("GET on miner [" + miner + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
 
-	return resp, err
+		if unmarshalError != nil {
+			return resp, unmarshalError
+		}
+
+		return resp, nil
+	}
 }
 
 func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
