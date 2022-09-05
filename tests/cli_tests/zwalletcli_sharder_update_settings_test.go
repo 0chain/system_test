@@ -219,7 +219,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		var sharderInfo climodel.Node
 		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
 		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 8, len(sharderInfo.Pools))
+		require.Equal(t, 8, sharderInfo.Settings.MaxNumDelegates)
 		min_stake, err := sharderInfo.Settings.MinStake.Int64()
 		require.Nil(t, err)
 		require.Equal(t, 2, int(intToZCN(min_stake)))
@@ -336,7 +336,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_sharder_settings: min_stake is less than allowed by SC: -10000000000 \\u003e 0", output[0])
+		require.Equal(t, "update_sharder_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
 	})
 
 	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
@@ -358,7 +358,7 @@ func TestSharderUpdateSettings(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], "update_sharder_settings: invalid negative min_stake:"), "Expected ["+output[0]+"] to start with [update_sharder_settings: invalid negative min_stake:]")
+		require.Equal(t, "update_sharder_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
 	})
 
 	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
