@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -86,6 +87,91 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}
 		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("Move file concurrently to existing directory, should work", func(t *testing.T) {
+		t.Parallel()
+
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		var fileNames [2]string
+		var remoteFilePaths, destFilePaths []string
+
+		const remotePathPrefix = "/"
+		const destPathPrefix = "/new"
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
+
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+				remoteFilePaths = append(remoteFilePaths, remoteFilePath)
+
+				destFilePath := filepath.Join(destPathPrefix, fileName)
+				destFilePaths = append(destFilePaths, destFilePath)
+
+				op, err := moveFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+					"destpath":   destPathPrefix,
+				}, true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
+
+		wg.Wait()
+
+		const expectedPattern = "%s moved"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 1, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		output, err := listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Len of output is not enough")
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 3, "Amount of files is not enough")
+
+		var foundAtSource, foundAtDest int
+		for _, f := range files {
+			if _, ok := cliutils.Contains(remoteFilePaths, f.Path); ok {
+				foundAtSource++
+			}
+
+			if _, ok := cliutils.Contains(destFilePaths, f.Path); ok {
+				foundAtDest++
+
+				_, ok = cliutils.Contains(fileNames[:], f.Name)
+				require.True(t, ok, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.Equal(t, 0, foundAtSource, "File is found at source", strings.Join(output, "\n"))
+		require.Equal(t, 2, foundAtDest, "File is not found at destination", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *testing.T) {
