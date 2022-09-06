@@ -215,6 +215,22 @@ type Allocation struct {
 	Curators                []string      `json:"curators"`
 }
 
+type Timestamp int64
+
+type AllocationUpdate struct {
+	ID                   string    `json:"id"`              // allocation id
+	Name                 string    `json:"name"`            // allocation name
+	OwnerID              string    `json:"owner_id"`        // Owner of the allocation
+	Size                 int64     `json:"size"`            // difference
+	Expiration           Timestamp `json:"expiration_date"` // difference
+	SetImmutable         bool      `json:"set_immutable"`
+	UpdateTerms          bool      `json:"update_terms"`
+	AddBlobberId         string    `json:"add_blobber_id"`
+	RemoveBlobberId      string    `json:"remove_blobber_id"`
+	ThirdPartyExtendable bool      `json:"third_party_extendable"`
+	FileOptions          uint8     `json:"file_options"`
+}
+
 type AllocationStats struct {
 	UsedSize                  int64  `json:"used_size"`
 	NumWrites                 int64  `json:"num_of_writes"`

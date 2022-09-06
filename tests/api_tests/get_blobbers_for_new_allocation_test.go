@@ -18,6 +18,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 		t.Parallel()
 		registeredWallet, keyPair := registerWallet(t)
 		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
+
 		require.NotNil(t, blobbers)
 		require.Greater(t, len(*blobbers), 3)
 		require.NotNil(t, blobberRequirements)
