@@ -45,7 +45,7 @@ func v1ClientGetBalance(t *testing.T, clientId string, consensusCategoriser util
 
 func v1ScrestAllocation(t *testing.T, clientId string, consensusCategoriser util.ConsensusMetFunction) (*model.Allocation, *resty.Response, error) { //nolint
 	var allocation *model.Allocation
-
+	
 	httpResponse, httpError := zeroChain.GetFromSharders(t, "/v1/screst/"+STORAGE_SMART_CONTRACT_ADDRESS+"/allocation?allocation="+clientId, consensusCategoriser, &allocation)
 
 	return allocation, httpResponse, httpError
