@@ -33,7 +33,6 @@ func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 	for _, block := range ch.blocks {
 		if minerId == block.MinerID {
 			won++
-			fmt.Println("won round", block.Round, "id", block.MinerID)
 		}
 	}
 	return won
@@ -76,19 +75,14 @@ func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http
 }
 
 func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
-	numMessages := int(ch.to-ch.from) / MaxQueryLimit
-	if (ch.to-ch.from)%MaxQueryLimit > 0 {
-		numMessages++
-	}
-	var blocksRead int64
-	for i := 0; i < numMessages; i++ {
-		from := ch.from + blocksRead
-		to := from + MaxQueryLimit
-		if to > ch.to {
-			to = ch.to
+	var offset int64
+	for {
+		blocks := getBlocks(t, ch.from, ch.to, MaxQueryLimit, offset, sharderBaseUrl)
+		offset += int64(len(blocks))
+		ch.blocks = append(ch.blocks, blocks...)
+		if len(blocks) < MaxQueryLimit {
+			break
 		}
-		ch.blocks = append(ch.blocks, getBlocks(t, from, to, MaxQueryLimit, 0, sharderBaseUrl)...)
-		blocksRead += MaxQueryLimit
 	}
 }
 
