@@ -13,8 +13,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -174,7 +172,6 @@ func getSharderUrl(t *testing.T) string {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
-	//require.Greater(t, len(reflect.ValueOf(sharders).MapKeys()), 0)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
 	return getNodeBaseURL(sharder.Host, sharder.Port)
@@ -188,7 +185,6 @@ func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-// http://localhost/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getMinerList
 func apiGetMiners(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/getMinerList")
 }
@@ -255,20 +251,4 @@ func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
 
 func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
-}
-
-func getBlock(t *testing.T, sharderBaseUrl string, round int64) apimodel.Block {
-	res, err := apiGetBlock(sharderBaseUrl, round)
-	require.Nil(t, err, "Error retrieving block %d", round)
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body: %v", err)
-
-	var block apimodel.Block
-	err = json.Unmarshal(resBody, &block)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-
-	return block
 }
