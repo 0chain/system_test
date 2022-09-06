@@ -75,7 +75,6 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Multiple stakes against a sharder should create multiple pools", func(t *testing.T) {
-		t.Skip("needs attention, works intermittently")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -87,6 +86,7 @@ func TestSharderStake(t *testing.T) {
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
+		require.Nil(t, err, "error unmarshalling pools info")
 		beforeNumPools := len(poolsInfoBefore.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
@@ -115,10 +115,21 @@ func TestSharderStake(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[sharder.ID], 2)
-		require.Equal(t, poolId1, poolsInfo.Pools[sharder.ID][beforeNumPools].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][beforeNumPools].Balance))
-		require.Equal(t, poolId2, poolsInfo.Pools[sharder.ID][1+beforeNumPools].ID)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][1+beforeNumPools].Balance))
+
+		found1 := false
+		found2 := false
+		for _, pool := range poolsInfo.Pools[sharder.ID] {
+			if pool.ID == poolId1 {
+				found1 = true
+				require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][beforeNumPools].Balance))
+			}
+			if pool.ID == poolId2 {
+				found2 = true
+				require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][1+beforeNumPools].Balance))
+			}
+		}
+		require.Equal(t, true, found1)
+		require.Equal(t, true, found2)
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {

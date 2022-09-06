@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair
 
 	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 
 	return blobbers, blobberRequirements
 }

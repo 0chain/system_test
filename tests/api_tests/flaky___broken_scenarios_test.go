@@ -29,11 +29,11 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 
 		walletRequest := model.Wallet{Id: expectedClientId, PublicKey: expectedKeyPair.PublicKey.SerializeToHexStr(), CreationDate: &invalidCreationDate}
 
-		registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, util.ConsensusByHttpStatus("200 OK"))
+		registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, util.ConsensusByHttpStatus(util.HttpOkStatus))
 
 		require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-		require.Equal(t, "200 OK", httpResponse.Status())
+		require.Equal(t, util.HttpOkStatus, httpResponse.Status())
 		require.Equal(t, registeredWallet.Id, expectedClientId)
 		require.Equal(t, registeredWallet.PublicKey, expectedKeyPair.PublicKey.SerializeToHexStr())
 		require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
