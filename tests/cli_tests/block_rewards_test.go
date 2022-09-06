@@ -32,6 +32,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		afterMiners := getSortedMiners(t, sharderUrl)
 		require.EqualValues(t, len(afterMiners.Nodes), len(beforeMiners.Nodes), "miner count changed during test")
 
+		// we add rewards at the end of the round, and they don't appear until the next round
 		startRound := beforeMiners.Nodes[0].Round + 1
 		endRound := afterMiners.Nodes[0].Round + 1
 		for i, m := range beforeMiners.Nodes {
@@ -43,8 +44,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		minerScConfig := getMinerScMap(t)
 		history := cliutil.NewHistory(startRound, endRound)
 		history.ReadBlocks(t, sharderUrl)
-		expectedTotalFees := history.TotalFees()
-		fmt.Println("total fees", expectedTotalFees)
 
 		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
