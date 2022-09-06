@@ -1,1 +1,14 @@
-{"client_id":"d992f8dd228c8b6f79d3858e93b67d28d1cef3395b2cf831fed77897c21414c8","client_key":"93d431abc3507b25a6c32f8dd6be4980ca1bdc4fc4f79e660641a689957a981f9658361e2c09888d3f92df63f96089f5e421edf29aa38a04924f02a78b960a93","keys":[{"public_key":"93d431abc3507b25a6c32f8dd6be4980ca1bdc4fc4f79e660641a689957a981f9658361e2c09888d3f92df63f96089f5e421edf29aa38a04924f02a78b960a93","private_key":"f6bf1f7f1e56776425c4e6d83f8f4462d3e27f9d09dd7789061ac9810f359d1b"}],"mnemonics":"angry galaxy sing cause dragon lecture yellow bonus uniform turtle involve fox warrior balcony noble fun era festival express thought marble city cliff size","version":"1.0","date_created":"2022-02-19T18:11:03+03:00"}
+{
+    "client_id": "b8b25d509afbe8f68f1342a2fa719acf312915a6f5a5bb0918cad6598e01325f",
+    "client_key": "e88949ab4fdfa724459fe41bb2c2e9ce5467ddb6911469614a4201b741933e157a1423853cb9426c3360b970ad8d9d6e07b93a60ba8531b268d1377f5804d103",
+    "keys": [
+        {
+            "public_key": "e88949ab4fdfa724459fe41bb2c2e9ce5467ddb6911469614a4201b741933e157a1423853cb9426c3360b970ad8d9d6e07b93a60ba8531b268d1377f5804d103",
+            "private_key": "b7c415c17659b198de177e95d15345a9c576cd2522ea14a0c20399fdb7731c0b"
+        }
+    ],
+    "mnemonics": "lock olive another scare idea awesome hat chaos general gauge immense near torch magic tomato ancient mule release know siege few twin donor race",
+    "version": "1.0",
+    "date_created": "1661370970",
+    "nonce": 0
+}
