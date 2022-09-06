@@ -11,7 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const storageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+const (
+	MaxQueryLimit    = 20
+	StorageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+)
 
 type ChainHistory struct {
 	from, to int64
@@ -25,44 +28,28 @@ func NewHistory(from, to int64) *ChainHistory {
 	}
 }
 
-func (ch *ChainHistory) DumpTransactions() {
-	for _, block := range ch.blocks {
-		for _, tx := range block.Transactions {
-			fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", block.MinerID)
-		}
-	}
-}
-
-func (ch *ChainHistory) TimesWonBestMiner(minerId string, start, end int64) int64 {
+func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 	var won int64
 	for _, block := range ch.blocks {
-		if block.Round < start || block.Round >= end {
-			continue
-		}
 		if minerId == block.MinerID {
 			won++
+			fmt.Println("won round", block.Round, "id", block.MinerID)
 		}
 	}
 	return won
 }
 
-func (ch *ChainHistory) TotalFees(start, end int64) int64 {
+func (ch *ChainHistory) TotalFees() int64 {
 	var fees int64
 	for _, block := range ch.blocks {
-		if block.Round < start || block.Round >= end {
-			continue
-		}
 		fees += ch.TotalBlockFees(block)
 	}
 	return fees
 }
 
-func (ch *ChainHistory) TotalMinerFees(minerId string, start, end int64) int64 {
+func (ch *ChainHistory) TotalMinerFees(minerId string) int64 {
 	var fees int64
 	for _, block := range ch.blocks {
-		if block.Round < start || block.Round >= end {
-			continue
-		}
 		if block.MinerID == minerId {
 			fees += ch.TotalBlockFees(block)
 		}
@@ -78,16 +65,35 @@ func (ch *ChainHistory) TotalBlockFees(block model.EventDbBlock) int64 {
 	return fees
 }
 
-// localhost/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/get_blocks?content=full&end=10&start=1
-func apiGetBlocks(start, end int64, sharderBaseURL string) (*http.Response, error) {
-	url := fmt.Sprintf(sharderBaseURL+"/v1/screst/"+storageScAddress+
+func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
+	url := fmt.Sprintf(sharderBaseURL+"/v1/screst/"+StorageScAddress+
 		"/get_blocks?content=full&start=%d&end=%d&limit=%d", start, end, end-start)
+	if limit > 0 || offset > 0 {
+		url += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
+	}
 	fmt.Println("url", url)
 	return http.Get(url)
 }
 
-func getBlocks(t *testing.T, from, to int64, sharderBaseUrl string) []model.EventDbBlock {
-	res, err := apiGetBlocks(from, to, sharderBaseUrl)
+func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
+	numMessages := int(ch.to-ch.from) / MaxQueryLimit
+	if (ch.to-ch.from)%MaxQueryLimit > 0 {
+		numMessages++
+	}
+	var blocksRead int64
+	for i := 0; i < numMessages; i++ {
+		from := ch.from + blocksRead
+		to := from + MaxQueryLimit
+		if to > ch.to {
+			to = ch.to
+		}
+		ch.blocks = append(ch.blocks, getBlocks(t, from, to, MaxQueryLimit, 0, sharderBaseUrl)...)
+		blocksRead += MaxQueryLimit
+	}
+}
+
+func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDbBlock {
+	res, err := apiGetBlocks(from, to, limit, offset, sharderBaseUrl)
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
 	defer res.Body.Close()
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
@@ -104,11 +110,32 @@ func getBlocks(t *testing.T, from, to int64, sharderBaseUrl string) []model.Even
 	return blocks
 }
 
-func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
-	for current := ch.from; current < ch.to; {
-		blocks := getBlocks(t, current, ch.to, sharderBaseUrl)
-		ch.blocks = append(ch.blocks, blocks...)
-		current = ch.blocks[len(ch.blocks)-1].Round
-		current++
+// debug dumps
+
+func (ch *ChainHistory) DumpTransactions() {
+	for _, block := range ch.blocks {
+		for _, tx := range block.Transactions {
+			fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", block.MinerID)
+		}
+	}
+}
+
+func (ch *ChainHistory) AccountingMiner(id string) {
+	fmt.Println("-------------", "accounts for", id, "-------------")
+	for _, block := range ch.blocks {
+		if id == block.MinerID {
+			ch.AccountingMinerBlock(id, block)
+		}
+	}
+}
+
+func (ch *ChainHistory) AccountingMinerBlock(id string, block model.EventDbBlock) {
+	if id != block.MinerID {
+		return
+	}
+	for _, tx := range block.Transactions {
+		if tx.Fee > 0 {
+			fmt.Println("round", block.Round, "fee", tx.Fee, "data", tx.TransactionData)
+		}
 	}
 }

@@ -26,6 +26,7 @@ import (
 const (
 	chainID                     = "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
 	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
+	minerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 	txnTypeSmartContract        = 1000 // A smart contract transaction type
 
 	freeTokensIndividualLimit = 10.0
