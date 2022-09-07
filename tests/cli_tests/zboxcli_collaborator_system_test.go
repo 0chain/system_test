@@ -148,7 +148,7 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
 		defer os.Remove("tmp" + remotepath)
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
+		expectedOutput := fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -614,7 +614,7 @@ func TestCollaborator(t *testing.T) {
 		defer os.Remove(updatedLocalPath)
 		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
+		expectedOutput := fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(localpath))
 		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -691,7 +691,7 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Name = (?P<Filename>.+)`), output[1])
 
 		remotepath := "/" + filepath.Base(localpath)
 

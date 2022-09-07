@@ -41,7 +41,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -73,7 +73,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -97,7 +97,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -128,7 +128,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -152,7 +152,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -182,7 +182,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -207,7 +207,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -261,7 +261,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -325,7 +325,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -383,7 +383,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -414,7 +414,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -439,7 +439,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -477,7 +477,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -502,7 +502,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -534,7 +534,7 @@ func TestShareFile(t *testing.T) {
 		os.Remove(file)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(file),
 		)
 
@@ -585,7 +585,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -663,7 +663,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -729,7 +729,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -794,7 +794,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -859,7 +859,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -898,7 +898,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -924,7 +924,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		remoteOwnerPathSubfolder := "/subfolder2/subfolder3/" + filepath.Base(file)
 		uploadParams = map[string]interface{}{
@@ -936,7 +936,7 @@ func TestShareFile(t *testing.T) {
 		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1104,7 +1104,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1168,7 +1168,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Read pool after download
@@ -1209,7 +1209,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1265,7 +1265,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Wait for blobber to redeem read-tokens
@@ -1309,7 +1309,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1388,7 +1388,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Wait for blobber to redeem read-tokens
@@ -1429,7 +1429,7 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(filename)), output[1])
+		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(filename)), output[1])
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1500,7 +1500,7 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1],
+		require.Equal(t, "Status completed callback. Name = "+filepath.Base(filename), output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// Read pool after download

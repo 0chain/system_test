@@ -3,12 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -54,7 +54,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -79,12 +79,12 @@ func TestDownload(t *testing.T) {
 		fileNameOfSecondDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[1], filesize)
 		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
 		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
- 
-		//deleting uploaded file from /dir1 since we will be downloading it now 
+
+		//deleting uploaded file from /dir1 since we will be downloading it now
 		err := os.Remove(fileNameOfFirstDirectory)
 		require.Nil(t, err)
-		
-		//deleting uploaded file from /dir2 since we will be downloading it now 
+
+		//deleting uploaded file from /dir2 since we will be downloading it now
 		err = os.Remove(fileNameOfSecondDirectory)
 		require.Nil(t, err)
 
@@ -102,8 +102,8 @@ func TestDownload(t *testing.T) {
 					"remotepath": remoteFilePaths[currentIndex] + filepath.Base(currentFileName),
 					"localpath":  "tmp/",
 				}), true)
-				    errorList[currentIndex] = err
-					outputList[currentIndex] = op
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
 			}(fileName, index)
 		}
 
@@ -113,7 +113,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, outputList[0], 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(fileNameOfFirstDirectory),
 		)
 
@@ -125,7 +125,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, outputList[1], 2)
 
 		expected = fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(fileNameOfSecondDirectory),
 		)
 
@@ -162,7 +162,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -199,7 +199,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -393,7 +393,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -440,7 +440,7 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[len(output)-1])
@@ -498,7 +498,7 @@ func TestDownload(t *testing.T) {
 		})
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 
@@ -579,7 +579,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -643,7 +643,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -824,7 +824,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -880,7 +880,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -974,7 +974,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -1188,7 +1188,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -1240,7 +1240,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])

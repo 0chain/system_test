@@ -265,7 +265,7 @@ func TestFileUpdate(t *testing.T) {
 		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Name = %s",
 			filepath.Base(localFilePath),
 		)
 		require.Equal(t, expected, output[1])
