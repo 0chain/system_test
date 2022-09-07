@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	NetworkEntrypoint     string `yaml:"network_entrypoint"`
-	TestBlobberEntrypoint string `yaml:"test_blobber_entrypoint"`
+	NetworkEntrypoint string `yaml:"network_entrypoint"`
+	SignatureScheme   string `yaml:"signature_scheme"`
 }
 
 func (config *Config) Init(path string) {

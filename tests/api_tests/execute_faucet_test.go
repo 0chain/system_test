@@ -144,8 +144,8 @@ func assertTransactionEquals(t *testing.T, txnRequest *model.Transaction, transa
 }
 
 func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transaction, keyPair model.KeyPair) (*model.TransactionResponse, *resty.Response, error) { //nolint
-	crypto.Hash(txnRequest)
-	crypto.Sign(txnRequest, keyPair)
+	crypto.HashTransaction(txnRequest)
+	crypto.SignTransaction(txnRequest, keyPair)
 
 	transactionResponse, httpResponse, err := v1TransactionPut(t, txnRequest, nil)
 

@@ -2,18 +2,25 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/sha1"
+	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"os"
 	"sync"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
+	"github.com/lithammer/shortuuid/v3"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
 )
 
 var blsLock sync.Mutex
+
+const BLS0Chain = "bls0chain"
 
 func Sha3256(publicKeyBytes []byte) string {
 	sha3256 := sha3.New256()
@@ -53,7 +60,27 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	return model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
 
-func Hash(request *model.Transaction) {
+func NewConnectionID() string {
+	return shortuuid.New()
+}
+
+func HashOfFile(src *os.File) (string, error) {
+	h := sha1.New()
+	if _, err := io.Copy(h, src); err != nil {
+		return "", err
+	}
+	src.Seek(0, io.SeekStart)
+
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func Hash(src string) string { return Sha3256([]byte(src)) }
+
+func Sign(hash string, pair model.KeyPair) string {
+	return pair.PrivateKey.Sign(string(hash)).SerializeToHexStr()
+}
+
+func HashTransaction(request *model.Transaction) {
 	var hashData = blankIfNil(request.CreationDate) + ":" +
 		blankIfNil(request.TransactionNonce) + ":" +
 		blankIfNil(request.ClientId) + ":" +
@@ -64,7 +91,7 @@ func Hash(request *model.Transaction) {
 	request.Hash = Sha3256([]byte(hashData))
 }
 
-func Sign(request *model.Transaction, pair model.KeyPair) {
+func SignTransaction(request *model.Transaction, pair model.KeyPair) {
 	hashToSign, _ := hex.DecodeString(request.Hash)
 	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
 }

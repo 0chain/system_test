@@ -1,13 +1,15 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/system_test/internal/api/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"path/filepath"
-	"strings"
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 )
@@ -15,7 +17,7 @@ import (
 func TestAddBlobber(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Adding a blobber as additional Parity shard, should work", func(t *testing.T) {
+	t.Run("Add new blobber to allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
@@ -33,7 +35,7 @@ func TestAddBlobber(t *testing.T) {
 		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID)
+		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, "")
 		updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 
 		allocation = getAllocation(t, transactionResponse.Entity.Hash)
@@ -41,6 +43,37 @@ func TestAddBlobber(t *testing.T) {
 
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 		require.Greater(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+	})
+
+	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
+		t.Parallel()
+
+		registeredWallet, keyPair := registerWallet(t)
+		response := executeFaucet(t, registeredWallet, keyPair)
+		require.NotNil(t, response)
+
+		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		blobberRequirements.Blobbers = availableBlobbers
+		transactionResponse, _ := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
+		allocation := getAllocation(t, transactionResponse.Entity.Hash)
+		require.NotNil(t, allocation)
+
+		numberOfBlobbersBefore := len(allocation.Blobbers)
+
+		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
+
+		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+
+		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, oldBlobberID)
+		updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
+
+		allocation = getAllocation(t, transactionResponse.Entity.Hash)
+		require.NotNil(t, allocation)
+
+		numberOfBlobbersAfter := len(allocation.Blobbers)
+		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Token accounting of added blobber as additional Parity shard, should work", func(t *testing.T) {
@@ -56,31 +89,73 @@ func TestAddBlobber(t *testing.T) {
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
 
-		fmt.Println(getBalance(t, registeredWallet.Id))
-
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID)
+		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, "")
 		updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
+
+		fmt.Println(allocation.BlobberDetails)
 
 		allocation = getAllocation(t, transactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
 
-		fmt.Println(getBalance(t, registeredWallet.Id))
-
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 		require.Greater(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+
+		const fileName = "test"
+		const filePath = "/test"
+		const actualSize int64 = 1024
+
+		newFile, err := createFileWithSize(fileName, actualSize)
+		require.Nil(t, err, "new file is not created")
+
+		hash, err := crypto.HashOfFile(newFile)
+		require.Nil(t, err, "hash for new file is not created")
+
+		newBlobberURL := getBlobberURL(newBlobberID, allocation.Blobbers)
+		require.NotZero(t, newBlobberURL, "can't get URL of a new blobber")
+
+		fmt.Println(getBalance(t, registeredWallet.Id))
+
+		fmt.Println(allocation.BlobberDetails)
+		blobberUploadFileRequest := model.BlobberUploadFileRequest{
+			KeyPair: sys.KeyPair{
+				PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
+				PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
+			},
+			URL:          newBlobberURL,
+			ClientID:     registeredWallet.Id,
+			ClientKey:    registeredWallet.PublicKey,
+			AllocationID: allocation.ID,
+			File:         newFile,
+			Meta: model.BlobberUploadFileMeta{
+				ConnectionID: crypto.NewConnectionID(),
+				FileName:     fileName,
+				FilePath:     filePath,
+				ActualHash:   hash,
+				ActualSize:   actualSize,
+			},
+		}
+		blobberUploadFileResponse, restyResponse, err := v1BlobberFileUpload(t, blobberUploadFileRequest)
+		require.Nil(t, err)
+		require.NotNil(t, blobberUploadFileResponse)
+		require.NotNil(t, restyResponse)
+
+		fmt.Println(getBalance(t, registeredWallet.Id))
+
+		fmt.Println(string(restyResponse.Body()))
 	})
 }
 
 //Returns new "AllocationUpdate" model for testing
-func getAllocationUpdate(allocationID string, newBlobberID string) *model.AllocationUpdate {
+func getAllocationUpdate(allocationID string, newBlobberID, oldBlobberID string) *model.AllocationUpdate {
 	return &model.AllocationUpdate{
-		ID:           allocationID,
-		AddBlobberId: newBlobberID,
+		ID:              allocationID,
+		AddBlobberId:    newBlobberID,
+		RemoveBlobberId: oldBlobberID,
 	}
 }
 
@@ -123,64 +198,44 @@ func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes
 	return ""
 }
 
-func escapedTestName(t *testing.T) string {
-	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
-		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
-		"?", "-")
-	return replacer.Replace(t.Name())
-}
-
-func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return uploadFileForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
-}
-
-func uploadFileForWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	t.Logf("Uploading file...")
-
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
-		p,
-		wallet,
-		cliConfigFilename,
-	)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*40)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
+//Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
+func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
+	for _, availableStorageNodeID := range *availableStorageNodeIDs {
+		for _, usedStorageNode := range usedStorageNodes {
+			if usedStorageNode.ID == availableStorageNodeID {
+				return availableStorageNodeID
+			}
+		}
 	}
+	return ""
 }
 
-func uploadFileWithoutRetry(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	t.Logf("Uploading file...")
-	p := createParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	return cliutils.RunCommandWithoutRetry(cmd)
+func getBlobberURL(blobberID string, blobbers []*model.StorageNode) string {
+	for _, blobber := range blobbers {
+		if blobber.ID == blobberID {
+			return blobber.BaseURL
+		}
+	}
+	return ""
 }
 
-func generateFileAndUpload(t *testing.T, allocationID, remotepath string, size int64) string {
-	return generateFileAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, size)
-}
+//Creates new file and fills it with random data
+func createFileWithSize(name string, size int64) (*os.File, error) {
+	buffer := make([]byte, size)
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return nil, err
+	} //nolint:gosec,revive
 
-func generateFileAndUploadForWallet(t *testing.T, wallet, allocationID, remotepath string, size int64) string {
-	filename := generateRandomTestFileName(t)
+	err = ioutil.WriteFile(name, buffer, 0777)
+	if err != nil {
+		return nil, err
+	}
 
-	err := createFileWithSize(filename, size)
-	require.Nil(t, err)
+	file, err := os.Open(name)
+	if err != nil {
+		return nil, err
+	}
 
-	// Upload parameters
-	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  filename,
-		"remotepath": remotepath + filepath.Base(filename),
-	})
-
-	return filename
+	return file, nil
 }

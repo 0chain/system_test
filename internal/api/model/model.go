@@ -2,6 +2,8 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/0chain/gosdk/core/sys"
+	"io"
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -329,15 +331,41 @@ type SharderStats struct {
 	MeanScanBlockStatsTime float64 `json:"mean_scan_block_stats_time"`
 }
 
-type SharderSCStateRequest struct {
-	SCAddress string `json:"sc_address"`
-	Key       string `json:"key"`
-}
-
 type SharderSCStateResponse struct {
 	ID        string    `json:"ID"`
 	StartTime time.Time `json:"StartTime"`
 	Used      float64   `json:"Used"`
+}
+
+type BlobberUploadFileMeta struct {
+	ConnectionID string `json:"connection_id"`
+	FileName     string `json:"filename"`
+	FilePath     string `json:"filepath"`
+	ActualHash   string `json:"actual_hash"`
+	ActualSize   int64  `json:"actual_size"`
+}
+
+type BlobberUploadFileRequest struct {
+	Meta BlobberUploadFileMeta
+	sys.KeyPair
+	URL, ClientID, ClientKey, AllocationID string
+	File                                   io.Reader
+}
+
+type T struct {
+	Filename   interface{} `json:"filename"`
+	Filepath   interface{} `json:"filepath"`
+	ActualHash interface{} `json:"actual_hash"`
+	ActualSize interface{} `json:"actual_size"`
+}
+
+type BlobberUploadFileResponse struct {
+}
+
+type FileReader struct {
+	Param    string
+	FileName string
+	Reader   io.Reader
 }
 
 func (w Wallet) String() string {

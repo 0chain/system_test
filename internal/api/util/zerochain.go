@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/model"
 	"testing"
 
 	resty "github.com/go-resty/resty/v2"
@@ -112,6 +113,31 @@ func (z *Zerochain) PostToSharder(t *testing.T, sharder, endpoint string, formDa
 		return resp, err
 	} else {
 		t.Logf("POST on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+
+		if unmarshalError != nil {
+			return resp, unmarshalError
+		}
+
+		return resp, nil
+	}
+}
+
+func (z *Zerochain) PostToBlobber(t *testing.T, blobber, endpoint string, fileReader model.FileReader, headers, formData map[string]string, targetObject interface{}) (*resty.Response, error) { //nolint
+	resp, err := z.restClient.R().
+		SetHeaders(headers).
+		SetFileReader(fileReader.Param, fileReader.FileName, fileReader.Reader).
+		SetFormData(formData).
+		Post(blobber + endpoint)
+
+	if resp != nil && resp.IsError() {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	} else {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
 		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
 
 		if unmarshalError != nil {

@@ -1,6 +1,2 @@
-<<<<<<< HEAD
 network_entrypoint: https://demo.0chain.net/dns/network
-test_blobber_entrypoint: https://
-=======
-network_entrypoint: https://demo.0chain.net/dns/network
->>>>>>> feature/sharder_get_scstate_test
+signature_scheme: bls0chain
