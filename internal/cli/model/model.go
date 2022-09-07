@@ -279,6 +279,7 @@ type StakePool struct {
 type Node struct {
 	SimpleNode `json:"simple_miner"`
 	StakePool  `json:"stake_pool"`
+	Round      int64 `json:"round"`
 }
 
 type SimpleNode struct {

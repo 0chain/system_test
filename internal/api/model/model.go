@@ -329,6 +329,17 @@ type SharderStats struct {
 	MeanScanBlockStatsTime float64 `json:"mean_scan_block_stats_time"`
 }
 
+type SharderSCStateRequest struct {
+	SCAddress string `json:"sc_address"`
+	Key       string `json:"key"`
+}
+
+type SharderSCStateResponse struct {
+	ID        string    `json:"ID"`
+	StartTime time.Time `json:"StartTime"`
+	Used      float64   `json:"Used"`
+}
+
 func (w Wallet) String() string {
 	out, err := json.Marshal(w)
 	if err != nil {
