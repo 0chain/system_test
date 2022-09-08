@@ -2,7 +2,10 @@ package api_tests
 
 import (
 	"encoding/hex"
-	"github.com/0chain/system_test/internal/api/util"
+	"github.com/0chain/gosdk/core/encryption"
+	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/system_test/internal/api/util/endpoint"
+	"strconv"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -22,48 +25,61 @@ func TestRegisterWallet(t *testing.T) {
 		registeredWallet, keyPair, rawHttpResponse, err := registerWalletForMnemonicWithoutAssertion(t, mnemonic)
 
 		publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
-		expectedClientId := crypto.Sha3256(publicKeyBytes)
+		expectedClientId := encryption.Hash(publicKeyBytes)
 		require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, rawHttpResponse)
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
-		require.Equal(t, util.HttpOkStatus, rawHttpResponse.Status())
-		require.Equal(t, registeredWallet.Id, expectedClientId)
-		require.Equal(t, registeredWallet.PublicKey, keyPair.PublicKey.SerializeToHexStr())
-		require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
+		require.Equal(t, endpoint.HttpOkStatus, rawHttpResponse.Status())
+		require.Equal(t, registeredWallet.ClientID, expectedClientId)
+		require.Equal(t, registeredWallet.ClientKey, keyPair.PublicKey.SerializeToHexStr())
+		require.Greater(t, registeredWallet.MustConvertDateCreatedToInt(), 0, "Creation date is an invalid value!")
 		require.NotNil(t, registeredWallet.Version)
 	})
 }
 
-func registerWallet(t *testing.T) (*model.Wallet, model.KeyPair) {
+func registerWallet(t *testing.T) (*model.Wallet, *model.KeyPair) {
 	mnemonic := crypto.GenerateMnemonic(t)
 
 	return registerWalletForMnemonic(t, mnemonic)
 }
 
-func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair) {
+func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, *model.KeyPair) {
 	registeredWallet, keyPair, httpResponse, err := registerWalletForMnemonicWithoutAssertion(t, mnemonic)
 
 	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
-	clientId := crypto.Sha3256(publicKeyBytes)
+	clientId := encryption.Hash(publicKeyBytes)
 
 	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
 	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
-	require.Equal(t, registeredWallet.Id, clientId)
-	require.Equal(t, registeredWallet.PublicKey, keyPair.PublicKey.SerializeToHexStr())
-	require.Greater(t, *registeredWallet.CreationDate, 0, "Creation date is an invalid value!")
+	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, registeredWallet.ClientID, clientId)
+	require.Equal(t, registeredWallet.ClientKey, keyPair.PublicKey.SerializeToHexStr())
+	require.Greater(t, registeredWallet.MustConvertDateCreatedToInt(), 0, "Creation date is an invalid value!")
 	require.NotNil(t, registeredWallet.Version)
 
 	return registeredWallet, keyPair
 }
 
-func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*model.Wallet, model.KeyPair, *resty.Response, error) { //nolint
+func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*model.Wallet, *model.KeyPair, *resty.Response, error) { //nolint
 	t.Logf("Registering wallet...")
 	keyPair := crypto.GenerateKeys(t, mnemonic)
 	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
-	clientId := crypto.Sha3256(publicKeyBytes)
-	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
+	clientId := encryption.Hash(publicKeyBytes)
+	walletRequest := model.ClientPutWalletRequest{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
-	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, util.ConsensusByHttpStatus(util.HttpOkStatus))
+	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, endpoint.ConsensusByHttpStatus(endpoint.HttpOkStatus))
 
-	return registeredWallet, keyPair, httpResponse, err
+	wallet := &model.Wallet{
+		ClientID:  registeredWallet.Id,
+		ClientKey: registeredWallet.PublicKey,
+		Keys: []*sys.KeyPair{{
+			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
+			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
+		}},
+		DateCreated: strconv.Itoa(*registeredWallet.CreationDate),
+		Mnemonics:   mnemonic,
+		Version:     registeredWallet.Version,
+		Nonce:       registeredWallet.Nonce,
+	}
+
+	return wallet, keyPair, httpResponse, err
 }

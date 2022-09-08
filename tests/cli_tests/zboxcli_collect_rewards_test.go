@@ -61,7 +61,7 @@ func TestCollectRewards(t *testing.T) {
 		// Use all 6 blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 0.2,
 			"data":   5,
 			"parity": 1,
 		})

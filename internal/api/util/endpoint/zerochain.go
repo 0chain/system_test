@@ -1,8 +1,7 @@
-package util
+package endpoint
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/model"
 	"testing"
 
 	resty "github.com/go-resty/resty/v2"
@@ -23,9 +22,9 @@ func ConsensusByHttpStatus(expectedStatus string) ConsensusMetFunction {
 	}
 }
 
-func (z *Zerochain) Init(config Config) {
+func (z *Zerochain) Init(networkEntrypoint string) {
 	z.restClient = *resty.New() //nolint
-	resp, err := z.restClient.R().Get(config.NetworkEntrypoint)
+	resp, err := z.restClient.R().Get(networkEntrypoint)
 	if err != nil {
 		panic("0dns call failed!: encountered error [" + err.Error() + "]")
 	}
@@ -123,11 +122,11 @@ func (z *Zerochain) PostToSharder(t *testing.T, sharder, endpoint string, formDa
 	}
 }
 
-func (z *Zerochain) PostToBlobber(t *testing.T, blobber, endpoint string, fileReader model.FileReader, headers, formData map[string]string, targetObject interface{}) (*resty.Response, error) { //nolint
+func (z *Zerochain) PostToBlobber(t *testing.T, blobber, endpoint string, headers, formData map[string]string, body []byte, targetObject interface{}) (*resty.Response, error) { //nolint
 	resp, err := z.restClient.R().
 		SetHeaders(headers).
-		SetFileReader(fileReader.Param, fileReader.FileName, fileReader.Reader).
 		SetFormData(formData).
+		SetBody(body).
 		Post(blobber + endpoint)
 
 	if resp != nil && resp.IsError() {
@@ -138,6 +137,30 @@ func (z *Zerochain) PostToBlobber(t *testing.T, blobber, endpoint string, fileRe
 		return resp, err
 	} else {
 		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+
+		if unmarshalError != nil {
+			return resp, unmarshalError
+		}
+
+		return resp, nil
+	}
+}
+
+func (z *Zerochain) GetFromBlobber(t *testing.T, blobber, endpoint string, headers, params map[string]string, targetObject interface{}) (*resty.Response, error) { //nolint
+	resp, err := z.restClient.R().
+		SetHeaders(headers).
+		SetQueryParams(params).
+		Get(blobber + endpoint)
+
+	if resp != nil && resp.IsError() {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	} else {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
 		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
 
 		if unmarshalError != nil {

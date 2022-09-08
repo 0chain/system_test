@@ -3,9 +3,11 @@ package crypto
 import (
 	"bytes"
 	"crypto/sha1"
+	"crypto/sha256"
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/0chain/gosdk/core/encryption"
 	"io"
 	"os"
 	"sync"
@@ -13,22 +15,13 @@ import (
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/lithammer/shortuuid/v3"
-	"github.com/tyler-smith/go-bip39" //nolint
-	"golang.org/x/crypto/sha3"
+	"github.com/lithammer/shortuuid/v3" //nolint
+	"github.com/tyler-smith/go-bip39"   //nolint
 )
 
 var blsLock sync.Mutex
 
 const BLS0Chain = "bls0chain"
-
-func Sha3256(publicKeyBytes []byte) string {
-	sha3256 := sha3.New256()
-	sha3256.Write(publicKeyBytes)
-	var buffer []byte
-	clientId := hex.EncodeToString(sha3256.Sum(buffer))
-	return clientId
-}
 
 func GenerateMnemonic(t *testing.T) string {
 	entropy, _ := bip39.NewEntropy(256)       //nolint
@@ -38,7 +31,7 @@ func GenerateMnemonic(t *testing.T) string {
 	return mnemonic
 }
 
-func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
+func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
@@ -57,27 +50,35 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
-	return model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
+	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
 
 func NewConnectionID() string {
-	return shortuuid.New()
+	return shortuuid.New() //nolint
 }
 
-func HashOfFile(src *os.File) (string, error) {
+func HashOfFileSHA1(src *os.File) (string, error) {
 	h := sha1.New()
 	if _, err := io.Copy(h, src); err != nil {
 		return "", err
 	}
-	src.Seek(0, io.SeekStart)
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
 
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func Hash(src string) string { return Sha3256([]byte(src)) }
+func HashOfFileSHA256(src *os.File) (string, error) {
+	h := sha256.New()
+	if _, err := io.Copy(h, src); err != nil {
+		return "", err
+	}
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
 
-func Sign(hash string, pair model.KeyPair) string {
-	return pair.PrivateKey.Sign(string(hash)).SerializeToHexStr()
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func HashTransaction(request *model.Transaction) {
@@ -86,12 +87,12 @@ func HashTransaction(request *model.Transaction) {
 		blankIfNil(request.ClientId) + ":" +
 		blankIfNil(request.ToClientId) + ":" +
 		blankIfNil(request.TransactionValue) + ":" +
-		Sha3256([]byte(request.TransactionData))
+		encryption.Hash(request.TransactionData)
 
-	request.Hash = Sha3256([]byte(hashData))
+	request.Hash = encryption.Hash(hashData)
 }
 
-func SignTransaction(request *model.Transaction, pair model.KeyPair) {
+func SignTransaction(request *model.Transaction, pair *model.KeyPair) {
 	hashToSign, _ := hex.DecodeString(request.Hash)
 	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
 }

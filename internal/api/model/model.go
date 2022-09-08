@@ -2,8 +2,13 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/core/transaction"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
+	"log"
+	"strconv"
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -188,33 +193,35 @@ type MerkleTreePath struct {
 }
 
 type Allocation struct {
-	ID             string           `json:"id"`
-	Tx             string           `json:"tx"`
-	DataShards     int              `json:"data_shards"`
-	ParityShards   int              `json:"parity_shards"`
-	Size           int64            `json:"size"`
-	Expiration     int64            `json:"expiration_date"`
-	Owner          string           `json:"owner_id"`
-	OwnerPublicKey string           `json:"owner_public_key"`
-	Payer          string           `json:"payer_id"`
-	Blobbers       []*StorageNode   `json:"blobbers"`
-	Stats          *AllocationStats `json:"stats"`
-	TimeUnit       time.Duration    `json:"time_unit"`
-	IsImmutable    bool             `json:"is_immutable"`
+	sdk.Allocation
 
-	BlobberDetails []*BlobberAllocation `json:"blobber_details"`
-
-	ReadPriceRange  PriceRange `json:"read_price_range"`
-	WritePriceRange PriceRange `json:"write_price_range"`
-
-	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
-	StartTime               int64         `json:"start_time"`
-	Finalized               bool          `json:"finalized,omitempty"`
-	Canceled                bool          `json:"canceled,omitempty"`
-	MovedToChallenge        int64         `json:"moved_to_challenge,omitempty"`
-	MovedBack               int64         `json:"moved_back,omitempty"`
-	MovedToValidators       int64         `json:"moved_to_validators,omitempty"`
-	Curators                []string      `json:"curators"`
+	//ID             string           `json:"id"`
+	//Tx             string           `json:"tx"`
+	//DataShards     int              `json:"data_shards"`
+	//ParityShards   int              `json:"parity_shards"`
+	//Size           int64            `json:"size"`
+	//Expiration     int64            `json:"expiration_date"`
+	//Owner          string           `json:"owner_id"`
+	//OwnerPublicKey string           `json:"owner_public_key"`
+	//Payer          string           `json:"payer_id"`
+	//Blobbers       []*StorageNode   `json:"blobbers"`
+	//Stats          *AllocationStats `json:"stats"`
+	//TimeUnit       time.Duration    `json:"time_unit"`
+	//IsImmutable    bool             `json:"is_immutable"`
+	//
+	//BlobberDetails []*BlobberAllocation `json:"blobber_details"`
+	//
+	//ReadPriceRange  PriceRange `json:"read_price_range"`
+	//WritePriceRange PriceRange `json:"write_price_range"`
+	//
+	//ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+	//StartTime               int64         `json:"start_time"`
+	//Finalized               bool          `json:"finalized,omitempty"`
+	//Canceled                bool          `json:"canceled,omitempty"`
+	//MovedToChallenge        int64         `json:"moved_to_challenge,omitempty"`
+	//MovedBack               int64         `json:"moved_back,omitempty"`
+	//MovedToValidators       int64         `json:"moved_to_validators,omitempty"`
+	//Curators                []string      `json:"curators"`
 }
 
 type Timestamp int64
@@ -244,19 +251,39 @@ type AllocationStats struct {
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
 }
 
-type BlobberAllocation struct {
-	BlobberID       string `json:"blobber_id"`
-	Size            int64  `json:"size"`
-	Terms           Terms  `json:"terms"`
-	MinLockDemand   int64  `json:"min_lock_demand"`
-	Spent           int64  `json:"spent"`
-	Penalty         int64  `json:"penalty"`
-	ReadReward      int64  `json:"read_reward"`
-	Returned        int64  `json:"returned"`
-	ChallengeReward int64  `json:"challenge_reward"`
-	FinalReward     int64  `json:"final_reward"`
+type GetBlobberResponse struct {
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	Terms             Terms             `json:"terms"`
+	Capacity          int64             `json:"capacity"`
+	Allocated         int64             `json:"allocated"`
+	LastHealthCheck   int64             `json:"last_health_check"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	TotalStake        int64             `json:"total_stake"`
 }
 
+type StakePoolSettings struct {
+	DelegateWallet string  `json:"delegate_wallet"`
+	MinStake       int     `json:"min_stake"`
+	MaxStake       int64   `json:"max_stake"`
+	NumDelegates   int     `json:"num_delegates"`
+	ServiceCharge  float64 `json:"service_charge"`
+}
+
+//type BlobberAllocation struct {
+//	BlobberID       string `json:"blobber_id"`
+//	Size            int64  `json:"size"`
+//	Terms           Terms  `json:"terms"`
+//	MinLockDemand   int64  `json:"min_lock_demand"`
+//	Spent           int64  `json:"spent"`
+//	Penalty         int64  `json:"penalty"`
+//	ReadReward      int64  `json:"read_reward"`
+//	Returned        int64  `json:"returned"`
+//	ChallengeReward int64  `json:"challenge_reward"`
+//	FinalReward     int64  `json:"final_reward"`
+//}
+//
 type Terms struct {
 	ReadPrice        int64         `json:"read_price"`
 	WritePrice       int64         `json:"write_price"`
@@ -281,12 +308,28 @@ type BlobberRequirements struct {
 	WritePriceRange PriceRange `json:"write_price_range"`
 }
 
-type Wallet struct {
+type ClientPutWalletRequest struct {
+	Id           string `json:"id"`
+	PublicKey    string `json:"public_key"`
+	CreationDate *int   `json:"creation_date"`
+}
+
+type ClientPutWalletResponse struct {
 	Id           string `json:"id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
 	PublicKey    string `json:"public_key"`
 	Nonce        int
+}
+
+type Wallet struct {
+	ClientID    string         `json:"client_id"`
+	ClientKey   string         `json:"client_key"`
+	Keys        []*sys.KeyPair `json:"keys"`
+	Mnemonics   string         `json:"mnemonics"`
+	Version     string         `json:"version"`
+	DateCreated string         `json:"date_created"`
+	Nonce       int
 }
 
 type ChallengeEntity struct {
@@ -326,7 +369,7 @@ type SharderStats struct {
 	LastFinalizedRound     int64   `json:"last_finalized_round"`
 	StateHealth            int64   `json:"state_health"`
 	AverageBlockSize       int     `json:"average_block_size"`
-	PrevInvocationCount    uint64  `json:"pervious_invocation_count"`
+	PrevInvocationCount    uint64  `json:"previous_invocation_count"`
 	PrevInvocationScanTime string  `json:"previous_incovcation_scan_time"`
 	MeanScanBlockStatsTime float64 `json:"mean_scan_block_stats_time"`
 }
@@ -338,41 +381,100 @@ type SharderSCStateResponse struct {
 }
 
 type BlobberUploadFileMeta struct {
-	ConnectionID string `json:"connection_id"`
-	FileName     string `json:"filename"`
-	FilePath     string `json:"filepath"`
-	ActualHash   string `json:"actual_hash"`
-	ActualSize   int64  `json:"actual_size"`
+	ConnectionID string `json:"connection_id" validation:"required"`
+	FileName     string `json:"filename" validation:"required"`
+	FilePath     string `json:"filepath" validation:"required"`
+	ActualHash   string `json:"actual_hash,omitempty" validation:"required"`
+	ContentHash  string `json:"content_hash" validation:"required"`
+	MimeType     string `json:"mimetype" validation:"required"`
+	ActualSize   int64  `json:"actual_size,omitempty" validation:"required"`
+	IsFinal      bool   `json:"is_final" validation:"required"`
 }
 
 type BlobberUploadFileRequest struct {
-	Meta BlobberUploadFileMeta
-	sys.KeyPair
-	URL, ClientID, ClientKey, AllocationID string
-	File                                   io.Reader
-}
-
-type T struct {
-	Filename   interface{} `json:"filename"`
-	Filepath   interface{} `json:"filepath"`
-	ActualHash interface{} `json:"actual_hash"`
-	ActualSize interface{} `json:"actual_size"`
+	URL, ClientID, ClientKey, ClientSignature, AllocationID string
+	File                                                    io.Reader
+	Meta                                                    BlobberUploadFileMeta
 }
 
 type BlobberUploadFileResponse struct {
 }
 
-type FileReader struct {
-	Param    string
-	FileName string
-	Reader   io.Reader
+type BlobberListFilesRequest struct {
+	sys.KeyPair
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, PathHash, Path string
 }
 
-func (w Wallet) String() string {
+type BlobberListFilesResponse struct {
+}
+
+type BlobberCommitConnectionWriteMarker struct {
+	AllocationRoot string `json:"allocation_root"`
+	AllocationID   string `json:"allocation_id"`
+	BlobberID      string `json:"blobber_id"`
+	ClientID       string `json:"client_id"`
+	Signature      string `json:"signature"`
+	Name           string `json:"name"`
+	ContentHash    string `json:"content_hash"`
+	LookupHash     string `json:"lookup_hash"`
+	Timestamp      int64  `json:"timestamp"`
+	Size           int64  `json:"size"`
+}
+
+type BlobberCommitConnectionRequest struct {
+	URL, ConnectionID, ClientKey string
+	WriteMarker                  BlobberCommitConnectionWriteMarker
+}
+
+type BlobberCommitConnectionResponse struct{}
+
+type BlobberGetFileReferencePathRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID string
+}
+
+type BlobberGetFileReferencePathResponse struct {
+	sdk.ReferencePathResult
+}
+
+func (w *Wallet) MustConvertDateCreatedToInt() int {
+	result, err := strconv.Atoi(w.DateCreated)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return result
+}
+
+func (w *Wallet) String() string {
 	out, err := json.Marshal(w)
 	if err != nil {
 		return "failed to serialize wallet object"
 	}
 
 	return string(out)
+}
+
+func (s *StubStatusBar) Started(allocationId, filePath string, op int, totalBytes int) {
+}
+func (s *StubStatusBar) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {
+}
+
+func (s *StubStatusBar) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
+}
+
+func (s *StubStatusBar) Error(allocationID string, filePath string, op int, err error) {
+}
+
+func (s *StubStatusBar) CommitMetaCompleted(request, response string, txn *transaction.Transaction, err error) {
+	fmt.Println(response, err)
+}
+
+func (s *StubStatusBar) RepairCompleted(filesRepaired int) {
+}
+
+type StubStatusBar struct {
+}
+
+type CreateStakePoolRequest struct {
+	BlobberID string `json:"blobber_id"`
+	PoolID    string `json:"pool_id"`
 }

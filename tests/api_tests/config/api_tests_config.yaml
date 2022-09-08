@@ -1,2 +1,1 @@
-network_entrypoint: https://demo.0chain.net/dns/network
-signature_scheme: bls0chain
+network_entrypoint: https://bolt.devnet-0chain.net/dns/network
