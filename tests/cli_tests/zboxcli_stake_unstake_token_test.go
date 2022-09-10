@@ -306,6 +306,16 @@ func stakeTokens(t *testing.T, cliConfigFilename, params string, retry bool) ([]
 	}
 }
 
+func stakeUserPools(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("Staking...")
+	cmd := fmt.Sprintf("./zbox sp-user-info --client %s --configDir ./config --config %s", params, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
 func stakePoolInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Fetching stake pool info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
