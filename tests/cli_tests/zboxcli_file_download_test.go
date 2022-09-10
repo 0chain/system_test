@@ -3,12 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -79,12 +79,12 @@ func TestDownload(t *testing.T) {
 		fileNameOfSecondDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[1], filesize)
 		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
 		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
- 
-		//deleting uploaded file from /dir1 since we will be downloading it now 
+
+		//deleting uploaded file from /dir1 since we will be downloading it now
 		err := os.Remove(fileNameOfFirstDirectory)
 		require.Nil(t, err)
-		
-		//deleting uploaded file from /dir2 since we will be downloading it now 
+
+		//deleting uploaded file from /dir2 since we will be downloading it now
 		err = os.Remove(fileNameOfSecondDirectory)
 		require.Nil(t, err)
 
@@ -102,8 +102,8 @@ func TestDownload(t *testing.T) {
 					"remotepath": remoteFilePaths[currentIndex] + filepath.Base(currentFileName),
 					"localpath":  "tmp/",
 				}), true)
-				    errorList[currentIndex] = err
-					outputList[currentIndex] = op
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
 			}(fileName, index)
 		}
 
