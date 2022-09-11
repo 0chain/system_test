@@ -1083,7 +1083,6 @@ func TestShareFile(t *testing.T) {
 
 	// FIXME download cost is not affecting read pool if downloading through auth ticket
 	t.Run("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", func(t *testing.T) {
-		t.Skip("Skipped for merging nonce")
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1142,7 +1141,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.Balance)
+		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance))
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1189,7 +1188,6 @@ func TestShareFile(t *testing.T) {
 
 	// FIXME download cost is not affecting read pool if downloading through auth ticket
 	t.Run("Share unencrypted file using auth ticket - download accounting test", func(t *testing.T) {
-		t.Skip("Skipped for nonce merge")
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1239,7 +1237,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.Balance)
+		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance))
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1288,7 +1286,6 @@ func TestShareFile(t *testing.T) {
 	})
 
 	t.Run("Share encrypted file using auth ticket - download accounting test where 3rd party pays - proxy re-encryption ", func(t *testing.T) {
-		t.Skip("Skipped for nonce merge")
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1361,7 +1358,7 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		require.Equal(t, 0.4, initialReadPool.Balance)
+		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance))
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1409,7 +1406,6 @@ func TestShareFile(t *testing.T) {
 	})
 
 	t.Run("Share unencrypted file using auth ticket - download accounting test where 3rd party pays ", func(t *testing.T) {
-		t.Skip("Skipped for nonce merge")
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -1472,8 +1468,7 @@ func TestShareFile(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
-
-		require.Equal(t, 0.4*1e10, initialReadPool.Balance, "read pool balance did not match expected")
+		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance), "read pool balance did not match expected")
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
