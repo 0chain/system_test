@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -91,8 +93,8 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -115,6 +117,58 @@ func TestUpload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Upload file concurrently to root directory, should work", func(t *testing.T) {
+		t.Parallel()
+
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		const remotePathPrefix = "/"
+
+		var fileNames [2]string
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				fileName := generateRandomTestFileName(t)
+				err := createFileWithSize(fileName, fileSize)
+				require.Nil(t, err)
+
+				fileNameBase := filepath.Base(fileName)
+
+				fileNames[currentIndex] = fileNameBase
+
+				op, err := uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": path.Join(remotePathPrefix, fileNameBase),
+					"localpath":  fileName,
+				}, true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
+		wg.Wait()
+
+		const expectedPattern = "Status completed callback. Type = application/octet-stream. Name = %s"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 2, strings.Join(outputList[i], "\n"))
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), outputList[i][1], "Output is not appropriate")
+		}
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *testing.T) {

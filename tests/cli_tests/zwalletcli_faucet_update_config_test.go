@@ -142,7 +142,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
-		//we use random nonce here since this transaction won't be sent to network
+		// we use random nonce here since this transaction won't be sent to network
 		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_pour_amount",
 		}, false)
