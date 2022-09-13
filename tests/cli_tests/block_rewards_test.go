@@ -50,7 +50,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
 		minerBlockRewardPerRound, _ := blockRewards(t, startRound, minerScConfig)
-		fmt.Println("start round", startRound, "end round", endRound)
 		for i, beforeMiner := range beforeMiners.Nodes {
 			id := beforeMiner.ID
 			timesWon := history.TimesWonBestMiner(id)
@@ -60,8 +59,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
 			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
 		}
-		fmt.Println("finished")
-
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
@@ -93,7 +90,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		_, sharderBlockRewards := blockRewards(t, startRound, minerScConfig)
 		numberOfRounds := endRound - startRound
 		totalBlockRewardsPerSharder := numberOfRounds * sharderBlockRewards / int64(len(beforeSharders.Nodes))
-		fmt.Println("start round", startRound, "end round", endRound)
 		for i, beforeSharder := range beforeSharders.Nodes {
 			expectedBlockRewards := totalBlockRewardsPerSharder
 			actualReward := afterSharders.Nodes[i].Reward - beforeSharder.Reward

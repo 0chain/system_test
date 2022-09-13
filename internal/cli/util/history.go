@@ -66,11 +66,10 @@ func (ch *ChainHistory) TotalBlockFees(block model.EventDbBlock) int64 {
 
 func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
 	url := fmt.Sprintf(sharderBaseURL+"/v1/screst/"+StorageScAddress+
-		"/get_blocks?content=full&start=%d&end=%d&limit=%d", start, end, end-start)
+		"/get_blocks?content=full&start=%d&end=%d", start, end, end-start)
 	if limit > 0 || offset > 0 {
 		url += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
 	}
-	fmt.Println("url", url)
 	return http.Get(url)
 }
 
@@ -91,7 +90,7 @@ func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl strin
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
 	defer res.Body.Close()
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
-		"gailed API request to get blocks %d to %d, status code: %d", from, to, res.StatusCode)
+		"failed API request to get blocks %d to %d, status code: %d", from, to, res.StatusCode)
 	require.NotNil(t, res.Body, "balance API response must not be nil")
 
 	resBody, err := io.ReadAll(res.Body)
