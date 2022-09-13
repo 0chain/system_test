@@ -66,7 +66,7 @@ func (ch *ChainHistory) TotalBlockFees(block model.EventDbBlock) int64 {
 
 func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
 	url := fmt.Sprintf(sharderBaseURL+"/v1/screst/"+StorageScAddress+
-		"/get_blocks?content=full&start=%d&end=%d", start, end, end-start)
+		"/get_blocks?content=full&start=%d&end=%d", start, end)
 	if limit > 0 || offset > 0 {
 		url += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
 	}
