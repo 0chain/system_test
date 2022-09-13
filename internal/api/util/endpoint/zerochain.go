@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	resty "github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2" //nolint
 )
 
 type Zerochain struct {
@@ -13,11 +13,11 @@ type Zerochain struct {
 	restClient resty.Client //nolint
 }
 
-type CallNode func(node string) (*resty.Response, error)
+type CallNode func(node string) (*resty.Response, error) // nolint
 type ConsensusMetFunction func(response *resty.Response, resolvedObject interface{}) bool
 
 func ConsensusByHttpStatus(expectedStatus string) ConsensusMetFunction {
-	return func(response *resty.Response, resolvedObject interface{}) bool {
+	return func(response *resty.Response, resolvedObject interface{}) bool { //nolint
 		return response.Status() == expectedStatus
 	}
 }
@@ -40,7 +40,7 @@ func (z *Zerochain) Init(networkEntrypoint string) {
 }
 
 func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
-	getFromMiner := func(miner string) (*resty.Response, error) {
+	getFromMiner := func(miner string) (*resty.Response, error) { //nolint
 		return z.GetFromMiner(t, miner, endpoint, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Miners, getFromMiner, targetObject, consensusMet)
@@ -67,7 +67,7 @@ func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string, targetObj
 }
 
 func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
-	postToMiner := func(miner string) (*resty.Response, error) {
+	postToMiner := func(miner string) (*resty.Response, error) { //nolint
 		return z.PostToMiner(t, miner, endpoint, body, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Miners, postToMiner, targetObject, consensusMet)
@@ -95,7 +95,7 @@ func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body inter
 }
 
 func (z *Zerochain) PostToShardersWithFormData(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, formData map[string]string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
-	postToSharder := func(sharder string) (*resty.Response, error) {
+	postToSharder := func(sharder string) (*resty.Response, error) { //nolint
 		return z.PostToSharder(t, sharder, endpoint, formData, body, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Sharders, postToSharder, targetObject, consensusMet)
@@ -172,7 +172,7 @@ func (z *Zerochain) GetFromBlobber(t *testing.T, blobber, endpoint string, heade
 }
 
 func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
-	getFromSharder := func(sharder string) (*resty.Response, error) {
+	getFromSharder := func(sharder string) (*resty.Response, error) { //nolint
 		return z.GetFromSharder(t, sharder, endpoint, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Sharders, getFromSharder, targetObject, consensusMet)
@@ -230,10 +230,10 @@ func (z *Zerochain) getHealthyNodes(nodes []string) []string {
 	return healthyNodes
 }
 
-func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMet ConsensusMetFunction) (*resty.Response, error) {
+func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMet ConsensusMetFunction) (*resty.Response, error) { //nolint
 	errors := make([]error, 0)
-	responsesAsExpected := make([]*resty.Response, 0)
-	responsesNotAsExpected := make([]*resty.Response, 0)
+	responsesAsExpected := make([]*resty.Response, 0)    //nolint
+	responsesNotAsExpected := make([]*resty.Response, 0) //nolint
 
 	for _, node := range nodes {
 		httpResponse, httpError := callNode(node)

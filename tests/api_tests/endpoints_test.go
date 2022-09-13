@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
-	resty "github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2" //nolint
 	"io"
 	"mime/multipart"
 	"path/filepath"
@@ -33,7 +33,7 @@ func v1TransactionPut(t *testing.T, walletRequest *model.Transaction, consensusC
 func v1TransactionGetConfirmation(t *testing.T, hash string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.Confirmation, *resty.Response, error) { //nolint
 	var confirmation *model.Confirmation
 
-	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/transaction/get/confirmation?hash="+hash), consensusCategoriser, &confirmation)
+	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/transaction/get/confirmation?hash=")+hash, consensusCategoriser, &confirmation)
 
 	return confirmation, httpResponse, httpError
 }
@@ -41,7 +41,7 @@ func v1TransactionGetConfirmation(t *testing.T, hash string, consensusCategorise
 func v1ClientGetBalance(t *testing.T, clientId string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.Balance, *resty.Response, error) { //nolint
 	var balance *model.Balance
 
-	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/client/get/balance?client_id="+clientId), consensusCategoriser, &balance)
+	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/client/get/balance?client_id=")+clientId, consensusCategoriser, &balance)
 
 	return balance, httpResponse, httpError
 }
@@ -49,7 +49,7 @@ func v1ClientGetBalance(t *testing.T, clientId string, consensusCategoriser endp
 func v1ScrestAllocation(t *testing.T, clientId string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.Allocation, *resty.Response, error) { //nolint
 	var allocation *model.Allocation
 
-	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/screst/", endpoint.StorageSmartContractAddress, "/allocation?allocation="+clientId), consensusCategoriser, &allocation)
+	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/screst/", endpoint.StorageSmartContractAddress, "/allocation?allocation=")+clientId, consensusCategoriser, &allocation)
 
 	return allocation, httpResponse, httpError
 }
@@ -97,7 +97,7 @@ func v1SharderGetSCState(t *testing.T, SCAddress, key string, consensusCategoris
 }
 
 //Uploads a new file to blobber
-func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) {
+func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberUploadFileResponse
 
 	payload := new(bytes.Buffer)
@@ -151,7 +151,7 @@ func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUpl
 }
 
 //Queries all the files in certain allocation
-func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) {
+func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberListFilesResponse
 
 	params := map[string]string{
@@ -177,7 +177,7 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 }
 
 //Queries files in certain allocation
-func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) {
+func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberGetFileReferencePathResponse
 
 	params := map[string]string{
@@ -201,7 +201,7 @@ func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequ
 }
 
 //Commits all the actions in a certain opened connection
-func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) {
+func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberCommitConnectionResponse
 
 	writeMarker, err := json.Marshal(blobberCommitConnectionRequest.WriteMarker)
@@ -233,7 +233,39 @@ func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest mode
 	return stats, httpResponse, httpError
 }
 
-func v1SCRestGetBlobber(t *testing.T, blobberId string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.GetBlobberResponse, *resty.Response, error) {
+//Commits all the actions in a certain opened connection
+func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) { //nolint
+	var stats *model.BlobberDownloadFileResponse
+
+	readMarker, err := json.Marshal(blobberDownloadFileRequest.ReadMarker)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	formData := map[string]string{
+		"path_hash":   blobberDownloadFileRequest.PathHash,
+		"block_num":   blobberDownloadFileRequest.BlockNum,
+		"num_blocks":  blobberDownloadFileRequest.NumBlocks,
+		"read_marker": string(readMarker),
+	}
+
+	headers := map[string]string{
+		"X-App-Client-Id":  blobberDownloadFileRequest.ReadMarker.ClientID,
+		"X-App-Client-Key": blobberDownloadFileRequest.ReadMarker.ClientKey,
+	}
+
+	httpResponse, httpError := zeroChain.PostToBlobber(t,
+		blobberDownloadFileRequest.URL,
+		filepath.Join("/v1/file/download", blobberDownloadFileRequest.ReadMarker.AllocationID),
+		headers,
+		formData,
+		nil,
+		&stats)
+
+	return stats, httpResponse, httpError
+}
+
+func v1SCRestGetBlobber(t *testing.T, blobberId string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.GetBlobberResponse, *resty.Response, error) { //nolint
 	var stats *model.GetBlobberResponse
 
 	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/screst/", endpoint.StorageSmartContractAddress, "/getBlobber?blobber_id="+blobberId), consensusCategoriser, &stats)

@@ -4,7 +4,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
-	resty "github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2" //nolint
 	"net/http"
 	"testing"
 	"time"
@@ -22,9 +22,9 @@ func TestExecuteFaucet(t *testing.T) {
 
 		registeredWallet, keyPair := registerWallet(t)
 
-		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.Nil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
+		require.NotNil(t, executeFaucetTransactionResponse)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		balance := getBalance(t, registeredWallet.ClientID)
 		require.Equal(t, tokenomics.IntToZCN(1), balance.Balance)
@@ -32,7 +32,7 @@ func TestExecuteFaucet(t *testing.T) {
 }
 
 func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction model.Transaction, maxPollDuration time.Duration) (*model.Confirmation, *resty.Response) { //nolint
-	consensus := func(response *resty.Response, resolvedObject interface{}) bool {
+	consensus := func(response *resty.Response, resolvedObject interface{}) bool { //nolint
 		confirmation := resolvedObject.(**model.Confirmation)
 		return (*confirmation) != nil && (*confirmation).Transaction.TransactionStatus == 1
 	}
@@ -58,7 +58,6 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
 	require.NotNil(t, confirmation.Transaction.TransactionOutput)
 	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
-	//require.Equal(t, 1, confirmation.Transaction.TransactionStatus, "Confirmation suggests original transaction was unsuccessful. Transaction output: [%s]", confirmation.Transaction.TransactionOutput)
 
 	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
 
@@ -69,7 +68,11 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 
 func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration, consensusCategoriser endpoint.ConsensusMetFunction) (*model.Confirmation, *resty.Response, error) { //nolint
 	t.Logf("Confirming transaction...")
-	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash, consensusCategoriser)
+	var (
+		confirmation *model.Confirmation
+		httpResponse *resty.Response //nolint
+		err          error
+	)
 
 	wait.PoolImmediately(maxPollDuration, func() bool {
 		confirmation, httpResponse, err = v1TransactionGetConfirmation(t, hash, consensusCategoriser)
@@ -113,7 +116,7 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair) (
 		TransactionNonce: wallet.Nonce + 1,
 	}
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
-	confirmation, _ := confirmTransaction(t, wallet, faucetTransaction.Entity, 2*time.Minute)
+	confirmation, _ := confirmTransaction(t, wallet, faucetTransaction.Entity, 5*time.Minute)
 
 	return faucetTransaction, confirmation
 }

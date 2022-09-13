@@ -194,34 +194,6 @@ type MerkleTreePath struct {
 
 type Allocation struct {
 	sdk.Allocation
-
-	//ID             string           `json:"id"`
-	//Tx             string           `json:"tx"`
-	//DataShards     int              `json:"data_shards"`
-	//ParityShards   int              `json:"parity_shards"`
-	//Size           int64            `json:"size"`
-	//Expiration     int64            `json:"expiration_date"`
-	//Owner          string           `json:"owner_id"`
-	//OwnerPublicKey string           `json:"owner_public_key"`
-	//Payer          string           `json:"payer_id"`
-	//Blobbers       []*StorageNode   `json:"blobbers"`
-	//Stats          *AllocationStats `json:"stats"`
-	//TimeUnit       time.Duration    `json:"time_unit"`
-	//IsImmutable    bool             `json:"is_immutable"`
-	//
-	//BlobberDetails []*BlobberAllocation `json:"blobber_details"`
-	//
-	//ReadPriceRange  PriceRange `json:"read_price_range"`
-	//WritePriceRange PriceRange `json:"write_price_range"`
-	//
-	//ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
-	//StartTime               int64         `json:"start_time"`
-	//Finalized               bool          `json:"finalized,omitempty"`
-	//Canceled                bool          `json:"canceled,omitempty"`
-	//MovedToChallenge        int64         `json:"moved_to_challenge,omitempty"`
-	//MovedBack               int64         `json:"moved_back,omitempty"`
-	//MovedToValidators       int64         `json:"moved_to_validators,omitempty"`
-	//Curators                []string      `json:"curators"`
 }
 
 type Timestamp int64
@@ -271,19 +243,6 @@ type StakePoolSettings struct {
 	ServiceCharge  float64 `json:"service_charge"`
 }
 
-//type BlobberAllocation struct {
-//	BlobberID       string `json:"blobber_id"`
-//	Size            int64  `json:"size"`
-//	Terms           Terms  `json:"terms"`
-//	MinLockDemand   int64  `json:"min_lock_demand"`
-//	Spent           int64  `json:"spent"`
-//	Penalty         int64  `json:"penalty"`
-//	ReadReward      int64  `json:"read_reward"`
-//	Returned        int64  `json:"returned"`
-//	ChallengeReward int64  `json:"challenge_reward"`
-//	FinalReward     int64  `json:"final_reward"`
-//}
-//
 type Terms struct {
 	ReadPrice        int64         `json:"read_price"`
 	WritePrice       int64         `json:"write_price"`
@@ -477,4 +436,26 @@ type StubStatusBar struct {
 type CreateStakePoolRequest struct {
 	BlobberID string `json:"blobber_id"`
 	PoolID    string `json:"pool_id"`
+}
+
+type BlobberDownloadFileReadMarker struct {
+	ClientID     string `json:"client_id"`
+	ClientKey    string `json:"client_public_key"`
+	BlobberID    string `json:"blobber_id"`
+	AllocationID string `json:"allocation_id"`
+	OwnerID      string `json:"owner_id"`
+	Signature    string `json:"signature"`
+	Timestamp    int64  `json:"timestamp"`
+	Counter      int64  `json:"counter"`
+}
+
+type BlobberDownloadFileRequest struct {
+	ReadMarker BlobberDownloadFileReadMarker
+	URL        string
+	PathHash   string
+	BlockNum   string
+	NumBlocks  string
+}
+
+type BlobberDownloadFileResponse struct {
 }

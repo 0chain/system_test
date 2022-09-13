@@ -6,17 +6,30 @@ import (
 
 // PoolImmediately pools passed function for a certain amount of time
 func PoolImmediately(duration time.Duration, callback func() bool) {
-	ticker := time.NewTicker(time.Second)
-	after := time.After(duration)
+	ticker := time.NewTicker(time.Second * 3)
 
+	defer ticker.Stop()
+
+	after := time.After(duration)
+	postAfter := time.After(time.Second * 15)
+
+primary:
 	for range ticker.C {
 		select {
 		case <-after:
-			return
+			break primary
 		default:
 			if callback() {
-				return
+				break primary
 			}
+		}
+	}
+
+	for range ticker.C {
+		select {
+		case <-postAfter:
+			return
+		default:
 		}
 	}
 }

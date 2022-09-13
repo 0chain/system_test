@@ -14,14 +14,18 @@ func TestRemoveBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
+		require.NotNil(t, executeFaucetTransactionResponse)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		require.NotNil(t, availableBlobbers)
+		require.NotNil(t, blobberRequirements)
+
 		blobberRequirements.Blobbers = availableBlobbers
+
 		transactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
