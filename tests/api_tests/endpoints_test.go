@@ -233,6 +233,38 @@ func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest mode
 	return stats, httpResponse, httpError
 }
 
+//Commits all the actions in a certain opened connection
+func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) {
+	var stats *model.BlobberDownloadFileResponse
+
+	readMarker, err := json.Marshal(blobberDownloadFileRequest.ReadMarker)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	formData := map[string]string{
+		"path_hash":   blobberDownloadFileRequest.PathHash,
+		"block_num":   blobberDownloadFileRequest.BlockNum,
+		"num_blocks":  blobberDownloadFileRequest.NumBlocks,
+		"read_marker": string(readMarker),
+	}
+
+	headers := map[string]string{
+		"X-App-Client-Id":  blobberDownloadFileRequest.ReadMarker.ClientID,
+		"X-App-Client-Key": blobberDownloadFileRequest.ReadMarker.ClientKey,
+	}
+
+	httpResponse, httpError := zeroChain.PostToBlobber(t,
+		blobberDownloadFileRequest.URL,
+		filepath.Join("/v1/file/download", blobberDownloadFileRequest.ReadMarker.AllocationID),
+		headers,
+		formData,
+		nil,
+		&stats)
+
+	return stats, httpResponse, httpError
+}
+
 func v1SCRestGetBlobber(t *testing.T, blobberId string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.GetBlobberResponse, *resty.Response, error) {
 	var stats *model.GetBlobberResponse
 

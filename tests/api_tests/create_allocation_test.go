@@ -21,12 +21,12 @@ func TestCreateAllocation(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.Nil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		blobberRequirements.Blobbers = blobbers
 		transactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 

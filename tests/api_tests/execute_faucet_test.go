@@ -24,7 +24,7 @@ func TestExecuteFaucet(t *testing.T) {
 
 		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.Nil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		balance := getBalance(t, registeredWallet.ClientID)
 		require.Equal(t, tokenomics.IntToZCN(1), balance.Balance)
@@ -58,7 +58,6 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	require.NotNil(t, confirmation.ReceiptMerkleTreePath)
 	require.NotNil(t, confirmation.Transaction.TransactionOutput)
 	require.NotNil(t, confirmation.Transaction.TxnOutputHash)
-	//require.Equal(t, 1, confirmation.Transaction.TransactionStatus, "Confirmation suggests original transaction was unsuccessful. Transaction output: [%s]", confirmation.Transaction.TransactionOutput)
 
 	assertTransactionEquals(t, &sentTransaction, confirmation.Transaction)
 

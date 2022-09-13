@@ -22,13 +22,17 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
+		require.NotNil(t, availableBlobbers)
+		require.NotNil(t, blobberRequirements)
+
 		blobberRequirements.Blobbers = availableBlobbers
+
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -41,13 +45,13 @@ func TestAddBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, "")
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
 
 		numberOfBlobbersAfter := len(allocation.Blobbers)
-		require.Greater(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 	})
 
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *testing.T) {
@@ -56,16 +60,19 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		require.NotNil(t, availableBlobbers)
+		require.NotNil(t, blobberRequirements)
+
 		blobberRequirements.Blobbers = availableBlobbers
+
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-
 		require.NotNil(t, allocation)
 
 		numberOfBlobbersBefore := len(allocation.Blobbers)
@@ -88,16 +95,19 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		require.NotNil(t, availableBlobbers)
+		require.NotNil(t, blobberRequirements)
+
 		blobberRequirements.Blobbers = availableBlobbers
+
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-
 		require.NotNil(t, allocation)
 
 		numberOfBlobbersBefore := len(allocation.Blobbers)
@@ -120,16 +130,19 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		require.NotNil(t, availableBlobbers)
+		require.NotNil(t, blobberRequirements)
+
 		blobberRequirements.Blobbers = availableBlobbers
+
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-
 		require.NotNil(t, allocation)
 
 		numberOfBlobbersBefore := len(allocation.Blobbers)
@@ -220,24 +233,24 @@ func getBlobberURL(blobberID string, blobbers []*blockchain.StorageNode) string 
 	return ""
 }
 
+func isBlobberExist(blobberID string, blobbers []*blockchain.StorageNode) bool {
+	return getBlobberURL(blobberID, blobbers) != ""
+}
+
 //Creates new file and fills it with random data
 func createFileWithSize(name string, size int64) (*os.File, error) {
-	//buffer := make([]byte, size)
-	//_, err := rand.Read(buffer)
-	//if err != nil {
-	//	return nil, err
-	//} //nolint:gosec,revive
+	buffer := make([]byte, size)
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return nil, err
+	} //nolint:gosec,revive
 
-	//file, err := os.Create(name)
-	//if err != nil {
-	//	return nil, err
-	//}
+	file, err := os.Create(name)
+	if err != nil {
+		return nil, err
+	}
 
-	//_, err = file.Write(buffer)
-	//if err != nil {
-	//	return nil, err
-	//}
-	file, err := os.Open("test")
+	_, err = file.Write(buffer)
 	if err != nil {
 		return nil, err
 	}
