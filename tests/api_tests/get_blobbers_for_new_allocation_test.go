@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
 
@@ -28,7 +27,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *testing.T) {
 		t.Parallel()
 		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
-		blobbers, response, err := v1ScrestAllocBlobbers(t, "{}", nil)
+		blobbers, response, err := api_client.v1ScrestAllocBlobbers(t, "{}", nil)
 		require.NotNil(t, blobbers)
 		require.NotNil(t, response)
 		require.NotNil(t, err)
@@ -41,7 +40,7 @@ func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair
 
 	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, api_client.HttpOkStatus, httpResponse.Status())
 
 	return blobbers, blobberRequirements
 }
@@ -68,6 +67,6 @@ func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model
 	allocationData, err := json.Marshal(blobberRequirements)
 	require.Nil(t, err)
 
-	blobbers, httpResponse, err := v1ScrestAllocBlobbers(t, string(allocationData), nil)
+	blobbers, httpResponse, err := api_client.v1ScrestAllocBlobbers(t, string(allocationData), nil)
 	return blobbers, blobberRequirements, httpResponse, err
 }

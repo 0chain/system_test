@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -16,7 +15,7 @@ func TestRemoveBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
@@ -25,7 +24,7 @@ func TestRemoveBlobber(t *testing.T) {
 		blobberRequirements.Blobbers = availableBlobbers
 
 		transactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -38,7 +37,7 @@ func TestRemoveBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, "", oldBlobberID)
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		require.Equal(t, api.TxUnsuccessfulStatus, confirmation.Status)
 
 		allocation = getAllocation(t, transactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)

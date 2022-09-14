@@ -1,7 +1,7 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/endpoint"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	resty "github.com/go-resty/resty/v2"
@@ -24,7 +24,7 @@ func TestExecuteFaucet(t *testing.T) {
 
 		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.Nil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		balance := getBalance(t, registeredWallet.ClientID)
 		require.Equal(t, tokenomics.IntToZCN(1), balance.Balance)
@@ -41,7 +41,7 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 
 	require.NotNil(t, confirmation, "Confirmation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred confirming transaction with http response [%s]", err, httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, client.HttpOkStatus, httpResponse.Status())
 	require.Equal(t, "1.0", confirmation.Version, "version did not match expected")
 	require.Equal(t, sentTransaction.Hash, confirmation.Hash, "hash did not match expected")
 	require.NotNil(t, confirmation.BlockHash)
@@ -66,12 +66,12 @@ func confirmTransaction(t *testing.T, wallet *model.Wallet, sentTransaction mode
 	return confirmation, httpResponse
 }
 
-func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration, consensusCategoriser endpoint.ConsensusMetFunction) (*model.Confirmation, *resty.Response, error) { //nolint
+func confirmTransactionWithoutAssertion(t *testing.T, hash string, maxPollDuration time.Duration, consensusCategoriser client.ConsensusMetFunction) (*model.Confirmation, *resty.Response, error) { //nolint
 	t.Logf("Confirming transaction...")
-	confirmation, httpResponse, err := v1TransactionGetConfirmation(t, hash, consensusCategoriser)
+	confirmation, httpResponse, err := client.v1TransactionGetConfirmation(t, hash, consensusCategoriser)
 
 	wait.PoolImmediately(maxPollDuration, func() bool {
-		confirmation, httpResponse, err = v1TransactionGetConfirmation(t, hash, consensusCategoriser)
+		confirmation, httpResponse, err = client.v1TransactionGetConfirmation(t, hash, consensusCategoriser)
 
 		return httpResponse.StatusCode() == http.StatusOK
 	})
@@ -84,14 +84,14 @@ func getBalance(t *testing.T, clientId string) *model.Balance {
 
 	require.NotNil(t, balance, "Balance was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, client.HttpOkStatus, httpResponse.Status())
 
 	return balance
 }
 
 func getBalanceWithoutAssertion(t *testing.T, clientId string) (*model.Balance, *resty.Response, error) { //nolint
 	t.Logf("Getting balance...")
-	balance, httpResponse, err := v1ClientGetBalance(t, clientId, nil)
+	balance, httpResponse, err := client.v1ClientGetBalance(t, clientId, nil)
 	return balance, httpResponse, err
 }
 
@@ -105,7 +105,7 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair) (
 		TransactionType:  1000,
 		TransactionFee:   0,
 		TransactionData:  "{\"name\":\"pour\",\"input\":{},\"name\":null}",
-		ToClientId:       endpoint.FaucetSmartContractAddress,
+		ToClientId:       client.FaucetSmartContractAddress,
 		CreationDate:     time.Now().Unix(),
 		ClientId:         wallet.ClientID,
 		Version:          "1.0",
@@ -122,7 +122,7 @@ func executeTransaction(t *testing.T, txnRequest *model.Transaction, keyPair *mo
 
 	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
 	require.NotNil(t, transactionResponse, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, client.HttpOkStatus, httpResponse.Status())
 	require.True(t, transactionResponse.Async)
 	require.NotNil(t, transactionResponse.Entity, "Transaction entity was unexpectedly nil! with http response [%s]", httpResponse)
 	require.NotNil(t, transactionResponse.Entity.ChainId)
@@ -151,7 +151,7 @@ func executeTransactionWithoutAssertion(t *testing.T, txnRequest *model.Transact
 	crypto.HashTransaction(txnRequest)
 	crypto.SignTransaction(txnRequest, keyPair)
 
-	transactionResponse, httpResponse, err := v1TransactionPut(t, txnRequest, nil)
+	transactionResponse, httpResponse, err := client.v1TransactionPut(t, txnRequest, nil)
 
 	return transactionResponse, httpResponse, err
 }

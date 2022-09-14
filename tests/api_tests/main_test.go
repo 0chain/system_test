@@ -2,14 +2,18 @@ package api_tests
 
 import (
 	"github.com/0chain/system_test/internal/api/util/config"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
+	"github.com/0chain/system_test/internal/api/util/setup"
+	"github.com/0chain/system_test/internal/api/util/tx_client"
 
 	"log"
 	"os"
 	"testing"
 )
 
-var zeroChain endpoint.Zerochain
+var (
+	apiClient *client.Client
+	txClient  *tx_client.Client
+)
 
 func TestMain(m *testing.M) {
 	configPath, ok := os.LookupEnv(config.ConfigPathEnv)
@@ -18,9 +22,7 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	parsedConfig := config.Parse(configPath)
-
-	zeroChain.Init(parsedConfig.NetworkEntrypoint)
+	setup.InitTestEnvironment(configPath)
 
 	os.Exit(m.Run())
 }

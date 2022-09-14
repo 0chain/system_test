@@ -2,9 +2,7 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/transaction"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
 	"log"
@@ -19,30 +17,6 @@ type Balance struct {
 	Txn     string `json:"txn"`
 	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
-}
-
-type TransactionResponse struct {
-	Async  bool        `json:"async"`
-	Entity Transaction `json:"entity"`
-}
-
-type Transaction struct {
-	Hash              string `json:"hash"`
-	Version           string `json:"version"`
-	ClientId          string `json:"client_id"`
-	ToClientId        string `json:"to_client_id"`
-	ChainId           string `json:"chain_id"`
-	PublicKey         string `json:"public_key,omitempty"`
-	TransactionData   string `json:"transaction_data"`
-	TransactionValue  int64  `json:"transaction_value"`
-	Signature         string `json:"signature"`
-	CreationDate      int64  `json:"creation_date"`
-	TransactionFee    int64  `json:"transaction_fee"`
-	TransactionType   int    `json:"transaction_type"`
-	TransactionOutput string `json:"transaction_output,omitempty"`
-	TxnOutputHash     string `json:"txn_output_hash"`
-	TransactionStatus int    `json:"transaction_status"`
-	TransactionNonce  int    `json:"transaction_nonce"`
 }
 
 type SmartContractTxnData struct {
@@ -99,7 +73,6 @@ type Transfer struct {
 type StorageNodeGeolocation struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
-	// reserved / Accuracy float64 `mapstructure:"accuracy"`
 }
 
 type ValidationNode struct {
@@ -412,27 +385,6 @@ func (w *Wallet) String() string {
 	return string(out)
 }
 
-func (s *StubStatusBar) Started(allocationId, filePath string, op int, totalBytes int) {
-}
-func (s *StubStatusBar) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {
-}
-
-func (s *StubStatusBar) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
-}
-
-func (s *StubStatusBar) Error(allocationID string, filePath string, op int, err error) {
-}
-
-func (s *StubStatusBar) CommitMetaCompleted(request, response string, txn *transaction.Transaction, err error) {
-	fmt.Println(response, err)
-}
-
-func (s *StubStatusBar) RepairCompleted(filesRepaired int) {
-}
-
-type StubStatusBar struct {
-}
-
 type CreateStakePoolRequest struct {
 	BlobberID string `json:"blobber_id"`
 	PoolID    string `json:"pool_id"`
@@ -458,4 +410,13 @@ type BlobberDownloadFileRequest struct {
 }
 
 type BlobberDownloadFileResponse struct {
+}
+
+type NetworkDNSResponse struct {
+	Miners   []string `json:"miners"`
+	Sharders []string `json:"sharders"`
+}
+
+type NetworkHealthResources struct {
+	NetworkDNSResponse
 }

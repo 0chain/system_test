@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
 	"math/rand"
 	"os"
@@ -22,7 +21,7 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
@@ -32,7 +31,7 @@ func TestAddBlobber(t *testing.T) {
 
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -45,7 +44,7 @@ func TestAddBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, "")
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -60,7 +59,7 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
@@ -70,7 +69,7 @@ func TestAddBlobber(t *testing.T) {
 
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -80,7 +79,7 @@ func TestAddBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, "", "")
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		require.Equal(t, api_client.TxUnsuccessfulStatus, confirmation.Status)
 
 		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -95,7 +94,7 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
@@ -105,7 +104,7 @@ func TestAddBlobber(t *testing.T) {
 
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -115,7 +114,7 @@ func TestAddBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, strconv.Itoa(rand.Intn(10)), "")
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		require.Equal(t, api_client.TxUnsuccessfulStatus, confirmation.Status)
 
 		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -130,7 +129,7 @@ func TestAddBlobber(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
@@ -140,7 +139,7 @@ func TestAddBlobber(t *testing.T) {
 
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
 		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -153,7 +152,7 @@ func TestAddBlobber(t *testing.T) {
 		allocationUpdate := getAllocationUpdate(allocation.ID, oldBlobberID, "")
 		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
 		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		require.Equal(t, api_client.TxUnsuccessfulStatus, confirmation.Status)
 
 		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
 		require.NotNil(t, allocation)
@@ -183,7 +182,7 @@ func updateAllocation(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair
 		TransactionType:  1000,
 		TransactionFee:   0,
 		TransactionData:  string(txnDataString),
-		ToClientId:       endpoint.StorageSmartContractAddress,
+		ToClientId:       api_client.StorageSmartContractAddress,
 		CreationDate:     time.Now().Unix(),
 		ClientId:         wallet.ClientID,
 		Version:          "1.0",

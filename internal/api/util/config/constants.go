@@ -1,11 +1,7 @@
 package config
 
-// Environment variables
-const (
-	ConfigPathEnv = "CONFIG_PATH"
-)
+// ConfigPathEnv contains name of env variable
+const ConfigPathEnv = "CONFIG_PATH"
 
-// Default variables
-const (
-	DefaultConfigPath = "./config/api_tests_config.yaml"
-)
+// DefaultConfigPath contains default value of ConfigPathEnv
+const DefaultConfigPath = "./config/api_tests_config.yaml"

@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"strconv"
 	"testing"
 
@@ -28,7 +27,7 @@ func TestRegisterWallet(t *testing.T) {
 		expectedClientId := encryption.Hash(publicKeyBytes)
 		require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, rawHttpResponse)
 		require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", rawHttpResponse)
-		require.Equal(t, endpoint.HttpOkStatus, rawHttpResponse.Status())
+		require.Equal(t, api_client.HttpOkStatus, rawHttpResponse.Status())
 		require.Equal(t, registeredWallet.ClientID, expectedClientId)
 		require.Equal(t, registeredWallet.ClientKey, keyPair.PublicKey.SerializeToHexStr())
 		require.Greater(t, registeredWallet.MustConvertDateCreatedToInt(), 0, "Creation date is an invalid value!")
@@ -50,7 +49,7 @@ func registerWalletForMnemonic(t *testing.T, mnemonic string) (*model.Wallet, *m
 
 	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
 	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, api_client.HttpOkStatus, httpResponse.Status())
 	require.Equal(t, registeredWallet.ClientID, clientId)
 	require.Equal(t, registeredWallet.ClientKey, keyPair.PublicKey.SerializeToHexStr())
 	require.Greater(t, registeredWallet.MustConvertDateCreatedToInt(), 0, "Creation date is an invalid value!")
@@ -66,7 +65,7 @@ func registerWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string) (*
 	clientId := encryption.Hash(publicKeyBytes)
 	walletRequest := model.ClientPutWalletRequest{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
-	registeredWallet, httpResponse, err := v1ClientPut(t, walletRequest, endpoint.ConsensusByHttpStatus(endpoint.HttpOkStatus))
+	registeredWallet, httpResponse, err := api_client.v1ClientPut(t, walletRequest, api_client.ConsensusByHttpStatus(api_client.HttpOkStatus))
 
 	wallet := &model.Wallet{
 		ClientID:  registeredWallet.Id,

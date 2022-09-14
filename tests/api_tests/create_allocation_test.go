@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
 
@@ -21,12 +20,12 @@ func TestCreateAllocation(t *testing.T) {
 		registeredWallet, keyPair := registerWallet(t)
 		response, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.Nil(t, response)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		blobberRequirements.Blobbers = blobbers
 		transactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 		allocation := getAllocation(t, transactionResponse.Entity.Hash)
 
@@ -45,7 +44,7 @@ func createAllocation(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair
 		TransactionType:  1000,
 		TransactionFee:   0,
 		TransactionData:  string(txnDataString),
-		ToClientId:       endpoint.StorageSmartContractAddress,
+		ToClientId:       api_client.StorageSmartContractAddress,
 		CreationDate:     time.Now().Unix(),
 		ClientId:         wallet.ClientID,
 		Version:          "1.0",
@@ -63,13 +62,13 @@ func getAllocation(t *testing.T, allocationId string) *model.Allocation {
 
 	require.NotNil(t, allocation, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, api_client.HttpOkStatus, httpResponse.Status())
 
 	return allocation
 }
 
 func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) { //nolint
 	t.Logf("Retrieving allocation...")
-	balance, httpResponse, err := v1ScrestAllocation(t, allocationId, nil)
+	balance, httpResponse, err := api_client.v1ScrestAllocation(t, allocationId, nil)
 	return balance, httpResponse, err
 }
