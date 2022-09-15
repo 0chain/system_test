@@ -830,7 +830,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[1])
 	})
 
