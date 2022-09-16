@@ -1,6 +1,6 @@
-package util
+package tokenomics
 
-const tokenUnit float64 = 1e+10
+const tokenUnit = 1e+10
 
 func IntToZCN(num float64) int64 {
 	return int64(num * tokenUnit)

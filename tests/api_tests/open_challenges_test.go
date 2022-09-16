@@ -3,7 +3,7 @@ package api_tests
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util"
+	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
 
@@ -25,8 +25,8 @@ func TestOpenChallenges(t *testing.T) {
 		require.NotNil(t, blobberRequirements)
 
 		blobberId := (*blobbers)[0]
-		response, err := v1ScrestOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId, util.ConsensusByHttpStatus(util.HttpOkStatus))
-		require.Equal(t, util.HttpOkStatus, response.Status())
+		response, err := v1ScrestOpenChallenges(t, endpoint.StorageSmartContractAddress, blobberId, endpoint.ConsensusByHttpStatus(endpoint.HttpOkStatus))
+		require.Equal(t, endpoint.HttpOkStatus, response.Status())
 		require.Nil(t, err)
 		bytesReader := bytes.NewBuffer(response.Body())
 		d := json.NewDecoder(bytesReader)

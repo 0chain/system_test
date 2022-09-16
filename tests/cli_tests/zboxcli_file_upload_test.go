@@ -728,6 +728,7 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		})
+
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
 			strings.HasSuffix(strings.Join(output, ""),

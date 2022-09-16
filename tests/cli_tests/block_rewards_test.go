@@ -27,7 +27,6 @@ const (
 )
 
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t.Skip("Skip till /nodeStat endpoint is modified")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -90,9 +89,10 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
-		startBeforeRound := getCurrentRound(t)
-		startReward := getMinersDetail(t, miner.ID).Reward
-		startAfterRound := getCurrentRound(t)
+		startNodeStat := getMinersDetail(t, miner.ID)
+		startReward := startNodeStat.Reward
+		startRound := startNodeStat.Round
+
 		// Do 5 send transactions with fees
 		fee := 0.1
 		for i := 0; i < 5; i++ {
@@ -100,14 +100,13 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
 
-		beforeAfterRound := getCurrentRound(t)
-		endReward := getMinersDetail(t, miner.ID).Reward
-		endAfterRound := getCurrentRound(t)
+		endNodeStat := getMinersDetail(t, miner.ID)
+		endReward := endNodeStat.Reward
+		endRound := endNodeStat.Round
 
-		maxTotalRewardsAndFees := int64(0)
-		minTotalRewardsAndFees := int64(0)
+		totalRewardsAndFees := int64(0)
 		// Calculate the total rewards and fees for this miner.
-		for round := startBeforeRound + 1; round <= endAfterRound; round++ {
+		for round := startRound + 1; round <= endRound; round++ {
 			block := getBlock(t, sharderBaseUrl, round)
 			// No expected rewards for this miner if not the generator of block.
 			if block.Block.MinerId != miner.ID {
@@ -142,37 +141,22 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			generatorFeeServiceCharge := generatorFees * miner.Settings.ServiceCharge
 			generatorFeeRemaining := generatorFees - generatorFeeServiceCharge
 
-			maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-			maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-			minTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-			minTotalRewardsAndFees += int64(generatorFeeServiceCharge)
+			totalRewardsAndFees += int64(generatorRewardServiceCharge)
+			totalRewardsAndFees += int64(generatorFeeServiceCharge)
+
 			// if none staked at node, node gets all rewards.
 			// otherwise, then remaining are distributed to stake holders.
 			if miner.TotalStake == 0 {
-				maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-				maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-				minTotalRewardsAndFees += int64(generatorRewardsRemaining)
-				minTotalRewardsAndFees += int64(generatorFeeRemaining)
+				totalRewardsAndFees += int64(generatorRewardsRemaining)
+				totalRewardsAndFees += int64(generatorFeeRemaining)
 			}
-			if round < startAfterRound || beforeAfterRound < round {
-				maxTotalRewardsAndFees += int64(generatorRewardServiceCharge)
-				maxTotalRewardsAndFees += int64(generatorFeeServiceCharge)
-				// if none staked at node, node gets all rewards.
-				// otherwise, then remaining are distributed to stake holders.
-				if miner.TotalStake == 0 {
-					maxTotalRewardsAndFees += int64(generatorRewardsRemaining)
-					maxTotalRewardsAndFees += int64(generatorFeeRemaining)
-				}
-			}
-
 		}
 		rewardEarned := endReward - startReward
-		require.GreaterOrEqual(t, rewardEarned, minTotalRewardsAndFees)
-		require.LessOrEqual(t, rewardEarned, maxTotalRewardsAndFees)
+		require.Equal(t, rewardEarned, totalRewardsAndFees)
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
-		t.Skip("Skipped till re-done")
+		t.Skip("Need investigation")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -221,9 +205,9 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		// Get base URL for API calls.
 		sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
-		startBeforeRound := getCurrentRound(t)
-		startReward := getMinersDetail(t, sharder.ID).Reward
-		startAfterRound := getCurrentRound(t)
+		startNodeStat := getMinersDetail(t, sharder.ID)
+		startReward := startNodeStat.Reward
+		startRound := startNodeStat.Round
 
 		// Do 5 send transactions with fees
 		fee := 0.1
@@ -232,14 +216,14 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
 
-		beforeAfterRound := getCurrentRound(t)
-		endReward := getMinersDetail(t, sharder.ID).Reward
-		endAfterRound := getCurrentRound(t)
+		endNodeStat := getMinersDetail(t, sharder.ID)
+		endReward := endNodeStat.Reward
+		endRound := endNodeStat.Round
 
-		maxTotalRewardsAndFees := int64(0)
-		minTotalRewardsAndFees := int64(0)
+		totalRewardsAndFees := int64(0)
+
 		// Calculate the total rewards and fees for this sharder.
-		for round := startBeforeRound + 1; round <= endAfterRound; round++ {
+		for round := startRound + 1; round <= endRound; round++ {
 			block := getBlock(t, sharderBaseUrl, round)
 
 			// Get total block fees
@@ -274,32 +258,18 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 			sharderFeeServiceCharge := sharderFeesShare * sharder.Settings.ServiceCharge
 			sharderFeeRemaining := sharderFeesShare - sharderFeeServiceCharge
 
-			maxTotalRewardsAndFees += int64(sharderRewardServiceCharge)
-			maxTotalRewardsAndFees += int64(sharderFeeServiceCharge)
-			minTotalRewardsAndFees += int64(sharderRewardServiceCharge)
-			minTotalRewardsAndFees += int64(sharderFeeServiceCharge)
+			totalRewardsAndFees += int64(sharderRewardServiceCharge)
+			totalRewardsAndFees += int64(sharderFeeServiceCharge)
+
 			// if none staked at node, node gets all rewards
 			// otherwise, then remaining are distributed to stake holders.
 			if sharder.TotalStake == 0 {
-				maxTotalRewardsAndFees += int64(sharderRewardsRemaining)
-				maxTotalRewardsAndFees += int64(sharderFeeRemaining)
-				minTotalRewardsAndFees += int64(sharderRewardsRemaining)
-				minTotalRewardsAndFees += int64(sharderFeeRemaining)
-			}
-
-			if round < startAfterRound || beforeAfterRound < round {
-				maxTotalRewardsAndFees += int64(sharderRewardServiceCharge)
-				maxTotalRewardsAndFees += int64(sharderFeeServiceCharge)
-				// if none staked at node, node gets all rewards
-				// otherwise, then remaining are distributed to stake holders.
-				if sharder.TotalStake == 0 {
-					maxTotalRewardsAndFees += int64(sharderRewardsRemaining)
-					maxTotalRewardsAndFees += int64(sharderFeeRemaining)
-				}
+				totalRewardsAndFees += int64(sharderRewardsRemaining)
+				totalRewardsAndFees += int64(sharderFeeRemaining)
 			}
 		}
 		rewardEarned := endReward - startReward
-		require.Equal(t, minTotalRewardsAndFees, rewardEarned)
+		require.Equal(t, totalRewardsAndFees, rewardEarned)
 	})
 }
 

@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package cliutils
+package specific
 
 import (
 	"os/exec"

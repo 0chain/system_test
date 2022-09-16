@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"crypto/rand"
+	"github.com/0chain/system_test/internal/cli/util/specific"
 	"math/big"
 	"os"
 	"os/exec"
@@ -109,7 +110,7 @@ func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
 	sanitizedArgs := sanitizeArgs(args)
 
 	cmd = exec.Command(commandName, sanitizedArgs...)
-	Setpgid(cmd)
+	specific.Setpgid(cmd)
 	err = cmd.Start()
 
 	return cmd, err

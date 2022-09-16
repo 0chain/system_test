@@ -2,7 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util"
+	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
 
@@ -18,6 +18,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 		t.Parallel()
 		registeredWallet, keyPair := registerWallet(t)
 		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
+
 		require.NotNil(t, blobbers)
 		require.Greater(t, len(*blobbers), 3)
 		require.NotNil(t, blobberRequirements)
@@ -35,17 +36,17 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 
 }
 
-func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
+func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
 	blobbers, blobberRequirements, httpResponse, err := getBlobbersMatchingRequirementsWithoutAssertion(t, wallet, keyPair, size, dataShards, parityShards, expiresIn)
 
 	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
 	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, util.HttpOkStatus, httpResponse.Status())
+	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
 
 	return blobbers, blobberRequirements
 }
 
-func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
+func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
 	t.Logf("Get blobbers for allocation...")
 	blobberRequirements := model.BlobberRequirements{
 		Size:           size,
@@ -60,13 +61,14 @@ func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model
 			Min: 0,
 			Max: 9223372036854775807,
 		},
-		OwnerId:        wallet.Id,
-		OwnerPublicKey: keyPair.PublicKey.SerializeToHexStr(),
+		OwnerId:        wallet.ClientID,
+		OwnerPublicKey: wallet.ClientKey,
 	}
 
 	allocationData, err := json.Marshal(blobberRequirements)
 	require.Nil(t, err)
 
 	blobbers, httpResponse, err := v1ScrestAllocBlobbers(t, string(allocationData), nil)
+
 	return blobbers, blobberRequirements, httpResponse, err
 }

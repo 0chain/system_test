@@ -1,7 +1,7 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util"
+	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -11,10 +11,10 @@ func TestName(t *testing.T) {
 
 	t.Run("Get miner stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
-		stats, httpResponse, err := v1MinerGetStats(t, util.ConsensusByHttpStatus(util.HttpOkStatus))
+		stats, httpResponse, err := v1MinerGetStats(t, endpoint.ConsensusByHttpStatus(endpoint.HttpOkStatus))
 
 		require.Nil(t, err)
-		require.Equal(t, util.HttpOkStatus, httpResponse.Status(), httpResponse)
+		require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status(), httpResponse)
 		require.NotNil(t, stats)
 		require.Greater(t, stats.BlockFinality, float64(0), httpResponse)
 		require.Greater(t, stats.LastFinalizedRound, int64(0), httpResponse)
@@ -29,10 +29,10 @@ func TestName(t *testing.T) {
 
 	t.Run("Get sharder stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
-		stats, httpResponse, err := v1SharderGetStats(t, util.ConsensusByHttpStatus(util.HttpOkStatus))
+		stats, httpResponse, err := v1SharderGetStats(t, endpoint.ConsensusByHttpStatus(endpoint.HttpOkStatus))
 
 		require.Nil(t, err)
-		require.Equal(t, util.HttpOkStatus, httpResponse.Status(), httpResponse)
+		require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status(), httpResponse)
 		require.NotNil(t, stats)
 		require.Greater(t, stats.LastFinalizedRound, int64(0), httpResponse)
 		require.GreaterOrEqual(t, stats.StateHealth, int64(-1), httpResponse)

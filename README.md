@@ -76,9 +76,9 @@ Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.y
 To run the entire test suite (minus tests for known broken features) run:
 
 ```bash
-cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
-cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
-cd ./tests/cli_tests/
+cp $ZBOX_LOCATION ./tests/cli/ # Copy zbox CLI to test folder
+cp $ZWALLET_LOCATION ./tests/cli/ # Copy zwallet CLI to test folder
+cd ./tests/cli/
 go test -run "^Test[^___]*$" ./... -v
 ```
 Debug logging can be achieved by running
@@ -109,7 +109,7 @@ system test directory. For example:
 ```bash
 cd zboxcli
 make install
-cp zbox ../system_test/tests/cli_tests/zbox
+cp zbox ../system_test/tests/cli/zbox
 ```
 
 Make sure you have the correct system test branch. Now you need to edit `system_test/tests/cli_tests/config/zbox_config.yaml`
