@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	resty "github.com/go-resty/resty/v2"
@@ -104,6 +105,7 @@ func (z *Zerochain) PostToShardersWithFormData(t *testing.T, endpoint string, co
 func (z *Zerochain) PostToSharder(t *testing.T, sharder, endpoint string, formData map[string]string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
 	resp, err := z.restClient.R().SetFormData(formData).SetBody(body).Post(sharder + endpoint)
 
+	fmt.Println(formData)
 	if resp != nil && resp.IsError() {
 		t.Logf("POST on sharder [" + sharder + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
 		return resp, nil

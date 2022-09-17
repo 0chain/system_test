@@ -80,12 +80,12 @@ func v1SharderGetStats(t *testing.T, consensusCategoriser util.ConsensusMetFunct
 	return stats, httpResponse, httpError
 }
 
-func v1SharderGetSCState(t *testing.T, SCAddress, key string, consensusCategoriser util.ConsensusMetFunction) (*model.SharderSCStateResponse, *resty.Response, error) { //nolint
+func v1SharderGetSCState(t *testing.T, sharderSCStateRequest model.SharderSCStateRequest, consensusCategoriser util.ConsensusMetFunction) (*model.SharderSCStateResponse, *resty.Response, error) { //nolint
 	var stats *model.SharderSCStateResponse
 
 	formData := map[string]string{
-		"sc_address": SCAddress,
-		"key":        key,
+		"sc_address": sharderSCStateRequest.SCAddress,
+		"key":        sharderSCStateRequest.Key,
 	}
 
 	httpResponse, httpError := zeroChain.PostToShardersWithFormData(t, "/v1/scstate/get", consensusCategoriser, formData, nil, &stats)
