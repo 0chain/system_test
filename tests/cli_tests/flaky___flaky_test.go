@@ -16,6 +16,7 @@ import (
 )
 
 func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
+	t.Skip()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
 	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {

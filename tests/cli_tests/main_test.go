@@ -30,10 +30,10 @@ func setupConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
-    
-	miner01ID   = viper.GetString("nodes.miner01ID")
-	miner02ID   = viper.GetString("nodes.miner02ID")
-	miner03ID   = viper.GetString("nodes.miner03ID")
+
+	miner01ID = viper.GetString("nodes.miner01ID")
+	miner02ID = viper.GetString("nodes.miner02ID")
+	miner03ID = viper.GetString("nodes.miner03ID")
 	sharder01ID = viper.GetString("nodes.sharder01ID")
 	sharder02ID = viper.GetString("nodes.sharder02ID")
 }
