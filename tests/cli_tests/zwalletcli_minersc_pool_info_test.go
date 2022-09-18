@@ -20,6 +20,8 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		w, err := getWallet(t, configPath)
+		require.NoError(t, err)
 
 		// before locking tokens against a miner
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
@@ -38,7 +40,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
-		poolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		// after locking tokens against a miner
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
@@ -48,12 +49,12 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[miner01ID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[miner01ID][0].ID)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[miner01ID][0].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner01ID,
+			"id": miner01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -84,7 +85,8 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
-		poolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+		w, err := getWallet(t, configPath)
+		require.NoError(t, err)
 
 		// after locking tokens against sharder
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
@@ -94,12 +96,12 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[sharder01ID], 1)
-		require.Equal(t, poolId, poolsInfo.Pools[sharder01ID][0].ID)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[sharder01ID][0].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder01ID,
+			"id": sharder01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -127,7 +129,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error locking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
-		minerPoolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder01ID,
@@ -136,7 +137,6 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error locking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
-		sharderPoolId := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		output, err = stakePoolsInMinerSCInfoForWallet(t, configPath, createParams(map[string]interface{}{
 			"client_id": wallet.ClientID,
@@ -148,24 +148,27 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pools")
 
+		w, err := getWallet(t, configPath)
+		require.NoError(t, err)
+
 		require.Len(t, poolsInfo.Pools[miner01ID], 1)
-		require.Equal(t, minerPoolId, poolsInfo.Pools[miner01ID][0].ID)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[miner01ID][0].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[miner01ID][0].Balance))
 
 		require.Len(t, poolsInfo.Pools[sharder01ID], 1)
-		require.Equal(t, sharderPoolId, poolsInfo.Pools[sharder01ID][0].ID)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[sharder01ID][0].ID)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder01ID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner01ID,
+			"id": miner01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder01ID,
+			"id": sharder01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())

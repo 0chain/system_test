@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,6 @@ func TestSharderStake(t *testing.T) {
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
-		poolIdRegex     = regexp.MustCompile("[a-f0-9]{64}")
 	)
 
 	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *testing.T) {
@@ -47,9 +47,8 @@ func TestSharderStake(t *testing.T) {
 		require.Nil(t, err, "error locking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
-		poolsInfo, err := pollForPoolInfo(t, sharder.ID, poolId)
+		poolsInfo, err := pollForPoolInfo(t, sharder.ID)
 		require.Nil(t, err)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
 
@@ -72,7 +71,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.Run("Multiple stakes against a sharder should create multiple pools", func(t *testing.T) {
+	t.Run("Multiple stakes against a sharder should not create multiple pools", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -85,7 +84,6 @@ func TestSharderStake(t *testing.T) {
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
 		require.Nil(t, err, "error unmarshalling pools info")
-		beforeNumPools := len(poolsInfoBefore.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder.ID,
@@ -94,16 +92,16 @@ func TestSharderStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
-		poolId1 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
+		// wait 50 rounds to see the pool become active
+		time.Sleep(20 * time.Second)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder.ID,
 			"tokens": 1,
 		}), true)
-		require.Nil(t, err, "error staking tokens against node")
+		require.NoError(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
-		poolId2 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
 		require.Nil(t, err, "error fetching Miner SC User pools")
@@ -111,23 +109,12 @@ func TestSharderStake(t *testing.T) {
 
 		var poolsInfo climodel.MinerSCUserPoolsInfo
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
-		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[sharder.ID], 2)
+		require.NoError(t, err, "error unmarshalling Miner SC User Pool")
+		require.Len(t, poolsInfo.Pools[sharder.ID], 1)
 
-		found1 := false
-		found2 := false
-		for _, pool := range poolsInfo.Pools[sharder.ID] {
-			if pool.ID == poolId1 {
-				found1 = true
-				require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][beforeNumPools].Balance))
-			}
-			if pool.ID == poolId2 {
-				found2 = true
-				require.Equal(t, float64(1), intToZCN(poolsInfo.Pools[sharder.ID][1+beforeNumPools].Balance))
-			}
-		}
-		require.Equal(t, true, found1)
-		require.Equal(t, true, found2)
+		w, err := getWallet(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, poolsInfo.Pools[sharder.ID][0].ID, w.ClientID)
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
@@ -179,9 +166,8 @@ func TestSharderStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
-		poolsInfo, err := pollForPoolInfo(t, sharder.ID, poolId)
+		poolsInfo, err := pollForPoolInfo(t, sharder.ID)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
