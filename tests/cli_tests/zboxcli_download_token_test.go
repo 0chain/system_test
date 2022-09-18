@@ -121,6 +121,8 @@ func readPoolInfoWithWallet(t *testing.T, wallet, cliConfigFilename string) ([]s
 	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
+// readPool actual command: ./zbox rp-info --json --silent --wallet TestShareFile-Share_encrypted_file_using_auth_ticket_-_download_accounting_test_-_proxy_re-encryption__second_wallet.json --configDir ./config --config zbox_config.yaml
+
 func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
