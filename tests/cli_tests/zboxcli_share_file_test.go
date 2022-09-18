@@ -1088,8 +1088,8 @@ func TestShareFile(t *testing.T) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
-		// upload file
 		file := generateRandomTestFileName(t)
+		remoteOwnerPath := "/" + filepath.Base(file)
 		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
@@ -1097,8 +1097,7 @@ func TestShareFile(t *testing.T) {
 		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  file,
-			"remotepath": file,
-			"encrypt":    "",
+			"remotepath": remoteOwnerPath,
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1122,7 +1121,7 @@ func TestShareFile(t *testing.T) {
 			"allocation":          allocationID,
 			"clientid":            clientId,
 			"encryptionpublickey": encKey,
-			"remotepath":          file,
+			"remotepath":          remoteOwnerPath,
 		}
 		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1149,7 +1148,7 @@ func TestShareFile(t *testing.T) {
 		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": file,
+			"remotepath": remoteOwnerPath,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -1167,9 +1166,10 @@ func TestShareFile(t *testing.T) {
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
+			"remotepath": remoteOwnerPath,
 		})
 
-		//! downloading file for receiver walet
+		// downloading file for receiver walet
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
