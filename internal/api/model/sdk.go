@@ -5,6 +5,8 @@ import (
 	"github.com/0chain/gosdk/core/transaction"
 )
 
+// Stub status bar used for commiting actions
+
 func (s *StubStatusBar) Started(allocationId, filePath string, op int, totalBytes int) {
 }
 func (s *StubStatusBar) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {

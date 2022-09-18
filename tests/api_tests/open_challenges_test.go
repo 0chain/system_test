@@ -3,11 +3,10 @@ package api_tests
 import (
 	"bytes"
 	"encoding/json"
-	"testing"
-	"time"
-
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestOpenChallenges(t *testing.T) {
@@ -16,18 +15,36 @@ func TestOpenChallenges(t *testing.T) {
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
-		require.NotNil(t, blobbers)
-		require.Greater(t, len(*blobbers), 3)
-		require.NotNil(t, blobberRequirements)
-
-		blobberId := (*blobbers)[0]
-		response, err := api_client.v1ScrestOpenChallenges(t, api_client.StorageSmartContractAddress, blobberId, api_client.ConsensusByHttpStatus(api_client.HttpOkStatus))
-		require.Equal(t, api_client.HttpOkStatus, response.Status())
+		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
 		require.Nil(t, err)
-		bytesReader := bytes.NewBuffer(response.Body())
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
+
+		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
+			&model.SCRestGetAllocationBlobbersRequest{
+				ClientID:  wallet.ClientID,
+				ClientKey: wallet.ClientKey,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
+
+		require.NotNil(t, scRestGetAllocationBlobbersResponse.Blobbers)
+		require.Greater(t, len(*scRestGetAllocationBlobbersResponse.Blobbers), 3)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse.BlobberRequirements)
+
+		blobberId := (*scRestGetAllocationBlobbersResponse.Blobbers)[0]
+
+		resp, err = apiClient.V1SCRestOpenChallenges(
+			model.SCRestOpenChallengesRequest{
+				BlobberID: blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+
+		bytesReader := bytes.NewBuffer(resp.Body())
 		d := json.NewDecoder(bytesReader)
 		d.UseNumber()
 

@@ -1,18 +1,17 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/setup"
-	"github.com/0chain/system_test/internal/api/util/tx_client"
-
 	"log"
 	"os"
 	"testing"
 )
 
 var (
-	apiClient *client.Client
-	txClient  *tx_client.Client
+	apiClient *client.APIClient
+	sdkClient *client.SDKClient
 )
 
 func TestMain(m *testing.M) {

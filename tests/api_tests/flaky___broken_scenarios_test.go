@@ -22,8 +22,8 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 	t.Run("Register wallet API call should be successful, ignoring invalid creation date", func(t *testing.T) {
 		t.Parallel()
 
-		mnemonic := crypto.GenerateMnemonic(t)
-		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
+		mnemonics := crypto.GenerateMnemonics()
+		expectedKeyPair := crypto.GenerateKeys(mnemonics)
 		publicKeyBytes, _ := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
 		expectedClientId := encryption.Hash(publicKeyBytes)
 		invalidCreationDate := -1

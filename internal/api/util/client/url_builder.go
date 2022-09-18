@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -26,7 +27,7 @@ func (ub *URLBuilder) SetPath(path string) *URLBuilder {
 }
 
 func (ub *URLBuilder) SetPathVariable(name, value string) *URLBuilder {
-	ub.formattedURL.Path = strings.Replace(ub.formattedURL.Path, name, value, 1)
+	ub.formattedURL.Path = strings.Replace(ub.formattedURL.Path, fmt.Sprintf(":%s", name), value, 1)
 	return ub
 }
 

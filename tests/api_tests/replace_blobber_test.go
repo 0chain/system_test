@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 	"math/rand"
 	"strconv"
@@ -14,7 +15,11 @@ func TestReplaceBlobber(t *testing.T) {
 	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
+		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
+
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
 		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)

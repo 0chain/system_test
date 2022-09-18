@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -10,34 +11,34 @@ func TestName(t *testing.T) {
 
 	t.Run("Get miner stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
-		stats, httpResponse, err := api_client.v1MinerGetStats(t, api_client.ConsensusByHttpStatus(api_client.HttpOkStatus))
 
+		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(client.HttpOkStatus)
 		require.Nil(t, err)
-		require.Equal(t, api_client.HttpOkStatus, httpResponse.Status(), httpResponse)
-		require.NotNil(t, stats)
-		require.Greater(t, stats.BlockFinality, float64(0), httpResponse)
-		require.Greater(t, stats.LastFinalizedRound, int64(0), httpResponse)
-		require.Greater(t, stats.BlocksFinalized, int64(0), httpResponse)
-		require.GreaterOrEqual(t, stats.StateHealth, int64(-1), httpResponse)
-		require.Greater(t, stats.CurrentRound, int64(0), httpResponse)
-		require.GreaterOrEqual(t, stats.RoundTimeout, int64(0), httpResponse)
-		require.GreaterOrEqual(t, stats.Timeouts, int64(0), httpResponse)
-		require.Greater(t, stats.AverageBlockSize, 0, httpResponse)
-		require.NotNil(t, stats.NetworkTime, httpResponse)
+		require.NotNil(t, resp)
+		require.NotNil(t, minerGetStatsResponse)
+		require.NotZero(t, minerGetStatsResponse.BlockFinality)
+		require.NotZero(t, minerGetStatsResponse.LastFinalizedRound)
+		require.NotZero(t, minerGetStatsResponse.BlocksFinalized)
+		require.GreaterOrEqual(t, minerGetStatsResponse.StateHealth, int64(-1))
+		require.NotZero(t, minerGetStatsResponse.CurrentRound)
+		require.GreaterOrEqual(t, minerGetStatsResponse.RoundTimeout, int64(0))
+		require.GreaterOrEqual(t, minerGetStatsResponse.Timeouts, int64(0))
+		require.NotZero(t, minerGetStatsResponse.AverageBlockSize)
+		require.NotNil(t, minerGetStatsResponse.NetworkTime)
 	})
 
 	t.Run("Get sharder stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
-		stats, httpResponse, err := api_client.v1SharderGetStats(t, api_client.ConsensusByHttpStatus(api_client.HttpOkStatus))
 
+		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(client.HttpOkStatus)
 		require.Nil(t, err)
-		require.Equal(t, api_client.HttpOkStatus, httpResponse.Status(), httpResponse)
-		require.NotNil(t, stats)
-		require.Greater(t, stats.LastFinalizedRound, int64(0), httpResponse)
-		require.GreaterOrEqual(t, stats.StateHealth, int64(-1), httpResponse)
-		require.Greater(t, stats.AverageBlockSize, 0, httpResponse)
-		require.GreaterOrEqual(t, stats.PrevInvocationCount, uint64(0), httpResponse)
-		require.NotNil(t, stats.PrevInvocationScanTime, uint64(0), httpResponse)
-		require.GreaterOrEqual(t, stats.MeanScanBlockStatsTime, float64(0), httpResponse)
+		require.NotNil(t, resp)
+		require.NotNil(t, sharderGetStatsResponse)
+		require.NotZero(t, sharderGetStatsResponse.LastFinalizedRound)
+		require.GreaterOrEqual(t, sharderGetStatsResponse.StateHealth, int64(-1))
+		require.NotZero(t, sharderGetStatsResponse.AverageBlockSize)
+		require.GreaterOrEqual(t, sharderGetStatsResponse.PrevInvocationCount, uint64(0))
+		require.NotZero(t, sharderGetStatsResponse.PrevInvocationScanTime)
+		require.GreaterOrEqual(t, sharderGetStatsResponse.MeanScanBlockStatsTime, float64(0))
 	})
 }

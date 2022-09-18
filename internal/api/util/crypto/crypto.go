@@ -6,37 +6,44 @@ import (
 	"crypto/sha256"
 	_ "crypto/sha256"
 	"encoding/hex"
-	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
-	"io"
-	"os"
-	"sync"
-	"testing"
-
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/lithammer/shortuuid/v3" //nolint
 	"github.com/tyler-smith/go-bip39"   //nolint
+	"io"
+	"log"
+	"os"
+	"sync"
 )
 
 var blsLock sync.Mutex
 
 const BLS0Chain = "bls0chain"
 
-func GenerateMnemonic(t *testing.T) string {
-	entropy, _ := bip39.NewEntropy(256)       //nolint
-	mnemonic, _ := bip39.NewMnemonic(entropy) //nolint
-	t.Logf("Generated mnemonic [%s]", mnemonic)
+func GenerateMnemonics() string {
+	entropy, err := bip39.NewEntropy(256) //nolint
+	if err != nil {
+		log.Fatalln(err)
+	}
+	mnemonic, err := bip39.NewMnemonic(entropy) //nolint
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Fatalf("Generated mnemonic [%s]\n", mnemonic)
 
 	return mnemonic
 }
 
-func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
+func GenerateKeys(mnemonics string) *model.KeyPair {
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
-	_ = bls.Init(bls.CurveFp254BNb)
-	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
+	err := bls.Init(bls.CurveFp254BNb)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	seed := bip39.NewSeed(mnemonics, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
 	bls.SetRandFunc(random)
 
@@ -47,7 +54,7 @@ func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 	secretKeyHex := secretKey.SerializeToHexStr()
 	publicKeyHex := publicKey.SerializeToHexStr()
 
-	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
+	log.Fatalf("Generated public key [%s] and secret key [%s]\n", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
 	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
@@ -81,25 +88,9 @@ func HashOfFileSHA256(src *os.File) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func HashTransaction(request *model.Transaction) {
-	var hashData = blankIfNil(request.CreationDate) + ":" +
-		blankIfNil(request.TransactionNonce) + ":" +
-		blankIfNil(request.ClientId) + ":" +
-		blankIfNil(request.ToClientId) + ":" +
-		blankIfNil(request.TransactionValue) + ":" +
-		encryption.Hash(request.TransactionData)
-
-	request.Hash = encryption.Hash(hashData)
-}
-
-func SignTransaction(request *model.Transaction, pair *model.KeyPair) {
-	hashToSign, _ := hex.DecodeString(request.Hash)
-	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
-}
-
-func blankIfNil(obj interface{}) string {
-	if obj == nil {
-		return ""
-	}
-	return fmt.Sprintf("%v", obj)
-}
+//func blankIfNil(obj interface{}) string {
+//	if obj == nil {
+//		return ""
+//	}
+//	return fmt.Sprintf("%v", obj)
+//}

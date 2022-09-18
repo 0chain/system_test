@@ -1,9 +1,7 @@
 package api_tests
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/gosdk/zboxcore/client"
@@ -24,24 +22,16 @@ func TestBlobberTokenAccounting(t *testing.T) {
 	t.Run("Token accounting of added blobber as additional parity shard to allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-
-		err := sdk.InitStorageSDK(registeredWallet.String(), "https://bolt.devnet-0chain.net/dns", "", "bls0chain", nil, int64(registeredWallet.Nonce))
+		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
 		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
 
-		conf.InitClientConfig(&conf.Config{
-			BlockWorker:             "https://bolt.devnet-0chain.net/dns",
-			SignatureScheme:         "bls0chain",
-			MinSubmit:               50,
-			MinConfirmation:         50,
-			ConfirmationChainLength: 3,
-		})
+		sdkClient.SetWallet(registeredWallet)
 
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
 		require.Equal(t, api_client.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
-		fmt.Println(getBalance(t, registeredWallet.ClientID).Balance)
 
 		//poolId, _, err := sdk.StakePoolLock("", uint64(tokenomics.IntToZCN(0.1)), 0)
 		//require.Nil(t, err)
@@ -194,32 +184,7 @@ func TestBlobberTokenAccounting(t *testing.T) {
 	})
 }
 
-func getCreateStakePool(blobberId string) *model.CreateStakePoolRequest {
-	return &model.CreateStakePoolRequest{BlobberID: blobberId}
-}
-
-func createStakePool(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, createStakePool *model.CreateStakePoolRequest) (*model.TransactionResponse, *model.Confirmation) {
-	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "stake_pool_lock", InputArgs: createStakePool})
-	require.Nil(t, err)
-
-	updateAllocationRequest := model.Transaction{
-		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
-		TxnOutputHash:    "",
-		TransactionValue: 1000000000,
-		TransactionType:  1000,
-		TransactionFee:   0,
-		TransactionData:  string(txnDataString),
-		ToClientId:       api_client.StorageSmartContractAddress,
-		CreationDate:     time.Now().Unix(),
-		ClientId:         wallet.ClientID,
-		Version:          "1.0",
-		TransactionNonce: wallet.Nonce + 1,
-	}
-
-	updateBlobberTransaction := executeTransaction(t, &updateAllocationRequest, keyPair)
-	confirmation, restyResponse := confirmTransaction(t, wallet, updateBlobberTransaction.Entity, time.Minute)
-	require.NotNil(t, restyResponse)
-
-	return updateBlobberTransaction, confirmation
-
-}
+//
+//func getCreateStakePool(blobberId string) *model.CreateStakePoolRequest {
+//	return &model.CreateStakePoolRequest{BlobberID: blobberId}
+//}

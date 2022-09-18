@@ -1,28 +1,13 @@
 package model
 
 import (
-	"encoding/json"
 	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
-	"log"
-	"strconv"
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/herumi/bls-go-binary/bls"
 )
-
-type Balance struct {
-	Txn     string `json:"txn"`
-	Round   int64  `json:"round"`
-	Balance int64  `json:"balance"`
-}
-
-type SmartContractTxnData struct {
-	Name      string      `json:"name"`
-	InputArgs interface{} `json:"input"`
-}
 
 type Block struct {
 	Block struct {
@@ -137,28 +122,29 @@ type Challenges struct {
 	Responded      bool              `json:"responded"`
 }
 
-type KeyPair struct {
-	PublicKey  bls.PublicKey
-	PrivateKey bls.SecretKey
-}
+//
+//type KeyPair struct {
+//	PublicKey  bls.PublicKey
+//	PrivateKey bls.SecretKey
+//}
 
-type Confirmation struct {
-	Version               string          `json:"version"`
-	Hash                  string          `json:"hash"`
-	BlockHash             string          `json:"block_hash"`
-	PreviousBlockHash     string          `json:"previous_block_hash"`
-	Transaction           *Transaction    `json:"txn,omitempty"`
-	CreationDate          int64           `json:"creation_date,omitempty"`
-	MinerID               string          `json:"miner_id"`
-	Round                 int64           `json:"round"`
-	Status                int             `json:"transaction_status"`
-	RoundRandomSeed       int64           `json:"round_random_seed"`
-	StateChangesCount     int             `json:"state_changes_count"`
-	MerkleTreeRoot        string          `json:"merkle_tree_root"`
-	MerkleTreePath        *MerkleTreePath `json:"merkle_tree_path"`
-	ReceiptMerkleTreeRoot string          `json:"receipt_merkle_tree_root"`
-	ReceiptMerkleTreePath *MerkleTreePath `json:"receipt_merkle_tree_path"`
-}
+//type Confirmation struct {
+//	Version               string          `json:"version"`
+//	Hash                  string          `json:"hash"`
+//	BlockHash             string          `json:"block_hash"`
+//	PreviousBlockHash     string          `json:"previous_block_hash"`
+//	Transaction           *Transaction    `json:"txn,omitempty"`
+//	CreationDate          int64           `json:"creation_date,omitempty"`
+//	MinerID               string          `json:"miner_id"`
+//	Round                 int64           `json:"round"`
+//	Status                int             `json:"transaction_status"`
+//	RoundRandomSeed       int64           `json:"round_random_seed"`
+//	StateChangesCount     int             `json:"state_changes_count"`
+//	MerkleTreeRoot        string          `json:"merkle_tree_root"`
+//	MerkleTreePath        *MerkleTreePath `json:"merkle_tree_path"`
+//	ReceiptMerkleTreeRoot string          `json:"receipt_merkle_tree_root"`
+//	ReceiptMerkleTreePath *MerkleTreePath `json:"receipt_merkle_tree_path"`
+//}
 
 type MerkleTreePath struct {
 	Nodes     []string `json:"nodes"`
@@ -167,22 +153,6 @@ type MerkleTreePath struct {
 
 type Allocation struct {
 	sdk.Allocation
-}
-
-type Timestamp int64
-
-type AllocationUpdate struct {
-	ID                   string    `json:"id"`              // allocation id
-	Name                 string    `json:"name"`            // allocation name
-	OwnerID              string    `json:"owner_id"`        // Owner of the allocation
-	Size                 int64     `json:"size"`            // difference
-	Expiration           Timestamp `json:"expiration_date"` // difference
-	SetImmutable         bool      `json:"set_immutable"`
-	UpdateTerms          bool      `json:"update_terms"`
-	AddBlobberId         string    `json:"add_blobber_id"`
-	RemoveBlobberId      string    `json:"remove_blobber_id"`
-	ThirdPartyExtendable bool      `json:"third_party_extendable"`
-	FileOptions          uint8     `json:"file_options"`
 }
 
 type AllocationStats struct {
@@ -228,22 +198,10 @@ type PriceRange struct {
 	Max int64 `json:"max"`
 }
 
-type BlobberRequirements struct {
-	Blobbers        *[]string  `json:"blobbers"`
-	DataShards      int64      `json:"data_shards"`
-	ParityShards    int64      `json:"parity_shards"`
-	Size            int64      `json:"size"`
-	OwnerId         string     `json:"owner_id"`
-	OwnerPublicKey  string     `json:"owner_public_key"`
-	ExpirationDate  int64      `json:"expiration_date"`
-	ReadPriceRange  PriceRange `json:"read_price_range"`
-	WritePriceRange PriceRange `json:"write_price_range"`
-}
-
 type ClientPutWalletRequest struct {
-	Id           string `json:"id"`
-	PublicKey    string `json:"public_key"`
-	CreationDate *int   `json:"creation_date"`
+	Id        string `json:"id"`
+	PublicKey string `json:"public_key"`
+	//CreationDate *int   `json:"creation_date"`
 }
 
 type ClientPutWalletResponse struct {
@@ -252,16 +210,6 @@ type ClientPutWalletResponse struct {
 	CreationDate *int   `json:"creation_date"`
 	PublicKey    string `json:"public_key"`
 	Nonce        int
-}
-
-type Wallet struct {
-	ClientID    string         `json:"client_id"`
-	ClientKey   string         `json:"client_key"`
-	Keys        []*sys.KeyPair `json:"keys"`
-	Mnemonics   string         `json:"mnemonics"`
-	Version     string         `json:"version"`
-	DateCreated string         `json:"date_created"`
-	Nonce       int
 }
 
 type ChallengeEntity struct {
@@ -283,33 +231,6 @@ type ChallengeEntity struct {
 type BCChallengeResponse struct {
 	BlobberID  string             `json:"blobber_id"`
 	Challenges []*ChallengeEntity `json:"challenges"`
-}
-
-type MinerStats struct {
-	BlockFinality      float64                  `json:"block_finality"`
-	LastFinalizedRound int64                    `json:"last_finalized_round"`
-	BlocksFinalized    int64                    `json:"blocks_finalized"`
-	StateHealth        int64                    `json:"state_health"`
-	CurrentRound       int64                    `json:"current_round"`
-	RoundTimeout       int64                    `json:"round_timeout"`
-	Timeouts           int64                    `json:"timeouts"`
-	AverageBlockSize   int                      `json:"average_block_size"`
-	NetworkTime        map[string]time.Duration `json:"network_times"`
-}
-
-type SharderStats struct {
-	LastFinalizedRound     int64   `json:"last_finalized_round"`
-	StateHealth            int64   `json:"state_health"`
-	AverageBlockSize       int     `json:"average_block_size"`
-	PrevInvocationCount    uint64  `json:"previous_invocation_count"`
-	PrevInvocationScanTime string  `json:"previous_incovcation_scan_time"`
-	MeanScanBlockStatsTime float64 `json:"mean_scan_block_stats_time"`
-}
-
-type SharderSCStateResponse struct {
-	ID        string    `json:"ID"`
-	StartTime time.Time `json:"StartTime"`
-	Used      float64   `json:"Used"`
 }
 
 type BlobberUploadFileMeta struct {
@@ -368,26 +289,8 @@ type BlobberGetFileReferencePathResponse struct {
 	sdk.ReferencePathResult
 }
 
-func (w *Wallet) MustConvertDateCreatedToInt() int {
-	result, err := strconv.Atoi(w.DateCreated)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return result
-}
-
-func (w *Wallet) String() string {
-	out, err := json.Marshal(w)
-	if err != nil {
-		return "failed to serialize wallet object"
-	}
-
-	return string(out)
-}
-
 type CreateStakePoolRequest struct {
 	BlobberID string `json:"blobber_id"`
-	PoolID    string `json:"pool_id"`
 }
 
 type BlobberDownloadFileReadMarker struct {
@@ -410,13 +313,4 @@ type BlobberDownloadFileRequest struct {
 }
 
 type BlobberDownloadFileResponse struct {
-}
-
-type NetworkDNSResponse struct {
-	Miners   []string `json:"miners"`
-	Sharders []string `json:"sharders"`
-}
-
-type NetworkHealthResources struct {
-	NetworkDNSResponse
 }
