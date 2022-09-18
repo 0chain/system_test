@@ -111,6 +111,8 @@ func TestMinerStake(t *testing.T) {
 
 		// wait for pool to be active from pending status, usually need to wait for 50 rounds
 		time.Sleep(20 * time.Second)
+		err = waitForRoundsGT(t, 50)
+		require.NoError(t, err)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": 1,

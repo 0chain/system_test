@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -94,12 +95,14 @@ func TestSharderStake(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
 		// wait 50 rounds to see the pool become active
-		time.Sleep(20 * time.Second)
+		t.Log("wait for 50 rounds...")
+		err = waitForRoundsGT(t, 50)
+		require.NoError(t, err)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder.ID,
 			"tokens": 1,
 		}), true)
-		require.NoError(t, err, "error staking tokens against node")
+		require.NoError(t, err, "error staking tokens against node: %s", output)
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
@@ -192,4 +195,25 @@ func TestSharderStake(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
 	})
+}
+
+// waitForRoundsGT waits for at least r rounds passed
+func waitForRoundsGT(t *testing.T, r int) error {
+	var (
+		lfb      = getLatestFinalizedBlock(t)
+		endRound = lfb.Round + int64(r)
+		checkTk  = time.NewTicker(5 * time.Second)
+	)
+
+	for {
+		select {
+		case <-time.After(3 * time.Minute):
+			return fmt.Errorf("wait timeout")
+		case <-checkTk.C:
+			lfb = getLatestFinalizedBlock(t)
+			if lfb.Round > endRound {
+				return nil
+			}
+		}
+	}
 }
