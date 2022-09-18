@@ -1088,8 +1088,8 @@ func TestShareFile(t *testing.T) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
-		// upload file
 		file := generateRandomTestFileName(t)
+		remoteOwnerPath := "/" + filepath.Base(file)
 		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
@@ -1097,8 +1097,7 @@ func TestShareFile(t *testing.T) {
 		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  file,
-			"remotepath": file,
-			"encrypt":    "",
+			"remotepath": remoteOwnerPath,
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1124,7 +1123,7 @@ func TestShareFile(t *testing.T) {
 			"allocation":          allocationID,
 			"clientid":            clientId,
 			"encryptionpublickey": encKey,
-			"remotepath":          file,
+			"remotepath":          remoteOwnerPath,
 		}
 		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1152,7 +1151,7 @@ func TestShareFile(t *testing.T) {
 		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": file,
+			"remotepath": remoteOwnerPath,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -1171,10 +1170,11 @@ func TestShareFile(t *testing.T) {
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
+			"remotepath": remoteOwnerPath,
 		})
 		t.Logf("Download file params: %s", downloadParams)
 
-		//! downloading file for receiver walet
+		// downloading file for receiver walet
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
@@ -1300,233 +1300,6 @@ func TestShareFile(t *testing.T) {
 
 		// todo: finalReadPool.OwnerBalance might be in ZCN format
 		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
-	})
-
-	t.Run("Share encrypted file using auth ticket - download accounting test where 3rd party pays - proxy re-encryption ", func(t *testing.T) {
-		t.Parallel()
-
-		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
-
-		// upload file
-		file := generateRandomTestFileName(t)
-		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		uploadParams := map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  file,
-			"remotepath": file,
-			"encrypt":    "",
-		}
-		output, err := uploadFile(t, configPath, uploadParams, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
-
-		// receiver wallet operations
-		receiverWallet := escapedTestName(t) + "_second"
-
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		require.Len(t, output, 4, strings.Join(output, "\n"))
-		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
-		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
-
-		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err)
-
-		encKey := walletReceiver.EncryptionPublicKey
-		clientId := walletReceiver.ClientID
-
-		shareParams := map[string]interface{}{
-			"allocation":          allocationID,
-			"clientid":            clientId,
-			"encryptionpublickey": encKey,
-			"remotepath":          file,
-		}
-		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-
-		authTicket, err := extractAuthToken(output[0])
-		require.Nil(t, err, "Error extracting auth token")
-		require.NotEqual(t, "", authTicket)
-
-		output, err = executeFaucetWithTokensForWallet(t, receiverWallet, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		readPoolParams := createParams(map[string]interface{}{
-			"tokens": 0.4,
-		})
-		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
-		// Read pool before download
-		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		initialReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-		require.NotEmpty(t, initialReadPool)
-
-		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance))
-
-		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": file,
-		}), true)
-		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
-
-		// Download the file (delete local copy first)
-		os.Remove(file)
-
-		downloadParams := createParams(map[string]interface{}{
-			"localpath":  file,
-			"authticket": authTicket,
-			"lookuphash": GetReferenceLookup(allocationID, file),
-		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
-
-		// Wait for blobber to redeem read-tokens
-		// Blobber runs worker in the interval of usually 10 seconds.
-		time.Sleep(time.Second * 20)
-		// Read pool after download
-		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		finalReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-		require.NotEmpty(t, finalReadPool)
-
-		// todo: finalReadPool.Balance might be in ZCN format
-		require.EqualValues(t, 0.4*1e10, float64(finalReadPool.Balance))
-	})
-
-	t.Run("Share unencrypted file using auth ticket - download accounting test where 3rd party pays ", func(t *testing.T) {
-		t.Parallel()
-
-		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
-
-		// upload file
-		filename := generateRandomTestFileName(t)
-		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		uploadParams := map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": filename,
-		}
-		output, err := uploadFile(t, configPath, uploadParams, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(filename)), output[1])
-
-		// receiver wallet operations
-		receiverWallet := escapedTestName(t) + "_second"
-
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		require.Len(t, output, 4, strings.Join(output, "\n"))
-		require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
-		require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
-
-		shareParams := map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": filename,
-		}
-		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-
-		authTicket, err := extractAuthToken(output[0])
-		require.Nil(t, err, "Error extracting auth token")
-		require.NotEqual(t, "", authTicket)
-
-		output, err = executeFaucetWithTokensForWallet(t, receiverWallet, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		readPoolParams := createParams(map[string]interface{}{
-			"tokens": 0.4,
-		})
-		output, err = readPoolLockWithWallet(t, receiverWallet, configPath, readPoolParams, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
-		// Read pool before download
-		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		initialReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-		require.NotEmpty(t, initialReadPool)
-		require.Equal(t, 0.4*1e10, float64(initialReadPool.Balance), "read pool balance did not match expected")
-
-		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": filename,
-		}), true)
-		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		expectedDownloadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN = unitToZCN(expectedDownloadCostInZCN, unit) * 1e10
-		t.Logf("Download cost: %v", expectedDownloadCostInZCN)
-
-		// Download the file (delete local copy first)
-		os.Remove(filename)
-
-		downloadParams := createParams(map[string]interface{}{
-			"localpath":  filename,
-			"authticket": authTicket,
-			"lookuphash": GetReferenceLookup(allocationID, filename),
-		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
-
-		// Read pool after download
-		output, err = readPoolInfoWithWallet(t, receiverWallet, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		finalReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
-		require.NotEmpty(t, finalReadPool)
-
-		// todo: finalReadPool.Balance might be in ZCN format
-		require.EqualValues(t, 0.5*1e10, float64(finalReadPool.Balance))
 	})
 }
 
