@@ -99,7 +99,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ ZCN \(\d*\.?\d+ USD\)$`), output[0])
-		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		require.GreaterOrEqual(t, newBalanceValue, float64(1.0))

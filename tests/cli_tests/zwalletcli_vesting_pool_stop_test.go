@@ -75,7 +75,7 @@ func TestVestingPoolStop(t *testing.T) {
 		require.Equal(t, "client_id:    "+wallet.ClientID, output[10])
 		canUnlockAmount, err := strconv.ParseFloat(regexp.MustCompile(`\d+\.?\d*`).FindString(output[2]), 64)
 		require.Nil(t, err, "error parsing float from vp-info")
-		canUnlockUnit := regexp.MustCompile("[um]?ZCN").FindString(output[2])
+		canUnlockUnit := regexp.MustCompile("[um]?(ZCN|SAS)").FindString(output[2])
 		canUnlockAmount = unitToZCN(canUnlockAmount, canUnlockUnit)
 
 		// token-accounting for this case: balance tokens should be unlockable
@@ -90,8 +90,8 @@ func TestVestingPoolStop(t *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "error fetching balance for target wallet")
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: \d+\.?\d* [um]?ZCN \(\d+\.?\d* USD\)`), output[0])
-		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: \d+\.?\d* [um]?(ZCN|SAS) \(\d+\.?\d* USD\)`), output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		newBalanceInZCN := unitToZCN(newBalanceValue, strings.Fields(newBalance)[1])
@@ -162,7 +162,7 @@ func TestVestingPoolStop(t *testing.T) {
 		require.Len(t, output, 23, "expected output of length 23")
 		canUnlockAmount, err := strconv.ParseFloat(regexp.MustCompile(`\d+\.?\d*`).FindString(output[2]), 64)
 		require.Nil(t, err, "error parsing float from vp-info")
-		canUnlockUnit := regexp.MustCompile("[um]?ZCN").FindString(output[2])
+		canUnlockUnit := regexp.MustCompile("[um]?(ZCN|SAS)").FindString(output[2])
 		canUnlockAmount = unitToZCN(canUnlockAmount, canUnlockUnit)
 
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
@@ -176,8 +176,8 @@ func TestVestingPoolStop(t *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "error fetching balance for target wallet")
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: \d+\.?\d* [um]?ZCN \(\d+\.?\d* USD\)`), output[0])
-		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: \d+\.?\d* [um]?(ZCN|SAS) \(\d+\.?\d* USD\)`), output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		newBalanceInZCN := unitToZCN(newBalanceValue, strings.Fields(newBalance)[1])
