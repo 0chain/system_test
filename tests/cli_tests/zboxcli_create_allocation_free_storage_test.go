@@ -366,9 +366,9 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	require.Nil(t, err, "error marshaling smart contract data")
 
 	txn.TransactionData = string(snBytes)
-	crypto.Hash(txn)
+	crypto.HashTransaction(txn)
 	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-	crypto.Sign(txn, keypair)
+	crypto.SignTransaction(txn, keypair)
 
 	return txn
 }
