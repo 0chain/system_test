@@ -32,6 +32,11 @@ func GenerateMnemonic(t *testing.T) string {
 }
 
 func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
+	defer func() {
+		if err := recover(); err != nil {
+			t.Errorf("panic occurred: ", err)
+		}
+	}()
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
