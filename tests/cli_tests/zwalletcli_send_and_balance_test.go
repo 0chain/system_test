@@ -435,6 +435,7 @@ func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
 	require.NotEmpty(t, nodeRes, "No node found: %v", strings.Join(output, "\n"))
 	return &nodeRes
 }
+
 func getMinersList(t *testing.T) *climodel.NodeList {
 	// Get miner list.
 	output, err := getMiners(t, configPath)
