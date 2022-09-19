@@ -21,7 +21,7 @@ const maxDuration = "max_duration"
 const minDuration = "min_duration"
 const minLock = "min_lock"
 
-func TestVestingPoolAdd(t *testing.T) {
+func Test___FlakyVestingPoolAdd(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -641,7 +641,7 @@ func TestVestingPoolAdd(t *testing.T) {
 	})
 }
 
-func TestVestingPoolDelete(t *testing.T) {
+func Test___FlakyVestingPoolDelete(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -780,7 +780,7 @@ func vestingPoolDelete(t *testing.T, cliConfigFilename, params string, retry boo
 	}
 }
 
-func TestVestingPoolInfo(t *testing.T) {
+func Test___FlakyVestingPoolInfo(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -996,7 +996,7 @@ func TestVestingPoolInfo(t *testing.T) {
 	})
 }
 
-func TestVestingPoolStop(t *testing.T) {
+func Test___FlakyVestingPoolStop(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1248,7 +1248,7 @@ func TestVestingPoolStop(t *testing.T) {
 	})
 }
 
-func TestVestingPoolTokenAccounting(t *testing.T) {
+func Test___FlakyVestingPoolTokenAccounting(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *testing.T) {
@@ -1448,7 +1448,7 @@ func TestVestingPoolTokenAccounting(t *testing.T) {
 	})
 }
 
-func TestVestingPoolTrigger(t *testing.T) {
+func Test___FlakyVestingPoolTrigger(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1646,7 +1646,7 @@ func TestVestingPoolTrigger(t *testing.T) {
 	})
 }
 
-func TestVestingPoolUnlock(t *testing.T) {
+func Test___FlakyVestingPoolUnlock(t *testing.T) {
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1869,7 +1869,7 @@ func TestVestingPoolUnlock(t *testing.T) {
 	})
 }
 
-func TestVestingPoolUpdateConfig(t *testing.T) {
+func Test___FlakyVestingPoolUpdateConfig(t *testing.T) {
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
