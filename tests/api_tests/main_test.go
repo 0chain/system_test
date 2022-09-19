@@ -3,7 +3,6 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
-	"github.com/0chain/system_test/internal/api/util/setup"
 	"log"
 	"os"
 	"testing"
@@ -21,7 +20,10 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	setup.InitTestEnvironment(configPath)
+	parsedConfig := config.Parse(configPath)
+
+	sdkClient = client.NewSDKClient(parsedConfig.NetworkEntrypoint)
+	apiClient = client.NewAPIClient(parsedConfig.NetworkEntrypoint)
 
 	os.Exit(m.Run())
 }

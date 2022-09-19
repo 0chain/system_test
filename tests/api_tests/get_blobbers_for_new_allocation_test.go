@@ -1,13 +1,10 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/client"
-	"testing"
-	"time"
-
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2" //nolint
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestGetBlobbersForNewAllocation(t *testing.T) {
@@ -16,7 +13,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 	t.Run("Alloc blobbers API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -49,40 +46,4 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 		require.NotNil(t, scRestGetAllocationBlobbersResponse)
 		require.NotNil(t, scRestGetAllocationBlobbersResponse.Blobbers)
 	})
-}
-
-//func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
-//	blobbers, blobberRequirements, httpResponse, err := getBlobbersMatchingRequirementsWithoutAssertion(t, wallet, keyPair, size, dataShards, parityShards, expiresIn)
-//
-//	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
-//	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-//	require.Equal(t, api_client.HttpOkStatus, httpResponse.Status())
-//
-//	return blobbers, blobberRequirements
-//}
-
-func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
-	t.Logf("Get blobbers for allocation...")
-	//blobberRequirements := model.BlobberRequirements{
-	//	Size:           size,
-	//	DataShards:     dataShards,
-	//	ParityShards:   parityShards,
-	//	ExpirationDate: time.Now().Add(expiresIn).Unix(),
-	//	ReadPriceRange: model.PriceRange{
-	//		Min: 0,
-	//		Max: 9223372036854775807,
-	//	},
-	//	WritePriceRange: model.PriceRange{
-	//		Min: 0,
-	//		Max: 9223372036854775807,
-	//	},
-	//	OwnerId:        wallet.ClientID,
-	//	OwnerPublicKey: keyPair.PublicKey.SerializeToHexStr(),
-	//}
-	//
-	//allocationData, err := json.Marshal(blobberRequirements)
-	//require.Nil(t, err)
-
-	blobbers, httpResponse, err := api_client.v1ScrestAllocBlobbers(t, string(allocationData), nil)
-	return blobbers, blobberRequirements, httpResponse, err
 }

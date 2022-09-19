@@ -3,6 +3,7 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestRemoveBlobber(t *testing.T) {
 	t.Run("Remove blobber in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -53,6 +54,7 @@ func TestRemoveBlobber(t *testing.T) {
 				Wallet:          wallet,
 				ToClientID:      client.StorageSmartContractAddress,
 				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
@@ -92,6 +94,7 @@ func TestRemoveBlobber(t *testing.T) {
 					AddBlobberId:    "",
 					RemoveBlobberId: oldBlobberID,
 				}),
+				Value: tokenomics.IntToZCN(0.1),
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)

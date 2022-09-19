@@ -13,7 +13,7 @@ func TestGetScState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -52,7 +52,7 @@ func TestGetScState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -63,8 +63,10 @@ func TestGetScState(t *testing.T) {
 				Key:       wallet.ClientID,
 			},
 			client.HttpNotFoundStatus)
+
 		require.Nil(t, err)
-		require.Nil(t, resp)
-		require.Nil(t, scStateGetResponse)
+		require.NotNil(t, resp)
+		require.NotNil(t, scStateGetResponse)
+		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
 	})
 }

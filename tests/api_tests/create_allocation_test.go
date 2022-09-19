@@ -3,6 +3,7 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestCreateAllocation(t *testing.T) {
 	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -53,6 +54,7 @@ func TestCreateAllocation(t *testing.T) {
 				Wallet:          wallet,
 				ToClientID:      client.StorageSmartContractAddress,
 				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
@@ -79,45 +81,3 @@ func TestCreateAllocation(t *testing.T) {
 		require.NotNil(t, scRestGetAllocation)
 	})
 }
-
-//
-//func createAllocation(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, blobberRequirements model.BlobberRequirements) (*model.TransactionResponse, *model.Confirmation) {
-//	t.Logf("Creating allocation...")
-//	txnDataString, err := json.Marshal(model.SmartContractTxnData{Name: "new_allocation_request", InputArgs: blobberRequirements})
-//	require.Nil(t, err)
-//	allocationRequest := model.Transaction{
-//		PublicKey:        keyPair.PublicKey.SerializeToHexStr(),
-//		TxnOutputHash:    "",
-//		TransactionValue: 1000000000,
-//		TransactionType:  1000,
-//		TransactionFee:   0,
-//		TransactionData:  string(txnDataString),
-//		ToClientId:       api_client.StorageSmartContractAddress,
-//		CreationDate:     time.Now().Unix(),
-//		ClientId:         wallet.ClientID,
-//		Version:          "1.0",
-//		TransactionNonce: wallet.Nonce + 1,
-//	}
-//
-//	allocationTransaction := executeTransaction(t, &allocationRequest, keyPair)
-//	confirmation, _ := confirmTransaction(t, wallet, allocationTransaction.Entity, 2*time.Minute)
-//
-//	return allocationTransaction, confirmation
-//}
-
-//
-//func getAllocation(t *testing.T, allocationId string) *model.Allocation {
-//	allocation, httpResponse, err := getAllocationWithoutAssertion(t, allocationId)
-//
-//	require.NotNil(t, allocation, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
-//	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-//	require.Equal(t, api_client.HttpOkStatus, httpResponse.Status())
-//
-//	return allocation
-//}
-//
-//func getAllocationWithoutAssertion(t *testing.T, allocationId string) (*model.Allocation, *resty.Response, error) { //nolint
-//	t.Logf("Retrieving allocation...")
-//	balance, httpResponse, err := api_client.v1ScrestAllocation(t, allocationId, nil)
-//	return balance, httpResponse, err
-//}

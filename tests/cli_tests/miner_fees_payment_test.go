@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -292,10 +291,10 @@ func TestMinerFeesPayment(t *testing.T) {
 
 func getBlockContainingTransaction(
 	t *testing.T,
-	startBlock, endBlock *apimodel.LatestFinalizedBlock,
+	startBlock, endBlock *climodel.LatestFinalizedBlock,
 	wallet *climodel.Wallet,
 	txnData string,
-) (block apimodel.Block) {
+) (block climodel.Block) {
 	for round := startBlock.Round + 1; round <= endBlock.Round; round++ {
 		block := getRoundBlockFromASharder(t, round)
 
@@ -314,7 +313,7 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
 }
 
-func getLatestFinalizedBlock(t *testing.T) *apimodel.LatestFinalizedBlock {
+func getLatestFinalizedBlock(t *testing.T) *climodel.LatestFinalizedBlock {
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -327,7 +326,7 @@ func getLatestFinalizedBlock(t *testing.T) *apimodel.LatestFinalizedBlock {
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 
-	var block apimodel.LatestFinalizedBlock
+	var block climodel.LatestFinalizedBlock
 	err = json.Unmarshal(resBody, &block)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 
@@ -355,10 +354,10 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 	return expectedMinerFee
 }
 
-func verifyMinerFeesPayment(t *testing.T, block *apimodel.Block, expectedMinerFee int64) bool {
+func verifyMinerFeesPayment(t *testing.T, block *climodel.Block, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
 		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
-			var transfers []apimodel.Transfer
+			var transfers []climodel.Transfer
 			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
 			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output: %v\n, txn data: %v\n txn status: %v", txn.TransactionOutput, txn.TransactionData, txn.TransactionStatus)
 

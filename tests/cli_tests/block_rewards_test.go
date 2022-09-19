@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -324,7 +323,7 @@ func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
 
-func getBlock(t *testing.T, sharderBaseUrl string, round int64) apimodel.Block {
+func getBlock(t *testing.T, sharderBaseUrl string, round int64) climodel.Block {
 	res, err := apiGetBlock(sharderBaseUrl, round)
 	require.Nil(t, err, "Error retrieving block %d", round)
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
@@ -333,7 +332,7 @@ func getBlock(t *testing.T, sharderBaseUrl string, round int64) apimodel.Block {
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body: %v", err)
 
-	var block apimodel.Block
+	var block climodel.Block
 	err = json.Unmarshal(resBody, &block)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 

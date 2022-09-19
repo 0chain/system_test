@@ -29,7 +29,7 @@ func GenerateMnemonics() string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Fatalf("Generated mnemonic [%s]\n", mnemonic)
+	log.Printf("Generated mnemonic [%s]\n", mnemonic)
 
 	return mnemonic
 }
@@ -54,7 +54,7 @@ func GenerateKeys(mnemonics string) *model.KeyPair {
 	secretKeyHex := secretKey.SerializeToHexStr()
 	publicKeyHex := publicKey.SerializeToHexStr()
 
-	log.Fatalf("Generated public key [%s] and secret key [%s]\n", publicKeyHex, secretKeyHex)
+	log.Printf("Generated public key [%s] and secret key [%s]\n", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
 	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}

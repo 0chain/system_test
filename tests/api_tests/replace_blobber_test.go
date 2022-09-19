@@ -1,12 +1,13 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
 	"math/rand"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestReplaceBlobber(t *testing.T) {
@@ -15,169 +16,482 @@ func TestReplaceBlobber(t *testing.T) {
 	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
 
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.FaucetSmartContractAddress,
+				TransactionData: model.NewFaucetTransactionData()},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionPutResponse)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionGetConfirmationResponse)
 
-		blobberRequirements.Blobbers = availableBlobbers
+		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
+			&model.SCRestGetAllocationBlobbersRequest{
+				ClientID:  wallet.ClientID,
+				ClientKey: wallet.ClientKey,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		createAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.StorageSmartContractAddress,
+				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionPutResponse)
 
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		createAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
 
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		scRestGetAllocation, resp, err := apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		numberOfBlobbersBefore := len(scRestGetAllocation.Blobbers)
+
+		oldBlobberID := getFirstUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		newBlobberID := getNotUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:     wallet,
+				ToClientID: client.StorageSmartContractAddress,
+				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+					ID:              scRestGetAllocation.ID,
+					AddBlobberId:    newBlobberID,
+					RemoveBlobberId: oldBlobberID,
+				}),
+				Value: tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionPutResponse)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		scRestGetAllocation, resp, err = apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersAfter := len(scRestGetAllocation.Blobbers)
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
-		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
+		require.True(t, isBlobberExist(newBlobberID, scRestGetAllocation.Blobbers))
 	})
 
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.FaucetSmartContractAddress,
+				TransactionData: model.NewFaucetTransactionData()},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionPutResponse)
 
-		blobberRequirements.Blobbers = availableBlobbers
+		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionGetConfirmationResponse)
 
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
+			&model.SCRestGetAllocationBlobbersRequest{
+				ClientID:  wallet.ClientID,
+				ClientKey: wallet.ClientKey,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		createAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.StorageSmartContractAddress,
+				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionPutResponse)
 
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		createAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		scRestGetAllocation, resp, err := apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersBefore := len(scRestGetAllocation.Blobbers)
+
+		oldBlobberID := getFirstUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, oldBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, api.TxUnsuccessfulStatus, confirmation.Status)
+		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:     wallet,
+				ToClientID: client.StorageSmartContractAddress,
+				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+					ID:              scRestGetAllocation.ID,
+					AddBlobberId:    oldBlobberID,
+					RemoveBlobberId: oldBlobberID,
+				}),
+				Value: tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionPutResponse)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxUnsuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		scRestGetAllocation, resp, err = apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersAfter := len(scRestGetAllocation.Blobbers)
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.FaucetSmartContractAddress,
+				TransactionData: model.NewFaucetTransactionData()},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionPutResponse)
 
-		blobberRequirements.Blobbers = availableBlobbers
+		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionGetConfirmationResponse)
 
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
+			&model.SCRestGetAllocationBlobbersRequest{
+				ClientID:  wallet.ClientID,
+				ClientKey: wallet.ClientKey,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		createAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.StorageSmartContractAddress,
+				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionPutResponse)
 
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		createAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		scRestGetAllocation, resp, err := apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersBefore := len(scRestGetAllocation.Blobbers)
+
+		newBlobberID := getNotUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, newBlobberID, "Old blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, strconv.Itoa(rand.Intn(10)))
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, api.TxUnsuccessfulStatus, confirmation.Status)
+		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:     wallet,
+				ToClientID: client.StorageSmartContractAddress,
+				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+					ID:              scRestGetAllocation.ID,
+					AddBlobberId:    newBlobberID,
+					RemoveBlobberId: strconv.Itoa(rand.Intn(10)),
+				}),
+				Value: tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionPutResponse)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxUnsuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		scRestGetAllocation, resp, err = apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersAfter := len(scRestGetAllocation.Blobbers)
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, wallet)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.FaucetSmartContractAddress,
+				TransactionData: model.NewFaucetTransactionData()},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionPutResponse)
 
-		blobberRequirements.Blobbers = availableBlobbers
+		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, faucetTransactionGetConfirmationResponse)
 
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
+			&model.SCRestGetAllocationBlobbersRequest{
+				ClientID:  wallet.ClientID,
+				ClientKey: wallet.ClientKey,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		createAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:          wallet,
+				ToClientID:      client.StorageSmartContractAddress,
+				TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+				Value:           tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionPutResponse)
 
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		createAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxSuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		scRestGetAllocation, resp, err := apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersBefore := len(scRestGetAllocation.Blobbers)
+
+		oldBlobberID := getFirstUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		newBlobberID := getNotUsedStorageNodeID(scRestGetAllocationBlobbersResponse.Blobbers, scRestGetAllocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		balanceBeforeAllocationUpdate := getBalance(t, registeredWallet.ClientID)
-		require.NotNil(t, balanceBeforeAllocationUpdate)
+		clientGetBalanceResponse, resp, err := apiClient.V1ClientGetBalance(
+			model.ClientGetBalanceRequest{
+				ClientID: wallet.ClientID,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, clientGetBalanceResponse)
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, api.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		balanceBeforeAllocationUpdate := clientGetBalanceResponse.Balance
 
-		balanceAfterAllocationUpdate := getBalance(t, registeredWallet.ClientID)
-		require.NotNil(t, balanceAfterAllocationUpdate)
+		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
+			model.InternalTransactionPutRequest{
+				Wallet:     wallet,
+				ToClientID: client.StorageSmartContractAddress,
+				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+					ID:              scRestGetAllocation.ID,
+					AddBlobberId:    newBlobberID,
+					RemoveBlobberId: oldBlobberID,
+				}),
+				Value: tokenomics.IntToZCN(0.1),
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionPutResponse)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus,
+			client.TxUnsuccessfulStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		clientGetBalanceResponse, resp, err = apiClient.V1ClientGetBalance(
+			model.ClientGetBalanceRequest{
+				ClientID: wallet.ClientID,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, clientGetBalanceResponse)
+
+		balanceAfterAllocationUpdate := clientGetBalanceResponse.Balance
+
+		scRestGetAllocation, resp, err = apiClient.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocation)
+
+		numberOfBlobbersAfter := len(scRestGetAllocation.Blobbers)
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 }

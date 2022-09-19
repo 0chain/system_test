@@ -9,7 +9,7 @@ var (
 	ErrNoMinersHealth  = errors.New("all miners seem to be unhealthy")
 	ErrNoShadersHealth = errors.New("all shaders seem to be unhealthy")
 
-	ErrGetFromResource = errors.New("error happened during GET request")
+	ErrGetFromResource = errors.New("error happened during request")
 
 	ErrExecutionConsensus = errors.New("execution consensus is not reached")
 )

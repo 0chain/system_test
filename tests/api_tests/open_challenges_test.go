@@ -1,8 +1,6 @@
 package api_tests
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
@@ -15,7 +13,7 @@ func TestOpenChallenges(t *testing.T) {
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(client.HttpOkStatus)
+		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, wallet)
@@ -36,21 +34,13 @@ func TestOpenChallenges(t *testing.T) {
 
 		blobberId := (*scRestGetAllocationBlobbersResponse.Blobbers)[0]
 
-		resp, err = apiClient.V1SCRestOpenChallenges(
-			model.SCRestOpenChallengesRequest{
+		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(
+			model.SCRestOpenChallengeRequest{
 				BlobberID: blobberId,
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-
-		bytesReader := bytes.NewBuffer(resp.Body())
-		d := json.NewDecoder(bytesReader)
-		d.UseNumber()
-
-		var blobberChallenges model.BCChallengeResponse
-		blobberChallenges.Challenges = make([]*model.ChallengeEntity, 0)
-		err = d.Decode(&blobberChallenges)
-		require.Nil(t, err)
+		require.NotNil(t, scRestOpenChallengeResponse)
 	})
 }
