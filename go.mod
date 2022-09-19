@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/0chain/gosdk v1.8.8-0.20220826123005-3c032dcae80f
-	github.com/ethereum/go-ethereum v1.10.23 // indirect
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.0.1-0.20220103075647-4e46f4fe2af2
 	github.com/lithammer/shortuuid/v3 v3.0.7
