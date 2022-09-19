@@ -37,8 +37,12 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 			t.Errorf("panic occurred: ", err)
 		}
 	}()
+
 	blsLock.Lock()
-	defer blsLock.Unlock()
+	defer func() {
+		blsLock.Unlock()
+		bls.SetRandFunc(nil)
+	}()
 
 	_ = bls.Init(bls.CurveFp254BNb)
 	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
@@ -53,7 +57,6 @@ func GenerateKeys(t *testing.T, mnemonic string) model.KeyPair {
 	publicKeyHex := publicKey.SerializeToHexStr()
 
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
-	bls.SetRandFunc(nil)
 
 	return model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
