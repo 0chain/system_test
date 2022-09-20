@@ -5,7 +5,6 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/0chain/gosdk/core/logger"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 	"log"
