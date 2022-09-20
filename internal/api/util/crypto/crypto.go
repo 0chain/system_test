@@ -19,12 +19,8 @@ import (
 var blsLock sync.Mutex
 
 func init() {
-	log.Printf("Initializing BLS...")
 	blsLock.Lock()
-	defer func() {
-		blsLock.Unlock()
-		bls.SetRandFunc(nil)
-	}()
+	defer blsLock.Unlock()
 
 	err := bls.Init(bls.CurveFp254BNb)
 
