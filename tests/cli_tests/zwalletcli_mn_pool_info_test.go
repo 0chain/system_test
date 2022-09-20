@@ -15,7 +15,6 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
-		poolIdRegex     = regexp.MustCompile("[a-f0-9]{64}")
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *testing.T) {
@@ -34,12 +33,10 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id":      miner01ID,
-			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
@@ -64,12 +61,10 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id":      sharder01ID,
-			"pool_id": poolId,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
@@ -85,41 +80,11 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      "abcdefgh",
-			"pool_id": "dummy pool id",
+			"id": "abcdefgh",
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't get miner node: value not present"}`, output[0])
 	})
 
-	t.Run("Miner pool info for invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      miner01ID,
-			"pool_id": "dummy pool id",
-		}), false)
-		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't find pool stats"}`, output[0])
-	})
-
-	t.Run("Sharder pool info for invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder01ID,
-			"pool_id": "dummy pool id",
-		}), false)
-		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
-		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't find pool stats"}`, output[0])
-	})
 }

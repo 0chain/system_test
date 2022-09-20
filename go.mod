@@ -1,6 +1,6 @@
 module github.com/0chain/system_test
 
-go 1.16
+go 1.18
 
 require (
 	github.com/0chain/gosdk v1.8.8-0.20220826123005-3c032dcae80f
