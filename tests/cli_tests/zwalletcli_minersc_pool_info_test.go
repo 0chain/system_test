@@ -130,7 +130,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
-		err = waitForRoundsGT(t, 50)
+		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder01ID,
 			"tokens": 1,

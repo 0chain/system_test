@@ -110,9 +110,8 @@ func TestMinerStake(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 
 		// wait for pool to be active from pending status, usually need to wait for 50 rounds
-		time.Sleep(20 * time.Second)
-		err = waitForRoundsGT(t, 50)
-		require.NoError(t, err)
+		waitForStakePoolActive(t)
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": 1,
@@ -352,8 +351,7 @@ func TestMinerStake(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 
-		err = waitForRoundsGT(t, 50)
-		require.NoError(t, err)
+		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": intToZCN(max_stake)/2 + 1,

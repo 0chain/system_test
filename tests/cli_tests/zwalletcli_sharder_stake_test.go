@@ -95,8 +95,7 @@ func TestSharderStake(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
 		// wait 50 rounds to see the pool become active
-		err = waitForRoundsGT(t, 50)
-		require.NoError(t, err)
+		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder.ID,
 			"tokens": 1,
@@ -198,8 +197,6 @@ func TestSharderStake(t *testing.T) {
 
 // waitForRoundsGT waits for at least r rounds passed
 func waitForRoundsGT(t *testing.T, r int) error {
-	t.Log("wait for 50 rounds...")
-
 	var (
 		lfb      = getLatestFinalizedBlock(t)
 		endRound = lfb.Round + int64(r)
@@ -217,4 +214,13 @@ func waitForRoundsGT(t *testing.T, r int) error {
 			}
 		}
 	}
+}
+
+func waitForStakePoolActive(t *testing.T) {
+	vs := getMinerSCConfiguration(t)
+	round, ok := vs["reward_round_frequency"]
+	require.True(t, ok, "could not get reward_round_frequency from minersc config")
+
+	err := waitForRoundsGT(t, int(round))
+	require.NoError(t, err)
 }
