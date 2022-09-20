@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -254,7 +253,6 @@ func TestMinerFeesPayment(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		stakePoolID := regexp.MustCompile("[a-f0-9]{64}").FindString(output[0])
 
 		cliutils.Wait(t, 30*time.Second)
 		endBlock := getLatestFinalizedBlock(t)
@@ -272,7 +270,6 @@ func TestMinerFeesPayment(t *testing.T) {
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolID,
 			"fee":        fee,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))

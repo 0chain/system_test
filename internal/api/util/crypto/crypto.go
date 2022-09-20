@@ -5,6 +5,7 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 	"sync"
 	"testing"
@@ -32,7 +33,9 @@ func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 		bls.SetRandFunc(nil)
 	}()
 
-	_ = bls.Init(bls.CurveFp254BNb)
+	err := bls.Init(bls.CurveFp254BNb)
+	require.NoError(t, err, "Error on BLS init")
+
 	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
 	bls.SetRandFunc(random)
@@ -54,7 +57,9 @@ func SignTransaction(t *testing.T, request *model.Transaction, pair *model.KeyPa
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
-	hashToSign, _ := hex.DecodeString(request.Hash)
+	hashToSign, err := hex.DecodeString(request.Hash)
+	require.NoError(t, err, "Error on hash")
+
 	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
 }
 

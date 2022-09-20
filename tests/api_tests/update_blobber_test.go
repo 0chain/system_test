@@ -2,11 +2,12 @@ package api_tests
 
 import (
 	"encoding/json"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestUpdateBlobber(t *testing.T) {
