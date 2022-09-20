@@ -112,33 +112,6 @@ func TestCollectRewards(t *testing.T) {
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
 	})
 
-	//t.Run("Test collect reward with invalid pool id should fail", func(t *testing.T) {
-	//	t.Parallel()
-	//
-	//	output, err := registerWallet(t, configPath)
-	//	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-	//
-	//	blobbers := []climodel.BlobberInfo{}
-	//	output, err = listBlobbers(t, configPath, "--json")
-	//	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	//	require.Len(t, output, 1)
-	//	err = json.Unmarshal([]byte(output[0]), &blobbers)
-	//	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-	//	require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-	//
-	//	// Pick a random blobber
-	//	blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-	//
-	//	output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-	//		"pool_id":       "invalid-pool-id",
-	//		"provider_type": "blobber",
-	//		"provider_id":   blobber.Id,
-	//	}), false)
-	//	require.NotNil(t, err)
-	//	require.Len(t, output, 1)
-	//	require.Contains(t, output[0], "can't get related user stake pools")
-	//})
-
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -214,32 +187,6 @@ func TestCollectRewards(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "provider type must be blobber or validator")
 	})
-
-	//t.Run("Test collect reward with no pool id should fail", func(t *testing.T) {
-	//	t.Parallel()
-	//
-	//	output, err := registerWallet(t, configPath)
-	//	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-	//
-	//	blobbers := []climodel.BlobberInfo{}
-	//	output, err = listBlobbers(t, configPath, "--json")
-	//	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	//	require.Len(t, output, 1)
-	//	err = json.Unmarshal([]byte(output[0]), &blobbers)
-	//	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-	//	require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-	//
-	//	// Pick a random blobber
-	//	blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-	//
-	//	output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-	//		"provider_type": "blobber",
-	//		"provider_id":   blobber.Id,
-	//	}), false)
-	//	require.NotNil(t, err)
-	//	require.Len(t, output, 1)
-	//	require.Contains(t, output[0], "no pool id")
-	//})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *testing.T) {
 		t.Parallel()
