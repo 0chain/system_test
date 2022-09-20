@@ -7,7 +7,7 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
+	"golang.org/x/crypto/sha3"
 	"io"
 	"os"
 	"sync"
@@ -32,8 +32,16 @@ func GenerateMnemonic(t *testing.T) string {
 }
 
 func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
+	defer func() {
+		if err := recover(); err != nil {
+			t.Errorf("panic occurred: ", err)
+		}
+	}()
 	blsLock.Lock()
-	defer blsLock.Unlock()
+	defer func() {
+		blsLock.Unlock()
+		bls.SetRandFunc(nil)
+	}()
 
 	_ = bls.Init(bls.CurveFp254BNb)
 	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
@@ -48,7 +56,6 @@ func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 	publicKeyHex := publicKey.SerializeToHexStr()
 
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
-	bls.SetRandFunc(nil)
 
 	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
@@ -87,9 +94,17 @@ func HashTransaction(request *model.Transaction) {
 		blankIfNil(request.ClientId) + ":" +
 		blankIfNil(request.ToClientId) + ":" +
 		blankIfNil(request.TransactionValue) + ":" +
-		encryption.Hash(request.TransactionData)
+		Sha3256([]byte(request.TransactionData))
 
-	request.Hash = encryption.Hash(hashData)
+	request.Hash = Sha3256([]byte(hashData))
+}
+
+func Sha3256(publicKeyBytes []byte) string {
+	sha3256 := sha3.New256()
+	sha3256.Write(publicKeyBytes)
+	var buffer []byte
+	clientId := hex.EncodeToString(sha3256.Sum(buffer))
+	return clientId
 }
 
 func SignTransaction(request *model.Transaction, pair *model.KeyPair) {
