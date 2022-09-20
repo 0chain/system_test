@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
 	"net/http"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
-	crypto "github.com/0chain/system_test/internal/api/util/crypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
@@ -40,6 +40,9 @@ const (
 )
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
+	err := bls.Init(bls.CurveFp254BNb)
+	require.NoError(t, err, "Error on BLS init")
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -286,13 +289,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 }
 
-func init() {
-	err := bls.Init(bls.CurveFp254BNb)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
@@ -369,7 +365,7 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	txn.TransactionData = string(snBytes)
 	crypto.HashTransaction(txn)
 	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-	crypto.SignTransaction(txn, keypair)
+	crypto.SignTransaction(t, txn, keypair)
 
 	return txn
 }
