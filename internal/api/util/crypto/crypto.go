@@ -5,8 +5,10 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/0chain/gosdk/core/logger"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
+	"log"
 	"sync"
 	"testing"
 
@@ -16,6 +18,21 @@ import (
 )
 
 var blsLock sync.Mutex
+
+func init() {
+	log.Printf("Initializing BLS...")
+	blsLock.Lock()
+	defer func() {
+		blsLock.Unlock()
+		bls.SetRandFunc(nil)
+	}()
+
+	err := bls.Init(bls.CurveFp254BNb)
+
+	if err != nil {
+		panic(err)
+	}
+}
 
 func GenerateMnemonic(t *testing.T) string {
 	entropy, _ := bip39.NewEntropy(256)       //nolint
@@ -32,9 +49,6 @@ func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 		blsLock.Unlock()
 		bls.SetRandFunc(nil)
 	}()
-
-	err := bls.Init(bls.CurveFp254BNb)
-	require.NoError(t, err, "Error on BLS init")
 
 	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
