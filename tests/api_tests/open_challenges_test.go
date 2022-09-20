@@ -3,9 +3,10 @@ package api_tests
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/endpoint"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/stretchr/testify/require"
