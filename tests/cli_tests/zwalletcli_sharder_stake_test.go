@@ -95,7 +95,6 @@ func TestSharderStake(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
 		// wait 50 rounds to see the pool become active
-		t.Log("wait for 50 rounds...")
 		err = waitForRoundsGT(t, 50)
 		require.NoError(t, err)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
@@ -199,6 +198,8 @@ func TestSharderStake(t *testing.T) {
 
 // waitForRoundsGT waits for at least r rounds passed
 func waitForRoundsGT(t *testing.T, r int) error {
+	t.Log("wait for 50 rounds...")
+
 	var (
 		lfb      = getLatestFinalizedBlock(t)
 		endRound = lfb.Round + int64(r)

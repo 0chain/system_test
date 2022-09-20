@@ -351,6 +351,9 @@ func TestMinerStake(t *testing.T) {
 			"tokens": intToZCN(max_stake) / 2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
+
+		err = waitForRoundsGT(t, 50)
+		require.NoError(t, err)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": intToZCN(max_stake)/2 + 1,
