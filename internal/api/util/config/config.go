@@ -13,7 +13,7 @@ const ConfigPathEnv = "CONFIG_PATH"
 const DefaultConfigPath = "./config/api_tests_config.yaml"
 
 type Config struct {
-	NetworkEntrypoint string `yaml:"network_entrypoint"`
+	BlockWorker string `yaml:"block_worker"`
 }
 
 func Parse(configPath string) *Config {
