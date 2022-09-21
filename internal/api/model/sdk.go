@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/0chain/gosdk/core/transaction"
 )
 
@@ -19,7 +18,6 @@ func (s *StubStatusBar) Error(allocationID string, filePath string, op int, err 
 }
 
 func (s *StubStatusBar) CommitMetaCompleted(request, response string, txn *transaction.Transaction, err error) {
-	fmt.Println(response, err)
 }
 
 func (s *StubStatusBar) RepairCompleted(filesRepaired int) {

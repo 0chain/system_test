@@ -6,14 +6,19 @@ import (
 )
 
 // CreateFile creates a new file and fills it with random data
-func CreateFile(name string, size int64) (*os.File, error) {
+func CreateFile(fileName string, size int64) (*os.File, error) {
+	//file, err := ioutil.TempFile("", fileName)
+	//if err != nil {
+	//	return nil, err
+	//}
+
 	buffer := make([]byte, size)
 	_, err := rand.Read(buffer)
 	if err != nil {
 		return nil, err
 	} //nolint:gosec,revive
 
-	file, err := os.Create(name)
+	file, err := os.Create(fileName)
 	if err != nil {
 		return nil, err
 	}

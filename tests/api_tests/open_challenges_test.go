@@ -13,26 +13,10 @@ func TestOpenChallenges(t *testing.T) {
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t)
 
-		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
-			&model.SCRestGetAllocationBlobbersRequest{
-				ClientID:  wallet.ClientID,
-				ClientKey: wallet.ClientKey,
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, scRestGetAllocationBlobbersResponse)
-
-		require.NotNil(t, scRestGetAllocationBlobbersResponse.Blobbers)
-		require.Greater(t, len(*scRestGetAllocationBlobbersResponse.Blobbers), 3)
-		require.NotNil(t, scRestGetAllocationBlobbersResponse.BlobberRequirements)
-
-		blobberId := (*scRestGetAllocationBlobbersResponse.Blobbers)[0]
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
 
 		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(
 			model.SCRestOpenChallengeRequest{

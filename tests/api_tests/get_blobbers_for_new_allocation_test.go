@@ -13,10 +13,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 	t.Run("Alloc blobbers API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t)
 
 		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
 			&model.SCRestGetAllocationBlobbersRequest{

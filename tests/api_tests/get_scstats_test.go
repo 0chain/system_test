@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestName(t *testing.T) {
+func TestGetSCStats(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Get miner stats call should return successfully", func(t *testing.T) {
