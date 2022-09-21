@@ -22,8 +22,8 @@ func TestMain(m *testing.M) {
 
 	parsedConfig := config.Parse(configPath)
 
-	sdkClient = client.NewSDKClient(parsedConfig.NetworkEntrypoint)
-	apiClient = client.NewAPIClient(parsedConfig.NetworkEntrypoint)
+	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
+	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 
 	os.Exit(m.Run())
 }

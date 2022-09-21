@@ -1,4 +1,4 @@
-package climodel
+package model
 
 import (
 	currency "github.com/0chain/system_test/internal/currency"
@@ -571,4 +571,43 @@ type Transaction struct {
 type TransactionData struct {
 	Name  string      `json:"name"`
 	Input interface{} `json:"input"`
+}
+
+type EventDBTransaction struct {
+	Hash              string `json:"hash" `
+	BlockHash         string `json:"block_hash"`
+	Round             int64  `json:"round"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id" `
+	ToClientId        string `json:"to_client_id" `
+	TransactionData   string `json:"transaction_data"`
+	Value             int64  `json:"value"`
+	Signature         string `json:"signature"`
+	CreationDate      int64  `json:"creation_date"  `
+	Fee               int64  `json:"fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output"`
+	OutputHash        string `json:"output_hash"`
+	Status            int    `json:"status"`
+}
+
+type EventDBBlock struct {
+	Hash                  string               `json:"hash"`
+	Version               string               `json:"version"`
+	CreationDate          int64                `json:"creation_date" `
+	Round                 int64                `json:"round" `
+	MinerID               string               `json:"miner_id"`
+	RoundRandomSeed       int64                `json:"round_random_seed"`
+	MerkleTreeRoot        string               `json:"merkle_tree_root"`
+	StateHash             string               `json:"state_hash"`
+	ReceiptMerkleTreeRoot string               `json:"receipt_merkle_tree_root"`
+	NumTxns               int                  `json:"num_txns"`
+	MagicBlockHash        string               `json:"magic_block_hash"`
+	PrevHash              string               `json:"prev_hash"`
+	Signature             string               `json:"signature"`
+	ChainId               string               `json:"chain_id"`
+	RunningTxnCount       string               `json:"running_txn_count"`
+	RoundTimeoutCount     int                  `json:"round_timeout_count"`
+	CreatedAt             time.Time            `json:"created_at"`
+	Transactions          []EventDBTransaction `json:"transactions"`
 }

@@ -4,14 +4,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
+	"github.com/stretchr/testify/require"
 	"log"
 	"strconv"
+	"testing"
 	"time"
 
 	resty "github.com/go-resty/resty/v2"
@@ -44,6 +45,7 @@ const (
 	TransactionPut             = "/v1/transaction/put"
 	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
 	ClientGetBalance           = "/v1/client/get/balance"
+	GetNetworkDetails          = "/network"
 )
 
 // Contains all used service providers
@@ -120,7 +122,9 @@ func (c *APIClient) getHealthyShaders(shaders []string) []string {
 }
 
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
-	resp, err := c.httpClient.R().Get(networkEntrypoint)
+	url := NewURLBuilder().MustShiftParse(networkEntrypoint).SetPath(GetNetworkDetails).String()
+
+	resp, err := c.httpClient.R().Get(url)
 	if err != nil {
 		return ErrNetworkHealth
 	}
@@ -201,7 +205,6 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 		newResp, err := c.executeForServiceProvider(formattedURL, executionRequest, method)
 		if err != nil {
 			errors = append(errors, err)
-			log.Println(err)
 			continue
 		}
 
@@ -249,7 +252,7 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	}
 
 	if clientPutRequest.ClientID == "" {
-		clientPutRequest.ClientID = encryption.Hash(publicKeyBytes)
+		clientPutRequest.ClientID = crypto.Sha3256(publicKeyBytes)
 	}
 
 	if clientPutRequest.ClientKey == "" {
@@ -295,13 +298,11 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		log.Fatalln(err)
 	}
 
-	internalTransactionPutRequest.Wallet.IncNonce()
-
 	transactionPutRequest := model.TransactionPutRequest{
 		ClientId:         internalTransactionPutRequest.Wallet.ClientID,
 		PublicKey:        internalTransactionPutRequest.Wallet.ClientKey,
 		ToClientId:       internalTransactionPutRequest.ToClientID,
-		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce,
+		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
 		TxnOutputHash:    TxOutput,
 		TransactionValue: *TxValue,
 		TransactionType:  TxType,
@@ -315,13 +316,13 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = encryption.Hash(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		transactionPutRequest.CreationDate,
 		transactionPutRequest.TransactionNonce,
 		transactionPutRequest.ClientId,
 		transactionPutRequest.ToClientId,
 		transactionPutRequest.TransactionValue,
-		encryption.Hash(transactionPutRequest.TransactionData)))
+		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
 
 	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
 	if err != nil {
@@ -370,7 +371,7 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 			HttpGETMethod,
 			SharderServiceProvider)
 		if err != nil {
-			log.Fatalln(err)
+			return false
 		}
 
 		if resp.StatusCode() != requiredStatusCode {
@@ -378,7 +379,6 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 		}
 
 		if transactionGetConfirmationResponse.Status != requiredTransactionStatus {
-			log.Println(transactionGetConfirmationResponse.Transaction.TransactionOutput)
 			return false
 		}
 
@@ -570,171 +570,127 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
-////Uploads a new file to blobber
-//func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) {
-//	var stats *model.BlobberUploadFileResponse
-//
-//	payload := new(bytes.Buffer)
-//	writer := multipart.NewWriter(payload)
-//	uploadFile, err := writer.CreateFormFile("uploadFile", filepath.Base(blobberUploadFileRequest.Meta.FilePath))
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	_, err = io.Copy(uploadFile, blobberUploadFileRequest.File)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	err = writer.WriteField("connection_id", blobberUploadFileRequest.Meta.ConnectionID)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	metaData, err := json.Marshal(blobberUploadFileRequest.Meta)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	err = writer.WriteField("uploadMeta", string(metaData))
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberUploadFileRequest.ClientID,
-//		"X-App-Client-Key":       blobberUploadFileRequest.ClientKey,
-//		"X-App-Client-Signature": blobberUploadFileRequest.ClientSignature,
-//		"Content-Type":           writer.FormDataContentType(),
-//	}
-//
-//	err = writer.Close()
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberUploadFileRequest.URL,
-//		filepath.Join("/v1/file/upload", blobberUploadFileRequest.AllocationID),
-//		headers,
-//		nil,
-//		payload.Bytes(),
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Queries all the files in certain allocation
-//func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) {
-//	var stats *model.BlobberListFilesResponse
-//
-//	params := map[string]string{
-//		"path_hash":  blobberListFilesRequest.PathHash,
-//		"path":       "/",
-//		"auth_token": "",
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberListFilesRequest.ClientID,
-//		"X-App-Client-Key":       blobberListFilesRequest.ClientKey,
-//		"X-App-Client-Signature": blobberListFilesRequest.ClientSignature,
-//	}
-//
-//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
-//		blobberListFilesRequest.URL,
-//		filepath.Join("/v1/file/list", blobberListFilesRequest.AllocationID),
-//		headers,
-//		params,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Queries files in certain allocation
-//func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) {
-//	var stats *model.BlobberGetFileReferencePathResponse
-//
-//	params := map[string]string{
-//		"paths": fmt.Sprintf("[\"%s\"]", "/"),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberGetFileReferencePathRequest.ClientID,
-//		"X-App-Client-Key":       blobberGetFileReferencePathRequest.ClientKey,
-//		"X-App-Client-Signature": blobberGetFileReferencePathRequest.ClientSignature,
-//	}
-//
-//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
-//		blobberGetFileReferencePathRequest.URL,
-//		filepath.Join("/v1/file/referencepath", blobberGetFileReferencePathRequest.AllocationID),
-//		headers,
-//		params,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Commits all the actions in a certain opened connection
-//func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) {
-//	var stats *model.BlobberCommitConnectionResponse
-//
-//	writeMarker, err := json.Marshal(blobberCommitConnectionRequest.WriteMarker)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	formData := map[string]string{
-//		"connection_id": blobberCommitConnectionRequest.ConnectionID,
-//		"write_marker":  string(writeMarker),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":   blobberCommitConnectionRequest.WriteMarker.ClientID,
-//		"X-App-Client-Key":  blobberCommitConnectionRequest.ClientKey,
-//		"Connection":        "Keep-Alive",
-//		"Cache-Control":     "no-cache",
-//		"Transfer-Encoding": "chunked",
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberCommitConnectionRequest.URL,
-//		filepath.Join("/v1/connection/commit", blobberCommitConnectionRequest.WriteMarker.AllocationID),
-//		headers,
-//		formData,
-//		nil,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Commits all the actions in a certain opened connection
-//func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) {
-//	var stats *model.BlobberDownloadFileResponse
-//
-//	readMarker, err := json.Marshal(blobberDownloadFileRequest.ReadMarker)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	formData := map[string]string{
-//		"path_hash":   blobberDownloadFileRequest.PathHash,
-//		"block_num":   blobberDownloadFileRequest.BlockNum,
-//		"num_blocks":  blobberDownloadFileRequest.NumBlocks,
-//		"read_marker": string(readMarker),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":  blobberDownloadFileRequest.ReadMarker.ClientID,
-//		"X-App-Client-Key": blobberDownloadFileRequest.ReadMarker.ClientKey,
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberDownloadFileRequest.URL,
-//		filepath.Join("/v1/file/download", blobberDownloadFileRequest.ReadMarker.AllocationID),
-//		headers,
-//		formData,
-//		nil,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
+// RegisterWalletWrapper does not provide deep test of used components
+func (c *APIClient) RegisterWalletWrapper(t *testing.T) *model.Wallet {
+	t.Log("Register wallet...")
+
+	wallet, resp, err := c.V1ClientPut(model.ClientPutRequest{}, HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return wallet
+}
+
+// ExecuteFaucetWrapper does not provide deep test of used components
+func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
+	t.Log("Execute faucet...")
+
+	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      FaucetSmartContractAddress,
+			TransactionData: model.NewFaucetTransactionData()},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, faucetTransactionPutResponse)
+
+	faucetTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: faucetTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+}
+
+// CreateAllocationWrapper does not provide deep test of used components
+func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse) string {
+	t.Log("Create allocation...")
+
+	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createAllocationTransactionPutResponse)
+
+	createAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: createAllocationTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+
+	return createAllocationTransactionPutResponse.Entity.Hash
+}
+
+// CreateStakePoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateStakePoolWrapper(t *testing.T) {
+	t.Log("Create stake pool...")
+}
+
+// UpdateAllocationWrapper does not provide deep test of used components
+func (c *APIClient) UpdateAllocationWrapper(t *testing.T) {
+	t.Log("Update allocation...")
+}
+
+func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet) model.SCRestGetAllocationBlobbersResponse {
+	t.Log("Get allocation blobbers...")
+
+	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
+		&model.SCRestGetAllocationBlobbersRequest{
+			ClientID:  wallet.ClientID,
+			ClientKey: wallet.ClientKey,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return scRestGetAllocationBlobbersResponse
+}
+
+// GetAllocationWrapper does not provide deep test of used components
+func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *model.SCRestGetAllocationResponse {
+	t.Log("Get allocation...")
+
+	scRestGetAllocation, resp, err := c.V1SCRestGetAllocation(
+		model.SCRestGetAllocationRequest{
+			AllocationID: allocationID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetAllocation)
+
+	return scRestGetAllocation
+}
+
+// GetWalletBalanceWrapper does not provide deep test of used components
+func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet) *model.ClientGetBalanceResponse {
+	t.Log("Get wallet balance...")
+
+	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
+		model.ClientGetBalanceRequest{
+			ClientID: wallet.ClientID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return clientGetBalanceResponse
+}

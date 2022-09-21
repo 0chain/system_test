@@ -4,7 +4,6 @@ package api_tests
 
 import (
 	"encoding/hex"
-	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"testing"
 
@@ -28,7 +27,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		publicKeyBytes, err := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
 		require.NotNil(t, err)
 
-		expectedClientId := encryption.Hash(publicKeyBytes)
+		expectedClientId := crypto.Sha3256(publicKeyBytes)
 		invalidCreationDate := -1
 
 		wallet, resp, err := apiClient.V1ClientPut(
@@ -72,7 +71,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		publicKeyBytes, err := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
 		require.NotNil(t, err)
 
-		clientId := encryption.Hash(publicKeyBytes)
+		clientId := crypto.Sha3256(publicKeyBytes)
 
 		wallet, resp, err := apiClient.V1ClientPut(
 			model.ClientPutRequest{

@@ -14,30 +14,8 @@ func TestCreateAllocation(t *testing.T) {
 	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
-
-		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:          wallet,
-				ToClientID:      client.FaucetSmartContractAddress,
-				TransactionData: model.NewFaucetTransactionData()},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, faucetTransactionPutResponse)
-
-		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			client.HttpOkStatus,
-			client.TxSuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, faucetTransactionGetConfirmationResponse)
+		wallet := apiClient.RegisterWalletWrapper(t)
+		apiClient.ExecuteFaucetWrapper(t, wallet)
 
 		scRestGetAllocationBlobbersResponse, resp, err := apiClient.V1SCRestGetAllocationBlobbers(
 			&model.SCRestGetAllocationBlobbersRequest{

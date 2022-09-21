@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetScState(t *testing.T) {
+func TestGetSCState(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {

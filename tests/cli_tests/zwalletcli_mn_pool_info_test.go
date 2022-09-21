@@ -36,7 +36,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      miner01ID,
+			"id": miner01ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
@@ -64,7 +64,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      sharder01ID,
+			"id": sharder01ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)

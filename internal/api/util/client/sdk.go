@@ -9,15 +9,15 @@ import (
 )
 
 type SDKClient struct {
-	networkEntrypoint string
+	blockWorker string
 }
 
-func NewSDKClient(networkEntrypoint string) *SDKClient {
+func NewSDKClient(blockWorker string) *SDKClient {
 	sdkClient := &SDKClient{
-		networkEntrypoint: networkEntrypoint}
+		blockWorker: blockWorker}
 
 	conf.InitClientConfig(&conf.Config{
-		BlockWorker:             networkEntrypoint,
+		BlockWorker:             blockWorker,
 		SignatureScheme:         crypto.BLS0Chain,
 		MinSubmit:               50,
 		MinConfirmation:         50,
@@ -30,12 +30,12 @@ func NewSDKClient(networkEntrypoint string) *SDKClient {
 func (c *SDKClient) SetWallet(wallet *model.Wallet) {
 	err := sdk.InitStorageSDK(
 		wallet.String(),
-		c.networkEntrypoint,
+		c.blockWorker,
 		"",
 		crypto.BLS0Chain,
 		nil,
 		int64(wallet.Nonce))
 	if err != nil {
-		log.Fatalln(ErrInitStorageSDK)
+		log.Fatalln(ErrInitStorageSDK, err)
 	}
 }
