@@ -1,10 +1,10 @@
-package util
+package endpoint
 
 import (
 	"encoding/json"
 	"testing"
 
-	resty "github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2" //nolint
 )
 
 type Zerochain struct {
@@ -13,18 +13,18 @@ type Zerochain struct {
 	restClient resty.Client //nolint
 }
 
-type CallNode func(node string) (*resty.Response, error)
+type CallNode func(node string) (*resty.Response, error) // nolint
 type ConsensusMetFunction func(response *resty.Response, resolvedObject interface{}) bool
 
 func ConsensusByHttpStatus(expectedStatus string) ConsensusMetFunction {
-	return func(response *resty.Response, resolvedObject interface{}) bool {
+	return func(response *resty.Response, resolvedObject interface{}) bool { //nolint
 		return response.Status() == expectedStatus
 	}
 }
 
-func (z *Zerochain) Init(config Config) {
+func (z *Zerochain) Init(networkEntrypoint string) {
 	z.restClient = *resty.New() //nolint
-	resp, err := z.restClient.R().Get(config.NetworkEntrypoint)
+	resp, err := z.restClient.R().Get(networkEntrypoint)
 	if err != nil {
 		panic("0dns call failed!: encountered error [" + err.Error() + "]")
 	}
@@ -40,7 +40,7 @@ func (z *Zerochain) Init(config Config) {
 }
 
 func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
-	getFromMiner := func(miner string) (*resty.Response, error) {
+	getFromMiner := func(miner string) (*resty.Response, error) { //nolint
 		return z.GetFromMiner(t, miner, endpoint, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Miners, getFromMiner, targetObject, consensusMet)
@@ -67,7 +67,7 @@ func (z *Zerochain) GetFromMiner(t *testing.T, miner, endpoint string, targetObj
 }
 
 func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
-	postToMiner := func(miner string) (*resty.Response, error) {
+	postToMiner := func(miner string) (*resty.Response, error) { //nolint
 		return z.PostToMiner(t, miner, endpoint, body, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Miners, postToMiner, targetObject, consensusMet)
@@ -75,15 +75,91 @@ func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet Con
 
 func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
 	resp, err := z.restClient.R().SetBody(body).Post(miner + endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.IsError() {
+		t.Log("POST on miner [" + miner + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	}
+
+	t.Log("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+	err = json.Unmarshal(resp.Body(), targetObject)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (z *Zerochain) PostToShardersWithFormData(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, formData map[string]string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
+	postToSharder := func(sharder string) (*resty.Response, error) { //nolint
+		return z.PostToSharder(t, sharder, endpoint, formData, body, targetObject)
+	}
+	return z.executeWithConsensus(t, z.Sharders, postToSharder, targetObject, consensusMet)
+}
+
+func (z *Zerochain) PostToSharder(t *testing.T, sharder, endpoint string, formData map[string]string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
+	resp, err := z.restClient.R().SetFormData(formData).SetBody(body).Post(sharder + endpoint)
 
 	if resp != nil && resp.IsError() {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		t.Logf("POST on sharder [" + sharder + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
 		return resp, nil
 	} else if err != nil {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		t.Logf("POST on sharder [" + sharder + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
 		return resp, err
 	} else {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		t.Logf("POST on sharder [" + sharder + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+
+		if unmarshalError != nil {
+			return resp, unmarshalError
+		}
+
+		return resp, nil
+	}
+}
+
+func (z *Zerochain) PostToBlobber(t *testing.T, blobber, endpoint string, headers, formData map[string]string, body []byte, targetObject interface{}) (*resty.Response, error) { //nolint
+	resp, err := z.restClient.R().
+		SetHeaders(headers).
+		SetFormData(formData).
+		SetBody(body).
+		Post(blobber + endpoint)
+
+	if resp != nil && resp.IsError() {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	} else {
+		t.Logf("POST on blobber [" + blobber + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
+
+		if unmarshalError != nil {
+			return resp, unmarshalError
+		}
+
+		return resp, nil
+	}
+}
+
+func (z *Zerochain) GetFromBlobber(t *testing.T, blobber, endpoint string, headers, params map[string]string, targetObject interface{}) (*resty.Response, error) { //nolint
+	resp, err := z.restClient.R().
+		SetHeaders(headers).
+		SetQueryParams(params).
+		Get(blobber + endpoint)
+
+	if resp != nil && resp.IsError() {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		return resp, nil
+	} else if err != nil {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		return resp, err
+	} else {
+		t.Logf("GET on blobber [" + blobber + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
 		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
 
 		if unmarshalError != nil {
@@ -95,7 +171,7 @@ func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body inter
 }
 
 func (z *Zerochain) GetFromSharders(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
-	getFromSharder := func(sharder string) (*resty.Response, error) {
+	getFromSharder := func(sharder string) (*resty.Response, error) { //nolint
 		return z.GetFromSharder(t, sharder, endpoint, targetObject)
 	}
 	return z.executeWithConsensus(t, z.Sharders, getFromSharder, targetObject, consensusMet)
@@ -153,10 +229,10 @@ func (z *Zerochain) getHealthyNodes(nodes []string) []string {
 	return healthyNodes
 }
 
-func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMet ConsensusMetFunction) (*resty.Response, error) {
+func (z *Zerochain) executeWithConsensus(t *testing.T, nodes []string, callNode CallNode, targetObject interface{}, consensusMet ConsensusMetFunction) (*resty.Response, error) { //nolint
 	errors := make([]error, 0)
-	responsesAsExpected := make([]*resty.Response, 0)
-	responsesNotAsExpected := make([]*resty.Response, 0)
+	responsesAsExpected := make([]*resty.Response, 0)    //nolint
+	responsesNotAsExpected := make([]*resty.Response, 0) //nolint
 
 	for _, node := range nodes {
 		httpResponse, httpError := callNode(node)
