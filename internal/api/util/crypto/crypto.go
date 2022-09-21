@@ -87,10 +87,3 @@ func HashOfFileSHA256(src *os.File) (string, error) {
 
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
-
-//func blankIfNil(obj interface{}) string {
-//	if obj == nil {
-//		return ""
-//	}
-//	return fmt.Sprintf("%v", obj)
-//}
