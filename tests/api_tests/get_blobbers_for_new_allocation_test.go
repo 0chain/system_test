@@ -2,9 +2,10 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/endpoint"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/go-resty/resty/v2" //nolint

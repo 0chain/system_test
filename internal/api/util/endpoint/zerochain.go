@@ -75,23 +75,22 @@ func (z *Zerochain) PostToMiners(t *testing.T, endpoint string, consensusMet Con
 
 func (z *Zerochain) PostToMiner(t *testing.T, miner, endpoint string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint
 	resp, err := z.restClient.R().SetBody(body).Post(miner + endpoint)
+	if err != nil {
+		return nil, err
+	}
 
-	if resp != nil && resp.IsError() {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
-		return resp, nil
-	} else if err != nil {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
-		return resp, err
-	} else {
-		t.Logf("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
-		unmarshalError := json.Unmarshal(resp.Body(), targetObject)
-
-		if unmarshalError != nil {
-			return resp, unmarshalError
-		}
-
+	if resp.IsError() {
+		t.Log("POST on miner [" + miner + "] endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
 		return resp, nil
 	}
+
+	t.Log("POST on miner [" + miner + "] endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+	err = json.Unmarshal(resp.Body(), targetObject)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (z *Zerochain) PostToShardersWithFormData(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, formData map[string]string, body interface{}, targetObject interface{}) (*resty.Response, error) { //nolint

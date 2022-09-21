@@ -2,26 +2,31 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/sha1"
-	"crypto/sha256"
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
-	"io"
-	"os"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 	"sync"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/lithammer/shortuuid/v3" //nolint
-	"github.com/tyler-smith/go-bip39"   //nolint
+	"github.com/tyler-smith/go-bip39" //nolint
 )
 
 var blsLock sync.Mutex
 
-const BLS0Chain = "bls0chain"
+func init() {
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	err := bls.Init(bls.CurveFp254BNb)
+
+	if err != nil {
+		panic(err)
+	}
+}
 
 func GenerateMnemonic(t *testing.T) string {
 	entropy, _ := bip39.NewEntropy(256)       //nolint
@@ -32,10 +37,13 @@ func GenerateMnemonic(t *testing.T) string {
 }
 
 func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
+	defer handlePanic(t)
 	blsLock.Lock()
-	defer blsLock.Unlock()
+	defer func() {
+		blsLock.Unlock()
+		bls.SetRandFunc(nil)
+	}()
 
-	_ = bls.Init(bls.CurveFp254BNb)
 	seed := bip39.NewSeed(mnemonic, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
 	bls.SetRandFunc(random)
@@ -48,37 +56,19 @@ func GenerateKeys(t *testing.T, mnemonic string) *model.KeyPair {
 	publicKeyHex := publicKey.SerializeToHexStr()
 
 	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
-	bls.SetRandFunc(nil)
 
 	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
 
-func NewConnectionID() string {
-	return shortuuid.New() //nolint
-}
+func SignTransaction(t *testing.T, request *model.Transaction, pair *model.KeyPair) {
+	defer handlePanic(t)
+	blsLock.Lock()
+	defer blsLock.Unlock()
 
-func HashOfFileSHA1(src *os.File) (string, error) {
-	h := sha1.New()
-	if _, err := io.Copy(h, src); err != nil {
-		return "", err
-	}
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return "", err
-	}
+	hashToSign, err := hex.DecodeString(request.Hash)
+	require.NoError(t, err, "Error on hash")
 
-	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-func HashOfFileSHA256(src *os.File) (string, error) {
-	h := sha256.New()
-	if _, err := io.Copy(h, src); err != nil {
-		return "", err
-	}
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
+	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
 }
 
 func HashTransaction(request *model.Transaction) {
@@ -87,14 +77,17 @@ func HashTransaction(request *model.Transaction) {
 		blankIfNil(request.ClientId) + ":" +
 		blankIfNil(request.ToClientId) + ":" +
 		blankIfNil(request.TransactionValue) + ":" +
-		encryption.Hash(request.TransactionData)
+		Sha3256([]byte(request.TransactionData))
 
-	request.Hash = encryption.Hash(hashData)
+	request.Hash = Sha3256([]byte(hashData))
 }
 
-func SignTransaction(request *model.Transaction, pair *model.KeyPair) {
-	hashToSign, _ := hex.DecodeString(request.Hash)
-	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
+func Sha3256(publicKeyBytes []byte) string {
+	sha3256 := sha3.New256()
+	sha3256.Write(publicKeyBytes)
+	var buffer []byte
+	clientId := hex.EncodeToString(sha3256.Sum(buffer))
+	return clientId
 }
 
 func blankIfNil(obj interface{}) string {
@@ -102,4 +95,10 @@ func blankIfNil(obj interface{}) string {
 		return ""
 	}
 	return fmt.Sprintf("%v", obj)
+}
+
+func handlePanic(t *testing.T) {
+	if err := recover(); err != nil {
+		t.Errorf("panic occurred: ", err)
+	}
 }
