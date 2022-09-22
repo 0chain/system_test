@@ -14,7 +14,7 @@ import (
 )
 
 func TestBlobberTokenAccounting(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	t.Parallel()
 
 	t.Run("Token accounting of added blobber as additional parity shard to allocation, should work", func(t *testing.T) {

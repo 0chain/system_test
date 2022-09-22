@@ -477,3 +477,13 @@ type BlobberDownloadFileRequest struct {
 
 type BlobberDownloadFileResponse struct {
 }
+
+type GetTotalStoredDataResponse int
+
+type GetTotalBlobberCapacityResponse int
+
+type GetAverageWritePriceResponse int
+
+type GetTotalMintedResponse int
+
+type GetTotalTotalChallengesResponse int

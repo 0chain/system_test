@@ -32,6 +32,11 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetTotalTotalChallenges    = "/v1/screst/:sc_address/total-total-challenges"
+	GetTotalMinted             = "/v1/screst/:sc_address/total-minted"
+	GetAverageWritePrice       = "/v1/screst/:sc_address/average-write-price"
+	GetTotalBlobberCapacity    = "/v1/screst/:sc_address/total-blobber-capacity"
+	GetTotalStoredData         = "/v1/screst/:sc_address/total-stored-data"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -568,6 +573,101 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 		SharderServiceProvider)
 
 	return scStateGetResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalStoredData(requiredStatusCode int) (*model.GetTotalStoredDataResponse, *resty.Response, error) { //nolint
+	var getTotalStoredDataResponse *model.GetTotalStoredDataResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalStoredData).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalStoredDataResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalStoredDataResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetAverageWritePrice(requiredStatusCode int) (*model.GetAverageWritePriceResponse, *resty.Response, error) { //nolint
+	var getAverageWritePriceResponse *model.GetAverageWritePriceResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetAverageWritePrice).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getAverageWritePriceResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getAverageWritePriceResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalBlobberCapacity(requiredStatusCode int) (*model.GetTotalBlobberCapacityResponse, *resty.Response, error) { //nolint
+	var getTotalBlobberCapacityResponse *model.GetTotalBlobberCapacityResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalBlobberCapacity).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalBlobberCapacityResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalBlobberCapacityResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalMinted(requiredStatusCode int) (*model.GetTotalMintedResponse, *resty.Response, error) { //nolint
+	var getTotalMintedResponse *model.GetTotalMintedResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalMinted).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalMintedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalMintedResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalTotalChallenges(requiredStatusCode int) (*model.GetTotalMintedResponse, *resty.Response, error) { //nolint
+	var getTotalTotalChallengesResponse *model.GetTotalMintedResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalTotalChallenges).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalTotalChallengesResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalTotalChallengesResponse, resp, err
 }
 
 ////Uploads a new file to blobber
