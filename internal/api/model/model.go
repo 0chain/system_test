@@ -3,13 +3,14 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/transaction"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/core/transaction"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
@@ -432,6 +433,15 @@ type BlobberGetFileReferencePathRequest struct {
 
 type BlobberGetFileReferencePathResponse struct {
 	sdk.ReferencePathResult
+}
+
+type BlobberGetFileRefsRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID string
+	refType                                                 string
+}
+
+type BlobberGetFileRefsResponse struct {
+	sdk.Ref
 }
 
 func (w *Wallet) MustConvertDateCreatedToInt() int {

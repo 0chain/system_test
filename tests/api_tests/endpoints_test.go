@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
-	resty "github.com/go-resty/resty/v2" //nolint
 	"io"
 	"mime/multipart"
 	"path/filepath"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/endpoint"
+	resty "github.com/go-resty/resty/v2" //nolint
 
 	"github.com/0chain/system_test/internal/api/model"
 )
@@ -96,7 +97,7 @@ func v1SharderGetSCState(t *testing.T, SCAddress, key string, consensusCategoris
 	return stats, httpResponse, httpError
 }
 
-//Uploads a new file to blobber
+// Uploads a new file to blobber
 func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberUploadFileResponse
 
@@ -150,7 +151,7 @@ func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUpl
 	return stats, httpResponse, httpError
 }
 
-//Queries all the files in certain allocation
+// Queries all the files in certain allocation
 func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberListFilesResponse
 
@@ -176,9 +177,32 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 	return stats, httpResponse, httpError
 }
 
-//Queries files in certain allocation
+func v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest) (*model.BlobberGetFileRefsRequest, *resty.Response, error) { //nolint
+	var stats *model.BlobberGetFileRefsRequest
+
+	params := map[string]string{
+		"paths": fmt.Sprintf("[\"%s\"]", "/"),
+	}
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
+		"X-App-Client-Key":       blobberGetFileRefsRequest.ClientKey,
+		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
+	}
+
+	httpResponse, httpError := zeroChain.GetFromBlobber(t,
+		blobberGetFileRefsRequest.URL,
+		filepath.Join("/v1/file/refs", blobberGetFileRefsRequest.AllocationID),
+		headers,
+		params,
+		&stats)
+
+	return stats, httpResponse, httpError
+}
+
+// Queries files in certain allocation
 func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) { //nolint
-	var stats *model.BlobberGetFileReferencePathResponse
+	var stats *model.BlobberGetFileRefsResponse
 
 	params := map[string]string{
 		"paths": fmt.Sprintf("[\"%s\"]", "/"),
@@ -200,7 +224,7 @@ func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequ
 	return stats, httpResponse, httpError
 }
 
-//Commits all the actions in a certain opened connection
+// Commits all the actions in a certain opened connection
 func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberCommitConnectionResponse
 
@@ -233,7 +257,7 @@ func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest mode
 	return stats, httpResponse, httpError
 }
 
-//Commits all the actions in a certain opened connection
+// Commits all the actions in a certain opened connection
 func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberDownloadFileResponse
 
