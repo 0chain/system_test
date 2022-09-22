@@ -14,10 +14,7 @@ func TestRemoveBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
+		executeFaucet(t, registeredWallet, keyPair)
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
 		require.NotNil(t, blobberRequirements)

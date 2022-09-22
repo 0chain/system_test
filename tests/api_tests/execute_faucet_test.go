@@ -21,12 +21,10 @@ func TestExecuteFaucet(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		executeFaucet(t, registeredWallet, keyPair)
 
 		balance := getBalance(t, registeredWallet.ClientID)
+
 		require.Equal(t, tokenomics.IntToZCN(1), balance.Balance)
 	})
 }
@@ -116,7 +114,10 @@ func executeFaucet(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair) (
 		TransactionNonce: wallet.Nonce + 1,
 	}
 	faucetTransaction := executeTransaction(t, &faucetRequest, keyPair)
+	require.NotNil(t, faucetTransaction)
 	confirmation, _ := confirmTransaction(t, wallet, faucetTransaction.Entity, 5*time.Minute)
+
+	require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
 	return faucetTransaction, confirmation
 }

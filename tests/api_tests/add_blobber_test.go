@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
@@ -20,10 +19,7 @@ func TestAddBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
+		executeFaucet(t, registeredWallet, keyPair)
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 2, 1, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
 		require.NotNil(t, blobberRequirements)
@@ -59,10 +55,7 @@ func TestAddBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
+		executeFaucet(t, registeredWallet, keyPair)
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
 		require.NotNil(t, blobberRequirements)
@@ -94,10 +87,7 @@ func TestAddBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
+		executeFaucet(t, registeredWallet, keyPair)
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
 		require.NotNil(t, blobberRequirements)
@@ -129,10 +119,7 @@ func TestAddBlobber(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
+		executeFaucet(t, registeredWallet, keyPair)
 		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
 		require.NotNil(t, availableBlobbers)
 		require.NotNil(t, blobberRequirements)
@@ -198,7 +185,7 @@ func updateAllocation(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair
 }
 
 //Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
-func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*blockchain.StorageNode) string {
+func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		var found bool
 		for _, usedStorageNode := range usedStorageNodes {
@@ -214,7 +201,7 @@ func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes
 }
 
 //Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
-func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*blockchain.StorageNode) string {
+func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		for _, usedStorageNode := range usedStorageNodes {
 			if usedStorageNode.ID == availableStorageNodeID {
@@ -225,16 +212,16 @@ func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNod
 	return ""
 }
 
-func getBlobberURL(blobberID string, blobbers []*blockchain.StorageNode) string {
+func getBlobberURL(blobberID string, blobbers []*model.StorageNode) string {
 	for _, blobber := range blobbers {
 		if blobber.ID == blobberID {
-			return blobber.Baseurl
+			return blobber.BaseURL
 		}
 	}
 	return ""
 }
 
-func isBlobberExist(blobberID string, blobbers []*blockchain.StorageNode) bool {
+func isBlobberExist(blobberID string, blobbers []*model.StorageNode) bool {
 	return getBlobberURL(blobberID, blobbers) != ""
 }
 

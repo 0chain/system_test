@@ -4,7 +4,6 @@ package api_tests
 
 import (
 	"encoding/hex"
-	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"testing"
 
@@ -26,7 +25,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		mnemonic := crypto.GenerateMnemonic(t)
 		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
 		publicKeyBytes, _ := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
-		expectedClientId := encryption.Hash(publicKeyBytes)
+		expectedClientId := crypto.Sha3256(publicKeyBytes)
 		invalidCreationDate := -1
 
 		walletRequest := model.ClientPutWalletRequest{Id: expectedClientId, PublicKey: expectedKeyPair.PublicKey.SerializeToHexStr(), CreationDate: &invalidCreationDate}
@@ -62,7 +61,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		mnemonic := crypto.GenerateMnemonic(t)
 		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
 		publicKeyBytes, _ := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
-		clientId := encryption.Hash(publicKeyBytes)
+		clientId := crypto.Sha3256(publicKeyBytes)
 		walletRequest := model.ClientPutWalletRequest{Id: clientId, PublicKey: "invalid"}
 
 		walletResponse, httpResponse, err := v1ClientPut(t, walletRequest, endpoint.ConsensusByHttpStatus("400 Bad Request"))

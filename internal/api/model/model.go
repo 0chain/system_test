@@ -1,5 +1,6 @@
 package model
 
+// DO NOT IMPORT GOSDK! THE MODELS SHOULD BE DECLARED EXPLICITLY HERE TO DETECT ANY BREAKING CHANGES
 import (
 	"encoding/json"
 	"fmt"
@@ -232,7 +233,46 @@ type MerkleTreePath struct {
 }
 
 type Allocation struct {
-	sdk.Allocation
+	ID             string           `json:"id"`
+	Tx             string           `json:"tx"`
+	DataShards     int              `json:"data_shards"`
+	ParityShards   int              `json:"parity_shards"`
+	Size           int64            `json:"size"`
+	Expiration     int64            `json:"expiration_date"`
+	Owner          string           `json:"owner_id"`
+	OwnerPublicKey string           `json:"owner_public_key"`
+	Payer          string           `json:"payer_id"`
+	Blobbers       []*StorageNode   `json:"blobbers"`
+	Stats          *AllocationStats `json:"stats"`
+	TimeUnit       time.Duration    `json:"time_unit"`
+	IsImmutable    bool             `json:"is_immutable"`
+
+	BlobberDetails []*BlobberAllocation `json:"blobber_details"`
+
+	ReadPriceRange  PriceRange `json:"read_price_range"`
+	WritePriceRange PriceRange `json:"write_price_range"`
+
+	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
+	StartTime               int64         `json:"start_time"`
+	Finalized               bool          `json:"finalized,omitempty"`
+	Canceled                bool          `json:"canceled,omitempty"`
+	MovedToChallenge        int64         `json:"moved_to_challenge,omitempty"`
+	MovedBack               int64         `json:"moved_back,omitempty"`
+	MovedToValidators       int64         `json:"moved_to_validators,omitempty"`
+	Curators                []string      `json:"curators"`
+}
+
+type BlobberAllocation struct {
+	BlobberID       string `json:"blobber_id"`
+	Size            int64  `json:"size"`
+	Terms           Terms  `json:"terms"`
+	MinLockDemand   int64  `json:"min_lock_demand"`
+	Spent           int64  `json:"spent"`
+	Penalty         int64  `json:"penalty"`
+	ReadReward      int64  `json:"read_reward"`
+	Returned        int64  `json:"returned"`
+	ChallengeReward int64  `json:"challenge_reward"`
+	FinalReward     int64  `json:"final_reward"`
 }
 
 type Timestamp int64
@@ -321,12 +361,11 @@ type ClientPutWalletResponse struct {
 }
 
 type Wallet struct {
-	ClientID    string         `json:"client_id"`
-	ClientKey   string         `json:"client_key"`
-	Keys        []*sys.KeyPair `json:"keys"`
-	Mnemonics   string         `json:"mnemonics"`
-	Version     string         `json:"version"`
-	DateCreated string         `json:"date_created"`
+	ClientID    string `json:"client_id"`
+	ClientKey   string `json:"client_key"`
+	Mnemonics   string `json:"mnemonics"`
+	Version     string `json:"version"`
+	DateCreated string `json:"date_created"`
 	Nonce       int
 }
 
@@ -434,7 +473,7 @@ type BlobberGetFileReferencePathResponse struct {
 	sdk.ReferencePathResult
 }
 
-func (w *Wallet) MustConvertDateCreatedToInt() int {
+func (w *Wallet) ConvertDateCreatedToInt() int {
 	result, err := strconv.Atoi(w.DateCreated)
 	if err != nil {
 		log.Fatalln(err)
