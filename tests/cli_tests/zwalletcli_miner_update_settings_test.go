@@ -3,11 +3,16 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	apimodel "github.com/0chain/system_test/internal/api/model"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -507,4 +512,28 @@ func minerInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]st
 
 func getCurrentRound(t *testing.T) int64 {
 	return getLatestFinalizedBlock(t).Round
+}
+
+func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
+	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
+}
+
+func getLatestFinalizedBlock(t *testing.T) *apimodel.LatestFinalizedBlock {
+	sharders := getShardersList(t)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+
+	res, err := apiGetLatestFinalized(sharderBaseUrl)
+	require.Nil(t, err, "Error retrieving latest block")
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get latest block: %d", res.StatusCode)
+	require.NotNil(t, res.Body, "Latest block API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var block apimodel.LatestFinalizedBlock
+	err = json.Unmarshal(resBody, &block)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return &block
 }
