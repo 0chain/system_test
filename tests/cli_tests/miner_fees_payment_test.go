@@ -69,7 +69,7 @@ func TestMinerAndSharderFeesPayment(t *testing.T) {
 		expectedSharderBlockRewards := numberOfRounds * sharderBlockRewards / int64(len(beforeSharders.Nodes))
 		totalFees := float64(history.TotalFees() / int64(len(beforeSharders.Nodes)))
 		expectedSharderFees := totalFees * (1 - minerScConfig["share_ratio"])
-		expectRewards := math.Round(float64(expectedSharderBlockRewards) + expectedSharderFees)
+		expectRewards := int64(math.Round(float64(expectedSharderBlockRewards) + expectedSharderFees))
 		for i, beforeSharder := range beforeSharders.Nodes {
 			actualReward := afterSharders.Nodes[i].Reward - beforeSharder.Reward
 			require.EqualValues(t, expectRewards, actualReward)
