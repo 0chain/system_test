@@ -719,6 +719,7 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		})
+
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
 			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
