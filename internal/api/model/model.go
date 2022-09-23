@@ -436,12 +436,10 @@ type BlobberGetFileReferencePathResponse struct {
 }
 
 type BlobberGetFileRefsRequest struct {
-	URL, ClientID, ClientKey, ClientSignature, AllocationID string
-	refType                                                 string
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType string
 }
 
 type BlobberGetFileRefsResponse struct {
-	sdk.Ref
 }
 
 func (w *Wallet) MustConvertDateCreatedToInt() int {

@@ -177,8 +177,8 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 	return stats, httpResponse, httpError
 }
 
-func v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest) (*model.BlobberGetFileRefsRequest, *resty.Response, error) { //nolint
-	var stats *model.BlobberGetFileRefsRequest
+func v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest) (*model.BlobberGetFileRefsResponse, *resty.Response, error) { //nolint
+	var stats *model.BlobberGetFileRefsResponse
 
 	params := map[string]string{
 		"paths": fmt.Sprintf("[\"%s\"]", "/"),
@@ -202,7 +202,7 @@ func v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberG
 
 // Queries files in certain allocation
 func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) { //nolint
-	var stats *model.BlobberGetFileRefsResponse
+	var stats *model.BlobberGetFileReferencePathResponse
 
 	params := map[string]string{
 		"paths": fmt.Sprintf("[\"%s\"]", "/"),
