@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -52,17 +53,21 @@ func TestMinerAndSharderFeesPayment(t *testing.T) {
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
 		minerBlockRewardPerRound, sharderBlockRewards := blockRewards(t, startRound, minerScConfig)
+		fmt.Println("miner block rewards", minerBlockRewardPerRound, "sharder", sharderBlockRewards)
 
 		for i, beforeMiner := range beforeMiners.Nodes {
 			id := beforeMiner.ID
 			timesWon := history.TimesWonBestMiner(id)
+			history.AccountingMiner(id)
 			expectedBlockRewards := timesWon * minerBlockRewardPerRound
 			recordedFees := history.TotalMinerFees(id)
 			expectedFees := int64(float64(recordedFees) * minerScConfig["share_ratio"])
 			expectedRewards := expectedBlockRewards + expectedFees
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
+			fmt.Println("expected rewards. before",
+				beforeMiner.Reward, "after", afterMiners.Nodes[i].Reward, "difference", expectedRewards-actualReward, "miner id", id)
 			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards. before",
-				beforeMiner.Reward, "after", afterMiners.Nodes[i].Reward)
+				beforeMiner.Reward, "after", afterMiners.Nodes[i].Reward, "difference", expectedRewards-actualReward, "miner id", id)
 		}
 
 		numberOfRounds := endRound - startRound
