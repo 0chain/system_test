@@ -26,7 +26,7 @@ func TestMinerAndSharderFeesPayment(t *testing.T) {
 			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
 
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 5)
 
 		afterMiners := getSortedMiners(t, sharderUrl)
 		require.EqualValues(t, len(afterMiners.Nodes), len(beforeMiners.Nodes), "miner count changed during test")
@@ -55,14 +55,14 @@ func TestMinerAndSharderFeesPayment(t *testing.T) {
 
 		for i, beforeMiner := range beforeMiners.Nodes {
 			id := beforeMiner.ID
-			history.AccountingMiner(id)
 			timesWon := history.TimesWonBestMiner(id)
 			expectedBlockRewards := timesWon * minerBlockRewardPerRound
 			recordedFees := history.TotalMinerFees(id)
 			expectedFees := int64(float64(recordedFees) * minerScConfig["share_ratio"])
 			expectedRewards := expectedBlockRewards + expectedFees
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
-			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
+			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards. before",
+				beforeMiner.Reward, "after", afterMiners.Nodes[i].Reward)
 		}
 
 		numberOfRounds := endRound - startRound
