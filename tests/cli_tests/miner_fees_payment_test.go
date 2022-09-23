@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -11,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerFeesPayment(t *testing.T) {
-	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
+func TestMinerAndSharderFeesPayment(t *testing.T) {
+	t.Run("Miner and sharder share of fee payments and rewards", func(t *testing.T) {
 		clientId := initialiseTest(t)
 		sharderUrl := getSharderUrl(t)
 
@@ -63,11 +62,6 @@ func TestMinerFeesPayment(t *testing.T) {
 			expectedFees := int64(float64(recordedFees) * minerScConfig["share_ratio"])
 			expectedRewards := expectedBlockRewards + expectedFees
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
-			fmt.Println()
-			fmt.Println("block rewards", expectedBlockRewards, "recorded fees", recordedFees, "share", minerScConfig["share_ratio"])
-			fmt.Println("expected", expectedRewards, "actual", actualReward, "difference", actualReward-expectedRewards)
-			fmt.Println("recoded fees", recordedFees, "expected block rewards", expectedBlockRewards, "timesWon", timesWon)
-			fmt.Println()
 			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
 		}
 
