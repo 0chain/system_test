@@ -10,6 +10,7 @@ import (
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/lithammer/shortuuid/v3" //nolint
 	"github.com/tyler-smith/go-bip39"   //nolint
+	"golang.org/x/crypto/sha3"
 	"io"
 	"log"
 	"os"
@@ -86,4 +87,11 @@ func HashOfFileSHA256(src *os.File) (string, error) {
 	}
 
 	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func Sha3256(src []byte) string {
+	sha3256 := sha3.New256()
+	sha3256.Write(src)
+	var buffer []byte
+	return hex.EncodeToString(sha3256.Sum(buffer))
 }

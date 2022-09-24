@@ -487,3 +487,33 @@ type GetAverageWritePriceResponse int
 type GetTotalMintedResponse int
 
 type GetTotalTotalChallengesResponse int
+
+type GetTotalStakedResponse int
+
+type GetGraphBlobberInactiveRoundsRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberInactiveRoundsResponse []int
+
+type GetGraphBlobberChallengesCompletedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesCompletedResponse []int
+
+type GetGraphBlobberChallengesPassedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesPassedResponse []int
+
+type GetGraphBlobberServiceChargeRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberServiceChargeResponse []int

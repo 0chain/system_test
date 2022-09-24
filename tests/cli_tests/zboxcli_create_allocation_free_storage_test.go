@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
 	"log"
@@ -370,13 +369,13 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 
 	txn.TransactionData = string(snBytes)
 
-	txn.Hash = encryption.Hash(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+	txn.Hash = crypto.Sha3256(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		txn.CreationDate,
 		txn.TransactionNonce,
 		txn.ClientId,
 		txn.ToClientId,
 		txn.TransactionValue,
-		encryption.Hash(txn.TransactionData)))
+		crypto.Sha3256(txn.TransactionData)))
 
 	hashToSign, err := hex.DecodeString(txn.Hash)
 	if err != nil {

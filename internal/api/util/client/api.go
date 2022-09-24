@@ -4,14 +4,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
+	"github.com/stretchr/testify/require"
 	"log"
 	"strconv"
+	"testing"
 	"time"
 
 	resty "github.com/go-resty/resty/v2"
@@ -32,23 +33,27 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetTotalTotalChallenges    = "/v1/screst/:sc_address/total-total-challenges"
-	GetTotalMinted             = "/v1/screst/:sc_address/total-minted"
-	GetAverageWritePrice       = "/v1/screst/:sc_address/average-write-price"
-	GetTotalBlobberCapacity    = "/v1/screst/:sc_address/total-blobber-capacity"
-	GetTotalStoredData         = "/v1/screst/:sc_address/total-stored-data"
-	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
-	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus             = "/v1/miner/get/stats"
-	SharderGetStatus           = "/v1/sharder/get/stats"
-	SCStateGet                 = "/v1/scstate/get"
-	SCRestGetAllocation        = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers          = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats              = "/v1/chain/get/stats"
-	ClientPut                  = "/v1/client/put"
-	TransactionPut             = "/v1/transaction/put"
-	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
-	ClientGetBalance           = "/v1/client/get/balance"
+	GetGraphBlobberServiceCharge       = "/v1/screst/:sc_address/graph-blobber-service-charge"
+	GetGraphBlobberChallengesCompleted = "/v1/screst/:sc_address/graph-blobber-challenges-completed"
+	GetGraphBlobberInactiveRounds      = "/v1/screst/:sc_address/graph-blobber-inactive-rounds"
+	GetTotalTotalChallenges            = "/v1/screst/:sc_address/total-total-challenges"
+	GetTotalMinted                     = "/v1/screst/:sc_address/total-minted"
+	GetAverageWritePrice               = "/v1/screst/:sc_address/average-write-price"
+	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
+	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
+	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
+	SCRestGetOpenChallenges            = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus                     = "/v1/miner/get/stats"
+	SharderGetStatus                   = "/v1/sharder/get/stats"
+	SCStateGet                         = "/v1/scstate/get"
+	SCRestGetAllocation                = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers                  = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                      = "/v1/chain/get/stats"
+	ClientPut                          = "/v1/client/put"
+	TransactionPut                     = "/v1/transaction/put"
+	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
+	ClientGetBalance                   = "/v1/client/get/balance"
+	GetNetworkDetails                  = "/network"
 )
 
 // Contains all used service providers
@@ -125,7 +130,9 @@ func (c *APIClient) getHealthyShaders(shaders []string) []string {
 }
 
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
-	resp, err := c.httpClient.R().Get(networkEntrypoint)
+	url := NewURLBuilder().MustShiftParse(networkEntrypoint).SetPath(GetNetworkDetails).String()
+
+	resp, err := c.httpClient.R().Get(url)
 	if err != nil {
 		return ErrNetworkHealth
 	}
@@ -203,10 +210,11 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 	for _, serviceProvider := range serviceProviders {
 		formattedURL := urlBuilder.MustShiftParse(serviceProvider).String()
 
+		fmt.Println(formattedURL)
+
 		newResp, err := c.executeForServiceProvider(formattedURL, executionRequest, method)
 		if err != nil {
 			errors = append(errors, err)
-			log.Println(err)
 			continue
 		}
 
@@ -230,11 +238,11 @@ func selectMostFrequentError(errors []error) error {
 	var maxMatch int
 	var result error
 
-	for _, error := range errors {
-		frequencyCounters[error]++
-		if frequencyCounters[error] > maxMatch {
-			maxMatch = frequencyCounters[error]
-			result = error
+	for _, err := range errors {
+		frequencyCounters[err]++
+		if frequencyCounters[err] > maxMatch {
+			maxMatch = frequencyCounters[err]
+			result = err
 		}
 	}
 
@@ -254,7 +262,7 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	}
 
 	if clientPutRequest.ClientID == "" {
-		clientPutRequest.ClientID = encryption.Hash(publicKeyBytes)
+		clientPutRequest.ClientID = crypto.Sha3256(publicKeyBytes)
 	}
 
 	if clientPutRequest.ClientKey == "" {
@@ -300,13 +308,11 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		log.Fatalln(err)
 	}
 
-	internalTransactionPutRequest.Wallet.IncNonce()
-
 	transactionPutRequest := model.TransactionPutRequest{
 		ClientId:         internalTransactionPutRequest.Wallet.ClientID,
 		PublicKey:        internalTransactionPutRequest.Wallet.ClientKey,
 		ToClientId:       internalTransactionPutRequest.ToClientID,
-		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce,
+		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
 		TxnOutputHash:    TxOutput,
 		TransactionValue: *TxValue,
 		TransactionType:  TxType,
@@ -320,13 +326,13 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = encryption.Hash(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		transactionPutRequest.CreationDate,
 		transactionPutRequest.TransactionNonce,
 		transactionPutRequest.ClientId,
 		transactionPutRequest.ToClientId,
 		transactionPutRequest.TransactionValue,
-		encryption.Hash(transactionPutRequest.TransactionData)))
+		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
 
 	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
 	if err != nil {
@@ -375,7 +381,7 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 			HttpGETMethod,
 			SharderServiceProvider)
 		if err != nil {
-			log.Fatalln(err)
+			return false
 		}
 
 		if resp.StatusCode() != requiredStatusCode {
@@ -383,7 +389,6 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 		}
 
 		if transactionGetConfirmationResponse.Status != requiredTransactionStatus {
-			log.Println(transactionGetConfirmationResponse.Transaction.TransactionOutput)
 			return false
 		}
 
@@ -594,6 +599,25 @@ func (c *APIClient) V1SharderGetTotalStoredData(requiredStatusCode int) (*model.
 	return getTotalStoredDataResponse, resp, err
 }
 
+func (c *APIClient) V1SharderGetTotalStaked(requiredStatusCode int) (*model.GetTotalStakedResponse, *resty.Response, error) { //nolint
+	var getTotalStakedResponse *model.GetTotalStakedResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalStoredData).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalStakedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalStakedResponse, resp, err
+}
+
 func (c *APIClient) V1SharderGetAverageWritePrice(requiredStatusCode int) (*model.GetAverageWritePriceResponse, *resty.Response, error) { //nolint
 	var getAverageWritePriceResponse *model.GetAverageWritePriceResponse
 
@@ -668,6 +692,215 @@ func (c *APIClient) V1SharderGetTotalTotalChallenges(requiredStatusCode int) (*m
 		SharderServiceProvider)
 
 	return getTotalTotalChallengesResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberInactiveRounds(getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint
+	var getGraphBlobberInactiveRoundsResponse *model.GetGraphBlobberInactiveRoundsResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberInactiveRounds).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberInactiveRoundsRequest.DataPoints)).
+		AddParams("id", getGraphBlobberInactiveRoundsRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberInactiveRoundsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberInactiveRoundsResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesCompletedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesCompletedResponse, *resty.Response, error) { //nolint
+	var getGraphBlobberChallengesCompletedResponse *model.GetGraphBlobberChallengesCompletedResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberChallengesCompleted).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesPassedRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallengesPassedRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberChallengesCompletedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberChallengesCompletedResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberChallengesPassed(getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesPassedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesPassedResponse, *resty.Response, error) { //nolint
+	var getGraphBlobberChallengesPassedResponse *model.GetGraphBlobberChallengesPassedResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberChallengesCompleted).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesPassedRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallengesPassedRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberChallengesPassedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberChallengesPassedResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberServiceCharge(getGraphBlobberServiceChargeRequest model.GetGraphBlobberServiceChargeRequest, requiredStatusCode int) (*model.GetGraphBlobberServiceChargeResponse, *resty.Response, error) { //nolint
+	var getGraphBlobberServiceChargeResponse *model.GetGraphBlobberServiceChargeResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberServiceCharge).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberServiceChargeRequest.DataPoints)).
+		AddParams("id", getGraphBlobberServiceChargeRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberServiceChargeResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberServiceChargeResponse, resp, err
+}
+
+// RegisterWalletWrapper does not provide deep test of used components
+func (c *APIClient) RegisterWalletWrapper(t *testing.T) *model.Wallet {
+	t.Log("Register wallet...")
+
+	wallet, resp, err := c.V1ClientPut(model.ClientPutRequest{}, HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return wallet
+}
+
+// ExecuteFaucetWrapper does not provide deep test of used components
+func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
+	t.Log("Execute faucet...")
+
+	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      FaucetSmartContractAddress,
+			TransactionData: model.NewFaucetTransactionData()},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, faucetTransactionPutResponse)
+
+	faucetTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: faucetTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+}
+
+// CreateAllocationWrapper does not provide deep test of used components
+func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse) string {
+	t.Log("Create allocation...")
+
+	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createAllocationTransactionPutResponse)
+
+	createAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: createAllocationTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+
+	return createAllocationTransactionPutResponse.Entity.Hash
+}
+
+// CreateStakePoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateStakePoolWrapper(t *testing.T) {
+	t.Log("Create stake pool...")
+}
+
+// UpdateAllocationWrapper does not provide deep test of used components
+func (c *APIClient) UpdateAllocationWrapper(t *testing.T) {
+	t.Log("Update allocation...")
+}
+
+func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet) model.SCRestGetAllocationBlobbersResponse {
+	t.Log("Get allocation blobbers...")
+
+	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
+		&model.SCRestGetAllocationBlobbersRequest{
+			ClientID:  wallet.ClientID,
+			ClientKey: wallet.ClientKey,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return scRestGetAllocationBlobbersResponse
+}
+
+// GetAllocationWrapper does not provide deep test of used components
+func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *model.SCRestGetAllocationResponse {
+	t.Log("Get allocation...")
+
+	scRestGetAllocation, resp, err := c.V1SCRestGetAllocation(
+		model.SCRestGetAllocationRequest{
+			AllocationID: allocationID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetAllocation)
+
+	return scRestGetAllocation
+}
+
+// GetWalletBalanceWrapper does not provide deep test of used components
+func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet) *model.ClientGetBalanceResponse {
+	t.Log("Get wallet balance...")
+
+	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
+		model.ClientGetBalanceRequest{
+			ClientID: wallet.ClientID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return clientGetBalanceResponse
 }
 
 ////Uploads a new file to blobber

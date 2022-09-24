@@ -8,6 +8,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/interaction"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
+	"log"
 	"path/filepath"
 	"testing"
 	"time"
@@ -20,33 +21,10 @@ func TestBlobberTokenAccounting(t *testing.T) {
 	t.Run("Token accounting of added blobber as additional parity shard to allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
-
+		wallet := apiClient.RegisterWalletWrapper(t)
 		sdkClient.SetWallet(wallet)
 
-		faucetTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:          wallet,
-				ToClientID:      client.FaucetSmartContractAddress,
-				TransactionData: model.NewFaucetTransactionData(),
-				Value:           tokenomics.IntToZCN(3)},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, faucetTransactionPutResponse)
-
-		faucetTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			client.HttpOkStatus,
-			client.TxSuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, faucetTransactionGetConfirmationResponse)
+		apiClient.ExecuteFaucetWrapper(t, wallet)
 
 		clientGetBalanceResponse, resp, err := apiClient.V1ClientGetBalance(
 			model.ClientGetBalanceRequest{
@@ -187,7 +165,7 @@ func TestBlobberTokenAccounting(t *testing.T) {
 		//newBlobberURL := getBlobberURL(newBlobberID, scRestGetAllocation.Blobbers)
 		//require.NotZero(t, newBlobberURL, "can't get URL of a new blobber")
 
-		//sign := encryption.Hash(allocation.Tx)
+		//sign := crypto.Sha3256(allocation.Tx)
 
 		//signBLS, err := client.SignHash(sign, crypto.BLS0Chain, []sys.KeyPair{sys.KeyPair{
 		//	PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
@@ -203,10 +181,13 @@ func TestBlobberTokenAccounting(t *testing.T) {
 			RemotePath: filePath,
 		}
 
-		//TODO: replace sdk part to nature API calls
+		//TODO: replace sdk part to raw API calls
 
 		sdkAllocation, err := sdk.GetAllocation(createAllocationTransactionPutResponse.Entity.Hash)
 		require.Nil(t, err)
+
+		log.Println(sdkAllocation)
+		log.Println(newFile.Name())
 
 		chunkedUpload, err := sdk.CreateChunkedUpload(config.MustGetHomeDir(), sdkAllocation,
 			fileMeta, newFile, false, false)

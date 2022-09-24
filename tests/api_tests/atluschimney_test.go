@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -21,6 +22,9 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if amount of total minted tokens changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
+		wallet := apiClient.RegisterWalletWrapper(t)
+		sdkClient.SetWallet(wallet)
+
 		getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -38,6 +42,9 @@ func TestAtlusChimney(t *testing.T) {
 
 	t.Run("Check if amount of total total challenges changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+		sdkClient.SetWallet(wallet)
 
 		getTotalTotalChallengesResponse, resp, err := apiClient.V1SharderGetTotalTotalChallenges(client.HttpOkStatus)
 		require.Nil(t, err)
@@ -63,10 +70,22 @@ func TestAtlusChimney(t *testing.T) {
 
 	t.Run("Get total staked, should work", func(t *testing.T) {
 		//total-staked
+		t.Parallel()
+
+		getTotalStakedResponse, resp, err := apiClient.V1SharderGetTotalStaked(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getTotalStakedResponse)
 	})
 
 	t.Run("Check if amount of total staked changed after creating new allocation, should work", func(t *testing.T) {
 		//total-staked
+		t.Parallel()
+
+		getTotalStakedResponse, resp, err := apiClient.V1SharderGetTotalStaked(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getTotalStakedResponse)
 	})
 
 	t.Run("Get total stored data, should work", func(t *testing.T) {
@@ -80,6 +99,9 @@ func TestAtlusChimney(t *testing.T) {
 
 	t.Run("Check if total stored data changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+		sdkClient.SetWallet(wallet)
 
 		//TODO: upload some data
 
@@ -113,6 +135,9 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if total blobber capacity changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
+		wallet := apiClient.RegisterWalletWrapper(t)
+		sdkClient.SetWallet(wallet)
+
 		//TODO: upload some data
 
 		//TODO: check blobber capacity before uploading
@@ -122,7 +147,175 @@ func TestAtlusChimney(t *testing.T) {
 		require.NotZero(t, *getAverageWritePriceResponse)
 		//TODO: check blobber capacity after uploading
 	})
-	//
+
+	t.Run("Get graph of blobber service charge of certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberServiceChargeResponse, resp, err := apiClient.V1SharderGetGraphBlobberServiceCharge(
+			model.GetGraphBlobberServiceChargeRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberServiceChargeResponse)
+
+		//graph-blobber-service-charge?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Check if graph of blobber service charge changed after file uploading, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberServiceChargeResponse, resp, err := apiClient.V1SharderGetGraphBlobberServiceCharge(
+			model.GetGraphBlobberServiceChargeRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberServiceChargeResponse)
+
+		//graph-blobber-service-charge?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of passed blobber challenges, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberChallengesPassed, resp, err := apiClient.V1SharderGetGraphBlobberChallengesPassed(
+			model.GetGraphBlobberChallengesPassedRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberChallengesPassed)
+
+		//graph-blobber-challenges-passed?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Check if graph of passed blobber challenges changed after file uploading, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberChallengesPassed, resp, err := apiClient.V1SharderGetGraphBlobberChallengesPassed(
+			model.GetGraphBlobberChallengesPassedRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberChallengesPassed)
+
+		//graph-blobber-challenges-passed?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of completed blobber challenges, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberChallengesCompletedResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallengesCompleted(
+			model.GetGraphBlobberChallengesCompletedRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberChallengesCompletedResponse)
+
+		//graph-blobber-challenges-completed?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Check if graph of completed blobber challenges changed after file uploading, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberChallengesCompletedResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallengesCompleted(
+			model.GetGraphBlobberChallengesCompletedRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberChallengesCompletedResponse)
+
+		//graph-blobber-challenges-completed?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of blobber inactive rounds, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberInactiveRounds, resp, err := apiClient.V1SharderGetGraphBlobberInactiveRounds(
+			model.GetGraphBlobberInactiveRoundsRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberInactiveRounds)
+
+		//graph-blobber-inactive-rounds?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Check if graph of blobber inactive rounds changed after file uploading, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWalletWrapper(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
+
+		getGraphBlobberInactiveRounds, resp, err := apiClient.V1SharderGetGraphBlobberInactiveRounds(
+			model.GetGraphBlobberInactiveRoundsRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberInactiveRounds)
+
+		//graph-blobber-inactive-rounds?data-points=17&id='$BLOBBERID
+	})
+
 	//echo -e "\naverges"
 	//echo -e "\ngraph-blobber-write-price"
 	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-write-price?data-points=17&id='$BLOBBERID
@@ -142,15 +335,4 @@ func TestAtlusChimney(t *testing.T) {
 	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-total-stake?data-points=17&id='$BLOBBERID
 	//echo -e "\ngraph-blobber-challenges-open"
 	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-open?data-points=17&id='$BLOBBERID
-	//
-	//echo -e "\ndifferences"
-	//echo -e "\ngraph-blobber-service-charge"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-service-charge?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-challenges-passed"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-passed?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-challenges-completed"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-completed?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-inactive-rounds"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-inactive-rounds?data-points=17&id='$BLOBBERID
-
 }
