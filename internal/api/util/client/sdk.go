@@ -18,6 +18,7 @@ import (
 
 type SDKClient struct {
 	blockWorker string
+	wallet      *model.Wallet
 }
 
 func NewSDKClient(blockWorker string) *SDKClient {
@@ -36,6 +37,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(wallet *model.Wallet) {
+	c.wallet = wallet
+
 	err := sdk.InitStorageSDK(
 		wallet.String(),
 		c.blockWorker,
@@ -94,4 +97,6 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 
 	err = sdkAllocation.CommitMetaTransaction(filepath.Join("/", filepath.Base(tmpFile.Name())), "Upload", "", "", nil, new(model.StubStatusBar))
 	require.Nil(t, err)
+
+	c.wallet.IncNonce()
 }

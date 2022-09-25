@@ -61,7 +61,8 @@ type Wallet struct {
 }
 
 type KeyPair struct {
-	PublicKey, PrivateKey string
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
 }
 
 type RawKeyPair struct {
@@ -113,7 +114,6 @@ func NewCollectRewardTransactionData(providerID, poolID string, providerType int
 	var input = map[string]interface{}{
 		"provider_id":   providerID,
 		"provider_type": providerType,
-		"pool_id":       poolID,
 	}
 
 	return TransactionData{
@@ -152,9 +152,9 @@ func NewUpdateBlobberTransactionData(scRestGetBlobberResponse *SCRestGetBlobberR
 
 type InternalTransactionPutRequest struct {
 	TransactionData
-	ToClientID, Body string
-	Wallet           *Wallet
-	Value            *int64
+	ToClientID string
+	Wallet     *Wallet
+	Value      *int64
 }
 
 type TransactionPutRequest struct {

@@ -4,11 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-=======
->>>>>>> feature/refactor_tests
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -321,10 +317,6 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	if internalTransactionPutRequest.Body != "" {
-		transactionPutRequest.TransactionNonce++
-	}
-
 	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%v:%v:%v:%v:%v:%v",
 		transactionPutRequest.CreationDate,
 		transactionPutRequest.TransactionNonce,
@@ -583,7 +575,7 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
 
 	urlBuilder := NewURLBuilder().
-		SetPath(SCStateGet).
+		SetPath(GetStakePoolStat).
 		SetPathVariable("sc_address", StorageSmartContractAddress).
 		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
 
@@ -675,7 +667,6 @@ func (c *APIClient) CreateStakePoolWrapper(t *testing.T, wallet *model.Wallet, p
 	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		model.InternalTransactionPutRequest{
 			Wallet:     wallet,
-			Body:       "j",
 			ToClientID: StorageSmartContractAddress,
 			TransactionData: model.NewCreateStackPoolTransactionData(
 				model.CreateStakePoolRequest{
@@ -688,9 +679,6 @@ func (c *APIClient) CreateStakePoolWrapper(t *testing.T, wallet *model.Wallet, p
 	require.NotNil(t, resp)
 	require.NotNil(t, createStakePoolTransactionPutResponse)
 
-	fmt.Println(resp.String())
-	fmt.Println(createStakePoolTransactionPutResponse.Entity)
-
 	createStakePoolTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
 		model.TransactionGetConfirmationRequest{
 			Hash: createStakePoolTransactionPutResponse.Entity.Hash,
@@ -700,6 +688,8 @@ func (c *APIClient) CreateStakePoolWrapper(t *testing.T, wallet *model.Wallet, p
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createStakePoolTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
 
 	return createStakePoolTransactionGetConfirmationResponse.Hash
 }
