@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -33,6 +34,7 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -69,7 +71,7 @@ const (
 //
 const (
 	TxType    = 1000
-	TxFee     = 0
+	TxFee     = 1000
 	TxVersion = "1.0"
 	TxOutput  = ""
 )
@@ -316,7 +318,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%v:%v:%v:%v:%v:%v",
 		transactionPutRequest.CreationDate,
 		transactionPutRequest.TransactionNonce,
 		transactionPutRequest.ClientId,
@@ -361,7 +363,7 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 		err  error
 	)
 
-	wait.PoolImmediately(time.Minute*2, func() bool {
+	wait.PoolImmediately(time.Minute*5, func() bool {
 		resp, err = c.executeForAllServiceProviders(
 			urlBuilder,
 			model.ExecutionRequest{
@@ -570,6 +572,26 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
+func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
+	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(SCStateGet).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &scRestGetStakePoolStatResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetStakePoolStatResponse, resp, err
+}
+
 // RegisterWalletWrapper does not provide deep test of used components
 func (c *APIClient) RegisterWalletWrapper(t *testing.T) *model.Wallet {
 	t.Log("Register wallet...")
@@ -640,13 +662,80 @@ func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, 
 }
 
 // CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePoolWrapper(t *testing.T) {
+func (c *APIClient) CreateStakePoolWrapper(t *testing.T, wallet *model.Wallet, providerType sdk.ProviderType, providerID string) string {
 	t.Log("Create stake pool...")
+
+	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCreateStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionPutResponse)
+
+	createStakePoolTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: createStakePoolTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionGetConfirmationResponse)
+
+	return createStakePoolTransactionPutResponse.Entity.Hash
+}
+
+func (c *APIClient) GetStakePoolStatWrapper(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
+	t.Log("Get stake pool stat...")
+
+	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
+		model.SCRestGetStakePoolStatRequest{
+			BlobberID: blobberID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return scRestGetStakePoolStat
 }
 
 // UpdateAllocationWrapper does not provide deep test of used components
-func (c *APIClient) UpdateAllocationWrapper(t *testing.T) {
+func (c *APIClient) UpdateAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet, newBlobberID, oldBlobberID, allocationID string) {
 	t.Log("Update allocation...")
+
+	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+				ID:              allocationID,
+				AddBlobberId:    newBlobberID,
+				RemoveBlobberId: oldBlobberID,
+			}),
+			Value: tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, updateAllocationTransactionPutResponse)
+
+	updateAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: allocationID,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 }
 
 func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet) model.SCRestGetAllocationBlobbersResponse {
@@ -693,6 +782,30 @@ func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet) 
 	require.NotNil(t, resp)
 
 	return clientGetBalanceResponse
+}
+
+func (c *APIClient) CollectRewardWrapper(t *testing.T, wallet *model.Wallet, providerID, poolID string, providerType int64) {
+	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCollectRewardTransactionData(providerID, poolID, providerType),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, collectRewardTransactionPutResponse)
+
+	collectRewardTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: collectRewardTransactionPutResponse.Entity.Hash,
+		},
+		HttpOkStatus,
+		TxSuccessfulStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, collectRewardTransactionGetConfirmationResponse)
 }
 
 ////Uploads a new file to blobber
