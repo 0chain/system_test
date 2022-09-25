@@ -603,7 +603,7 @@
 									"",
 									"utils.conditionalTest(\"faucet_executed\",\"Balance matches expected\", function () {",
 									"    var response = JSON.parse(responseBody);",
-									"    pm.expect(response.balance).to.eql(10000000000);",
+									"    pm.expect(response.balance).to.eql(40000000000);",
 									"});",
 									"",
 									"utils.conditionalTest(\"faucet_executed\", \"txn matches faucet txn hash\", function () {",
