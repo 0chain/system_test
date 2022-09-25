@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
+func TestAtlusChimneyGraphTotalStaked(t *testing.T) {
 	t.Parallel()
 
 	t.Run("test api should return error when event db not able to find round matching", func(t *testing.T) {
@@ -18,7 +18,7 @@ func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
 		to := ""
 
 		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-challenge-pools",
+			"url":         "/graph-total-staked",
 			"data-points": "1",
 			"from":        from,
 			"to":          to,
@@ -35,7 +35,7 @@ func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
 		to := ""
 
 		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":  "/graph-total-challenge-pools",
+			"url":  "/graph-total-staked",
 			"from": from,
 			"to":   to,
 		}))
@@ -50,7 +50,7 @@ func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
 		to := ""
 
 		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-challenge-pools",
+			"url":         "/graph-total-staked",
 			"data-points": "1",
 			"to":          to,
 		}))
@@ -65,7 +65,7 @@ func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
 		from := ""
 
 		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-challenge-pools",
+			"url":         "/graph-total-staked",
 			"data-points": "1",
 			"from":        from,
 		}))
@@ -81,7 +81,7 @@ func TestAtlusChimneyGraphTotalChallengePools(t *testing.T) {
 		to := strconv.FormatInt(int64(math.Floor(float64(time.Now().Unix()/1000))), 10)
 
 		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-challenge-pools",
+			"url":         "/graph-total-staked",
 			"data-points": "1",
 			"from":        from,
 			"to":          to,

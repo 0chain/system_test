@@ -75,7 +75,7 @@ func TestAtlusChimneyGraphAllocatedStorage(t *testing.T) {
 		require.Nil(t, resp)
 	})
 
-	t.Run("test api should run successfully", func(t *testing.T) {
+	t.Run("test api should return successfully", func(t *testing.T) {
 		t.Parallel()
 		from := strconv.FormatInt(int64(math.Floor(float64(time.Now().Unix()-86400000/1000))), 10)
 		to := strconv.FormatInt(int64(math.Floor(float64(time.Now().Unix()/1000))), 10)
@@ -90,5 +90,6 @@ func TestAtlusChimneyGraphAllocatedStorage(t *testing.T) {
 		require.Nil(t, httpErr)
 		require.Equal(t, http.StatusOK, httpResp.StatusCode())
 		require.NotNil(t, resp)
+		require.Equal(t, 1, len(resp))
 	})
 }
