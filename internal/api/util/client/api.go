@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -276,7 +275,7 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	wallet := &model.Wallet{
 		ClientID:  clientPutResponse.Id,
 		ClientKey: clientPutResponse.PublicKey,
-		Keys: []*sys.KeyPair{{
+		Keys: []model.KeyPair{{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}},
