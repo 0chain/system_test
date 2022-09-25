@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/herumi/bls-go-binary/bls"
 	"io"
 	"log"
@@ -104,6 +105,19 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
+func NewCollectRewardTransactionData(providerID, poolID string, providerType int64) TransactionData {
+	var input = map[string]interface{}{
+		"provider_id":   providerID,
+		"provider_type": providerType,
+		"pool_id":       poolID,
+	}
+
+	return TransactionData{
+		Name:  "collect_reward",
+		Input: input,
+	}
+}
+
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
@@ -114,7 +128,7 @@ func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse SCRe
 func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
 	return TransactionData{
 		Name:  "stake_pool_lock",
-		Input: createStakePoolRequest,
+		Input: &createStakePoolRequest,
 	}
 }
 
@@ -134,9 +148,9 @@ func NewUpdateBlobberTransactionData(scRestGetBlobberResponse *SCRestGetBlobberR
 
 type InternalTransactionPutRequest struct {
 	TransactionData
-	ToClientID string
-	Wallet     *Wallet
-	Value      *int64
+	ToClientID, Body string
+	Wallet           *Wallet
+	Value            *int64
 }
 
 type TransactionPutRequest struct {
@@ -349,7 +363,8 @@ type StakePoolSettings struct {
 }
 
 type CreateStakePoolRequest struct {
-	BlobberID string `json:"blobber_id"`
+	ProviderType sdk.ProviderType `json:"provider_type,omitempty"`
+	ProviderID   string           `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -476,4 +491,36 @@ type BlobberDownloadFileRequest struct {
 }
 
 type BlobberDownloadFileResponse struct {
+}
+
+type SCRestGetStakePoolStatRequest struct {
+	BlobberID string
+}
+
+type SCRestGetStakePoolStatResponse struct {
+	ID           string                      `json:"pool_id"`
+	Balance      int64                       `json:"balance"`
+	Unstake      int64                       `json:"unstake"`
+	Free         int64                       `json:"free"`
+	Capacity     int64                       `json:"capacity"`
+	WritePrice   int64                       `json:"write_price"`
+	OffersTotal  int64                       `json:"offers_total"`
+	UnstakeTotal int64                       `json:"unstake_total"`
+	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty      int64                       `json:"penalty"`
+	Rewards      int64                       `json:"rewards"`
+	Settings     StakePoolSettings           `json:"settings"`
+}
+
+type StakePoolDelegatePoolInfo struct {
+	ID         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	DelegateID string `json:"delegate_id"`
+	Rewards    int64  `json:"rewards"`
+	UnStake    bool   `json:"unstake"`
+
+	TotalReward  int64  `json:"total_reward"`
+	TotalPenalty int64  `json:"total_penalty"`
+	Status       string `json:"status"`
+	RoundCreated int64  `json:"round_created"`
 }
