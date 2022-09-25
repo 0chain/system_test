@@ -96,7 +96,7 @@ func v1SharderGetSCState(t *testing.T, SCAddress, key string, consensusCategoris
 	return stats, httpResponse, httpError
 }
 
-//Uploads a new file to blobber
+// Uploads a new file to blobber
 func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberUploadFileResponse
 
@@ -150,7 +150,7 @@ func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUpl
 	return stats, httpResponse, httpError
 }
 
-//Queries all the files in certain allocation
+// Queries all the files in certain allocation
 func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberListFilesResponse
 
@@ -176,7 +176,7 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 	return stats, httpResponse, httpError
 }
 
-//Queries files in certain allocation
+// Queries files in certain allocation
 func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberGetFileReferencePathResponse
 
@@ -200,7 +200,7 @@ func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequ
 	return stats, httpResponse, httpError
 }
 
-//Commits all the actions in a certain opened connection
+// Commits all the actions in a certain opened connection
 func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberCommitConnectionResponse
 
@@ -233,7 +233,7 @@ func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest mode
 	return stats, httpResponse, httpError
 }
 
-//Commits all the actions in a certain opened connection
+// Commits all the actions in a certain opened connection
 func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberDownloadFileResponse
 
@@ -271,4 +271,12 @@ func v1SCRestGetBlobber(t *testing.T, blobberId string, consensusCategoriser end
 	httpResponse, httpError := zeroChain.GetFromSharders(t, filepath.Join("/v1/screst/", endpoint.StorageSmartContractAddress, "/getBlobber?blobber_id="+blobberId), consensusCategoriser, &stats)
 
 	return stats, httpResponse, httpError
+}
+
+func v1SCRestGetDataPointsUsingURL(t *testing.T, url string) ([]string, *resty.Response, error) {
+	var responseArray []string
+
+	httpResponse, httpError := zeroChain.GetFromChimney(t, filepath.Join("/v1/screst/", endpoint.StorageSmartContractAddress, url), &responseArray)
+
+	return responseArray, httpResponse, httpError
 }
