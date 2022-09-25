@@ -8,10 +8,7 @@ import (
 	"testing"
 )
 
-var (
-	apiClient *client.APIClient
-	sdkClient *client.SDKClient
-)
+var apiClient *client.APIClient
 
 func TestMain(m *testing.M) {
 	configPath, ok := os.LookupEnv(config.ConfigPathEnv)
@@ -22,7 +19,6 @@ func TestMain(m *testing.M) {
 
 	parsedConfig := config.Parse(configPath)
 
-	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 
 	os.Exit(m.Run())
