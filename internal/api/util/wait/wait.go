@@ -11,7 +11,7 @@ func PoolImmediately(duration time.Duration, callback func() bool) {
 	defer ticker.Stop()
 
 	after := time.After(duration)
-	postAfter := time.After(time.Second * 15)
+	postAfter := time.After(time.Second * 5)
 
 primary:
 	for range ticker.C {
