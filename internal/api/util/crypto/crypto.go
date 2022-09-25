@@ -35,7 +35,7 @@ func GenerateMnemonics() string {
 	return mnemonic
 }
 
-func GenerateKeys(mnemonics string) *model.KeyPair {
+func GenerateKeys(mnemonics string) *model.RawKeyPair {
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
@@ -58,7 +58,7 @@ func GenerateKeys(mnemonics string) *model.KeyPair {
 	log.Printf("Generated public key [%s] and secret key [%s]\n", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
-	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
+	return &model.RawKeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
 
 func NewConnectionID() string {

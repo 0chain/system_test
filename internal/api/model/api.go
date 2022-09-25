@@ -50,17 +50,21 @@ type ClientPutResponse struct {
 }
 
 type Wallet struct {
-	ClientID    string         `json:"client_id"`
-	ClientKey   string         `json:"client_key"`
-	Keys        []*sys.KeyPair `json:"keys"`
-	Mnemonics   string         `json:"mnemonics"`
-	Version     string         `json:"version"`
-	DateCreated string         `json:"date_created"`
-	Nonce       int            `json:"-"`
-	RawKeys     *KeyPair       `json:"-"`
+	ClientID    string      `json:"client_id"`
+	ClientKey   string      `json:"client_key"`
+	Keys        []KeyPair   `json:"keys"`
+	Mnemonics   string      `json:"mnemonics"`
+	Version     string      `json:"version"`
+	DateCreated string      `json:"date_created"`
+	Nonce       int         `json:"-"`
+	RawKeys     *RawKeyPair `json:"-"`
 }
 
 type KeyPair struct {
+	PublicKey, PrivateKey string
+}
+
+type RawKeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
@@ -69,7 +73,7 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) MustGetKeyPair() *sys.KeyPair {
+func (w *Wallet) MustGetKeyPair() KeyPair {
 	if len(w.Keys) == 0 {
 		log.Fatalln("wallet has no keys")
 	}
