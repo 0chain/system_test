@@ -57,7 +57,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-		allocationID := strings.Fields(output[0])[4]
+		allocationID := strings.Fields(output[0])[2]
 
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
