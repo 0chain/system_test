@@ -13,11 +13,11 @@ func TestExecuteFaucet(t *testing.T) {
 	t.Run("Execute Faucet API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 
-		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucetWithAssertions(t, wallet, client.TxSuccessfulStatus)
 
-		walletBalance := apiClient.GetWalletBalanceWrapper(t, wallet, client.HttpOkStatus)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		require.Equal(t, *tokenomics.IntToZCN(1), walletBalance.Balance)
 	})
 }

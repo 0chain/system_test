@@ -13,8 +13,8 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
-		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{
@@ -30,7 +30,7 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{

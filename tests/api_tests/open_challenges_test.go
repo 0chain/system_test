@@ -13,9 +13,9 @@ func TestOpenChallenges(t *testing.T) {
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
 		blobberId := (*allocationBlobbers.Blobbers)[0]
 
 		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(

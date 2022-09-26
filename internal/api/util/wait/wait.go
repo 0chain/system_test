@@ -24,7 +24,7 @@ primary:
 				log.Println("Wait pool callback has succeed")
 				break primary
 			}
-			log.Println("Wait pool callback has failed")
+			log.Println("Wait pool callback has failed, continue...")
 		}
 	}
 

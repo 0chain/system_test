@@ -35,9 +35,10 @@ type ExecutionRequest struct {
 }
 
 type ClientPutRequest struct {
-	ClientID     string `json:"id"`
-	ClientKey    string `json:"public_key"`
-	CreationDate *int   `json:"creation_date"`
+	ClientID      string `json:"id"`
+	ClientKey     string `json:"public_key"`
+	CreationDate  *int   `json:"creation_date"`
+	GenerateInput bool
 }
 
 type ClientPutResponse struct {
@@ -79,12 +80,12 @@ func (w *Wallet) MustGetKeyPair() KeyPair {
 	return w.Keys[0]
 }
 
-func (w *Wallet) MustConvertDateCreatedToInt() int {
+func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
 	result, err := strconv.Atoi(w.DateCreated)
 	if err != nil {
-		log.Fatalln(err)
+		return 0, err
 	}
-	return result
+	return result, nil
 }
 
 func (w *Wallet) String() string {

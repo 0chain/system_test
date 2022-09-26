@@ -11,11 +11,11 @@ func TestCreateAllocation(t *testing.T) {
 	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
-		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
-		apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 	})
 }
