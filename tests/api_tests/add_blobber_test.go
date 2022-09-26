@@ -1,11 +1,11 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
-	"math/rand"
-	"strconv"
+	"math/big"
 	"testing"
 )
 
@@ -67,7 +67,10 @@ func TestAddBlobber(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, strconv.Itoa(rand.Intn(10)), "", allocationID, client.TxUnsuccessfulStatus)
+		result, err := rand.Int(rand.Reader, big.NewInt(10))
+		require.Nil(t, err)
+
+		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxUnsuccessfulStatus)
 
 		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
@@ -99,7 +102,7 @@ func TestAddBlobber(t *testing.T) {
 	})
 }
 
-//Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
+// Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
 func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		var found bool
@@ -115,7 +118,7 @@ func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes
 	return ""
 }
 
-//Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
+// Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
 func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		for _, usedStorageNode := range usedStorageNodes {

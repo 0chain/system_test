@@ -1,10 +1,10 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
-	"math/rand"
-	"strconv"
+	"math/big"
 	"testing"
 )
 
@@ -76,7 +76,10 @@ func TestReplaceBlobber(t *testing.T) {
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, strconv.Itoa(rand.Intn(10)), allocationID, client.TxUnsuccessfulStatus)
+		result, err := rand.Int(rand.Reader, big.NewInt(10))
+		require.Nil(t, err)
+
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxUnsuccessfulStatus)
 
 		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
