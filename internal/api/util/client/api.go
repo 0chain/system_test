@@ -447,24 +447,7 @@ func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRes
 func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
 	var scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse
 
-	blobberRequirements := model.BlobberRequirements{
-		Size:           10000,
-		DataShards:     1,
-		ParityShards:   1,
-		ExpirationDate: time.Now().Add(time.Minute * 20).Unix(),
-		ReadPriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		WritePriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		OwnerId:        scRestGetAllocationBlobbersRequest.ClientID,
-		OwnerPublicKey: scRestGetAllocationBlobbersRequest.ClientKey,
-	}
-
-	data, err := json.Marshal(blobberRequirements)
+	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -486,7 +469,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersReq
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
-	scRestGetAllocationBlobbersResponse.BlobberRequirements = blobberRequirements
+	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
 	return scRestGetAllocationBlobbersResponse, resp, err
 }
@@ -569,19 +552,26 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
-// RegisterWalletWrapper does not provide deep test of used components
-func (c *APIClient) RegisterWalletWrapper(t *testing.T) *model.Wallet {
+func (c *APIClient) RegisterWalletWrapper(t *testing.T, requiredStatusCode int) *model.Wallet {
 	t.Log("Register wallet...")
 
-	wallet, resp, err := c.V1ClientPut(model.ClientPutRequest{}, HttpOkStatus)
+	wallet, resp, err := c.V1ClientPut(model.ClientPutRequest{}, requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, wallet)
+
+	publicKeyBytes, err := hex.DecodeString(wallet.RawKeys.PublicKey.SerializeToHexStr())
+	require.Nil(t, err)
+
+	require.Equal(t, wallet.ClientID, crypto.Sha3256(publicKeyBytes))
+	require.Equal(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+	require.NotZero(t, wallet.MustConvertDateCreatedToInt(), "creation date is an invalid value!")
+	require.NotZero(t, wallet.Version)
 
 	return wallet
 }
 
-// ExecuteFaucetWrapper does not provide deep test of used components
-func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
+func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet, requiredStatusCode, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -589,7 +579,7 @@ func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
 			TransactionData: model.NewFaucetTransactionData()},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
@@ -598,17 +588,53 @@ func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
 		model.TransactionGetConfirmationRequest{
 			Hash: faucetTransactionPutResponse.Entity.Hash,
 		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
+		requiredStatusCode,
+		requiredTransactionStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionGetConfirmationResponse)
 
+	require.True(t, faucetTransactionPutResponse.Async)
+	require.NotNil(t, faucetTransactionPutResponse.Entity)
+	require.NotNil(t, faucetTransactionPutResponse.Entity.ChainId)
+	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionOutput)
+	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionStatus)
+
+	require.Equal(t, faucetTransactionPutResponse.Request.Hash, faucetTransactionPutResponse.Entity.Hash)
+	require.Equal(t, faucetTransactionPutResponse.Request.Version, faucetTransactionPutResponse.Entity.Version)
+	require.Equal(t, faucetTransactionPutResponse.Request.ClientId, faucetTransactionPutResponse.Entity.ClientId)
+	require.Equal(t, faucetTransactionPutResponse.Request.ToClientId, faucetTransactionPutResponse.Entity.ToClientId)
+	require.Equal(t, faucetTransactionPutResponse.Request.PublicKey, faucetTransactionPutResponse.Entity.PublicKey)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionData, faucetTransactionPutResponse.Entity.TransactionData)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionValue, faucetTransactionPutResponse.Entity.TransactionValue)
+	require.Equal(t, faucetTransactionPutResponse.Request.Signature, faucetTransactionPutResponse.Entity.Signature)
+	require.Equal(t, faucetTransactionPutResponse.Request.CreationDate, faucetTransactionPutResponse.Entity.CreationDate)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionFee, faucetTransactionPutResponse.Entity.TransactionFee)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionType, faucetTransactionPutResponse.Entity.TransactionType)
+
+	require.Equal(t, TxVersion, faucetTransactionGetConfirmationResponse.Version)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.BlockHash)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.PreviousBlockHash)
+	require.Greater(t, faucetTransactionGetConfirmationResponse.CreationDate, int64(0))
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MinerID)
+	require.Greater(t, faucetTransactionGetConfirmationResponse.Round, int64(0))
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Status)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.RoundRandomSeed)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.StateChangesCount)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreeRoot)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreePath)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreeRoot)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreePath)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TransactionOutput)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TxnOutputHash)
+
 	wallet.IncNonce()
 }
 
-// CreateAllocationWrapper does not provide deep test of used components
-func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse) string {
+func (c *APIClient) CreateAllocationWrapper(t *testing.T,
+	wallet *model.Wallet,
+	scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse,
+	requiredStatusCode, requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
 
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -618,7 +644,7 @@ func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, 
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
 			Value:           tokenomics.IntToZCN(0.1),
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
@@ -627,8 +653,8 @@ func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, 
 		model.TransactionGetConfirmationRequest{
 			Hash: createAllocationTransactionPutResponse.Entity.Hash,
 		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
+		requiredStatusCode,
+		requiredTransactionStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
@@ -638,40 +664,58 @@ func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, 
 	return createAllocationTransactionPutResponse.Entity.Hash
 }
 
-// CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePoolWrapper(t *testing.T) {
-	t.Log("Create stake pool...")
-}
-
-// UpdateAllocationWrapper does not provide deep test of used components
-func (c *APIClient) UpdateAllocationWrapper(t *testing.T) {
+func (c *APIClient) UpdateAllocationWrapper(t *testing.T, requiredStatusCode int) {
 	t.Log("Update allocation...")
 }
 
-func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet) model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet, customBlobberRequirements *model.BlobberRequirements, requiredStatusCode int) model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
+
+	var blobberRequirements model.BlobberRequirements
+
+	if customBlobberRequirements != nil {
+		blobberRequirements = *customBlobberRequirements
+	} else {
+		blobberRequirements = model.BlobberRequirements{
+			Size:           10000,
+			DataShards:     1,
+			ParityShards:   1,
+			ExpirationDate: time.Now().Add(time.Minute * 20).Unix(),
+			ReadPriceRange: model.PriceRange{
+				Min: 0,
+				Max: 9223372036854775807,
+			},
+			WritePriceRange: model.PriceRange{
+				Min: 0,
+				Max: 9223372036854775807,
+			},
+			OwnerId:        wallet.ClientID,
+			OwnerPublicKey: wallet.ClientKey,
+		}
+	}
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
-			ClientID:  wallet.ClientID,
-			ClientKey: wallet.ClientKey,
+			ClientID:            wallet.ClientID,
+			ClientKey:           wallet.ClientKey,
+			BlobberRequirements: blobberRequirements,
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
 	return scRestGetAllocationBlobbersResponse
 }
 
-// GetAllocationWrapper does not provide deep test of used components
-func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *model.SCRestGetAllocationResponse {
+func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string, requiredStatusCode int) *model.SCRestGetAllocationResponse {
 	t.Log("Get allocation...")
 
 	scRestGetAllocation, resp, err := c.V1SCRestGetAllocation(
 		model.SCRestGetAllocationRequest{
 			AllocationID: allocationID,
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, scRestGetAllocation)
@@ -679,17 +723,17 @@ func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *mod
 	return scRestGetAllocation
 }
 
-// GetWalletBalanceWrapper does not provide deep test of used components
-func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet) *model.ClientGetBalanceResponse {
+func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet, requiredStatusCode int) *model.ClientGetBalanceResponse {
 	t.Log("Get wallet balance...")
 
 	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
 		model.ClientGetBalanceRequest{
 			ClientID: wallet.ClientID,
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, clientGetBalanceResponse)
 
 	return clientGetBalanceResponse
 }

@@ -16,13 +16,13 @@ func TestAddBlobber(t *testing.T) {
 	t.Run("Add new blobber to allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -54,7 +54,7 @@ func TestAddBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
@@ -63,13 +63,13 @@ func TestAddBlobber(t *testing.T) {
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
@@ -98,7 +98,7 @@ func TestAddBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
@@ -107,13 +107,13 @@ func TestAddBlobber(t *testing.T) {
 	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
@@ -142,7 +142,7 @@ func TestAddBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
@@ -151,13 +151,13 @@ func TestAddBlobber(t *testing.T) {
 	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -189,7 +189,7 @@ func TestAddBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)

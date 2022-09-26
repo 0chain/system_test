@@ -288,6 +288,7 @@ type SCRestGetAllocationRequest struct {
 }
 
 type SCRestGetAllocationBlobbersRequest struct {
+	BlobberRequirements
 	ClientID, ClientKey string
 }
 

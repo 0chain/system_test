@@ -14,13 +14,13 @@ func TestRemoveBlobber(t *testing.T) {
 	t.Run("Remove blobber in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -52,7 +52,7 @@ func TestRemoveBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)

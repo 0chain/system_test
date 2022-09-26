@@ -1,6 +1,7 @@
 package wait
 
 import (
+	"log"
 	"time"
 )
 
@@ -20,10 +21,14 @@ primary:
 			break primary
 		default:
 			if callback() {
+				log.Println("Wait pool callback has succeed")
 				break primary
 			}
+			log.Println("Wait pool callback has failed")
 		}
 	}
+
+	log.Println("Wait pool received a timeout")
 
 	for range ticker.C {
 		select {

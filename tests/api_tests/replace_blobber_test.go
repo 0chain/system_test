@@ -57,7 +57,7 @@ func TestReplaceBlobber(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)

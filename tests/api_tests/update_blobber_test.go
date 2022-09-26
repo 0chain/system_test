@@ -14,13 +14,13 @@ func TestUpdateBlobber(t *testing.T) {
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWalletWrapper(t, client.HttpOkStatus)
+		apiClient.ExecuteFaucetWrapper(t, wallet, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers, client.HttpOkStatus, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocationWrapper(t, allocationID, client.HttpOkStatus)
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
