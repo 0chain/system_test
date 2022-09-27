@@ -181,9 +181,10 @@ func v1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.Blob
 	var hashnode *model.BlobberGetHashnodeResponse
 
 	headers := map[string]string{
-		"X-App-Client-Id":  blobberGetHashnodeRequest.ClientId,
-		"X-App-Client-Key": blobberGetHashnodeRequest.ClientKey,
-		"allocation":       blobberGetHashnodeRequest.AllocationID,
+		"X-App-Client-Id":        blobberGetHashnodeRequest.ClientId,
+		"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
+		"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
+		"allocation":             blobberGetHashnodeRequest.AllocationID,
 	}
 
 	httpResponse, httpError := zeroChain.GetFromBlobber(t,
