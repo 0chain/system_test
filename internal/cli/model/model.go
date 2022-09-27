@@ -75,8 +75,6 @@ type Allocation struct {
 	// WritePriceRange is requested writing prices range.
 	WritePriceRange PriceRange `json:"write_price_range"`
 
-	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
-
 	StartTime         int64    `json:"start_time"`
 	Finalized         bool     `json:"finalized,omitempty"`
 	Canceled          bool     `json:"canceled,omitempty"`
