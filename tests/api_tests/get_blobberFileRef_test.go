@@ -33,14 +33,8 @@ func TestGetBlobberFileRefs(t *testing.T) {
 		url := "http://dev.0chain.net/blobber01"
 		clientSignature, _ := SignHash(transactionResponse.Entity.Hash, "bls0chain", sysKeyPair)
 		allocationId := transactionResponse.Entity.Hash // allocation id
-		refType := "f"
-		// func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest)
-		// fileUploadStats, _, _ = v1BlobberFileUpload(t)
-		// refType = "d"
+		refType := "f"                                  // or can be "d"
 		getBlobberFileUploadRequest(t, url, registeredWallet, keyPair, allocationId, refType, clientSignature)
-		// require.NotNil()
-
-		// ending the function here with panic
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, registeredWallet, keyPair, allocationId, refType, clientSignature)
 		_, _, httpError := v1BlobberGetFileRefs(t, blobberFileRefRequest)
 		require.NotNil(t, httpError)
@@ -86,12 +80,20 @@ func getBlobberFileUploadRequest(t *testing.T, url string, registeredWallet *mod
 	t.Logf("get blobber file upload request object...")
 
 	// generating random file
-	// size := 1024
 	filename := generateRandomTestFileName(t)
 	file, err := createFileWithSize(filename, 1024)
-	// blobberUploadFileRequest
-	// File
 	require.Nil(t, err)
+
+	blobberUploadFileMeta := model.BlobberUploadFileMeta{
+		ConnectionID: "connection_id", // need to find the connectionId
+		FileName:     filename,
+		FilePath:     "/",
+		ActualHash:   "actual_hash",  // need actual_hash
+		ContentHash:  "content_hash", // need to calculate content_hash
+		MimeType:     "text/plain",
+		ActualSize:   1024,
+		IsFinal:      true,
+	}
 	blobberFileUploadFileRequest := model.BlobberUploadFileRequest{
 		URL:             url,
 		ClientID:        registeredWallet.ClientID,
@@ -99,50 +101,11 @@ func getBlobberFileUploadRequest(t *testing.T, url string, registeredWallet *mod
 		ClientSignature: clientSignature,
 		AllocationID:    allocationId,
 		File:            file,
+		Meta:            blobberUploadFileMeta,
 	}
 	fileUploadResponse, _, _ := v1BlobberFileUpload(t, blobberFileUploadFileRequest)
 	require.NotNil(t, fileUploadResponse)
-	// t.Logf(" this is upload file response %v", fileUploadResponse)
-	// t.Logf(" this is whole file ------------------------------------------------------------------------------------------------ ", file)
-	// require.Nil(t, err)
-	// blobberFileMeta :=
-	// type BlobberUploadFileMeta struct {
-	// 	ConnectionID string `json:"connection_id" validation:"required"`
-	// 	FileName     string `json:"filename" validation:"required"`
-	// 	FilePath     string `json:"filepath" validation:"required"`
-	// 	ActualHash   string `json:"actual_hash,omitempty" validation:"required"`
-	// 	ContentHash  string `json:"content_hash" validation:"required"`
-	// 	MimeType     string `json:"mimetype" validation:"required"`
-	// 	ActualSize   int64  `json:"actual_size,omitempty" validation:"required"`
-	// 	IsFinal      bool   `json:"is_final" validation:"required"`
-	// }
-
-	// blobberUploadMeta := model.BlobberUploadFileMeta{
-	// 	ConnectionID: "",
-	// 	FileName:     "",
-	// 	FilePath:     "",
-	// 	ActualHash:   "",
-	// 	ContentHash:  "",
-	// 	MimeType:     "",
-	// 	ActualSize:   0,
-	// 	IsFinal:      false,
-	// }
-
-	// blobberFileUploadFileRequest := model.BlobberUploadFileRequest{
-	// 	URL:             url,
-	// 	ClientID:        registeredWallet.ClientID,
-	// 	ClientKey:       registeredWallet.ClientKey,
-	// 	ClientSignature: clientSignature,
-	// 	AllocationID:    allocationId,
-	// }
-	// BlobberUploadFileRequest
 }
-
-// func createFileWithSize(name string, size int64) error {
-// 	buffer := make([]byte, size)
-// 	rand.Read(buffer) //nolint:gosec,revive
-// 	return os.WriteFile(name, buffer, os.ModePerm)
-// }
 
 func generateRandomTestFileName(t *testing.T) string {
 	path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
