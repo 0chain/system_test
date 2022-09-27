@@ -2,8 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/core/common"
-	"github.com/0chain/gosdk/core/sys"
 	"github.com/herumi/bls-go-binary/bls"
 	"io"
 	"log"
@@ -373,7 +371,7 @@ type SCRestGetAllocationResponse struct {
 	Stats           *AllocationStats `json:"stats"`
 	TimeUnit        time.Duration    `json:"time_unit"`
 	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       common.Balance   `json:"write_pool"`
+	WritePool       int64            `json:"write_pool"`
 	ReadPriceRange  PriceRange       `json:"read_price_range"`
 	WritePriceRange PriceRange       `json:"write_price_range"`
 }
@@ -427,7 +425,7 @@ type BlobberUploadFileResponse struct {
 }
 
 type BlobberListFilesRequest struct {
-	sys.KeyPair
+	KeyPair
 	URL, ClientID, ClientKey, ClientSignature, AllocationID, PathHash, Path string
 }
 
