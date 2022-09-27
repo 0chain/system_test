@@ -176,6 +176,21 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 	return stats, httpResponse, httpError
 }
 
+func v1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest) (*model.BlobberGetHashnodeResponse, *resty.Response, error) { //nolint
+	var hashnode *model.BlobberGetHashnodeResponse
+
+	var headers, params map[string]string
+
+	httpResponse, httpError := zeroChain.GetFromBlobber(t,
+		blobberGetHashnodeRequest.URL,
+		filepath.Join("/v1/hashnode/root", blobberGetHashnodeRequest.AllocationID),
+		headers,
+		params,
+		&hashnode,
+	)
+	return hashnode, httpResponse, httpError
+}
+
 //Queries files in certain allocation
 func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) { //nolint
 	var stats *model.BlobberGetFileReferencePathResponse
