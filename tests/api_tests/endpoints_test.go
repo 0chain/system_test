@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
-	resty "github.com/go-resty/resty/v2" //nolint
 	"io"
 	"mime/multipart"
 	"path/filepath"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/endpoint"
+	resty "github.com/go-resty/resty/v2" //nolint
 
 	"github.com/0chain/system_test/internal/api/model"
 )
@@ -179,13 +180,17 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 func v1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest) (*model.BlobberGetHashnodeResponse, *resty.Response, error) { //nolint
 	var hashnode *model.BlobberGetHashnodeResponse
 
-	var headers, params map[string]string
+	headers := map[string]string{
+		"X-App-Client-Id":  blobberGetHashnodeRequest.ClientId,
+		"X-App-Client-Key": blobberGetHashnodeRequest.ClientKey,
+		"allocation":       blobberGetHashnodeRequest.AllocationID,
+	}
 
 	httpResponse, httpError := zeroChain.GetFromBlobber(t,
 		blobberGetHashnodeRequest.URL,
 		filepath.Join("/v1/hashnode/root", blobberGetHashnodeRequest.AllocationID),
 		headers,
-		params,
+		nil,
 		&hashnode,
 	)
 	return hashnode, httpResponse, httpError

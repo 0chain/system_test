@@ -435,7 +435,7 @@ type BlobberGetFileReferencePathResponse struct {
 }
 
 type BlobberGetHashnodeRequest struct {
-	URL, AllocationID string
+	URL, ClientId, ClientKey, AllocationID string
 }
 
 type BlobberGetHashnodeResponse struct {

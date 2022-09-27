@@ -12,19 +12,19 @@ import (
 func TestHashnodeRoot(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *testing.T) {
+	t.Run("Get hashnode root from blobber should work", func(t *testing.T) {
 		t.Parallel()
 
 		registeredWallet, keyPair := registerWallet(t)
 
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*20)
+		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
 		blobberRequirements.Blobbers = availableBlobbers
 		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status)
+		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
 		require.NotNil(t, createAllocationTransactionResponse)
 
 		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
@@ -39,9 +39,9 @@ func TestHashnodeRoot(t *testing.T) {
 		}
 
 		getBlobberResponse, restyResponse, err := v1BlobberGetHashNodeRoot(t, *blobberRequest)
+		t.Log(getBlobberResponse, restyResponse, err)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
 		require.NotNil(t, getBlobberResponse)
-		t.Log(getBlobberResponse)
 	})
 }
