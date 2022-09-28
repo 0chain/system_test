@@ -4,9 +4,11 @@ import (
 	"crypto/rand"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
+	"time"
 )
 
 func TestAddBlobber(t *testing.T) {
@@ -29,9 +31,14 @@ func TestAddBlobber(t *testing.T) {
 
 		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
 
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore+1
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 	})
 
@@ -47,11 +54,16 @@ func TestAddBlobber(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, "", "", allocationID, client.TxUnsuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, "", "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
 
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
@@ -70,11 +82,16 @@ func TestAddBlobber(t *testing.T) {
 		result, err := rand.Int(rand.Reader, big.NewInt(10))
 		require.Nil(t, err)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxUnsuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
 
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
@@ -93,11 +110,16 @@ func TestAddBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, "", allocationID, client.TxUnsuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
 
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 }

@@ -95,10 +95,14 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 	return apiClient
 }
 
-func (c *APIClient) getHealthyNodes(nodes []string) []string {
+func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
 	var result []string
 	for _, node := range nodes {
-		formattedURL := NewURLBuilder().MustShiftParse(node).SetPath(ChainGetStats).String()
+		urlBuilder := NewURLBuilder()
+		if err := urlBuilder.MustShiftParse(node); err != nil {
+			return nil, err
+		}
+		formattedURL := urlBuilder.SetPath(ChainGetStats).String()
 
 		healthResponse, err := c.httpClient.R().Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
@@ -109,21 +113,25 @@ func (c *APIClient) getHealthyNodes(nodes []string) []string {
 
 		log.Printf("%s is DOWN!", node)
 	}
-	return result
+	return result, nil
 }
 
-func (c *APIClient) getHealthyMiners(miners []string) []string {
+func (c *APIClient) getHealthyMiners(miners []string) ([]string, error) {
 	return c.getHealthyNodes(miners)
 }
 
-func (c *APIClient) getHealthyShaders(shaders []string) []string {
+func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
 	return c.getHealthyNodes(shaders)
 }
 
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
-	url := NewURLBuilder().MustShiftParse(networkEntrypoint).SetPath(GetNetworkDetails).String()
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
+		return err
+	}
+	formattedURL := urlBuilder.SetPath(GetNetworkDetails).String()
 
-	resp, err := c.httpClient.R().Get(url)
+	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
 		return ErrNetworkHealth
 	}
@@ -135,14 +143,20 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 		return ErrNetworkHealth
 	}
 
-	healthyMiners := c.getHealthyMiners(networkDNSResponse.Miners)
+	healthyMiners, err := c.getHealthyMiners(networkDNSResponse.Miners)
+	if err != nil {
+		return err
+	}
 	if len(healthyMiners) == 0 {
 		return ErrNoMinersHealth
 	}
 
 	c.NetworkHealthResources.Miners = healthyMiners
 
-	healthySharders := c.getHealthyShaders(networkDNSResponse.Sharders)
+	healthySharders, err := c.getHealthyShaders(networkDNSResponse.Sharders)
+	if err != nil {
+		return err
+	}
 	if len(healthySharders) == 0 {
 		return ErrNoShadersHealth
 	}
@@ -199,7 +213,10 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 	}
 
 	for _, serviceProvider := range serviceProviders {
-		formattedURL := urlBuilder.MustShiftParse(serviceProvider).String()
+		if err := urlBuilder.MustShiftParse(serviceProvider); err != nil {
+			return nil, err
+		}
+		formattedURL := urlBuilder.String()
 
 		newResp, err := c.executeForServiceProvider(formattedURL, executionRequest, method)
 		if err != nil {
@@ -247,7 +264,7 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	keyPair := crypto.GenerateKeys(mnemonics)
 	publicKeyBytes, err := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	if clientPutRequest.GenerateInput {
@@ -296,7 +313,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 
 	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	transactionPutRequest := model.TransactionPutRequest{
@@ -327,7 +344,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 
 	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	transactionPutRequest.Signature = internalTransactionPutRequest.Wallet.RawKeys.PrivateKey.Sign(string(hashToSign)).
@@ -350,41 +367,21 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 	return transactionPutResponse, resp, err
 }
 
-func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode, requiredTransactionStatus int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
 	var transactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(TransactionGetConfirmation).
 		AddParams("hash", transactionGetConfirmationRequest.Hash)
 
-	var (
-		resp *resty.Response //nolint
-		err  error
-	)
-
-	wait.PoolImmediately(time.Minute*2, func() bool {
-		resp, err = c.executeForAllServiceProviders(
-			urlBuilder,
-			model.ExecutionRequest{
-				Dst:                &transactionGetConfirmationResponse,
-				RequiredStatusCode: requiredStatusCode,
-			},
-			HttpGETMethod,
-			SharderServiceProvider)
-		if err != nil {
-			return false
-		}
-
-		if resp.StatusCode() != requiredStatusCode {
-			return false
-		}
-
-		if transactionGetConfirmationResponse.Status != requiredTransactionStatus {
-			return false
-		}
-
-		return true
-	})
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &transactionGetConfirmationResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
 
 	return transactionGetConfirmationResponse, resp, err
 }
@@ -446,12 +443,12 @@ func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRes
 	return scRestGetAllocationResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
-	var scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse
+func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
+	scRestGetAllocationBlobbersResponse := new(model.SCRestGetAllocationBlobbersResponse)
 
 	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	urlBuilder := NewURLBuilder().
@@ -616,15 +613,28 @@ func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTr
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
 
-	faucetTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: faucetTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse)
+	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if faucetTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
@@ -643,15 +653,28 @@ func (c *APIClient) ExecuteFaucetWithAssertions(t *testing.T, wallet *model.Wall
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
 
-	faucetTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: faucetTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse)
+	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if faucetTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	require.True(t, faucetTransactionPutResponse.Async)
 	require.NotNil(t, faucetTransactionPutResponse.Entity)
@@ -692,7 +715,7 @@ func (c *APIClient) ExecuteFaucetWithAssertions(t *testing.T, wallet *model.Wall
 
 func (c *APIClient) CreateAllocation(t *testing.T,
 	wallet *model.Wallet,
-	scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse,
+	scRestGetAllocationBlobbersResponse *model.SCRestGetAllocationBlobbersResponse,
 	requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
 
@@ -708,15 +731,29 @@ func (c *APIClient) CreateAllocation(t *testing.T,
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
 
-	createAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: createAllocationTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
+	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 
@@ -742,20 +779,33 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	require.NotNil(t, resp)
 	require.NotNil(t, updateAllocationTransactionPutResponse)
 
-	updateAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: allocationID,
-		},
-		HttpOkStatus,
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: allocationID,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, customBlobberRequirements *model.BlobberRequirements, requiredStatusCode int) model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, customBlobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
 	var blobberRequirements model.BlobberRequirements
@@ -798,11 +848,25 @@ func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, cu
 func (c *APIClient) GetAllocation(t *testing.T, allocationID string, requiredStatusCode int) *model.SCRestGetAllocationResponse {
 	t.Log("Get allocation...")
 
-	scRestGetAllocation, resp, err := c.V1SCRestGetAllocation(
-		model.SCRestGetAllocationRequest{
-			AllocationID: allocationID,
-		},
-		requiredStatusCode)
+	var (
+		scRestGetAllocation *model.SCRestGetAllocationResponse
+		resp                *resty.Response //nolint
+		err                 error
+	)
+
+	wait.PoolImmediately(t, time.Second*30, func() bool {
+		scRestGetAllocation, resp, err = c.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: allocationID,
+			},
+			requiredStatusCode)
+		if err != nil {
+			return false
+		}
+
+		return true
+	})
+
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, scRestGetAllocation)
@@ -838,15 +902,28 @@ func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetB
 	require.NotNil(t, resp)
 	require.NotNil(t, updateBlobberTransactionPutResponse)
 
-	updateBlobberTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: updateBlobberTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, updateBlobberTransactionGetConfirmationResponse)
+	var updateBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: updateBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateBlobberTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }

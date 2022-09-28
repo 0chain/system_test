@@ -2,8 +2,10 @@ package api_tests
 
 import (
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 func TestRemoveBlobber(t *testing.T) {
@@ -26,8 +28,14 @@ func TestRemoveBlobber(t *testing.T) {
 
 		apiClient.UpdateAllocationBlobbers(t, wallet, "", oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
+
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
