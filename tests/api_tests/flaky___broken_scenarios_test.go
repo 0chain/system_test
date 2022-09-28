@@ -54,7 +54,10 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		wallet := apiClient.RegisterWallet(t, clientId, "invalid", nil, false, client.HttpNotFoundStatus)
 
 		require.NotEqual(t, wallet.ClientID, clientId)
-		require.NotEqual(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+
+		keyPair, err := wallet.GetKeyPair()
+		require.Nil(t, err)
+		require.NotEqual(t, wallet.ClientKey, keyPair.PublicKey)
 
 		_, err = wallet.ConvertDateCreatedToInt()
 		require.NotNil(t, err)

@@ -591,8 +591,11 @@ func (c *APIClient) RegisterWalletWithAssertions(t *testing.T, clientID, clientK
 	dateCreated, err := wallet.ConvertDateCreatedToInt()
 	require.Nil(t, err)
 
+	keyPair, err := wallet.GetKeyPair()
+	require.Nil(t, err)
+
 	require.Equal(t, wallet.ClientID, crypto.Sha3256(publicKeyBytes))
-	require.Equal(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+	require.Equal(t, wallet.ClientKey, keyPair.PublicKey)
 	require.NotZero(t, dateCreated, "creation date is an invalid value!")
 	require.NotZero(t, wallet.Version)
 

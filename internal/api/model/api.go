@@ -71,11 +71,11 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) MustGetKeyPair() (*KeyPair, error) {
+func (w *Wallet) GetKeyPair() (*KeyPair, error) {
 	if len(w.Keys) == 0 {
-		return
+		return nil, ErrNoKeyPair
 	}
-	return w.Keys[0]
+	return w.Keys[0], nil
 }
 
 func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
