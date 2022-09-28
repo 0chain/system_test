@@ -32,6 +32,7 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -931,6 +932,98 @@ func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetB
 	wallet.IncNonce()
 }
 
+// CreateStakePoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateStakePool(t *testing.T, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+	t.Log("Create stake pool...")
+
+	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCreateStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionPutResponse)
+
+	createStakePoolTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: createStakePoolTransactionPutResponse.Entity.Hash,
+		},
+		requiredTransactionStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+
+	return createStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
+	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetStakePoolStat).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &scRestGetStakePoolStatResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetStakePoolStatResponse, resp, err
+}
+
+func (c *APIClient) GetStakePoolStat(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
+	t.Log("Get stake pool stat...")
+
+	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
+		model.SCRestGetStakePoolStatRequest{
+			BlobberID: blobberID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return scRestGetStakePoolStat
+}
+
+func (c *APIClient) CollectRewardWrapper(t *testing.T, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
+	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCollectRewardTransactionData(providerID, providerType),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, collectRewardTransactionPutResponse)
+
+	collectRewardTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
+		model.TransactionGetConfirmationRequest{
+			Hash: collectRewardTransactionPutResponse.Entity.Hash,
+		},
+		requiredTransactionStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, collectRewardTransactionGetConfirmationResponse)
+
+	wallet.IncNonce()
+}
+
 func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
 	scRestGetBlobberResponse, resp, err := c.V1SCRestGetBlobber(
 		model.SCRestGetBlobberRequest{
@@ -943,3 +1036,172 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 
 	return scRestGetBlobberResponse
 }
+
+////Uploads a new file to blobber
+//func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) {
+//	var stats *model.BlobberUploadFileResponse
+//
+//	payload := new(bytes.Buffer)
+//	writer := multipart.NewWriter(payload)
+//	uploadFile, err := writer.CreateFormFile("uploadFile", filepath.Base(blobberUploadFileRequest.Meta.FilePath))
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	_, err = io.Copy(uploadFile, blobberUploadFileRequest.File)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	err = writer.WriteField("connection_id", blobberUploadFileRequest.Meta.ConnectionID)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	metaData, err := json.Marshal(blobberUploadFileRequest.Meta)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	err = writer.WriteField("uploadMeta", string(metaData))
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	headers := map[string]string{
+//		"X-App-Client-Id":        blobberUploadFileRequest.ClientID,
+//		"X-App-Client-Key":       blobberUploadFileRequest.ClientKey,
+//		"X-App-Client-Signature": blobberUploadFileRequest.ClientSignature,
+//		"Content-Type":           writer.FormDataContentType(),
+//	}
+//
+//	err = writer.Close()
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	httpResponse, httpError := zeroChain.PostToBlobber(t,
+//		blobberUploadFileRequest.URL,
+//		filepath.Join("/v1/file/upload", blobberUploadFileRequest.AllocationID),
+//		headers,
+//		nil,
+//		payload.Bytes(),
+//		&stats)
+//
+//	return stats, httpResponse, httpError
+//}
+//
+////Queries all the files in certain allocation
+//func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) {
+//	var stats *model.BlobberListFilesResponse
+//
+//	params := map[string]string{
+//		"path_hash":  blobberListFilesRequest.PathHash,
+//		"path":       "/",
+//		"auth_token": "",
+//	}
+//
+//	headers := map[string]string{
+//		"X-App-Client-Id":        blobberListFilesRequest.ClientID,
+//		"X-App-Client-Key":       blobberListFilesRequest.ClientKey,
+//		"X-App-Client-Signature": blobberListFilesRequest.ClientSignature,
+//	}
+//
+//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
+//		blobberListFilesRequest.URL,
+//		filepath.Join("/v1/file/list", blobberListFilesRequest.AllocationID),
+//		headers,
+//		params,
+//		&stats)
+//
+//	return stats, httpResponse, httpError
+//}
+//
+////Queries files in certain allocation
+//func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) {
+//	var stats *model.BlobberGetFileReferencePathResponse
+//
+//	params := map[string]string{
+//		"paths": fmt.Sprintf("[\"%s\"]", "/"),
+//	}
+//
+//	headers := map[string]string{
+//		"X-App-Client-Id":        blobberGetFileReferencePathRequest.ClientID,
+//		"X-App-Client-Key":       blobberGetFileReferencePathRequest.ClientKey,
+//		"X-App-Client-Signature": blobberGetFileReferencePathRequest.ClientSignature,
+//	}
+//
+//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
+//		blobberGetFileReferencePathRequest.URL,
+//		filepath.Join("/v1/file/referencepath", blobberGetFileReferencePathRequest.AllocationID),
+//		headers,
+//		params,
+//		&stats)
+//
+//	return stats, httpResponse, httpError
+//}
+//
+////Commits all the actions in a certain opened connection
+//func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) {
+//	var stats *model.BlobberCommitConnectionResponse
+//
+//	writeMarker, err := json.Marshal(blobberCommitConnectionRequest.WriteMarker)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	formData := map[string]string{
+//		"connection_id": blobberCommitConnectionRequest.ConnectionID,
+//		"write_marker":  string(writeMarker),
+//	}
+//
+//	headers := map[string]string{
+//		"X-App-Client-Id":   blobberCommitConnectionRequest.WriteMarker.ClientID,
+//		"X-App-Client-Key":  blobberCommitConnectionRequest.ClientKey,
+//		"Connection":        "Keep-Alive",
+//		"Cache-Control":     "no-cache",
+//		"Transfer-Encoding": "chunked",
+//	}
+//
+//	httpResponse, httpError := zeroChain.PostToBlobber(t,
+//		blobberCommitConnectionRequest.URL,
+//		filepath.Join("/v1/connection/commit", blobberCommitConnectionRequest.WriteMarker.AllocationID),
+//		headers,
+//		formData,
+//		nil,
+//		&stats)
+//
+//	return stats, httpResponse, httpError
+//}
+//
+////Commits all the actions in a certain opened connection
+//func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) {
+//	var stats *model.BlobberDownloadFileResponse
+//
+//	readMarker, err := json.Marshal(blobberDownloadFileRequest.ReadMarker)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//
+//	formData := map[string]string{
+//		"path_hash":   blobberDownloadFileRequest.PathHash,
+//		"block_num":   blobberDownloadFileRequest.BlockNum,
+//		"num_blocks":  blobberDownloadFileRequest.NumBlocks,
+//		"read_marker": string(readMarker),
+//	}
+//
+//	headers := map[string]string{
+//		"X-App-Client-Id":  blobberDownloadFileRequest.ReadMarker.ClientID,
+//		"X-App-Client-Key": blobberDownloadFileRequest.ReadMarker.ClientKey,
+//	}
+//
+//	httpResponse, httpError := zeroChain.PostToBlobber(t,
+//		blobberDownloadFileRequest.URL,
+//		filepath.Join("/v1/file/download", blobberDownloadFileRequest.ReadMarker.AllocationID),
+//		headers,
+//		formData,
+//		nil,
+//		&stats)
+//
+//	return stats, httpResponse, httpError
+//}

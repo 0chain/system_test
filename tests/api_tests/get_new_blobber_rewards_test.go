@@ -1,8 +1,7 @@
 package api_tests
 
 import (
-	"fmt"
-	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -15,51 +14,51 @@ func TestNewBlobberRewards(t *testing.T) {
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		sdkClient.SetWallet(wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		apiClient.ExecuteFaucetWrapper(t, wallet)
-
-		walletBalance := apiClient.GetWalletBalanceWrapper(t, wallet)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
-
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbersWrapper(t, wallet, newBlobberID, "", allocationID)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
+		allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersAfter := len(allocation.Blobbers)
 		require.Greater(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 
-		stakePoolID := apiClient.CreateStakePoolWrapper(t, wallet, sdk.ProviderBlobber, newBlobberID)
-		fmt.Println(stakePoolID)
+		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
+		// TODO: replace with native "Upload API" call
 		sdkClient.UploadSomeFile(t, allocationID)
-		wait.PoolImmediately(time.Minute*2, func() bool { return false })
-
-		apiClient.CollectRewardWrapper(t, wallet, newBlobberID, stakePoolID, 3)
-
-		stakePoolInfo := apiClient.GetStakePoolStatWrapper(t, newBlobberID)
 
 		var rewards int64
-		for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-			if poolDelegateInfo.DelegateID == wallet.ClientID {
-				rewards = poolDelegateInfo.TotalReward
-				break
-			}
-		}
 
+		wait.PoolImmediately(t, time.Minute*2, func() bool {
+			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+
+			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
+				if poolDelegateInfo.DelegateID == wallet.ClientID {
+					rewards = poolDelegateInfo.TotalReward
+					break
+				}
+			}
+
+			return rewards > int64(0)
+		})
 		require.Greater(t, rewards, int64(0))
 
-		walletBalance = apiClient.GetWalletBalanceWrapper(t, wallet)
+		apiClient.CollectRewardWrapper(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
+
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards)

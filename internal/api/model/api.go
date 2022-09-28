@@ -107,7 +107,7 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
-func NewCollectRewardTransactionData(providerID, poolID string, providerType int64) TransactionData {
+func NewCollectRewardTransactionData(providerID string, providerType int) TransactionData {
 	var input = map[string]interface{}{
 		"provider_id":   providerID,
 		"provider_type": providerType,
