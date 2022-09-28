@@ -2,11 +2,10 @@ package api_tests
 
 import (
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,36 +15,28 @@ func TestHashnodeRoot(t *testing.T) {
 	t.Run("Get hashnode root from blobber should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		blobberRequirements.Blobbers = availableBlobbers
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-		require.NotNil(t, createAllocationTransactionResponse)
-
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
-
-		blobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
-		require.NotZero(t, blobberID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
 		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{*keyPair})
 		require.Nil(t, err)
 
 		blobberRequest := &model.BlobberGetHashnodeRequest{
 			AllocationID:    allocation.ID,
-			URL:             getBlobberURL(blobberID, allocation.Blobbers),
-			ClientId:        registeredWallet.ClientID,
-			ClientKey:       registeredWallet.ClientKey,
+			URL:             getBlobberURL(newBlobberID, allocation.Blobbers),
+			ClientId:        wallet.ClientID,
+			ClientKey:       wallet.ClientKey,
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := v1BlobberGetHashNodeRoot(t, *blobberRequest)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest)
 		t.Log(getBlobberResponse, restyResponse, err)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)

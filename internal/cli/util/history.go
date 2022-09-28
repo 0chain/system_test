@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +18,7 @@ const (
 
 type ChainHistory struct {
 	from, to int64
-	blocks   []model.EventDbBlock
+	blocks   []model.EventDBBlock
 }
 
 func NewHistory(from, to int64) *ChainHistory {
@@ -56,7 +56,7 @@ func (ch *ChainHistory) TotalMinerFees(minerId string) int64 {
 	return fees
 }
 
-func (ch *ChainHistory) TotalBlockFees(block model.EventDbBlock) int64 {
+func (ch *ChainHistory) TotalBlockFees(block model.EventDBBlock) int64 {
 	var fees int64
 	for _, tx := range block.Transactions {
 		fees += tx.Fee
@@ -85,7 +85,7 @@ func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
 	}
 }
 
-func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDbBlock {
+func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDBBlock {
 	res, err := apiGetBlocks(from, to, limit, offset, sharderBaseUrl)
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
 	defer res.Body.Close()
@@ -96,7 +96,7 @@ func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl strin
 	resBody, err := io.ReadAll(res.Body)
 	require.NoError(t, err, "reading response body: %v", err)
 
-	var blocks []model.EventDbBlock
+	var blocks []model.EventDBBlock
 	err = json.Unmarshal(resBody, &blocks)
 	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
 
@@ -122,7 +122,7 @@ func (ch *ChainHistory) AccountingMiner(id string) {
 	}
 }
 
-func (ch *ChainHistory) AccountingMinerBlock(id string, block model.EventDbBlock) {
+func (ch *ChainHistory) AccountingMinerBlock(id string, block model.EventDBBlock) {
 	if id != block.MinerID {
 		return
 	}
