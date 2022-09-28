@@ -73,8 +73,11 @@ func (w *Wallet) Marshal() (string, error) {
 }
 
 func (w *Wallet) Sign(hash, scheme string) (string, error) {
-	sigScheme := NewSignatureScheme(scheme)
-	err := sigScheme.SetPrivateKey(w.Keys[0].PrivateKey)
+	sigScheme, err := NewSignatureScheme(scheme)
+	if err != nil {
+		return "", err
+	}
+	err = sigScheme.SetPrivateKey(w.Keys[0].PrivateKey)
 	if err != nil {
 		return "", err
 	}

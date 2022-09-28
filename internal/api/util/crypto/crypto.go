@@ -106,8 +106,11 @@ func handlePanic(t *testing.T) {
 func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
 	retSignature := ""
 	for _, kv := range keys {
-		ss := NewSignatureScheme(signatureScheme)
-		err := ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
+		ss, err := NewSignatureScheme(signatureScheme)
+		if err != nil {
+			return "", err
+		}
+		err = ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
 		if err != nil {
 			return "", err
 		}

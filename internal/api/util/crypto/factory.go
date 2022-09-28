@@ -12,14 +12,14 @@ import (
 )
 
 // NewSignatureScheme creates an instance for using signature functions
-func NewSignatureScheme(sigScheme string) SignatureScheme {
+func NewSignatureScheme(sigScheme string) (SignatureScheme, error) {
 	switch sigScheme {
 	case "ed25519":
-		return NewED255190chainScheme()
+		return NewED255190chainScheme(), nil
 	case "bls0chain":
-		return NewHerumiScheme()
+		return NewHerumiScheme(), nil
 	default:
-		panic(fmt.Sprintf("unknown signature scheme: %v", sigScheme))
+		return nil, errors.New("invalid_scheme", fmt.Sprintf("unknown signature scheme: %v", sigScheme))
 	}
 }
 
