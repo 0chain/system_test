@@ -107,7 +107,7 @@ func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string
 	retSignature := ""
 	for _, kv := range keys {
 		ss := NewSignatureScheme(signatureScheme)
-		err := ss.SetPrivateKey(kv.PrivateKey.GetHexString())
+		err := ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
 		if err != nil {
 			return "", err
 		}
