@@ -99,6 +99,6 @@ func blankIfNil(obj interface{}) string {
 
 func handlePanic(t *testing.T) {
 	if err := recover(); err != nil {
-		t.Errorf("panic occurred: ", err)
+		t.Error("panic occurred: ", err)
 	}
 }
