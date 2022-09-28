@@ -420,62 +420,6 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload File with Commit Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		filesize := int64(1024)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 2048,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n")))
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-	})
-
-	t.Run("Upload Encrypted File with Commit Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		filesize := int64(10)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 100000,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-			"encrypt":    "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n")))
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	t.Run("Data shards do not require more allocation space", func(t *testing.T) {
 		t.Parallel()
 
