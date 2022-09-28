@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/0chain/errors"
-	"github.com/tyler-smith/go-bip39"
+	bip39 "github.com/tyler-smith/go-bip39"
 
 	"github.com/0chain/gosdk/core/encryption"
 )
