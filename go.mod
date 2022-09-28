@@ -3,7 +3,7 @@ module github.com/0chain/system_test
 go 1.18
 
 require (
-	github.com/0chain/gosdk v1.8.9-0.20220928015345-dc21bb13b80e
+	github.com/0chain/gosdk v1.8.9-0.20220928021258-3c6d3d6c9a7d
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.0.1-0.20220103075647-4e46f4fe2af2
 	github.com/shopspring/decimal v1.3.1
