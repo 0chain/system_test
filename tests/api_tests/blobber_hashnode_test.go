@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	"github.com/stretchr/testify/require"
 )
@@ -34,8 +35,11 @@ func TestHashnodeRoot(t *testing.T) {
 		require.NotZero(t, blobberID)
 
 		blobberRequest := &model.BlobberGetHashnodeRequest{
-			AllocationID: allocation.ID,
-			URL:          getBlobberURL(blobberID, allocation.Blobbers),
+			AllocationID:    allocation.ID,
+			URL:             getBlobberURL(blobberID, allocation.Blobbers),
+			ClientId:        registeredWallet.ClientID,
+			ClientKey:       registeredWallet.ClientKey,
+			ClientSignature: keyPair.PrivateKey.Sign(crypto.Sha3256([]byte(allocation.ID))).SerializeToHexStr(),
 		}
 
 		getBlobberResponse, restyResponse, err := v1BlobberGetHashNodeRoot(t, *blobberRequest)
