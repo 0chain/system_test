@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -18,8 +17,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
-
-var reCommitResponse = regexp.MustCompile(`^Commit Metadata successful, Response : (.*)$`)
 
 func TestUpload(t *testing.T) {
 	t.Parallel()
@@ -439,10 +436,9 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/dir/" + filepath.Base(filename),
 			"localpath":  filename,
-			"commit":     "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 2, strings.Join(output, "\n")))
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
@@ -450,19 +446,6 @@ func TestUpload(t *testing.T) {
 		)
 		require.Equal(t, expected, output[1])
 
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
 	t.Run("Upload Encrypted File with Commit Should Work", func(t *testing.T) {
@@ -481,31 +464,16 @@ func TestUpload(t *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/dir/" + filepath.Base(filename),
 			"localpath":  filename,
-			"commit":     "",
 			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 2, strings.Join(output, "\n")))
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
-		require.NotEqual(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
 	t.Run("Data shards do not require more allocation space", func(t *testing.T) {

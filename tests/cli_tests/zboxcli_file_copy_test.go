@@ -509,33 +509,10 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destpath":   destpath,
-			"commit":     "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, fileSize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, remotePath, commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-
-		// verify commit txn
-		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
-		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, "Transaction verification success", output[0])
-		require.Equal(t, "TransactionStatus: 1", output[1])
-		require.Greater(t, len(output[2]), 0, output[2])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
