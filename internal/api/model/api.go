@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"github.com/herumi/bls-go-binary/bls"
-	"log"
 	"strconv"
 	"time"
 )
@@ -49,7 +48,7 @@ type ClientPutResponse struct {
 type Wallet struct {
 	ClientID    string      `json:"client_id"`
 	ClientKey   string      `json:"client_key"`
-	Keys        []KeyPair   `json:"keys"`
+	Keys        []*KeyPair  `json:"keys"`
 	Mnemonics   string      `json:"mnemonics"`
 	Version     string      `json:"version"`
 	DateCreated string      `json:"date_created"`
@@ -70,11 +69,11 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) MustGetKeyPair() KeyPair {
+func (w *Wallet) GetKeyPair() (*KeyPair, error) {
 	if len(w.Keys) == 0 {
-		log.Fatalln("wallet has no keys")
+		return nil, ErrNoKeyPair
 	}
-	return w.Keys[0]
+	return w.Keys[0], nil
 }
 
 func (w *Wallet) ConvertDateCreatedToInt() (int, error) {

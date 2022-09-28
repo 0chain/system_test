@@ -291,7 +291,7 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	wallet := &model.Wallet{
 		ClientID:  clientPutResponse.Id,
 		ClientKey: clientPutResponse.PublicKey,
-		Keys: []model.KeyPair{{
+		Keys: []*model.KeyPair{{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}},
@@ -591,8 +591,11 @@ func (c *APIClient) RegisterWalletWithAssertions(t *testing.T, clientID, clientK
 	dateCreated, err := wallet.ConvertDateCreatedToInt()
 	require.Nil(t, err)
 
+	keyPair, err := wallet.GetKeyPair()
+	require.Nil(t, err)
+
 	require.Equal(t, wallet.ClientID, crypto.Sha3256(publicKeyBytes))
-	require.Equal(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+	require.Equal(t, wallet.ClientKey, keyPair.PublicKey)
 	require.NotZero(t, dateCreated, "creation date is an invalid value!")
 	require.NotZero(t, wallet.Version)
 
@@ -739,7 +742,7 @@ func (c *APIClient) CreateAllocation(t *testing.T,
 				Hash: createAllocationTransactionPutResponse.Entity.Hash,
 			},
 			HttpOkStatus)
-		
+
 		if err != nil {
 			return false
 		}
