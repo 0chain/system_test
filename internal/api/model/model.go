@@ -2,14 +2,13 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/transaction"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
@@ -460,10 +459,6 @@ func (s *StubStatusBar) Completed(allocationId, filePath string, filename string
 }
 
 func (s *StubStatusBar) Error(allocationID string, filePath string, op int, err error) {
-}
-
-func (s *StubStatusBar) CommitMetaCompleted(request, response string, txn *transaction.Transaction, err error) {
-	fmt.Println(response, err)
 }
 
 func (s *StubStatusBar) RepairCompleted(filesRepaired int) {
