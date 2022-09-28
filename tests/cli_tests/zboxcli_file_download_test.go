@@ -1159,44 +1159,6 @@ func TestDownload(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		originalFileChecksum := generateChecksum(t, filename)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-	})
-
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *testing.T) {
 		t.Parallel()
 
