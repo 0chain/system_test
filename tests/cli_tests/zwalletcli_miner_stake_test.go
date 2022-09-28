@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -464,7 +463,7 @@ func getBalanceFromSharders(t *testing.T, clientId string) int64 {
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 
-	var startBalance apimodel.Balance
+	var startBalance climodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 

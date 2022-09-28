@@ -31,7 +31,6 @@ linters-settings:
       - ifElseChain
       - octalLiteral
       - whyNoLint
-      - wrapperFunc
   gocyclo:
     min-complexity: 25
   goimports:

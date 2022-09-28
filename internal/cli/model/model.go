@@ -1,4 +1,4 @@
-package climodel
+package model
 
 import (
 	currency "github.com/0chain/system_test/internal/currency"
@@ -454,4 +454,160 @@ type SendTransaction struct {
 	Status string `json:"status"`
 	Txn    string `json:"tx"`
 	Nonce  string `json:"nonce"`
+}
+
+type Balance struct {
+	Txn     string `json:"txn"`
+	Round   int64  `json:"round"`
+	Balance int64  `json:"balance"`
+}
+
+type Block struct {
+	Block struct {
+		Version                        string `json:"version"`
+		CreationDate                   int64  `json:"creation_date"`
+		LatestFinalizedMagicBlockHash  string `json:"latest_finalized_magic_block_hash"`
+		LatestFinalizedMagicBlockRound int64  `json:"latest_finalized_magic_block_round"`
+		PrevHash                       string `json:"prev_hash"`
+		PrevVerificationTickets        []struct {
+			VerifierId string `json:"verifier_id"`
+			Signature  string `json:"signature"`
+		} `json:"prev_verification_tickets"`
+		MinerId             string               `json:"miner_id"`
+		Round               int64                `json:"round"`
+		RoundRandomSeed     int64                `json:"round_random_seed"`
+		RoundTimeoutCount   int64                `json:"round_timeout_count"`
+		StateHash           string               `json:"state_hash"`
+		Transactions        []*TransactionEntity `json:"transactions"`
+		VerificationTickets []struct {
+			VerifierId string `json:"verifier_id"`
+			Signature  string `json:"signature"`
+		} `json:"verification_tickets"`
+		Hash            string  `json:"hash"`
+		Signature       string  `json:"signature"`
+		ChainId         string  `json:"chain_id"`
+		ChainWeight     float64 `json:"chain_weight"`
+		RunningTxnCount int     `json:"running_txn_count"`
+	} `json:"block"`
+}
+
+type TransactionEntity struct {
+	PublicKey         string `json:"public_key,omitempty"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id"`
+	ToClientId        string `json:"to_client_id"`
+	TransactionData   string `json:"transaction_data"`
+	TransactionValue  int64  `json:"transaction_value"`
+	CreationDate      int64  `json:"creation_date"`
+	TransactionFee    int64  `json:"transaction_fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output,omitempty"`
+	TxnOutputHash     string `json:"txn_output_hash"`
+	TransactionNonce  int    `json:"transaction_nonce"`
+	Hash              string `json:"hash"`
+	ChainId           string `json:"chain_id"`
+	Signature         string `json:"signature"`
+	TransactionStatus int    `json:"transaction_status"`
+}
+
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
+
+type Transfer struct {
+	Minter string `json:"minter"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Amount int64  `json:"amount"`
+}
+
+type ValidationNode struct {
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+}
+
+type BlobberChallenge struct {
+	BlobberID  string       `json:"blobber_id"`
+	Challenges []Challenges `json:"challenges"`
+}
+
+type Challenges struct {
+	ID             string            `json:"id"`
+	Created        int64             `json:"created"`
+	Validators     []*ValidationNode `json:"validators"`
+	RandomNumber   int64             `json:"seed"`
+	AllocationID   string            `json:"allocation_id"`
+	AllocationRoot string            `json:"allocation_root"`
+	BlobberID      string            `json:"blobber_id"`
+	Responded      bool              `json:"responded"`
+}
+
+type Transaction struct {
+	Hash              string `json:"hash"`
+	Signature         string `json:"signature"`
+	PublicKey         string `json:"public_key,omitempty"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id"`
+	ChainId           string `json:"chain_id"`
+	ToClientId        string `json:"to_client_id"`
+	TransactionData   string `json:"transaction_data"`
+	TransactionValue  int64  `json:"transaction_value"`
+	CreationDate      int64  `json:"creation_date"`
+	TransactionFee    int64  `json:"transaction_fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output,omitempty"`
+	TxnOutputHash     string `json:"txn_output_hash"`
+	TransactionNonce  int    `json:"transaction_nonce"`
+}
+
+type TransactionData struct {
+	Name  string      `json:"name"`
+	Input interface{} `json:"input"`
+}
+
+type EventDBTransaction struct {
+	Hash              string `json:"hash" `
+	BlockHash         string `json:"block_hash"`
+	Round             int64  `json:"round"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id" `
+	ToClientId        string `json:"to_client_id" `
+	TransactionData   string `json:"transaction_data"`
+	Value             int64  `json:"value"`
+	Signature         string `json:"signature"`
+	CreationDate      int64  `json:"creation_date"  `
+	Fee               int64  `json:"fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output"`
+	OutputHash        string `json:"output_hash"`
+	Status            int    `json:"status"`
+}
+
+type EventDBBlock struct {
+	Hash                  string               `json:"hash"`
+	Version               string               `json:"version"`
+	CreationDate          int64                `json:"creation_date" `
+	Round                 int64                `json:"round" `
+	MinerID               string               `json:"miner_id"`
+	RoundRandomSeed       int64                `json:"round_random_seed"`
+	MerkleTreeRoot        string               `json:"merkle_tree_root"`
+	StateHash             string               `json:"state_hash"`
+	ReceiptMerkleTreeRoot string               `json:"receipt_merkle_tree_root"`
+	NumTxns               int                  `json:"num_txns"`
+	MagicBlockHash        string               `json:"magic_block_hash"`
+	PrevHash              string               `json:"prev_hash"`
+	Signature             string               `json:"signature"`
+	ChainId               string               `json:"chain_id"`
+	RunningTxnCount       string               `json:"running_txn_count"`
+	RoundTimeoutCount     int                  `json:"round_timeout_count"`
+	CreatedAt             time.Time            `json:"created_at"`
+	Transactions          []EventDBTransaction `json:"transactions"`
 }

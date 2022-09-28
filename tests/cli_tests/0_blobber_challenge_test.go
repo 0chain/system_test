@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -347,7 +346,7 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	return sharderURLs
 }
 
-func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset int, limit int) *apimodel.BlobberChallenge {
+func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset int, limit int) *climodel.BlobberChallenge {
 	for _, sharderBaseURL := range sharderBaseURLs {
 		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
 			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)))
@@ -363,7 +362,7 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 		defer res.Body.Close()
 
 		require.Nil(t, err, "Error reading response body")
-		var openChallengesInBlobber apimodel.BlobberChallenge
+		var openChallengesInBlobber climodel.BlobberChallenge
 		err = json.Unmarshal(resBody, &openChallengesInBlobber)
 		require.Nil(t, err, "error unmarshalling response body")
 
@@ -374,8 +373,8 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 	return nil
 }
 
-func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]apimodel.Challenges) {
-	openChallenges = make(map[string]apimodel.Challenges)
+func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []string) (openChallenges map[string]climodel.Challenges) {
+	openChallenges = make(map[string]climodel.Challenges)
 	for _, blobberId := range blobbers {
 		offset := 0
 		limit := 20
@@ -394,7 +393,7 @@ func openChallengesForAllBlobbers(t *testing.T, sharderBaseURLs, blobbers []stri
 	return openChallenges
 }
 
-func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]apimodel.Challenges) bool {
+func areNewChallengesOpened(t *testing.T, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]climodel.Challenges) bool {
 	t.Log("Checking for new challenges to open...")
 	for i := 0; i < 150; i++ {
 		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)

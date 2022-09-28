@@ -6,8 +6,14 @@ import (
 	"os"
 )
 
+// ConfigPathEnv contains name of env variable
+const ConfigPathEnv = "CONFIG_PATH"
+
+// DefaultConfigPath contains default value of ConfigPathEnv
+const DefaultConfigPath = "./config/api_tests_config.yaml"
+
 type Config struct {
-	NetworkEntrypoint string `yaml:"network_entrypoint"`
+	BlockWorker string `yaml:"block_worker"`
 }
 
 func Parse(configPath string) *Config {
@@ -23,13 +29,4 @@ func Parse(configPath string) *Config {
 	}
 
 	return result
-}
-
-func MustGetHomeDir() string {
-	homeDir, err := os.UserHomeDir()
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return homeDir
 }
