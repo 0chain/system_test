@@ -32,6 +32,7 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetHashNodeRoot			   = "/v1/hashnode/root/:allocation"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -423,27 +424,37 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 	return scRestGetBlobberResponse, resp, err
 }
 
-func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest) (*model.BlobberGetHashnodeResponse, *resty.Response, error) { 
+func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) { 
 	var hashnode *model.BlobberGetHashnodeResponse
 
 
-	headers := map[string]string{
-		"X-App-Client-Id":        blobberGetHashnodeRequest.ClientId,
-		"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
-		"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
-		"allocation":             blobberGetHashnodeRequest.AllocationID,
-	}
+	// headers := map[string]string{
+	// 	"X-App-Client-Id":        blobberGetHashnodeRequest.ClientId,
+	// 	"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
+	// 	"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
+	// 	"allocation":             blobberGetHashnodeRequest.AllocationID,
+	// }
 
-	urlBuilder := NewURLBuilder().SetPath()
+	// urlBuilder := NewURLBuilder().
+	// 	SetPath(GetHashNodeRoot).
+	// 	SetPathVariable("allocation", blobberGetHashnodeRequest.AllocationID)
 
-	resp, err := zeroChain.GetFromBlobber(t,
-		blobberGetHashnodeRequest.URL,
-		filepath.Join("/v1/hashnode/root", blobberGetHashnodeRequest.AllocationID),
-		headers,
-		nil,
-		&hashnode,
-	)
-	return hashnode, resp, err
+	// resp, err := c.executeForServiceProvider(urlBuilder,
+	// 	model.ExecutionRequest{
+	// 		Dst: &hashnode,
+	// 		RequiredStatusCode: requiredStatusCode,
+	// 	},
+	// 	HttpGETMethod,
+	// 	Blobber
+	// 	)(t,
+	// 	blobberGetHashnodeRequest.URL,
+	// 	filepath.Join("/v1/hashnode/root", blobberGetHashnodeRequest.AllocationID),
+	// 	headers,
+	// 	nil,
+	// 	&hashnode,
+	// )
+	// return hashnode, resp, err
+	return hashnode, nil, nil
 }
 
 func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRestGetAllocationRequest, requiredStatusCode int) (*model.SCRestGetAllocationResponse, *resty.Response, error) { //nolint

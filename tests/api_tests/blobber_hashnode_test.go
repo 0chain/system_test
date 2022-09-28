@@ -25,7 +25,7 @@ func TestHashnodeRoot(t *testing.T) {
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{*keyPair})
+		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{wallet.Keys[0]})
 		require.Nil(t, err)
 
 		blobberRequest := &model.BlobberGetHashnodeRequest{
@@ -36,7 +36,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest, client.HttpOkStatus)
 		t.Log(getBlobberResponse, restyResponse, err)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
