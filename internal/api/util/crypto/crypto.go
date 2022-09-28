@@ -102,3 +102,24 @@ func handlePanic(t *testing.T) {
 		t.Error("panic occurred: ", err)
 	}
 }
+
+func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss := NewSignatureScheme(signatureScheme)
+		err := ss.SetPrivateKey(kv.PrivateKey.GetHexString())
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
+}
