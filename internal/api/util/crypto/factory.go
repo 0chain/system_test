@@ -58,7 +58,7 @@ func UnmarshalSignatureSchemes(sigScheme string, obj interface{}) ([]SignatureSc
 		return ss, nil
 
 	default:
-		panic(fmt.Sprintf("unknown signature scheme: %v", sigScheme))
+		return nil, errors.New("invalid_signature", fmt.Sprintf("unknown signature scheme: %v", sigScheme))
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/0chain/errors"
 	"github.com/0chain/gosdk/core/encryption"
-	"github.com/tyler-smith/go-bip39"
+	bip39 "github.com/tyler-smith/go-bip39"
 )
 
 const CryptoVersion = "1.0"
