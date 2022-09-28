@@ -30,12 +30,3 @@ func Parse(configPath string) *Config {
 
 	return result
 }
-
-func MustGetHomeDir() string {
-	homeDir, err := os.UserHomeDir()
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return homeDir
-}

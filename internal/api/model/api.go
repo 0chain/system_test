@@ -2,12 +2,8 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/core/common"
-	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/herumi/bls-go-binary/bls"
 	"io"
-	"log"
 	"strconv"
 	"time"
 )
@@ -36,9 +32,10 @@ type ExecutionRequest struct {
 }
 
 type ClientPutRequest struct {
-	ClientID     string `json:"id"`
-	ClientKey    string `json:"public_key"`
-	CreationDate *int   `json:"creation_date"`
+	ClientID      string `json:"id"`
+	ClientKey     string `json:"public_key"`
+	CreationDate  *int   `json:"creation_date"`
+	GenerateInput bool
 }
 
 type ClientPutResponse struct {
@@ -52,7 +49,7 @@ type ClientPutResponse struct {
 type Wallet struct {
 	ClientID    string      `json:"client_id"`
 	ClientKey   string      `json:"client_key"`
-	Keys        []KeyPair   `json:"keys"`
+	Keys        []*KeyPair  `json:"keys"`
 	Mnemonics   string      `json:"mnemonics"`
 	Version     string      `json:"version"`
 	DateCreated string      `json:"date_created"`
@@ -74,19 +71,19 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) MustGetKeyPair() KeyPair {
+func (w *Wallet) MustGetKeyPair() (*KeyPair, error) {
 	if len(w.Keys) == 0 {
-		log.Fatalln("wallet has no keys")
+		return
 	}
 	return w.Keys[0]
 }
 
-func (w *Wallet) MustConvertDateCreatedToInt() int {
+func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
 	result, err := strconv.Atoi(w.DateCreated)
 	if err != nil {
-		log.Fatalln(err)
+		return 0, err
 	}
-	return result
+	return result, nil
 }
 
 func (w *Wallet) String() string {
@@ -122,10 +119,10 @@ func NewCollectRewardTransactionData(providerID, poolID string, providerType int
 	}
 }
 
-func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse SCRestGetAllocationBlobbersResponse) TransactionData {
+func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
-		Input: scRestGetAllocationBlobbersResponse,
+		Input: *scRestGetAllocationBlobbersResponse,
 	}
 }
 
@@ -302,6 +299,7 @@ type SCRestGetAllocationRequest struct {
 }
 
 type SCRestGetAllocationBlobbersRequest struct {
+	BlobberRequirements
 	ClientID, ClientKey string
 }
 
@@ -367,8 +365,8 @@ type StakePoolSettings struct {
 }
 
 type CreateStakePoolRequest struct {
-	ProviderType sdk.ProviderType `json:"provider_type,omitempty"`
-	ProviderID   string           `json:"provider_id,omitempty"`
+	ProviderType int    `json:"provider_type,omitempty"`
+	ProviderID   string `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -386,7 +384,7 @@ type SCRestGetAllocationResponse struct {
 	Stats           *AllocationStats `json:"stats"`
 	TimeUnit        time.Duration    `json:"time_unit"`
 	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       common.Balance   `json:"write_pool"`
+	WritePool       int64            `json:"write_pool"`
 	ReadPriceRange  PriceRange       `json:"read_price_range"`
 	WritePriceRange PriceRange       `json:"write_price_range"`
 }
@@ -440,7 +438,7 @@ type BlobberUploadFileResponse struct {
 }
 
 type BlobberListFilesRequest struct {
-	sys.KeyPair
+	KeyPair
 	URL, ClientID, ClientKey, ClientSignature, AllocationID, PathHash, Path string
 }
 

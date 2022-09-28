@@ -1,13 +1,14 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"math/rand"
-	"strconv"
+	"math/big"
 	"testing"
+	"time"
 )
 
 func TestAddBlobber(t *testing.T) {
@@ -16,187 +17,114 @@ func TestAddBlobber(t *testing.T) {
 	t.Run("Add new blobber to allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:     wallet,
-				ToClientID: client.StorageSmartContractAddress,
-				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
-					ID:              allocationID,
-					AddBlobberId:    newBlobberID,
-					RemoveBlobberId: "",
-				}),
-				Value: tokenomics.IntToZCN(0.1),
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionPutResponse)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
-		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
-			},
-			client.HttpOkStatus,
-			client.TxSuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+		var numberOfBlobbersAfter int
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
 
+			return numberOfBlobbersAfter == numberOfBlobbersBefore+1
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 	})
 
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:     wallet,
-				ToClientID: client.StorageSmartContractAddress,
-				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
-					ID:              allocationID,
-					AddBlobberId:    "",
-					RemoveBlobberId: "",
-				}),
-				Value: tokenomics.IntToZCN(0.1),
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionPutResponse)
+		apiClient.UpdateAllocationBlobbers(t, wallet, "", "", allocationID, client.TxSuccessfulStatus)
 
-		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
-			},
-			client.HttpOkStatus,
-			client.TxUnsuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+		var numberOfBlobbersAfter int
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
 
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:     wallet,
-				ToClientID: client.StorageSmartContractAddress,
-				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
-					ID:              allocationID,
-					AddBlobberId:    strconv.Itoa(rand.Intn(10)),
-					RemoveBlobberId: "",
-				}),
-				Value: tokenomics.IntToZCN(0.1),
-			},
-			client.HttpOkStatus)
+		result, err := rand.Int(rand.Reader, big.NewInt(10))
 		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionPutResponse)
 
-		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
-			},
-			client.HttpOkStatus,
-			client.TxUnsuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxSuccessfulStatus)
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
 
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWalletWrapper(t)
-		apiClient.ExecuteFaucetWrapper(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbersWrapper(t, wallet)
-		allocationID := apiClient.CreateAllocationWrapper(t, wallet, allocationBlobbers)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		allocation := apiClient.GetAllocationWrapper(t, allocationID)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		updateAllocationTransactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:     wallet,
-				ToClientID: client.StorageSmartContractAddress,
-				TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
-					ID:              allocationID,
-					AddBlobberId:    oldBlobberID,
-					RemoveBlobberId: "",
-				}),
-				Value: tokenomics.IntToZCN(0.1),
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionPutResponse)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
-		updateAllocationTransactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
-			},
-			client.HttpOkStatus,
-			client.TxUnsuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+		var numberOfBlobbersAfter int
 
-		allocation = apiClient.GetAllocationWrapper(t, allocationID)
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
 
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 }
 
-//Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
+// Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
 func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		var found bool
@@ -212,7 +140,7 @@ func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes
 	return ""
 }
 
-//Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
+// Returns "StorageNode" ID which is not used for created allocation yet, if such one exists
 func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
 	for _, availableStorageNodeID := range *availableStorageNodeIDs {
 		for _, usedStorageNode := range usedStorageNodes {

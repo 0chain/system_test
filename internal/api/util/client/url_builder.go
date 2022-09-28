@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"path/filepath"
 	"strings"
@@ -38,11 +37,10 @@ func (ub *URLBuilder) AddParams(name, value string) *URLBuilder {
 	return ub
 }
 
-//
-func (ub *URLBuilder) MustShiftParse(rawURL string) *URLBuilder {
+func (ub *URLBuilder) MustShiftParse(rawURL string) error {
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	ub.shiftedURL = ub.formattedURL
@@ -50,7 +48,7 @@ func (ub *URLBuilder) MustShiftParse(rawURL string) *URLBuilder {
 
 	ub.SetPath(ub.shiftedURL.Path)
 
-	return ub
+	return nil
 }
 
 func (ub *URLBuilder) String() string {

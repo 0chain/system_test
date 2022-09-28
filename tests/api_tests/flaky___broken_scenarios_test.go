@@ -7,7 +7,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 	"testing"
 
-	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
 )
@@ -25,25 +24,12 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		mnemonics := crypto.GenerateMnemonics()
 		expectedKeyPair := crypto.GenerateKeys(mnemonics)
 		publicKeyBytes, err := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
-		require.NotNil(t, err)
+		require.Nil(t, err)
 
 		expectedClientId := crypto.Sha3256(publicKeyBytes)
 		invalidCreationDate := -1
 
-		wallet, resp, err := apiClient.V1ClientPut(
-			model.ClientPutRequest{
-				ClientID:     expectedClientId,
-				ClientKey:    expectedKeyPair.PublicKey.SerializeToHexStr(),
-				CreationDate: &invalidCreationDate,
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
-		require.Equal(t, wallet.ClientID, expectedClientId)
-		require.Equal(t, wallet.ClientKey, expectedKeyPair.PublicKey.SerializeToHexStr())
-		require.NotZero(t, wallet.DateCreated, "Creation date is an invalid value!")
-		require.NotNil(t, wallet.Version)
+		apiClient.RegisterWalletWithAssertions(t, expectedClientId, expectedKeyPair.PublicKey.SerializeToHexStr(), &invalidCreationDate, false, client.HttpOkStatus)
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - client id invalid", func(t *testing.T) {
@@ -52,15 +38,7 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		mnemonics := crypto.GenerateMnemonics()
 		expectedKeyPair := crypto.GenerateKeys(mnemonics)
 
-		wallet, resp, err := apiClient.V1ClientPut(
-			model.ClientPutRequest{
-				ClientID:  "invalid",
-				ClientKey: expectedKeyPair.PublicKey.SerializeToHexStr(),
-			},
-			client.HttpNotFoundStatus)
-		require.NotNil(t, err)
-		require.NotNil(t, resp)
-		require.Nil(t, wallet)
+		apiClient.RegisterWalletWithAssertions(t, "invalid", expectedKeyPair.PublicKey.SerializeToHexStr(), nil, false, client.HttpOkStatus)
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - public key invalid", func(t *testing.T) {
@@ -69,29 +47,33 @@ func Test___BrokenScenariosRegisterWallet(t *testing.T) {
 		mnemonics := crypto.GenerateMnemonics()
 		expectedKeyPair := crypto.GenerateKeys(mnemonics)
 		publicKeyBytes, err := hex.DecodeString(expectedKeyPair.PublicKey.SerializeToHexStr())
-		require.NotNil(t, err)
+		require.Nil(t, err)
 
 		clientId := crypto.Sha3256(publicKeyBytes)
 
-		wallet, resp, err := apiClient.V1ClientPut(
-			model.ClientPutRequest{
-				ClientID:  clientId,
-				ClientKey: "invalid",
-			},
-			client.HttpNotFoundStatus)
+		wallet := apiClient.RegisterWallet(t, clientId, "invalid", nil, false, client.HttpNotFoundStatus)
+
+		require.NotEqual(t, wallet.ClientID, clientId)
+		require.NotEqual(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+
+		_, err = wallet.ConvertDateCreatedToInt()
 		require.NotNil(t, err)
-		require.NotNil(t, resp)
-		require.Nil(t, wallet)
+
+		require.Zero(t, wallet.Version)
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - empty json body", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(
-			model.ClientPutRequest{},
-			client.HttpNotFoundStatus)
-		require.NotNil(t, err)
-		require.NotNil(t, resp)
-		require.Nil(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, false, client.HttpOkStatus)
+
+		require.NotZero(t, wallet.ClientID)
+		require.Zero(t, wallet.ClientKey)
+
+		dateCreated, err := wallet.ConvertDateCreatedToInt()
+		require.Nil(t, err)
+		require.NotZero(t, dateCreated)
+
+		require.NotZero(t, wallet.Version)
 	})
 }

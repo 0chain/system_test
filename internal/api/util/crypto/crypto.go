@@ -2,18 +2,13 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/sha1"
-	"crypto/sha256"
 	_ "crypto/sha256"
 	"encoding/hex"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/lithammer/shortuuid/v3" //nolint
-	"github.com/tyler-smith/go-bip39"   //nolint
+	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
-	"io"
 	"log"
-	"os"
 	"sync"
 )
 
@@ -59,34 +54,6 @@ func GenerateKeys(mnemonics string) *model.RawKeyPair {
 	bls.SetRandFunc(nil)
 
 	return &model.RawKeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
-}
-
-func NewConnectionID() string {
-	return shortuuid.New() //nolint
-}
-
-func HashOfFileSHA1(src *os.File) (string, error) {
-	h := sha1.New()
-	if _, err := io.Copy(h, src); err != nil {
-		return "", err
-	}
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-func HashOfFileSHA256(src *os.File) (string, error) {
-	h := sha256.New()
-	if _, err := io.Copy(h, src); err != nil {
-		return "", err
-	}
-	if _, err := src.Seek(0, io.SeekStart); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func Sha3256(src []byte) string {

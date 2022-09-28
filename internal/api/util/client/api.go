@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -33,7 +32,6 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -70,7 +68,7 @@ const (
 //
 const (
 	TxType    = 1000
-	TxFee     = 1000
+	TxFee     = 0
 	TxVersion = "1.0"
 	TxOutput  = ""
 )
@@ -97,10 +95,14 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 	return apiClient
 }
 
-func (c *APIClient) getHealthyNodes(nodes []string) []string {
+func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
 	var result []string
 	for _, node := range nodes {
-		formattedURL := NewURLBuilder().MustShiftParse(node).SetPath(ChainGetStats).String()
+		urlBuilder := NewURLBuilder()
+		if err := urlBuilder.MustShiftParse(node); err != nil {
+			return nil, err
+		}
+		formattedURL := urlBuilder.SetPath(ChainGetStats).String()
 
 		healthResponse, err := c.httpClient.R().Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
@@ -111,21 +113,25 @@ func (c *APIClient) getHealthyNodes(nodes []string) []string {
 
 		log.Printf("%s is DOWN!", node)
 	}
-	return result
+	return result, nil
 }
 
-func (c *APIClient) getHealthyMiners(miners []string) []string {
+func (c *APIClient) getHealthyMiners(miners []string) ([]string, error) {
 	return c.getHealthyNodes(miners)
 }
 
-func (c *APIClient) getHealthyShaders(shaders []string) []string {
+func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
 	return c.getHealthyNodes(shaders)
 }
 
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
-	url := NewURLBuilder().MustShiftParse(networkEntrypoint).SetPath(GetNetworkDetails).String()
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
+		return err
+	}
+	formattedURL := urlBuilder.SetPath(GetNetworkDetails).String()
 
-	resp, err := c.httpClient.R().Get(url)
+	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
 		return ErrNetworkHealth
 	}
@@ -137,14 +143,20 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 		return ErrNetworkHealth
 	}
 
-	healthyMiners := c.getHealthyMiners(networkDNSResponse.Miners)
+	healthyMiners, err := c.getHealthyMiners(networkDNSResponse.Miners)
+	if err != nil {
+		return err
+	}
 	if len(healthyMiners) == 0 {
 		return ErrNoMinersHealth
 	}
 
 	c.NetworkHealthResources.Miners = healthyMiners
 
-	healthySharders := c.getHealthyShaders(networkDNSResponse.Sharders)
+	healthySharders, err := c.getHealthyShaders(networkDNSResponse.Sharders)
+	if err != nil {
+		return err
+	}
 	if len(healthySharders) == 0 {
 		return ErrNoShadersHealth
 	}
@@ -201,7 +213,10 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 	}
 
 	for _, serviceProvider := range serviceProviders {
-		formattedURL := urlBuilder.MustShiftParse(serviceProvider).String()
+		if err := urlBuilder.MustShiftParse(serviceProvider); err != nil {
+			return nil, err
+		}
+		formattedURL := urlBuilder.String()
 
 		newResp, err := c.executeForServiceProvider(formattedURL, executionRequest, method)
 		if err != nil {
@@ -249,15 +264,14 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	keyPair := crypto.GenerateKeys(mnemonics)
 	publicKeyBytes, err := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
-	if clientPutRequest.ClientID == "" {
-		clientPutRequest.ClientID = crypto.Sha3256(publicKeyBytes)
-	}
-
-	if clientPutRequest.ClientKey == "" {
-		clientPutRequest.ClientKey = keyPair.PublicKey.SerializeToHexStr()
+	if clientPutRequest.GenerateInput {
+		clientPutRequest = model.ClientPutRequest{
+			ClientID:  crypto.Sha3256(publicKeyBytes),
+			ClientKey: keyPair.PublicKey.SerializeToHexStr(),
+		}
 	}
 
 	resp, err := c.executeForAllServiceProviders(
@@ -277,15 +291,18 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 	wallet := &model.Wallet{
 		ClientID:  clientPutResponse.Id,
 		ClientKey: clientPutResponse.PublicKey,
-		Keys: []model.KeyPair{{
+		Keys: []*model.KeyPair{{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}},
-		DateCreated: strconv.Itoa(*clientPutResponse.CreationDate),
-		Mnemonics:   mnemonics,
-		Version:     clientPutResponse.Version,
-		Nonce:       clientPutResponse.Nonce,
-		RawKeys:     keyPair,
+		Mnemonics: mnemonics,
+		Version:   clientPutResponse.Version,
+		Nonce:     clientPutResponse.Nonce,
+		RawKeys:   keyPair,
+	}
+
+	if clientPutResponse.CreationDate != nil {
+		wallet.DateCreated = strconv.Itoa(*clientPutResponse.CreationDate)
 	}
 
 	return wallet, resp, err
@@ -296,7 +313,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 
 	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	transactionPutRequest := model.TransactionPutRequest{
@@ -317,7 +334,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%v:%v:%v:%v:%v:%v",
+	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		transactionPutRequest.CreationDate,
 		transactionPutRequest.TransactionNonce,
 		transactionPutRequest.ClientId,
@@ -327,7 +344,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 
 	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	transactionPutRequest.Signature = internalTransactionPutRequest.Wallet.RawKeys.PrivateKey.Sign(string(hashToSign)).
@@ -350,41 +367,21 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 	return transactionPutResponse, resp, err
 }
 
-func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode, requiredTransactionStatus int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
 	var transactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(TransactionGetConfirmation).
 		AddParams("hash", transactionGetConfirmationRequest.Hash)
 
-	var (
-		resp *resty.Response //nolint
-		err  error
-	)
-
-	wait.PoolImmediately(time.Minute*5, func() bool {
-		resp, err = c.executeForAllServiceProviders(
-			urlBuilder,
-			model.ExecutionRequest{
-				Dst:                &transactionGetConfirmationResponse,
-				RequiredStatusCode: requiredStatusCode,
-			},
-			HttpGETMethod,
-			SharderServiceProvider)
-		if err != nil {
-			return false
-		}
-
-		if resp.StatusCode() != requiredStatusCode {
-			return false
-		}
-
-		if transactionGetConfirmationResponse.Status != requiredTransactionStatus {
-			return false
-		}
-
-		return true
-	})
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &transactionGetConfirmationResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
 
 	return transactionGetConfirmationResponse, resp, err
 }
@@ -446,29 +443,12 @@ func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRes
 	return scRestGetAllocationResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
-	var scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse
+func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
+	scRestGetAllocationBlobbersResponse := new(model.SCRestGetAllocationBlobbersResponse)
 
-	blobberRequirements := model.BlobberRequirements{
-		Size:           10000,
-		DataShards:     1,
-		ParityShards:   1,
-		ExpirationDate: time.Now().Add(time.Minute * 20).Unix(),
-		ReadPriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		WritePriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		OwnerId:        scRestGetAllocationBlobbersRequest.ClientID,
-		OwnerPublicKey: scRestGetAllocationBlobbersRequest.ClientKey,
-	}
-
-	data, err := json.Marshal(blobberRequirements)
+	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, err
 	}
 
 	urlBuilder := NewURLBuilder().
@@ -488,7 +468,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersReq
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
-	scRestGetAllocationBlobbersResponse.BlobberRequirements = blobberRequirements
+	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
 	return scRestGetAllocationBlobbersResponse, resp, err
 }
@@ -571,39 +551,56 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
-	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
+// RegisterWallet provides basic assertions
+func (c *APIClient) RegisterWallet(t *testing.T, clientID, clientKey string, creationDate *int, generateInput bool, requiredStatusCode int) *model.Wallet {
+	t.Log("Register wallet with basic assertions...")
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetStakePoolStat).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
-
-	resp, err := c.executeForAllServiceProviders(
-		urlBuilder,
-		model.ExecutionRequest{
-			Dst:                &scRestGetStakePoolStatResponse,
-			RequiredStatusCode: requiredStatusCode,
+	wallet, resp, err := c.V1ClientPut(
+		model.ClientPutRequest{
+			ClientID:      clientID,
+			ClientKey:     clientKey,
+			CreationDate:  creationDate,
+			GenerateInput: generateInput,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
-
-	return scRestGetStakePoolStatResponse, resp, err
-}
-
-// RegisterWalletWrapper does not provide deep test of used components
-func (c *APIClient) RegisterWalletWrapper(t *testing.T) *model.Wallet {
-	t.Log("Register wallet...")
-
-	wallet, resp, err := c.V1ClientPut(model.ClientPutRequest{}, HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, wallet)
 
 	return wallet
 }
 
-// ExecuteFaucetWrapper does not provide deep test of used components
-func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
+func (c *APIClient) RegisterWalletWithAssertions(t *testing.T, clientID, clientKey string, creationDate *int, generateInput bool, requiredStatusCode int) *model.Wallet {
+	t.Log("Register wallet with assertions...")
+
+	wallet, resp, err := c.V1ClientPut(
+		model.ClientPutRequest{
+			ClientID:      clientID,
+			ClientKey:     clientKey,
+			CreationDate:  creationDate,
+			GenerateInput: generateInput,
+		},
+		requiredStatusCode)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, wallet)
+
+	publicKeyBytes, err := hex.DecodeString(wallet.RawKeys.PublicKey.SerializeToHexStr())
+	require.Nil(t, err)
+
+	dateCreated, err := wallet.ConvertDateCreatedToInt()
+	require.Nil(t, err)
+
+	require.Equal(t, wallet.ClientID, crypto.Sha3256(publicKeyBytes))
+	require.Equal(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
+	require.NotZero(t, dateCreated, "creation date is an invalid value!")
+	require.NotZero(t, wallet.Version)
+
+	return wallet
+}
+
+// ExecuteFaucet provides basic assertions
+func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -616,21 +613,110 @@ func (c *APIClient) ExecuteFaucetWrapper(t *testing.T, wallet *model.Wallet) {
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
 
-	faucetTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: faucetTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse)
+	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if faucetTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
 
-// CreateAllocationWrapper does not provide deep test of used components
-func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, scRestGetAllocationBlobbersResponse model.SCRestGetAllocationBlobbersResponse) string {
+// ExecuteFaucetWithAssertions provides deep assertions
+func (c *APIClient) ExecuteFaucetWithAssertions(t *testing.T, wallet *model.Wallet, requiredTransactionStatus int) {
+	t.Log("Execute faucet with assertions...")
+
+	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      FaucetSmartContractAddress,
+			TransactionData: model.NewFaucetTransactionData()},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, faucetTransactionPutResponse)
+
+	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: faucetTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if faucetTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	require.True(t, faucetTransactionPutResponse.Async)
+	require.NotNil(t, faucetTransactionPutResponse.Entity)
+	require.NotNil(t, faucetTransactionPutResponse.Entity.ChainId)
+	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionOutput)
+	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionStatus)
+
+	require.Equal(t, faucetTransactionPutResponse.Request.Hash, faucetTransactionPutResponse.Entity.Hash)
+	require.Equal(t, faucetTransactionPutResponse.Request.Version, faucetTransactionPutResponse.Entity.Version)
+	require.Equal(t, faucetTransactionPutResponse.Request.ClientId, faucetTransactionPutResponse.Entity.ClientId)
+	require.Equal(t, faucetTransactionPutResponse.Request.ToClientId, faucetTransactionPutResponse.Entity.ToClientId)
+	require.Equal(t, faucetTransactionPutResponse.Request.PublicKey, faucetTransactionPutResponse.Entity.PublicKey)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionData, faucetTransactionPutResponse.Entity.TransactionData)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionValue, faucetTransactionPutResponse.Entity.TransactionValue)
+	require.Equal(t, faucetTransactionPutResponse.Request.Signature, faucetTransactionPutResponse.Entity.Signature)
+	require.Equal(t, faucetTransactionPutResponse.Request.CreationDate, faucetTransactionPutResponse.Entity.CreationDate)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionFee, faucetTransactionPutResponse.Entity.TransactionFee)
+	require.Equal(t, faucetTransactionPutResponse.Request.TransactionType, faucetTransactionPutResponse.Entity.TransactionType)
+
+	require.Equal(t, TxVersion, faucetTransactionGetConfirmationResponse.Version)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.BlockHash)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.PreviousBlockHash)
+	require.Greater(t, faucetTransactionGetConfirmationResponse.CreationDate, int64(0))
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MinerID)
+	require.Greater(t, faucetTransactionGetConfirmationResponse.Round, int64(0))
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Status)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.RoundRandomSeed)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.StateChangesCount)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreeRoot)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreePath)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreeRoot)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreePath)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TransactionOutput)
+	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TxnOutputHash)
+
+	wallet.IncNonce()
+}
+
+func (c *APIClient) CreateAllocation(t *testing.T,
+	wallet *model.Wallet,
+	scRestGetAllocationBlobbersResponse *model.SCRestGetAllocationBlobbersResponse,
+	requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
 
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -645,71 +731,36 @@ func (c *APIClient) CreateAllocationWrapper(t *testing.T, wallet *model.Wallet, 
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
 
-	createAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: createAllocationTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createAllocationTransactionGetConfirmationResponse)
+	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 
 	return createAllocationTransactionPutResponse.Entity.Hash
 }
 
-// CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePoolWrapper(t *testing.T, wallet *model.Wallet, providerType sdk.ProviderType, providerID string) string {
-	t.Log("Create stake pool...")
-
-	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewCreateStackPoolTransactionData(
-				model.CreateStakePoolRequest{
-					ProviderType: providerType,
-					ProviderID:   providerID,
-				}),
-			Value: tokenomics.IntToZCN(0.5)},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createStakePoolTransactionPutResponse)
-
-	createStakePoolTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: createStakePoolTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createStakePoolTransactionGetConfirmationResponse)
-
-	wallet.IncNonce()
-
-	return createStakePoolTransactionGetConfirmationResponse.Hash
-}
-
-func (c *APIClient) GetStakePoolStatWrapper(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
-	t.Log("Get stake pool stat...")
-
-	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
-		model.SCRestGetStakePoolStatRequest{
-			BlobberID: blobberID,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-
-	return scRestGetStakePoolStat
-}
-
-// UpdateAllocationWrapper does not provide deep test of used components
-func (c *APIClient) UpdateAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet, newBlobberID, oldBlobberID, allocationID string) {
+func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet, newBlobberID, oldBlobberID, allocationID string, requiredTransactionStatus int) {
 	t.Log("Update allocation...")
 
 	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -728,43 +779,94 @@ func (c *APIClient) UpdateAllocationBlobbersWrapper(t *testing.T, wallet *model.
 	require.NotNil(t, resp)
 	require.NotNil(t, updateAllocationTransactionPutResponse)
 
-	updateAllocationTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: allocationID,
-		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, updateAllocationTransactionGetConfirmationResponse)
+	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: allocationID,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbersWrapper(t *testing.T, wallet *model.Wallet) model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, customBlobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
+
+	var blobberRequirements model.BlobberRequirements
+
+	if customBlobberRequirements != nil {
+		blobberRequirements = *customBlobberRequirements
+	} else {
+		blobberRequirements = model.BlobberRequirements{
+			Size:           10000,
+			DataShards:     1,
+			ParityShards:   1,
+			ExpirationDate: time.Now().Add(time.Minute * 20).Unix(),
+			ReadPriceRange: model.PriceRange{
+				Min: 0,
+				Max: 9223372036854775807,
+			},
+			WritePriceRange: model.PriceRange{
+				Min: 0,
+				Max: 9223372036854775807,
+			},
+			OwnerId:        wallet.ClientID,
+			OwnerPublicKey: wallet.ClientKey,
+		}
+	}
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
-			ClientID:  wallet.ClientID,
-			ClientKey: wallet.ClientKey,
+			ClientID:            wallet.ClientID,
+			ClientKey:           wallet.ClientKey,
+			BlobberRequirements: blobberRequirements,
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
 	return scRestGetAllocationBlobbersResponse
 }
 
-// GetAllocationWrapper does not provide deep test of used components
-func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *model.SCRestGetAllocationResponse {
+func (c *APIClient) GetAllocation(t *testing.T, allocationID string, requiredStatusCode int) *model.SCRestGetAllocationResponse {
 	t.Log("Get allocation...")
 
-	scRestGetAllocation, resp, err := c.V1SCRestGetAllocation(
-		model.SCRestGetAllocationRequest{
-			AllocationID: allocationID,
-		},
-		HttpOkStatus)
+	var (
+		scRestGetAllocation *model.SCRestGetAllocationResponse
+		resp                *resty.Response //nolint
+		err                 error
+	)
+
+	wait.PoolImmediately(t, time.Second*30, func() bool {
+		scRestGetAllocation, resp, err = c.V1SCRestGetAllocation(
+			model.SCRestGetAllocationRequest{
+				AllocationID: allocationID,
+			},
+			requiredStatusCode)
+		if err != nil {
+			return false
+		}
+
+		return true
+	})
+
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, scRestGetAllocation)
@@ -772,212 +874,69 @@ func (c *APIClient) GetAllocationWrapper(t *testing.T, allocationID string) *mod
 	return scRestGetAllocation
 }
 
-// GetWalletBalanceWrapper does not provide deep test of used components
-func (c *APIClient) GetWalletBalanceWrapper(t *testing.T, wallet *model.Wallet) *model.ClientGetBalanceResponse {
+func (c *APIClient) GetWalletBalance(t *testing.T, wallet *model.Wallet, requiredStatusCode int) *model.ClientGetBalanceResponse {
 	t.Log("Get wallet balance...")
 
 	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
 		model.ClientGetBalanceRequest{
 			ClientID: wallet.ClientID,
 		},
-		HttpOkStatus)
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, clientGetBalanceResponse)
 
 	return clientGetBalanceResponse
 }
 
-func (c *APIClient) CollectRewardWrapper(t *testing.T, wallet *model.Wallet, providerID, poolID string, providerType int64) {
-	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
+func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
+	updateBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewCollectRewardTransactionData(providerID, poolID, providerType),
+			TransactionData: model.NewUpdateBlobberTransactionData(scRestGetBlobberResponse),
 			Value:           tokenomics.IntToZCN(0.1),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
-	require.NotNil(t, collectRewardTransactionPutResponse)
+	require.NotNil(t, updateBlobberTransactionPutResponse)
 
-	collectRewardTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: collectRewardTransactionPutResponse.Entity.Hash,
-		},
-		HttpOkStatus,
-		TxSuccessfulStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, collectRewardTransactionGetConfirmationResponse)
+	var updateBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: updateBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateBlobberTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
 
-////Uploads a new file to blobber
-//func v1BlobberFileUpload(t *testing.T, blobberUploadFileRequest model.BlobberUploadFileRequest) (*model.BlobberUploadFileResponse, *resty.Response, error) {
-//	var stats *model.BlobberUploadFileResponse
-//
-//	payload := new(bytes.Buffer)
-//	writer := multipart.NewWriter(payload)
-//	uploadFile, err := writer.CreateFormFile("uploadFile", filepath.Base(blobberUploadFileRequest.Meta.FilePath))
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	_, err = io.Copy(uploadFile, blobberUploadFileRequest.File)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	err = writer.WriteField("connection_id", blobberUploadFileRequest.Meta.ConnectionID)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	metaData, err := json.Marshal(blobberUploadFileRequest.Meta)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	err = writer.WriteField("uploadMeta", string(metaData))
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberUploadFileRequest.ClientID,
-//		"X-App-Client-Key":       blobberUploadFileRequest.ClientKey,
-//		"X-App-Client-Signature": blobberUploadFileRequest.ClientSignature,
-//		"Content-Type":           writer.FormDataContentType(),
-//	}
-//
-//	err = writer.Close()
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberUploadFileRequest.URL,
-//		filepath.Join("/v1/file/upload", blobberUploadFileRequest.AllocationID),
-//		headers,
-//		nil,
-//		payload.Bytes(),
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Queries all the files in certain allocation
-//func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListFilesRequest) (*model.BlobberListFilesResponse, *resty.Response, error) {
-//	var stats *model.BlobberListFilesResponse
-//
-//	params := map[string]string{
-//		"path_hash":  blobberListFilesRequest.PathHash,
-//		"path":       "/",
-//		"auth_token": "",
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberListFilesRequest.ClientID,
-//		"X-App-Client-Key":       blobberListFilesRequest.ClientKey,
-//		"X-App-Client-Signature": blobberListFilesRequest.ClientSignature,
-//	}
-//
-//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
-//		blobberListFilesRequest.URL,
-//		filepath.Join("/v1/file/list", blobberListFilesRequest.AllocationID),
-//		headers,
-//		params,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Queries files in certain allocation
-//func v1BlobberGetFileReferencePath(t *testing.T, blobberGetFileReferencePathRequest model.BlobberGetFileReferencePathRequest) (*model.BlobberGetFileReferencePathResponse, *resty.Response, error) {
-//	var stats *model.BlobberGetFileReferencePathResponse
-//
-//	params := map[string]string{
-//		"paths": fmt.Sprintf("[\"%s\"]", "/"),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":        blobberGetFileReferencePathRequest.ClientID,
-//		"X-App-Client-Key":       blobberGetFileReferencePathRequest.ClientKey,
-//		"X-App-Client-Signature": blobberGetFileReferencePathRequest.ClientSignature,
-//	}
-//
-//	httpResponse, httpError := zeroChain.GetFromBlobber(t,
-//		blobberGetFileReferencePathRequest.URL,
-//		filepath.Join("/v1/file/referencepath", blobberGetFileReferencePathRequest.AllocationID),
-//		headers,
-//		params,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Commits all the actions in a certain opened connection
-//func v1BlobberCommitConnection(t *testing.T, blobberCommitConnectionRequest model.BlobberCommitConnectionRequest) (*model.BlobberCommitConnectionResponse, *resty.Response, error) {
-//	var stats *model.BlobberCommitConnectionResponse
-//
-//	writeMarker, err := json.Marshal(blobberCommitConnectionRequest.WriteMarker)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	formData := map[string]string{
-//		"connection_id": blobberCommitConnectionRequest.ConnectionID,
-//		"write_marker":  string(writeMarker),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":   blobberCommitConnectionRequest.WriteMarker.ClientID,
-//		"X-App-Client-Key":  blobberCommitConnectionRequest.ClientKey,
-//		"Connection":        "Keep-Alive",
-//		"Cache-Control":     "no-cache",
-//		"Transfer-Encoding": "chunked",
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberCommitConnectionRequest.URL,
-//		filepath.Join("/v1/connection/commit", blobberCommitConnectionRequest.WriteMarker.AllocationID),
-//		headers,
-//		formData,
-//		nil,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
-//
-////Commits all the actions in a certain opened connection
-//func v1BlobberDownloadFile(t *testing.T, blobberDownloadFileRequest model.BlobberDownloadFileRequest) (*model.BlobberDownloadFileResponse, *resty.Response, error) {
-//	var stats *model.BlobberDownloadFileResponse
-//
-//	readMarker, err := json.Marshal(blobberDownloadFileRequest.ReadMarker)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	formData := map[string]string{
-//		"path_hash":   blobberDownloadFileRequest.PathHash,
-//		"block_num":   blobberDownloadFileRequest.BlockNum,
-//		"num_blocks":  blobberDownloadFileRequest.NumBlocks,
-//		"read_marker": string(readMarker),
-//	}
-//
-//	headers := map[string]string{
-//		"X-App-Client-Id":  blobberDownloadFileRequest.ReadMarker.ClientID,
-//		"X-App-Client-Key": blobberDownloadFileRequest.ReadMarker.ClientKey,
-//	}
-//
-//	httpResponse, httpError := zeroChain.PostToBlobber(t,
-//		blobberDownloadFileRequest.URL,
-//		filepath.Join("/v1/file/download", blobberDownloadFileRequest.ReadMarker.AllocationID),
-//		headers,
-//		formData,
-//		nil,
-//		&stats)
-//
-//	return stats, httpResponse, httpError
-//}
+func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
+	scRestGetBlobberResponse, resp, err := c.V1SCRestGetBlobber(
+		model.SCRestGetBlobberRequest{
+			BlobberID: blobberID,
+		},
+		requiredStatusCode)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetBlobberResponse)
+
+	return scRestGetBlobberResponse
+}
