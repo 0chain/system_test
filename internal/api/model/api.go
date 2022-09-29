@@ -9,13 +9,10 @@ import (
 	"github.com/herumi/bls-go-binary/bls"
 )
 
-type NetworkDNSResponse struct {
+type HealthyServiceProviders struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
-}
-
-type NetworkHealthResources struct {
-	NetworkDNSResponse
+	Blobbers []string
 }
 
 type ExecutionRequest struct {
@@ -330,10 +327,6 @@ type BlobberGetHashnodeRequest struct {
 }
 
 type BlobberGetHashnodeResponse struct {
-	hashnode Hashnode
-}
-
-type Hashnode struct {
 	// hash data
 	AllocationID   string `gorm:"column:allocation_id" json:"allocation_id,omitempty"`
 	Type           string `gorm:"column:type" json:"type,omitempty"`
@@ -347,8 +340,8 @@ type Hashnode struct {
 	ActualFileSize int64  `gorm:"column:actual_file_size" json:"actual_file_size,omitempty"`
 
 	// other data
-	ParentPath string      `gorm:"parent_path" json:"-"`
-	Children   []*Hashnode `gorm:"-" json:"children,omitempty"`
+	ParentPath string                        `gorm:"parent_path" json:"-"`
+	Children   []*BlobberGetHashnodeResponse `gorm:"-" json:"children,omitempty"`
 }
 
 type SCRestGetBlobberResponse struct {
@@ -400,6 +393,10 @@ type SCRestGetAllocationResponse struct {
 	WritePool       int64            `json:"write_pool"`
 	ReadPriceRange  PriceRange       `json:"read_price_range"`
 	WritePriceRange PriceRange       `json:"write_price_range"`
+}
+
+type StorageNodes struct {
+	Nodes []*StorageNode `json:"Nodes"`
 }
 
 type StorageNode struct {
