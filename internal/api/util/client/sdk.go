@@ -90,7 +90,10 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.Nil(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(config.MustGetHomeDir(), sdkAllocation,
+	homeDir, err := config.GetHomeDir()
+	require.Nil(t, err)
+
+	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
 		fileMeta, buf, false, false)
 	require.Nil(t, err)
 	require.Nil(t, chunkedUpload.Start())

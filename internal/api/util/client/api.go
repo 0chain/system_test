@@ -951,14 +951,28 @@ func (c *APIClient) CreateStakePool(t *testing.T, wallet *model.Wallet, provider
 	require.NotNil(t, resp)
 	require.NotNil(t, createStakePoolTransactionPutResponse)
 
-	createStakePoolTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: createStakePoolTransactionPutResponse.Entity.Hash,
-		},
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createStakePoolTransactionGetConfirmationResponse)
+	var createStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 
@@ -1012,14 +1026,28 @@ func (c *APIClient) CollectRewardWrapper(t *testing.T, wallet *model.Wallet, pro
 	require.NotNil(t, resp)
 	require.NotNil(t, collectRewardTransactionPutResponse)
 
-	collectRewardTransactionGetConfirmationResponse, resp, err := c.V1TransactionGetConfirmation(
-		model.TransactionGetConfirmationRequest{
-			Hash: collectRewardTransactionPutResponse.Entity.Hash,
-		},
-		requiredTransactionStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, collectRewardTransactionGetConfirmationResponse)
+	var collectRewardTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		collectRewardTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: collectRewardTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if collectRewardTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return collectRewardTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
 
 	wallet.IncNonce()
 }
