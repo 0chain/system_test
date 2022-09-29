@@ -42,5 +42,6 @@ func TestHashnodeRoot(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
 		require.NotNil(t, getBlobberResponse)
+		require.Equal(t, getBlobberResponse.AllocationID, allocationID)
 	})
 }
