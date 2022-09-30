@@ -13,7 +13,7 @@ func TestExecuteFaucet(t *testing.T) {
 	t.Run("Execute Faucet API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 
 		apiClient.ExecuteFaucetWithAssertions(t, wallet, client.TxSuccessfulStatus)
 
