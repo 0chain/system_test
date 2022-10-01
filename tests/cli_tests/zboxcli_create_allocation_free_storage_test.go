@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
 	"net/http"
 	"os"
@@ -14,6 +13,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/crypto"
 
 	"github.com/herumi/bls-go-binary/bls"
 
@@ -69,7 +70,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfg, _ := keyValuePairStringToMap(t, output)
+	cfg, _ := keyValuePairStringToMap(output)
 
 	// miners list
 	output, err = getMiners(t, configPath)
