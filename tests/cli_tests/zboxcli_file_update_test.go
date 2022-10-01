@@ -2,8 +2,6 @@ package cli_tests
 
 import (
 	"encoding/base64"
-	"encoding/json"
-	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -236,57 +233,6 @@ func TestFileUpdate(t *testing.T) {
 		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
 		require.Nil(t, err)
 		require.Equal(t, 1.5*MB, actualSize)
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("update existing file with commit metadata should work", func(t *testing.T) {
-		t.Parallel()
-
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 2,
-		})
-
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		updateFileWithCommit(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  "tmp/",
-			"commit":     true,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(localFilePath),
-		)
-		require.Equal(t, expected, output[1])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(localFilePath), commitResp.MetaData.Name)
-		require.Equal(t, remotepath+filepath.Base(localFilePath), commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFilePath))
-
-		originalFileChecksum := generateChecksum(t, localFilePath)
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
