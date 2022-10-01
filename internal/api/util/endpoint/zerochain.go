@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	resty "github.com/go-resty/resty/v2" //nolint
@@ -289,17 +290,19 @@ func mostDominantError(errors []error) error {
 }
 
 func (z *Zerochain) GetFromChimney(t *testing.T, endpoint string, targetObject interface{}) (*resty.Response, error) { //nolint
-	resp, err := z.restClient.R().Get(endpoint)
+	networkURL := strings.Split(z.Sharders[0], "/")[2]
+	url := "https://" + networkURL + endpoint
+	resp, err := z.restClient.R().Get(url)
 
 	if resp != nil && resp.IsError() {
-		t.Logf("GET on endpoint [" + endpoint + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
+		t.Logf("GET on endpoint [" + url + "] was unsuccessful, resulting in HTTP [" + resp.Status() + "] and body [" + resp.String() + "]")
 		return resp, nil
 	} else if err != nil {
-		t.Logf("GET on endpoint [" + endpoint + "] processed with error [" + err.Error() + "]")
+		t.Logf("GET on endpoint [" + url + "] processed with error [" + err.Error() + "]")
 		return resp, err
 	} else {
 		if targetObject != nil {
-			t.Logf("GET on sharder endpoint [" + endpoint + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
+			t.Logf("GET on sharder endpoint [" + url + "] processed without error, resulting in HTTP [" + resp.Status() + "] with body [" + resp.String() + "]")
 			unmarshalError := json.Unmarshal(resp.Body(), targetObject)
 			if unmarshalError != nil {
 				return resp, unmarshalError
