@@ -111,7 +111,6 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		//unlock tokens for non offered tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolSecond.ID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -120,7 +119,6 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		//unlock tokens for offered tokens should fail
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolFirst.ID,
 		}))
 		require.Equal(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 
@@ -134,7 +132,6 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		//unlock tokens should work
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolFirst.ID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -188,7 +185,6 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		//unlock tokens for offered tokens should fail
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePool.ID,
 		}))
 		require.Equal(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 
