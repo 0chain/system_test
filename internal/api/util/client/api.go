@@ -31,19 +31,28 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
-	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus             = "/v1/miner/get/stats"
-	SharderGetStatus           = "/v1/sharder/get/stats"
-	SCStateGet                 = "/v1/scstate/get"
-	SCRestGetAllocation        = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers          = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats              = "/v1/chain/get/stats"
-	ClientPut                  = "/v1/client/put"
-	TransactionPut             = "/v1/transaction/put"
-	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
-	ClientGetBalance           = "/v1/client/get/balance"
-	GetNetworkDetails          = "/network"
+	GetAllocationBlobbers       = "/v1/screst/:sc_address/alloc_blobbers"
+	SCRestGetOpenChallenges     = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus              = "/v1/miner/get/stats"
+	SharderGetStatus            = "/v1/sharder/get/stats"
+	SCStateGet                  = "/v1/scstate/get"
+	SCRestGetAllocation         = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers           = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats               = "/v1/chain/get/stats"
+	ClientPut                   = "/v1/client/put"
+	TransactionPut              = "/v1/transaction/put"
+	TransactionGetConfirmation  = "/v1/transaction/get/confirmation"
+	ClientGetBalance            = "/v1/client/get/balance"
+	GetNetworkDetails           = "/network"
+	GetGraphAllocatedStorage    = "/v1/screst/:sc_address/graph-allocated-storage"
+	GetGraphChallenges          = "/v1/screst/:sc_address/graph-challenges"
+	GetGraphTokenSupply         = "/v1/screst/:sc_address/graph-token-supply"
+	GetGraphTotalChallengePools = "/v1/screst/:sc_address/graph-total-challenge-pools"
+	GetGraphTotalMinted         = "/v1/screst/:sc_address/graph-total-minted"
+	GetGraphTotalStaked         = "/v1/screst/:sc_address/graph-total-staked"
+	GetGraphTotalLocked         = "/v1/screst/:sc_address/graph-total-locked"
+	GetGraphUsedStorage         = "/v1/screst/:sc_address/graph-used-storage"
+	GetGraphWritePrice          = "/v1/screst/:sc_address/graph-write-price"
 )
 
 // Contains all used service providers
@@ -891,4 +900,27 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	require.NotNil(t, scRestGetBlobberResponse)
 
 	return scRestGetBlobberResponse
+}
+
+func (c *APIClient) V1SCRestGetDataPointsUsingURL(path string, requiredStatusCode int) ([]string, *resty.Response, error) { //nolint
+	var responseArray []string
+
+	urlBuilder := NewURLBuilder().
+		SetPath(path).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	if err := urlBuilder.MustShiftParse(path); err != nil {
+		return nil, nil, err
+	}
+	formattedURL := urlBuilder.String()
+
+	resp, err := c.executeForServiceProvider(
+		formattedURL,
+		model.ExecutionRequest{
+			Dst:                responseArray,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod)
+
+	return responseArray, resp, err
 }

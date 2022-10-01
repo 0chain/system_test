@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 	"math"
 	"net/http"
@@ -17,12 +18,12 @@ func TestAtlusChimneyGraphTotalMinted(t *testing.T) {
 		from := ""
 		to := ""
 
-		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-minted",
+		resp, httpResp, httpErr := apiClient.V1SCRestGetDataPointsUsingURL(createParams(map[string]interface{}{
+			"url":         client.GetGraphTotalMinted,
 			"data-points": "1",
 			"from":        from,
 			"to":          to,
-		}))
+		}), http.StatusOK)
 
 		require.NotNil(t, httpErr)
 		require.Equal(t, http.StatusBadRequest, httpResp.StatusCode())
@@ -34,11 +35,11 @@ func TestAtlusChimneyGraphTotalMinted(t *testing.T) {
 		from := ""
 		to := ""
 
-		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":  "/graph-total-minted",
+		resp, httpResp, httpErr := apiClient.V1SCRestGetDataPointsUsingURL(createParams(map[string]interface{}{
+			"url":  client.GetGraphTotalMinted,
 			"from": from,
 			"to":   to,
-		}))
+		}), http.StatusOK)
 
 		require.NotNil(t, httpErr)
 		require.Equal(t, http.StatusBadRequest, httpResp.StatusCode())
@@ -49,11 +50,11 @@ func TestAtlusChimneyGraphTotalMinted(t *testing.T) {
 		t.Parallel()
 		to := ""
 
-		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-minted",
+		resp, httpResp, httpErr := apiClient.V1SCRestGetDataPointsUsingURL(createParams(map[string]interface{}{
+			"url":         client.GetGraphTotalMinted,
 			"data-points": "1",
 			"to":          to,
-		}))
+		}), http.StatusOK)
 
 		require.NotNil(t, httpErr)
 		require.Equal(t, http.StatusBadRequest, httpResp.StatusCode())
@@ -64,11 +65,11 @@ func TestAtlusChimneyGraphTotalMinted(t *testing.T) {
 		t.Parallel()
 		from := ""
 
-		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-minted",
+		resp, httpResp, httpErr := apiClient.V1SCRestGetDataPointsUsingURL(createParams(map[string]interface{}{
+			"url":         client.GetGraphTotalMinted,
 			"data-points": "1",
 			"from":        from,
-		}))
+		}), http.StatusOK)
 
 		require.NotNil(t, httpErr)
 		require.Equal(t, http.StatusBadRequest, httpResp.StatusCode())
@@ -80,12 +81,12 @@ func TestAtlusChimneyGraphTotalMinted(t *testing.T) {
 		from := strconv.FormatInt(int64(math.Floor(float64(time.Now().Unix()-86400000/1000))), 10)
 		to := strconv.FormatInt(int64(math.Floor(float64(time.Now().Unix()/1000))), 10)
 
-		resp, httpResp, httpErr := v1SCRestGetDataPointsUsingURL(t, createParams(map[string]interface{}{
-			"url":         "/graph-total-minted",
+		resp, httpResp, httpErr := apiClient.V1SCRestGetDataPointsUsingURL(createParams(map[string]interface{}{
+			"url":         client.GetGraphTotalMinted,
 			"data-points": "1",
 			"from":        from,
 			"to":          to,
-		}))
+		}), http.StatusOK)
 
 		require.Nil(t, httpErr)
 		require.Equal(t, http.StatusOK, httpResp.StatusCode())
