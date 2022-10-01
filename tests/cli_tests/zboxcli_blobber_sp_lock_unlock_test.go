@@ -223,7 +223,6 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePool.ID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
