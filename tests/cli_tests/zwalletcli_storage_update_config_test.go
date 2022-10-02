@@ -14,7 +14,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var settings = []string{}
+var settingUpdateSleepTime = time.Second * 10
 
 func TestStorageUpdateConfig(t *testing.T) {
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -56,11 +56,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 			resetChanges[name] = strconv.FormatInt(int64(value), 10)
 			newChanges[name] = strconv.FormatInt(int64(value+1), 10)
 			expectedChange.Numeric[name] = value + 1
-			fmt.Println("setting name", name,
-				"reset", strconv.FormatInt(int64(value), 10),
-				"new", strconv.FormatInt(int64(value+1), 10),
-				"expected", value+1,
-			)
 		}
 		for _, name := range climodel.StorageBoolSettings {
 			value, ok := settings.Boolean[name]
@@ -81,7 +76,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, newChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
-		time.Sleep(time.Second * 10)
+		time.Sleep(settingUpdateSleepTime)
 
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
@@ -90,160 +85,72 @@ func TestStorageUpdateConfig(t *testing.T) {
 		_, err = updateStorageSCConfig(t, scOwnerWallet, resetChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
-		time.Sleep(time.Second * 10)
+		time.Sleep(settingUpdateSleepTime)
 
 		settingsReset := getStorageConfigMap(t)
 		checkSettings(t, settingsReset, settings)
 		fmt.Println("piers done")
 
 	})
-	/*
-		t.Run("should allow update of max_read_price", func(t *testing.T) {
-			t.Skip("Skip till fixed...")
-			configKey := "max_read_price"
-			newValue := 99
 
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 
-			// register SC owner wallet
-			output, err = registerWalletForName(t, configPath, scOwnerWallet)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			output, err = getStorageSCConfig(t, configPath, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+		output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]string{
+			"max_read_price": "110",
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
+	})
 
-			cfgBefore, _, _, _ := keyValuePairStringToMap(output)
+	t.Run("update with bad config key should fail", func(t *testing.T) {
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			t.Cleanup(func() {
-				oldValue := cfgBefore[configKey]
-				output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-					"keys":   configKey,
-					"values": oldValue,
-				}, true)
-				require.Nil(t, err, strings.Join(output, "\n"))
-				require.Len(t, output, 2, strings.Join(output, "\n"))
-				require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-				require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-			})
+		badKey := "bad key"
+		value := "1"
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			badKey: value,
+		}, false)
+		require.Error(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings, updating settings: unknown key "+badKey+
+			", can't set value "+value, output[0], strings.Join(output, "\n"))
+	})
 
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys":   configKey,
-				"values": newValue,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
-			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	t.Run("update max_read_price to invalid value should fail", func(t *testing.T) {
+		t.Parallel()
 
-			cliutils.Wait(t, 5*time.Second)
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
 
-			output, err = getStorageSCConfig(t, configPath, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+		configKey := "max_read_price"
+		badValue := "x"
 
-			cfgAfter, _, _, _ := keyValuePairStringToMap(output)
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			require.Equal(t, fmt.Sprint(newValue), cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
+		// register SC owner wallet
+		output, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-			// test transaction to verify chain is still working
-			output, err = executeFaucetWithTokens(t, configPath, 1)
-			require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-		})
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			configKey: badValue,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "update_settings, updating settings: cannot convert key "+configKey+
+			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax",
+			output[0], strings.Join(output, "\n"))
+	})
 
-		t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-			t.Skip("piers")
-			configKey := "max_read_price"
-			newValue := "110"
-
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]interface{}{
-				"keys":   configKey,
-				"values": newValue,
-			}, false)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, strings.Join(output, "\n"))
-			require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
-		})
-
-		t.Run("update with bad config key should fail", func(t *testing.T) {
-			t.Skip("piers")
-			configKey := "unknown_key"
-
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys":   configKey,
-				"values": 1,
-			}, false)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, strings.Join(output, "\n"))
-			require.Equal(t, "update_settings, updating settings: unknown key unknown_key, can't set value 1", output[0], strings.Join(output, "\n"))
-		})
-
-		t.Run("update with missing keys param should fail", func(t *testing.T) {
-			t.Skip("piers")
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"values": 1,
-			}, false)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, strings.Join(output, "\n"))
-			require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
-		})
-
-		t.Run("update with missing values param should fail", func(t *testing.T) {
-			t.Skip("piers")
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys": "max_read_price",
-			}, false)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, strings.Join(output, "\n"))
-			require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
-		})
-
-		t.Run("update max_read_price to invalid value should fail", func(t *testing.T) {
-			t.Skip("piers")
-			t.Parallel()
-
-			if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-				t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-			}
-
-			configKey := "max_read_price"
-			newValue := "x"
-
-			// unused wallet, just added to avoid having the creating new wallet outputs
-			output, err := registerWallet(t, configPath)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			// register SC owner wallet
-			output, err = registerWalletForName(t, configPath, scOwnerWallet)
-			require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-				"keys":   configKey,
-				"values": newValue,
-			}, false)
-			require.NotNil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, strings.Join(output, "\n"))
-			require.Equal(t, "update_settings, updating settings: cannot convert key max_read_price value x to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax", output[0], strings.Join(output, "\n"))
-		})
-	*/
 }
 
 func checkSettings(t *testing.T, actual, expected settingMaps) {
@@ -260,7 +167,7 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 		require.True(t, ok, "unrecognised setting", name)
 		// add in the check for floats after 0chain fix
 		if actualSetting != expectedSetting {
-			fmt.Println(fmt.Sprintf("float setting %s, values actual %g and expected %g don't match",
+			fmt.Println(fmt.Sprintf("mismatched float setting %s, values actual %g and expected %g don't match",
 				name, actualSetting, expectedSetting))
 		}
 	}
