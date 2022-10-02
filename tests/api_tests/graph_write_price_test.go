@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestAtlusChimneyGraphWritePrice(t *testing.T) {
+func TestGraphWritePrice(t *testing.T) {
 	t.Parallel()
 
 	t.Run("test api should return error when event db not able to find round matching", func(t *testing.T) {
