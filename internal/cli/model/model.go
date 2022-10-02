@@ -1,8 +1,9 @@
 package model
 
 import (
-	currency "github.com/0chain/system_test/internal/currency"
 	"time"
+
+	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
