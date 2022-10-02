@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -19,7 +21,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
@@ -41,7 +42,9 @@ const (
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
 	err := bls.Init(bls.CurveFp254BNb)
-	require.NoError(t, err, "Error on BLS init")
+	if err != nil {
+		panic(err)
+	}
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -304,7 +307,7 @@ func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	return wallet
 }
 
-func sendTxn(miners climodel.NodeList, txn *apimodel.Transaction) error {
+func sendTxn(miners climodel.NodeList, txn *climodel.Transaction) error {
 	var (
 		err error
 		wg  sync.WaitGroup
@@ -325,7 +328,7 @@ func sendTxn(miners climodel.NodeList, txn *apimodel.Transaction) error {
 	return err
 }
 
-func apiPutTransaction(minerBaseURL string, txn *apimodel.Transaction) (*http.Response, error) {
+func apiPutTransaction(minerBaseURL string, txn *climodel.Transaction) (*http.Response, error) {
 	txnData, err := json.Marshal(txn)
 	if err != nil {
 		return nil, err
@@ -334,8 +337,8 @@ func apiPutTransaction(minerBaseURL string, txn *apimodel.Transaction) (*http.Re
 	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
 }
 
-func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile) *apimodel.Transaction {
-	txn := &apimodel.Transaction{}
+func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile) *climodel.Transaction {
+	txn := &climodel.Transaction{}
 	txn.Version = "1.0"
 	txn.ClientId = from.ClientID
 	txn.CreationDate = time.Now().Unix()
@@ -358,14 +361,29 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 		"total_limit":      freeTokensTotalLimit,
 	}
 
-	sn := apimodel.SmartContractTxnData{Name: "add_free_storage_assigner", InputArgs: input}
+	sn := climodel.TransactionData{Name: "add_free_storage_assigner", Input: input}
 	snBytes, err := json.Marshal(sn)
 	require.Nil(t, err, "error marshaling smart contract data")
 
 	txn.TransactionData = string(snBytes)
-	crypto.HashTransaction(txn)
+
+	txn.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+		txn.CreationDate,
+		txn.TransactionNonce,
+		txn.ClientId,
+		txn.ToClientId,
+		txn.TransactionValue,
+		crypto.Sha3256([]byte(txn.TransactionData)))))
+
+	hashToSign, err := hex.DecodeString(txn.Hash)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-	crypto.SignTransaction(t, txn, keypair)
+
+	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
+		SerializeToHexStr()
 
 	return txn
 }

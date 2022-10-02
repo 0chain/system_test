@@ -1,10 +1,11 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/endpoint"
+	"crypto/rand"
+	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"math/rand"
-	"strconv"
+	"math/big"
 	"testing"
 	"time"
 )
@@ -15,41 +16,32 @@ func TestReplaceBlobber(t *testing.T) {
 	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet := apiClient.RegisterWallet(t)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		blobberRequirements.Blobbers = availableBlobbers
-
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
-
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		var numberOfBlobbersAfter int
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
+
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
 	})
@@ -57,123 +49,100 @@ func TestReplaceBlobber(t *testing.T) {
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet := apiClient.RegisterWallet(t)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		blobberRequirements.Blobbers = availableBlobbers
-
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
-
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, oldBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		var numberOfBlobbersAfter int
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
+
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet := apiClient.RegisterWallet(t)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		blobberRequirements.Blobbers = availableBlobbers
-
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
-
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "Old blobber ID contains zero value")
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, strconv.Itoa(rand.Intn(10)))
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxUnsuccessfulStatus, confirmation.Status)
+		result, err := rand.Int(rand.Reader, big.NewInt(10))
+		require.Nil(t, err)
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxSuccessfulStatus)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+		var numberOfBlobbersAfter int
+
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
+
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
+
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
 	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
-		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
-		require.NotNil(t, executeFaucetTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		wallet := apiClient.RegisterWallet(t)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		availableBlobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 10000, 1, 1, time.Minute*20)
-		require.NotNil(t, availableBlobbers)
-		require.NotNil(t, blobberRequirements)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		blobberRequirements.Blobbers = availableBlobbers
-
-		createAllocationTransactionResponse, confirmation := createAllocation(t, registeredWallet, keyPair, blobberRequirements)
-		require.NotNil(t, createAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
-
-		allocation := getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
-
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		oldBlobberID := getFirstUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		newBlobberID := getNotUsedStorageNodeID(availableBlobbers, allocation.Blobbers)
+		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		balanceBeforeAllocationUpdate := getBalance(t, registeredWallet.ClientID)
-		require.NotNil(t, balanceBeforeAllocationUpdate)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		balanceBeforeAllocationUpdate := walletBalance.Balance
 
-		allocationUpdate := getAllocationUpdate(allocation.ID, newBlobberID, oldBlobberID)
-		updateAllocationTransactionResponse, confirmation := updateAllocation(t, registeredWallet, keyPair, allocationUpdate)
-		require.NotNil(t, updateAllocationTransactionResponse)
-		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
-		balanceAfterAllocationUpdate := getBalance(t, registeredWallet.ClientID)
-		require.NotNil(t, balanceAfterAllocationUpdate)
+		var numberOfBlobbersAfter int
 
-		allocation = getAllocation(t, createAllocationTransactionResponse.Entity.Hash)
-		require.NotNil(t, allocation)
+		wait.PoolImmediately(t, time.Second*30, func() bool {
+			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			numberOfBlobbersAfter = len(allocation.Blobbers)
 
-		numberOfBlobbersAfter := len(allocation.Blobbers)
+			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		})
+
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		balanceAfterAllocationUpdate := walletBalance.Balance
+
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 }
