@@ -12,7 +12,7 @@ func TestUpdateBlobber(t *testing.T) {
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
@@ -24,7 +24,7 @@ func TestUpdateBlobber(t *testing.T) {
 		require.NotZero(t, blobberID)
 
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
-		require.NotEqual(t, wallet.ClientID, blobber.StakePoolSettings.DelegateWallet)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
 
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 	})
