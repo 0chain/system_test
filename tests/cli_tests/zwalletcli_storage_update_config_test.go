@@ -81,7 +81,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, newChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 10)
 
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
@@ -90,7 +90,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		_, err = updateStorageSCConfig(t, scOwnerWallet, resetChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 10)
 
 		settingsReset := getStorageConfigMap(t)
 		checkSettings(t, settingsReset, settings)
