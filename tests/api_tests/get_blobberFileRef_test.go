@@ -15,10 +15,12 @@ import (
 	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/endpoint"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+
+	// cli_tests "github.com/0chain/system_test/tests/cli_tests"
+
 	"github.com/stretchr/testify/require"
 	//nolint
 )
@@ -28,16 +30,11 @@ func TestGetBlobberFileRefs(t *testing.T) {
 	configPath := "./api_tests_config.yaml"
 	t.Run("Get file ref with allocation id, remote path and ref type should work", func(t *testing.T) {
 		t.Parallel()
-
 		_, err := registerWalletViaCli(t, configPath)
 		require.Nil(t, err)
 		wallet := readWalletFile(t, "./config/"+escapedTestName(t)+"_wallet.json")
-		registeredWallet := &model.Wallet{
-			ClientID:  wallet.ClientID,
-			ClientKey: wallet.ClientKey,
-			Nonce:     0,
-		}
-		keyPair := crypto.GenerateKeys(t, wallet.Mnemonic)
+		registeredWallet, keyPair := registerWalletForMnemonic(t, wallet.Mnemonic)
+		// keyPair := crypto.GenerateKeys(t, wallet.Mnemonic)
 		executeFaucetTransactionResponse, confirmation := executeFaucet(t, registeredWallet, keyPair)
 		require.NotNil(t, executeFaucetTransactionResponse)
 		require.Equal(t, endpoint.TxSuccessfulStatus, confirmation.Status, confirmation.Transaction.TransactionOutput)
@@ -61,13 +58,16 @@ func TestGetBlobberFileRefs(t *testing.T) {
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}}
 
-		url := "http://dev.0chain.net/blobber01"
+		url := "http://demo.0chain.net/blobber01"
 		clientSignature, _ := SignHash(createAllocationTransactionResponse.Entity.Hash, "bls0chain", sysKeyPair)
 		// // require.NotNil(t, allocation)
 		allocationId := allocation.ID
 		refType := "f" // or can be "d"
 		getBlobberFileUploadRequest(t, url, registeredWallet, keyPair, allocationId, refType, clientSignature)
-		// blobberFileRefRequest := getBlobberFileRefRequest(t, url, registeredWallet, keyPair, allocationId, refType, clientSignature)
+		blobberFileRefRequest := getBlobberFileRefRequest(t, url, registeredWallet, keyPair, allocationId, refType, clientSignature)
+		_, httpResponse, err := v1BlobberGetFileRefs(t, blobberFileRefRequest)
+		require.Nil(t, err)
+		require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status(), httpResponse)
 	})
 }
 
