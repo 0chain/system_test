@@ -158,7 +158,7 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	require.Len(t, actual.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings))
 	require.Len(t, actual.Boolean, len(climodel.StorageBoolSettings))
 	require.Len(t, actual.Duration, len(climodel.StorageDurationSettings))
-	var mismatches string
+	var mismatches = "expected and actual setting mismatches after update discovered:\n"
 
 	for _, name := range climodel.StorageFloatSettings {
 		actualSetting, ok := actual.Numeric[name]
