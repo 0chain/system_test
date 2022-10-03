@@ -10,6 +10,7 @@ import (
 type Zerochain struct {
 	Miners     []string     `json:"miners"`
 	Sharders   []string     `json:"sharders"`
+	Blobbers   []string     `json:"blobbers"`
 	restClient resty.Client //nolint
 }
 
@@ -34,9 +35,10 @@ func (z *Zerochain) Init(config Config) {
 		panic("0dns call failed!: encountered error [" + err.Error() + "] when trying to serialize body [" + resp.String() + "]")
 	}
 
-	healthyMiners, healthySharders := z.performHealthcheck()
+	healthyMiners, healthySharders, healthyBlobbers := z.performHealthcheck()
 	z.Miners = healthyMiners
 	z.Sharders = healthySharders
+	z.Blobbers = healthyBlobbers
 }
 
 func (z *Zerochain) GetFromMiners(t *testing.T, endpoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) { //nolint
@@ -123,9 +125,10 @@ func (z *Zerochain) GetFromSharder(t *testing.T, sharder string, endpoint string
 	}
 }
 
-func (z *Zerochain) performHealthcheck() ([]string, []string) {
+func (z *Zerochain) performHealthcheck() ([]string, []string, []string) {
 	healthyMiners := z.getHealthyNodes(z.Miners)
 	healthySharders := z.getHealthyNodes(z.Sharders)
+	healthyBlobbers := z.getHealthyNodes(z.Blobbers)
 
 	if len(healthyMiners) == 0 {
 		panic("No healthy miners found!")
@@ -133,8 +136,11 @@ func (z *Zerochain) performHealthcheck() ([]string, []string) {
 	if len(healthySharders) == 0 {
 		panic("No healthy sharders found!")
 	}
+	if len(healthyBlobbers) == 0 {
+		panic("No healthy blobbers found!")
+	}
 
-	return healthyMiners, healthySharders
+	return healthyMiners, healthySharders, healthyBlobbers
 }
 
 func (z *Zerochain) getHealthyNodes(nodes []string) []string {
@@ -210,4 +216,21 @@ func mostDominantError(errors []error) error {
 	}
 
 	return mostFrequent
+}
+
+func (z *Zerochain) DeleteFileFromBlobber(t *testing.T, endPoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) {
+	deleteFileFromBlobber := func(blobber string) (*resty.Response, error) {
+		return z.deleteFileFromBlobber(t, blobber, endPoint, targetObject)
+	}
+	return z.executeWithConsensus(t, z.Blobbers, deleteFileFromBlobber, targetObject, consensusMet)
+}
+
+func (z *Zerochain) deleteFileFromBlobber(t *testing.T, blobber, endPoint string, targetObject interface{}) (*resty.Response, error) {
+	resp, err := z.restClient.R().Delete(blobber + endPoint)
+	// if err then we will deal with it here
+	if err != nil {
+		t.Logf("There is an error, cannot deal with deletion of this code %s", err)
+		return nil, err
+	}
+	return resp, nil
 }

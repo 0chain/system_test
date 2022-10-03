@@ -79,3 +79,11 @@ func v1SharderGetStats(t *testing.T, consensusCategoriser util.ConsensusMetFunct
 
 	return stats, httpResponse, httpError
 }
+
+func v1BlobberDelete(t *testing.T, blobberId string, allocationId string, consensusCategoriser util.ConsensusMetFunction) {
+	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
+	// We are gonna delete that file from that blobber
+	endPoint = "/" + blobberId + "/v1/file/upload/" + allocationId
+	output, err := zeroChain.DeleteFileFromBlobber(t, endPoint, consensusCategoriser)
+	return output, err
+}

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	zeroChainutils "../../internal/api/util";
 )
 
 func TestRepairFile(t *testing.T) {
@@ -36,8 +37,8 @@ func TestRepairFile(t *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"parity": 1,
-			"data":   1,
+			"parity": 2,
+			"data":   2,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -49,41 +50,44 @@ func TestRepairFile(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+
+		fmt.Sprintf("All the files in all the blobbers are")
+		fmt.Sprintf("File details is %s    %s ", output, filepath.Base(filename))
+		return
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(filename)), output[1])
 
-		// now delete the file from any random blobber
 		allocation := getAllocation(t, allocationID)
-		require.Len(t, allocation.Blobbers, 2)
+		require.Len(t, allocation.Blobbers, 4)
 
 		// deleting the file in single blobber
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 		})
-		output, err = deleteFile(t, walletOwner, params, false)
-		// Since there were 2 blobbers before, Now they should be 2
+		// Need to call v1BlobberDelete from here
+		output, err = (t, walletOwner, params, false)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("%s deleted", filepath.Base(filename)), output[1])
+		require.Equal(t, fmt.Sprintf("%s deleted", filepath.Base(filename)), output[0])
+		fmt.Println("inside deleteFile, resp is %s", output);
 
 		// now we will try to repair the file and will create another folder to keep the same
-		err = os.MkdirAll("tmp_repair", os.ModePerm)
+		err = os.MkdirAll(os.TempDir(), os.ModePerm)
 		require.Nil(t, err)
 
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"repairpath": "/",
-			"rootpath":   "tmp_repair/",
+			"rootpath":   os.TempDir(),
 		})
 
 		output, _ = repairAllocation(t, walletOwner, configPath, params, false)
 		require.Len(t, output, 1)
-		// require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired: %s", "2"), output[len(output)-1])
+		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired: %s", "2"), output[len(output)-1])
 	})
 
 	return
