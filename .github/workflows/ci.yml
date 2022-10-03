@@ -13,9 +13,7 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
-          sudo apt update
-          sudo apt-cache search ansilove
-          ansilove -o ./output.png ./test.ansi
+          cat /etc/os-release || lsb_release -a
 
       - name: "Archive API Test Config & Console Output"
         uses: actions/upload-artifact@v3
