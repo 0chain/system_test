@@ -13,24 +13,21 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           rm -rf *
-          echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
-          sudo apt update
-          sudo apt-get -y install php
-          sudo apt-get install php-gd
-          wget https://github.com/ansilove/ansilove-php/archive/refs/heads/master.zip
+          wget https://github.com/ansilove/ansigo/archive/refs/heads/master.zip
           unzip master.zip
-          cd ansilove-php-master
-          ls -l 
+          cd ansigo-master
+          GO111MODULE=off go build ./...
+          mv ansigo-master ansigo
           RED='\033[0;31m'
-          NC='\033[0m' # No Color
-          echo -e "This ${RED}should be coloured{NC} this should not be" | tee file.ansi
-          ./ansilove -o ./output.png ./file.ansi  
+          NC='\033[0m'
+          echo -e "This ${RED}should be coloured${NC} this should not be" | tee file.ansi
+          ./ansigo ../file.ansi  
           rm -rf *
           
 
       - name: "Archive API Test Config & Console Output"
         uses: actions/upload-artifact@v3
         with:
-         name: output.png
+         name: file.ansi.png
          path: |
-          ./output.png
+           ./file.ansi.png
