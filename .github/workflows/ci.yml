@@ -22,11 +22,12 @@ jobs:
           unzip master.zip
           cd ansigo-master
           GO111MODULE=off go build ./...
-          mv ansigo-master ansigo
+          mv ansigo-master ../ansigo
+          cd ../
           RED='\033[0;31m'
           NC='\033[0m'
           echo -e "This ${RED}should be coloured${NC} this should not be" | tee file.ansi
-          ./ansigo ../file.ansi  
+          ./ansigo ./file.ansi  
           rm -rf *
           
 
