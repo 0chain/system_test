@@ -9,30 +9,13 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 90
     steps:
-      - name: "Setup Go"
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
-
-      - name: "Config: Run tests against existing 0Chain network"
-        shell: 'script --return --quiet --command "bash {0}"'
+      - name: "Create file"
         run: |
-          rm -rf *
-          wget https://github.com/ansilove/ansigo/archive/refs/heads/master.zip
-          unzip master.zip
-          cd ansigo-master
-          GO111MODULE=off go build ./...
-          mv ansigo-master ../ansigo
-          cd ../
           RED='\033[0;31m'
           NC='\033[0m'
-          echo -e "This ${RED}should be coloured${NC} this should not be" | tee file.ansi
-          ./ansigo ./file.ansi
-          ls -l
+          echo -e "This ${RED}should be coloured${NC} this should not be" | tee output.ansi
 
-      - name: "Archive API Test Config & Console Output"
-        uses: actions/upload-artifact@v3
+      - name: "Convert file"
+        uses: 0chain/actions/text-to-png@feature/add-txt-to-png
         with:
-         name: file.ansi.png
-         path: |
-           ./file.ansi.png
+          file_location: ./output.ansi
