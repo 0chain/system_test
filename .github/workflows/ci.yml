@@ -16,8 +16,6 @@ jobs:
           sudo apt update
           sudo sudo apt install -y imagemagick
           sed -i "/.*<policy *domain=\"path\" *rights=\"none\" *pattern=\"@\*\" *\/>.*/d" /etc/ImageMagick-6/policy.xml
-          cat 'after' 
-          cat /etc/ImageMagick-6/policy.xml
           ls -l --color=always
           ls -l --color=always | convert label:@- output.png
           
