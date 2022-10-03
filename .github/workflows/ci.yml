@@ -16,8 +16,9 @@ jobs:
           sudo apt update
           sudo sudo apt install -y imagemagick
           sed -i "/.*<policy *domain=\"path\" *rights=\"none\" *pattern=\"@\*\" *\/>.*/d" /etc/ImageMagick-6/policy.xml
-          ls -l --color=always
-          ls -l --color=always | convert label:@- output.png
+          RED='\033[0;31m'
+          NC='\033[0m' # No Color
+          echo -e "This ${RED}should be coloured{NC} this should not" | convert label:@- output.png
           
 
       - name: "Archive API Test Config & Console Output"
