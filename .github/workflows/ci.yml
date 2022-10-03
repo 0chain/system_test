@@ -18,7 +18,7 @@ jobs:
           sudo apt-get -y install build-essential
           sudo apt-get -y install cmake
           wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
-          unzip -y master.zip
+          unzip master.zip
           ls -l 
           mkdir build || true
           cd build
