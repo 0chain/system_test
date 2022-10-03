@@ -14,8 +14,8 @@ jobs:
         run: |
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           cat test.ansi
-          sudo apt update
-          sudo apt install -y ansilove
+          wget http://ftp.ubuntu.com/ubuntu/ubuntu/pool/universe/a/ansilove/ansilove_4.1.6-1_amd64.deb
+          sudo apt install -y ./ansilove_4.1.6-1_amd64.deb
           ansilove -o ./output.png ./test.ansi
 
       - name: "Archive API Test Config & Console Output"
