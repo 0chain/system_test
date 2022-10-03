@@ -167,13 +167,5 @@ func (ed *ED255190chainScheme) GetID() string {
 
 // GetPrivateKeyAsByteArray - converts private key into byte array
 func (ed *ED255190chainScheme) GetPrivateKeyAsByteArray() ([]byte, error) {
-	// if len(b0.PrivateKey) == 0 {
-	// 	return nil, errors.New("get_private_key_as_byte_array", "cannot convert empty private key to byte array")
-	// }
-	// privateKeyBytes, err := hex.DecodeString(b0.PrivateKey)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return privateKeyBytes, nil
 	return nil, errors.New("chain_scheme_get_private_key_as_byte_array", "it is not implemented yet")
 }
