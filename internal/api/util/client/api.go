@@ -155,14 +155,14 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		return ErrNetworkHealthy
 	}
 
-	var networkDNSResponse *model.HealthyServiceProviders
+	var networkServiceProviders *model.HealthyServiceProviders
 
-	err = json.Unmarshal(resp.Body(), &networkDNSResponse)
+	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
 		return ErrNetworkHealthy
 	}
 
-	healthyMiners, err := c.getHealthyMiners(networkDNSResponse.Miners)
+	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 
 	c.HealthyServiceProviders.Miners = healthyMiners
 
-	healthySharders, err := c.getHealthyShaders(networkDNSResponse.Sharders)
+	healthySharders, err := c.getHealthyShaders(networkServiceProviders.Sharders)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	var nodes model.StorageNodes
 
 	for {
-		if err := urlBuilder.MustShiftParse(networkDNSResponse.Sharders[0]); err != nil {
+		if err := urlBuilder.MustShiftParse(networkServiceProviders.Sharders[0]); err != nil {
 			return err
 		}
 		urlBuilder = urlBuilder.SetPath(GetBlobbers).SetPathVariable("sc_address", StorageSmartContractAddress)
@@ -206,12 +206,12 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 
 		for _, node := range nodes.Nodes {
-			networkDNSResponse.Blobbers = append(networkDNSResponse.Blobbers, node.BaseURL)
+			networkServiceProviders.Blobbers = append(networkServiceProviders.Blobbers, node.BaseURL)
 		}
 		offset += limit
 	}
 
-	healthyBlobbers, err := c.getHealthyBlobbers(networkDNSResponse.Blobbers)
+	healthyBlobbers, err := c.getHealthyBlobbers(networkServiceProviders.Blobbers)
 	if err != nil {
 		return err
 	}
