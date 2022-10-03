@@ -16,6 +16,10 @@ jobs:
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           sudo apt update
           sudo sudo apt install -y imagemagick
+          cat /etc/ImageMagick-6/policy.xml
+          sed -i '/<policy domain="path" rights="none" pattern="@*" />/d' /etc/ImageMagick-6/policy.xml
+          cat 'after' 
+          cat /etc/ImageMagick-6/policy.xml
           ls -l --color=always | convert label:@- output.png
           
 
