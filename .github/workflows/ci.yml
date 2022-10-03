@@ -19,3 +19,6 @@ jobs:
         uses: 0chain/actions/text-to-png@feature/add-txt-to-png
         with:
           file_location: ./output.ansi
+
+      - name: "Verify file exists"
+        run: ls -l
