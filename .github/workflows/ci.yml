@@ -15,18 +15,8 @@ jobs:
           rm -rf *
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           sudo apt update
-          sudo apt-get -y install build-essential
-          sudo apt-get -y install cmake
-          wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
-          unzip master.zip
-          cd ansilove-master
-          ls -l 
-          mkdir build
-          cd build
-          cmake ..
-          make
-          ls -l 
-          rm -rf *
+          sudo sudo apt install -y imagemagick
+          ls -l --color=always | convert label:@- output.png
           
 
       - name: "Archive API Test Config & Console Output"
