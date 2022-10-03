@@ -19,8 +19,9 @@ jobs:
           sudo apt-get -y install cmake
           wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
           unzip master.zip
+          cd ansilove-master
           ls -l 
-          mkdir build || true
+          mkdir build
           cd build
           cmake ..
           make
