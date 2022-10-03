@@ -16,13 +16,14 @@ jobs:
           sudo apt update
           sudo apt-get install build-essential cmake
           wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
-          unzip master.zip
+          unzip -y master.zip
           ls -l 
           mkdir build
           cd build
           cmake ..
           make
           ls -l 
+          rm -rf *
           
 
       - name: "Archive API Test Config & Console Output"
