@@ -14,6 +14,7 @@ jobs:
         run: |
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           cat test.ansi
+          sudo apt update
           sudo apt install -y ansilove > build.log 2>&1 || { sleep 60 && sudo apt install -y ansilove > build.log 2>&1 || { cat build.log && echo "::error title=Failed to install dependency::failed to install ansilove, cannot send slack notification"; }; }
           ansilove -o ./output.png ./test.ansi
 
