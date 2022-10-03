@@ -27,9 +27,8 @@ jobs:
           RED='\033[0;31m'
           NC='\033[0m'
           echo -e "This ${RED}should be coloured${NC} this should not be" | tee file.ansi
-          ./ansigo ./file.ansi  
-          rm -rf *
-          
+          ./ansigo ./file.ansi
+          ls -l
 
       - name: "Archive API Test Config & Console Output"
         uses: actions/upload-artifact@v3
