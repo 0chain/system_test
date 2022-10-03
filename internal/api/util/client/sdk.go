@@ -9,7 +9,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -52,23 +51,17 @@ func (c *SDKClient) SetWallet(wallet *model.Wallet) {
 }
 
 func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
-	tmpFile, err := ioutil.TempFile("", "*")
+	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	defer func(name string) {
-		err := os.Remove(name)
+		err := os.RemoveAll(name)
 		if err != nil {
 
 		}
 	}(tmpFile.Name())
-
-	defer func(file *os.File) {
-		if err := file.Close(); err != nil {
-			log.Fatalln(err)
-		}
-	}(tmpFile)
 
 	const actualSize int64 = 1024
 
@@ -97,9 +90,6 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 		fileMeta, buf, false, false)
 	require.Nil(t, err)
 	require.Nil(t, chunkedUpload.Start())
-
-	err = sdkAllocation.CommitMetaTransaction(filepath.Join("/", filepath.Base(tmpFile.Name())), "Upload", "", "", nil, new(model.StubStatusBar))
-	require.Nil(t, err)
 
 	c.wallet.IncNonce()
 }
