@@ -26,13 +26,14 @@ func TestHashnodeRoot(t *testing.T) {
 		usedBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, usedBlobberID, "Old blobber ID contains zero value")
 
-
 		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{wallet.Keys[0]})
 		require.Nil(t, err)
 
+		blobberUrl := getBlobberURL(usedBlobberID, allocation.Blobbers)
+
 		blobberRequest := &model.BlobberGetHashnodeRequest{
 			AllocationID:    allocation.ID,
-			URL:             getBlobberURL(usedBlobberID, allocation.Blobbers),
+			URL:             blobberUrl,
 			ClientId:        wallet.ClientID,
 			ClientKey:       wallet.ClientKey,
 			ClientSignature: sign,
