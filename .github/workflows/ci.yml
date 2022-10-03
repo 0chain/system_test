@@ -13,14 +13,15 @@ jobs:
         run: |
           RED='\033[0;31m'
           NC='\033[0m'
-          echo -e "This ${RED}should be coloured${NC} this should not be" | tee output.ansi
+          echo -e "This ${RED}should be coloured${NC} this should not be" | tee output
 
       - name: "Convert file"
         uses: 0chain/actions/text-to-png@feature/add-txt-to-png
         with:
-          file_location: ./output.ansi
+          file_location: ./output
 
       - name: "Verify file exists"
+        shell: 'script --return --quiet --command "bash {0}"'
         run: |
           pwd
           ls -l
