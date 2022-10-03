@@ -12,6 +12,7 @@ jobs:
       - name: "Config: Run tests against existing 0Chain network"
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
+          rm -rf *
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           sudo apt update
           sudo apt-get -y install build-essential
@@ -19,7 +20,7 @@ jobs:
           wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
           unzip -y master.zip
           ls -l 
-          mkdir build
+          mkdir build || true
           cd build
           cmake ..
           make
