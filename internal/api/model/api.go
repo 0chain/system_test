@@ -328,20 +328,20 @@ type BlobberGetHashnodeRequest struct {
 
 type BlobberGetHashnodeResponse struct {
 	// hash data
-	AllocationID   string `gorm:"column:allocation_id" json:"allocation_id,omitempty"`
-	Type           string `gorm:"column:type" json:"type,omitempty"`
-	Name           string `gorm:"column:name" json:"name,omitempty"`
-	Path           string `gorm:"column:path" json:"path,omitempty"`
-	ContentHash    string `gorm:"column:content_hash" json:"content_hash,omitempty"`
-	MerkleRoot     string `gorm:"column:merkle_root" json:"merkle_root,omitempty"`
-	ActualFileHash string `gorm:"column:actual_file_hash" json:"actual_file_hash,omitempty"`
-	ChunkSize      int64  `gorm:"column:chunk_size" json:"chunk_size,omitempty"`
-	Size           int64  `gorm:"column:size" json:"size,omitempty"`
-	ActualFileSize int64  `gorm:"column:actual_file_size" json:"actual_file_size,omitempty"`
+	AllocationID   string `json:"allocation_id,omitempty"`
+	Type           string `json:"type,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Path           string `json:"path,omitempty"`
+	ContentHash    string `json:"content_hash,omitempty"`
+	MerkleRoot     string `json:"merkle_root,omitempty"`
+	ActualFileHash string `json:"actual_file_hash,omitempty"`
+	ChunkSize      int64  `json:"chunk_size,omitempty"`
+	Size           int64  `json:"size,omitempty"`
+	ActualFileSize int64  `json:"actual_file_size,omitempty"`
 
 	// other data
-	ParentPath string                        `gorm:"parent_path" json:"-"`
-	Children   []*BlobberGetHashnodeResponse `gorm:"-" json:"children,omitempty"`
+	ParentPath string                        `json:"-"`
+	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
 type SCRestGetBlobberResponse struct {
