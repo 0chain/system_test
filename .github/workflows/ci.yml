@@ -10,7 +10,6 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: "Config: Run tests against existing 0Chain network"
-        shell: 'script --return --quiet --command "bash {0}"'
         run: |
           rm -rf *
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
@@ -19,6 +18,7 @@ jobs:
           sed -i "/.*<policy *domain=\"path\" *rights=\"none\" *pattern=\"@\*\" *\/>.*/d" /etc/ImageMagick-6/policy.xml
           cat 'after' 
           cat /etc/ImageMagick-6/policy.xml
+          ls -l --color=always
           ls -l --color=always | convert label:@- output.png
           
 
