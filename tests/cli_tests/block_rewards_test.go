@@ -110,7 +110,6 @@ func initialiseTest(t *testing.T, wallet string, funds bool) string {
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	}
 
-	//targetWalletName := escapedTestName(t) + "_TARGET"
 	output, err = registerWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
 

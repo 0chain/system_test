@@ -72,7 +72,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 			expectedChange.Duration[name] = value + 1
 		}
 
-		fmt.Println("change storage sc settings")
 		output, err := updateStorageSCConfig(t, scOwnerWallet, newChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
@@ -81,7 +80,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
 
-		fmt.Println("reset storage sc settings to original values")
 		_, err = updateStorageSCConfig(t, scOwnerWallet, resetChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 
@@ -89,12 +87,9 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		settingsReset := getStorageConfigMap(t)
 		checkSettings(t, settingsReset, settings)
-		fmt.Println("piers done")
-
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
