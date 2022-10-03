@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
 	"net/http"
 	"os"
@@ -19,13 +20,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	apimodel "github.com/0chain/system_test/internal/api/model"
-	crypto "github.com/0chain/system_test/internal/api/util/crypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
 const (
 	chainID                     = "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
 	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
+	minerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 	txnTypeSmartContract        = 1000 // A smart contract transaction type
 
 	freeTokensIndividualLimit = 10.0
@@ -39,6 +40,9 @@ const (
 )
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
+	err := bls.Init(bls.CurveFp254BNb)
+	require.NoError(t, err, "Error on BLS init")
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -285,13 +289,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 }
 
-func init() {
-	err := bls.Init(bls.CurveFp254BNb)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
@@ -366,9 +363,9 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 	require.Nil(t, err, "error marshaling smart contract data")
 
 	txn.TransactionData = string(snBytes)
-	crypto.Hash(txn)
+	crypto.HashTransaction(txn)
 	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-	crypto.Sign(txn, keypair)
+	crypto.SignTransaction(t, txn, keypair)
 
 	return txn
 }

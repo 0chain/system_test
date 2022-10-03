@@ -1,8 +1,8 @@
 package climodel
 
 import (
-	"time"
 	currency "github.com/0chain/system_test/internal/currency"
+	"time"
 )
 
 type Provider int
@@ -189,10 +189,10 @@ type CommitResponse struct {
 		LookupHash      string          `json:"LookupHash"`
 		Hash            string          `json:"Hash"`
 		MimeType        string          `json:"MimeType"`
+		EncryptedKey    string          `json:"EncryptedKey"`
 		Size            int64           `json:"Size"`
 		ActualFileSize  int64           `json:"ActualFileSize"`
 		ActualNumBlocks int             `json:"ActualNumBlocks"`
-		EncryptedKey    string          `json:"EncryptedKey"`
 		CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
 		Collaborators   []Collaborator  `json:"Collaborators"`
 	} `json:"MetaData"`
@@ -277,8 +277,10 @@ type StakePool struct {
 }
 
 type Node struct {
-	SimpleNode `json:"simple_miner"`
-	StakePool  `json:"stake_pool"`
+	SimpleNode  `json:"simple_miner"`
+	StakePool   `json:"stake_pool"`
+	Round       int64 `json:"round"`
+	TotalReward int64 `json:"total_reward"`
 }
 
 type SimpleNode struct {
