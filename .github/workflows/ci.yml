@@ -21,4 +21,6 @@ jobs:
           file_location: ./output.ansi
 
       - name: "Verify file exists"
-        run: ls -l
+        run: |
+          pwd
+          ls -l
