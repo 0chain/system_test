@@ -15,7 +15,7 @@ func TestHashnodeRoot(t *testing.T) {
 	t.Run("Get hashnode root from blobber should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
@@ -26,7 +26,7 @@ func TestHashnodeRoot(t *testing.T) {
 		usedBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, usedBlobberID, "Old blobber ID contains zero value")
 
-		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{wallet.Keys[0]})
+		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{wallet.Keys})
 		require.Nil(t, err)
 
 		blobberUrl := getBlobberURL(usedBlobberID, allocation.Blobbers)
@@ -34,8 +34,8 @@ func TestHashnodeRoot(t *testing.T) {
 		blobberRequest := &model.BlobberGetHashnodeRequest{
 			AllocationID:    allocation.ID,
 			URL:             blobberUrl,
-			ClientId:        wallet.ClientID,
-			ClientKey:       wallet.ClientKey,
+			ClientId:        wallet.Id,
+			ClientKey:       wallet.PublicKey,
 			ClientSignature: sign,
 		}
 

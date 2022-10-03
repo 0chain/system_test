@@ -2,8 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"log"
-	"strconv"
 	"time"
 
 	"github.com/herumi/bls-go-binary/bls"
@@ -29,58 +27,22 @@ type ExecutionRequest struct {
 	RequiredStatusCode int
 }
 
-type ClientPutRequest struct {
-	ClientID      string `json:"id"`
-	ClientKey     string `json:"public_key"`
-	CreationDate  *int   `json:"creation_date"`
-	GenerateInput bool
-}
-
-type ClientPutResponse struct {
-	Id           string `json:"id"`
-	Version      string `json:"version"`
-	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
+type Wallet struct {
+	Id           string  `json:"id"`
+	Version      string  `json:"version"`
+	CreationDate *int    `json:"creation_date"`
+	PublicKey    string  `json:"public_key"`
+	Keys         KeyPair `json:"keys"`
 	Nonce        int
 }
 
-type Wallet struct {
-	ClientID    string      `json:"client_id"`
-	ClientKey   string      `json:"client_key"`
-	Keys        []KeyPair   `json:"keys"`
-	Mnemonics   string      `json:"mnemonics"`
-	Version     string      `json:"version"`
-	DateCreated string      `json:"date_created"`
-	Nonce       int         `json:"-"`
-	RawKeys     *RawKeyPair `json:"-"`
-}
-
 type KeyPair struct {
-	PublicKey, PrivateKey string
-}
-
-type RawKeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
 
 func (w *Wallet) IncNonce() {
 	w.Nonce++
-}
-
-func (w *Wallet) MustGetKeyPair() KeyPair {
-	if len(w.Keys) == 0 {
-		log.Fatalln("wallet has no keys")
-	}
-	return w.Keys[0]
-}
-
-func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
-	result, err := strconv.Atoi(w.DateCreated)
-	if err != nil {
-		return 0, err
-	}
-	return result, nil
 }
 
 func (w *Wallet) String() string {
@@ -108,13 +70,6 @@ func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCR
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,
-	}
-}
-
-func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
-	return TransactionData{
-		Name:  "stake_pool_lock",
-		Input: createStakePoolRequest,
 	}
 }
 

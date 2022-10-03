@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,8 +20,8 @@ import (
 
 // Statuses of http based responses
 const (
-	HttpOkStatus       = 200
-	HttpNotFoundStatus = 400
+	HttpOkStatus         = 200
+	HttpBadRequestStatus = 400
 )
 
 // Contains all methods used for http based requests
@@ -71,7 +70,6 @@ const (
 	TxUnsuccessfulStatus
 )
 
-//
 const (
 	TxType    = 1000
 	TxFee     = 0
@@ -316,25 +314,10 @@ func selectMostFrequentError(errors []error) error {
 	return result
 }
 
-func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, requiredStatusCode int) (*model.Wallet, *resty.Response, error) { //nolint
-	var clientPutResponse *model.ClientPutResponse
+func (c *APIClient) V1ClientPut(t *testing.T, clientPutRequest model.Wallet, requiredStatusCode int) (*model.Wallet, *resty.Response, error) { //nolint
+	var clientPutResponse *model.Wallet
 
 	urlBuilder := NewURLBuilder().SetPath(ClientPut)
-
-	mnemonics := crypto.GenerateMnemonics()
-	keyPair := crypto.GenerateKeys(mnemonics)
-	publicKeyBytes, err := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if clientPutRequest.GenerateInput {
-		clientPutRequest = model.ClientPutRequest{
-			ClientID:  crypto.Sha3256(publicKeyBytes),
-			ClientKey: keyPair.PublicKey.SerializeToHexStr(),
-		}
-	}
-
 	resp, err := c.executeForAllServiceProviders(
 		urlBuilder,
 		model.ExecutionRequest{
@@ -349,27 +332,10 @@ func (c *APIClient) V1ClientPut(clientPutRequest model.ClientPutRequest, require
 		return nil, resp, err
 	}
 
-	wallet := &model.Wallet{
-		ClientID:  clientPutResponse.Id,
-		ClientKey: clientPutResponse.PublicKey,
-		Keys: []model.KeyPair{{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}},
-		Mnemonics: mnemonics,
-		Version:   clientPutResponse.Version,
-		Nonce:     clientPutResponse.Nonce,
-		RawKeys:   keyPair,
-	}
-
-	if clientPutResponse.CreationDate != nil {
-		wallet.DateCreated = strconv.Itoa(*clientPutResponse.CreationDate)
-	}
-
-	return wallet, resp, err
+	return clientPutResponse, resp, err
 }
 
-func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.InternalTransactionPutRequest, requiredStatusCode int) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionPut(t *testing.T, internalTransactionPutRequest model.InternalTransactionPutRequest, requiredStatusCode int) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
 	var transactionPutResponse *model.TransactionPutResponse
 
 	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
@@ -378,8 +344,8 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 	}
 
 	transactionPutRequest := model.TransactionPutRequest{
-		ClientId:         internalTransactionPutRequest.Wallet.ClientID,
-		PublicKey:        internalTransactionPutRequest.Wallet.ClientKey,
+		ClientId:         internalTransactionPutRequest.Wallet.Id,
+		PublicKey:        internalTransactionPutRequest.Wallet.PublicKey,
 		ToClientId:       internalTransactionPutRequest.ToClientID,
 		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
 		TxnOutputHash:    TxOutput,
@@ -403,13 +369,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue,
 		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
 
-	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	transactionPutRequest.Signature = internalTransactionPutRequest.Wallet.RawKeys.PrivateKey.Sign(string(hashToSign)).
-		SerializeToHexStr()
+	crypto.SignTransaction(t, &transactionPutRequest, &internalTransactionPutRequest.Wallet.Keys)
 
 	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
 
@@ -635,52 +595,39 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
-// RegisterWallet provides basic assertions
-func (c *APIClient) RegisterWallet(t *testing.T, clientID, clientKey string, creationDate *int, generateInput bool, requiredStatusCode int) *model.Wallet {
-	t.Log("Register wallet with basic assertions...")
+func (c *APIClient) RegisterWallet(t *testing.T) *model.Wallet {
+	mnemonic := crypto.GenerateMnemonics(t)
 
-	wallet, resp, err := c.V1ClientPut(
-		model.ClientPutRequest{
-			ClientID:      clientID,
-			ClientKey:     clientKey,
-			CreationDate:  creationDate,
-			GenerateInput: generateInput,
-		},
-		requiredStatusCode)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, wallet)
-
-	return wallet
+	return c.RegisterWalletForMnemonic(t, mnemonic)
 }
 
-func (c *APIClient) RegisterWalletWithAssertions(t *testing.T, clientID, clientKey string, creationDate *int, generateInput bool, requiredStatusCode int) *model.Wallet {
-	t.Log("Register wallet with assertions...")
+func (c *APIClient) RegisterWalletForMnemonic(t *testing.T, mnemonic string) *model.Wallet {
+	registeredWallet, httpResponse, err := c.RegisterWalletForMnemonicWithoutAssertion(t, mnemonic, HttpOkStatus)
 
-	wallet, resp, err := c.V1ClientPut(
-		model.ClientPutRequest{
-			ClientID:      clientID,
-			ClientKey:     clientKey,
-			CreationDate:  creationDate,
-			GenerateInput: generateInput,
-		},
-		requiredStatusCode)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, wallet)
+	publicKeyBytes, _ := hex.DecodeString(registeredWallet.Keys.PublicKey.SerializeToHexStr())
+	clientId := crypto.Sha3256(publicKeyBytes)
 
-	publicKeyBytes, err := hex.DecodeString(wallet.RawKeys.PublicKey.SerializeToHexStr())
-	require.Nil(t, err)
+	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
+	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
+	require.Equal(t, "200 OK", httpResponse.Status())
+	require.Equal(t, registeredWallet.Id, clientId)
+	require.Equal(t, registeredWallet.PublicKey, registeredWallet.Keys.PublicKey.SerializeToHexStr())
+	require.NotNil(t, registeredWallet.CreationDate, "Creation date is nil!")
+	require.NotNil(t, registeredWallet.Version)
 
-	dateCreated, err := wallet.ConvertDateCreatedToInt()
-	require.Nil(t, err)
+	return registeredWallet
+}
 
-	require.Equal(t, wallet.ClientID, crypto.Sha3256(publicKeyBytes))
-	require.Equal(t, wallet.ClientKey, wallet.MustGetKeyPair().PublicKey)
-	require.NotZero(t, dateCreated, "creation date is an invalid value!")
-	require.NotZero(t, wallet.Version)
+func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *testing.T, mnemonic string, expectedHttpStatus int) (*model.Wallet, *resty.Response, error) {
+	keyPair := crypto.GenerateKeys(t, mnemonic)
+	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
+	clientId := crypto.Sha3256(publicKeyBytes)
+	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
-	return wallet
+	registeredWallet, httpResponse, err := c.V1ClientPut(t, walletRequest, expectedHttpStatus)
+	registeredWallet.Keys = *keyPair
+
+	return registeredWallet, httpResponse, err
 }
 
 // ExecuteFaucet provides basic assertions
@@ -688,6 +635,7 @@ func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTr
 	t.Log("Execute faucet...")
 
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
@@ -728,6 +676,7 @@ func (c *APIClient) ExecuteFaucetWithAssertions(t *testing.T, wallet *model.Wall
 	t.Log("Execute faucet with assertions...")
 
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
@@ -804,6 +753,7 @@ func (c *APIClient) CreateAllocation(t *testing.T,
 	t.Log("Create allocation...")
 
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
@@ -848,6 +798,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	t.Log("Update allocation...")
 
 	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
 		model.InternalTransactionPutRequest{
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
@@ -910,15 +861,15 @@ func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, cu
 				Min: 0,
 				Max: 9223372036854775807,
 			},
-			OwnerId:        wallet.ClientID,
-			OwnerPublicKey: wallet.ClientKey,
+			OwnerId:        wallet.Id,
+			OwnerPublicKey: wallet.PublicKey,
 		}
 	}
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
-			ClientID:            wallet.ClientID,
-			ClientKey:           wallet.ClientKey,
+			ClientID:            wallet.Id,
+			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: blobberRequirements,
 		},
 		requiredStatusCode)
@@ -959,7 +910,7 @@ func (c *APIClient) GetWalletBalance(t *testing.T, wallet *model.Wallet, require
 
 	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
 		model.ClientGetBalanceRequest{
-			ClientID: wallet.ClientID,
+			ClientID: wallet.Id,
 		},
 		requiredStatusCode)
 	require.Nil(t, err)
@@ -971,6 +922,7 @@ func (c *APIClient) GetWalletBalance(t *testing.T, wallet *model.Wallet, require
 
 func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
 	updateBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
