@@ -10,15 +10,19 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: "Config: Run tests against existing 0Chain network"
+        shell: 'script --return --quiet --command "bash {0}"'
         run: |
           rm -rf *
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           sudo apt update
-          sudo sudo apt install -y imagemagick
-          sed -i "/.*<policy *domain=\"path\" *rights=\"none\" *pattern=\"@\*\" *\/>.*/d" /etc/ImageMagick-6/policy.xml
-          RED='\033[0;31m'
-          NC='\033[0m' # No Color
-          echo -e "This ${RED}should be coloured{NC} this should not" | convert label:@- output.png
+          sudo apt-get -y install build-essential
+          sudo apt-get -y install cmake
+          wget https://github.com/ansilove/ansilove-php/archive/refs/heads/master.zip
+          unzip master.zip
+          cd ansilove-php-master
+          ls -l 
+          ./ansilove 
+          rm -rf *
           
 
       - name: "Archive API Test Config & Console Output"
