@@ -14,8 +14,10 @@ jobs:
         run: |
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
           sudo apt update
-          sudo apt install termshot
-          termshot ./output.png cat test.ansi
+          sudo apt-get install build-essential cmake
+          wget https://github.com/ansilove/ansilove/archive/refs/heads/master.zip
+          unzip master.zip
+          ls -l 
           
 
       - name: "Archive API Test Config & Console Output"
