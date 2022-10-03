@@ -22,7 +22,4 @@ jobs:
 
       - name: "Create file 2"
         run: |
-          RED='\033[0;31m'
-          NC='\033[0m'
-          echo -e "This ${RED}should be coloured${NC} this should not be" | tee output
           ls -l
