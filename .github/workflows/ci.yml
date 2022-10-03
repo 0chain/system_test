@@ -13,7 +13,10 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           echo "^[[34mtest^[[39;49m^[[0m" > test.ansi
-          cat /etc/os-release || lsb_release -a
+          sudo apt update
+          sudo apt install termshot
+          termshot ./output.png cat test.ansi
+          
 
       - name: "Archive API Test Config & Console Output"
         uses: actions/upload-artifact@v3
