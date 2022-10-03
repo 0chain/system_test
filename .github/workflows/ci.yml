@@ -9,6 +9,11 @@ jobs:
     runs-on: [ tests-suite ]
     timeout-minutes: 90
     steps:
+      - name: "Setup Go"
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
       - name: "Config: Run tests against existing 0Chain network"
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
