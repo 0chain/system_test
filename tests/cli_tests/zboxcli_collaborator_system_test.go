@@ -564,7 +564,7 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "Error in moving the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		require.Equal(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
@@ -655,7 +655,7 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "Unexpected success in copying the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		require.Equal(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *testing.T) {

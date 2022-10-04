@@ -589,7 +589,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *testing.T) {
