@@ -1,35 +1,30 @@
 package wait
 
 import (
+	"testing"
 	"time"
 )
 
 // PoolImmediately pools passed function for a certain amount of time
-func PoolImmediately(duration time.Duration, callback func() bool) {
+func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool) {
 	ticker := time.NewTicker(time.Millisecond * 500)
 
 	defer ticker.Stop()
 
 	after := time.After(duration)
-	postAfter := time.After(time.Second * 5)
 
-primary:
 	for range ticker.C {
 		select {
 		case <-after:
-			break primary
+			return
 		default:
 			if callback() {
-				break primary
+				t.Log("Wait pool callback has succeed")
+				return
 			}
+			t.Log("Wait pool callback has failed, continue...")
 		}
 	}
 
-	for range ticker.C {
-		select {
-		case <-postAfter:
-			return
-		default:
-		}
-	}
+	t.Log("Wait pool received a timeout")
 }

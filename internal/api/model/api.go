@@ -2,11 +2,8 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/core/common"
-	"github.com/0chain/gosdk/core/sys"
 	"github.com/herumi/bls-go-binary/bls"
 	"io"
-	"log"
 	"strconv"
 	"time"
 )
@@ -35,9 +32,10 @@ type ExecutionRequest struct {
 }
 
 type ClientPutRequest struct {
-	ClientID     string `json:"id"`
-	ClientKey    string `json:"public_key"`
-	CreationDate *int   `json:"creation_date"`
+	ClientID      string `json:"id"`
+	ClientKey     string `json:"public_key"`
+	CreationDate  *int   `json:"creation_date"`
+	GenerateInput bool
 }
 
 type ClientPutResponse struct {
@@ -49,17 +47,22 @@ type ClientPutResponse struct {
 }
 
 type Wallet struct {
-	ClientID    string         `json:"client_id"`
-	ClientKey   string         `json:"client_key"`
-	Keys        []*sys.KeyPair `json:"keys"`
-	Mnemonics   string         `json:"mnemonics"`
-	Version     string         `json:"version"`
-	DateCreated string         `json:"date_created"`
-	Nonce       int            `json:"-"`
-	RawKeys     *KeyPair       `json:"-"`
+	ClientID    string      `json:"client_id"`
+	ClientKey   string      `json:"client_key"`
+	Keys        []*KeyPair  `json:"keys"`
+	Mnemonics   string      `json:"mnemonics"`
+	Version     string      `json:"version"`
+	DateCreated string      `json:"date_created"`
+	Nonce       int         `json:"-"`
+	RawKeys     *RawKeyPair `json:"-"`
 }
 
 type KeyPair struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
+
+type RawKeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
@@ -68,19 +71,19 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) MustGetKeyPair() *sys.KeyPair {
+func (w *Wallet) GetKeyPair() (*KeyPair, error) {
 	if len(w.Keys) == 0 {
-		log.Fatalln("wallet has no keys")
+		return nil, ErrNoKeyPair
 	}
-	return w.Keys[0]
+	return w.Keys[0], nil
 }
 
-func (w *Wallet) MustConvertDateCreatedToInt() int {
+func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
 	result, err := strconv.Atoi(w.DateCreated)
 	if err != nil {
-		log.Fatalln(err)
+		return 0, err
 	}
-	return result
+	return result, nil
 }
 
 func (w *Wallet) String() string {
@@ -104,17 +107,29 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
-func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse SCRestGetAllocationBlobbersResponse) TransactionData {
+func NewCollectRewardTransactionData(providerID string, providerType int) TransactionData {
+	var input = map[string]interface{}{
+		"provider_id":   providerID,
+		"provider_type": providerType,
+	}
+
+	return TransactionData{
+		Name:  "collect_reward",
+		Input: input,
+	}
+}
+
+func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
-		Input: scRestGetAllocationBlobbersResponse,
+		Input: *scRestGetAllocationBlobbersResponse,
 	}
 }
 
 func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
 	return TransactionData{
 		Name:  "stake_pool_lock",
-		Input: createStakePoolRequest,
+		Input: &createStakePoolRequest,
 	}
 }
 
@@ -284,6 +299,7 @@ type SCRestGetAllocationRequest struct {
 }
 
 type SCRestGetAllocationBlobbersRequest struct {
+	BlobberRequirements
 	ClientID, ClientKey string
 }
 
@@ -349,7 +365,8 @@ type StakePoolSettings struct {
 }
 
 type CreateStakePoolRequest struct {
-	BlobberID string `json:"blobber_id"`
+	ProviderType int    `json:"provider_type,omitempty"`
+	ProviderID   string `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -367,7 +384,7 @@ type SCRestGetAllocationResponse struct {
 	Stats           *AllocationStats `json:"stats"`
 	TimeUnit        time.Duration    `json:"time_unit"`
 	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       common.Balance   `json:"write_pool"`
+	WritePool       int64            `json:"write_pool"`
 	ReadPriceRange  PriceRange       `json:"read_price_range"`
 	WritePriceRange PriceRange       `json:"write_price_range"`
 }
@@ -421,7 +438,7 @@ type BlobberUploadFileResponse struct {
 }
 
 type BlobberListFilesRequest struct {
-	sys.KeyPair
+	KeyPair
 	URL, ClientID, ClientKey, ClientSignature, AllocationID, PathHash, Path string
 }
 
@@ -476,6 +493,38 @@ type BlobberDownloadFileRequest struct {
 }
 
 type BlobberDownloadFileResponse struct {
+}
+
+type SCRestGetStakePoolStatRequest struct {
+	BlobberID string
+}
+
+type SCRestGetStakePoolStatResponse struct {
+	ID           string                      `json:"pool_id"`
+	Balance      int64                       `json:"balance"`
+	Unstake      int64                       `json:"unstake"`
+	Free         int64                       `json:"free"`
+	Capacity     int64                       `json:"capacity"`
+	WritePrice   int64                       `json:"write_price"`
+	OffersTotal  int64                       `json:"offers_total"`
+	UnstakeTotal int64                       `json:"unstake_total"`
+	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty      int64                       `json:"penalty"`
+	Rewards      int64                       `json:"rewards"`
+	Settings     StakePoolSettings           `json:"settings"`
+}
+
+type StakePoolDelegatePoolInfo struct {
+	ID         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	DelegateID string `json:"delegate_id"`
+	Rewards    int64  `json:"rewards"`
+	UnStake    bool   `json:"unstake"`
+
+	TotalReward  int64  `json:"total_reward"`
+	TotalPenalty int64  `json:"total_penalty"`
+	Status       string `json:"status"`
+	RoundCreated int64  `json:"round_created"`
 }
 
 type GetTotalStoredDataResponse int

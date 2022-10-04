@@ -41,6 +41,11 @@ const (
 )
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
+	err := bls.Init(bls.CurveFp254BNb)
+	if err != nil {
+		panic(err)
+	}
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -287,13 +292,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 }
 
-func init() {
-	err := bls.Init(bls.CurveFp254BNb)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
@@ -369,20 +367,20 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 
 	txn.TransactionData = string(snBytes)
 
-	txn.Hash = crypto.Sha3256(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+	txn.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		txn.CreationDate,
 		txn.TransactionNonce,
 		txn.ClientId,
 		txn.ToClientId,
 		txn.TransactionValue,
-		crypto.Sha3256(txn.TransactionData)))
+		crypto.Sha3256([]byte(txn.TransactionData)))))
 
 	hashToSign, err := hex.DecodeString(txn.Hash)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	keypair := crypto.GenerateKeys(from.Mnemonic)
+	keypair := crypto.GenerateKeys(t, from.Mnemonic)
 
 	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
 		SerializeToHexStr()

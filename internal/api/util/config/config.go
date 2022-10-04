@@ -31,11 +31,11 @@ func Parse(configPath string) *Config {
 	return result
 }
 
-func MustGetHomeDir() string {
+func GetHomeDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
 
 	if err != nil {
-		log.Fatalln(err)
+		return "", err
 	}
-	return homeDir
+	return homeDir, nil
 }

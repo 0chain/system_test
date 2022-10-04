@@ -13,30 +13,8 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
-
-		transactionPutResponse, resp, err := apiClient.V1TransactionPut(
-			model.InternalTransactionPutRequest{
-				Wallet:          wallet,
-				ToClientID:      client.FaucetSmartContractAddress,
-				TransactionData: model.NewFaucetTransactionData()},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, transactionPutResponse)
-
-		transactionGetConfirmationResponse, resp, err := apiClient.V1TransactionGetConfirmation(
-			model.TransactionGetConfirmationRequest{
-				Hash: transactionPutResponse.Entity.Hash,
-			},
-			client.HttpOkStatus,
-			client.TxSuccessfulStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, transactionGetConfirmationResponse)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{
@@ -52,10 +30,7 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet, resp, err := apiClient.V1ClientPut(model.ClientPutRequest{}, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, wallet)
+		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{
