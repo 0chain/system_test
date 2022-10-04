@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite [master/a15df796] ran against [dev-3.devnet-0chain.net] at [2022-10-04_10.15.42]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite [master/a15df796] ran against [dev-3.devnet-0chain.net] at [2022-10-04_10.15.42]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>104</strong>Duration: <strong>7ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>20</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>3</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>81</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 4, 2022 10:23:15</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  skipped" id="17"></div>
+            
+                <div class="testResultGroup failed " id="18"></div>
+            
+                <div class="testResultGroup failed " id="19"></div>
+            
+                <div class="testResultGroup failed " id="20"></div>
+            
+                <div class="testResultGroup failed " id="21"></div>
+            
+                <div class="testResultGroup failed " id="22"></div>
+            
+                <div class="testResultGroup failed " id="23"></div>
+            
+                <div class="testResultGroup failed " id="24"></div>
+            
+                <div class="testResultGroup failed " id="25"></div>
+            
+                <div class="testResultGroup failed " id="26"></div>
+            
+                <div class="testResultGroup failed " id="27"></div>
+            
+                <div class="testResultGroup failed " id="28"></div>
+            
+                <div class="testResultGroup failed " id="29"></div>
+            
+                <div class="testResultGroup failed " id="30"></div>
+            
+                <div class="testResultGroup failed " id="31"></div>
+            
+                <div class="testResultGroup failed " id="32"></div>
+            
+                <div class="testResultGroup failed " id="33"></div>
+            
+                <div class="testResultGroup failed " id="34"></div>
+            
+                <div class="testResultGroup failed " id="35"></div>
+            
+                <div class="testResultGroup failed " id="36"></div>
+            
+                <div class="testResultGroup failed " id="37"></div>
+            
+                <div class="testResultGroup failed " id="38"></div>
+            
+                <div class="testResultGroup failed " id="39"></div>
+            
+                <div class="testResultGroup failed " id="40"></div>
+            
+                <div class="testResultGroup failed " id="41"></div>
+            
+                <div class="testResultGroup failed " id="42"></div>
+            
+                <div class="testResultGroup failed " id="43"></div>
+            
+                <div class="testResultGroup failed " id="44"></div>
+            
+                <div class="testResultGroup failed " id="45"></div>
+            
+                <div class="testResultGroup failed " id="46"></div>
+            
+                <div class="testResultGroup failed " id="47"></div>
+            
+                <div class="testResultGroup failed " id="48"></div>
+            
+                <div class="testResultGroup  skipped" id="49"></div>
+            
+                <div class="testResultGroup failed " id="50"></div>
+            
+                <div class="testResultGroup failed " id="51"></div>
+            
+                <div class="testResultGroup failed " id="52"></div>
+            
+                <div class="testResultGroup failed " id="53"></div>
+            
+                <div class="testResultGroup failed " id="54"></div>
+            
+                <div class="testResultGroup failed " id="55"></div>
+            
+                <div class="testResultGroup failed " id="56"></div>
+            
+                <div class="testResultGroup failed " id="57"></div>
+            
+                <div class="testResultGroup failed " id="58"></div>
+            
+                <div class="testResultGroup failed " id="59"></div>
+            
+                <div class="testResultGroup failed " id="60"></div>
+            
+                <div class="testResultGroup failed " id="61"></div>
+            
+                <div class="testResultGroup failed " id="62"></div>
+            
+                <div class="testResultGroup failed " id="63"></div>
+            
+                <div class="testResultGroup failed " id="64"></div>
+            
+                <div class="testResultGroup failed " id="65"></div>
+            
+                <div class="testResultGroup failed " id="66"></div>
+            
+                <div class="testResultGroup failed " id="67"></div>
+            
+                <div class="testResultGroup failed " id="68"></div>
+            
+                <div class="testResultGroup failed " id="69"></div>
+            
+                <div class="testResultGroup failed " id="70"></div>
+            
+                <div class="testResultGroup failed " id="71"></div>
+            
+                <div class="testResultGroup failed " id="72"></div>
+            
+                <div class="testResultGroup failed " id="73"></div>
+            
+                <div class="testResultGroup failed " id="74"></div>
+            
+                <div class="testResultGroup failed " id="75"></div>
+            
+                <div class="testResultGroup failed " id="76"></div>
+            
+                <div class="testResultGroup  skipped" id="77"></div>
+            
+                <div class="testResultGroup failed " id="78"></div>
+            
+                <div class="testResultGroup failed " id="79"></div>
+            
+                <div class="testResultGroup failed " id="80"></div>
+            
+                <div class="testResultGroup failed " id="81"></div>
+            
+                <div class="testResultGroup failed " id="82"></div>
+            
+                <div class="testResultGroup failed " id="83"></div>
+            
+                <div class="testResultGroup failed " id="84"></div>
+            
+                <div class="testResultGroup failed " id="85"></div>
+            
+                <div class="testResultGroup failed " id="86"></div>
+            
+                <div class="testResultGroup failed " id="87"></div>
+            
+                <div class="testResultGroup failed " id="88"></div>
+            
+                <div class="testResultGroup failed " id="89"></div>
+            
+                <div class="testResultGroup failed " id="90"></div>
+            
+                <div class="testResultGroup failed " id="91"></div>
+            
+                <div class="testResultGroup failed " id="92"></div>
+            
+                <div class="testResultGroup failed " id="93"></div>
+            
+                <div class="testResultGroup failed " id="94"></div>
+            
+                <div class="testResultGroup failed " id="95"></div>
+            
+                <div class="testResultGroup failed " id="96"></div>
+            
+                <div class="testResultGroup failed " id="97"></div>
+            
+                <div class="testResultGroup  " id="98"></div>
+            
+                <div class="testResultGroup  " id="99"></div>
+            
+                <div class="testResultGroup  " id="100"></div>
+            
+                <div class="testResultGroup  " id="101"></div>
+            
+                <div class="testResultGroup  " id="102"></div>
+            
+                <div class="testResultGroup failed " id="103"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAddRemoveCurator","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_add_remove_curator_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.41,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    0_blobber_challenge_test.go:26: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_blobber_challenge_test.go:26\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e468), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestBlobberChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=$HOME is not defined\n","        \t            \t)\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_blobber_challenge_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":144.44,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_stake_unstake_token_test.go:294: Requesting blobber list...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","--- PASS: TestBlobberConfigUpdate (144.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_blobber_config_update_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_all_params_at_once_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.01,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_all_params_at_once_should_work (7.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_capacity_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_capacity_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.03,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work (7.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_stake_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    utils.go:134: Waiting 3s...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work (10.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.01,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_stake_should_work (7.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_read_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_read_price_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_service_charge_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_service_charge_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_write_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.05,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:368: Requesting blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_blobber_write_price_should_work (7.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_no_params_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.79,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","--- PASS: TestBlobberConfigUpdate/update_no_params_should_work (6.79s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.36,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id invalid-blobber-id --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:26.692559 wallet_base.go:261: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:73: \u001b[31m0box-sdk        [INFO]   2022/10/04 10:18:26.692596 sdk.go:72: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:26.785750 transaction.go:1332: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:73: \u001b[31m0box-sdk        [DEBUG]  2022/10/04 10:18:26.865950 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner03\",\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:73: \u001b[31mrequesting blobber:\n","    utils.go:73: \u001b[31minternal_error: missing blobber: invalid-blobber-id\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail (8.36s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.17,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    utils.go:66: \u001b[31mCommand failed on final attempt [1/1] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id 501b7edb4dfdb20e1cc38048721fa94b25392c39ffcd6bcaccdd61a90f2f9933 --silent --wallet TestBlobberConfigUpdate-update_with_invalid_blobber_wallet-owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [update_blobber_settings_failed: access denied, allowed for delegate_wallet owner only]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:33.725349 wallet_base.go:261: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:73: \u001b[31m0box-sdk        [INFO]   2022/10/04 10:18:33.725388 sdk.go:72: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:33.818955 transaction.go:1332: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:73: \u001b[31m0box-sdk        [DEBUG]  2022/10/04 10:18:33.898084 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:73: \u001b[31mupdate_blobber_settings_failed: access denied, allowed for delegate_wallet owner only\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail (10.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_without_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.16,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:373: Updating blobber info...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNE","WLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNE","WLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update  --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e","- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNEWLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:18.385327 wallet_base.go:261: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:73: \u001b[31m0box-sdk        [INFO]   2022/10/04 10:18:18.385365 sdk.go:72: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:73: \u001b[31m0chain-core-sdk [INFO]   2022/10/04 10:18:18.480436 transaction.go:1332: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:73: \u001b[31m0box-sdk        [DEBUG]  2022/10/04 10:18:18.562264 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:73: \u001b[31mError: required flag(s) \"blobber_id\" not set\n","    utils.go:73: \u001b[31mUsage:\n","    utils.go:73: \u001b[31mzbox bl-update [flags]\n","    utils.go:73: \u001b[31mFlags:\n","    utils.go:73: \u001b[31m--blobber_id string             blobber ID, required\n","    utils.go:73: \u001b[31m--capacity int                  update blobber capacity bid, optional\n","    utils.go:73: \u001b[31m-h, --help                          help for bl-update\n","    utils.go:73: \u001b[31m--max_offer_duration duration   update max_offer_duration, optional\n","    utils.go:73: \u001b[31m--max_stake float               update max_stake, optional\n","    utils.go:73: \u001b[31m--min_lock_demand float         update min_lock_demand, optional\n","    utils.go:73: \u001b[31m--min_stake float               update min_stake, optional\n","    utils.go:73: \u001b[31m--num_delegates int             update num_delegates, optional\n","    utils.go:73: \u001b[31m--read_price float              update read_price, optional\n","    utils.go:73: \u001b[31m--service_charge float          update service_charge, optional\n","    utils.go:73: \u001b[31m--write_price float             update write_price, optional\n","    utils.go:73: \u001b[31mGlobal Flags:\n","    utils.go:73: \u001b[31m--config string              config file (default is config.yaml)\n","    utils.go:73: \u001b[31m--configDir string           configuration directory (default is $HOME/.zcn)\n","    utils.go:73: \u001b[31m--network string             network file to overwrite the network details (if required, default is network.yaml)\n","    utils.go:73: \u001b[31m--silent                     Do not show interactive sdk logs (shown by default)\n","    utils.go:73: \u001b[31m--wallet string              wallet file (default is wallet.json)\n","    utils.go:73: \u001b[31m--wallet_client_id string    wallet client_id\n","    utils.go:73: \u001b[31m--wallet_client_key string   wallet client_key\n","    utils.go:73: \u001b[31m--withNonce int              nonce that will be used in transaction (default is 0)\n","    utils.go:73: \u001b[31mrequired flag(s) \"blobber_id\" not set\n","--- PASS: TestBlobberConfigUpdate/update_without_blobber_ID_should_fail (8.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestBlockRewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    block_rewards_test.go:22: Till batch-update is merged...\n","--- SKIP: TestBlockRewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"block_rewards_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_zcnbridge_burn_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeClientInit","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.02,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_zcnbridge_client_init_test.go","TestFunctionDetail":{"Line":78,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeClientInit/Init_bridge_client_config_to_default_path_and_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.02,"Output":["","    zwalletcli_zcnbridge_client_init_test.go:186: Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder\n","    zwalletcli_zcnbridge_client_init_test.go:204: ./zwallet bridge-client-init --password password --ethereumaddress 0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947 --bridgeaddress 0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB --wzcnaddress 0x930E1BE76461587969Cb7eB9BFe61166b1E70244 --ethereumnodeurl https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4 --consensusthreshold 0.7500 --gaslimit 300000 --value 0 --wallet TestBridgeClientInit-Init_bridge_client_config_to_default_path_and_file_wallet.json --configDir ./config --config ./zbox_config.yaml \n","panic: $HOME is not defined [recovered]\n","\tpanic: $HOME is not defined\n","\n","goroutine 354 [running]:\n","testing.tRunner.func1.2({0x9a14a0, 0xc0004c1980})\n","\t/root/actions-runner3/_work/_tool/go/1.18.6/x64/src/testing/testing.go:1389 +0x24e\n","testing.tRunner.func1()\n","\t/root/actions-runner3/_work/_tool/go/1.18.6/x64/src/testing/testing.go:1392 +0x39f\n","panic({0x9a14a0, 0xc0004c1980})\n","\t/root/actions-runner3/_work/_tool/go/1.18.6/x64/src/runtime/panic.go:838 +0x207\n","github.com/0chain/system_test/tests/cli_tests.getZCNDir()\n","\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_zcnbridge_ethereum-account-register_test.go:124 +0x52\n","github.com/0chain/system_test/tests/cli_tests.TestBridgeClientInit.func1(0x0?)\n","\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_zcnbridge_client_init_test.go:82 +0xc5\n","testing.tRunner(0xc0002ff520, 0xa7a210)\n","\t/root/actions-runner3/_work/_tool/go/1.18.6/x64/src/testing/testing.go:1439 +0x102\n","created by testing.(*T).Run\n","\t/root/actions-runner3/_work/_tool/go/1.18.6/x64/src/testing/testing.go:1486 +0x35f\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBurnTicket","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_zcnbridge_burn_ticket_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCancelAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_cancel_allocation_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCollaborator","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_collaborator_system_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCollectRewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_collect_rewards_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_common_user_functions_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_allocation_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.06,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    utils.go:134: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:164: Retrieving storage config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet sc-config --silent --wallet TestCreateAllocationFreeStorage_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zboxcli_create_allocation_free_storage_test.go:72: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zboxcli_create_allocation_free_storage_test.go:72\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000092090), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestCreateAllocationFreeStorage\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_allocation_free_storage_test.go","TestFunctionDetail":{"Line":43,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_dir_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestDownload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_download_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.76,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_faucet_update_config_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/should_allow_update_of_max_pour_amount","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.48,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    utils.go:134: Waiting 5s...\n","    zwalletcli_faucet_update_config_test.go:157: Retrieving faucet config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet fc-config --silent --wallet TestFaucetUpdateConfig-should_allow_update_of_max_pour_amount_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_faucet_update_config_test.go:33: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:33\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000092870), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestFaucetUpdateConfig/should_allow_update_of_max_pour_amount\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/update_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.41,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    zwalletcli_faucet_update_config_test.go:106: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:106\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: unauthorized access - only the owner can access\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: unauthorized access - only the owner can access\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestFaucetUpdateConfig/update_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/update_max_pour_amount_to_invalid_value_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.02,"Output":["","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    zwalletcli_faucet_update_config_test.go:87: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:87\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: key max_pour_amount, unable to convert x to state.balance\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: key max_pour_amount, unable to convert x to state.balance\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestFaucetUpdateConfig/update_max_pour_amount_to_invalid_value_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/update_with_bad_config_key_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.02,"Output":["","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    zwalletcli_faucet_update_config_test.go:123: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:123\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: key unknown_key not recognised as setting\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: key unknown_key not recognised as setting\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestFaucetUpdateConfig/update_with_bad_config_key_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/update_with_missing_keys_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.02,"Output":["","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    zwalletcli_faucet_update_config_test.go:137: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:137\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestFaucetUpdateConfig/update_with_missing_keys_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFaucetUpdateConfig/update_with_missing_values_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    zwalletcli_faucet_update_config_test.go:151: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_faucet_update_config_test.go:151\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestFaucetUpdateConfig/update_with_missing_values_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_copy_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_delete_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_download_token_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_meta_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMove","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_move_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_rename_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileStats","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_stats_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_update_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_upload_token_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFinalizeAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_finalize_allocation_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestGetId","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_get_id_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_list_file_system_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestMinerFeesPayment","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    miner_fees_payment_test.go:19: Skipped till re-done\n","--- SKIP: TestMinerFeesPayment (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"miner_fees_payment_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerSCUserPoolInfo","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":40.57,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_minersc_pool_info_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerSCUserPoolInfo/Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_miner_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.47,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 2.000000 --input {} --silent --wallet TestMinerSCUserPoolInfo-Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_miner_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_minersc_pool_info_test.go:22: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_minersc_pool_info_test.go:22\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000eeaf8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestMinerSCUserPoolInfo/Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_miner_should_work\n","        \tMessages:   \terror executing faucet%!(EXTRA string=$HOME is not defined)\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerSCUserPoolInfo/Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_sharder_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.45,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 2.000000 --input {} --silent --wallet TestMinerSCUserPoolInfo-Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_sharder_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_minersc_pool_info_test.go:69: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_minersc_pool_info_test.go:69\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee078), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestMinerSCUserPoolInfo/Getting_MinerSC_Stake_pools_of_a_wallet_before_and_after_locking_against_a_sharder_should_work\n","        \tMessages:   \terror executing faucet%!(EXTRA string=$HOME is not defined)\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerSCUserPoolInfo/Getting_MinerSC_pools_info_for_a_different_client_id_than_wallet_owner_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.65,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zboxcli_update_allocation_test.go:588: Executing faucet...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 2.000000 --input {} --silent --wallet TestMinerSCUserPoolInfo-Getting_MinerSC_pools_info_for_a_different_client_id_than_wallet_owner_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_minersc_pool_info_test.go:119: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_minersc_pool_info_test.go:119\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e300), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestMinerSCUserPoolInfo/Getting_MinerSC_pools_info_for_a_different_client_id_than_wallet_owner_should_work\n","        \tMessages:   \terror executing faucet%!(EXTRA string=$HOME is not defined)\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerSharderPoolInfo","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_mn_pool_info_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerStake","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":4.07,"Output":["","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet ls-miners --json --silent --wallet wallets/miner01_node_delegate_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_miner_stake_test.go:26: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_stake_test.go:26\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee438), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestMinerStake\n","        \tMessages:   \terror listing miners\n",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_miner_stake_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.34,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_miner_update_config_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateConfig/update_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.42,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    zwalletcli_miner_update_config_test.go:30: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_update_config_test.go:30\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: unauthorized access - only the owner can access\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: unauthorized access - only the owner can access\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestMinerUpdateConfig/update_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateConfig/update_with_bad_config_key_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.64,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    zwalletcli_miner_update_config_test.go:54: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_update_config_test.go:54\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: unsupported key unknown_key\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: unsupported key unknown_key\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestMinerUpdateConfig/update_with_bad_config_key_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateConfig/update_with_missing_keys_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.65,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    zwalletcli_miner_update_config_test.go:75: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_update_config_test.go:75\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestMinerUpdateConfig/update_with_missing_keys_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateConfig/update_with_missing_values_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.63,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    zwalletcli_miner_update_config_test.go:96: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_update_config_test.go:96\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestMinerUpdateConfig/update_with_missing_values_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMinerUpdateSettings","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":9.07,"Output":["","    utils.go:134: Waiting 5s...\n","    zwalletcli_miner_update_config_test.go:102: Retrieving miner config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet mn-config --silent --wallet TestMinerUpdateSettings_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_send_and_balance_test.go:455: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_send_and_balance_test.go:455\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_miner_update_settings_test.go:22\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000eea08), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestMinerUpdateSettings\n","        \tMessages:   \tget miners sc config failed%!(EXTRA string=$HOME is not defined)\n",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_miner_update_settings_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestMultisigWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_multisig_wallet_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":66.92,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_owner_update_config_test.go","TestFunctionDetail":{"Line":11,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_FaucetSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.13,"Output":["","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet fc-update-config --values 542292677b624ea2da82163802a760a26feb25b6e34752cfcf688e61f98c4d72 --keys owner_id --silent --wallet wallets/sc_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:183: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:183\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00030a3a8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_FaucetSC\n","        \tMessages:   \t$HOME is not defined\n","    zwalletcli_faucet_update_config_test.go:169: Updating faucet config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet fc-update-config --keys owner_id --values 1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802 --silent --wallet TestOwnerUpdate_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:175: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:175\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1034\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1203\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1433\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/panic.go:482\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:864\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:183\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00030a5d0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_FaucetSC\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_MinerSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.52,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet mn-update-config --values 542292677b624ea2da82163802a760a26feb25b6e34752cfcf688e61f98c4d72 --keys owner_id --silent --wallet wallets/sc_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:141: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:141\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e9d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_MinerSC\n","        \tMessages:   \t$HOME is not defined\n","    zwalletcli_miner_update_config_test.go:114: Updating miner config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet mn-update-config --keys owner_id --values 1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802 --silent --wallet TestOwnerUpdate_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:133: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:133\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1034\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1203\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1433\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/panic.go:482\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:864\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:141\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00030a330), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_MinerSC\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_StorageSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.15,"Output":["","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet sc-update-config --keys owner_id --values 542292677b624ea2da82163802a760a26feb25b6e34752cfcf688e61f98c4d72 --silent --wallet wallets/sc_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:40: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:40\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000092288), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_StorageSC\n","        \tMessages:   \t$HOME is not defined\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet sc-update-config --keys owner_id --values 1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802 --silent --wallet TestOwnerUpdate_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:32: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:32\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1034\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1203\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1433\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/panic.go:482\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:864\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:40\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000092300), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_StorageSC\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_VestingSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.53,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet vp-update-config --keys owner_id --values 542292677b624ea2da82163802a760a26feb25b6e34752cfcf688e61f98c4d72 --silent --wallet wallets/sc_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:99: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:99\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e630), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_VestingSC\n","        \tMessages:   \t$HOME is not defined\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet vp-update-config --values 1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802 --keys owner_id --silent --wallet TestOwnerUpdate_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    0_owner_update_config_test.go:91: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:91\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1034\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1203\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:1433\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/panic.go:482\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/testing.go:864\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:99\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00000e7b0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_VestingSC\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestReadPoolLockUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_rp_lock_unlock_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestRecoverWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_recover_wallet_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_register_wallet_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSendAndBalance","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_send_and_balance_test.go","TestFunctionDetail":{"Line":23,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSharderStake","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    zwalletcli_send_and_balance_test.go:413: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_send_and_balance_test.go:413\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_sharder_stake_test.go:21\n","        \tError:      \tShould be true\n","        \tTest:       \tTestSharderStake\n","        \tMessages:   \tMagicBlock Sharders not found in getShardersForWallet output\n",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_sharder_stake_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSharderUpdateSettings","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":9.07,"Output":["","    utils.go:134: Waiting 5s...\n","    zwalletcli_miner_update_config_test.go:102: Retrieving miner config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet mn-config --silent --wallet TestSharderUpdateSettings_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_send_and_balance_test.go:455: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_send_and_balance_test.go:455\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_sharder_update_settings_test.go:20\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee468), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestSharderUpdateSettings\n","        \tMessages:   \tget miners sc config failed%!(EXTRA string=$HOME is not defined)\n",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_sharder_update_settings_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestShareFile","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_share_file_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStakeUnstakeTokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_stake_unstake_token_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.63,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_storage_update_config_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestStorageUpdateConfig/should_allow_update_of_max_read_price","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zwalletcli_storage_update_config_test.go:21: Skip till fixed...\n","    --- SKIP: TestStorageUpdateConfig/should_allow_update_of_max_read_price (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig/update_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.41,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:89: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_storage_update_config_test.go:89\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings: unauthorized access - only the owner can access\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings: unauthorized access - only the owner can access\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestStorageUpdateConfig/update_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig/update_max_read_price_to_invalid_value_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.63,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:158: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_storage_update_config_test.go:158\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings, updating settings: cannot convert key max_read_price value x to state.balance: strconv.ParseFloat: parsing \\\\\\\"x\\\\\\\": invalid syntax\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings, updating settings: cannot convert key max_read_price value x to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestStorageUpdateConfig/update_max_read_price_to_invalid_value_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig/update_with_bad_config_key_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.4,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:105: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_storage_update_config_test.go:105\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_settings, updating settings: unknown key unknown_key, can't set value 1\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_settings, updating settings: unknown key unknown_key, can't set value 1\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestStorageUpdateConfig/update_with_bad_config_key_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig/update_with_missing_keys_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.4,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:118: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_storage_update_config_test.go:118\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestStorageUpdateConfig/update_with_missing_keys_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStorageUpdateConfig/update_with_missing_values_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.41,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_storage_update_config_test.go:176: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:131: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_storage_update_config_test.go:131\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"number keys must equal the number values\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-number keys must equal the number values\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestStorageUpdateConfig/update_with_missing_values_param_should_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStreamUploadDownload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_livestream_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSyncWithBlobbers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_sync_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_transfer_allocation_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_update_allocation_test.go","TestFunctionDetail":{"Line":25,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":51.3,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zwalletcli_update_global_config_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Get_Global_Config_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.46,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:280: Retrieving global config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet global-config --silent --wallet TestUpdateGlobalConfig-Get_Global_Config_Should_Work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_update_global_config_test.go:25: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:25\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee6d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateGlobalConfig/Get_Global_Config_Should_Work\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_Update_immutable_config_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.59,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zwalletcli_update_global_config_test.go:292: Updating global config...\n","    zwalletcli_update_global_config_test.go:146: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:146\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_globals: validation: server_chain.owner cannot be modified via a transaction\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_globals: validation: server_chain.owner cannot be modified via a transaction\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_Update_immutable_config_must_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_Update_multiple_config_including_1_immutable_config_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.65,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zwalletcli_update_global_config_test.go:280: Retrieving global config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet global-config --silent --wallet TestUpdateGlobalConfig-Update_Global_Config_-_Update_multiple_config_including_1_immutable_config_must_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_update_global_config_test.go:260: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:260\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:163\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000090a68), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_Update_multiple_config_including_1_immutable_config_must_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_Update_multiple_mutable_config_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.46,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:280: Retrieving global config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet global-config --silent --wallet TestUpdateGlobalConfig-Update_Global_Config_-_Update_multiple_mutable_config_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_update_global_config_test.go:260: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:260\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:90\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee9c0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_Update_multiple_mutable_config_should_work\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_Update_mutable_config_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.46,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:280: Retrieving global config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet global-config --silent --wallet TestUpdateGlobalConfig-Update_Global_Config_-_Update_mutable_config_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_update_global_config_test.go:260: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:260\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:45\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000ee7c8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_Update_mutable_config_should_work\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_update_with_invalid_key_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.4,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:292: Updating global config...\n","    zwalletcli_update_global_config_test.go:221: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:221\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_globals: validation: 'invalid.key' is not a valid global setting\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_globals: validation: 'invalid.key' is not a valid global setting\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_update_with_invalid_key_must_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_update_with_invalid_value_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.41,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:292: Updating global config...\n","    zwalletcli_update_global_config_test.go:237: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:237\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_globals: validation: server_chain.block.proposal.max_wait_time value abc cannot be parsed as a time.duration\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_globals: validation: server_chain.block.proposal.max_wait_time value abc cannot be parsed as a time.duration\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_update_with_invalid_value_must_fail\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_-_update_with_suppliying_no_parameter_must_update_nothing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.46,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:280: Retrieving global config...\n","    utils.go:63: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:63: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [$HOME is not defined]\n","    utils.go:66: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet global-config --silent --wallet TestUpdateGlobalConfig-Update_Global_Config_-_update_with_suppliying_no_parameter_must_update_nothing_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [$HOME is not defined]\n","    utils.go:69: \u001b[31mThe verbose output for the command is:\n","    utils.go:73: \u001b[31m$HOME is not defined\n","    zwalletcli_update_global_config_test.go:260: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:260\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:191\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000eeeb8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_-_update_with_suppliying_no_parameter_must_update_nothing\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateGlobalConfig/Update_Global_Config_with_a_non-owner_wallet_Should_Fail_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.42,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zwalletcli_update_global_config_test.go:292: Updating global config...\n","    zwalletcli_update_global_config_test.go:253: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zwalletcli_update_global_config_test.go:253\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"update_globals: unauthorized access - only the owner can access\"\n","        \t            \tactual  : \"$HOME is not defined\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-update_globals: unauthorized access - only the owner can access\n","        \t            \t+$HOME is not defined\n","        \tTest:       \tTestUpdateGlobalConfig/Update_Global_Config_with_a_non-owner_wallet_Should_Fail_\n","        \tMessages:   \t$HOME is not defined\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_upload_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45.49,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:141: Requesting validator list...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","--- PASS: TestValidatorConfigUpdate (45.49s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_validator_config_update_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_blobber_max_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:146: Requesting validator info...\n","--- PASS: TestValidatorConfigUpdate/update_blobber_max_stake_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_blobber_min_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.01,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:146: Requesting validator info...\n","--- PASS: TestValidatorConfigUpdate/update_blobber_min_stake_should_work (7.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_blobber_service_charge_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.02,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:146: Requesting validator info...\n","--- PASS: TestValidatorConfigUpdate/update_blobber_service_charge_should_work (7.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_validator_number_of_delegates_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.03,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    zboxcli_validator_config_update_test.go:151: Updating validator info...\n","    zboxcli_validator_config_update_test.go:146: Requesting validator info...\n","--- PASS: TestValidatorConfigUpdate/update_validator_number_of_delegates_should_work (7.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_wp_lock_unlock_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
