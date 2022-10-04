@@ -39,6 +39,7 @@ const (
 	GetTotalMinted                     = "/v1/screst/:sc_address/total-minted"
 	GetAverageWritePrice               = "/v1/screst/:sc_address/average-write-price"
 	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
+	GetTotalStaked                     = "/v1/screst/:sc_address/total-staked"
 	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
 	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
@@ -194,7 +195,11 @@ func (c *APIClient) executeForServiceProvider(url string, executionRequest model
 
 	log.Printf("%s returned %s with status %s", url, resp.String(), resp.Status())
 	if executionRequest.Dst != nil {
-		err = json.Unmarshal(resp.Body(), executionRequest.Dst)
+		src := resp.Body()
+		if len(src) == 0 {
+			return nil, ErrEmptyResponse
+		}
+		err = json.Unmarshal(src, executionRequest.Dst)
 		if err != nil {
 			return nil, err
 		}
@@ -1092,7 +1097,7 @@ func (c *APIClient) V1SharderGetTotalStaked(requiredStatusCode int) (*model.GetT
 	var getTotalStakedResponse *model.GetTotalStakedResponse
 
 	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalStoredData).
+		SetPath(GetTotalStaked).
 		SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(

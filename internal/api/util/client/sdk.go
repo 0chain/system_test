@@ -12,10 +12,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 )
 
 type SDKClient struct {
+	sync.Mutex
+
 	blockWorker string
 	wallet      *model.Wallet
 }
@@ -36,6 +39,7 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(wallet *model.Wallet) {
+	c.Lock()
 	c.wallet = wallet
 
 	err := sdk.InitStorageSDK(
@@ -51,6 +55,7 @@ func (c *SDKClient) SetWallet(wallet *model.Wallet) {
 }
 
 func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
+	defer c.Unlock()
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		log.Fatalln(err)

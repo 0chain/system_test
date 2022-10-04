@@ -527,17 +527,25 @@ type StakePoolDelegatePoolInfo struct {
 	RoundCreated int64  `json:"round_created"`
 }
 
-type GetTotalStoredDataResponse int
+type GetTotalStoredDataResponse struct {
+	TotalStoredData int `json:"total-stored-data"`
+}
 
-type GetTotalBlobberCapacityResponse int
+type GetTotalBlobberCapacityResponse struct {
+	TotalBlobberCapacity int `json:"total-blobber-capacity"`
+}
 
-type GetAverageWritePriceResponse int
+type GetAverageWritePriceResponse struct {
+	AverageWritePrice int `json:"average-write-price"`
+}
 
 type GetTotalMintedResponse int
 
 type GetTotalTotalChallengesResponse int
 
-type GetTotalStakedResponse int
+type GetTotalStakedResponse struct {
+	TotalStaked int `json:"total-staked"`
+}
 
 type GetGraphBlobberInactiveRoundsRequest struct {
 	DataPoints int

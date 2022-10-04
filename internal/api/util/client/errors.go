@@ -12,6 +12,8 @@ var (
 	ErrGetFromResource = errors.New("error happened during request")
 
 	ErrExecutionConsensus = errors.New("execution consensus is not reached")
+
+	ErrEmptyResponse = errors.New("response seems to be empty")
 )
 
 // Contains errors used for SDK client
