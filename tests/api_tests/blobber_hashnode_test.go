@@ -106,4 +106,6 @@ func TestHashnodeRoot(t *testing.T) {
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
 	})
+
+	// TODO: add a case for hasnoderoot of an allocation with a file in it.
 }
