@@ -469,7 +469,7 @@ func TestFileDelete(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

@@ -744,7 +744,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 3)
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[1])
+		require.Contains(t, output[1], "consensus_not_met")
 	})
 
 	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {

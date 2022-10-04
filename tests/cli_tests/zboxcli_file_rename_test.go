@@ -447,7 +447,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], "Rename failed: Commit consensus failed.") || strings.HasPrefix(output[0], "rename failed: Commit consensus failed."), "expected string starting with 'R|rename failed: Commit consensus failed.' got:", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -589,7 +589,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Consensus not met.", output[0])
+		require.Equal(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *testing.T) {
@@ -637,7 +637,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Consensus not met.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

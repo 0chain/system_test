@@ -289,7 +289,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -438,7 +438,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Equal(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -490,7 +490,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Equal(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("copy file from someone else's allocation should fail", func(t *testing.T) {
@@ -537,7 +537,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

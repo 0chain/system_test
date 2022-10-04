@@ -481,8 +481,7 @@ func TestCollaborator(t *testing.T) {
 		})
 		require.NotNil(t, err, "Unexpected success in renaming the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Rename failed: Rename request failed. Consensus not met."
-		require.Equal(t, expectedOutput, output[0], "Unexpected output when renaming the file", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to delete the file", func(t *testing.T) {
@@ -523,7 +522,7 @@ func TestCollaborator(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Unexpected success in deleting the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Delete failed. Delete failed: Success_rate", "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to move the file", func(t *testing.T) {
@@ -565,8 +564,7 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "Error in moving the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Copy failed: Copy request failed. Operation failed."
-		require.Equal(t, expectedOutput, output[0], "Unexpected output when removing the file", strings.Join(output, "\n"))
+		require.Equal(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should be able to update the file", func(t *testing.T) {
@@ -657,8 +655,7 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, "Unexpected success in copying the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Copy failed: Copy request failed. Operation failed."
-		require.Equal(t, expectedOutput, output[0], "Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *testing.T) {
