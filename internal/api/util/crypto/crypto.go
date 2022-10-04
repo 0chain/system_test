@@ -11,7 +11,6 @@ import (
 	"golang.org/x/crypto/sha3"
 	"log"
 	"sync"
-	"testing"
 )
 
 const BLS0Chain = "bls0chain"
@@ -30,6 +29,7 @@ func init() {
 }
 
 func GenerateMnemonics() string {
+	defer handlePanic()
 	entropy, err := bip39.NewEntropy(256) //nolint
 	if err != nil {
 		log.Fatalln(err)
@@ -43,6 +43,7 @@ func GenerateMnemonics() string {
 }
 
 func GenerateKeys(mnemonics string) *model.RawKeyPair {
+	defer handlePanic()
 	blsLock.Lock()
 	defer func() {
 		blsLock.Unlock()
@@ -69,7 +70,8 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-func SignTransaction(hash string, pair *model.RawKeyPair) (string, error) {
+func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
+	defer handlePanic()
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
@@ -82,26 +84,24 @@ func SignTransaction(hash string, pair *model.RawKeyPair) (string, error) {
 	return signature, nil
 }
 
-func HashTransaction(request *model.TransactionEntity) {
-	var hashData = blankIfNil(request.CreationDate) + ":" +
-		blankIfNil(request.TransactionNonce) + ":" +
-		blankIfNil(request.ClientId) + ":" +
-		blankIfNil(request.ToClientId) + ":" +
-		blankIfNil(request.TransactionValue) + ":" +
-		Sha3256([]byte(request.TransactionData))
+func CreateTransactionHash(request *model.TransactionPutRequest) (string, error) {
+	hexHash := Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+		request.CreationDate,
+		request.TransactionNonce,
+		request.ClientId,
+		request.ToClientId,
+		request.TransactionValue,
+		Sha3256([]byte(request.TransactionData)))))
 
-	request.Hash = Sha3256([]byte(hashData))
-}
-
-func blankIfNil(obj interface{}) string {
-	if obj == nil {
-		return ""
+	hash, err := hex.DecodeString(hexHash)
+	if err != nil {
+		return "", err
 	}
-	return fmt.Sprintf("%v", obj)
+	return string(hash), nil
 }
 
-func handlePanic(t *testing.T) {
+func handlePanic() {
 	if err := recover(); err != nil {
-		t.Errorf("panic occurred: ", err)
+		log.Fatalf("panic occurred: %s", err)
 	}
 }

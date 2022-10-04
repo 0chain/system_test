@@ -334,21 +334,18 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		transactionPutRequest.CreationDate,
-		transactionPutRequest.TransactionNonce,
-		transactionPutRequest.ClientId,
-		transactionPutRequest.ToClientId,
-		transactionPutRequest.TransactionValue,
-		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
-
-	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
+	var hash string
+	hash, err = crypto.CreateTransactionHash(&transactionPutRequest)
 	if err != nil {
 		return nil, nil, err
 	}
+	transactionPutRequest.Hash = hash
 
-	transactionPutRequest.Signature = internalTransactionPutRequest.Wallet.RawKeys.PrivateKey.Sign(string(hashToSign)).
-		SerializeToHexStr()
+	signature, err := crypto.SignHash(transactionPutRequest.Hash, internalTransactionPutRequest.Wallet.RawKeys)
+	if err != nil {
+		return nil, nil, err
+	}
+	transactionPutRequest.Signature = signature
 
 	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
 
@@ -1012,7 +1009,7 @@ func (c *APIClient) GetStakePoolStat(t *testing.T, blobberID string) *model.SCRe
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewardWrapper(t *testing.T, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
+func (c *APIClient) CollectReward(t *testing.T, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
