@@ -50,12 +50,12 @@ func TestBlobberRewards(t *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		apiClient.CollectRewardWrapper(t, wallet, blobberID, 3, client.TxSuccessfulStatus)
+		apiClient.CollectRewards(t, wallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Greater(t, balanceAfter, balanceBefore)
+		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 
 	t.Run("Check if a blobber, which is not used for allocation can receive rewards, shouldn't work", func(t *testing.T) {
@@ -96,12 +96,12 @@ func TestBlobberRewards(t *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		apiClient.CollectRewardWrapper(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		apiClient.CollectRewards(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Greater(t, balanceAfter, balanceBefore)
+		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
@@ -155,11 +155,11 @@ func TestBlobberRewards(t *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		apiClient.CollectRewardWrapper(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		apiClient.CollectRewards(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Greater(t, balanceAfter, balanceBefore)
+		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 }
