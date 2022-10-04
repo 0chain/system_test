@@ -334,15 +334,11 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	var hash string
-	hash, err = crypto.CreateTransactionHash(&transactionPutRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-	transactionPutRequest.Hash = hash
+	transactionPutRequest.Hash = crypto.CreateTransactionHash(&transactionPutRequest)
 
 	signature, err := crypto.SignHash(transactionPutRequest.Hash, internalTransactionPutRequest.Wallet.RawKeys)
 	if err != nil {
+		fmt.Println("hash here")
 		return nil, nil, err
 	}
 	transactionPutRequest.Signature = signature
@@ -609,6 +605,7 @@ func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTr
 			ToClientID:      FaucetSmartContractAddress,
 			TransactionData: model.NewFaucetTransactionData()},
 		HttpOkStatus)
+	t.Log(err)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)

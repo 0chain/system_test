@@ -77,6 +77,7 @@ func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 
 	hashToSign, err := hex.DecodeString(hash)
 	if err != nil {
+		fmt.Println(hash)
 		return "", err
 	}
 
@@ -84,20 +85,14 @@ func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 	return signature, nil
 }
 
-func CreateTransactionHash(request *model.TransactionPutRequest) (string, error) {
-	hexHash := Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+func CreateTransactionHash(request *model.TransactionPutRequest) string {
+	return Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		request.CreationDate,
 		request.TransactionNonce,
 		request.ClientId,
 		request.ToClientId,
 		request.TransactionValue,
 		Sha3256([]byte(request.TransactionData)))))
-
-	hash, err := hex.DecodeString(hexHash)
-	if err != nil {
-		return "", err
-	}
-	return string(hash), nil
 }
 
 func handlePanic() {

@@ -12,6 +12,8 @@ func TestBlobberRewards(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
@@ -59,6 +61,8 @@ func TestBlobberRewards(t *testing.T) {
 	})
 
 	t.Run("Check if a blobber, which is not used for allocation can receive rewards, shouldn't work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
@@ -74,24 +78,31 @@ func TestBlobberRewards(t *testing.T) {
 
 		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
+		var rewardsBefore int64
+
+		stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+
+		for _, poolDelegateInfo := range stakePoolInfo.Delegate {
+			rewardsBefore += poolDelegateInfo.TotalReward
+		}
+
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadSomeFile(t, allocationID)
 
-		var rewards int64
+		var rewardsAfter int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+			rewardsAfter = 0
+
+			stakePoolInfo = apiClient.GetStakePoolStat(t, newBlobberID)
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-				if poolDelegateInfo.DelegateID == wallet.ClientID {
-					rewards = poolDelegateInfo.TotalReward
-					break
-				}
+				rewardsBefore += poolDelegateInfo.TotalReward
 			}
 
-			return rewards > int64(0)
+			return rewardsAfter > rewardsBefore
 		})
-		require.Zero(t, rewards)
+		require.Equal(t, rewardsAfter, rewardsBefore)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
@@ -101,10 +112,12 @@ func TestBlobberRewards(t *testing.T) {
 		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards)
+		require.Equal(t, balanceAfter, balanceBefore)
 	})
 
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
