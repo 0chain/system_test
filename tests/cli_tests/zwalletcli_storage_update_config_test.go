@@ -153,7 +153,7 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	require.Len(t, actual.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings))
 	require.Len(t, actual.Boolean, len(climodel.StorageBoolSettings))
 	require.Len(t, actual.Duration, len(climodel.StorageDurationSettings))
-	var mismatches = "expected and actual setting mismatches after update discovered:\n"
+	var mismatches = ""
 
 	for _, name := range climodel.StorageFloatSettings {
 		actualSetting, ok := actual.Numeric[name]
@@ -206,7 +206,8 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 				name, actualSetting, expectedSetting)
 		}
 	}
-	require.Len(t, mismatches, 0, mismatches)
+
+	require.Len(t, mismatches, 0, "expected and actual setting mismatches after update discovered:\n", mismatches)
 }
 
 func updateStorageSCConfig(t *testing.T, walletName string, param map[string]string, retry bool) ([]string, error) {
