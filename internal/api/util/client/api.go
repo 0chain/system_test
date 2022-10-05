@@ -107,7 +107,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			return nil, err
 		}
 
-		formattedURL := ""
+		var formattedURL string
 		switch serviceProviderType {
 		case MinerServiceProvider:
 			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
