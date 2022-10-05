@@ -426,7 +426,7 @@ type BlobberCommitConnectionRequest struct {
 }
 
 type BlobberDeleteConnectionRequest struct {
-	URL, ConnectionId, ClientKey, ClientSignature, remotePath string
+	URL, ConnectionId, ClientKey, ClientSignature, Path, AllocationID, BlobberID string
 	// WriteMarket                  BlobberCommitConnectionWriteMarker
 }
 type BlobberCommitConnectionResponse struct{}

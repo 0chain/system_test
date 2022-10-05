@@ -83,14 +83,14 @@ func v1SharderGetStats(t *testing.T, consensusCategoriser endpoint.ConsensusMetF
 	return stats, httpResponse, httpError
 }
 
-func v1BlobberDelete(t *testing.T, blobberId string, allocationId string, consensusCategoriser util.ConsensusMetFunction, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) {
+func v1BlobberDeleteFile(t *testing.T, consensusCategoriser util.ConsensusMetFunction, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) {
 	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
 	// We are gonna delete that file from that blobber
-	endPoint = "/" + blobberId + "/v1/file/upload/" + allocationId
+	endPoint = "/" + blobberDeleteConnectionRequest.BlobberID + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
 
 	formData := map[string]string{
-		"connection_id": blobberDeleteConnectionRequest.ConnectionId,
-		"path": blobberDeleteConnectionRequest.remotePath,
+		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
+		"path": blobberDeleteConnectionRequest.Path,
 	}
 	
 	headers := map[string]string{
