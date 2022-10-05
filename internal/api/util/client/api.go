@@ -127,6 +127,10 @@ func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
 	return c.getHealthyNodes(shaders)
 }
 
+func (c *APIClient) getHealthyBlobbers(blobbers []string) ([]string, error) {
+	return c.getHealthyNodes(blobbers)
+}
+
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
 	urlBuilder := NewURLBuilder()
 	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
@@ -165,6 +169,18 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 	}
 
 	c.NetworkHealthResources.Sharders = healthySharders
+
+	healthyBlobbers, err := c.getHealthyBlobbers(networkDNSResponse.Blobbers)
+
+	if err != nil {
+		return err
+	}
+	if len(healthySharders) == 0 {
+		return ErrNoShadersHealth
+	}
+
+	c.NetworkHealthResources.Blobbers = healthyBlobbers
+
 	return nil
 }
 
@@ -214,7 +230,7 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 	case SharderServiceProvider:
 		serviceProviders = c.NetworkHealthResources.Sharders
 	case BlobberServiceProvider:
-		// serviceProviders = c.NetworkHealthResources.
+		serviceProviders = c.NetworkHealthResources.Blobbers
 	}
 
 	for _, serviceProvider := range serviceProviders {
