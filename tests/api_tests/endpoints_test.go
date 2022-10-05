@@ -83,12 +83,26 @@ func v1SharderGetStats(t *testing.T, consensusCategoriser endpoint.ConsensusMetF
 	return stats, httpResponse, httpError
 }
 
-func v1BlobberDelete(t *testing.T, blobberId string, allocationId string, consensusCategoriser util.ConsensusMetFunction) {
+func v1BlobberDelete(t *testing.T, blobberId string, allocationId string, consensusCategoriser util.ConsensusMetFunction, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) {
 	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
 	// We are gonna delete that file from that blobber
 	endPoint = "/" + blobberId + "/v1/file/upload/" + allocationId
-	output, err := zeroChain.DeleteFileFromBlobber(t, endPoint, consensusCategoriser)
+
+	formData := map[string]string{
+		"connection_id": blobberDeleteConnectionRequest.ConnectionId,
+		"path": blobberDeleteConnectionRequest.remotePath,
+	}
+	
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberDeleteConnectionRequest.ClientID,
+		"X-App-Client-Key":       blobberDeleteConnectionRequest.ClientKey,
+		"X-App-Client-Signature": blobberDeleteConnectionRequest.ClientSignature,
+		"X-Content-Type": "multipart/form-data"
+	}
+
+	output, err := zeroChain.DeleteFileFromBlobber(t, endPoint, consensusCategoriser, formData, headers)
 	return output, err
+}
 func v1SharderGetSCState(t *testing.T, SCAddress, key string, consensusCategoriser endpoint.ConsensusMetFunction) (*model.SharderSCStateResponse, *resty.Response, error) { //nolint
 	var stats *model.SharderSCStateResponse
 
@@ -171,7 +185,6 @@ func v1BlobberListFiles(t *testing.T, blobberListFilesRequest model.BlobberListF
 		"X-App-Client-Key":       blobberListFilesRequest.ClientKey,
 		"X-App-Client-Signature": blobberListFilesRequest.ClientSignature,
 	}
-
 	httpResponse, httpError := zeroChain.GetFromBlobber(t,
 		blobberListFilesRequest.URL,
 		filepath.Join("/v1/file/list", blobberListFilesRequest.AllocationID),

@@ -3,13 +3,14 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/transaction"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"io"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/core/transaction"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
@@ -424,6 +425,10 @@ type BlobberCommitConnectionRequest struct {
 	WriteMarker                  BlobberCommitConnectionWriteMarker
 }
 
+type BlobberDeleteConnectionRequest struct {
+	URL, ConnectionId, ClientKey, ClientSignature, remotePath string
+	// WriteMarket                  BlobberCommitConnectionWriteMarker
+}
 type BlobberCommitConnectionResponse struct{}
 
 type BlobberGetFileReferencePathRequest struct {

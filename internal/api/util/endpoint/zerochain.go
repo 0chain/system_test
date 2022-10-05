@@ -294,15 +294,15 @@ func mostDominantError(errors []error) error {
 	return mostFrequent
 }
 
-func (z *Zerochain) DeleteFileFromBlobber(t *testing.T, endPoint string, consensusMet ConsensusMetFunction, targetObject interface{}) (*resty.Response, error) {
+func (z *Zerochain) DeleteFileFromBlobber(t *testing.T, endPoint string, consensusMet ConsensusMetFunction, formData map[string]string, headers map[string]string, targetObject interface{}) (*resty.Response, error) {
 	deleteFileFromBlobber := func(blobber string) (*resty.Response, error) {
-		return z.deleteFileFromBlobber(t, blobber, endPoint, targetObject)
+		return z.deleteFileFromBlobber(t, blobber, endPoint, targetObject, formData, headers)
 	}
 	return z.executeWithConsensus(t, z.Blobbers, deleteFileFromBlobber, targetObject, consensusMet)
 }
 
-func (z *Zerochain) deleteFileFromBlobber(t *testing.T, blobber, endPoint string, targetObject interface{}) (*resty.Response, error) {
-	resp, err := z.restClient.R().Delete(blobber + endPoint)
+func (z *Zerochain) deleteFileFromBlobber(t *testing.T, blobber, endPoint string, targetObject interface{}, formData map[string]string, headers map[string]string) (*resty.Response, error) {
+	resp, err := z.restClient.R().SetFormData(formData).SetHeaders(headers).Delete(blobber + endPoint)
 	// if err then we will deal with it here
 	if err != nil {
 		t.Logf("There is an error, cannot deal with deletion of this code %s", err)
