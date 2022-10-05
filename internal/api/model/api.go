@@ -2,13 +2,16 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/herumi/bls-go-binary/bls"
+	"strconv"
 	"time"
+
+	"github.com/herumi/bls-go-binary/bls"
 )
 
 type NetworkDNSResponse struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
+	Blobbers []string `json:"blobbers"`
 }
 
 type NetworkHealthResources struct {
@@ -29,22 +32,59 @@ type ExecutionRequest struct {
 	RequiredStatusCode int
 }
 
-type Wallet struct {
-	Id           string  `json:"id"`
-	Version      string  `json:"version"`
-	CreationDate *int    `json:"creation_date"`
-	PublicKey    string  `json:"public_key"`
-	Keys         KeyPair `json:"keys"`
+type ClientPutRequest struct {
+	ClientID      string `json:"id"`
+	ClientKey     string `json:"public_key"`
+	CreationDate  *int   `json:"creation_date"`
+	GenerateInput bool
+}
+
+type ClientPutResponse struct {
+	Id           string `json:"id"`
+	Version      string `json:"version"`
+	CreationDate *int   `json:"creation_date"`
+	PublicKey    string `json:"public_key"`
 	Nonce        int
 }
 
+type Wallet struct {
+	ClientID    string      `json:"client_id"`
+	ClientKey   string      `json:"client_key"`
+	Keys        []*KeyPair  `json:"keys"`
+	Mnemonics   string      `json:"mnemonics"`
+	Version     string      `json:"version"`
+	DateCreated string      `json:"date_created"`
+	Nonce       int         `json:"-"`
+	RawKeys     *RawKeyPair `json:"-"`
+}
+
 type KeyPair struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
+
+type RawKeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
 
 func (w *Wallet) IncNonce() {
 	w.Nonce++
+}
+
+func (w *Wallet) GetKeyPair() (*KeyPair, error) {
+	if len(w.Keys) == 0 {
+		return nil, ErrNoKeyPair
+	}
+	return w.Keys[0], nil
+}
+
+func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
+	result, err := strconv.Atoi(w.DateCreated)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
 }
 
 func (w *Wallet) String() string {
@@ -68,10 +108,29 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
+func NewCollectRewardTransactionData(providerID string, providerType int) TransactionData {
+	var input = map[string]interface{}{
+		"provider_id":   providerID,
+		"provider_type": providerType,
+	}
+
+	return TransactionData{
+		Name:  "collect_reward",
+		Input: input,
+	}
+}
+
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,
+	}
+}
+
+func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "stake_pool_lock",
+		Input: &createStakePoolRequest,
 	}
 }
 
@@ -307,7 +366,8 @@ type StakePoolSettings struct {
 }
 
 type CreateStakePoolRequest struct {
-	BlobberID string `json:"blobber_id"`
+	ProviderType int    `json:"provider_type,omitempty"`
+	ProviderID   string `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -356,4 +416,11 @@ type AllocationStats struct {
 	SuccessChallenges         int64  `json:"num_success_challenges"`
 	FailedChallenges          int64  `json:"num_failed_challenges"`
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
+}
+
+type BlobberGetFileRefsRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType string
+}
+
+type BlobberGetFileRefsResponse struct {
 }

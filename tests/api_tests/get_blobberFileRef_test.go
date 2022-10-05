@@ -64,6 +64,8 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, keyPairSecond, allocationID, refType, clientSignature)
 		require.NotNil(t, blobberFileRefRequest)
+		blobberFileRefsResponse, httpStatusCode, err := apiClient.v1BlobberGetFileRefs(blobberFileRefRequest)
+		require.NotNil(t, blobberFileRefsResponse)
 	})
 }
 
