@@ -26,6 +26,7 @@ func TestGraphTotalLocked(t *testing.T) {
 		}), http.StatusOK)
 
 		require.NotNil(t, httpErr)
+		require.NotNil(t, httpResp)
 		require.Equal(t, http.StatusBadRequest, httpResp.StatusCode())
 		require.Nil(t, resp)
 	})
