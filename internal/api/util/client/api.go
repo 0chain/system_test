@@ -54,7 +54,6 @@ const (
 const (
 	MinerServiceProvider = iota
 	SharderServiceProvider
-	BlobberServiceProvider // need to implement the blobber service provider
 )
 
 // Contains all smart contract addreses used in the client
@@ -127,10 +126,6 @@ func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
 	return c.getHealthyNodes(shaders)
 }
 
-func (c *APIClient) getHealthyBlobbers(blobbers []string) ([]string, error) {
-	return c.getHealthyNodes(blobbers)
-}
-
 func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
 	urlBuilder := NewURLBuilder()
 	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
@@ -169,17 +164,6 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 	}
 
 	c.NetworkHealthResources.Sharders = healthySharders
-
-	healthyBlobbers, err := c.getHealthyBlobbers(networkDNSResponse.Blobbers)
-
-	if err != nil {
-		return err
-	}
-	if len(healthySharders) == 0 {
-		return ErrNoShadersHealth
-	}
-
-	c.NetworkHealthResources.Blobbers = healthyBlobbers
 
 	return nil
 }
@@ -229,8 +213,6 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 		serviceProviders = c.NetworkHealthResources.Miners
 	case SharderServiceProvider:
 		serviceProviders = c.NetworkHealthResources.Sharders
-	case BlobberServiceProvider:
-		serviceProviders = c.NetworkHealthResources.Blobbers
 	}
 
 	for _, serviceProvider := range serviceProviders {
@@ -965,9 +947,8 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) { //nolint
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
-	// var scRestGetAllocationResponse *model.SCRestGetAllocationResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(GetFileRef).
@@ -982,15 +963,14 @@ func (c *APIClient) v1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 	requetHeader["X-App-Client-Key"] = blobberGetFileRefsRequest.ClientKey
 	requetHeader["X-App-Client-Signature"] = blobberGetFileRefsRequest.ClientSignature
 
-	resp, err := c.executeForAllServiceProviders(
-		urlBuilder,
+	resp, err := c.executeForServiceProvider(
+		urlBuilder.String(),
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
 			RequiredStatusCode: requiredStatusCode,
 			Headers:            requetHeader,
 		},
-		HttpGETMethod,
-		BlobberServiceProvider)
+		HttpGETMethod)
 
 	return blobberGetFileResponse, resp, err
 }

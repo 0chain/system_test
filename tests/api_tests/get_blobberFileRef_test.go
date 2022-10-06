@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"testing"
-	"time"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
@@ -10,7 +9,6 @@ import (
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,24 +27,10 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersBefore := len(allocation.Blobbers)
-
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
-
-		var numberOfBlobbersAfter int
-
-		wait.PoolImmediately(t, time.Second*30, func() bool {
-			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-			numberOfBlobbersAfter = len(allocation.Blobbers)
-
-			return numberOfBlobbersAfter == numberOfBlobbersBefore+1
-		})
-		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -62,14 +46,16 @@ func TestBlobberFileRefs(t *testing.T) {
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
 
-		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, keyPairSecond, allocationID, refType, clientSignature)
+		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, keyPairSecond, allocationID, refType, clientSignature, remoteFilePath)
 		require.NotNil(t, blobberFileRefRequest)
-		blobberFileRefsResponse, httpStatusCode, err := apiClient.v1BlobberGetFileRefs(blobberFileRefRequest)
+		blobberFileRefsResponse, httpStatusCode, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
 		require.NotNil(t, blobberFileRefsResponse)
+		require.NotNil(t, httpStatusCode)
+		require.Nil(t, err)
 	})
 }
 
-func getBlobberFileRefRequest(t *testing.T, url string, registeredWallet *model.Wallet, keyPair *model.KeyPair, allocationId string, refType string, clientSignature string) model.BlobberGetFileRefsRequest {
+func getBlobberFileRefRequest(t *testing.T, url string, registeredWallet *model.Wallet, keyPair *model.KeyPair, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest {
 	t.Logf("get blobber file request object...")
 	blobberFileRequest := model.BlobberGetFileRefsRequest{
 		URL:             url,
@@ -78,6 +64,7 @@ func getBlobberFileRefRequest(t *testing.T, url string, registeredWallet *model.
 		ClientSignature: clientSignature,
 		AllocationID:    allocationId,
 		RefType:         refType,
+		RemotePath:      remotePath,
 	}
 	return blobberFileRequest
 }

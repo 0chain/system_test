@@ -11,7 +11,6 @@ import (
 type NetworkDNSResponse struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
-	Blobbers []string `json:"blobbers"`
 }
 
 type NetworkHealthResources struct {
@@ -419,8 +418,49 @@ type AllocationStats struct {
 }
 
 type BlobberGetFileRefsRequest struct {
-	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType string
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType, RemotePath string
+}
+
+type FileAttributes struct {
+}
+
+type RefsData struct {
+	ID             int             `json:"id"`
+	Type           string          `json:"type"`
+	AllocationId   string          `json:"allocation_id"`
+	LookupHash     string          `json:"lookup_hash"`
+	Name           string          `json:"name"`
+	Path           string          `json:"path"`
+	Hash           string          `json:"hash"`
+	NumBlocks      int             `json:"num_blocks"`
+	PathHash       string          `json:"path_hash"`
+	ParentHash     string          `json:"parent_path"`
+	Level          int             `json:"level"`
+	ContentHash    string          `json:"content_hash"`
+	Size           int             `json:"size"`
+	MerkleRoot     string          `json:"merkle_root"`
+	ActualFileSize int             `json:"actual_file_size"`
+	ActualFileHash string          `json:"actual_file_hash"`
+	WriteMarker    string          `json:"write_marker"`
+	Attributes     *FileAttributes `json:"attributes"`
+	CreatedAt      string          `json:"created_at"`
+	UpdatedAt      string          `json:"updated_at"`
+}
+
+type LatestWriteMarker struct {
+	AllocationRoot     string `json:"allocation_root"`
+	PrevAllocationRoot string `json:"prev_allocation_root"`
+	AllocationId       string `json:"allocation_id"`
+	Size               int    `json:"size"`
+	BlobberId          string `json:"blobber_id"`
+	Timestamp          int    `json:"timestamp"`
+	ClientId           string `json:"client_id"`
+	Signature          string `json:"signature"`
 }
 
 type BlobberGetFileRefsResponse struct {
+	TotalPages        int                `json:"total_pages"`
+	OffsetPath        string             `json:"offsetPath"`
+	Refs              []*RefsData        `json:"refs"`
+	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
 }
