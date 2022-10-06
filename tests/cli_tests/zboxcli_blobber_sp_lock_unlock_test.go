@@ -162,7 +162,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     0.8,
+			"tokens":     0.5,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		var stakePool = climodel.StakePoolInfo{}
@@ -174,7 +174,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		name := cliutils.RandomAlphaNumericString(10)
 
 		options := map[string]interface{}{
-			"lock": 0.2,
+			"lock": 0.5,
 			"name": name,
 		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
