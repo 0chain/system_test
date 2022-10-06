@@ -902,8 +902,8 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) V1SCRestGetDataPointsUsingURL(path string, requiredStatusCode int) ([]int64, *resty.Response, error) { //nolint
-	var responseArray = make([]int64, 1)
+func (c *APIClient) V1SCRestGetDataPointsUsingURL(path string, requiredStatusCode int) (model.SCRestGraphEndpointResponse, *resty.Response, error) { //nolint
+	var responseArray *model.SCRestGraphEndpointResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(path).
@@ -922,5 +922,5 @@ func (c *APIClient) V1SCRestGetDataPointsUsingURL(path string, requiredStatusCod
 		},
 		HttpGETMethod)
 
-	return responseArray, resp, err
+	return *responseArray, resp, err
 }

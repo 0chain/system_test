@@ -279,6 +279,8 @@ type SCRestGetBlobberRequest struct {
 	BlobberID string
 }
 
+type SCRestGraphEndpointResponse []int64
+
 type SCRestGetBlobberResponse struct {
 	ID                string            `json:"id"`
 	BaseURL           string            `json:"url"`
