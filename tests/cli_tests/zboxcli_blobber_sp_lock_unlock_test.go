@@ -76,18 +76,18 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		spInfo := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &spInfo)
-		require.Len(t, spInfo.Delegate, 2)
+		require.Len(t, spInfo.Delegate, 3)
 
 		stakePool := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotEmpty(t, stakePool)
-		require.Equal(t, 800, stakePool.Balance)
+		require.Equal(t, int64(18000000000), stakePool.Balance)
 
 		//Lock more tokens in blobbers stake pool
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     0.2,
+			"tokens":     0.4,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		var stakePoolSecond = climodel.StakePoolInfo{}
@@ -120,7 +120,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}))
-		require.Equal(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
+		require.Equal(t, "Error unstaking tokens from stake pool", err, strings.Join(output, "\n"))
 
 		//cancel allocation
 		output, err = cancelAllocation(t, configPath, createParams(map[string]interface{}{
@@ -133,7 +133,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}))
-		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens unlocked, pool deleted", output[0])
 
@@ -144,7 +144,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.9)
+		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		blobbers := []climodel.BlobberInfo{}
@@ -162,7 +162,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     0.8,
+			"tokens":     1,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		var stakePool = climodel.StakePoolInfo{}
@@ -174,7 +174,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		name := cliutils.RandomAlphaNumericString(10)
 
 		options := map[string]interface{}{
-			"lock": 0.7,
+			"lock": 1,
 			"name": name,
 		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
@@ -186,7 +186,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}))
-		require.Equal(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
+		require.Equal(t, "Error unstaking tokens from stake pool", err, strings.Join(output, "\n"))
 
 	})
 
