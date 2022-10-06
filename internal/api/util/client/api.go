@@ -917,7 +917,7 @@ func (c *APIClient) V1SCRestGetDataPointsUsingURL(path string, requiredStatusCod
 	resp, err := c.executeForServiceProvider(
 		formattedURL,
 		model.ExecutionRequest{
-			Dst:                responseArray,
+			Dst:                &responseArray,
 			RequiredStatusCode: requiredStatusCode,
 		},
 		HttpGETMethod)
