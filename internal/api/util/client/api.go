@@ -951,6 +951,8 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
 	urlBuilder := NewURLBuilder().
+		SetScheme("https").
+		SetHost("dev.0chain.net").
 		SetPath(GetFileRef).
 		SetPathVariable("allocation_id", blobberGetFileRefsRequest.AllocationID).
 		AddParams("path", blobberGetFileRefsRequest.RemotePath). // for testing purpose
@@ -971,7 +973,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 			Headers:            requetHeader,
 		},
 		HttpGETMethod)
-	t.Logf("Output from get v1/file/ref %s", resp)
+	t.Logf("Output from get v1/file/ref %s", resp.String())
 
 	return blobberGetFileResponse, resp, err
 }
