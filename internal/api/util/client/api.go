@@ -953,8 +953,8 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 	urlBuilder := NewURLBuilder().
 		SetPath(GetFileRef).
 		SetPathVariable("allocation_id", blobberGetFileRefsRequest.AllocationID).
-		AddParams("path", "/").                                 // for testing purpose
-		AddParams("refType", blobberGetFileRefsRequest.RefType) // for testing purpose
+		AddParams("path", blobberGetFileRefsRequest.RemotePath). // for testing purpose
+		AddParams("refType", blobberGetFileRefsRequest.RefType)  // for testing purpose
 
 	requetHeader :=
 		make(map[string]string)
@@ -962,7 +962,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 	requetHeader["X-App-Client-Id"] = blobberGetFileRefsRequest.ClientID
 	requetHeader["X-App-Client-Key"] = blobberGetFileRefsRequest.ClientKey
 	requetHeader["X-App-Client-Signature"] = blobberGetFileRefsRequest.ClientSignature
-
+	t.Logf("formatted url %s", urlBuilder.String())
 	resp, err := c.executeForServiceProvider(
 		urlBuilder.String(),
 		model.ExecutionRequest{
@@ -971,6 +971,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 			Headers:            requetHeader,
 		},
 		HttpGETMethod)
+	t.Logf("Output from get v1/file/ref %s", resp)
 
 	return blobberGetFileResponse, resp, err
 }
