@@ -291,8 +291,6 @@ type SCRestGetBlobberResponse struct {
 	TotalStake        int64             `json:"total_stake"`
 }
 
-type SCRestGraphResponse []int64
-
 type Terms struct {
 	ReadPrice        int64         `json:"read_price"`
 	WritePrice       int64         `json:"write_price"`
