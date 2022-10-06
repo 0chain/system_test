@@ -605,7 +605,6 @@ func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTr
 			ToClientID:      FaucetSmartContractAddress,
 			TransactionData: model.NewFaucetTransactionData()},
 		HttpOkStatus)
-	t.Log(err)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
@@ -1012,7 +1011,7 @@ func (c *APIClient) CollectRewards(t *testing.T, wallet *model.Wallet, providerI
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCollectRewardTransactionData(providerID, providerType),
-			Value:           tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(0),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)

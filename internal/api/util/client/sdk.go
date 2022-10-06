@@ -97,6 +97,4 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 		fileMeta, buf, false, false)
 	require.Nil(t, err)
 	require.Nil(t, chunkedUpload.Start())
-
-	c.wallet.IncNonce()
 }

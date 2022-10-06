@@ -49,3 +49,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/0chain/gosdk => /Volumes/Files/go/src/0chain.io/gosdk
