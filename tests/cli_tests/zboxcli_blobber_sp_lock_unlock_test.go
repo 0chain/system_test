@@ -76,13 +76,13 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		require.Len(t, output, 1)
 		spInfo := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &spInfo)
-		require.Len(t, spInfo.Delegate, 3)
+		require.Len(t, spInfo.Delegate, 2)
 
 		stakePool := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotEmpty(t, stakePool)
-		require.Equal(t, int64(18000000000), stakePool.Balance)
+		require.Equal(t, int64(26000000000), stakePool.Balance)
 
 		//Lock more tokens in blobbers stake pool
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
@@ -162,7 +162,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     1,
+			"tokens":     0.8,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		var stakePool = climodel.StakePoolInfo{}
@@ -174,7 +174,7 @@ func TestBlobberStakePoolLockUnlock(t *testing.T) {
 		name := cliutils.RandomAlphaNumericString(10)
 
 		options := map[string]interface{}{
-			"lock": 1,
+			"lock": 0.2,
 			"name": name,
 		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
