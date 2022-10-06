@@ -39,7 +39,7 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(wallet *model.Wallet) {
-	c.Lock()
+	c.Mutex.Lock()
 
 	c.wallet = wallet
 
@@ -56,7 +56,7 @@ func (c *SDKClient) SetWallet(wallet *model.Wallet) {
 }
 
 func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
-	defer c.Unlock()
+	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
