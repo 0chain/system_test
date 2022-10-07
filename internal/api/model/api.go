@@ -2,19 +2,17 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/herumi/bls-go-binary/bls"
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/herumi/bls-go-binary/bls"
 )
 
-type NetworkDNSResponse struct {
+type HealthyServiceProviders struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
-}
-
-type NetworkHealthResources struct {
-	NetworkDNSResponse
+	Blobbers []string
 }
 
 type ExecutionRequest struct {
@@ -337,6 +335,28 @@ type SCRestGetBlobberRequest struct {
 	BlobberID string
 }
 
+type BlobberGetHashnodeRequest struct {
+	URL, ClientId, ClientKey, ClientSignature, AllocationID string
+}
+
+type BlobberGetHashnodeResponse struct {
+	// hash data
+	AllocationID   string `json:"allocation_id,omitempty"`
+	Type           string `json:"type,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Path           string `json:"path,omitempty"`
+	ContentHash    string `json:"content_hash,omitempty"`
+	MerkleRoot     string `json:"merkle_root,omitempty"`
+	ActualFileHash string `json:"actual_file_hash,omitempty"`
+	ChunkSize      int64  `json:"chunk_size,omitempty"`
+	Size           int64  `json:"size,omitempty"`
+	ActualFileSize int64  `json:"actual_file_size,omitempty"`
+
+	// other data
+	ParentPath string                        `json:"-"`
+	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
+}
+
 type SCRestGetBlobberResponse struct {
 	ID                string            `json:"id"`
 	BaseURL           string            `json:"url"`
@@ -387,6 +407,10 @@ type SCRestGetAllocationResponse struct {
 	WritePool       int64            `json:"write_pool"`
 	ReadPriceRange  PriceRange       `json:"read_price_range"`
 	WritePriceRange PriceRange       `json:"write_price_range"`
+}
+
+type StorageNodes struct {
+	Nodes []*StorageNode `json:"Nodes"`
 }
 
 type StorageNode struct {
