@@ -70,6 +70,30 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.RawKeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss, err := NewSignatureScheme(signatureScheme)
+		if err != nil {
+			return "", err
+		}
+		err = ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
+}
+
 func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 	defer handlePanic()
 	blsLock.Lock()

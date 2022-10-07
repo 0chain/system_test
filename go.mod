@@ -3,6 +3,7 @@ module github.com/0chain/system_test
 go 1.18
 
 require (
+	github.com/0chain/errors v1.0.3
 	github.com/0chain/gosdk v1.8.9-0.20220930021432-c340a27d7b2b
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.0.1-0.20220103075647-4e46f4fe2af2
@@ -17,15 +18,20 @@ require (
 )
 
 require (
-	github.com/0chain/errors v1.0.3 // indirect
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/multierr v1.8.0 // indirect
+	go.uber.org/zap v1.23.0 // indirect
+)
+
+require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.1.1 // indirect
 	github.com/klauspost/reedsolomon v1.11.0 // indirect
-	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -40,9 +46,6 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	go.dedis.ch/fixbuf v1.0.3 // indirect
 	go.dedis.ch/kyber/v3 v3.0.14 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 	golang.org/x/text v0.3.7 // indirect
