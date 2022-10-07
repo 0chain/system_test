@@ -1140,7 +1140,5 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 			Headers:            headers,
 		},
 		HttpGETMethod)
-	t.Logf("Output from get v1/file/ref %s", resp.String())
-
 	return blobberGetFileResponse, resp, err
 }
