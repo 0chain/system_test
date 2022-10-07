@@ -77,8 +77,6 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
-	return
-
 	t.Run("Get file ref with incorrect allocation id should fail", func(t *testing.T) {
 		t.Parallel()
 
