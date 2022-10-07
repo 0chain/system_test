@@ -8,13 +8,10 @@ import (
 	"github.com/herumi/bls-go-binary/bls"
 )
 
-type NetworkDNSResponse struct {
+type HealthyServiceProviders struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
-}
-
-type NetworkHealthResources struct {
-	NetworkDNSResponse
+	Blobbers []string
 }
 
 type ExecutionRequest struct {
@@ -349,6 +346,10 @@ type SCRestGetBlobberResponse struct {
 	TotalStake        int64             `json:"total_stake"`
 }
 
+type StorageNodes struct {
+	Nodes []*StorageNode `json:"Nodes"`
+}
+
 type Terms struct {
 	ReadPrice        int64         `json:"read_price"`
 	WritePrice       int64         `json:"write_price"`
@@ -421,30 +422,27 @@ type BlobberGetFileRefsRequest struct {
 	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType, RemotePath string
 }
 
-type FileAttributes struct {
-}
-
 type RefsData struct {
-	ID             int             `json:"id"`
-	Type           string          `json:"type"`
-	AllocationId   string          `json:"allocation_id"`
-	LookupHash     string          `json:"lookup_hash"`
-	Name           string          `json:"name"`
-	Path           string          `json:"path"`
-	Hash           string          `json:"hash"`
-	NumBlocks      int             `json:"num_blocks"`
-	PathHash       string          `json:"path_hash"`
-	ParentHash     string          `json:"parent_path"`
-	Level          int             `json:"level"`
-	ContentHash    string          `json:"content_hash"`
-	Size           int             `json:"size"`
-	MerkleRoot     string          `json:"merkle_root"`
-	ActualFileSize int             `json:"actual_file_size"`
-	ActualFileHash string          `json:"actual_file_hash"`
-	WriteMarker    string          `json:"write_marker"`
-	Attributes     *FileAttributes `json:"attributes"`
-	CreatedAt      string          `json:"created_at"`
-	UpdatedAt      string          `json:"updated_at"`
+	ID             int    `json:"id"`
+	Type           string `json:"type"`
+	AllocationId   string `json:"allocation_id"`
+	LookupHash     string `json:"lookup_hash"`
+	Name           string `json:"name"`
+	Path           string `json:"path"`
+	Hash           string `json:"hash"`
+	NumBlocks      int    `json:"num_blocks"`
+	PathHash       string `json:"path_hash"`
+	ParentPath     string `json:"parent_path"`
+	Level          int    `json:"level"`
+	ContentHash    string `json:"content_hash"`
+	Size           int    `json:"size"`
+	MerkleRoot     string `json:"merkle_root"`
+	ActualFileSize int    `json:"actual_file_size"`
+	ActualFileHash string `json:"actual_file_hash"`
+	WriteMarker    string `json:"write_marker"`
+	CreatedAt      int    `json:"created_at"`
+	UpdatedAt      int    `json:"updated_at"`
+	ChunkSize      int    `json:"chunk_size"`
 }
 
 type LatestWriteMarker struct {
@@ -456,11 +454,14 @@ type LatestWriteMarker struct {
 	Timestamp          int    `json:"timestamp"`
 	ClientId           string `json:"client_id"`
 	Signature          string `json:"signature"`
+	LookupHash         string `json:"lookup_hash"`
+	Name               string `json:"name"`
+	ContentHash        string `json:"content_hash"`
 }
 
 type BlobberGetFileRefsResponse struct {
 	TotalPages        int                `json:"total_pages"`
-	OffsetPath        string             `json:"offsetPath"`
+	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
 }

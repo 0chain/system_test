@@ -15,7 +15,7 @@ import (
 func TestBlobberFileRefs(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Get file ref with allocation id, remote path and ref type should work", func(t *testing.T) {
+	t.Run("Get file ref with allocation id, remote path with reftype as regular should work", func(t *testing.T) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
@@ -38,7 +38,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		url := blobber.BaseURL
 		keyPairSecond, _ := wallet.GetKeyPair()
 		keyPair := crypto.GenerateKeys(wallet.Mnemonics)
-		refType := "f"
+		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
 		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
@@ -47,11 +47,40 @@ func TestBlobberFileRefs(t *testing.T) {
 		}})
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, keyPairSecond, allocationID, refType, clientSignature, remoteFilePath)
-		require.NotNil(t, blobberFileRefRequest)
-		blobberFileRefsResponse, httpStatusCode, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
-		require.NotNil(t, blobberFileRefsResponse)
-		require.NotNil(t, httpStatusCode)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
+		require.NotNil(t, blobberFileRefsResponse)
+		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
+		require.GreaterOrEqual(t, blobberFileRefsResponse.TotalPages, int(1))
+		require.NotNil(t, blobberFileRefsResponse.OffsetPath)
+		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId)
+		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.ClientId)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
+
+		// request with refType as updated
+		refType = "updated"
+		blobberFileRefRequest = getBlobberFileRefRequest(t, url, wallet, keyPairSecond, allocationID, refType, clientSignature, remoteFilePath)
+		blobberFileRefsResponse, resp, err = apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, blobberFileRefsResponse)
+		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
+		require.GreaterOrEqual(t, blobberFileRefsResponse.TotalPages, int(1))
+		require.NotNil(t, blobberFileRefsResponse.OffsetPath)
+		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId)
+		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.ClientId)
+		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 }
 

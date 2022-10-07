@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,6 +34,7 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
 	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
@@ -42,6 +44,7 @@ const (
 	SCRestGetAllocation        = "/v1/screst/:sc_address/allocation"
 	SCRestGetBlobbers          = "/v1/screst/:sc_address/getBlobber"
 	ChainGetStats              = "/v1/chain/get/stats"
+	BlobberGetStats            = "/_stats"
 	ClientPut                  = "/v1/client/put"
 	TransactionPut             = "/v1/transaction/put"
 	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
@@ -54,6 +57,7 @@ const (
 const (
 	MinerServiceProvider = iota
 	SharderServiceProvider
+	BlobberServiceProvider
 )
 
 // Contains all smart contract addreses used in the client
@@ -80,7 +84,7 @@ var (
 )
 
 type APIClient struct {
-	model.NetworkHealthResources
+	model.HealthyServiceProviders
 
 	httpClient *resty.Client //nolint
 }
@@ -90,21 +94,31 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 		httpClient: resty.New(), //nolint
 	}
 
-	if err := apiClient.selectHealthServiceProviders(networkEntrypoint); err != nil {
+	if err := apiClient.selectHealthyServiceProviders(networkEntrypoint); err != nil {
 		log.Fatalln(err)
 	}
 
 	return apiClient
 }
 
-func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
+func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]string, error) {
 	var result []string
 	for _, node := range nodes {
 		urlBuilder := NewURLBuilder()
 		if err := urlBuilder.MustShiftParse(node); err != nil {
 			return nil, err
 		}
-		formattedURL := urlBuilder.SetPath(ChainGetStats).String()
+		// formattedURL := urlBuilder.SetPath(ChainGetStats).String()
+		formattedURL := ""
+
+		switch serviceProviderType {
+		case MinerServiceProvider:
+			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
+		case SharderServiceProvider:
+			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
+		case BlobberServiceProvider:
+			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
+		}
 
 		healthResponse, err := c.httpClient.R().Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
@@ -119,14 +133,18 @@ func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
 }
 
 func (c *APIClient) getHealthyMiners(miners []string) ([]string, error) {
-	return c.getHealthyNodes(miners)
+	return c.getHealthyNodes(miners, MinerServiceProvider)
 }
 
 func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
-	return c.getHealthyNodes(shaders)
+	return c.getHealthyNodes(shaders, SharderServiceProvider)
 }
 
-func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
+func (c *APIClient) getHealthyBlobbers(blobbers []string) ([]string, error) {
+	return c.getHealthyNodes(blobbers, BlobberServiceProvider)
+}
+
+func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) error {
 	urlBuilder := NewURLBuilder()
 	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
 		return err
@@ -138,14 +156,14 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 		return ErrNetworkHealth
 	}
 
-	var networkDNSResponse *model.NetworkDNSResponse
+	var networkServiceProviders *model.HealthyServiceProviders
 
-	err = json.Unmarshal(resp.Body(), &networkDNSResponse)
+	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
 		return ErrNetworkHealth
 	}
 
-	healthyMiners, err := c.getHealthyMiners(networkDNSResponse.Miners)
+	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
 	if err != nil {
 		return err
 	}
@@ -153,9 +171,9 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 		return ErrNoMinersHealth
 	}
 
-	c.NetworkHealthResources.Miners = healthyMiners
+	c.HealthyServiceProviders.Miners = healthyMiners
 
-	healthySharders, err := c.getHealthyShaders(networkDNSResponse.Sharders)
+	healthySharders, err := c.getHealthyShaders(networkServiceProviders.Sharders)
 	if err != nil {
 		return err
 	}
@@ -163,7 +181,46 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 		return ErrNoShadersHealth
 	}
 
-	c.NetworkHealthResources.Sharders = healthySharders
+	c.HealthyServiceProviders.Sharders = healthySharders
+
+	offset := 0
+	limit := 20
+	var nodes model.StorageNodes
+
+	for {
+		if err := urlBuilder.MustShiftParse(networkServiceProviders.Sharders[0]); err != nil {
+			return err
+		}
+		urlBuilder = urlBuilder.SetPath(GetBlobbers).SetPathVariable("sc_address", StorageSmartContractAddress)
+		formattedURL = urlBuilder.AddParams("offset", fmt.Sprint(offset)).AddParams("limit", fmt.Sprint(limit)).String()
+		resp, err = c.httpClient.R().Get(formattedURL)
+		if err != nil {
+			return ErrNoBlobbersHealthy
+		}
+		err = json.Unmarshal(resp.Body(), &nodes)
+		if err != nil {
+			return ErrNetworkHealth
+		}
+
+		if len(nodes.Nodes) == 0 {
+			break
+		}
+
+		for _, node := range nodes.Nodes {
+			networkServiceProviders.Blobbers = append(networkServiceProviders.Blobbers, node.BaseURL)
+		}
+		offset += limit
+	}
+
+	healthyBlobbers, err := c.getHealthyBlobbers(networkServiceProviders.Blobbers)
+	if err != nil {
+		return err
+	}
+	if len(healthyBlobbers) == 0 {
+		return ErrNoBlobbersHealthy
+	}
+
+	c.HealthyServiceProviders.Blobbers = healthyBlobbers
 
 	return nil
 }
@@ -210,9 +267,11 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 
 	switch serviceProviderType {
 	case MinerServiceProvider:
-		serviceProviders = c.NetworkHealthResources.Miners
+		serviceProviders = c.HealthyServiceProviders.Miners
 	case SharderServiceProvider:
-		serviceProviders = c.NetworkHealthResources.Sharders
+		serviceProviders = c.HealthyServiceProviders.Sharders
+	case BlobberServiceProvider:
+		serviceProviders = c.HealthyServiceProviders.Blobbers
 	}
 
 	for _, serviceProvider := range serviceProviders {
@@ -947,30 +1006,25 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
-	urlBuilder := NewURLBuilder().
-		SetScheme("https").
-		SetHost("dev.0chain.net").
-		SetPath(GetFileRef).
-		SetPathVariable("allocation_id", blobberGetFileRefsRequest.AllocationID).
-		AddParams("path", blobberGetFileRefsRequest.RemotePath). // for testing purpose
-		AddParams("refType", blobberGetFileRefsRequest.RefType)  // for testing purpose
+	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
 
-	requetHeader :=
-		make(map[string]string)
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
+		"X-App-Client-Key":       blobberGetFileRefsRequest.ClientKey,
+		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
+	}
+	t.Logf("request headers %s ", headers)
 
-	requetHeader["X-App-Client-Id"] = blobberGetFileRefsRequest.ClientID
-	requetHeader["X-App-Client-Key"] = blobberGetFileRefsRequest.ClientKey
-	requetHeader["X-App-Client-Signature"] = blobberGetFileRefsRequest.ClientSignature
-	t.Logf("formatted url %s", urlBuilder.String())
+	t.Logf("final formatted url %s", url)
 	resp, err := c.executeForServiceProvider(
-		urlBuilder.String(),
+		url,
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
 			RequiredStatusCode: requiredStatusCode,
-			Headers:            requetHeader,
+			Headers:            headers,
 		},
 		HttpGETMethod)
 	t.Logf("Output from get v1/file/ref %s", resp.String())
