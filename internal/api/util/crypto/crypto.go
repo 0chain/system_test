@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
 	"log"
 	"sync"
-	"testing"
 )
+
+const BLS0Chain = "bls0chain"
 
 var blsLock sync.Mutex
 
@@ -28,7 +28,8 @@ func init() {
 	}
 }
 
-func GenerateMnemonics(t *testing.T) string {
+func GenerateMnemonics() string {
+	defer handlePanic()
 	entropy, err := bip39.NewEntropy(256) //nolint
 	if err != nil {
 		log.Fatalln(err)
@@ -37,13 +38,12 @@ func GenerateMnemonics(t *testing.T) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	t.Logf("Generated mnemonic [%s]", mnemonic)
 
 	return mnemonic
 }
 
-func GenerateKeys(t *testing.T, mnemonics string) *model.KeyPair {
-	defer handlePanic(t)
+func GenerateKeys(mnemonics string) *model.RawKeyPair {
+	defer handlePanic()
 	blsLock.Lock()
 	defer func() {
 		blsLock.Unlock()
@@ -58,13 +58,9 @@ func GenerateKeys(t *testing.T, mnemonics string) *model.KeyPair {
 	secretKey.SetByCSPRNG()
 
 	publicKey := secretKey.GetPublicKey()
-	secretKeyHex := secretKey.SerializeToHexStr()
-	publicKeyHex := publicKey.SerializeToHexStr()
-
-	t.Logf("Generated public key [%s] and secret key [%s]", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
-	return &model.KeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
+	return &model.RawKeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
 }
 
 func Sha3256(src []byte) string {
@@ -74,7 +70,7 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.RawKeyPair) (string, error) {
 	retSignature := ""
 	for _, kv := range keys {
 		ss, err := NewSignatureScheme(signatureScheme)
@@ -98,37 +94,33 @@ func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string
 	return retSignature, nil
 }
 
-func SignTransaction(t *testing.T, request *model.TransactionPutRequest, pair *model.KeyPair) {
-	defer handlePanic(t)
+func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
+	defer handlePanic()
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
-	hashToSign, err := hex.DecodeString(request.Hash)
-	require.NoError(t, err, "Error on hash")
-
-	request.Signature = pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
-}
-
-func HashTransaction(request *model.TransactionEntity) {
-	var hashData = blankIfNil(request.CreationDate) + ":" +
-		blankIfNil(request.TransactionNonce) + ":" +
-		blankIfNil(request.ClientId) + ":" +
-		blankIfNil(request.ToClientId) + ":" +
-		blankIfNil(request.TransactionValue) + ":" +
-		Sha3256([]byte(request.TransactionData))
-
-	request.Hash = Sha3256([]byte(hashData))
-}
-
-func blankIfNil(obj interface{}) string {
-	if obj == nil {
-		return ""
+	hashToSign, err := hex.DecodeString(hash)
+	if err != nil {
+		fmt.Println(hash)
+		return "", err
 	}
-	return fmt.Sprintf("%v", obj)
+
+	signature := pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
+	return signature, nil
 }
 
-func handlePanic(t *testing.T) {
+func CreateTransactionHash(request *model.TransactionPutRequest) string {
+	return Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+		request.CreationDate,
+		request.TransactionNonce,
+		request.ClientId,
+		request.ToClientId,
+		request.TransactionValue,
+		Sha3256([]byte(request.TransactionData)))))
+}
+
+func handlePanic() {
 	if err := recover(); err != nil {
-		t.Error("panic occurred: ", err)
+		log.Fatalf("panic occurred: %s", err)
 	}
 }
