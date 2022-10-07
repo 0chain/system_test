@@ -104,29 +104,10 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
-func NewCollectRewardTransactionData(providerID string, providerType int) TransactionData {
-	var input = map[string]interface{}{
-		"provider_id":   providerID,
-		"provider_type": providerType,
-	}
-
-	return TransactionData{
-		Name:  "collect_reward",
-		Input: input,
-	}
-}
-
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,
-	}
-}
-
-func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
-	return TransactionData{
-		Name:  "stake_pool_lock",
-		Input: &createStakePoolRequest,
 	}
 }
 

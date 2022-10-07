@@ -7,6 +7,8 @@ import (
 	"log"
 	"sync"
 
+	"github.com/0chain/gosdk/core/sys"
+	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39" //nolint
@@ -62,4 +64,25 @@ func Sha3256(src []byte) string {
 	sha3256.Write(src)
 	var buffer []byte
 	return hex.EncodeToString(sha3256.Sum(buffer))
+}
+
+func SignHash(hash string, signatureScheme string, keys []sys.KeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss := zcncrypto.NewSignatureScheme(signatureScheme)
+		err := ss.SetPrivateKey(kv.PrivateKey)
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
 }

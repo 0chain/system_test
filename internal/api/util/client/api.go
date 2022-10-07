@@ -35,7 +35,6 @@ const (
 // Contains all used url paths in the client
 const (
 	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
-	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"

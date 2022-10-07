@@ -5,7 +5,6 @@ import (
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -40,7 +39,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -104,7 +103,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -141,7 +140,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -177,7 +176,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "invalid-ref-type"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -214,7 +213,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "invalid-ref-type"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -250,7 +249,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := ""
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -287,7 +286,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := ""
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -352,7 +351,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -389,7 +388,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
+		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
 			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
 			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
 		}})
@@ -415,25 +414,4 @@ func getBlobberFileRefRequest(t *testing.T, url string, registeredWallet *model.
 		RemotePath:      remotePath,
 	}
 	return blobberFileRequest
-}
-
-func SignHash(hash string, signatureScheme string, keys []sys.KeyPair) (string, error) {
-	retSignature := ""
-	for _, kv := range keys {
-		ss := zcncrypto.NewSignatureScheme(signatureScheme)
-		err := ss.SetPrivateKey(kv.PrivateKey)
-		if err != nil {
-			return "", err
-		}
-
-		if len(retSignature) == 0 {
-			retSignature, err = ss.Sign(hash)
-		} else {
-			retSignature, err = ss.Add(retSignature, hash)
-		}
-		if err != nil {
-			return "", err
-		}
-	}
-	return retSignature, nil
 }

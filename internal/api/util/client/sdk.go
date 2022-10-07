@@ -88,8 +88,6 @@ func (c *SDKClient) UploadFileWithSpecificName(t *testing.T, allocationID string
 		RemotePath: filepath.Join("/", filepath.Base(tmpFile.Name())),
 	}
 
-	t.Logf("remote file path was %s ", filepath.Join("/", filepath.Base(tmpFile.Name())))
-
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.Nil(t, err)
 
