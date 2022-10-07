@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -40,7 +39,6 @@ func TestMinerStake(t *testing.T) {
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
-		poolIdRegex     = regexp.MustCompile("[a-f0-9]{64}")
 	)
 
 	t.Parallel()
@@ -61,24 +59,21 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
-		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
+		poolsInfo, err := pollForPoolInfo(t, miner.ID)
 		require.Nil(t, err)
 		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
 
 		// Unlock should work
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error unlocking tokens against a node")
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens will be unlocked next VC", output[0])
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
@@ -112,7 +107,9 @@ func TestMinerStake(t *testing.T) {
 			"error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
-		poolId1 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
+
+		// wait for pool to be active from pending status, usually need to wait for 50 rounds
+		waitForStakePoolActive(t)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
@@ -121,7 +118,6 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
-		poolId2 := regexp.MustCompile("[0-9a-z]{64}").FindString(output[0])
 
 		var poolsInfo climodel.MinerSCUserPoolsInfo
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
@@ -129,25 +125,10 @@ func TestMinerStake(t *testing.T) {
 		require.Len(t, output, 1)
 
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
-		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Len(t, poolsInfo.Pools[miner.ID], 2)
+		require.NoError(t, err)
+		require.Len(t, poolsInfo.Pools[miner.ID], 1)
 
-		foundPool1 := false
-		foundPool2 := false
-
-		for _, pool := range poolsInfo.Pools[miner.ID] {
-			if pool.ID == poolId1 {
-				require.Equal(t, float64(1), intToZCN(pool.Balance))
-				foundPool1 = true
-			}
-			if pool.ID == poolId2 {
-				require.Equal(t, float64(1), intToZCN(pool.Balance))
-				foundPool2 = true
-			}
-		}
-
-		require.True(t, foundPool1, "Created pool was not listed")
-		require.True(t, foundPool2, "Created pool was not listed")
+		require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
@@ -223,17 +204,15 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
-		poolsInfo, err := pollForPoolInfo(t, miner.ID, poolId)
+		poolsInfo, err := pollForPoolInfo(t, miner.ID)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -270,7 +249,7 @@ func TestMinerStake(t *testing.T) {
 					"id":     newMiner.ID,
 					"tokens": 1.0,
 				}), walletName, true)
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Len(t, output, 1)
 				require.Regexp(t, lockOutputRegex, output[0])
 			}(i)
@@ -331,7 +310,7 @@ func TestMinerStake(t *testing.T) {
 			"id":        miner01ID,
 			"min_stake": 1,
 		}), true)
-		require.Nil(t, err)
+		require.NoError(t, err, output)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner01ID,
@@ -370,6 +349,8 @@ func TestMinerStake(t *testing.T) {
 			"tokens": intToZCN(max_stake) / 2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
+
+		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     miner.ID,
 			"tokens": intToZCN(max_stake)/2 + 1,
@@ -398,11 +379,9 @@ func TestMinerStake(t *testing.T) {
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
-		poolId := poolIdRegex.FindString(output[0])
 
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      "abcdefgh",
-			"pool_id": poolId,
+			"id": "abcdefgh",
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
@@ -410,39 +389,22 @@ func TestMinerStake(t *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": poolId,
+			"id": miner.ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 	})
-
-	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id":      miner.ID,
-			"pool_id": "abcdefgh",
-		}), false)
-		require.NotNil(t, err, "expected error when using invalid node id")
-		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
-	})
 }
 
-func pollForPoolInfo(t *testing.T, minerID, poolId string) (climodel.DelegatePool, error) {
+func pollForPoolInfo(t *testing.T, minerID string) (climodel.DelegatePool, error) {
 	t.Log(`polling for pool info till it is "ACTIVE"...`)
 	timeout := time.After(time.Minute * 5)
 
 	var poolsInfo climodel.DelegatePool
 	for {
 		output, err := minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id":      minerID,
-			"pool_id": poolId,
+			"id": minerID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
@@ -501,7 +463,7 @@ func getBalanceFromSharders(t *testing.T, clientId string) int64 {
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 
-	var startBalance apimodel.Balance
+	var startBalance climodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 

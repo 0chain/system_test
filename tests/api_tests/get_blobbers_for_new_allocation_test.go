@@ -1,14 +1,10 @@
 package api_tests
 
 import (
-	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/endpoint"
-	"testing"
-	"time"
-
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/go-resty/resty/v2" //nolint
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestGetBlobbersForNewAllocation(t *testing.T) {
@@ -16,59 +12,25 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 
 	t.Run("Alloc blobbers API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
-		registeredWallet, keyPair := registerWallet(t)
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
 
-		require.NotNil(t, blobbers)
-		require.Greater(t, len(*blobbers), 3)
-		require.NotNil(t, blobberRequirements)
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+
+		require.NotNil(t, allocationBlobbers.Blobbers)
+		require.Greater(t, len(*allocationBlobbers.Blobbers), 3)
+		require.NotNil(t, allocationBlobbers.BlobberRequirements)
 	})
 
 	// FIXME lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319
 	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *testing.T) {
 		t.Parallel()
 		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
-		blobbers, response, err := v1ScrestAllocBlobbers(t, "{}", nil)
-		require.NotNil(t, blobbers)
-		require.NotNil(t, response)
-		require.NotNil(t, err)
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpOkStatus)
+
+		require.NotNil(t, allocationBlobbers.Blobbers)
 	})
-
-}
-
-func getBlobbersMatchingRequirements(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements) {
-	blobbers, blobberRequirements, httpResponse, err := getBlobbersMatchingRequirementsWithoutAssertion(t, wallet, keyPair, size, dataShards, parityShards, expiresIn)
-
-	require.NotNil(t, blobbers, "Allocation was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Nil(t, err, "Unexpected error [%s] occurred getting balance with http response [%s]", err, httpResponse)
-	require.Equal(t, endpoint.HttpOkStatus, httpResponse.Status())
-
-	return blobbers, blobberRequirements
-}
-
-func getBlobbersMatchingRequirementsWithoutAssertion(t *testing.T, wallet *model.Wallet, keyPair *model.KeyPair, size int64, dataShards int64, parityShards int64, expiresIn time.Duration) (*[]string, model.BlobberRequirements, *resty.Response, error) { //nolint
-	t.Logf("Get blobbers for allocation...")
-	blobberRequirements := model.BlobberRequirements{
-		Size:           size,
-		DataShards:     dataShards,
-		ParityShards:   parityShards,
-		ExpirationDate: time.Now().Add(expiresIn).Unix(),
-		ReadPriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		WritePriceRange: model.PriceRange{
-			Min: 0,
-			Max: 9223372036854775807,
-		},
-		OwnerId:        wallet.ClientID,
-		OwnerPublicKey: wallet.ClientKey,
-	}
-
-	allocationData, err := json.Marshal(blobberRequirements)
-	require.Nil(t, err)
-
-	blobbers, httpResponse, err := v1ScrestAllocBlobbers(t, string(allocationData), nil)
-
-	return blobbers, blobberRequirements, httpResponse, err
 }
