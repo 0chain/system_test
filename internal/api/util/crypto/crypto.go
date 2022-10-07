@@ -4,22 +4,33 @@ import (
 	"bytes"
 	_ "crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"sync"
 
-	"github.com/0chain/gosdk/core/sys"
-	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
 )
 
-var blsLock sync.Mutex
-
 const BLS0Chain = "bls0chain"
 
+var blsLock sync.Mutex
+
+func init() {
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	err := bls.Init(bls.CurveFp254BNb)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
 func GenerateMnemonics() string {
+	defer handlePanic()
 	entropy, err := bip39.NewEntropy(256) //nolint
 	if err != nil {
 		log.Fatalln(err)
@@ -28,19 +39,17 @@ func GenerateMnemonics() string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("Generated mnemonic [%s]\n", mnemonic)
 
 	return mnemonic
 }
 
 func GenerateKeys(mnemonics string) *model.RawKeyPair {
+	defer handlePanic()
 	blsLock.Lock()
-	defer blsLock.Unlock()
-
-	err := bls.Init(bls.CurveFp254BNb)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	defer func() {
+		blsLock.Unlock()
+		bls.SetRandFunc(nil)
+	}()
 
 	seed := bip39.NewSeed(mnemonics, "0chain-client-split-key") //nolint
 	random := bytes.NewReader(seed)
@@ -50,10 +59,6 @@ func GenerateKeys(mnemonics string) *model.RawKeyPair {
 	secretKey.SetByCSPRNG()
 
 	publicKey := secretKey.GetPublicKey()
-	secretKeyHex := secretKey.SerializeToHexStr()
-	publicKeyHex := publicKey.SerializeToHexStr()
-
-	log.Printf("Generated public key [%s] and secret key [%s]\n", publicKeyHex, secretKeyHex)
 	bls.SetRandFunc(nil)
 
 	return &model.RawKeyPair{PublicKey: *publicKey, PrivateKey: secretKey}
@@ -66,23 +71,33 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-func SignHash(hash string, signatureScheme string, keys []sys.KeyPair) (string, error) {
-	retSignature := ""
-	for _, kv := range keys {
-		ss := zcncrypto.NewSignatureScheme(signatureScheme)
-		err := ss.SetPrivateKey(kv.PrivateKey)
-		if err != nil {
-			return "", err
-		}
+func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
+	defer handlePanic()
+	blsLock.Lock()
+	defer blsLock.Unlock()
 
-		if len(retSignature) == 0 {
-			retSignature, err = ss.Sign(hash)
-		} else {
-			retSignature, err = ss.Add(retSignature, hash)
-		}
-		if err != nil {
-			return "", err
-		}
+	hashToSign, err := hex.DecodeString(hash)
+	if err != nil {
+		fmt.Println(hash)
+		return "", err
 	}
-	return retSignature, nil
+
+	signature := pair.PrivateKey.Sign(string(hashToSign)).SerializeToHexStr()
+	return signature, nil
+}
+
+func CreateTransactionHash(request *model.TransactionPutRequest) string {
+	return Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+		request.CreationDate,
+		request.TransactionNonce,
+		request.ClientId,
+		request.ToClientId,
+		request.TransactionValue,
+		Sha3256([]byte(request.TransactionData)))))
+}
+
+func handlePanic() {
+	if err := recover(); err != nil {
+		log.Fatalf("panic occurred: %s", err)
+	}
 }

@@ -35,6 +35,7 @@ const (
 // Contains all used url paths in the client
 const (
 	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
+	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus             = "/v1/miner/get/stats"
@@ -395,21 +396,14 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		transactionPutRequest.CreationDate,
-		transactionPutRequest.TransactionNonce,
-		transactionPutRequest.ClientId,
-		transactionPutRequest.ToClientId,
-		transactionPutRequest.TransactionValue,
-		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
+	transactionPutRequest.Hash = crypto.CreateTransactionHash(&transactionPutRequest)
 
-	hashToSign, err := hex.DecodeString(transactionPutRequest.Hash)
+	signature, err := crypto.SignHash(transactionPutRequest.Hash, internalTransactionPutRequest.Wallet.RawKeys)
 	if err != nil {
+		fmt.Println("hash here")
 		return nil, nil, err
 	}
-
-	transactionPutRequest.Signature = internalTransactionPutRequest.Wallet.RawKeys.PrivateKey.Sign(string(hashToSign)).
-		SerializeToHexStr()
+	transactionPutRequest.Signature = signature
 
 	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
 
@@ -612,7 +606,7 @@ func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetReques
 	return scStateGetResponse, resp, err
 }
 
-// RegisterWallet provides basic assertions -
+// RegisterWallet provides basic assertions
 func (c *APIClient) RegisterWallet(t *testing.T, clientID, clientKey string, creationDate *int, generateInput bool, requiredStatusCode int) *model.Wallet {
 	t.Log("Register wallet with basic assertions...")
 
@@ -987,6 +981,126 @@ func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetB
 		}
 
 		return updateBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+}
+
+// CreateStakePoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateStakePool(t *testing.T, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+	t.Log("Create stake pool...")
+
+	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCreateStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionPutResponse)
+
+	var createStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: createStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
+	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetStakePoolStat).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &scRestGetStakePoolStatResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetStakePoolStatResponse, resp, err
+}
+
+func (c *APIClient) GetStakePoolStat(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
+	t.Log("Get stake pool stat...")
+
+	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
+		model.SCRestGetStakePoolStatRequest{
+			BlobberID: blobberID,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
+	return scRestGetStakePoolStat
+}
+
+func (c *APIClient) CollectRewards(t *testing.T, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
+	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCollectRewardTransactionData(providerID, providerType),
+			Value:           tokenomics.IntToZCN(0),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, collectRewardTransactionPutResponse)
+
+	var collectRewardTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		collectRewardTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			model.TransactionGetConfirmationRequest{
+				Hash: collectRewardTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if collectRewardTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return collectRewardTransactionGetConfirmationResponse.Status == requiredTransactionStatus
 	})
 
 	wallet.IncNonce()

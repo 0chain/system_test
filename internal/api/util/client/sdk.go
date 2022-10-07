@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/0chain/gosdk/core/conf"
@@ -18,6 +19,8 @@ import (
 )
 
 type SDKClient struct {
+	sync.Mutex
+
 	blockWorker string
 	wallet      *model.Wallet
 }
@@ -38,6 +41,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(wallet *model.Wallet) {
+	c.Mutex.Lock()
+
 	c.wallet = wallet
 
 	err := sdk.InitStorageSDK(
@@ -108,23 +113,19 @@ func (c *SDKClient) UploadFileWithSpecificName(t *testing.T, allocationID string
 }
 
 func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
-	tmpFile, err := ioutil.TempFile("", "*")
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	defer func(name string) {
-		err := os.Remove(name)
+		err := os.RemoveAll(name)
 		if err != nil {
 
 		}
 	}(tmpFile.Name())
-
-	defer func(file *os.File) {
-		if err := file.Close(); err != nil {
-			log.Fatalln(err)
-		}
-	}(tmpFile)
 
 	const actualSize int64 = 1024
 
@@ -153,9 +154,4 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 		fileMeta, buf, false, false)
 	require.Nil(t, err)
 	require.Nil(t, chunkedUpload.Start())
-
-	err = sdkAllocation.CommitMetaTransaction(filepath.Join("/", filepath.Base(tmpFile.Name())), "Upload", "", "", nil, new(model.StubStatusBar))
-	require.Nil(t, err)
-
-	c.wallet.IncNonce()
 }
