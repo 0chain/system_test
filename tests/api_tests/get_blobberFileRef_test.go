@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/0chain/gosdk/core/encryption"
-	"github.com/0chain/gosdk/core/sys"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -28,7 +27,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -39,10 +38,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -103,10 +99,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -129,7 +122,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		remoteFilePath = "/invalid-remote-file-path"
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -140,10 +133,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -166,7 +156,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -176,10 +166,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "invalid-ref-type"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -202,7 +189,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		remoteFilePath = ""
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -213,10 +200,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "invalid-ref-type"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -239,7 +223,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -249,10 +233,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := ""
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -275,7 +256,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		remoteFilePath = ""
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -286,10 +267,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := ""
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -312,7 +290,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 		refType := "regular"
@@ -341,7 +319,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -351,10 +329,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		wallet.ClientID = "invalue-client-id"
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)
@@ -378,7 +353,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFileWithSpecificName(t, allocationID)
+		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -388,10 +363,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		refType := "regular"
 		sign := encryption.Hash(allocation.Tx)
 
-		clientSignature, _ := crypto.SignHash(sign, "bls0chain", []sys.KeyPair{sys.KeyPair{
-			PrivateKey: keyPair.PrivateKey.SerializeToHexStr(),
-			PublicKey:  keyPair.PublicKey.SerializeToHexStr(),
-		}})
+		clientSignature, _ := crypto.SignHash(sign, keyPair)
 
 		wallet.ClientKey = "invalid-client-key"
 		blobberFileRefRequest := getBlobberFileRefRequest(t, url, wallet, allocationID, refType, clientSignature, remoteFilePath)

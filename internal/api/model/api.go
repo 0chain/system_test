@@ -56,17 +56,6 @@ type Wallet struct {
 	RawKeys     *RawKeyPair `json:"-"`
 }
 
-type Wallet struct {
-	ClientID    string      `json:"client_id"`
-	ClientKey   string      `json:"client_key"`
-	Keys        []*KeyPair  `json:"keys"`
-	Mnemonics   string      `json:"mnemonics"`
-	Version     string      `json:"version"`
-	DateCreated string      `json:"date_created"`
-	Nonce       int         `json:"-"`
-	RawKeys     *RawKeyPair `json:"-"`
-}
-
 type KeyPair struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
