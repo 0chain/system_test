@@ -380,7 +380,7 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 		log.Fatalln(err)
 	}
 
-	keypair := crypto.GenerateKeys(t, from.Mnemonic)
+	keypair := crypto.GenerateKeys(from.Mnemonic)
 
 	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
 		SerializeToHexStr()

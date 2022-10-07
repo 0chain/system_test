@@ -16,7 +16,7 @@ func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool)
 	for range ticker.C {
 		select {
 		case <-after:
-			return
+			t.Fatal("Wait pool received a timeout")
 		default:
 			if callback() {
 				t.Log("Wait pool callback has succeed")
@@ -25,6 +25,4 @@ func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool)
 			t.Log("Wait pool callback has failed, continue...")
 		}
 	}
-
-	t.Log("Wait pool received a timeout")
 }
