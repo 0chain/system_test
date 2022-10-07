@@ -3,6 +3,8 @@ package model
 import (
 	"encoding/json"
 	"github.com/herumi/bls-go-binary/bls"
+	"io"
+	"strconv"
 	"time"
 )
 
@@ -29,22 +31,59 @@ type ExecutionRequest struct {
 	RequiredStatusCode int
 }
 
-type Wallet struct {
-	Id           string  `json:"id"`
-	Version      string  `json:"version"`
-	CreationDate *int    `json:"creation_date"`
-	PublicKey    string  `json:"public_key"`
-	Keys         KeyPair `json:"keys"`
+type ClientPutRequest struct {
+	ClientID      string `json:"id"`
+	ClientKey     string `json:"public_key"`
+	CreationDate  *int   `json:"creation_date"`
+	GenerateInput bool
+}
+
+type ClientPutResponse struct {
+	Id           string `json:"id"`
+	Version      string `json:"version"`
+	CreationDate *int   `json:"creation_date"`
+	PublicKey    string `json:"public_key"`
 	Nonce        int
 }
 
+type Wallet struct {
+	ClientID    string      `json:"client_id"`
+	ClientKey   string      `json:"client_key"`
+	Keys        []*KeyPair  `json:"keys"`
+	Mnemonics   string      `json:"mnemonics"`
+	Version     string      `json:"version"`
+	DateCreated string      `json:"date_created"`
+	Nonce       int         `json:"-"`
+	RawKeys     *RawKeyPair `json:"-"`
+}
+
 type KeyPair struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
+
+type RawKeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
 
 func (w *Wallet) IncNonce() {
 	w.Nonce++
+}
+
+func (w *Wallet) GetKeyPair() (*KeyPair, error) {
+	if len(w.Keys) == 0 {
+		return nil, ErrNoKeyPair
+	}
+	return w.Keys[0], nil
+}
+
+func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
+	result, err := strconv.Atoi(w.DateCreated)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
 }
 
 func (w *Wallet) String() string {
@@ -68,10 +107,29 @@ func NewFaucetTransactionData() TransactionData {
 	}
 }
 
+func NewCollectRewardTransactionData(providerID string, providerType int) TransactionData {
+	var input = map[string]interface{}{
+		"provider_id":   providerID,
+		"provider_type": providerType,
+	}
+
+	return TransactionData{
+		Name:  "collect_reward",
+		Input: input,
+	}
+}
+
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,
+	}
+}
+
+func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "stake_pool_lock",
+		Input: &createStakePoolRequest,
 	}
 }
 
@@ -307,7 +365,8 @@ type StakePoolSettings struct {
 }
 
 type CreateStakePoolRequest struct {
-	BlobberID string `json:"blobber_id"`
+	ProviderType int    `json:"provider_type,omitempty"`
+	ProviderID   string `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -356,4 +415,114 @@ type AllocationStats struct {
 	SuccessChallenges         int64  `json:"num_success_challenges"`
 	FailedChallenges          int64  `json:"num_failed_challenges"`
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
+}
+
+type BlobberUploadFileMeta struct {
+	ConnectionID string `json:"connection_id" validation:"required"`
+	FileName     string `json:"filename" validation:"required"`
+	FilePath     string `json:"filepath" validation:"required"`
+	ActualHash   string `json:"actual_hash,omitempty" validation:"required"`
+	ContentHash  string `json:"content_hash" validation:"required"`
+	MimeType     string `json:"mimetype" validation:"required"`
+	ActualSize   int64  `json:"actual_size,omitempty" validation:"required"`
+	IsFinal      bool   `json:"is_final" validation:"required"`
+}
+
+type BlobberUploadFileRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID string
+	File                                                    io.Reader
+	Meta                                                    BlobberUploadFileMeta
+}
+
+type BlobberUploadFileResponse struct {
+}
+
+type BlobberListFilesRequest struct {
+	KeyPair
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, PathHash, Path string
+}
+
+type BlobberListFilesResponse struct {
+}
+
+type BlobberCommitConnectionWriteMarker struct {
+	AllocationRoot string `json:"allocation_root"`
+	AllocationID   string `json:"allocation_id"`
+	BlobberID      string `json:"blobber_id"`
+	ClientID       string `json:"client_id"`
+	Signature      string `json:"signature"`
+	Name           string `json:"name"`
+	ContentHash    string `json:"content_hash"`
+	LookupHash     string `json:"lookup_hash"`
+	Timestamp      int64  `json:"timestamp"`
+	Size           int64  `json:"size"`
+}
+
+type BlobberCommitConnectionRequest struct {
+	URL, ConnectionID, ClientKey string
+	WriteMarker                  BlobberCommitConnectionWriteMarker
+}
+
+type BlobberCommitConnectionResponse struct{}
+
+//type BlobberGetFileReferencePathRequest struct {
+//	URL, ClientID, ClientKey, ClientSignature, AllocationID string
+//}
+
+//type BlobberGetFileReferencePathResponse struct {
+//	sdk.ReferencePathResult
+//}
+
+type BlobberDownloadFileReadMarker struct {
+	ClientID     string `json:"client_id"`
+	ClientKey    string `json:"client_public_key"`
+	BlobberID    string `json:"blobber_id"`
+	AllocationID string `json:"allocation_id"`
+	OwnerID      string `json:"owner_id"`
+	Signature    string `json:"signature"`
+	Timestamp    int64  `json:"timestamp"`
+	Counter      int64  `json:"counter"`
+}
+
+type BlobberDownloadFileRequest struct {
+	ReadMarker BlobberDownloadFileReadMarker
+	URL        string
+	PathHash   string
+	BlockNum   string
+	NumBlocks  string
+}
+
+type BlobberDownloadFileResponse struct {
+}
+
+type SCRestGetStakePoolStatRequest struct {
+	BlobberID string
+}
+
+type SCRestGetStakePoolStatResponse struct {
+	ID           string                      `json:"pool_id"`
+	Balance      int64                       `json:"balance"`
+	Unstake      int64                       `json:"unstake"`
+	Free         int64                       `json:"free"`
+	Capacity     int64                       `json:"capacity"`
+	WritePrice   int64                       `json:"write_price"`
+	OffersTotal  int64                       `json:"offers_total"`
+	UnstakeTotal int64                       `json:"unstake_total"`
+	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty      int64                       `json:"penalty"`
+	Rewards      int64                       `json:"rewards"`
+	Settings     StakePoolSettings           `json:"settings"`
+}
+
+type StakePoolDelegatePoolInfo struct {
+	ID         string `json:"id"`
+	Balance    int64  `json:"balance"`
+	DelegateID string `json:"delegate_id"`
+	Rewards    int64  `json:"rewards"`
+	UnStake    bool   `json:"unstake"`
+
+	TotalReward  int64  `json:"total_reward"`
+	TotalPenalty int64  `json:"total_penalty"`
+	Status       string `json:"status"`
+	RoundCreated int64  `json:"round_created"`
 }
