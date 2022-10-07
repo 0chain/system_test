@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 	"io"
 	"log"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/crypto"
 
 	"github.com/herumi/bls-go-binary/bls"
 
@@ -380,7 +381,7 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 		log.Fatalln(err)
 	}
 
-	keypair := crypto.GenerateKeys(t, from.Mnemonic)
+	keypair := crypto.GenerateKeys(from.Mnemonic)
 
 	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
 		SerializeToHexStr()
