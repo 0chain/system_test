@@ -562,9 +562,21 @@ type GetAverageWritePriceResponse struct {
 	AverageWritePrice int `json:"average-write-price"`
 }
 
-type GetTotalMintedResponse int
+type GetTotalMintedResponse struct {
+	TotalMinted int `json:"total-minted"`
+}
 
-type GetTotalTotalChallengesResponse int
+type GetTotalTotalChallengesResponse struct {
+	TotalTotalChallenges int `json:"total-total-challenges"`
+}
+
+type GetTotalSuccessfulChallengesResponse struct {
+	TotalSuccessfulChallenges int `json:"total-successful-challenges"`
+}
+
+type GetTotalAllocatedStorage struct {
+	TotalAllocatedStorage int `json:"total-allocated-storage"`
+}
 
 type GetTotalStakedResponse struct {
 	TotalStaked int `json:"total-staked"`

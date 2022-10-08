@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -43,6 +42,7 @@ const (
 	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
 	GetTotalStaked                     = "/v1/screst/:sc_address/total-staked"
 	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
+	GetTotalAllocatedStorage           = "/v1/screst/:sc_address/total-allocation-storage"
 	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
 	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
 	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
@@ -499,9 +499,16 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(blobberGetHashnodeRequest model.Blo
 		"allocation":             blobberGetHashnodeRequest.AllocationID,
 	}
 
-	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(blobberGetHashnodeRequest.URL); err != nil {
+		return nil, nil, err
+	}
+	formattedURL := urlBuilder.
+		SetPath(GetHashNodeRoot).
+		SetPathVariable("allocation", blobberGetHashnodeRequest.AllocationID).
+		String()
 
-	resp, err := c.executeForServiceProvider(url,
+	resp, err := c.executeForServiceProvider(formattedURL,
 		model.ExecutionRequest{
 			Headers:            headers,
 			Dst:                &hashnode,
@@ -1244,8 +1251,27 @@ func (c *APIClient) V1SharderGetTotalMinted(requiredStatusCode int) (*model.GetT
 	return getTotalMintedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalTotalChallenges(requiredStatusCode int) (*model.GetTotalMintedResponse, *resty.Response, error) { //nolint
-	var getTotalTotalChallengesResponse *model.GetTotalMintedResponse
+func (c *APIClient) V1SharderGetTotalAllocatedStorage(requiredStatusCode int) (*model.GetTotalAllocatedStorage, *resty.Response, error) { //nolint
+	var getTotalAllocatedStorage *model.GetTotalAllocatedStorage
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalAllocatedStorage).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalAllocatedStorage,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalAllocatedStorage, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalTotalChallenges(requiredStatusCode int) (*model.GetTotalTotalChallengesResponse, *resty.Response, error) { //nolint
+	var getTotalTotalChallengesResponse *model.GetTotalTotalChallengesResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(GetTotalTotalChallenges).
@@ -1261,6 +1287,25 @@ func (c *APIClient) V1SharderGetTotalTotalChallenges(requiredStatusCode int) (*m
 		SharderServiceProvider)
 
 	return getTotalTotalChallengesResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetTotalSuccessfulChallenges(requiredStatusCode int) (*model.GetTotalSuccessfulChallengesResponse, *resty.Response, error) { //nolint
+	var getTotalSuccessfulChallengesResponse *model.GetTotalSuccessfulChallengesResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetTotalTotalChallenges).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getTotalSuccessfulChallengesResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getTotalSuccessfulChallengesResponse, resp, err
 }
 
 func (c *APIClient) V1SharderGetGraphBlobberInactiveRounds(getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint

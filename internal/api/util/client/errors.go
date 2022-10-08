@@ -19,5 +19,6 @@ var (
 
 // Contains errors used for SDK client
 var (
-	ErrInitStorageSDK = errors.New("error happened during SDK storage initialization")
+	ErrInitStorageSDK    = errors.New("error happened during SDK storage initialization")
+	ErrSessionNotStarted = errors.New("session was not started")
 )

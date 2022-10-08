@@ -17,6 +17,7 @@ func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool)
 		select {
 		case <-after:
 			t.Fatal("Wait pool received a timeout")
+			return
 		default:
 			if callback() {
 				t.Log("Wait pool callback has succeed")
