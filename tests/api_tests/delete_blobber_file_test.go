@@ -1,8 +1,11 @@
 package api_tests
 
 import (
+	client2 "github.com/0chain/gosdk/zboxcore/client"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -21,11 +24,6 @@ func TestDeleteBlobberFile(t *testing.T) {
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		resp, err := apiClient.deleteBlobberFile(t, wallet, "", oldBlobberID, allocationID, client.TxSuccessfulStatus)
-
-		require.NotNil(t, resp)
-		require.Nil(t, err)
-
 		usedBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, usedBlobberID, "Old blobber ID contains zero value")
 
@@ -42,9 +40,14 @@ func TestDeleteBlobberFile(t *testing.T) {
 			ClientSignature:    sign,
 			Path:               "/",
 			BlobberID:          blobberId,
-			connectionID:       zboxutil.NewConnectionId(),
-			ClientID:           client.getClientID(),
-			RequiredStatusCode: HttpOkStatus,
+			ConnectionID:       zboxutil.NewConnectionId(),
+			ClientID:           client2.GetClientID(),
+			RequiredStatusCode: client.HttpOkStatus,
 		}
+
+		apiClient.DeleteBlobberFile(t, blobberDeleteConnectionRequest)
+
+		// require.NotNil(t, resp)
+		// require.Nil(t, err)
 	})
 }

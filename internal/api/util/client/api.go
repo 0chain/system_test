@@ -977,7 +977,7 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
+func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionRequest *model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
 	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
 	// We are gonna delete that file from that blobber
 	// endPoint = "/" + blobberDeleteConnectionRequest.BlobberID + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
@@ -1006,14 +1006,14 @@ func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionReq
 		HttpDeleteMethod,
 		BlobberServiceProvider)
 
-	require.NotNil(t, resp)
-	require.Nil(t, err)
+	// require.NotNil(t, resp)
+	// require.Nil(t, err)
 	return resp, err
 }
 
-func (c *APIClient) deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
+func (c *APIClient) DeleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
 	resp, err := c.v1BlobberDeleteFile(t, blobberDeleteConnectionRequest)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
+	// require.Nil(t, err)
+	// require.NotNil(t, resp)
 	return resp, err
 }
