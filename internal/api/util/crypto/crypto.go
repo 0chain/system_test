@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
-	"github.com/tyler-smith/go-bip39" //nolint
+	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/sha3"
 	"log"
 	"sync"
@@ -70,6 +70,30 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.RawKeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss, err := NewSignatureScheme(signatureScheme)
+		if err != nil {
+			return "", err
+		}
+		err = ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
+}
+
 func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 	defer handlePanic()
 	blsLock.Lock()
@@ -84,20 +108,14 @@ func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 	return signature, nil
 }
 
-func CreateTransactionHash(request *model.TransactionPutRequest) (string, error) {
-	hexHash := Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+func CreateTransactionHash(request *model.TransactionPutRequest) string {
+	return Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
 		request.CreationDate,
 		request.TransactionNonce,
 		request.ClientId,
 		request.ToClientId,
 		request.TransactionValue,
 		Sha3256([]byte(request.TransactionData)))))
-
-	hash, err := hex.DecodeString(hexHash)
-	if err != nil {
-		return "", err
-	}
-	return string(hash), nil
 }
 
 func handlePanic() {

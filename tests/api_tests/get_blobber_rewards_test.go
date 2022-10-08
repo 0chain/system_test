@@ -12,6 +12,8 @@ func TestBlobberRewards(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
@@ -38,14 +40,13 @@ func TestBlobberRewards(t *testing.T) {
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
 
 				if poolDelegateInfo.DelegateID == wallet.ClientID {
-					rewards = poolDelegateInfo.TotalReward
+					rewards = poolDelegateInfo.Rewards
 					break
 				}
 			}
 
-			return rewards > int64(0)
+			return rewards > 0
 		})
-		require.Greater(t, rewards, int64(0))
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
@@ -58,7 +59,9 @@ func TestBlobberRewards(t *testing.T) {
 		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 
-	t.Run("Check if a blobber, which is not used for allocation can receive rewards, shouldn't work", func(t *testing.T) {
+	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
@@ -69,42 +72,42 @@ func TestBlobberRewards(t *testing.T) {
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadSomeFile(t, allocationID)
 
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		balanceBefore := walletBalance.Balance
+
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID)
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
+
 				if poolDelegateInfo.DelegateID == wallet.ClientID {
-					rewards = poolDelegateInfo.TotalReward
+					rewards = poolDelegateInfo.Rewards
 					break
 				}
 			}
 
-			return rewards > int64(0)
+			return rewards > 0
 		})
-		require.Zero(t, rewards)
-
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		balanceBefore := walletBalance.Balance
-
-		apiClient.CollectRewards(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards)
+		require.Equal(t, balanceAfter, balanceBefore)
 	})
 
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
+		t.Parallel()
+
 		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
 		sdkClient.SetWallet(wallet)
 
@@ -136,24 +139,23 @@ func TestBlobberRewards(t *testing.T) {
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadSomeFile(t, allocationID)
 
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		balanceBefore := walletBalance.Balance
+
 		var rewards int64
 
-		wait.PoolImmediately(t, time.Minute*10, func() bool {
+		wait.PoolImmediately(t, time.Minute*20, func() bool {
 			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
 				if poolDelegateInfo.DelegateID == wallet.ClientID {
-					rewards = poolDelegateInfo.TotalReward
+					rewards = poolDelegateInfo.Rewards
 					break
 				}
 			}
 
-			return rewards > int64(0)
+			return rewards > 0
 		})
-		require.Greater(t, rewards, int64(0))
-
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		balanceBefore := walletBalance.Balance
 
 		apiClient.CollectRewards(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
 

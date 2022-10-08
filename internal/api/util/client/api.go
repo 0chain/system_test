@@ -4,15 +4,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"log"
-	"strconv"
-	"testing"
-	"time"
 
 	resty "github.com/go-resty/resty/v2"
 )
@@ -41,6 +43,8 @@ const (
 	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
 	GetTotalStaked                     = "/v1/screst/:sc_address/total-staked"
 	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
+	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
+	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
 	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
 	SCRestGetOpenChallenges            = "/v1/screst/:sc_address/openchallenges"
@@ -54,6 +58,7 @@ const (
 	TransactionPut                     = "/v1/transaction/put"
 	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
 	ClientGetBalance                   = "/v1/client/get/balance"
+	BlobberGetStats                    = "/_stats"
 	GetNetworkDetails                  = "/network"
 )
 
@@ -61,6 +66,7 @@ const (
 const (
 	MinerServiceProvider = iota
 	SharderServiceProvider
+	BlobberServiceProvider
 )
 
 // Contains all smart contract addreses used in the client
@@ -87,7 +93,7 @@ var (
 )
 
 type APIClient struct {
-	model.NetworkHealthResources
+	model.HealthyServiceProviders
 
 	httpClient *resty.Client //nolint
 }
@@ -97,21 +103,30 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 		httpClient: resty.New(), //nolint
 	}
 
-	if err := apiClient.selectHealthServiceProviders(networkEntrypoint); err != nil {
+	if err := apiClient.selectHealthyServiceProviders(networkEntrypoint); err != nil {
 		log.Fatalln(err)
 	}
 
 	return apiClient
 }
 
-func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
+func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]string, error) {
 	var result []string
 	for _, node := range nodes {
 		urlBuilder := NewURLBuilder()
 		if err := urlBuilder.MustShiftParse(node); err != nil {
 			return nil, err
 		}
-		formattedURL := urlBuilder.SetPath(ChainGetStats).String()
+
+		var formattedURL string
+		switch serviceProviderType {
+		case MinerServiceProvider:
+			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
+		case SharderServiceProvider:
+			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
+		case BlobberServiceProvider:
+			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
+		}
 
 		healthResponse, err := c.httpClient.R().Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
@@ -126,14 +141,18 @@ func (c *APIClient) getHealthyNodes(nodes []string) ([]string, error) {
 }
 
 func (c *APIClient) getHealthyMiners(miners []string) ([]string, error) {
-	return c.getHealthyNodes(miners)
+	return c.getHealthyNodes(miners, MinerServiceProvider)
 }
 
-func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
-	return c.getHealthyNodes(shaders)
+func (c *APIClient) getHealthyShaders(sharders []string) ([]string, error) {
+	return c.getHealthyNodes(sharders, SharderServiceProvider)
 }
 
-func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error {
+func (c *APIClient) getHealthyBlobbers(blobbers []string) ([]string, error) {
+	return c.getHealthyNodes(blobbers, BlobberServiceProvider)
+}
+
+func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) error {
 	urlBuilder := NewURLBuilder()
 	if err := urlBuilder.MustShiftParse(networkEntrypoint); err != nil {
 		return err
@@ -142,35 +161,75 @@ func (c *APIClient) selectHealthServiceProviders(networkEntrypoint string) error
 
 	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
-		return ErrNetworkHealth
+		return ErrNetworkHealthy
 	}
 
-	var networkDNSResponse *model.NetworkDNSResponse
+	var networkServiceProviders *model.HealthyServiceProviders
 
-	err = json.Unmarshal(resp.Body(), &networkDNSResponse)
+	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
-		return ErrNetworkHealth
+		return ErrNetworkHealthy
 	}
 
-	healthyMiners, err := c.getHealthyMiners(networkDNSResponse.Miners)
+	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
 	if err != nil {
 		return err
 	}
 	if len(healthyMiners) == 0 {
-		return ErrNoMinersHealth
+		return ErrNoMinersHealthy
 	}
 
-	c.NetworkHealthResources.Miners = healthyMiners
+	c.HealthyServiceProviders.Miners = healthyMiners
 
-	healthySharders, err := c.getHealthyShaders(networkDNSResponse.Sharders)
+	healthySharders, err := c.getHealthyShaders(networkServiceProviders.Sharders)
 	if err != nil {
 		return err
 	}
 	if len(healthySharders) == 0 {
-		return ErrNoShadersHealth
+		return ErrNoShadersHealthy
 	}
 
-	c.NetworkHealthResources.Sharders = healthySharders
+	c.HealthyServiceProviders.Sharders = healthySharders
+
+	offset := 0
+	limit := 20
+	var nodes model.StorageNodes
+
+	for {
+		if err := urlBuilder.MustShiftParse(networkServiceProviders.Sharders[0]); err != nil {
+			return err
+		}
+		urlBuilder = urlBuilder.SetPath(GetBlobbers).SetPathVariable("sc_address", StorageSmartContractAddress)
+		formattedURL = urlBuilder.AddParams("offset", fmt.Sprint(offset)).AddParams("limit", fmt.Sprint(limit)).String()
+		resp, err = c.httpClient.R().Get(formattedURL)
+		if err != nil {
+			return ErrNoBlobbersHealthy
+		}
+		err = json.Unmarshal(resp.Body(), &nodes)
+		if err != nil {
+			return ErrNetworkHealthy
+		}
+
+		if len(nodes.Nodes) == 0 {
+			break
+		}
+
+		for _, node := range nodes.Nodes {
+			networkServiceProviders.Blobbers = append(networkServiceProviders.Blobbers, node.BaseURL)
+		}
+		offset += limit
+	}
+
+	healthyBlobbers, err := c.getHealthyBlobbers(networkServiceProviders.Blobbers)
+	if err != nil {
+		return err
+	}
+	if len(healthyBlobbers) == 0 {
+		return ErrNoBlobbersHealthy
+	}
+
+	c.HealthyServiceProviders.Blobbers = healthyBlobbers
+
 	return nil
 }
 
@@ -220,9 +279,11 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 
 	switch serviceProviderType {
 	case MinerServiceProvider:
-		serviceProviders = c.NetworkHealthResources.Miners
+		serviceProviders = c.HealthyServiceProviders.Miners
 	case SharderServiceProvider:
-		serviceProviders = c.NetworkHealthResources.Sharders
+		serviceProviders = c.HealthyServiceProviders.Sharders
+	case BlobberServiceProvider:
+		serviceProviders = c.HealthyServiceProviders.Blobbers
 	}
 
 	for _, serviceProvider := range serviceProviders {
@@ -347,12 +408,7 @@ func (c *APIClient) V1TransactionPut(internalTransactionPutRequest model.Interna
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
 
-	var hash string
-	hash, err = crypto.CreateTransactionHash(&transactionPutRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-	transactionPutRequest.Hash = hash
+	transactionPutRequest.Hash = crypto.CreateTransactionHash(&transactionPutRequest)
 
 	signature, err := crypto.SignHash(transactionPutRequest.Hash, internalTransactionPutRequest.Wallet.RawKeys)
 	if err != nil {
@@ -431,6 +487,29 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 		SharderServiceProvider)
 
 	return scRestGetBlobberResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberGetHashNodeRoot(blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+	var hashnode *model.BlobberGetHashnodeResponse
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberGetHashnodeRequest.ClientId,
+		"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
+		"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
+		"allocation":             blobberGetHashnodeRequest.AllocationID,
+	}
+
+	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+
+	resp, err := c.executeForServiceProvider(url,
+		model.ExecutionRequest{
+			Headers:            headers,
+			Dst:                &hashnode,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+	)
+	return hashnode, resp, err
 }
 
 func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRestGetAllocationRequest, requiredStatusCode int) (*model.SCRestGetAllocationResponse, *resty.Response, error) { //nolint
@@ -873,11 +952,7 @@ func (c *APIClient) GetAllocation(t *testing.T, allocationID string, requiredSta
 				AllocationID: allocationID,
 			},
 			requiredStatusCode)
-		if err != nil {
-			return false
-		}
-
-		return true
+		return err == nil
 	})
 
 	require.Nil(t, err)
@@ -1028,7 +1103,7 @@ func (c *APIClient) CollectRewards(t *testing.T, wallet *model.Wallet, providerI
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCollectRewardTransactionData(providerID, providerType),
-			Value:           tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(0),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)

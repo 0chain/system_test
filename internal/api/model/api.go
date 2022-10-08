@@ -8,13 +8,10 @@ import (
 	"time"
 )
 
-type NetworkDNSResponse struct {
+type HealthyServiceProviders struct {
 	Miners   []string `json:"miners"`
 	Sharders []string `json:"sharders"`
-}
-
-type NetworkHealthResources struct {
-	NetworkDNSResponse
+	Blobbers []string
 }
 
 type ExecutionRequest struct {
@@ -389,6 +386,10 @@ type SCRestGetAllocationResponse struct {
 	WritePriceRange PriceRange       `json:"write_price_range"`
 }
 
+type StorageNodes struct {
+	Nodes []*StorageNode `json:"Nodes"`
+}
+
 type StorageNode struct {
 	ID                string                 `json:"id"`
 	BaseURL           string                 `json:"url"`
@@ -525,6 +526,28 @@ type StakePoolDelegatePoolInfo struct {
 	TotalPenalty int64  `json:"total_penalty"`
 	Status       string `json:"status"`
 	RoundCreated int64  `json:"round_created"`
+}
+
+type BlobberGetHashnodeRequest struct {
+	URL, ClientId, ClientKey, ClientSignature, AllocationID string
+}
+
+type BlobberGetHashnodeResponse struct {
+	// hash data
+	AllocationID   string `json:"allocation_id,omitempty"`
+	Type           string `json:"type,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Path           string `json:"path,omitempty"`
+	ContentHash    string `json:"content_hash,omitempty"`
+	MerkleRoot     string `json:"merkle_root,omitempty"`
+	ActualFileHash string `json:"actual_file_hash,omitempty"`
+	ChunkSize      int64  `json:"chunk_size,omitempty"`
+	Size           int64  `json:"size,omitempty"`
+	ActualFileSize int64  `json:"actual_file_size,omitempty"`
+
+	// other data
+	ParentPath string                        `json:"-"`
+	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
 type GetTotalStoredDataResponse struct {

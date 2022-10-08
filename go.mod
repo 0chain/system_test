@@ -3,6 +3,7 @@ module github.com/0chain/system_test
 go 1.18
 
 require (
+	github.com/0chain/errors v1.0.3
 	github.com/0chain/gosdk v1.8.9-0.20220930021432-c340a27d7b2b
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.0.1-0.20220103075647-4e46f4fe2af2
@@ -17,7 +18,6 @@ require (
 )
 
 require (
-	github.com/0chain/errors v1.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
