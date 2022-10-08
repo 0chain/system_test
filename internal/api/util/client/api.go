@@ -29,6 +29,7 @@ const (
 	HttpPOSTMethod = iota + 1
 	HttpGETMethod
 	HttpPUTMethod
+	HttpDeleteMethod
 )
 
 // Contains all used url paths in the client
@@ -49,6 +50,7 @@ const (
 	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
 	ClientGetBalance           = "/v1/client/get/balance"
 	GetNetworkDetails          = "/network"
+	DeleteBlobberFile          = "/:blobber_id/v1/file/upload/:allocation_id"
 )
 
 // Contains all used service providers
@@ -235,6 +237,8 @@ func (c *APIClient) executeForServiceProvider(url string, executionRequest model
 		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Post(url)
 	case HttpGETMethod:
 		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetQueryParams(executionRequest.QueryParams).Get(url)
+	case HttpDeleteMethod:
+		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Delete(url)
 	}
 
 	if err != nil {
@@ -971,4 +975,45 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	require.NotNil(t, scRestGetBlobberResponse)
 
 	return scRestGetBlobberResponse
+}
+
+func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
+	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
+	// We are gonna delete that file from that blobber
+	// endPoint = "/" + blobberDeleteConnectionRequest.BlobberID + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
+
+	formData := map[string]string{
+		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
+		"path":          blobberDeleteConnectionRequest.Path,
+	}
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberDeleteConnectionRequest.ClientID,
+		"X-App-Client-Key":       blobberDeleteConnectionRequest.ClientKey,
+		"X-App-Client-Signature": blobberDeleteConnectionRequest.ClientSignature,
+		"X-Content-Type":         "multipart/form-data",
+	}
+
+	urlBuilder := NewURLBuilder().SetPath(DeleteBlobberFile).SetPathVariable("blobber_id", blobberDeleteConnectionRequest.BlobberID).SetPathVariable("allocation_id", blobberDeleteConnectionRequest.AllocationID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Headers:            headers,
+			FormData:           formData,
+			RequiredStatusCode: blobberDeleteConnectionRequest.RequiredStatusCode,
+		},
+		HttpDeleteMethod,
+		BlobberServiceProvider)
+
+	require.NotNil(t, resp)
+	require.Nil(t, err)
+	return resp, err
+}
+
+func (c *APIClient) deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
+	resp, err := c.v1BlobberDeleteFile(t, blobberDeleteConnectionRequest)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	return resp, err
 }

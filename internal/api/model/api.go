@@ -381,3 +381,8 @@ type AllocationStats struct {
 	FailedChallenges          int64  `json:"num_failed_challenges"`
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
 }
+
+type BlobberDeleteConnectionRequest struct {
+	URL, ConnectionID, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
+	RequiredStatusCode                                                                     int
+}
