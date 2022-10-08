@@ -1011,7 +1011,7 @@ func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionReq
 	return resp, err
 }
 
-func (c *APIClient) DeleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
+func (c *APIClient) DeleteBlobberFileFn(t *testing.T, blobberDeleteConnectionRequest *model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
 	resp, err := c.v1BlobberDeleteFile(t, blobberDeleteConnectionRequest)
 	// require.Nil(t, err)
 	// require.NotNil(t, resp)

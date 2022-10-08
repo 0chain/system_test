@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	client2 "github.com/0chain/gosdk/zboxcore/client"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
@@ -45,7 +46,9 @@ func TestDeleteBlobberFile(t *testing.T) {
 			RequiredStatusCode: client.HttpOkStatus,
 		}
 
-		apiClient.DeleteBlobberFile(t, blobberDeleteConnectionRequest)
+		fmt.Printf("%+v\n", blobberDeleteConnectionRequest)
+
+		apiClient.DeleteBlobberFileFn(t, blobberDeleteConnectionRequest)
 
 		// require.NotNil(t, resp)
 		// require.Nil(t, err)
