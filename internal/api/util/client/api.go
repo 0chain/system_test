@@ -1129,9 +1129,6 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 		"X-App-Client-Key":       blobberGetFileRefsRequest.ClientKey,
 		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
 	}
-	t.Logf("request headers %s ", headers)
-
-	t.Logf("final formatted url %s", url)
 	resp, err := c.executeForServiceProvider(
 		url,
 		model.ExecutionRequest{

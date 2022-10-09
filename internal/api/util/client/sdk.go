@@ -56,7 +56,7 @@ func (c *SDKClient) SetWallet(wallet *model.Wallet) {
 	}
 }
 
-func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) string {
+func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")

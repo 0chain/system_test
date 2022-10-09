@@ -27,7 +27,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -46,15 +46,15 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 		require.GreaterOrEqual(t, blobberFileRefsResponse.TotalPages, int(1))
-		require.NotNil(t, blobberFileRefsResponse.OffsetPath)
+		require.Equal(t, blobberFileRefsResponse.OffsetPath, remoteFilePath)
 		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId, allocationID)
 		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId, blobberID)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.ClientId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.ClientId, wallet.ClientID)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 
 		// request with refType as updated
@@ -65,15 +65,15 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 		require.GreaterOrEqual(t, blobberFileRefsResponse.TotalPages, int(1))
-		require.NotNil(t, blobberFileRefsResponse.OffsetPath)
+		require.Equal(t, blobberFileRefsResponse.OffsetPath, remoteFilePath)
 		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId, allocationID)
 		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId, blobberID)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.ClientId)
+		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.ClientId, wallet.ClientID)
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
@@ -122,7 +122,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/invalid-remote-file-path"
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -156,7 +156,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -189,7 +189,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = ""
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -223,7 +223,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -256,7 +256,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = ""
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -290,7 +290,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 		refType := "regular"
@@ -319,7 +319,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -353,7 +353,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadSomeFile(t, allocationID)
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -375,7 +375,6 @@ func TestBlobberFileRefs(t *testing.T) {
 }
 
 func getBlobberFileRefRequest(t *testing.T, url string, registeredWallet *model.Wallet, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest {
-	t.Logf("get blobber file request object...")
 	blobberFileRequest := model.BlobberGetFileRefsRequest{
 		URL:             url,
 		ClientID:        registeredWallet.ClientID,

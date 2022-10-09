@@ -31,7 +31,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		var rewards int64
 
@@ -79,7 +79,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
@@ -138,7 +138,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
