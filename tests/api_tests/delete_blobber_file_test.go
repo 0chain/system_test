@@ -22,7 +22,7 @@ func TestDeleteBlobberFile(t *testing.T) {
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
+		
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		usedBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)

@@ -980,7 +980,6 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionRequest *model.BlobberDeleteConnectionRequest) (*resty.Response, error) {
 	// AT last,we need to make api call to the url like "/blobber_01/v1/file/upload/${allocationId}" with the delete command, in this way
 	// We are gonna delete that file from that blobber
-	// endPoint = "/" + blobberDeleteConnectionRequest.BlobberID + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
 
 	formData := map[string]string{
 		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
@@ -994,18 +993,21 @@ func (c *APIClient) v1BlobberDeleteFile(t *testing.T, blobberDeleteConnectionReq
 		"X-Content-Type":         "multipart/form-data",
 	}
 
-	urlBuilder := NewURLBuilder().SetPath(DeleteBlobberFile).SetPathVariable("blobber_id", blobberDeleteConnectionRequest.BlobberID).SetPathVariable("allocation_id", blobberDeleteConnectionRequest.AllocationID)
-
-	resp, err := c.executeForAllServiceProviders(
-		urlBuilder,
+	// endPoint = ""
+	// urlBuilder := NewURLBuilder().SetPath(endPoint).SetPathVariable("blobber_id", blobberDeleteConnectionRequest.BlobberID).SetPathVariable("allocation_id", blobberDeleteConnectionRequest.AllocationID)
+	url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
+	resp, err := c.executeForServiceProvider(
+		url,
 		model.ExecutionRequest{
 			Headers:            headers,
 			FormData:           formData,
 			RequiredStatusCode: blobberDeleteConnectionRequest.RequiredStatusCode,
 		},
-		HttpDeleteMethod,
-		BlobberServiceProvider)
+		HttpDeleteMethod)
 
+	// fmt.Println("url builder is", urlBuilder)
+	fmt.Println("resp is ", resp)
+	fmt.Println("err is ", err)
 	// require.NotNil(t, resp)
 	// require.Nil(t, err)
 	return resp, err
