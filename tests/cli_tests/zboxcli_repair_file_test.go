@@ -67,29 +67,19 @@ func TestRepairFile(t *testing.T) {
 
 		// Make API call to delete file from a single blobber
 		connectionID := shortuuid.New()
-		formData := map[string]string{
-			"connection_id": connectionID,
-			"path":          "/" + filepath.Base(filename),
-		}
 
 		sign, err := crypto.SignHash(allocation.ID, []model.RawKeyPair{})
 		require.Nil(t, err)
 
-		headers := map[string]string{
-			"X-App-Client-Id":        wallet.ClientID,
-			"X-App-Client-Key":       wallet.ClientPublicKey,
-			"X-App-Client-Signature": sign,
-			"X-Content-Type":         "multipart/form-data",
-		}
-
-		url := blobberURL + "/v1/file/upload/" + allocation.ID
-		resp, err := http.NewRequest(http.MethodDelete, url, nil)
+		resp, err := deleteFile(t, connectionID, wallet, sign, allocation.ID)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
 
 		// now we will try to repair the file and will create another folder to keep the same
 		err = os.MkdirAll(os.TempDir(), os.ModePerm)
 		require.Nil(t, err)
 
-		params = createParams(map[string]interface{}{
+		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"repairpath": "/",
 			"rootpath":   os.TempDir(),
@@ -165,4 +155,27 @@ func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, re
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+func deleteFile(t *testing.T, connectionId string, wallet *climodel.Wallet, sign []byte, allocationID string) {
+	formData := map[string]string{
+		"connection_id": connectionID,
+		"path":          "/" + filepath.Base(filename),
+	}
+
+	headers := map[string]string{
+		"X-App-Client-Id":        wallet.ClientID,
+		"X-App-Client-Key":       wallet.ClientPublicKey,
+		"X-App-Client-Signature": sign,
+		"X-Content-Type":         "multipart/form-data",
+	}
+
+	url := blobberURL + "/v1/file/upload/" + allocationID
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	req.headers = headers
+	req.body = formData
+
+	client = &http.client{}
+	resp, err := client.Do(req)
+	return resp, err
 }
