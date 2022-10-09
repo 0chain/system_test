@@ -615,5 +615,5 @@ type EventDBBlock struct {
 }
 
 type BlobberDeleteConnectionRequest struct {
-	URL, ConnectionId, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
+	URL, ConnectionID, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
 }

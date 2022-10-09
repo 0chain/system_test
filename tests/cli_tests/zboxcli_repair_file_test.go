@@ -1,8 +1,8 @@
 package cli_tests
 
 import (
-	// "encoding/json"
-	// "encoding/json"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"net/http"
@@ -83,13 +83,13 @@ func TestRepairFile(t *testing.T) {
 			ClientKey:       wallet.ClientPublicKey,
 			ClientSignature: string(sign),
 			ClientID:        wallet.ClientID,
-			ConnectionId:    connectionID,
+			ConnectionID:    connectionID,
 			AllocationID:    allocationID,
 			Path:            "/" + filepath.Base(filename),
 			URL:             blobberUrl,
 		}
 		require.NotNil(t, blobberDeleteConnectionRequest)
-		deleteBlobberFile(t, blobberDeleteConnectionRequest)
+		// deleteBlobberFile(t, blobberDeleteConnectionRequest)
 		// require.Nil(t, err)
 		// require.NotNil(t, resp)
 
@@ -177,13 +177,18 @@ func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, re
 
 func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.BlobberDeleteConnectionRequest) {
 
-	// formData := map[string]string{
-	// 	"connection_id": connectionID,
-	// 	"path":          ,
-	// }
+	formData := map[string]string{
+		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
+		"path":          blobberDeleteConnectionRequest.URL,
+	}
+
+	formDataByteArray, err := json.Marshal(formData)
+	require.Nil(t, err)
+	require.NotNil(t, formData)
+	// body := []byte{}
 
 	url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	req, _ := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(formDataByteArray))
 	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
 	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
 	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
