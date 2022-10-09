@@ -34,6 +34,7 @@ const (
 
 // Contains all used url paths in the client
 const (
+	GetHashNodeRoot            = "/v1/hashnode/root/:allocation"
 	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
 	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
 	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
@@ -108,9 +109,8 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 		if err := urlBuilder.MustShiftParse(node); err != nil {
 			return nil, err
 		}
-		// formattedURL := urlBuilder.SetPath(ChainGetStats).String()
-		formattedURL := ""
 
+		var formattedURL string
 		switch serviceProviderType {
 		case MinerServiceProvider:
 			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
@@ -136,8 +136,8 @@ func (c *APIClient) getHealthyMiners(miners []string) ([]string, error) {
 	return c.getHealthyNodes(miners, MinerServiceProvider)
 }
 
-func (c *APIClient) getHealthyShaders(shaders []string) ([]string, error) {
-	return c.getHealthyNodes(shaders, SharderServiceProvider)
+func (c *APIClient) getHealthyShaders(sharders []string) ([]string, error) {
+	return c.getHealthyNodes(sharders, SharderServiceProvider)
 }
 
 func (c *APIClient) getHealthyBlobbers(blobbers []string) ([]string, error) {
@@ -153,14 +153,14 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 
 	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
-		return ErrNetworkHealth
+		return ErrNetworkHealthy
 	}
 
 	var networkServiceProviders *model.HealthyServiceProviders
 
 	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
-		return ErrNetworkHealth
+		return ErrNetworkHealthy
 	}
 
 	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
@@ -168,7 +168,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		return err
 	}
 	if len(healthyMiners) == 0 {
-		return ErrNoMinersHealth
+		return ErrNoMinersHealthy
 	}
 
 	c.HealthyServiceProviders.Miners = healthyMiners
@@ -178,7 +178,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		return err
 	}
 	if len(healthySharders) == 0 {
-		return ErrNoShadersHealth
+		return ErrNoShadersHealthy
 	}
 
 	c.HealthyServiceProviders.Sharders = healthySharders
@@ -199,7 +199,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 		err = json.Unmarshal(resp.Body(), &nodes)
 		if err != nil {
-			return ErrNetworkHealth
+			return ErrNetworkHealthy
 		}
 
 		if len(nodes.Nodes) == 0 {
@@ -476,6 +476,29 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 		SharderServiceProvider)
 
 	return scRestGetBlobberResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+	var hashnode *model.BlobberGetHashnodeResponse
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberGetHashnodeRequest.ClientId,
+		"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
+		"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
+		"allocation":             blobberGetHashnodeRequest.AllocationID,
+	}
+
+	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+
+	resp, err := c.executeForServiceProvider(url,
+		model.ExecutionRequest{
+			Headers:            headers,
+			Dst:                &hashnode,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+	)
+	return hashnode, resp, err
 }
 
 func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRestGetAllocationRequest, requiredStatusCode int) (*model.SCRestGetAllocationResponse, *resty.Response, error) { //nolint
@@ -918,11 +941,7 @@ func (c *APIClient) GetAllocation(t *testing.T, allocationID string, requiredSta
 				AllocationID: allocationID,
 			},
 			requiredStatusCode)
-		if err != nil {
-			return false
-		}
-
-		return true
+		return err == nil
 	})
 
 	require.Nil(t, err)
