@@ -41,6 +41,11 @@ const (
 )
 
 func TestCreateAllocationFreeStorage(t *testing.T) {
+	err := bls.Init(bls.CurveFp254BNb)
+	if err != nil {
+		panic(err)
+	}
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -112,7 +117,12 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Nil(t, err, "Could not marshal marker")
 
 		data := hex.EncodeToString(forSignatureBytes)
-		marker.Signature = sign(t, data, assignerWallet)
+		rawHash, err := hex.DecodeString(data)
+		require.Nil(t, err, "failed to decode hex %s", data)
+		require.NotNil(t, rawHash, "failed to decode hex %s", data)
+		secretKey := crypto.ToSecretKey(t, assignerWallet)
+		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
+
 		marker.Assigner = assignerWallet.ClientID
 
 		forFileBytes, err := json.Marshal(marker)
@@ -232,7 +242,11 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Nil(t, err, "Could not marshal marker")
 
 		data := hex.EncodeToString(forSignatureBytes)
-		marker.Signature = sign(t, data, assignerWallet)
+		rawHash, err := hex.DecodeString(data)
+		require.Nil(t, err, "failed to decode hex %s", data)
+		require.NotNil(t, rawHash, "failed to decode hex %s", data)
+		secretKey := crypto.ToSecretKey(t, assignerWallet)
+		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
 		marker.Assigner = assignerWallet.ClientID
 
 		forFileBytes, err := json.Marshal(marker)
@@ -269,7 +283,11 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Nil(t, err, "Could not marshal marker")
 
 		data := hex.EncodeToString(forSignatureBytes)
-		marker.Signature = sign(t, data, assignerWallet)
+		rawHash, err := hex.DecodeString(data)
+		require.Nil(t, err, "failed to decode hex %s", data)
+		require.NotNil(t, rawHash, "failed to decode hex %s", data)
+		secretKey := crypto.ToSecretKey(t, assignerWallet)
+		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
 		marker.Assigner = assignerWallet.ClientID
 
 		forFileBytes, err := json.Marshal(marker)
@@ -285,13 +303,6 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
 	})
-}
-
-func init() {
-	err := bls.Init(bls.CurveFp254BNb)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
@@ -382,25 +393,10 @@ func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile
 		log.Fatalln(err)
 	}
 
-	keypair := crypto.GenerateKeys(from.Mnemonic)
+	keypair := crypto.GenerateKeys(t, from.Mnemonic)
 
 	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
 		SerializeToHexStr()
 
 	return txn
-}
-
-func sign(t *testing.T, data string, wallet *climodel.WalletFile) string {
-	rawHash, err := hex.DecodeString(data)
-	require.Nil(t, err, "failed to decode hex %s", data)
-	require.NotNil(t, rawHash, "failed to decode hex %s", data)
-
-	var sk bls.SecretKey
-	sk.SetByCSPRNG()
-	err = sk.DeserializeHexStr(wallet.Keys[0].PrivateKey)
-	require.Nil(t, err, "failed to serialize hex of private key")
-
-	sig := sk.Sign(string(rawHash))
-
-	return sig.SerializeToHexStr()
 }
