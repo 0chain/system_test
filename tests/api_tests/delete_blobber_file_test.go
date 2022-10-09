@@ -2,13 +2,14 @@ package api_tests
 
 import (
 	"fmt"
+	"testing"
+
 	client2 "github.com/0chain/gosdk/zboxcore/client"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestDeleteBlobberFile(t *testing.T) {
@@ -22,7 +23,7 @@ func TestDeleteBlobberFile(t *testing.T) {
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-		
+
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		usedBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)

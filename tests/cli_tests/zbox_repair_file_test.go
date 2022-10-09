@@ -11,7 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/lithammer/shortuuid/v3"
 	"github.com/stretchr/testify/require"
 	// zeroChainutils "../../internal/api/util";
 )
@@ -24,6 +27,9 @@ func TestRepairFile(t *testing.T) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
@@ -52,9 +58,6 @@ func TestRepairFile(t *testing.T) {
 			"localpath":  filename,
 		}, true)
 
-		fmt.Sprintf("All the files in all the blobbers are")
-		fmt.Sprintf("File details is %s    %s ", output, filepath.Base(filename))
-
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(filename)), output[1])
@@ -62,13 +65,34 @@ func TestRepairFile(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 		require.Len(t, allocation.Blobbers, 4)
 
-		// deleting the file in single blobber
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-		})
-		// Need to call v1BlobberDelete from here
-		output, err = deleteFile(t, walletOwner, params, false)
+		// Make API call to delete file from a single blobber
+		connectionID := shortuuid.New()
+		formData := map[string]string{
+			"connection_id": connectionID,
+			"path":          "/" + filepath.Base(filename),
+		}
+
+		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{})
+		require.Nil(t, err)
+
+		headers := map[string]string{
+			"X-App-Client-Id":        wallet.ClientID,
+			"X-App-Client-Key":       wallet.ClientPublicKey,
+			"X-App-Client-Signature": sign,
+			"X-Content-Type":         "multipart/form-data",
+		}
+
+		// endPoint = ""
+		// urlBuilder := NewURLBuilder().SetPath(endPoint).SetPathVariable("blobber_id", blobberDeleteConnectionRequest.BlobberID).SetPathVariable("allocation_id", blobberDeleteConnectionRequest.AllocationID)
+		url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
+		resp, err := c.executeForServiceProvider(
+			url,
+			model.ExecutionRequest{
+				Headers:            headers,
+				FormData:           formData,
+				RequiredStatusCode: blobberDeleteConnectionRequest.RequiredStatusCode,
+			},
+			HttpDeleteMethod)
 
 		// require.Nil(t, err, strings.Join(output, "\n"))
 		// require.Len(t, output, 1)
