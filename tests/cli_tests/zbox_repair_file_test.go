@@ -72,7 +72,7 @@ func TestRepairFile(t *testing.T) {
 			"path":          "/" + filepath.Base(filename),
 		}
 
-		sign, err := crypto.SignHash(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{})
+		sign, err := crypto.Sign(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{})
 		require.Nil(t, err)
 
 		headers := map[string]string{

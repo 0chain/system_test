@@ -70,11 +70,7 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-<<<<<<< HEAD
-func SignHash(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
-=======
 func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.RawKeyPair) (string, error) {
->>>>>>> master
 	retSignature := ""
 	for _, kv := range keys {
 		ss, err := NewSignatureScheme(signatureScheme)
@@ -98,13 +94,8 @@ func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []mo
 	return retSignature, nil
 }
 
-<<<<<<< HEAD
-func SignTransaction(t *testing.T, request *model.TransactionPutRequest, pair *model.KeyPair) {
-	defer handlePanic(t)
-=======
 func SignHash(hash string, pair *model.RawKeyPair) (string, error) {
 	defer handlePanic()
->>>>>>> master
 	blsLock.Lock()
 	defer blsLock.Unlock()
 
@@ -130,10 +121,6 @@ func CreateTransactionHash(request *model.TransactionPutRequest) string {
 
 func handlePanic() {
 	if err := recover(); err != nil {
-<<<<<<< HEAD
-		t.Error("panic occurred: ", err)
-=======
 		log.Fatalf("panic occurred: %s", err)
->>>>>>> master
 	}
 }
