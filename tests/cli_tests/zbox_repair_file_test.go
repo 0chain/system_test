@@ -4,6 +4,7 @@ import (
 	// "encoding/json"
 	// "encoding/json"
 	"fmt"
+	"net/http"
 	// climodel "github.com/0chain/system_test/internal/cli/model"
 	"os"
 	"path/filepath"
@@ -28,14 +29,13 @@ func TestRepairFile(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
+		wallet := loadWallet(t, escapedTestName(t))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		_, err = getWallet(t, configPath)
-		walletOwner := escapedTestName(t)
+		// walletOwner := escapedTestName(t)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
 		// first uploading the file
@@ -72,7 +72,7 @@ func TestRepairFile(t *testing.T) {
 			"path":          "/" + filepath.Base(filename),
 		}
 
-		sign, err := crypto.Sign(crypto.Sha3256([]byte(allocation.ID)), "bls0chain", []model.KeyPair{})
+		sign, err := crypto.SignHash(allocation.ID, []model.RawKeyPair{})
 		require.Nil(t, err)
 
 		headers := map[string]string{
@@ -82,24 +82,9 @@ func TestRepairFile(t *testing.T) {
 			"X-Content-Type":         "multipart/form-data",
 		}
 
-		// endPoint = ""
-		// urlBuilder := NewURLBuilder().SetPath(endPoint).SetPathVariable("blobber_id", blobberDeleteConnectionRequest.BlobberID).SetPathVariable("allocation_id", blobberDeleteConnectionRequest.AllocationID)
-		url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
-		resp, err := c.executeForServiceProvider(
-			url,
-			model.ExecutionRequest{
-				Headers:            headers,
-				FormData:           formData,
-				RequiredStatusCode: blobberDeleteConnectionRequest.RequiredStatusCode,
-			},
-			HttpDeleteMethod)
+		url := blobberURL + "/v1/file/upload/" + allocation.ID
+		resp, err := http.NewRequest(http.MethodDelete, url, nil)
 
-		// require.Nil(t, err, strings.Join(output, "\n"))
-		// require.Len(t, output, 1)
-		// require.Equal(t, fmt.Sprintf("%s deleted", filepath.Base(filename)), output[0])
-		fmt.Println(fmt.Sprintf("inside deleteFile, resp is %s", output))
-		fmt.Println(fmt.Sprintf("%s deleted", filepath.Base(filename)))
-		return
 		// now we will try to repair the file and will create another folder to keep the same
 		err = os.MkdirAll(os.TempDir(), os.ModePerm)
 		require.Nil(t, err)

@@ -157,13 +157,8 @@ func loadDelegateWallets(t *testing.T) map[string]*climodel.Wallet {
 }
 
 func loadWallet(t *testing.T, name string) *climodel.Wallet {
-	output, err := registerWalletForName(t, configPath, name)
-	require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-	forName, err := getWalletForName(t, configPath, name)
-	require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-	return forName
-
+	// 	Load wallet from json file into wallet object
+	return &climodel.Wallet{}
 }
 
 func ensureZeroBalance(t *testing.T, output []string, err error) {

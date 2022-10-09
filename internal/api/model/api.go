@@ -2,11 +2,8 @@ package model
 
 import (
 	"encoding/json"
-<<<<<<< HEAD
-=======
 	"io"
 	"strconv"
->>>>>>> master
 	"time"
 
 	"github.com/herumi/bls-go-binary/bls"
@@ -444,11 +441,6 @@ type AllocationStats struct {
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
 }
 
-<<<<<<< HEAD
-type BlobberDeleteConnectionRequest struct {
-	URL, ConnectionID, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
-	RequiredStatusCode                                                                     int
-=======
 type BlobberUploadFileMeta struct {
 	ConnectionID string `json:"connection_id" validation:"required"`
 	FileName     string `json:"filename" validation:"required"`
@@ -557,5 +549,4 @@ type StakePoolDelegatePoolInfo struct {
 	TotalPenalty int64  `json:"total_penalty"`
 	Status       string `json:"status"`
 	RoundCreated int64  `json:"round_created"`
->>>>>>> master
 }

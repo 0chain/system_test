@@ -1,8 +1,9 @@
 package model
 
 import (
-	currency "github.com/0chain/system_test/internal/currency"
 	"time"
+
+	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
@@ -44,6 +45,7 @@ type Wallet struct {
 	ClientID            string `json:"client_id"`
 	ClientPublicKey     string `json:"client_public_key"`
 	EncryptionPublicKey string `json:"encryption_public_key"`
+	Mnemonics           string `json:"mnemonics"`
 }
 
 type Allocation struct {

@@ -4,10 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-<<<<<<< HEAD
-=======
 	github.com/0chain/gosdk v1.8.9-0.20220930021432-c340a27d7b2b
->>>>>>> master
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.0.1-0.20220103075647-4e46f4fe2af2
 	github.com/shopspring/decimal v1.3.1
@@ -22,25 +19,13 @@ require (
 
 require (
 	github.com/google/uuid v1.3.0 // indirect
-<<<<<<< HEAD
-	github.com/h2non/filetype v1.1.3 // indirect
-	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	go.uber.org/zap v1.22.0 // indirect
-)
-
-require (
-	github.com/0chain/gosdk v1.8.8
-=======
-	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
+	github.com/lithammer/shortuuid/v3 v3.0.7
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 )
 
 require (
->>>>>>> master
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
