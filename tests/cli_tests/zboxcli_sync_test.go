@@ -722,9 +722,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
 		require.True(t,
-			strings.Contains(strings.Join(output, ""),
-				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
-			strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
