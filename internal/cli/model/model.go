@@ -613,3 +613,7 @@ type EventDBBlock struct {
 	CreatedAt             time.Time            `json:"created_at"`
 	Transactions          []EventDBTransaction `json:"transactions"`
 }
+
+type BlobberDeleteConnectionRequest struct {
+	URL, ConnectionId, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
+}

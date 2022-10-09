@@ -4,16 +4,16 @@ import (
 	// "encoding/json"
 	// "encoding/json"
 	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"net/http"
-	// climodel "github.com/0chain/system_test/internal/cli/model"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/crypto"
+	// "github.com/0chain/system_test/internal/api/model"
+	// "github.com/0chain/system_test/internal/api/util/crypto"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/lithammer/shortuuid/v3"
 	"github.com/stretchr/testify/require"
@@ -29,13 +29,15 @@ func TestRepairFile(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		wallet := loadWallet(t, escapedTestName(t))
+		// wallet := loadWallet(t, escapedTestName(t))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
-		_, err = getWallet(t, configPath)
-		// walletOwner := escapedTestName(t)
+		wallet, err := getWallet(t, configPath)
+
+		fmt.Println("wallet is ", wallet)
+		walletOwner := escapedTestName(t)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
 		// first uploading the file
@@ -68,12 +70,28 @@ func TestRepairFile(t *testing.T) {
 		// Make API call to delete file from a single blobber
 		connectionID := shortuuid.New()
 
-		sign, err := crypto.SignHash(allocation.ID, []model.RawKeyPair{})
-		require.Nil(t, err)
+		blobbers := getBlobbersList(t)
+		blobberUrl := blobbers[0].Url
 
-		resp, err := deleteFile(t, connectionID, wallet, sign, allocation.ID)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
+		fmt.Println("blobbers list is ", blobbers)
+		// sign, err := crypto.SignHash(allocation.ID, []model.RawKeyPair{})
+		// require.Nil(t, err)
+		sign := []byte("sign")
+		// connectionID string, wallet *climodel.Wallet, sign string, allocationID string, filename string, blobberURL string) {
+
+		blobberDeleteConnectionRequest := &climodel.BlobberDeleteConnectionRequest{
+			ClientKey:       wallet.ClientPublicKey,
+			ClientSignature: string(sign),
+			ClientID:        wallet.ClientID,
+			ConnectionId:    connectionID,
+			AllocationID:    allocationID,
+			Path:            "/" + filepath.Base(filename),
+			URL:             blobberUrl,
+		}
+		require.NotNil(t, blobberDeleteConnectionRequest)
+		deleteBlobberFile(t, blobberDeleteConnectionRequest)
+		// require.Nil(t, err)
+		// require.NotNil(t, resp)
 
 		// now we will try to repair the file and will create another folder to keep the same
 		err = os.MkdirAll(os.TempDir(), os.ModePerm)
@@ -157,25 +175,25 @@ func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, re
 	}
 }
 
-func deleteFile(t *testing.T, connectionId string, wallet *climodel.Wallet, sign []byte, allocationID string) {
-	formData := map[string]string{
-		"connection_id": connectionID,
-		"path":          "/" + filepath.Base(filename),
-	}
+func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.BlobberDeleteConnectionRequest) {
 
-	headers := map[string]string{
-		"X-App-Client-Id":        wallet.ClientID,
-		"X-App-Client-Key":       wallet.ClientPublicKey,
-		"X-App-Client-Signature": sign,
-		"X-Content-Type":         "multipart/form-data",
-	}
+	// formData := map[string]string{
+	// 	"connection_id": connectionID,
+	// 	"path":          ,
+	// }
 
-	url := blobberURL + "/v1/file/upload/" + allocationID
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
-	req.headers = headers
-	req.body = formData
+	url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
+	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
+	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
+	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
+	req.Header.Set("X-Content-Type", "multipart/form-data")
 
-	client = &http.client{}
+	client := &http.Client{}
 	resp, err := client.Do(req)
-	return resp, err
+
+	fmt.Println("resp from client", resp)
+	fmt.Println("err from client", err)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
 }
