@@ -36,7 +36,8 @@ func TestRepairFile(t *testing.T) {
 
 		wallet, err := getWallet(t, configPath)
 
-		fmt.Println("wallet is ", wallet)
+		fmt.Printf("%+v\n", wallet)
+
 		walletOwner := escapedTestName(t)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
@@ -177,6 +178,7 @@ func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, re
 
 func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.BlobberDeleteConnectionRequest) {
 
+	// Forming the body of the request
 	formData := map[string]string{
 		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
 		"path":          blobberDeleteConnectionRequest.URL,
@@ -185,15 +187,17 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 	formDataByteArray, err := json.Marshal(formData)
 	require.Nil(t, err)
 	require.NotNil(t, formData)
-	// body := []byte{}
 
 	url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
 	req, _ := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(formDataByteArray))
+
+	// Setting the request headers
 	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
 	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
 	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
 	req.Header.Set("X-Content-Type", "multipart/form-data")
 
+	// Sending the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 

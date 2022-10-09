@@ -2,6 +2,8 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -181,6 +183,7 @@ func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error)
 
 func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	t.Logf("Getting wallet...")
+	fmt.Println("name is", name)
 	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 
@@ -192,7 +195,18 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 
 	var wallet *climodel.Wallet
 
+	filePath := "./config" + name + "_wallet.json"
+	walletFile, _ := ioutil.ReadFile(filePath)
+	var walletFileInfo interface{}
+	err = json.Unmarshal([]byte(walletFile), &walletFileInfo)
+
+	fmt.Println("Printing wallet info")
+	fmt.Println(walletFileInfo)
+
 	err = json.Unmarshal([]byte(output[0]), &wallet)
+	// fmt.Printf("%+v\n", walletFileInfo)
+
+	// wallet.Mnemonics = walletFileInfo.mnemonics
 	if err != nil {
 		t.Errorf("failed to unmarshal the result into wallet")
 		return nil, err
