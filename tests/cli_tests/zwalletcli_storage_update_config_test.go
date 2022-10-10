@@ -48,7 +48,8 @@ func TestStorageUpdateConfig(t *testing.T) {
 			require.True(t, ok, "unrecognised setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
 			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
-			expectedChange.Numeric[name] = value + 0.1
+			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
+			require.NoError(t, err)
 		}
 		for _, name := range climodel.StorageIntSettings {
 			value, ok := settings.Numeric[name]
@@ -160,10 +161,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 		require.True(t, ok, "unrecognised setting", name)
 		expectedSetting, ok := expected.Numeric[name]
 		require.True(t, ok, "unrecognised setting", name)
-		// add in the check for floats after 0chain fix
 		if actualSetting != expectedSetting {
-			fmt.Println(fmt.Sprintf("mismatched float setting %s, values actual %g and expected %g don't match",
-				name, actualSetting, expectedSetting))
+			mismatches += fmt.Sprintf("float setting %s, values actual %g and expected %g don't match\n",
+				name, actualSetting, expectedSetting)
 		}
 	}
 	for _, name := range climodel.StorageIntSettings {
