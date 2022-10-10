@@ -1,17 +1,18 @@
 package cli_tests
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/crypto"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/crypto"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 
 	// "github.com/0chain/system_test/internal/api/model"
 	// "github.com/0chain/system_test/internal/api/util/crypto"
@@ -118,16 +119,10 @@ func TestRepairFile(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		// wallet := loadWallet(t, escapedTestName(t))
-
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
-
-		// fmt.Printf("%+v\n", wallet)
-
-		walletOwner := escapedTestName(t)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
 		// first uploading the file
@@ -160,8 +155,7 @@ func TestRepairFile(t *testing.T) {
 		// Make API call to delete file from a single blobber
 		connectionID := shortuuid.New()
 
-		blobbers := getBlobbersList(t)
-		blobberUrl := blobbers[0].Url
+		blobberUrl := allocation.Blobbers[0].Baseurl
 
 		keyPair := crypto.GenerateKeys(wallet.Mnemonics)
 		sign, err := crypto.SignHash(allocation.ID, keyPair)
@@ -177,10 +171,9 @@ func TestRepairFile(t *testing.T) {
 			URL:             blobberUrl,
 		}
 		require.NotNil(t, blobberDeleteConnectionRequest)
+		
 		deleteBlobberFile(t, blobberDeleteConnectionRequest)
-		fmt.Printf("%+v\n", blobberDeleteConnectionRequest)
-		// require.Nil(t, err)
-		// require.NotNil(t, resp)
+		require.Nil(t, err)
 
 		// now we will try to repair the file and will create another folder to keep the same
 		err = os.MkdirAll(os.TempDir(), os.ModePerm)
@@ -192,6 +185,7 @@ func TestRepairFile(t *testing.T) {
 			"rootpath":   os.TempDir(),
 		})
 
+		walletOwner := escapedTestName(t)
 		output, _ = repairAllocation(t, walletOwner, configPath, params, false)
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired: %s", "1"), output[len(output)-1])
@@ -266,18 +260,16 @@ func repairAllocation(t *testing.T, wallet, cliConfigFilename, params string, re
 
 func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.BlobberDeleteConnectionRequest) (*http.Response, error) {
 
-	// Forming the body of the request
-	formData := map[string]string{
-		"connection_id": blobberDeleteConnectionRequest.ConnectionID,
-		"path":          blobberDeleteConnectionRequest.URL,
-	}
+	query := &url.Values{}
 
-	formDataByteArray, err := json.Marshal(formData)
+	query.Add("connection_id", blobberDeleteConnectionRequest.ConnectionID)
+	query.Add("path", blobberDeleteConnectionRequest.Path)
+
+	url, err := url.Parse(blobberDeleteConnectionRequest.URL)
 	require.Nil(t, err)
-	require.NotNil(t, formData)
-
-	url := blobberDeleteConnectionRequest.URL + "/v1/file/upload/" + blobberDeleteConnectionRequest.AllocationID
-	req, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(formDataByteArray))
+	url.Path = path.Join(url.Path, "/v1/file/upload/", blobberDeleteConnectionRequest.AllocationID)
+	url.RawQuery = query.Encode()
+	req, _ := http.NewRequest(http.MethodDelete, url.String(), nil)
 
 	if err != nil {
 		fmt.Println(err)
@@ -287,14 +279,11 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
 	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
 	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
-	req.Header.Set("X-Content-Type", "multipart/form-data")
+	// req.Header.Set("X-Content-Type", "multipart/form-data")
 
 	// Sending the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
-
-	fmt.Println("resp from client", resp)
-	fmt.Println("err from client", err)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 
