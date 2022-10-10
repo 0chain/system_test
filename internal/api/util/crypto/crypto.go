@@ -17,6 +17,8 @@ import (
 
 var blsLock sync.Mutex
 
+const BLS0Chain = "bls0chain"
+
 func init() {
 	blsLock.Lock()
 	defer blsLock.Unlock()
@@ -40,6 +42,7 @@ func GenerateMnemonics(t *testing.T) string {
 
 func GenerateKeys(t *testing.T, mnemonics string) *model.KeyPair {
 	defer handlePanic(t)
+	blsLock.Lock()
 	defer func() {
 		blsLock.Unlock()
 		bls.SetRandFunc(nil)
@@ -67,6 +70,30 @@ func Sha3256(src []byte) string {
 	sha3256.Write(src)
 	var buffer []byte
 	return hex.EncodeToString(sha3256.Sum(buffer))
+}
+
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss, err := NewSignatureScheme(signatureScheme)
+		if err != nil {
+			return "", err
+		}
+		err = ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
 }
 
 func ToSecretKey(t *testing.T, wallet *climodel.WalletFile) *bls.SecretKey {
