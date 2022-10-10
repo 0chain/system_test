@@ -193,20 +193,21 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 
 	require.Len(t, output, 1)
 
+	// Reading the wallet file to read the mnemonics
 	var wallet *climodel.Wallet
-
-	filePath := "./config" + name + "_wallet.json"
+	filePath := "./config/" + name + "_wallet.json"
 	walletFile, _ := ioutil.ReadFile(filePath)
-	var walletFileInfo interface{}
+	var walletFileInfo climodel.ReadWallet
 	err = json.Unmarshal([]byte(walletFile), &walletFileInfo)
 
-	fmt.Println("Printing wallet info")
-	fmt.Println(walletFileInfo)
+	if err != nil {
+		t.Errorf("failed to unmarshal the wallet file read")
+		return nil, err
+	}
 
 	err = json.Unmarshal([]byte(output[0]), &wallet)
-	// fmt.Printf("%+v\n", walletFileInfo)
 
-	// wallet.Mnemonics = walletFileInfo.mnemonics
+	wallet.Mnemonics = walletFileInfo.Mnemonics
 	if err != nil {
 		t.Errorf("failed to unmarshal the result into wallet")
 		return nil, err

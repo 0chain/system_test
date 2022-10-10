@@ -617,3 +617,16 @@ type EventDBBlock struct {
 type BlobberDeleteConnectionRequest struct {
 	URL, ConnectionID, ClientKey, ClientSignature, Path, AllocationID, BlobberID, ClientID string
 }
+
+type walletKeys struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
+type ReadWallet struct {
+	ClientID    string       `json:"client_id"`
+	ClientKey   string       `json:"client_key`
+	Keys        []walletKeys `json:"keys"`
+	Mnemonics   string       `json:"mnemonics"`
+	Version     string       `json:"version"`
+	DateCreated string       `json:"date_created"`
+}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"net/http"
 	"os"
@@ -36,7 +37,7 @@ func TestRepairFile(t *testing.T) {
 
 		wallet, err := getWallet(t, configPath)
 
-		fmt.Printf("%+v\n", wallet)
+		// fmt.Printf("%+v\n", wallet)
 
 		walletOwner := escapedTestName(t)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
@@ -74,11 +75,9 @@ func TestRepairFile(t *testing.T) {
 		blobbers := getBlobbersList(t)
 		blobberUrl := blobbers[0].Url
 
-		fmt.Println("blobbers list is ", blobbers)
-		// sign, err := crypto.SignHash(allocation.ID, []model.RawKeyPair{})
-		// require.Nil(t, err)
-		sign := []byte("sign")
-		// connectionID string, wallet *climodel.Wallet, sign string, allocationID string, filename string, blobberURL string) {
+		keyPair := crypto.GenerateKeys(wallet.Mnemonics)
+		sign, err := crypto.SignHash(allocation.ID, keyPair)
+		require.Nil(t, err)
 
 		blobberDeleteConnectionRequest := &climodel.BlobberDeleteConnectionRequest{
 			ClientKey:       wallet.ClientPublicKey,
