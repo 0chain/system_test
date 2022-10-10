@@ -1193,7 +1193,6 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 
-	// FIXME download cost is not affecting read pool if downloading through auth ticket
 	t.Run("Share unencrypted file using auth ticket - download accounting test", func(t *testing.T) {
 		t.Parallel()
 
@@ -1225,7 +1224,7 @@ func TestShareFile(t *testing.T) {
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": file,
+			"remotepath": remoteOwnerPath,
 		}
 		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
