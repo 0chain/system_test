@@ -29,12 +29,26 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string  `json:"id"`
-	Version      string  `json:"version"`
-	CreationDate *int    `json:"creation_date"`
-	PublicKey    string  `json:"public_key"`
-	Keys         KeyPair `json:"keys"`
+	Id           string `json:"id"`
+	Version      string `json:"version"`
+	CreationDate *int   `json:"creation_date"`
+	PublicKey    string `json:"public_key"`
 	Nonce        int
+	Keys         *KeyPair `json:"-"`
+}
+
+type SdkWallet struct {
+	ClientID    string        `json:"client_id"`
+	ClientKey   string        `json:"client_key"`
+	Keys        []*SdkKeyPair `json:"keys"`
+	Mnemonics   string        `json:"mnemonics"`
+	Version     string        `json:"version"`
+	DateCreated string        `json:"date_created"`
+}
+
+type SdkKeyPair struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
 }
 
 type KeyPair struct {
@@ -46,13 +60,13 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) String() string {
+func (w *SdkWallet) String() (string, error) {
 	out, err := json.Marshal(w)
 	if err != nil {
-		return "failed to serialize wallet object"
+		return "", err
 	}
 
-	return string(out)
+	return string(out), nil
 }
 
 type TransactionData struct {

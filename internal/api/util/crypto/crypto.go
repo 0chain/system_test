@@ -72,7 +72,7 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []model.KeyPair) (string, error) {
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []*model.KeyPair) (string, error) {
 	retSignature := ""
 	for _, kv := range keys {
 		ss, err := NewSignatureScheme(signatureScheme)

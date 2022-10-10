@@ -8,6 +8,9 @@ import (
 )
 
 func init() {
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
 	err := bls.Init(bls.CurveFp254BNb)
 	if err != nil {
 		panic(err)

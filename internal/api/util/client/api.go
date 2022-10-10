@@ -370,7 +370,7 @@ func (c *APIClient) V1TransactionPut(t *testing.T, internalTransactionPutRequest
 		transactionPutRequest.TransactionValue,
 		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
 
-	crypto.SignTransaction(t, &transactionPutRequest, &internalTransactionPutRequest.Wallet.Keys)
+	crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
 
 	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
 
@@ -626,7 +626,7 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *testing.T, mnem
 	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
 	registeredWallet, httpResponse, err := c.V1ClientPut(t, walletRequest, expectedHttpStatus)
-	registeredWallet.Keys = *keyPair
+	registeredWallet.Keys = keyPair
 
 	return registeredWallet, httpResponse, err
 }
