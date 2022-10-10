@@ -722,9 +722,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
 		require.True(t,
-			strings.Contains(strings.Join(output, ""),
-				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
-			strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
@@ -833,17 +831,18 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//	- rootFolder: Leave empty or send "/" to create on os temp folder
-//	- structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
-//	- returns local root folder
-//	- sample structure:
-// map[string]interface{}{
-// 	"FolderA": map[string]interface{}{
-// 		"file1.txt": 64*KB + 1,
-// 		"file2.txt": 64*KB + 1,
-// 	},
-// 	"FolderB": map[string]interface{}{},
-// }
+//   - rootFolder: Leave empty or send "/" to create on os temp folder
+//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//   - returns local root folder
+//   - sample structure:
+//
+//	map[string]interface{}{
+//		"FolderA": map[string]interface{}{
+//			"file1.txt": 64*KB + 1,
+//			"file2.txt": 64*KB + 1,
+//		},
+//		"FolderB": map[string]interface{}{},
+//	}
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
