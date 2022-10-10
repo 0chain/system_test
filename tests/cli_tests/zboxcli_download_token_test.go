@@ -18,7 +18,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
-		// t.Skip("Skipped for nonce merge")
+		t.Skip("Skipped for nonce merge")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -70,7 +70,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool before download
 		initialReadPool := getReadPoolInfo(t)
 		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.Balance)
-		t.Logf("Initial read pool balance %v", initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -105,7 +104,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool after download
 		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
 		updatedReadPool, err := getReadPoolUpdate(t, initialReadPool, 5)
-		t.Logf("Final read pool balance %v", updatedReadPool.Balance)
 		require.NoError(t, err)
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
@@ -120,8 +118,6 @@ func readPoolInfoWithWallet(t *testing.T, wallet, cliConfigFilename string) ([]s
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
-
-// readPool actual command: ./zbox rp-info --json --silent --wallet TestShareFile-Share_encrypted_file_using_auth_ticket_-_download_accounting_test_-_proxy_re-encryption__second_wallet.json --configDir ./config --config zbox_config.yaml
 
 func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
