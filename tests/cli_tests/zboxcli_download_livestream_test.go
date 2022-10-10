@@ -146,6 +146,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
 		count_m3u8 := 0
+		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
 
 			if err != nil {
@@ -172,6 +173,7 @@ func TestLivestreamDownload(t *testing.T) {
 					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
+					count_ts += 1
 					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) {
 						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 						//require.Error(t, errors.New("File is not matched"), "File is not matched.")
@@ -183,24 +185,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		var data climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
-
-		for _, data = range stats {
-			t.Log(data.Name)
-		}
+		require.GreaterOrEqual(t, count_ts, 1, "at least one .ts file should be created!")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -337,6 +322,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 					t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
 					count_m3u8 := 0
+					count_ts := 0
 					err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
 
 						if err != nil {
@@ -363,6 +349,7 @@ func TestLivestreamDownload(t *testing.T) {
 								count_m3u8 += 1
 								return nil
 							} else if extension[len(extension)-1] == "ts" {
+								count_ts += 1
 								if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) {
 									t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 									//require.Error(t, errors.New("File is not matched"), "File is not matched.")
@@ -374,7 +361,7 @@ func TestLivestreamDownload(t *testing.T) {
 					})
 					require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 					require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-
+					require.GreaterOrEqual(t, count_ts, 1, "at least one .ts file should be created!")
 					output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 						"allocation": allocationID,
 						"remotepath": remotepath,
@@ -528,6 +515,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
 		count_m3u8 := 0
+		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
 
 			if err != nil {
@@ -554,6 +542,7 @@ func TestLivestreamDownload(t *testing.T) {
 					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
+					count_ts += 1
 					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) {
 						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 						//require.Error(t, errors.New("File is not matched"), "File is not matched.")
@@ -565,7 +554,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-
+		require.GreaterOrEqual(t, count_ts, 1, "at least one .ts file should be created!")
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
