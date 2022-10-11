@@ -1,11 +1,12 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestBlobberRewards(t *testing.T) {
@@ -30,7 +31,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		var rewards int64
 
@@ -78,7 +79,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
@@ -137,7 +138,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadSomeFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
