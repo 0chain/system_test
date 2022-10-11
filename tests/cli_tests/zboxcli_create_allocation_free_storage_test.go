@@ -73,7 +73,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfg, _ := keyValuePairStringToMap(t, output)
+	cfg, _ := keyValuePairStringToMap(output)
 
 	// miners list
 	output, err = getMiners(t, configPath)
