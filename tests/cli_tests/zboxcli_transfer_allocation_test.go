@@ -250,9 +250,11 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
 		// expire the allocation first
+		expDuration := int64(-3) // In hours
+
 		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "-3h",
+			"expiry":     fmt.Sprintf("%dh", expDuration),
 		}), true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))

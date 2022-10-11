@@ -111,9 +111,11 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in Write pool amongst all blobbers
+		expDuration := int64(-3) // In hours
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"tokens":     1,
+			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
 		output, err = writePoolLock(t, configPath, params, true)
 		require.Nil(t, err, "Failed to lock write tokens", strings.Join(output, "\n"))
