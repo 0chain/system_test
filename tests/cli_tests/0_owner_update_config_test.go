@@ -1,14 +1,16 @@
 package cli_tests
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestOwnerUpdate(t *testing.T) {
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -25,17 +27,15 @@ func TestOwnerUpdate(t *testing.T) {
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
 		t.Cleanup(func() {
-			output, err := updateStorageSCConfig(t, newOwnerName, map[string]interface{}{
-				"keys":   ownerKey,
-				"values": oldOwner,
+			output, err := updateStorageSCConfig(t, newOwnerName, map[string]string{
+				ownerKey: oldOwner,
 			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 		})
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   ownerKey,
-			"values": newOwnerWallet.ClientID,
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			ownerKey: newOwnerWallet.ClientID,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
@@ -62,13 +62,12 @@ func TestOwnerUpdate(t *testing.T) {
 		output, err = getStorageSCConfig(t, configPath, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
+		cfgAfter, _ := keyValuePairStringToMap(output)
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
 
 		// Updating config with old owner should fail
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   "max_read_price",
-			"values": 99,
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"max_read_price": "99",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -104,7 +103,7 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
+		cfgAfter, _ := keyValuePairStringToMap(output)
 
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
 
@@ -146,16 +145,14 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
+		cfgAfter, _ := keyValuePairStringToMap(output)
 
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
 
 		// Should fail update with old owner
-		configKey := "interest_rate"
-		newValue := "0.1"
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": newValue,
+			"keys":   "min_stake",
+			"values": "1",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -163,7 +160,6 @@ func TestOwnerUpdate(t *testing.T) {
 	})
 
 	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
-
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -188,7 +184,7 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
+		cfgAfter, _ := keyValuePairStringToMap(output)
 
 		require.Equal(t, newOwnerWallet.ClientID, cfgAfter[ownerKey], "new value [%s] for owner was not set", newOwnerWallet.ClientID)
 

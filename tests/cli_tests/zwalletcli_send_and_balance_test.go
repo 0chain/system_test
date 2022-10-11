@@ -455,6 +455,6 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 
-	_, returnVal := keyValuePairStringToMap(t, output)
+	_, returnVal := keyValuePairStringToMap(output)
 	return returnVal
 }

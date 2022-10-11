@@ -49,7 +49,7 @@ func TestZCNBridgeGlobalSettings(t *testing.T) {
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfgBefore, _ := keyValuePairStringToMap(t, output)
+	cfgBefore, _ := keyValuePairStringToMap(output)
 
 	// ensure revert in config is run regardless of test result
 	defer func() {
@@ -118,7 +118,7 @@ func updateAndVerify(t *testing.T, key, value string) map[string]string {
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	cfgAfter, _ := keyValuePairStringToMap(t, output)
+	cfgAfter, _ := keyValuePairStringToMap(output)
 	return cfgAfter
 }
 

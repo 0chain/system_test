@@ -33,7 +33,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgBefore, _ := keyValuePairStringToMap(t, output)
+		cfgBefore, _ := keyValuePairStringToMap(output)
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
@@ -61,7 +61,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-		cfgAfter, _ := keyValuePairStringToMap(t, output)
+		cfgAfter, _ := keyValuePairStringToMap(output)
 
 		require.Equal(t, newValue, cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
 

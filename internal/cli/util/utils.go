@@ -2,7 +2,6 @@ package cliutils
 
 import (
 	"crypto/rand"
-	"github.com/0chain/system_test/internal/cli/util/specific"
 	"math/big"
 	"os"
 	"os/exec"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/cli/util/specific"
 
 	"github.com/sirupsen/logrus"
 )
