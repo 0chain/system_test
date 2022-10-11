@@ -634,33 +634,37 @@ var StorageFloatSettings = []string{
 	"block_reward.zeta.mu",
 }
 
-var StorageIntSettings = []string{
+var StorageCurrencySettigs = []string{
 	"max_mint",
-	"min_alloc_size",
-	"min_blobber_capacity",
 	"readpool.min_lock",
 	"writepool.min_lock",
 	"stakepool.min_lock",
 	"max_total_free_allocation",
 	"max_individual_free_allocation",
-	"free_allocation_settings.data_shards",
-	"free_allocation_settings.parity_shards",
-	"free_allocation_settings.size",
 	"free_allocation_settings.read_price_range.min",
 	"free_allocation_settings.read_price_range.max",
 	"free_allocation_settings.write_price_range.min",
 	"free_allocation_settings.write_price_range.max",
-	"max_blobbers_per_allocation",
 	"max_read_price",
 	"max_write_price",
 	"max_write_price",
+	"block_reward.block_reward",
+	"block_reward.qualifying_stake",
+}
+
+var StorageIntSettings = []string{
+
+	"min_alloc_size",
+	"min_blobber_capacity",
+	"free_allocation_settings.data_shards",
+	"free_allocation_settings.parity_shards",
+	"free_allocation_settings.size",
+	"max_blobbers_per_allocation",
 	"failed_challenges_to_cancel",
 	"failed_challenges_to_revoke_min_lock",
 	"max_challenges_per_generation",
 	"validators_per_challenge",
 	"max_delegates",
-	"block_reward.block_reward",
-	"block_reward.qualifying_stake",
 	"cost.update_settings",
 	"cost.read_redeem",
 	"cost.commit_connection",

@@ -28,7 +28,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		settings := getStorageConfigMap(t)
 
 		require.Len(t, settings.Keys, len(climodel.StorageKeySettings))
-		require.Len(t, settings.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings))
+		require.Len(t, settings.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings)+len(climodel.StorageCurrencySettigs))
 		require.Len(t, settings.Boolean, len(climodel.StorageBoolSettings))
 		require.Len(t, settings.Duration, len(climodel.StorageDurationSettings))
 
@@ -44,6 +44,14 @@ func TestStorageUpdateConfig(t *testing.T) {
 			expectedChange.Keys[name] = value
 		}
 		for _, name := range climodel.StorageFloatSettings {
+			value, ok := settings.Numeric[name]
+			require.True(t, ok, "unrecognised setting", name)
+			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
+			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
+			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
+			require.NoError(t, err)
+		}
+		for _, name := range climodel.StorageCurrencySettigs {
 			value, ok := settings.Numeric[name]
 			require.True(t, ok, "unrecognised setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
@@ -75,19 +83,20 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		output, err := updateStorageSCConfig(t, scOwnerWallet, newChanges, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
+		t.Cleanup(func() {
+			_, err = updateStorageSCConfig(t, scOwnerWallet, resetChanges, true)
+			require.NoError(t, err, strings.Join(output, "\n"))
 
+			time.Sleep(settingUpdateSleepTime)
+
+			settingsReset := getStorageConfigMap(t)
+			checkSettings(t, settingsReset, settings)
+		})
 		time.Sleep(settingUpdateSleepTime)
 
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
 
-		_, err = updateStorageSCConfig(t, scOwnerWallet, resetChanges, true)
-		require.NoError(t, err, strings.Join(output, "\n"))
-
-		time.Sleep(settingUpdateSleepTime)
-
-		settingsReset := getStorageConfigMap(t)
-		checkSettings(t, settingsReset, settings)
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -151,7 +160,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 func checkSettings(t *testing.T, actual, expected settingMaps) {
 	require.Len(t, actual.Keys, len(climodel.StorageKeySettings))
-	require.Len(t, actual.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings))
+	require.Len(t, actual.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings)+len(climodel.StorageCurrencySettigs))
 	require.Len(t, actual.Boolean, len(climodel.StorageBoolSettings))
 	require.Len(t, actual.Duration, len(climodel.StorageDurationSettings))
 	var mismatches = ""
@@ -163,6 +172,17 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 		require.True(t, ok, "unrecognised setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("float setting %s, values actual %g and expected %g don't match\n",
+				name, actualSetting, expectedSetting)
+		}
+	}
+	for _, name := range climodel.StorageCurrencySettigs {
+		actualSetting, ok := actual.Numeric[name]
+		require.True(t, ok, "unrecognised setting", name)
+		expectedSetting, ok := expected.Numeric[name]
+		require.True(t, ok, "unrecognised setting", name)
+		if actualSetting != expectedSetting {
+			mismatches += fmt.Sprintf("currency"+
+				" setting %s, values actual %g and expected %g don't match\n",
 				name, actualSetting, expectedSetting)
 		}
 	}
