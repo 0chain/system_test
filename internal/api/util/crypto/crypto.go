@@ -120,6 +120,18 @@ func Sign(t *testing.T, data string, sk *bls.SecretKey) string {
 	return sig.SerializeToHexStr()
 }
 
+func SignHexString(t *testing.T, data string, sk *bls.SecretKey) string {
+	defer handlePanic(t)
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	hashToSign, err := hex.DecodeString(data)
+	require.NoError(t, err)
+
+	signature := sk.Sign(string(hashToSign)).SerializeToHexStr()
+	return signature
+}
+
 func SignTransaction(t *testing.T, request *model.TransactionPutRequest, pair *model.KeyPair) {
 	defer handlePanic(t)
 	blsLock.Lock()
