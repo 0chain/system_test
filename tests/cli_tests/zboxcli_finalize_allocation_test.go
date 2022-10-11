@@ -18,7 +18,7 @@ func TestFinalizeAllocation(t *testing.T) {
 		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(-3) // In hours
+		expDuration := int64(-6) // In hours
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
