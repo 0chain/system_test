@@ -5,13 +5,14 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sync"
+
 	"github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
-	"sync"
 	"testing"
 )
 

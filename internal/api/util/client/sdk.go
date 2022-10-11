@@ -3,16 +3,17 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"os"
+	"path/filepath"
+	"sync"
+	"testing"
+
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"os"
-	"path/filepath"
-	"sync"
-	"testing"
 )
 
 type SDKClient struct {
@@ -65,7 +66,7 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
+func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
@@ -107,4 +108,6 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 		fileMeta, buf, false, false)
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
+
+	return filepath.Join("/", filepath.Base(tmpFile.Name()))
 }

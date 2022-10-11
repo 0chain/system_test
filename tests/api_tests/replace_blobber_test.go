@@ -2,12 +2,13 @@ package api_tests
 
 import (
 	"crypto/rand"
-	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/wait"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/wait"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReplaceBlobber(t *testing.T) {
