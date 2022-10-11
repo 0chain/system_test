@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 
@@ -70,7 +71,8 @@ func TestRepairFile(t *testing.T) {
 		blobberUrl := allocation.Blobbers[0].Baseurl
 
 		keyPair := crypto.GenerateKeys(wallet.Mnemonics)
-		sign, err := crypto.SignHash(allocation.ID, keyPair)
+		hash := encryption.Hash(allocation.ID)
+		sign, err := crypto.SignHash(hash, keyPair)
 		require.Nil(t, err)
 
 		blobberDeleteConnectionRequest := &climodel.BlobberDeleteConnectionRequest{
@@ -83,9 +85,8 @@ func TestRepairFile(t *testing.T) {
 			URL:             blobberUrl,
 		}
 		require.NotNil(t, blobberDeleteConnectionRequest)
-		
+
 		deleteBlobberFile(t, blobberDeleteConnectionRequest)
-		require.Nil(t, err)
 
 		// now we will try to repair the file and will create another folder to keep the same
 		err = os.MkdirAll(os.TempDir(), os.ModePerm)
@@ -194,4 +195,6 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 	resp, err := client.Do(req)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
+
+	// TODO Also add commit request, otherwise file is not yet deleted
 }
