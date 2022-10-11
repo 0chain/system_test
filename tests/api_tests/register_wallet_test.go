@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/client"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/client"
 )
 
 func TestRegisterWallet(t *testing.T) {

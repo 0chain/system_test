@@ -5,12 +5,13 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
+	"sync"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
-	"log"
-	"sync"
 )
 
 const BLS0Chain = "bls0chain"

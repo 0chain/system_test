@@ -441,6 +441,54 @@ type AllocationStats struct {
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
 }
 
+type BlobberGetFileRefsRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType, RemotePath string
+}
+
+type RefsData struct {
+	ID             int    `json:"id"`
+	Type           string `json:"type"`
+	AllocationId   string `json:"allocation_id"`
+	LookupHash     string `json:"lookup_hash"`
+	Name           string `json:"name"`
+	Path           string `json:"path"`
+	Hash           string `json:"hash"`
+	NumBlocks      int    `json:"num_blocks"`
+	PathHash       string `json:"path_hash"`
+	ParentPath     string `json:"parent_path"`
+	Level          int    `json:"level"`
+	ContentHash    string `json:"content_hash"`
+	Size           int    `json:"size"`
+	MerkleRoot     string `json:"merkle_root"`
+	ActualFileSize int    `json:"actual_file_size"`
+	ActualFileHash string `json:"actual_file_hash"`
+	WriteMarker    string `json:"write_marker"`
+	CreatedAt      int    `json:"created_at"`
+	UpdatedAt      int    `json:"updated_at"`
+	ChunkSize      int    `json:"chunk_size"`
+}
+
+type LatestWriteMarker struct {
+	AllocationRoot     string `json:"allocation_root"`
+	PrevAllocationRoot string `json:"prev_allocation_root"`
+	AllocationId       string `json:"allocation_id"`
+	Size               int    `json:"size"`
+	BlobberId          string `json:"blobber_id"`
+	Timestamp          int    `json:"timestamp"`
+	ClientId           string `json:"client_id"`
+	Signature          string `json:"signature"`
+	LookupHash         string `json:"lookup_hash"`
+	Name               string `json:"name"`
+	ContentHash        string `json:"content_hash"`
+}
+
+type BlobberGetFileRefsResponse struct {
+	TotalPages        int                `json:"total_pages"`
+	OffsetPath        string             `json:"offset_path"`
+	Refs              []*RefsData        `json:"refs"`
+	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
+}
+
 type BlobberUploadFileMeta struct {
 	ConnectionID string `json:"connection_id" validation:"required"`
 	FileName     string `json:"filename" validation:"required"`

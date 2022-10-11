@@ -1,11 +1,12 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/config"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/config"
 )
 
 var (

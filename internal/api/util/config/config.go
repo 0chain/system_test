@@ -1,9 +1,10 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3" //nolint
 	"log"
 	"os"
+
+	"gopkg.in/yaml.v3" //nolint
 )
 
 // ConfigPathEnv contains name of env variable
