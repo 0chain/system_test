@@ -260,6 +260,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
+		cliutils.Wait(t, 4*time.Minute)
+
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
