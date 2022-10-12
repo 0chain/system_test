@@ -21,7 +21,7 @@ import (
 )
 
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t.Skip("Till batch-update is merged...")
+	//t.Skip("Till batch-update is merged...")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
