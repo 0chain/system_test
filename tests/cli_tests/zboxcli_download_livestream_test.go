@@ -24,7 +24,7 @@ import (
 )
 
 func TestLivestreamDownload(t *testing.T) {
-	t.Parallel()
+	//	t.Parallel()
 
 	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
@@ -33,7 +33,7 @@ func TestLivestreamDownload(t *testing.T) {
 	}
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+		//	t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -208,7 +208,7 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -397,7 +397,7 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
-		t.Parallel()
+		//t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -590,7 +590,6 @@ func TestLivestreamDownload(t *testing.T) {
 }
 
 func startUploadFeed1(wg *sync.WaitGroup, errChan chan error, t *testing.T, cmdName, cliConfigFilename, params string) {
-
 	defer wg.Done()
 
 	t.Logf("Starting upload of live stream to zbox...")
@@ -602,7 +601,7 @@ func startUploadFeed1(wg *sync.WaitGroup, errChan chan error, t *testing.T, cmdN
 	require.Nil(t, err, "error in uploading a live feed")
 
 	// Need atleast 3-4 .ts files uploaded
-	cliutils.Wait(t, 180*time.Second)
+	cliutils.Wait(t, 60*time.Second)
 
 	// Kills upload process as well as it's child processes
 	err = cmd.Process.Kill()
@@ -622,7 +621,7 @@ func startDownloadFeed(wg *sync.WaitGroup, errChan chan error, t *testing.T, cli
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 
 	require.Nil(t, err, "error in downloading a live feed")
-	cliutils.Wait(t, 160*time.Second)
+	cliutils.Wait(t, 50*time.Second)
 
 	err = cmd.Process.Kill()
 
