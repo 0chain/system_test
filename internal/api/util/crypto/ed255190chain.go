@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/ed25519"
 )
 
-//ED255190chainScheme - a signature scheme based on ED25519
+// ED255190chainScheme - a signature scheme based on ED25519
 type ED255190chainScheme struct {
 	privateKey []byte
 	publicKey  []byte
@@ -24,7 +24,7 @@ func NewED255190chainScheme() *ED255190chainScheme {
 	return &ED255190chainScheme{}
 }
 
-//GenerateKeys - implement interface
+// GenerateKeys - implement interface
 func (ed *ED255190chainScheme) GenerateKeys() (*Wallet, error) {
 	// Check for recovery
 	if len(ed.mnemonic) == 0 {
@@ -57,7 +57,7 @@ func (ed *ED255190chainScheme) GenerateKeys() (*Wallet, error) {
 	return w, nil
 }
 
-//GenerateKeysWithEth - not implemented
+// GenerateKeysWithEth - not implemented
 func (ed *ED255190chainScheme) GenerateKeysWithEth(mnemonic, password string) (*Wallet, error) {
 	return nil, errors.New("", "Not supported for this scheme")
 }
@@ -142,24 +142,24 @@ func (ed *ED255190chainScheme) Add(signature, msg string) (string, error) {
 	return "", errors.New("chain_scheme_add", "Not supported by signature scheme")
 }
 
-//GetPublicKey - implement interface
+// GetPublicKey - implement interface
 func (ed *ED255190chainScheme) GetPublicKey() string {
 	return hex.EncodeToString(ed.publicKey)
 }
 
-//GetPrivateKey - implement interface
+// GetPrivateKey - implement interface
 func (ed *ED255190chainScheme) GetPrivateKey() string {
 	return hex.EncodeToString(ed.privateKey)
 }
 
-//SetID sets ID in HexString format
+// SetID sets ID in HexString format
 func (ed *ED255190chainScheme) SetID(id string) error {
 	// b0.Ids = id
 	// return b0.id.SetHexString(id)
 	return errors.New("chain_scheme_set_id", "it is not implemented yet")
 }
 
-//GetID gets ID in hex string format
+// GetID gets ID in hex string format
 func (ed *ED255190chainScheme) GetID() string {
 	//return b0.id.GetHexString()
 	return ""
