@@ -56,14 +56,14 @@ func TestReadMarker(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, "", sharderUrl)
-		fmt.Println("readmarkers", len(readMarkers))
-		//require.Len(t, readMarkers, defaultBlobberCount)
+		//fmt.Println("readmarkers", len(readMarkers))
+		require.Len(t, readMarkers, defaultBlobberCount)
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
-		fmt.Println("readmarker count after", afterCount)
-		//require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
+		//fmt.Println("readmarker count after", afterCount)
+		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 }
 
