@@ -438,7 +438,7 @@ func generateThumbnail(t *testing.T, localpath string) int {
 	return len(thumbnailBytes)
 }
 
-//nolint
+// nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
 	thumbnail := escapedTestName(t) + "thumbnail.png"
 

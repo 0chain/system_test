@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"io"
-	"strconv"
 	"time"
 
 	"github.com/herumi/bls-go-binary/bls"
@@ -29,38 +28,30 @@ type ExecutionRequest struct {
 	RequiredStatusCode int
 }
 
-type ClientPutRequest struct {
-	ClientID      string `json:"id"`
-	ClientKey     string `json:"public_key"`
-	CreationDate  *int   `json:"creation_date"`
-	GenerateInput bool
-}
-
-type ClientPutResponse struct {
+type Wallet struct {
 	Id           string `json:"id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
 	PublicKey    string `json:"public_key"`
 	Nonce        int
+	Keys         *KeyPair `json:"-"`
 }
 
-type Wallet struct {
-	ClientID    string      `json:"client_id"`
-	ClientKey   string      `json:"client_key"`
-	Keys        []*KeyPair  `json:"keys"`
-	Mnemonics   string      `json:"mnemonics"`
-	Version     string      `json:"version"`
-	DateCreated string      `json:"date_created"`
-	Nonce       int         `json:"-"`
-	RawKeys     *RawKeyPair `json:"-"`
+type SdkWallet struct {
+	ClientID    string        `json:"client_id"`
+	ClientKey   string        `json:"client_key"`
+	Keys        []*SdkKeyPair `json:"keys"`
+	Mnemonics   string        `json:"mnemonics"`
+	Version     string        `json:"version"`
+	DateCreated string        `json:"date_created"`
 }
 
-type KeyPair struct {
+type SdkKeyPair struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
 }
 
-type RawKeyPair struct {
+type KeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
@@ -69,28 +60,13 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) GetKeyPair() (*KeyPair, error) {
-	if len(w.Keys) == 0 {
-		return nil, ErrNoKeyPair
-	}
-	return w.Keys[0], nil
-}
-
-func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
-	result, err := strconv.Atoi(w.DateCreated)
-	if err != nil {
-		return 0, err
-	}
-	return result, nil
-}
-
-func (w *Wallet) String() string {
+func (w *SdkWallet) String() (string, error) {
 	out, err := json.Marshal(w)
 	if err != nil {
-		return "failed to serialize wallet object"
+		return "", err
 	}
 
-	return string(out)
+	return string(out), nil
 }
 
 type TransactionData struct {
