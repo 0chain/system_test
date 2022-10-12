@@ -12,7 +12,7 @@ func TestCreateAllocation(t *testing.T) {
 	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)

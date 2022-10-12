@@ -55,7 +55,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, "feed", configPath,  createParams(map[string]interface{}{
+		err = startUploadFeed(t, "feed", configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
