@@ -63,12 +63,14 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 		nil,
 		int64(wallet.Nonce),
 	)
+
+	c.Mutex.Unlock()
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
 func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
-	defer c.Mutex.Unlock()
-
+	// defer c.Mutex.Unlock()
+	c.Mutex.Lock()
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		require.NoError(t, err)
@@ -108,6 +110,8 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 		fileMeta, buf, false, false)
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
+
+	c.Mutex.Unlock()
 
 	return filepath.Join("/", filepath.Base(tmpFile.Name()))
 }
