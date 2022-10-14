@@ -109,6 +109,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			return nil, err
 		}
 
+		r := c.httpClient.R()
 		var formattedURL string
 		switch serviceProviderType {
 		case MinerServiceProvider:
@@ -117,9 +118,10 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
 		case BlobberServiceProvider:
 			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
+			r.SetBasicAuth("admin", "password")
 		}
 
-		healthResponse, err := c.httpClient.R().Get(formattedURL)
+		healthResponse, err := r.Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
 			log.Printf("%s is UP!", node)
 			result = append(result, node)
