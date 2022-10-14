@@ -549,7 +549,7 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
-		require.Contains(t, aggregatedOutput, "download failed")
+		require.Contains(t, aggregatedOutput, "Download failed")
 
 		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{
@@ -912,13 +912,11 @@ func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID stri
 	// this requires the allocation has file uploaded to work properly.
 	for {
 		// using `list all` to verify transfer as this check blobber content as opposed to `get allocation` which is based on sharder
-		output, err := listAllWithWallet(t, newOwner, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		output, _ := listAllWithWallet(t, newOwner, configPath, allocationID, true)
 
 		// if not empty, the transfer of allocation contents has occurred on blobbers.
 		// there is only one content expected so once it is no longer empty, transfer is deemed complete.
-		if output[0] != "[]" {
+		if len(output) == 1 && output[0] != "[]" {
 			return true
 		}
 
