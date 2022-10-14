@@ -284,7 +284,7 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
-		wallet := sdkWallet
+		wallet := CopyWallet(sdkWallet)
 		wallet.Id = "invalue-client-id"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -314,7 +314,7 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
-		wallet := sdkWallet
+		wallet := CopyWallet(sdkWallet)
 		wallet.Id = "invalid-client-key"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
@@ -335,4 +335,16 @@ func getBlobberFileRefRequest(url string, registeredsdkWallet *model.Wallet, all
 		RemotePath:      remotePath,
 	}
 	return blobberFileRequest
+}
+
+func CopyWallet(wallet *model.Wallet) *model.Wallet {
+	newWallet := &model.Wallet{
+		Id: wallet.Id,
+		Version: wallet.Version,
+		PublicKey: wallet.PublicKey,
+		CreationDate: wallet.CreationDate,
+		Nonce: wallet.Nonce,
+		Keys: wallet.Keys,
+	}
+	return newWallet
 }
