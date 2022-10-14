@@ -11,8 +11,6 @@ import (
 
 func TestBlobberRewards(t *testing.T) {
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
-		t.Parallel()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)

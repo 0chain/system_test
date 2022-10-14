@@ -284,8 +284,9 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
-		sdkWallet.Id = "invalue-client-id"
-		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
+		wallet := sdkWallet
+		wallet.Id = "invalue-client-id"
+		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
@@ -313,8 +314,9 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
-		sdkWallet.Id = "invalid-client-key"
-		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
+		wallet := sdkWallet
+		wallet.Id = "invalid-client-key"
+		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
