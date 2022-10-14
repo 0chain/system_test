@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -23,7 +24,7 @@ import (
 )
 
 func TestLivestreamDownload(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 
 	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
@@ -32,7 +33,7 @@ func TestLivestreamDownload(t *testing.T) {
 	}
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -47,14 +48,14 @@ func TestLivestreamDownload(t *testing.T) {
 		remotepath := "/live/stream"
 
 		localfolderForUpload := filepath.Join(os.TempDir(), escapedTestName(t)+"_upload")
-		localpathForUpload := localfolderForUpload
-		err = os.MkdirAll(localpathForUpload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForUpload)
+		err = os.MkdirAll(localfolderForUpload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForUpload)
+		localpathForUpload := localfolderForUpload + "/up.m3u8"
 
 		localfolderForDownload := filepath.Join(os.TempDir(), escapedTestName(t)+"_download")
-		localpathForDownload := localfolderForDownload
-		err = os.MkdirAll(localpathForDownload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForDownload)
+		err = os.MkdirAll(localfolderForDownload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForDownload)
+		localpathForDownload := localfolderForDownload + "/down.m3u8"
 
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
@@ -69,7 +70,7 @@ func TestLivestreamDownload(t *testing.T) {
 		go startUploadFeed1(wg, errUploadChan, t, "feed", configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForUpload + "/up.m3u8",
+			"localpath":  localpathForUpload,
 			"feed":       feed,
 		}))
 		cliutils.Wait(t, 20*time.Second)
@@ -77,7 +78,7 @@ func TestLivestreamDownload(t *testing.T) {
 		go startDownloadFeed(wg, errDownloadChan, t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForDownload + "/down.m3u8",
+			"localpath":  localpathForDownload,
 		}))
 
 		wg.Wait()
@@ -93,10 +94,9 @@ func TestLivestreamDownload(t *testing.T) {
 		close(errDownloadChan)
 		close(errUploadChan)
 
-		wg.Wait()
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localpathForUpload)
+		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
 
 		hashmap := make(map[string]string)
 
@@ -143,7 +143,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
+		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -151,7 +151,7 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
+
 			if !info.IsDir() {
 
 				file, err := os.Open(path)
@@ -173,12 +173,11 @@ func TestLivestreamDownload(t *testing.T) {
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					count_ts += 1
-					/*
-						if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
-							t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
-							return errors.New(".ts file is not matched with the original one!")
-						}
-					*/
+
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
+						return errors.New(".ts file is not matched with the original one!")
+					}
 
 				}
 			}
@@ -186,7 +185,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-		//require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
+		require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -204,12 +203,11 @@ func TestLivestreamDownload(t *testing.T) {
 		t.Logf("%d\n", len(files))
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
-			//t.Logf("%s , %s , %s", file.Name, file.Path, file.Hash)
 		}
 	})
 
 	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -224,14 +222,14 @@ func TestLivestreamDownload(t *testing.T) {
 		remotepath := "/live/stream"
 
 		localfolderForUpload := filepath.Join(os.TempDir(), escapedTestName(t)+"_upload")
-		localpathForUpload := localfolderForUpload
-		err = os.MkdirAll(localpathForUpload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForUpload)
+		err = os.MkdirAll(localfolderForUpload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForUpload)
+		localpathForUpload := localfolderForUpload + "/up.m3u8"
 
 		localfolderForDownload := filepath.Join(os.TempDir(), escapedTestName(t)+"_download")
-		localpathForDownload := localfolderForDownload
-		err = os.MkdirAll(localpathForDownload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForDownload)
+		err = os.MkdirAll(localfolderForDownload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForDownload)
+		localpathForDownload := localfolderForDownload + "/down.m3u8"
 
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
@@ -246,14 +244,14 @@ func TestLivestreamDownload(t *testing.T) {
 		go startUploadFeed1(wg, errUploadChan, t, "stream", configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForUpload + "/up.m3u8",
+			"localpath":  localpathForUpload,
 		}))
 		cliutils.Wait(t, 20*time.Second)
 
 		go startDownloadFeed(wg, errDownloadChan, t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForDownload + "/down.m3u8",
+			"localpath":  localpathForDownload,
 		}))
 
 		wg.Wait()
@@ -269,10 +267,9 @@ func TestLivestreamDownload(t *testing.T) {
 		close(errDownloadChan)
 		close(errUploadChan)
 
-		wg.Wait()
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localpathForUpload)
+		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
 
 		hashmap := make(map[string]string)
 
@@ -281,7 +278,7 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
+
 			if !info.IsDir() {
 				file, err := os.Open(path)
 
@@ -319,7 +316,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
+		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -327,7 +324,7 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
+
 			if !info.IsDir() {
 
 				file, err := os.Open(path)
@@ -349,36 +346,19 @@ func TestLivestreamDownload(t *testing.T) {
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					count_ts += 1
-					/*
-						if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
-							t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
-							return errors.New(".ts file is not matched with the original one!")
-						}
-					*/
+
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
+						return errors.New(".ts file is not matched with the original one!")
+					}
+
 				}
 			}
 			return nil
 		})
 		require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-		//require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		var data climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
-
-		for _, data = range stats {
-			t.Log(data.Name)
-		}
+		require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -400,7 +380,7 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -415,14 +395,15 @@ func TestLivestreamDownload(t *testing.T) {
 		remotepath := "/live/stream"
 
 		localfolderForUpload := filepath.Join(os.TempDir(), escapedTestName(t)+"_upload")
-		localpathForUpload := localfolderForUpload
-		err = os.MkdirAll(localpathForUpload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForUpload)
+
+		err = os.MkdirAll(localfolderForUpload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForUpload)
+		localpathForUpload := localfolderForUpload + "/up.m3u8"
 
 		localfolderForDownload := filepath.Join(os.TempDir(), escapedTestName(t)+"_download")
-		localpathForDownload := localfolderForDownload
-		err = os.MkdirAll(localpathForDownload, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpathForDownload)
+		err = os.MkdirAll(localfolderForDownload, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localfolderForDownload)
+		localpathForDownload := localfolderForDownload + "/down.m3u8"
 
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
@@ -437,7 +418,7 @@ func TestLivestreamDownload(t *testing.T) {
 		go startUploadFeed1(wg, errUploadChan, t, "feed", configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForUpload + "/up.m3u8",
+			"localpath":  localpathForUpload,
 			"feed":       feed,
 		}))
 		cliutils.Wait(t, 20*time.Second)
@@ -445,7 +426,7 @@ func TestLivestreamDownload(t *testing.T) {
 		go startDownloadFeed(wg, errDownloadChan, t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"localpath":  localpathForDownload + "/down.m3u8",
+			"localpath":  localpathForDownload,
 			"delay":      1,
 		}))
 
@@ -462,10 +443,9 @@ func TestLivestreamDownload(t *testing.T) {
 		close(errDownloadChan)
 		close(errUploadChan)
 
-		wg.Wait()
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localpathForUpload)
+		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
 
 		hashmap := make(map[string]string)
 
@@ -512,7 +492,7 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localpathForDownload)
+		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -542,36 +522,19 @@ func TestLivestreamDownload(t *testing.T) {
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
 					count_ts += 1
-					/*
-						if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
-							t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
-							return errors.New(".ts file is not matched with the original one!")
-						}
-					*/
+
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
+						return errors.New(".ts file is not matched with the original one!")
+					}
+
 				}
 			}
 			return nil
 		})
 		require.Nil(t, err, "error in traversing locally created .m3u8 and .ts files!")
 		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created!")
-		//require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var stats map[string]climodel.FileStats
-		var data climodel.FileStats
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
-
-		for _, data = range stats {
-			t.Log(data.Name)
-		}
+		require.Greater(t, count_ts, 0, "at least one .ts file should be created!")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -589,7 +552,6 @@ func TestLivestreamDownload(t *testing.T) {
 		t.Logf("%d\n", len(files))
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
-			//t.Logf("%s , %s , %s", file.Name, file.Path, file.Hash)
 		}
 	})
 }
