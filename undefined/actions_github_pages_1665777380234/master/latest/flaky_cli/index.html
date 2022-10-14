@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [master/04624fd0] ran against [dev-3.devnet-0chain.net] at [2022-10-14_20.57.24]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [master/04624fd0] ran against [dev-3.devnet-0chain.net] at [2022-10-14_20.57.24]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>71</strong>Duration: <strong>5ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>65</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>2</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>4</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 14, 2022 21:56:00</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  skipped" id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  skipped" id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+                <div class="testResultGroup failed " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+                <div class="testResultGroup  " id="33"></div>
+            
+                <div class="testResultGroup  " id="34"></div>
+            
+                <div class="testResultGroup  " id="35"></div>
+            
+                <div class="testResultGroup  " id="36"></div>
+            
+                <div class="testResultGroup  " id="37"></div>
+            
+                <div class="testResultGroup  " id="38"></div>
+            
+                <div class="testResultGroup  " id="39"></div>
+            
+                <div class="testResultGroup  " id="40"></div>
+            
+                <div class="testResultGroup  " id="41"></div>
+            
+                <div class="testResultGroup  " id="42"></div>
+            
+                <div class="testResultGroup  " id="43"></div>
+            
+                <div class="testResultGroup  " id="44"></div>
+            
+                <div class="testResultGroup  " id="45"></div>
+            
+                <div class="testResultGroup  " id="46"></div>
+            
+                <div class="testResultGroup  " id="47"></div>
+            
+                <div class="testResultGroup  " id="48"></div>
+            
+                <div class="testResultGroup  " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup  " id="52"></div>
+            
+                <div class="testResultGroup  " id="53"></div>
+            
+                <div class="testResultGroup  " id="54"></div>
+            
+                <div class="testResultGroup  " id="55"></div>
+            
+                <div class="testResultGroup  " id="56"></div>
+            
+                <div class="testResultGroup  " id="57"></div>
+            
+                <div class="testResultGroup  " id="58"></div>
+            
+                <div class="testResultGroup  " id="59"></div>
+            
+                <div class="testResultGroup  " id="60"></div>
+            
+                <div class="testResultGroup  " id="61"></div>
+            
+                <div class="testResultGroup  " id="62"></div>
+            
+                <div class="testResultGroup  " id="63"></div>
+            
+                <div class="testResultGroup  " id="64"></div>
+            
+                <div class="testResultGroup  " id="65"></div>
+            
+                <div class="testResultGroup  " id="66"></div>
+            
+                <div class="testResultGroup  " id="67"></div>
+            
+                <div class="testResultGroup  " id="68"></div>
+            
+                <div class="testResultGroup  " id="69"></div>
+            
+                <div class="testResultGroup  " id="70"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___broken_scenarios_test.go:26: \n","--- SKIP: Test___FlakyBrokenScenarios (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":25,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":232,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.13,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_file_upload_test.go:803: Uploading file...\n","","    utils.go:135: Waiting 10s...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_file_copy_test.go:626: Copying file...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    flaky___flaky_test.go:294: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:294\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: Test___FlakyFileMove (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":300,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.76,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_file_upload_test.go:803: Uploading file...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_file_move_test.go:555: Moving file...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_ (17.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: Test___FlakyFileRename (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":176,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.27,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_file_upload_test.go:803: Uploading file...\n","","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","","    zboxcli_cancel_allocation_test.go:106: Canceling allocation...\n","--- PASS: Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file (17.27s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:19: \n","--- SKIP: Test___FlakyScenariosCommonUserFunctions (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":85,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":261.25,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zboxcli_create_allocation_test.go:288: Creating new allocation...\n","","    zboxcli_file_upload_test.go:803: Uploading file...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:892: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:909: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:135: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","","    utils.go:135: Waiting 10s...\n","","    utils.go:135: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 10s...\n","","    utils.go:135: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","","    utils.go:135: Waiting 10s...\n","","    utils.go:135: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 10s...\n","","    utils.go:135: Waiting 5s...\n","","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 10s...\n","    utils.go:135: Waiting 5s...\n","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 10s...\n","    utils.go:135: Waiting 5s...\n","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 10s...\n","    utils.go:135: Waiting 5s...\n","    zboxcli_create_dir_test.go:356: Listing all...\n","    utils.go:135: Waiting 5s...\n","    utils.go:135: Waiting 2m0s...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:172: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:172\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyTransferAllocation/transfer_allocation_accounting_test\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.7,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolAdd (8.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_destination_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.53,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_destination_flag_should_fail (3.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_duration_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.52,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_duration_flag_should_fail (3.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_lock_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.51,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_lock_flag_should_fail (3.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_for_duration_less_than_min_duration_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.71,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_for_duration_less_than_min_duration_should_fail (13.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_description_greater_than_max_description_length_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.69,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_description_greater_than_max_description_length_should_fail (13.69s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_destinations_greater_than_max_destinations_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.54,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_destinations_greater_than_max_destinations_should_fail (24.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_duration_greater_than_max_duration_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.7,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_duration_greater_than_max_duration_should_fail (13.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_excess_locked_tokens_should_work_and_allow_unlocking","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.85,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_excess_locked_tokens_should_work_and_allow_unlocking (13.85s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_invalid_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.85,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_invalid_destination_should_fail (6.85s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_lock_less_than_min_lock_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.69,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_lock_less_than_min_lock_should_fail (13.69s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_locking_insufficient_tokens_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.7,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_locking_insufficient_tokens_should_fail (13.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_and_description_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.27,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_and_description_should_work (17.27s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.32,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_should_work (17.32s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_one_valid_destination_and_one_invalid_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.45,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_one_valid_destination_and_one_invalid_destination_should_fail (10.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination,_valid_duration_and_valid_tokens_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.7,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination,_valid_duration_and_valid_tokens_should_work (13.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination_and_description_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.82,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination_and_description_should_work (13.82s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_for_multiple_destination_wallets_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.52,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_for_multiple_destination_wallets_should_work (18.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.94,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_should_work (13.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_for_multiple_destinations_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.27,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_for_multiple_destinations_should_fail (17.27s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.72,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_should_fail (13.72s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.72,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolDelete (8.72s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":644,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Deleting_someone_else's_vesting_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.46,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:773: Deleting vesting pool...\n","--- PASS: Test___FlakyVestingPoolDelete/Deleting_someone_else's_vesting_pool_should_fail (20.46s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.67,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:773: Deleting vesting pool...\n","","    utils.go:135: Waiting 5s...\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_should_work (23.67s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.76,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:773: Deleting vesting pool...\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_with_invalid_pool_id_should_fail (6.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.51,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:773: Deleting vesting pool...\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_without_pool_id_flag_should_fail (3.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.72,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolInfo (8.72s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":783,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_belonging_to_someone_else's_wallet_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.25,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_belonging_to_someone_else's_wallet_must_fail (17.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.72,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_with_multiple_destinations_should_work (17.72s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.99,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_with_invalid_pool_id_should_fail (6.99s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_with_valid_pool_id_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.08,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_with_valid_pool_id_should_work (14.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.6,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_without_pool_id_flag_should_fail (3.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.71,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolStop (8.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":999,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":33.09,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2051: Stopping vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","","    utils.go:135: Waiting 5s...\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_multiple_destinations_should_work (33.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_pool_with_one_destination_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.41,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2051: Stopping vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","","    utils.go:135: Waiting 5s...\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_pool_with_one_destination_should_work (26.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_someone_else's_pool_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.53,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2051: Stopping vesting pool...\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_someone_else's_pool_must_fail (20.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_without_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.54,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2051: Stopping vesting pool...\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_without_destination_should_fail (3.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_without_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":7.13,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2051: Stopping vesting pool...\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_without_pool_id_must_fail (7.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: Test___FlakyVestingPoolTokenAccounting (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1251,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_multiple_destinations_should_move_some_balance_to_pending_which_should_be_unlockable","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":33.44,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_multiple_destinations_should_move_some_balance_to_pending_which_should_be_unlockable (33.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_one_destination_should_move_some_balance_to_pending_which_should_be_unlockable","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.81,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_one_destination_should_move_some_balance_to_pending_which_should_be_unlockable (24.81s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.28,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolTrigger (29.28s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1451,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Triggering_someone_else's_pool_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.57,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2040: Triggering vesting pool...\n","--- PASS: Test___FlakyVestingPoolTrigger/Triggering_someone_else's_pool_must_fail (20.57s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_a_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.95,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2040: Triggering vesting pool...\n","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_a_pool_with_multiple_destinations_should_work (21.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_one_destination_pool_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.6,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2040: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_one_destination_pool_should_work (17.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.76,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2040: Triggering vesting pool...\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_with_invalid_pool_id_should_fail (6.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.51,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2040: Triggering vesting pool...\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_without_pool_id_flag_should_fail (3.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.7,"Output":["","","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolUnlock (8.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1649,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Unlocking_someone_else's_vesting_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.55,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolUnlock/Unlocking_someone_else's_vesting_pool_should_fail (20.55s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_by_destination_wallet_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.52,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_by_destination_wallet_should_work (22.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_for_one_destination_and_no_excess_tokens_in_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.09,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_for_one_destination_and_no_excess_tokens_in_pool_should_fail (18.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_with_excess_tokens_in_pool_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.95,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:188: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:2073: Adding a new vesting pool...\n","","    utils.go:135: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:2062: fetching vesting pool info...\n","","    utils.go:135: Waiting 5s...\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_with_excess_tokens_in_pool_should_work (23.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_unlock_with_invalid_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.89,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_unlock_with_invalid_pool_id_must_fail (6.89s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_unlock_without_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.59,"Output":["","","","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:2025: Unlocking a vesting pool...\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_unlock_without_pool_id_must_fail (3.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":44.14,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig (44.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1872,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/should_allow_update_of_max_destinations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.63,"Output":["","    utils.go:135: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","    utils.go:135: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1992: Retrieving vesting config...\n","    zboxcli_update_allocation_test.go:607: Executing faucet...\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/should_allow_update_of_max_destinations (23.63s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.73,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_by_non-smartcontract_owner_should_fail (6.73s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_max_destinations_to_invalid_value_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.34,"Output":["","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_max_destinations_to_invalid_value_should_fail (3.34s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_bad_config_key_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.34,"Output":["","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_bad_config_key_should_fail (3.34s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_missing_keys_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.11,"Output":["","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_missing_keys_param_should_fail (0.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_missing_values_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.59,"Output":["","    zwalletcli_register_wallet_test.go:108: Registering wallet...\n","    flaky___unused_for_mainnet_test.go:2004: Updating vesting config...\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_missing_values_param_should_fail (3.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
