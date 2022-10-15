@@ -24,7 +24,6 @@ import (
 )
 
 func TestLivestreamDownload(t *testing.T) {
-	t.Parallel()
 
 	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
 
@@ -33,7 +32,6 @@ func TestLivestreamDownload(t *testing.T) {
 	}
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -96,8 +94,6 @@ func TestLivestreamDownload(t *testing.T) {
 
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
-
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
@@ -105,7 +101,6 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
 			if !info.IsDir() {
 				file, err := os.Open(path)
 
@@ -143,7 +138,6 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -172,12 +166,12 @@ func TestLivestreamDownload(t *testing.T) {
 					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
-					count_ts += 1
 
-					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts > 0 {
 						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 						return errors.New(".ts file is not matched with the original one!")
 					}
+					count_ts += 1
 
 				}
 			}
@@ -200,14 +194,12 @@ func TestLivestreamDownload(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "error in unmarshalling the response from the list files")
 
-		t.Logf("%d\n", len(files))
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
 	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
-		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -269,8 +261,6 @@ func TestLivestreamDownload(t *testing.T) {
 
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
-
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
@@ -316,7 +306,6 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -345,12 +334,12 @@ func TestLivestreamDownload(t *testing.T) {
 					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
-					count_ts += 1
 
-					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts > 0 {
 						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 						return errors.New(".ts file is not matched with the original one!")
 					}
+					count_ts += 1
 
 				}
 			}
@@ -373,14 +362,12 @@ func TestLivestreamDownload(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "error in unmarshalling the response from the list files")
 
-		t.Logf("%d\n", len(files))
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
-		t.Parallel()
 
 		_ = initialiseTest(t)
 
@@ -445,8 +432,6 @@ func TestLivestreamDownload(t *testing.T) {
 
 		require.Nil(t, err, "error in killing download command")
 
-		t.Logf("LOCAL PATH for UPLOAD : %s", localfolderForUpload)
-
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
@@ -454,7 +439,7 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
+
 			if !info.IsDir() {
 				file, err := os.Open(path)
 
@@ -492,7 +477,6 @@ func TestLivestreamDownload(t *testing.T) {
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
 
-		t.Logf("LOCAL FOLDER for DOWNLOAD : %s", localfolderForDownload)
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
@@ -500,7 +484,6 @@ func TestLivestreamDownload(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			//t.Logf(info.Name())
 			if !info.IsDir() {
 
 				file, err := os.Open(path)
@@ -521,12 +504,12 @@ func TestLivestreamDownload(t *testing.T) {
 					count_m3u8 += 1
 					return nil
 				} else if extension[len(extension)-1] == "ts" {
-					count_ts += 1
 
-					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts < 1 {
+					if hashmap[info.Name()] != hex.EncodeToString(hash.Sum(nil)) && count_ts > 0 {
 						t.Logf("HASH of UP :%s\nHASH of DOWN :%s\n \n", hashmap[info.Name()], hex.EncodeToString(hash.Sum(nil)))
 						return errors.New(".ts file is not matched with the original one!")
 					}
+					count_ts += 1
 
 				}
 			}
@@ -549,7 +532,6 @@ func TestLivestreamDownload(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &files)
 		require.Nil(t, err, "error in unmarshalling the response from the list files")
 
-		t.Logf("%d\n", len(files))
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
@@ -562,13 +544,11 @@ func startUploadFeed1(wg *sync.WaitGroup, errChan chan error, t *testing.T, cmdN
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
 
-	t.Logf(commandString)
-
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
 
 	// Need atleast 3-4 .ts files uploaded
-	cliutils.Wait(t, 75*time.Second)
+	cliutils.Wait(t, 65*time.Second)
 
 	// Kills upload process as well as it's child processes
 	err = cmd.Process.Kill()
@@ -583,12 +563,10 @@ func startDownloadFeed(wg *sync.WaitGroup, errChan chan error, t *testing.T, cli
 
 	commandString := fmt.Sprintf("./zbox download --live %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
 
-	t.Logf(commandString)
-
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 
 	require.Nil(t, err, "error in downloading a live feed")
-	cliutils.Wait(t, 75*time.Second)
+	cliutils.Wait(t, 50*time.Second)
 
 	err = cmd.Process.Kill()
 
