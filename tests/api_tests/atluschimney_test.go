@@ -447,31 +447,73 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if graph of blobber inactive rounds changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t)
+		mnemonic := crypto.GenerateMnemonics(t)
+		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		getGraphBlobberInactiveRounds, resp, err := apiClient.V1SharderGetGraphBlobberInactiveRounds(
-			model.GetGraphBlobberInactiveRoundsRequest{
-				DataPoints: 17,
-				BlobberID:  blobberId,
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotZero(t, *getGraphBlobberInactiveRounds)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+
+			getGraphBlobberInactiveRoundsBefore, resp, err := apiClient.V1SharderGetGraphBlobberInactiveRounds(
+				model.GetGraphBlobberInactiveRoundsRequest{
+					DataPoints: 17,
+					BlobberID:  "",
+				},
+				client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, getGraphBlobberInactiveRoundsBefore)
+
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var getGraphBlobberInactiveRoundsAfter *model.GetGraphBlobberInactiveRoundsResponse
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getGraphBlobberInactiveRoundsAfter, resp, err = apiClient.V1SharderGetGraphBlobberInactiveRounds(
+					model.GetGraphBlobberInactiveRoundsRequest{
+						DataPoints: 17,
+						BlobberID:  "",
+					},
+					client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				return getGraphBlobberInactiveRoundsAfter != getGraphBlobberInactiveRoundsBefore
+			})
+
+			require.NotEqual(t, getGraphBlobberInactiveRoundsAfter, getGraphBlobberInactiveRoundsBefore)
+		})
 	})
 
-	//echo -e "\naverges"
-	//echo -e "\ngraph-blobber-write-price"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-write-price?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-capacity"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-capacity?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-allocated"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-allocated?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-saved-data"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-saved-data?data-points=17&id='$BLOBBERID
+	t.Run("Get graph of blobber write prices, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-write-price?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of blobber capacity, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-capacity?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of allocated storage in a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-allocated?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of all allocated size in a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-allocated?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of all saved data in a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-saved-data?data-points=17&id='$BLOBBERID
+	})
+
 	//echo -e "\ngraph-blobber-read-data"
 	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-read-data?data-points=17&id='$BLOBBERID
 	//echo -e "\ngraph-blobber-offers-total"
