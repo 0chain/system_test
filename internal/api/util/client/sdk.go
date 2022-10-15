@@ -9,7 +9,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -20,7 +19,7 @@ type SDKClient struct {
 	sync.Mutex
 
 	blockWorker string
-	wallet      *model.Wallet
+	wallet      *model.SdkWallet
 }
 
 func NewSDKClient(blockWorker string) *SDKClient {
@@ -46,29 +45,44 @@ func (c *SDKClient) CloseSession() {
 	c.Mutex.Unlock()
 }
 
-func (c *SDKClient) SetWallet(wallet *model.Wallet) {
-	c.wallet = wallet
+func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics string) {
+	c.Mutex.Lock()
 
-	err := sdk.InitStorageSDK(
-		wallet.String(),
+	c.wallet = &model.SdkWallet{
+		ClientID:  wallet.Id,
+		ClientKey: wallet.PublicKey,
+		Keys: []*model.SdkKeyPair{{
+			PrivateKey: wallet.Keys.PrivateKey.SerializeToHexStr(),
+			PublicKey:  wallet.Keys.PublicKey.SerializeToHexStr(),
+		}},
+		Mnemonics: mnemonics,
+		Version:   wallet.Version,
+	}
+
+	serializedWallet, err := c.wallet.String()
+	require.NoError(t, err, "failed to serialize wallet object", wallet)
+
+	err = sdk.InitStorageSDK(
+		serializedWallet,
 		c.blockWorker,
 		"",
 		crypto.BLS0Chain,
 		nil,
-		int64(wallet.Nonce))
-	if err != nil {
-		log.Fatalln(ErrInitStorageSDK, err)
-	}
+		int64(wallet.Nonce),
+	)
+	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
+func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
+	defer c.Mutex.Unlock()
+
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
-		log.Fatalln(err)
+		require.NoError(t, err)
 	}
 
 	defer func(name string) {
-		err = os.RemoveAll(name)
+		err := os.RemoveAll(name)
 		if err != nil {
 
 		}
@@ -79,7 +93,7 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 	rawBuf := make([]byte, actualSize)
 	_, err = rand.Read(rawBuf)
 	if err != nil {
-		log.Fatalln(err)
+		require.NoError(t, err)
 	} //nolint:gosec,revive
 
 	buf := bytes.NewBuffer(rawBuf)
@@ -92,13 +106,15 @@ func (c *SDKClient) UploadSomeFile(t *testing.T, allocationID string) {
 	}
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	homeDir, err := config.GetHomeDir()
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
 		fileMeta, buf, false, false)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
+
+	return filepath.Join("/", filepath.Base(tmpFile.Name()))
 }

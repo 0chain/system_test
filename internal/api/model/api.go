@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/herumi/bls-go-binary/bls"
 	"io"
-	"strconv"
 	"time"
 )
 
@@ -28,38 +27,30 @@ type ExecutionRequest struct {
 	RequiredStatusCode int
 }
 
-type ClientPutRequest struct {
-	ClientID      string `json:"id"`
-	ClientKey     string `json:"public_key"`
-	CreationDate  *int   `json:"creation_date"`
-	GenerateInput bool
-}
-
-type ClientPutResponse struct {
+type Wallet struct {
 	Id           string `json:"id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
 	PublicKey    string `json:"public_key"`
 	Nonce        int
+	Keys         *KeyPair `json:"-"`
 }
 
-type Wallet struct {
-	ClientID    string      `json:"client_id"`
-	ClientKey   string      `json:"client_key"`
-	Keys        []*KeyPair  `json:"keys"`
-	Mnemonics   string      `json:"mnemonics"`
-	Version     string      `json:"version"`
-	DateCreated string      `json:"date_created"`
-	Nonce       int         `json:"-"`
-	RawKeys     *RawKeyPair `json:"-"`
+type SdkWallet struct {
+	ClientID    string        `json:"client_id"`
+	ClientKey   string        `json:"client_key"`
+	Keys        []*SdkKeyPair `json:"keys"`
+	Mnemonics   string        `json:"mnemonics"`
+	Version     string        `json:"version"`
+	DateCreated string        `json:"date_created"`
 }
 
-type KeyPair struct {
+type SdkKeyPair struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
 }
 
-type RawKeyPair struct {
+type KeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
 }
@@ -68,28 +59,13 @@ func (w *Wallet) IncNonce() {
 	w.Nonce++
 }
 
-func (w *Wallet) GetKeyPair() (*KeyPair, error) {
-	if len(w.Keys) == 0 {
-		return nil, ErrNoKeyPair
-	}
-	return w.Keys[0], nil
-}
-
-func (w *Wallet) ConvertDateCreatedToInt() (int, error) {
-	result, err := strconv.Atoi(w.DateCreated)
-	if err != nil {
-		return 0, err
-	}
-	return result, nil
-}
-
-func (w *Wallet) String() string {
+func (w *SdkWallet) String() (string, error) {
 	out, err := json.Marshal(w)
 	if err != nil {
-		return "failed to serialize wallet object"
+		return "", err
 	}
 
-	return string(out)
+	return string(out), nil
 }
 
 type TransactionData struct {
@@ -287,7 +263,7 @@ type Challenge struct {
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers *[]string `json:"blobbers"`
+	Blobbers []string `json:"blobbers"`
 	BlobberRequirements
 }
 
@@ -298,6 +274,17 @@ type SCRestGetAllocationRequest struct {
 type SCRestGetAllocationBlobbersRequest struct {
 	BlobberRequirements
 	ClientID, ClientKey string
+}
+
+type AllocationBlobbers interface{}
+
+func ConvertInterfaceStringArray(blobbers AllocationBlobbers) []string {
+	var blobbersInterfaceArray = blobbers.([]interface{})
+	var blobbersStringArray []string
+	for _, v := range blobbersInterfaceArray {
+		blobbersStringArray = append(blobbersStringArray, v.(string))
+	}
+	return blobbersStringArray
 }
 
 type BlobberRequirements struct {
@@ -416,6 +403,54 @@ type AllocationStats struct {
 	SuccessChallenges         int64  `json:"num_success_challenges"`
 	FailedChallenges          int64  `json:"num_failed_challenges"`
 	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
+}
+
+type BlobberGetFileRefsRequest struct {
+	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType, RemotePath string
+}
+
+type RefsData struct {
+	ID             int    `json:"id"`
+	Type           string `json:"type"`
+	AllocationId   string `json:"allocation_id"`
+	LookupHash     string `json:"lookup_hash"`
+	Name           string `json:"name"`
+	Path           string `json:"path"`
+	Hash           string `json:"hash"`
+	NumBlocks      int    `json:"num_blocks"`
+	PathHash       string `json:"path_hash"`
+	ParentPath     string `json:"parent_path"`
+	Level          int    `json:"level"`
+	ContentHash    string `json:"content_hash"`
+	Size           int    `json:"size"`
+	MerkleRoot     string `json:"merkle_root"`
+	ActualFileSize int    `json:"actual_file_size"`
+	ActualFileHash string `json:"actual_file_hash"`
+	WriteMarker    string `json:"write_marker"`
+	CreatedAt      int    `json:"created_at"`
+	UpdatedAt      int    `json:"updated_at"`
+	ChunkSize      int    `json:"chunk_size"`
+}
+
+type LatestWriteMarker struct {
+	AllocationRoot     string `json:"allocation_root"`
+	PrevAllocationRoot string `json:"prev_allocation_root"`
+	AllocationId       string `json:"allocation_id"`
+	Size               int    `json:"size"`
+	BlobberId          string `json:"blobber_id"`
+	Timestamp          int    `json:"timestamp"`
+	ClientId           string `json:"client_id"`
+	Signature          string `json:"signature"`
+	LookupHash         string `json:"lookup_hash"`
+	Name               string `json:"name"`
+	ContentHash        string `json:"content_hash"`
+}
+
+type BlobberGetFileRefsResponse struct {
+	TotalPages        int                `json:"total_pages"`
+	OffsetPath        string             `json:"offset_path"`
+	Refs              []*RefsData        `json:"refs"`
+	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
 }
 
 type BlobberUploadFileMeta struct {
