@@ -57,40 +57,39 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if amount of total total challenges changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		sdkClient.NewSession()
-		defer sdkClient.CloseSession()
-
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		getTotalTotalChallengesResponse, resp, err := apiClient.V1SharderGetTotalTotalChallenges(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalTotalChallengesResponse.TotalTotalChallenges, 0)
-
-		totalTotalChallengesBefore := getTotalTotalChallengesResponse.TotalTotalChallenges
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalTotalChallengesAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalTotalChallengesResponse, resp, err = apiClient.V1SharderGetTotalTotalChallenges(client.HttpOkStatus)
+			getTotalTotalChallengesResponse, resp, err := apiClient.V1SharderGetTotalTotalChallenges(client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, getTotalTotalChallengesResponse.TotalTotalChallenges, 0)
 
-			totalTotalChallengesAfter = getTotalTotalChallengesResponse.TotalTotalChallenges
+			totalTotalChallengesBefore := getTotalTotalChallengesResponse.TotalTotalChallenges
 
-			return totalTotalChallengesAfter > totalTotalChallengesBefore
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalTotalChallengesAfter int
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalTotalChallengesResponse, resp, err = apiClient.V1SharderGetTotalTotalChallenges(client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				totalTotalChallengesAfter = getTotalTotalChallengesResponse.TotalTotalChallenges
+
+				return totalTotalChallengesAfter > totalTotalChallengesBefore
+			})
+
+			require.Greater(t, totalTotalChallengesAfter, totalTotalChallengesBefore)
 		})
-
-		require.Greater(t, totalTotalChallengesAfter, totalTotalChallengesBefore)
 	})
 
 	t.Run("Get total successful challenges, should work", func(t *testing.T) {
@@ -105,40 +104,40 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if amount of total successful challenges changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		sdkClient.NewSession()
-		defer sdkClient.CloseSession()
-
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		getTotalSuccessfulChallengesResponse, resp, err := apiClient.V1SharderGetTotalSuccessfulChallenges(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges, 0)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		totalSuccessfulChallengesBefore := getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalSuccessfulChallengesAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalSuccessfulChallengesResponse, resp, err = apiClient.V1SharderGetTotalSuccessfulChallenges(client.HttpOkStatus)
+			getTotalSuccessfulChallengesResponse, resp, err := apiClient.V1SharderGetTotalSuccessfulChallenges(client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges, 0)
 
-			totalSuccessfulChallengesAfter = getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges
+			totalSuccessfulChallengesBefore := getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges
 
-			return totalSuccessfulChallengesAfter > totalSuccessfulChallengesBefore
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalSuccessfulChallengesAfter int
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalSuccessfulChallengesResponse, resp, err = apiClient.V1SharderGetTotalSuccessfulChallenges(client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				totalSuccessfulChallengesAfter = getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges
+
+				return totalSuccessfulChallengesAfter > totalSuccessfulChallengesBefore
+			})
+
+			require.Greater(t, totalSuccessfulChallengesAfter, totalSuccessfulChallengesBefore)
 		})
-
-		require.Greater(t, totalSuccessfulChallengesAfter, totalSuccessfulChallengesBefore)
 	})
 
 	t.Run("Get total allocated storage, should work", func(t *testing.T) {
@@ -153,40 +152,40 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if amount of total allocated storage changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		sdkClient.NewSession()
-		defer sdkClient.CloseSession()
-
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		getTotalAllocatedStorageResponse, resp, err := apiClient.V1SharderGetTotalAllocatedStorage(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalAllocatedStorageResponse.TotalAllocatedStorage, 0)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		totalAllocatedStorageBefore := getTotalAllocatedStorageResponse.TotalAllocatedStorage
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalAllocatedStorageAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalAllocatedStorageResponse, resp, err = apiClient.V1SharderGetTotalAllocatedStorage(client.HttpOkStatus)
+			getTotalAllocatedStorageResponse, resp, err := apiClient.V1SharderGetTotalAllocatedStorage(client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, getTotalAllocatedStorageResponse.TotalAllocatedStorage, 0)
 
-			totalAllocatedStorageAfter = getTotalAllocatedStorageResponse.TotalAllocatedStorage
+			totalAllocatedStorageBefore := getTotalAllocatedStorageResponse.TotalAllocatedStorage
 
-			return totalAllocatedStorageAfter > totalAllocatedStorageBefore
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalAllocatedStorageAfter int
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalAllocatedStorageResponse, resp, err = apiClient.V1SharderGetTotalAllocatedStorage(client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				totalAllocatedStorageAfter = getTotalAllocatedStorageResponse.TotalAllocatedStorage
+
+				return totalAllocatedStorageAfter > totalAllocatedStorageBefore
+			})
+
+			require.Greater(t, totalAllocatedStorageAfter, totalAllocatedStorageBefore)
 		})
-
-		require.Greater(t, totalAllocatedStorageAfter, totalAllocatedStorageBefore)
 	})
 
 	t.Run("Get total staked, should work", func(t *testing.T) {
@@ -219,40 +218,40 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if total stored data changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		sdkClient.NewSession()
-		defer sdkClient.CloseSession()
-
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		getTotalStoredDataResponse, resp, err := apiClient.V1SharderGetTotalStoredData(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalStoredDataResponse.TotalStoredData, 0)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		totalStoredDataBefore := getTotalStoredDataResponse.TotalStoredData
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalStoredDataAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalStoredDataResponse, resp, err = apiClient.V1SharderGetTotalStoredData(client.HttpOkStatus)
+			getTotalStoredDataResponse, resp, err := apiClient.V1SharderGetTotalStoredData(client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, getTotalStoredDataResponse.TotalStoredData, 0)
 
-			totalStoredDataAfter = getTotalStoredDataResponse.TotalStoredData
+			totalStoredDataBefore := getTotalStoredDataResponse.TotalStoredData
 
-			return totalStoredDataAfter > totalStoredDataBefore
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalStoredDataAfter int
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalStoredDataResponse, resp, err = apiClient.V1SharderGetTotalStoredData(client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				totalStoredDataAfter = getTotalStoredDataResponse.TotalStoredData
+
+				return totalStoredDataAfter > totalStoredDataBefore
+			})
+
+			require.Greater(t, totalStoredDataAfter, totalStoredDataBefore)
 		})
-
-		require.Greater(t, totalStoredDataAfter, totalStoredDataBefore)
 	})
 
 	t.Run("Get average write price, should work", func(t *testing.T) {
@@ -276,40 +275,40 @@ func TestAtlusChimney(t *testing.T) {
 	t.Run("Check if total blobber capacity changed after file uploading, should work", func(t *testing.T) {
 		t.Parallel()
 
-		sdkClient.NewSession()
-		defer sdkClient.CloseSession()
-
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
 
-		getTotalBlobberCapacityResponse, resp, err := apiClient.V1SharderGetTotalBlobberCapacity(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalBlobberCapacityResponse.TotalBlobberCapacity, 0)
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		totalBlobberCapacityBefore := getTotalBlobberCapacityResponse.TotalBlobberCapacity
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalBlobberCapacityAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalBlobberCapacityResponse, resp, err = apiClient.V1SharderGetTotalBlobberCapacity(client.HttpOkStatus)
+			getTotalBlobberCapacityResponse, resp, err := apiClient.V1SharderGetTotalBlobberCapacity(client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, getTotalBlobberCapacityResponse.TotalBlobberCapacity, 0)
 
-			totalBlobberCapacityAfter = getTotalBlobberCapacityResponse.TotalBlobberCapacity
+			totalBlobberCapacityBefore := getTotalBlobberCapacityResponse.TotalBlobberCapacity
 
-			return totalBlobberCapacityAfter < totalBlobberCapacityBefore
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalBlobberCapacityAfter int
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalBlobberCapacityResponse, resp, err = apiClient.V1SharderGetTotalBlobberCapacity(client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				totalBlobberCapacityAfter = getTotalBlobberCapacityResponse.TotalBlobberCapacity
+
+				return totalBlobberCapacityAfter < totalBlobberCapacityBefore
+			})
+
+			require.Less(t, totalBlobberCapacityAfter, totalBlobberCapacityBefore)
 		})
-
-		require.Less(t, totalBlobberCapacityAfter, totalBlobberCapacityBefore)
 	})
 
 	t.Run("Get graph of blobber service charge of certain blobber, should work", func(t *testing.T) {
