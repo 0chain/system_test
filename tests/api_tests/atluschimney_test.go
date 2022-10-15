@@ -489,39 +489,53 @@ func TestAtlusChimney(t *testing.T) {
 		})
 	})
 
-	t.Run("Get graph of blobber write prices, should work", func(t *testing.T) {
+	t.Run("Get graph of write prices of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-write-price?data-points=17&id='$BLOBBERID
 	})
 
-	t.Run("Get graph of blobber capacity, should work", func(t *testing.T) {
+	t.Run("Get graph of capacity of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-capacity?data-points=17&id='$BLOBBERID
 	})
 
-	t.Run("Get graph of allocated storage in a certain blobber, should work", func(t *testing.T) {
+	t.Run("Get graph of allocated storage of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-allocated?data-points=17&id='$BLOBBERID
 	})
 
-	t.Run("Get graph of all allocated size in a certain blobber, should work", func(t *testing.T) {
+	t.Run("Get graph of all allocated size of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-allocated?data-points=17&id='$BLOBBERID
 	})
 
-	t.Run("Get graph of all saved data in a certain blobber, should work", func(t *testing.T) {
+	t.Run("Get graph of all saved data of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-saved-data?data-points=17&id='$BLOBBERID
 	})
 
-	//echo -e "\ngraph-blobber-read-data"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-read-data?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-offers-total"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-offers-total?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-unstake-total"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-unstake-total?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-total-stake"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-total-stake?data-points=17&id='$BLOBBERID
-	//echo -e "\ngraph-blobber-challenges-open"
-	//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-open?data-points=17&id='$BLOBBERID
+	t.Run("Get graph of read data of a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-read-data?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of total offers of a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-offers-total?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of unstaked tokens of a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-unstake-total?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of staked tokens of a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-total-stake?data-points=17&id='$BLOBBERID
+	})
+
+	t.Run("Get graph of opened challenges of a certain blobber, should work", func(t *testing.T) {
+		t.Parallel()
+		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-open?data-points=17&id='$BLOBBERID
+	})
 }
