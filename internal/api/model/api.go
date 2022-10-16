@@ -644,3 +644,24 @@ type GetGraphBlobberServiceChargeRequest struct {
 }
 
 type GetGraphBlobberServiceChargeResponse []int
+
+type GetGraphBlobberWritePriceRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberWritePriceResponse []int
+
+type GetGraphBlobberCapacityRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberCapacityResponse []int
+
+type GetGraphBlobberAllocatedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberAllocatedResponse []int
