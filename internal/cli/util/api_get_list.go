@@ -10,20 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func addParms(url string, params map[string]string) string {
-	first := true
-	for key, value := range params {
-		if first {
-			url += "?"
-			first = false
-		} else {
-			url += "&"
-		}
-		url += key + "=" + value
-	}
-	return url
-}
-
 func ApiGet[T any](t *testing.T, url string, params map[string]string) *T {
 	url = addParms(url, params)
 
@@ -84,4 +70,18 @@ func getNext(t *testing.T, url string, from, to, limit, offset int64, params map
 	resBody, err := io.ReadAll(res.Body)
 	require.NoError(t, err, "reading response body: %v", err)
 	return resBody
+}
+
+func addParms(url string, params map[string]string) string {
+	first := true
+	for key, value := range params {
+		if first {
+			url += "?"
+			first = false
+		} else {
+			url += "&"
+		}
+		url += key + "=" + value
+	}
+	return url
 }

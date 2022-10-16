@@ -15,43 +15,33 @@ import (
 )
 
 func TestReadMarker(t *testing.T) {
+	const defaultBlobberCount = 4
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 	t.Run("Read-markers retrieved after download", func(t *testing.T) {
-		const defaultBlobberCount = 4
+		t.Skip("piers")
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotePath := "/dir/"
+
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
+			"size":   allocSize,
 			"tokens": 1,
 		})
 
-		remotePath := "/dir/"
-		filesize := 2 * MB
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotePath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		filename := generateFileAndUpload(t, allocationId, remotePath, filesize)
 
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		remoteFilePath := remotePath + filepath.Base(filename)
-
 		sharderUrl := getSharderUrl(t)
 		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.Zerof(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
-		fmt.Println("beforeCount", beforeCount)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
-			"remotepath": remoteFilePath,
+			"remotepath": remotePath + filepath.Base(filename),
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), true)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
@@ -59,10 +49,9 @@ func TestReadMarker(t *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, "", sharderUrl)
-		//fmt.Println("readmarkers", len(readMarkers))
 		require.Len(t, readMarkers, defaultBlobberCount)
+
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
-		//fmt.Println("readmarker count after", afterCount)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 }
