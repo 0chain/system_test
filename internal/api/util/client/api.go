@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"strings"
 	"testing"
@@ -131,7 +130,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 		}
 
 		status := healthResponse.StatusCode()
-		response, err := io.ReadAll(healthResponse.RawBody())
+		response := healthResponse.Body()
 		if err != nil {
 			log.Printf("Read error %s for blobber %s.", err.Error(), node)
 			continue
