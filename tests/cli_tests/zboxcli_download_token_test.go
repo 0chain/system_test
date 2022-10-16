@@ -57,7 +57,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		// // Lock read pool tokens
+		// Lock read pool tokens
 		lockedTokens := 0.4
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": lockedTokens,
@@ -96,7 +96,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 			"remotepath": remotePath,
 		})
 
-		output, err = downloadFile(t, configPath, downloadParams, true)
+		output, err = downloadFile(t, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
