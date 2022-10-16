@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -55,7 +57,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		// Lock read pool tokens
+		// // Lock read pool tokens
 		lockedTokens := 0.4
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": lockedTokens,
@@ -105,7 +107,16 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		// Read pool after download
 		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
-		updatedReadPool, err := getReadPoolUpdate(t, initialReadPool, 5)
+		output, err = readPoolInfo(t, configPath)
+		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		updatedReadPool := climodel.ReadPoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &updatedReadPool)
+		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, updatedReadPool)
+
+		t.Logf("Updated read pool balance %f", float64(updatedReadPool.Balance))
 		require.NoError(t, err)
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
