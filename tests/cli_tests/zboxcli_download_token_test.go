@@ -82,8 +82,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
-		t.Logf("Download cost: %f", expectedDownloadCost)
-
 		unit := strings.Fields(output[0])[1]
 		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
 
@@ -116,7 +114,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, updatedReadPool)
 
-		t.Logf("Updated read pool balance %f", float64(updatedReadPool.Balance))
 		require.NoError(t, err)
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
 	})
