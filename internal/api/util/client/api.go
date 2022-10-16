@@ -119,7 +119,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 		case BlobberServiceProvider:
 			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
 			// /_stats requires username-password as it is an admin API.
-			r.SetBasicAuth("admin", "password")
+			r.SetBasicAuth("", "")
 		}
 
 		healthResponse, err := r.Get(formattedURL)
