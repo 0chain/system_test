@@ -18,7 +18,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
-		t.Skip("Skipped for nonce merge")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -41,20 +40,20 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		path, err := filepath.Abs("tmp")
+		file := generateRandomTestFileName(t)
+		remotePath := "/" + filepath.Base(file)
+		fileSize := int64(5 * MB) // must upload bigger file to ensure has noticeable cost
+		err = createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
-		filename := cliutils.RandomAlphaNumericString(10) + "_test.txt"
-		fullPath := fmt.Sprintf("%s/%s", path, filename)
-		err = createFileWithSize(fullPath, 1024*5)
-		require.Nil(t, err, "error while generating file: ", err)
-
-		// upload a dummy 5 MB file
-		uploadWithParam(t, configPath, map[string]interface{}{
+		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
-			"localpath":  fullPath,
-			"remotepath": "/",
-		})
+			"localpath":  file,
+			"remotepath": remotePath,
+		}
+		output, err = uploadFile(t, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
 		// Lock read pool tokens
 		lockedTokens := 0.4
@@ -73,7 +72,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/" + filename,
+			"remotepath": remotePath,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -84,18 +83,19 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		unit := strings.Fields(output[0])[1]
 		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
 
-		// Download the file
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		// Download the file (delete local copy first)
+		os.Remove(file)
+
+		downloadParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/" + filename,
-			"localpath":  "../../internal/dummy_file/five_MB_test_file_dowloaded",
-		}), true)
+			"localpath":  file,
+			"remotepath": remotePath,
+		})
+
+		output, err = downloadFile(t, configPath, downloadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
-
-		defer os.Remove("../../internal/dummy_file/five_MB_test_file_dowloaded")
-
 		require.Len(t, output, 2)
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filename, output[1])
 
 		// Wait for blobber to redeem read-tokens
 		// Blobber runs worker in the interval of usually 10 seconds.
