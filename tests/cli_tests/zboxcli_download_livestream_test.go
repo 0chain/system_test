@@ -33,7 +33,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
 
-		_ = initialiseTest(t)
+		_ = initialiseTest(t, escapedTestName(t)+"_wallet", true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
@@ -201,7 +201,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
 
-		_ = initialiseTest(t)
+		_ = initialiseTest(t, escapedTestName(t)+"_wallet", true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
@@ -369,7 +369,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
 
-		_ = initialiseTest(t)
+		_ = initialiseTest(t, escapedTestName(t)+"_wallet", true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
