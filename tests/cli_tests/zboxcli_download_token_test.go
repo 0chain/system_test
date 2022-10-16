@@ -80,6 +80,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
+		t.Logf("Download cost: %f", expectedDownloadCost)
+
 		unit := strings.Fields(output[0])[1]
 		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
 
