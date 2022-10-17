@@ -462,9 +462,12 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 	ctx, cf := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer cf()
 
+	var done bool
 	for {
+
 		select {
 		case <-ctx.Done():
+			done = true
 			break
 		case <-time.After(5 * time.Second):
 			files, _ := ioutil.ReadDir(localFolder)
@@ -476,9 +479,15 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 			}
 
 			if c > 2 {
+				done = true
 				break
 			}
 		}
+
+		if done {
+			break
+		}
+
 	}
 
 	// Kills upload process as well as it's child processes
