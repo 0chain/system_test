@@ -9,39 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/core/common"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+
 	"github.com/stretchr/testify/require"
 )
-
-type RecentlyAddedRefResult struct {
-	Offset int    `json:"offset"`
-	Refs   []ORef `json:"refs"`
-}
-
-type ORef struct {
-	SimilarField
-	ID int64 `json:"id"`
-}
-
-type SimilarField struct {
-	Type                string           `json:"type"`
-	AllocationID        string           `json:"allocation_id"`
-	LookupHash          string           `json:"lookup_hash"`
-	Name                string           `json:"name"`
-	Path                string           `json:"path"`
-	PathHash            string           `json:"path_hash"`
-	ParentPath          string           `json:"parent_path"`
-	PathLevel           int              `json:"level"`
-	Size                int64            `json:"size"`
-	ActualFileSize      int64            `json:"actual_file_size"`
-	ActualFileHash      string           `json:"actual_file_hash"`
-	MimeType            string           `json:"mimetype"`
-	ActualThumbnailSize int64            `json:"actual_thumbnail_size"`
-	ActualThumbnailHash string           `json:"actual_thumbnail_hash"`
-	CreatedAt           common.Timestamp `json:"created_at"`
-	UpdatedAt           common.Timestamp `json:"updated_at"`
-}
 
 func TestRecentlyAddedRefs(t *testing.T) {
 	t.Parallel()
@@ -51,6 +23,8 @@ func TestRecentlyAddedRefs(t *testing.T) {
 	require.Nil(t, err)
 
 	t.Run("Recently Added Refs Should be listed", func(t *testing.T) {
+		t.Parallel()
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -85,7 +59,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
 
-		result := RecentlyAddedRefResult{}
+		result := climodel.RecentlyAddedRefResult{}
 
 		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
 		require.Nil(t, err)
@@ -104,6 +78,8 @@ func TestRecentlyAddedRefs(t *testing.T) {
 	})
 
 	t.Run("Refs created 30 seconds ago should not be listed with from-date less than 30 seconds", func(t *testing.T) {
+		t.Parallel()
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -138,7 +114,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
 		require.Len(t, output, 5)
 
-		result := RecentlyAddedRefResult{}
+		result := climodel.RecentlyAddedRefResult{}
 		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
 		require.Nil(t, err)
 
@@ -148,7 +124,57 @@ func TestRecentlyAddedRefs(t *testing.T) {
 
 	})
 
+	t.Run("Refs of someone else's allocation should return error", func(t *testing.T) {
+		t.Parallel()
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": 10000,
+		})
+
+		fileSize := int64(10)
+		p := "/d1/d2/d3/d4/d5/d6/"
+		fPath := generateRandomTestFileName(t)
+		fileName := filepath.Base(fPath)
+		remotePath := filepath.Join(p, fileName)
+		err := createFileWithSize(fPath, fileSize)
+		require.Nil(t, err)
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fPath,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+
+		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
+
+		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		t1 := time.Now()
+		time.Sleep(time.Second * 30)
+
+		output, err = listRecentlyAddedRefsForWallet(
+			t, nonAllocOwnerWallet, configPath,
+			createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"json":       "",
+				"from_date":  fmt.Sprintf("%v", time.Since(t1)),
+				"page":       1,
+			}), true)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "invalid_signature")
+		require.Contains(t, aggregatedOutput, "invalid_access")
+
+	})
+
 	t.Run("Invalid parameters should return error", func(t *testing.T) {
+		t.Parallel()
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
