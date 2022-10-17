@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/cli/util/specific"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -111,7 +113,7 @@ func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
 	sanitizedArgs := sanitizeArgs(args)
 
 	cmd = exec.Command(commandName, sanitizedArgs...)
-	Setpgid(cmd)
+	specific.Setpgid(cmd)
 	err = cmd.Start()
 
 	return cmd, err

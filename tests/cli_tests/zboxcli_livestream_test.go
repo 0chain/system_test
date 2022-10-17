@@ -55,7 +55,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
+		err = startUploadFeed(t, "feed", configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
@@ -466,11 +466,10 @@ func startUploadFeed(t *testing.T, cmdName, cliConfigFilename, params string) er
 
 func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 	feed = ""
-	const feed1 = `https://www.youtube.com/watch?v=5qap5aO4i9A`
-	const feed2 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
-	const feed3 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
+	const feed1 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
+	const feed2 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
 
-	for i := 1; i < 4; i++ {
+	for i := 1; i < 3; i++ {
 		var resp *http.Response
 		var err error
 		switch i {
@@ -480,9 +479,6 @@ func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 		case 2:
 			resp, err = http.Get(feed2)
 			feed = feed2
-		case 3:
-			resp, err = http.Get(feed3)
-			feed = feed3
 		}
 		if err == nil && resp.StatusCode == 200 {
 			return feed, true

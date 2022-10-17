@@ -581,55 +581,6 @@ func TestSyncWithBlobbers(t *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with commit should work", func(t *testing.T) {
-		t.Parallel()
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
-
-		// The folder structure tree
-		// Integer values will be consider as files with that size
-		// Map values will be considered as folders
-		mockFolderStructure := map[string]interface{}{
-			"Folder A": map[string]interface{}{
-				"file 1.txt": 128 * KB,
-				"file 2.txt": 64 * KB,
-			},
-			"Folder B": map[string]interface{}{
-				"file 3.txt": 64 * KB,
-				"Folder C": map[string]interface{}{
-					"file 4.txt": 64 * KB,
-				},
-			},
-			"abc.txt": 128 * KB,
-		}
-
-		// Create files and folders based on defined structure recursively
-		localpath, err := createMockFolders(t, "", mockFolderStructure)
-		require.Nil(t, err, "Error in creating mock folders: ", err, localpath)
-		defer os.RemoveAll(localpath)
-
-		output, err := syncFolder(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"commit":     true,
-			"localpath":  localpath,
-		}, true)
-		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
-		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
-		require.Equal(t, "Sync Complete", output[len(output)-1])
-
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		// This will traverse the tree and asserts the existent of the files
-		assertFileExistenceRecursively(t, mockFolderStructure, files)
-	})
-
 	t.Run("Sync path with cache flag should work", func(t *testing.T) {
 		t.Parallel()
 
@@ -771,9 +722,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
 		require.True(t,
-			strings.Contains(strings.Join(output, ""),
-				`{"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
-			strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
@@ -882,17 +831,18 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//	- rootFolder: Leave empty or send "/" to create on os temp folder
-//	- structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
-//	- returns local root folder
-//	- sample structure:
-// map[string]interface{}{
-// 	"FolderA": map[string]interface{}{
-// 		"file1.txt": 64*KB + 1,
-// 		"file2.txt": 64*KB + 1,
-// 	},
-// 	"FolderB": map[string]interface{}{},
-// }
+//   - rootFolder: Leave empty or send "/" to create on os temp folder
+//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//   - returns local root folder
+//   - sample structure:
+//
+//	map[string]interface{}{
+//		"FolderA": map[string]interface{}{
+//			"file1.txt": 64*KB + 1,
+//			"file2.txt": 64*KB + 1,
+//		},
+//		"FolderB": map[string]interface{}{},
+//	}
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))

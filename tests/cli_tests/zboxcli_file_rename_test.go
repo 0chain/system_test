@@ -3,11 +3,10 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"math"
+	"path"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -90,56 +89,175 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
+	t.Run("Rename file concurrently to existing directory, should work", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fileSize := int64(math.Floor(1 * MB))
+		var fileNames [2]string
+		var destFileNames []string
 
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		const remotePathPrefix = "/"
 
-		// Get initial write pool
-		initialAllocation := getAllocation(t, allocationID)
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
 
-		// Rename file
-		remotepath := filepath.Base(localpath)
-		renameAllocationFile(t, allocationID, remotepath, remotepath+"_renamed")
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
 
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
 
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+				destFileName := filepath.Base(generateRandomTestFileName(t))
+				destFileNames = append(destFileNames, destFileName)
 
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+				op, err := renameFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": filepath.Join(remotePathPrefix, fileName),
+					"destname":   destFileName,
+				}, true)
 
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
 
-		finalAllocation := getAllocation(t, allocationID)
+		wg.Wait()
 
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
-		createAllocationTestTeardown(t, allocationID)
+		const renameExpectedPattern = "%s renamed"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 1, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(renameExpectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Rename output is not appropriate")
+		}
+
+		output, err := listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Len of output is not enough")
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2, "Amount of files is not enough")
+
+		for _, file := range files {
+			_, ok := cliutils.Contains(destFileNames, file.Name)
+
+			require.True(t, ok, strings.Join(output, "\n"))
+			require.Greater(t, file.Size, int(fileSize), strings.Join(output, "\n"))
+			require.Equal(t, "f", file.Type, strings.Join(output, "\n"))
+			require.NotEmpty(t, file.Hash, "File hash is empty")
+		}
+	})
+
+	t.Run("Rename and delete file concurrently, should work", func(t *testing.T) {
+		t.Parallel()
+
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		var renameFileNames [2]string
+		var destFileNames [2]string
+
+		var deleteFileNames [2]string
+
+		const remotePathPrefix = "/"
+
+		var renameOutputList, deleteOutputList [2][]string
+		var renameErrorList, deleteErrorList [2]error
+		var wg sync.WaitGroup
+
+		renameFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[0] = renameFileName
+
+		destFileName := filepath.Base(generateRandomTestFileName(t))
+		destFileNames[0] = destFileName
+
+		renameFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[1] = renameFileName
+
+		destFileName = filepath.Base(generateRandomTestFileName(t))
+		destFileNames[1] = destFileName
+
+		deleteFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[0] = deleteFileName
+
+		deleteFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[1] = deleteFileName
+
+		for i := 0; i < 2; i++ {
+			wg.Add(2)
+
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				op, err := renameFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": filepath.Join(remotePathPrefix, renameFileNames[currentIndex]),
+					"destname":   destFileNames[currentIndex],
+				}, true)
+
+				renameErrorList[currentIndex] = err
+				renameOutputList[currentIndex] = op
+			}(i)
+
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": filepath.Join(remotePathPrefix, deleteFileNames[currentIndex]),
+				}), true)
+
+				deleteErrorList[currentIndex] = err
+				deleteOutputList[currentIndex] = op
+			}(i)
+		}
+
+		wg.Wait()
+
+		const renameExpectedPattern = "%s renamed"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, renameErrorList[i], strings.Join(renameOutputList[i], "\n"))
+			require.Len(t, renameOutputList[i], 1, strings.Join(renameOutputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(renameExpectedPattern, renameFileNames[i]), filepath.Base(renameOutputList[i][0]), "Rename output is not appropriate")
+		}
+
+		const deleteExpectedPattern = "%s deleted"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
+			require.Len(t, deleteOutputList[i], 1, strings.Join(deleteOutputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(deleteExpectedPattern, deleteFileNames[i]), filepath.Base(deleteOutputList[i][0]), "Delete output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join(remotePathPrefix, deleteFileNames[i]),
+				"json":       "",
+			}), true)
+			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		}
 	})
 
 	t.Run("rename file to same filename (no change)", func(t *testing.T) {
@@ -329,8 +447,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		//  FIXME: Should be `Renamed failed see https://github.com/0chain/zboxcli/issues/240`
-		require.Equal(t, "Delete failed: Commit consensus failed", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -433,97 +550,26 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file with commit param", func(t *testing.T) {
+	t.Run("rename root path should fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(2048)
-		fileSize := int64(256)
 
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destName := "new_" + filename
-		destPath := "/child/" + destName
+		remotePath := "/"
+		destName := "new_"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
-
-		output, err = renameFile(t, configPath, map[string]interface{}{
+		output, err := renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-			"commit":     "",
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, fileSize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, remotePath, commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-
-		// verify commit txn
-		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
-		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, "Transaction verification success", output[0])
-		require.Equal(t, "TransactionStatus: 1", output[1])
-		require.Greater(t, len(output[2]), 0, output[2])
-		// list-all
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 2)
-
-		// check if expected file has been renamed
-		foundAtSource := false
-		foundAtDest := false
-		for _, f := range files {
-			if f.Path == remotePath {
-				foundAtSource = true
-			}
-			if f.Path == destPath {
-				foundAtDest = true
-				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
-				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-				require.NotEmpty(t, f.Hash)
-			}
-		}
-		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
-		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
 	})
 
 	t.Run("rename non-existing file should fail", func(t *testing.T) {
@@ -543,7 +589,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *testing.T) {
@@ -591,7 +637,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Rename failed: Rename request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

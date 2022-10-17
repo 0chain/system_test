@@ -3,11 +3,9 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -91,64 +89,89 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
+	t.Run("Move file concurrently to existing directory, should work", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fileSize := int64(math.Floor(1 * MB))
+		var fileNames [2]string
+		var remoteFilePaths, destFilePaths []string
 
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		const remotePathPrefix = "/"
+		const destPathPrefix = "/new"
 
-		initialAllocation := getAllocation(t, allocationID)
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
 
-		// Move file
-		remotepath := "/" + filepath.Base(localpath)
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"destpath":   "/newdir/",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
 
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+				remoteFilePaths = append(remoteFilePaths, remoteFilePath)
 
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+				destFilePath := filepath.Join(destPathPrefix, fileName)
+				destFilePaths = append(destFilePaths, destFilePath)
 
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+				op, err := moveFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+					"destpath":   destPathPrefix,
+				}, true)
 
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
 
-		finalAllocation := getAllocation(t, allocationID)
+		wg.Wait()
 
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
+		const expectedPattern = "%s moved"
 
-		createAllocationTestTeardown(t, allocationID)
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 1, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		output, err := listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Len of output is not enough")
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 3, "Amount of files is not enough")
+
+		var foundAtSource, foundAtDest int
+		for _, f := range files {
+			if _, ok := cliutils.Contains(remoteFilePaths, f.Path); ok {
+				foundAtSource++
+			}
+
+			if _, ok := cliutils.Contains(destFilePaths, f.Path); ok {
+				foundAtDest++
+
+				_, ok = cliutils.Contains(fileNames[:], f.Name)
+				require.True(t, ok, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.Equal(t, 0, foundAtSource, "File is found at source", strings.Join(output, "\n"))
+		require.Equal(t, 2, foundAtDest, "File is not found at destination", strings.Join(output, "\n"))
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *testing.T) {
@@ -260,8 +283,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed https://github.com/0chain/zboxcli/issues/240`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -346,8 +368,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -382,99 +403,6 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("move file with commit param", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destpath := "/"
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
-
-		output, err = moveFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"destpath":   destpath,
-			"commit":     "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, fileSize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, remotePath, commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-
-		// verify commit txn
-		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
-		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, "Transaction verification success", output[0])
-		require.Equal(t, "TransactionStatus: 1", output[1])
-		require.Greater(t, len(output[2]), 0, output[2])
-
-		// list-all
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 2)
-
-		// check if expected file has been moved
-		foundAtSource := false
-		foundAtDest := false
-		for _, f := range files {
-			if f.Path == remotePath {
-				foundAtSource = true
-			}
-			if f.Path == destpath+filename {
-				foundAtDest = true
-				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
-				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-				require.NotEmpty(t, f.Hash)
-			}
-		}
-		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
-		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
-	})
-
 	t.Run("move non-existing file should fail", func(t *testing.T) {
 		t.Parallel()
 
@@ -492,8 +420,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *testing.T) {
@@ -540,8 +467,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,7 +26,6 @@ func TestDownload(t *testing.T) {
 	require.Nil(t, err)
 
 	// Success Scenarios
-
 	t.Run("Download File from Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -61,6 +61,77 @@ func TestDownload(t *testing.T) {
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+	})
+
+	t.Run("Download File Concurrently Should Work from two Different Directory", func(t *testing.T) {
+		t.Parallel()
+
+		allocSize := int64(4096)
+		filesize := int64(1024)
+		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[0], filesize)
+		fileNameOfSecondDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[1], filesize)
+		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
+		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
+
+		//deleting uploaded file from /dir1 since we will be downloading it now
+		err := os.Remove(fileNameOfFirstDirectory)
+		require.Nil(t, err)
+
+		//deleting uploaded file from /dir2 since we will be downloading it now
+		err = os.Remove(fileNameOfSecondDirectory)
+		require.Nil(t, err)
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		fileNames := [2]string{fileNameOfFirstDirectory, fileNameOfSecondDirectory}
+		for index, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+				op, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePaths[currentIndex] + filepath.Base(currentFileName),
+					"localpath":  "tmp/",
+				}), true)
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(fileName, index)
+		}
+
+		wg.Wait()
+
+		require.Nil(t, errorList[0], strings.Join(outputList[0], "\n"))
+		require.Len(t, outputList[0], 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(fileNameOfFirstDirectory),
+		)
+
+		require.Equal(t, expected, outputList[0][1])
+		downloadedFileFromFirstDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfFirstDirectory))
+
+		require.Equal(t, originalFirstFileChecksum, downloadedFileFromFirstDirectoryChecksum)
+		require.Nil(t, errorList[1], strings.Join(outputList[1], "\n"))
+		require.Len(t, outputList[1], 2)
+
+		expected = fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(fileNameOfSecondDirectory),
+		)
+
+		require.Equal(t, expected, outputList[1][1])
+		downloadedFileFromSecondDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfSecondDirectory))
+		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
 
 	t.Run("Download File from a Directory Should Work", func(t *testing.T) {
@@ -1086,58 +1157,6 @@ func TestDownload(t *testing.T) {
 		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
-	})
-
-	t.Run("Download File With commit Flag Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		originalFileChecksum := generateChecksum(t, filename)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-			"commit":     "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, remotepath+filepath.Base(filename), commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *testing.T) {

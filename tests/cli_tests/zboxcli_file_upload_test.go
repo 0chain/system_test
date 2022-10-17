@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -16,8 +17,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
-
-var reCommitResponse = regexp.MustCompile(`^Commit Metadata successful, Response : (.*)$`)
 
 func TestUpload(t *testing.T) {
 	t.Parallel()
@@ -91,8 +90,8 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload File to Root Directory Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -115,6 +114,58 @@ func TestUpload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Upload file concurrently to root directory, should work", func(t *testing.T) {
+		t.Parallel()
+
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		const remotePathPrefix = "/"
+
+		var fileNames [2]string
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				fileName := generateRandomTestFileName(t)
+				err := createFileWithSize(fileName, fileSize)
+				require.Nil(t, err)
+
+				fileNameBase := filepath.Base(fileName)
+
+				fileNames[currentIndex] = fileNameBase
+
+				op, err := uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": path.Join(remotePathPrefix, fileNameBase),
+					"localpath":  fileName,
+				}, true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
+		wg.Wait()
+
+		const expectedPattern = "Status completed callback. Type = application/octet-stream. Name = %s"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 2, strings.Join(outputList[i], "\n"))
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), outputList[i][1], "Output is not appropriate")
+		}
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *testing.T) {
@@ -312,11 +363,13 @@ func TestUpload(t *testing.T) {
 	t.Run("Upload Large File Should Work", func(t *testing.T) {
 		t.Parallel()
 
-		allocSize := int64(500 * MB)
-		fileSize := int64(99 * MB)
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"tokens": 9,
+			"size":   allocSize,
+			"lock":   9,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -365,91 +418,6 @@ func TestUpload(t *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
-	})
-
-	t.Run("Upload File with Commit Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		filesize := int64(1024)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 2048,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-			"commit":     "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-	})
-
-	t.Run("Upload Encrypted File with Commit Should Work", func(t *testing.T) {
-		t.Parallel()
-
-		filesize := int64(10)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 100000,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, filesize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/" + filepath.Base(filename),
-			"localpath":  filename,
-			"commit":     "",
-			"encrypt":    "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, filesize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, "/dir/"+filepath.Base(filename), commitResp.MetaData.Path)
-		require.NotEqual(t, "", commitResp.MetaData.EncryptedKey)
 	})
 
 	t.Run("Data shards do not require more allocation space", func(t *testing.T) {
@@ -503,9 +471,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
-			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *testing.T) {
@@ -530,9 +496,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
-			`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *testing.T) {
@@ -558,10 +522,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 
-		require.True(t,
-			strings.HasSuffix(strings.Join(output, ""),
-				`bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *testing.T) {
@@ -599,9 +560,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t,
-			strings.HasSuffix(strings.Join(output, ""), `Upload failed. bad request: {"code":"duplicate_file","error":"duplicate_file: File at path already exists"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *testing.T) {
@@ -672,11 +631,10 @@ func TestUpload(t *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		})
+
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
-			strings.HasSuffix(strings.Join(output, ""),
-				`bad request: {"code":"invalid_operation","error":"invalid_operation: Operation needs to be performed by the owner or the payer of the allocation"}`),
-			strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *testing.T) {
@@ -785,8 +743,8 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 2)
-		require.Equal(t, "Error in file operation: commit_consensus_failed: Upload failed as there was no commit consensus", output[1])
+		require.Len(t, output, 3)
+		require.Contains(t, output[1], "consensus_not_met")
 	})
 
 	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
@@ -814,7 +772,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 3)
-		require.True(t, strings.HasSuffix(strings.Join(output, ""), `file name too long"}`), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 }
 

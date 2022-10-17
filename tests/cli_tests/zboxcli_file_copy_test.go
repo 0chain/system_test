@@ -3,11 +3,9 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -93,6 +91,89 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}
 		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("Copy file concurrently to existing directory, should work", func(t *testing.T) {
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		var fileNames [2]string
+		var remoteFilePaths, destFilePaths []string
+
+		const remotePathPrefix = "/"
+		const destPathPrefix = "/new"
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
+
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+				remoteFilePaths = append(remoteFilePaths, remoteFilePath)
+
+				destFilePath := filepath.Join(destPathPrefix, fileName)
+				destFilePaths = append(destFilePaths, destFilePath)
+
+				op, err := copyFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+					"destpath":   destPathPrefix,
+				}, true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(i)
+		}
+
+		wg.Wait()
+
+		const expectedPattern = "%s copied"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 1, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		output, err := listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 5)
+
+		var foundAtSource, foundAtDest int
+		for _, f := range files {
+			if _, ok := cliutils.Contains(remoteFilePaths, f.Path); ok {
+				foundAtSource++
+			}
+
+			if _, ok := cliutils.Contains(destFilePaths, f.Path); ok {
+				foundAtDest++
+
+				_, ok = cliutils.Contains(fileNames[:], f.Name)
+				require.True(t, ok, strings.Join(output, "\n"))
+				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.Equal(t, 2, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.Equal(t, 2, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("copy file to non-existing directory should work", func(t *testing.T) {
@@ -208,7 +289,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -357,7 +438,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -370,103 +451,6 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Len(t, files, 3)
 
 		// check if both existing files are there
-		foundAtSource := false
-		foundAtDest := false
-		for _, f := range files {
-			if f.Path == remotePath {
-				foundAtSource = true
-				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
-				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-				require.NotEmpty(t, f.Hash)
-			}
-			if f.Path == destpath+filename {
-				foundAtDest = true
-				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
-				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-				require.NotEmpty(t, f.Hash)
-			}
-		}
-		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
-		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
-	})
-
-	t.Run("copy file with commit param", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(2048)
-		fileSize := int64(256)
-
-		file := generateRandomTestFileName(t)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-		destpath := "/"
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-		require.Equal(t, expected, output[1])
-
-		output, err = copyFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"destpath":   destpath,
-			"commit":     "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
-
-		match := reCommitResponse.FindStringSubmatch(output[2])
-		require.Len(t, match, 2)
-
-		var commitResp climodel.CommitResponse
-		err = json.Unmarshal([]byte(match[1]), &commitResp)
-		require.Nil(t, err)
-		require.NotEmpty(t, commitResp)
-
-		require.Equal(t, "application/octet-stream", commitResp.MetaData.MimeType)
-		require.Equal(t, fileSize, commitResp.MetaData.Size)
-		require.Equal(t, filepath.Base(filename), commitResp.MetaData.Name)
-		require.Equal(t, remotePath, commitResp.MetaData.Path)
-		require.Equal(t, "", commitResp.MetaData.EncryptedKey)
-
-		// verify commit txn
-		output, err = verifyTransaction(t, configPath, commitResp.TxnID)
-		require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		require.Equal(t, "Transaction verification success", output[0])
-		require.Equal(t, "TransactionStatus: 1", output[1])
-		require.Greater(t, len(output[2]), 0, output[2])
-
-		// list-all
-		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 3)
-
-		// check if expected file has been copied. both files should be there
 		foundAtSource := false
 		foundAtDest := false
 		for _, f := range files {
@@ -506,7 +490,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("copy file from someone else's allocation should fail", func(t *testing.T) {
@@ -553,7 +537,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -632,69 +616,6 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
 
-	t.Run("File copy - Users should not be charged for moving a file ", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
-		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fileSize := int64(math.Floor(1 * MB))
-
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
-
-		// Get initial write pool
-		cliutils.Wait(t, 10*time.Second)
-
-		initialAllocation := getAllocation(t, allocationID)
-
-		// Move file
-		remotepath := "/" + filepath.Base(localpath)
-
-		// copy file
-		output, err = copyFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"destpath":   "/newdir/",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
-
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
-
-		finalAllocation := getAllocation(t, allocationID)
-
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
-
-		createAllocationTestTeardown(t, allocationID)
-	})
 }
 
 func copyFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
