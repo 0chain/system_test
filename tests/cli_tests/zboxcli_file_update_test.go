@@ -396,7 +396,7 @@ func TestFileUpdate(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "consensus_not_met")
+		require.Contains(t, aggregatedOutput, "file_meta_error: Error getting the file meta data from blobbers")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -423,7 +423,7 @@ func TestFileUpdate(t *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
