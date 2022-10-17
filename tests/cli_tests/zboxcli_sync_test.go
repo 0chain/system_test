@@ -719,10 +719,10 @@ func TestSyncWithBlobbers(t *testing.T) {
 			"allocation": allocationID,
 			"localpath":  localpath,
 		}, true)
-		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
-		require.True(t,
-			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.NotNil(t, err)
+		require.Len(t, output, 1)
+		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))

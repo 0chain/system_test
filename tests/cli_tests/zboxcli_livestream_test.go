@@ -467,7 +467,8 @@ func startUploadFeed(t *testing.T, cmdName, cliConfigFilename, params string) er
 func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 	feed = ""
 	const feed1 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
-	const feed2 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
+	const feed2 = `https://www.youtube.com/watch?v=fuXfT4Rv_WM`
+	const feed3 = `https://www.youtube.com/watch?v=oaSLqdnKniA`
 
 	for i := 1; i < 3; i++ {
 		var resp *http.Response
@@ -479,6 +480,9 @@ func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 		case 2:
 			resp, err = http.Get(feed2)
 			feed = feed2
+		case 3:
+			resp, err = http.Get(feed3)
+			feed = feed3
 		}
 		if err == nil && resp.StatusCode == 200 {
 			return feed, true
