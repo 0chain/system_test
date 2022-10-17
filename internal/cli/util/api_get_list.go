@@ -40,11 +40,12 @@ func ApiGetList[T any](t *testing.T, url string, params map[string]string, from,
 		err := json.Unmarshal(raw, &temp)
 		require.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
 
-		offset += int64(len(temp))
 		out = append(out, temp...)
 		if len(temp) < MaxQueryLimit {
 			return out
 		}
+
+		offset += int64(len(temp))
 	}
 }
 
