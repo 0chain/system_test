@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func ApiGet[T any](t *testing.T, url string, params map[string]string) *T { //nolint:all
+func ApiGet[T any](t *testing.T, url string, params map[string]string) *T { //nolint
 	url = addParms(url, params)
 
 	res, err := http.Get(url)
@@ -30,7 +30,7 @@ func ApiGet[T any](t *testing.T, url string, params map[string]string) *T { //no
 	return result
 }
 
-func ApiGetList[T any](t *testing.T, url string, params map[string]string, from, to int64) []T { //nolint:all
+func ApiGetList[T any](t *testing.T, url string, params map[string]string, from, to int64) []T { //nolint
 	var out []T
 	var offset int64
 	for {
