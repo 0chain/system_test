@@ -721,7 +721,7 @@ func TestSyncWithBlobbers(t *testing.T) {
 		}, true)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 
 		// no file must be uploaded to allocation
