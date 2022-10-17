@@ -724,15 +724,12 @@ func TestSyncWithBlobbers(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 
+		// no file must be uploaded to allocation
 		output, err = listAll(t, configPath, allocationID, true)
-		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+
+		require.NotNil(t, err)
 		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 0, "no file must be uploaded to allocation", files)
+		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 	})
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *testing.T) {

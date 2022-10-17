@@ -1,9 +1,11 @@
 package cli_tests
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -55,7 +57,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, "feed", configPath, createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
@@ -124,7 +126,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
@@ -193,7 +195,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  remotepath,
 			"localpath":   localpath,
@@ -264,7 +266,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
@@ -331,7 +333,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
@@ -399,7 +401,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  remotepath,
 			"localpath":   localpath,
@@ -450,14 +452,34 @@ func TestStreamUploadDownload(t *testing.T) {
 	// FIXME: Disabled for now due to process hanging
 }
 
-func startUploadFeed(t *testing.T, cmdName, cliConfigFilename, params string) error {
+func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, params string) error {
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
 
 	// Need atleast 3-4 .ts files uploaded
-	cliutils.Wait(t, 30*time.Second)
+	ctx, cf := context.WithTimeout(context.TODO(), 1*time.Minute)
+	defer cf()
+
+	for {
+		select {
+		case <-ctx.Done():
+			break
+		case <-time.After(5 * time.Second):
+			files, _ := ioutil.ReadDir(localFolder)
+			c := 0
+			for _, file := range files {
+				if strings.HasSuffix(file.Name(), ".ts") {
+					c++
+				}
+			}
+
+			if c > 2 {
+				break
+			}
+		}
+	}
 
 	// Kills upload process as well as it's child processes
 	err = cmd.Process.Kill()
