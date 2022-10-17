@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -71,6 +69,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		// Read pool before download
 		initialReadPool := getReadPoolInfo(t)
 		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.Balance)
+		t.Logf("Initial readpool balance  %v", initialReadPool.Balance)
 
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -81,6 +80,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		t.Logf("Expected download cost %v", expectedDownloadCost)
 
 		unit := strings.Fields(output[0])[1]
 		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
@@ -99,19 +99,14 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		// Wait for blobber to redeem read-tokens
-		// Blobber runs worker in the interval of usually 10 seconds.
-		time.Sleep(time.Second * 20)
+		// waiting 60 seconds for blobber to redeem tokens
+		cliutils.Wait(t, 60*time.Second)
 
 		// Read pool after download
 		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
-		output, err = readPoolInfo(t, configPath)
-		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		updatedReadPool := climodel.ReadPoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &updatedReadPool)
-		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		updatedReadPool := getReadPoolInfo(t)
+		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance)
+		t.Logf("Final readpool balance  %v", updatedReadPool.Balance)
 		require.NotEmpty(t, updatedReadPool)
 
 		require.NoError(t, err)
