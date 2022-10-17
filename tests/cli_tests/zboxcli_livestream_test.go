@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -470,7 +469,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 			done = true
 			break
 		case <-time.After(5 * time.Second):
-			files, _ := ioutil.ReadDir(localFolder)
+			files, _ := os.ReadDir(localFolder)
 			c := 0
 			for _, file := range files {
 				if strings.HasSuffix(file.Name(), ".ts") {
