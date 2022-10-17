@@ -107,7 +107,7 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		updatedReadPool := getReadPoolInfo(t)
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance)
 		t.Logf("Final readpool balance  %v", updatedReadPool.Balance)
-		require.NotEmpty(t, updatedReadPool)
+		require.Empty(t, updatedReadPool)
 
 		require.NoError(t, err)
 		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
