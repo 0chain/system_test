@@ -20,7 +20,6 @@ func TestReadMarker(t *testing.T) {
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 	t.Run("Read-markers retrieved after download", func(t *testing.T) {
-		t.Skip("piers")
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotePath := "/dir/"
