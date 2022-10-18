@@ -1,15 +1,16 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -20,97 +21,88 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
-
-		allocParam := createParams(map[string]interface{}{
-			"lock":   0.6,
-			"size":   10485760,
-			"expire": "1h",
-		})
-		output, err = createNewAllocation(t, configPath, allocParam)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
-		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
-
-		allocationID := strings.Fields(output[0])[2]
+		walletOwner := escapedTestName(t)
+		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
 		file := generateRandomTestFileName(t)
-		remotePath := "/" + filepath.Base(file)
-		fileSize := int64(5 * MB) // must upload bigger file to ensure has noticeable cost
-		err = createFileWithSize(file, fileSize)
+		remoteOwnerPath := "/" + filepath.Base(file)
+		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
+		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  file,
-			"remotepath": remotePath,
+			"remotepath": remoteOwnerPath,
 		}
-		output, err = uploadFile(t, configPath, uploadParams, true)
+		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
+		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
 
-		// Lock read pool tokens
-		lockedTokens := 0.4
-		readPoolParams := createParams(map[string]interface{}{
-			"tokens": lockedTokens,
-		})
-		output, err = readPoolLock(t, configPath, readPoolParams, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		// locking 1 read tokens to readPool via wallet
+		err = registerWalletForNameAndLockReadTokens(t, configPath, walletOwner)
+		require.Nil(t, err)
 
+		output, err = readPoolInfoWithWallet(t, walletOwner, configPath)
+		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
 
-		// Read pool before download
-		initialReadPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockedTokens), initialReadPool.Balance)
-		t.Logf("Initial readpool balance  %v", initialReadPool.Balance)
+		initialReadPool := climodel.ReadPoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialReadPool)
+		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, initialReadPool)
 
+		// staked a total of 1.4*1e10 tokens in readpool
+		require.Equal(t, 1.4*1e10, float64(initialReadPool.Balance))
+
+		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotePath,
+			"remotepath": remoteOwnerPath,
 		}), true)
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
 		expectedDownloadCost, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-		t.Logf("Expected download cost %v", expectedDownloadCost)
 
 		unit := strings.Fields(output[0])[1]
-		expectedDownloadCostInZCN := unitToZCN(expectedDownloadCost, unit)
+		expectedDownloadCostInSas := unitToZCN(expectedDownloadCost, unit) * 1e10
+		t.Logf("Download cost: %v sas", expectedDownloadCostInSas)
 
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
 		downloadParams := createParams(map[string]interface{}{
-			"allocation": allocationID,
 			"localpath":  file,
-			"remotepath": remotePath,
+			"allocation": allocationID,
+			"remotepath": remoteOwnerPath,
 		})
 
-		output, err = downloadFile(t, configPath, downloadParams, false)
+		// downloading file for wallet
+		output, err = downloadFileForWallet(t, walletOwner, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Nil(t, err, "Downloading the file failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+			"download file - Unexpected output", strings.Join(output, "\n"))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
 
-		// Read pool after download
-		expectedPoolBalance := ConvertToValue(lockedTokens) - ConvertToValue(expectedDownloadCostInZCN)
-		updatedReadPool := getReadPoolInfo(t)
-		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance)
-		t.Logf("Final readpool balance  %v", updatedReadPool.Balance)
-		require.Empty(t, updatedReadPool)
+		output, err = readPoolInfoWithWallet(t, walletOwner, configPath)
+		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
-		require.NoError(t, err)
-		require.Equal(t, expectedPoolBalance, updatedReadPool.Balance, "Read Pool balance must be equal to (initial balance-download cost)")
+		finalReadPool := climodel.ReadPoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &finalReadPool)
+		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
+		require.NotEmpty(t, finalReadPool)
+
+		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
+		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+
+		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 }
 
