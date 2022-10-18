@@ -45,6 +45,7 @@ type Wallet struct {
 	ClientID            string `json:"client_id"`
 	ClientPublicKey     string `json:"client_public_key"`
 	EncryptionPublicKey string `json:"encryption_public_key"`
+	Mnemonics           string `json:"mnemonics"`
 }
 
 type Allocation struct {
@@ -611,6 +612,30 @@ type EventDBBlock struct {
 	RoundTimeoutCount     int                  `json:"round_timeout_count"`
 	CreatedAt             time.Time            `json:"created_at"`
 	Transactions          []EventDBTransaction `json:"transactions"`
+}
+
+type BlobberDeleteConnectionRequest struct {
+	URL             string
+	ConnectionID    string
+	ClientKey       string
+	ClientSignature string
+	Path            string
+	AllocationID    string
+	BlobberID       string
+	ClientID        string
+}
+
+type walletKeys struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
+type ReadWallet struct {
+	ClientID    string       `json:"client_id"`
+	ClientKey   string       `json:"client_key"`
+	Keys        []walletKeys `json:"keys"`
+	Mnemonics   string       `json:"mnemonics"`
+	Version     string       `json:"version"`
+	DateCreated string       `json:"date_created"`
 }
 
 var StorageKeySettings = []string{

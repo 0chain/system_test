@@ -2,6 +2,8 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -157,13 +159,8 @@ func loadDelegateWallets(t *testing.T) map[string]*climodel.Wallet {
 }
 
 func loadWallet(t *testing.T, name string) *climodel.Wallet {
-	output, err := registerWalletForName(t, configPath, name)
-	require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
-
-	forName, err := getWalletForName(t, configPath, name)
-	require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-	return forName
-
+	// 	Load wallet from json file into wallet object
+	return &climodel.Wallet{}
 }
 
 func ensureZeroBalance(t *testing.T, output []string, err error) {
@@ -186,6 +183,7 @@ func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error)
 
 func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	t.Logf("Getting wallet...")
+	fmt.Println("name is", name)
 	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 
@@ -195,9 +193,21 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 
 	require.Len(t, output, 1)
 
+	// Reading the wallet file to read the mnemonics
 	var wallet *climodel.Wallet
+	filePath := "./config/" + name + "_wallet.json"
+	walletFile, _ := ioutil.ReadFile(filePath)
+	var walletFileInfo climodel.ReadWallet
+	err = json.Unmarshal([]byte(walletFile), &walletFileInfo)
+
+	if err != nil {
+		t.Errorf("failed to unmarshal the wallet file read")
+		return nil, err
+	}
 
 	err = json.Unmarshal([]byte(output[0]), &wallet)
+
+	wallet.Mnemonics = walletFileInfo.Mnemonics
 	if err != nil {
 		t.Errorf("failed to unmarshal the result into wallet")
 		return nil, err

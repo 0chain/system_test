@@ -29,6 +29,7 @@ const (
 	HttpPOSTMethod = iota + 1
 	HttpGETMethod
 	HttpPUTMethod
+	HttpDeleteMethod
 )
 
 // Contains all used url paths in the client
@@ -51,6 +52,7 @@ const (
 	ClientGetBalance           = "/v1/client/get/balance"
 	GetNetworkDetails          = "/network"
 	GetFileRef                 = "/v1/file/refs/:allocation_id"
+	DeleteBlobberFile          = "/:blobber_id/v1/file/upload/:allocation_id"
 )
 
 // Contains all used service providers
@@ -237,6 +239,8 @@ func (c *APIClient) executeForServiceProvider(url string, executionRequest model
 		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Post(url)
 	case HttpGETMethod:
 		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetQueryParams(executionRequest.QueryParams).Get(url)
+	case HttpDeleteMethod:
+		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Delete(url)
 	}
 
 	if err != nil {
@@ -1095,25 +1099,4 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	require.NotNil(t, scRestGetBlobberResponse)
 
 	return scRestGetBlobberResponse
-}
-
-func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
-	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
-
-	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
-
-	headers := map[string]string{
-		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
-		"X-App-Client-Key":       blobberGetFileRefsRequest.ClientKey,
-		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
-	}
-	resp, err := c.executeForServiceProvider(
-		url,
-		model.ExecutionRequest{
-			Dst:                &blobberGetFileResponse,
-			RequiredStatusCode: requiredStatusCode,
-			Headers:            headers,
-		},
-		HttpGETMethod)
-	return blobberGetFileResponse, resp, err
 }
