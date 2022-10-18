@@ -457,17 +457,16 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
 
+	defer cmd.Process.Kill() //nolint: errcheck
+
 	// Need atleast 3-4 .ts files uploaded
 	ctx, cf := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer cf()
 
-	var done bool
 	for {
-
 		select {
 		case <-ctx.Done():
-			done = true
-			break
+			return nil
 		case <-time.After(5 * time.Second):
 			files, _ := os.ReadDir(localFolder)
 			c := 0
@@ -478,20 +477,11 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 			}
 
 			if c > 2 {
-				done = true
-				break
+				return nil
 			}
 		}
-
-		if done {
-			break
-		}
-
 	}
 
-	// Kills upload process as well as it's child processes
-	err = cmd.Process.Kill()
-	return err
 }
 
 func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {

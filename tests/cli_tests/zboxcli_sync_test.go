@@ -726,10 +726,9 @@ func TestSyncWithBlobbers(t *testing.T) {
 
 		// no file must be uploaded to allocation
 		output, err = listAll(t, configPath, allocationID, true)
-
-		require.NotNil(t, err)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
+		require.Equal(t, output[0], "[]")
 	})
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *testing.T) {
