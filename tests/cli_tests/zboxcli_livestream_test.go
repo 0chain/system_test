@@ -21,7 +21,6 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
-	t.Parallel()
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
 
@@ -34,7 +33,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	// Success scenarios
 
 	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -103,7 +102,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -172,7 +171,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -243,7 +242,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -310,7 +309,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -378,7 +377,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -460,7 +459,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 	defer cmd.Process.Kill() //nolint: errcheck
 
 	// Need atleast 3-4 .ts files uploaded
-	ctx, cf := context.WithTimeout(context.TODO(), 1*time.Minute)
+	ctx, cf := context.WithTimeout(context.TODO(), 3*time.Minute)
 	defer cf()
 
 	for {
