@@ -52,7 +52,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"from_date":  fmt.Sprintf("%v", time.Since(t2)),
+			"in":         fmt.Sprintf("%v", time.Since(t2)),
 			"page":       1,
 		}), true)
 
@@ -107,7 +107,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"from_date":  fmt.Sprintf("%v", time.Since(t1)),
+			"in":         fmt.Sprintf("%v", time.Since(t1)),
 			"page":       1,
 		}), true)
 
@@ -161,7 +161,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"json":       "",
-				"from_date":  fmt.Sprintf("%v", time.Since(t1)),
+				"in":         fmt.Sprintf("%v", time.Since(t1)),
 				"page":       1,
 			}), true)
 
@@ -193,7 +193,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"from_date":  "invalid string",
+			"in":         "invalid string",
 			"page":       1,
 		}), true)
 
