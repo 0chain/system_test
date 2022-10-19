@@ -13,7 +13,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/stretchr/testify/require"
-	"github.com/tyler-smith/go-bip39" //nolint
+	bip39 "github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
 )
 

@@ -736,3 +736,14 @@ var StorageDurationSettings = []string{
 }
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
+
+type WriteMarker struct {
+	AllocationRoot       string
+	PrevAllocationRoot   string
+	AllocationID         string
+	Size                 int64
+	BlobberID            string
+	WriteMarkerTimeStamp Timestamp
+	ClientID             string
+	Signature            string
+}
