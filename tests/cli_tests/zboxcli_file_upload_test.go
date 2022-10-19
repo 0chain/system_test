@@ -770,7 +770,7 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
 	})
 }
