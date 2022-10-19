@@ -447,7 +447,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "filename is longer than 100 characters")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
