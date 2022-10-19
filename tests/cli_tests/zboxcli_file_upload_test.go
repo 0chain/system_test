@@ -745,8 +745,6 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "filename is longer than 100 characters")
 	})
-
-	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(1 * MB)
