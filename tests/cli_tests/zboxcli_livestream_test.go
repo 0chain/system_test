@@ -21,6 +21,7 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
+	t.Parallel()
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
 
@@ -33,7 +34,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	// Success scenarios
 
 	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -102,7 +103,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -171,7 +172,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -242,7 +243,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -309,7 +310,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -377,7 +378,7 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
-
+		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -466,7 +467,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(5 * time.Second):
+		case <-time.After(1 * time.Second):
 			files, _ := os.ReadDir(localFolder)
 			c := 0
 			for _, file := range files {
@@ -475,7 +476,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 				}
 			}
 
-			if c > 2 {
+			if c > 4 {
 				return nil
 			}
 		}
