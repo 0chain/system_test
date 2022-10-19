@@ -11,7 +11,11 @@ import (
 )
 
 func TestBlobberFileRefs(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -71,6 +75,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with incorrect allocation id should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -97,6 +103,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid remote file path should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -126,6 +134,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid refType should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -154,6 +164,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with no path should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -183,6 +195,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with no refType should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -211,6 +225,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with no path and no refType should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -240,6 +256,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client signature should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -264,6 +282,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client id should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -294,6 +314,8 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client key should fail", func(t *testing.T) {
+		t.Parallel()
+
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
@@ -339,12 +361,12 @@ func getBlobberFileRefRequest(url string, registeredsdkWallet *model.Wallet, all
 
 func CopyWallet(wallet *model.Wallet) *model.Wallet {
 	newWallet := &model.Wallet{
-		Id: wallet.Id,
-		Version: wallet.Version,
-		PublicKey: wallet.PublicKey,
+		Id:           wallet.Id,
+		Version:      wallet.Version,
+		PublicKey:    wallet.PublicKey,
 		CreationDate: wallet.CreationDate,
-		Nonce: wallet.Nonce,
-		Keys: wallet.Keys,
+		Nonce:        wallet.Nonce,
+		Keys:         wallet.Keys,
 	}
 	return newWallet
 }
