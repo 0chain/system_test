@@ -196,13 +196,11 @@ func TestStreamUploadDownload(t *testing.T) {
 		defer os.RemoveAll(localfolder)
 
 		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
-			"allocation":      allocationID,
-			"remotepath":      remotepath,
-			"localpath":       localpath,
-			"feed":            feed,
-			"chunknumber":     10,
-			"downloader-args": "\"-f best --proxy socks5://127.0.0.1:1080\"",
-			"ffmpeg-args":     "\"-loglevel info\"",
+			"allocation":  allocationID,
+			"remotepath":  remotepath,
+			"localpath":   localpath,
+			"feed":        feed,
+			"chunknumber": 10,
 		}))
 		require.Nil(t, err, "startUploadFeed: "+err.Error())
 		KillFFMPEG()
@@ -457,15 +455,16 @@ func TestStreamUploadDownload(t *testing.T) {
 func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, params string) error {
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
-	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
-	require.Nil(t, err, "error in uploading a live feed")
+	cmd, stderr, err := cliutils.StartCommandWithStderr(commandString)
+	require.Nil(t, err, "error in uploading a live feed: "+err.Error())
 
 	ready := waitTsFilesReady(localFolder)
 	if !ready {
 		cmd.Process.Kill() //nolint: errcheck
-		err = cmd.Wait()
-		if err != nil {
-			return errors.New("failed to download video files: " + err.Error())
+
+		errOutput := stderr.String()
+		if len(errOutput) > 0 {
+			return errors.New("failed to download video files: " + errOutput)
 		}
 
 		return errors.New("download video files is timeout")
