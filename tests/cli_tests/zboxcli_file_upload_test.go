@@ -745,32 +745,6 @@ func TestUpload(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "filename is longer than 100 characters")
 	})
-		t.Parallel()
-
-		allocSize := int64(1 * MB)
-		fileSize := int64(512 * KB)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"parity": 1,
-			"data":   1,
-		})
-
-		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(167)
-		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, false)
-		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 1)
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
-	})
 }
 
 func uploadWithParam(t *testing.T, cliConfigFilename string, param map[string]interface{}) {
