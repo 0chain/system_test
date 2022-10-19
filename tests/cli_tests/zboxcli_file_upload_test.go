@@ -718,8 +718,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	//FIXME: Filenames longer than 100 characters are rejected https://github.com/0chain/zboxcli/issues/249
-	t.Run("BROKEN Upload File longer than 99 chars should fail gracefully but does not see zboxcli/issues/249", func(t *testing.T) {
+	t.Run("Upload File longer than 99 chars should fail gracefully", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(1 * MB)
@@ -743,8 +742,8 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 3)
-		require.Contains(t, output[1], "consensus_not_met")
+		require.Len(t, output, 1)
+		require.Contains(t, output[1], "filename is longer than 100 characters")
 	})
 
 	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
