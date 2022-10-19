@@ -18,7 +18,7 @@ import (
 func TestFileDownloadTokenMovement(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Each blobber's read pool balance should reduce by download cost", func(t *testing.T) {
+	t.Run("Downloader's readpool balance should reduce by download cost", func(t *testing.T) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
