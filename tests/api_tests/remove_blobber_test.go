@@ -27,7 +27,7 @@ func TestRemoveBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, "", oldBlobberID, allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, "", oldBlobberID, allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
