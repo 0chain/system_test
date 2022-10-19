@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -70,9 +71,9 @@ func TestRepairFile(t *testing.T) {
 
 		blobberUrl := allocation.Blobbers[0].Baseurl
 
-		keyPair := crypto.GenerateKeys(wallet.Mnemonics)
+		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		hash := encryption.Hash(allocation.ID)
-		sign, err := crypto.SignHash(hash, keyPair)
+		sign := crypto.SignHexString(t, hash, &keyPair.PrivateKey)
 		require.Nil(t, err)
 
 		blobberDeleteConnectionRequest := &climodel.BlobberDeleteConnectionRequest{
@@ -83,6 +84,7 @@ func TestRepairFile(t *testing.T) {
 			AllocationID:    allocationID,
 			Path:            "/" + filepath.Base(filename),
 			URL:             blobberUrl,
+			BlobberID:       allocation.Blobbers[0].ID,
 		}
 		require.NotNil(t, blobberDeleteConnectionRequest)
 
@@ -101,7 +103,7 @@ func TestRepairFile(t *testing.T) {
 		walletOwner := escapedTestName(t)
 		output, _ = repairAllocation(t, walletOwner, configPath, params, false)
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired: %s", "2"), output[len(output)-1])
+		require.Equal(t, fmt.Sprintf("Repair file completed, Total files repaired: %s", "1"), output[len(output)-1])
 	})
 
 	return
@@ -177,6 +179,7 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 
 	query.Add("connection_id", blobberDeleteConnectionRequest.ConnectionID)
 	query.Add("path", blobberDeleteConnectionRequest.Path)
+	query.Add("repair_request", "true")
 
 	url, err := url.Parse(blobberDeleteConnectionRequest.URL)
 	require.Nil(t, err)
@@ -197,4 +200,45 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 	require.NotNil(t, resp)
 
 	// TODO Also add commit request, otherwise file is not yet deleted
+
+	var allocationRoot = blobberDeleteConnectionRequest.AllocationID
+	var allocationID = blobberDeleteConnectionRequest.AllocationID
+	var size = int64(512 * KB)
+	var blobberID = blobberDeleteConnectionRequest.BlobberID
+	type Timestamp int64
+	var timestamp = Timestamp(time.Now().Unix())
+	var clientID = blobberDeleteConnectionRequest.ClientID
+	var signature = blobberDeleteConnectionRequest.ClientSignature
+	var writeMarker = &climodel.WriteMarker{
+		AllocationRoot:       allocationRoot,
+		PrevAllocationRoot:   "",
+		AllocationID:         allocationID,
+		Size:                 size,
+		BlobberID:            blobberID,
+		WriteMarkerTimeStamp: timestamp,
+		ClientID:             clientID,
+		Signature:            signature,
+	}
+
+	WriteMarkerMarshal, err := json.Marshal(writeMarker)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	WriteMarkerString := string(WriteMarkerMarshal)
+
+	query = &url.Values{}
+	query.Add("connection_id", blobberDeleteConnectionRequest.ConnectionID)
+	query.Add("write_marker", WriteMarkerString)
+
+	url = blobberDeleteConnectionRequest.Url + "/v1/file/commit/" + allocationID
+	req, _ := http.NewRequest(http.MethodPost, url, nil)
+	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
+	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
+	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
+	resp, err := client.Do(req)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+
 }

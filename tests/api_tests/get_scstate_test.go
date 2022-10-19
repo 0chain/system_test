@@ -1,10 +1,11 @@
 package api_tests
 
 import (
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGetSCState(t *testing.T) {
@@ -13,13 +14,13 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{
 				SCAddress: client.FaucetSmartContractAddress,
-				Key:       wallet.ClientID,
+				Key:       wallet.Id,
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
@@ -30,18 +31,18 @@ func TestGetSCState(t *testing.T) {
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			model.SCStateGetRequest{
 				SCAddress: client.FaucetSmartContractAddress,
-				Key:       wallet.ClientID,
+				Key:       wallet.Id,
 			},
-			client.HttpNotFoundStatus)
+			client.HttpBadRequestStatus)
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, scStateGetResponse)
-		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
+		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }

@@ -637,3 +637,113 @@ type ReadWallet struct {
 	Version     string       `json:"version"`
 	DateCreated string       `json:"date_created"`
 }
+
+var StorageKeySettings = []string{
+	"owner_id",
+}
+
+var StorageFloatSettings = []string{
+	"cancellation_charge",
+	"free_allocation_settings.read_pool_fraction",
+	"validator_reward",
+	"blobber_slash",
+	"challenge_rate_per_mb_min",
+	"block_reward.sharder_ratio",
+	"block_reward.miner_ratio",
+	"block_reward.blobber_ratio",
+	"block_reward.gamma.alpha",
+	"block_reward.gamma.a",
+	"block_reward.gamma.b",
+	"block_reward.zeta.i",
+	"block_reward.zeta.k",
+	"block_reward.zeta.mu",
+}
+
+var StorageCurrencySettigs = []string{
+	"max_mint",
+	"readpool.min_lock",
+	"writepool.min_lock",
+	"stakepool.min_lock",
+	"max_total_free_allocation",
+	"max_individual_free_allocation",
+	"free_allocation_settings.read_price_range.min",
+	"free_allocation_settings.read_price_range.max",
+	"free_allocation_settings.write_price_range.min",
+	"free_allocation_settings.write_price_range.max",
+	"max_read_price",
+	"max_write_price",
+	"max_write_price",
+	"block_reward.block_reward",
+	"block_reward.qualifying_stake",
+}
+
+var StorageIntSettings = []string{
+
+	"min_alloc_size",
+	"min_blobber_capacity",
+	"free_allocation_settings.data_shards",
+	"free_allocation_settings.parity_shards",
+	"free_allocation_settings.size",
+	"max_blobbers_per_allocation",
+	"failed_challenges_to_cancel",
+	"failed_challenges_to_revoke_min_lock",
+	"max_challenges_per_generation",
+	"validators_per_challenge",
+	"max_delegates",
+	"cost.update_settings",
+	"cost.read_redeem",
+	"cost.commit_connection",
+	"cost.new_allocation_request",
+	"cost.update_allocation_request",
+	"cost.finalize_allocation",
+	"cost.cancel_allocation",
+	"cost.add_free_storage_assigner",
+	"cost.free_allocation_request",
+	"cost.free_update_allocation",
+	"cost.add_curator",
+	"cost.remove_curator",
+	"cost.blobber_health_check",
+	"cost.update_blobber_settings",
+	"cost.pay_blobber_block_rewards",
+	"cost.curator_transfer_allocation",
+	"cost.challenge_request",
+	"cost.challenge_response",
+	"cost.generate_challenges",
+	"cost.add_validator",
+	"cost.update_validator_settings",
+	"cost.add_blobber",
+	"cost.new_read_pool",
+	"cost.read_pool_lock",
+	"cost.read_pool_unlock",
+	"cost.write_pool_lock",
+	"cost.write_pool_unlock",
+	"cost.stake_pool_lock",
+	"cost.stake_pool_unlock",
+	"cost.stake_pool_pay_interests",
+	"cost.commit_settings_changes",
+	"cost.collect_reward",
+}
+var StorageBoolSettings = []string{
+	"challenge_enabled",
+}
+var StorageDurationSettings = []string{
+	"time_unit",
+	"min_offer_duration",
+	"min_alloc_duration",
+	"max_challenge_completion_time",
+	"stakepool.min_lock_period",
+	"free_allocation_settings.duration",
+}
+
+var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
+
+type WriteMarker struct {
+	AllocationRoot       string
+	PrevAllocationRoot   string
+	AllocationID         string
+	Size                 int64
+	BlobberID            string
+	WriteMarkerTimeStamp Timestamp
+	ClientID             string
+	Signature            string
+}
