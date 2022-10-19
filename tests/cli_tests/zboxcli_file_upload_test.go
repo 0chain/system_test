@@ -718,7 +718,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	t.Run("Upload File longer than 99 chars should fail gracefully", func(t *testing.T) {
+	t.Run("Upload File longer than 100 chars should fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(1 * MB)
@@ -731,7 +731,7 @@ func TestUpload(t *testing.T) {
 		})
 
 		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(100)
+		randomFilename := cliutils.RandomAlphaNumericString(101)
 		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
@@ -743,7 +743,7 @@ func TestUpload(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 1)
-		require.Contains(t, output[1], "filename is longer than 100 characters")
+		require.Contains(t, output[0], "filename is longer than 100 characters")
 	})
 
 	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
