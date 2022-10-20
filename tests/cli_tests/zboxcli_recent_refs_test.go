@@ -77,7 +77,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}
 	})
 
-	t.Run("Refs created 30 seconds ago should not be listed with from-date less than 30 seconds", func(t *testing.T) {
+	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -118,13 +118,12 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
 		require.Nil(t, err)
 
-		require.Nil(t, err)
 		require.Equal(t, 0, result.Offset)
 		require.Len(t, result.Refs, 0)
 
 	})
 
-	t.Run("Refs of someone else's allocation should return error", func(t *testing.T) {
+	t.Run("Refs of someone else's allocation should return zero refs", func(t *testing.T) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -165,11 +164,12 @@ func TestRecentlyAddedRefs(t *testing.T) {
 				"page":       1,
 			}), true)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid_signature")
-		require.Contains(t, aggregatedOutput, "invalid_access")
+		require.Nil(t, err)
+		result := climodel.RecentlyAddedRefResult{}
+		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
+		require.Nil(t, err)
 
+		require.Len(t, result.Refs, 0)
 	})
 
 	t.Run("Invalid parameters should return error", func(t *testing.T) {
@@ -182,7 +182,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err := listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"from_date":  "6m",
+			"in":         "6m",
 			"page":       -1,
 		}), true)
 
