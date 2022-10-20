@@ -29,6 +29,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			"size": 10000,
 		})
 
+		t.Logf("Allocation: %s", allocationID)
 		t2 := time.Now()
 		fileSize := int64(10)
 		p := "/d1/d2/d3/d4/d5/d6/"
@@ -49,15 +50,19 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
+		in := fmt.Sprintf("%v", time.Since(t2))
+		t.Log("Recent refs in: ", in)
+
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"in":         fmt.Sprintf("%v", time.Since(t2)),
+			"in":         in,
 			"page":       1,
+			"page_limit": 100,
 		}), true)
 
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 
 		result := climodel.RecentlyAddedRefResult{}
 
@@ -112,7 +117,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}), true)
 
 		require.Nil(t, err, "List recent files failed", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 
 		result := climodel.RecentlyAddedRefResult{}
 		err = json.Unmarshal([]byte(output[len(output)-1]), &result)
@@ -211,7 +216,7 @@ func listRecentlyAddedRefs(t *testing.T, cliConfigFilename, param string, retry 
 func listRecentlyAddedRefsForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Log("Listing recently added refs")
 	cmd := fmt.Sprintf(
-		"./zbox recent-refs %s --silent --wallet %s --configDir ./config --config %s",
+		"./zbox recent-refs %s --silent --wallet %s --configDir ./config --config %s ",
 		param,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
