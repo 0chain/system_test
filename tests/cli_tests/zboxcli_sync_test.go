@@ -836,13 +836,13 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 //   - returns local root folder
 //   - sample structure:
 //
-//	map[string]interface{}{
-//		"FolderA": map[string]interface{}{
-//			"file1.txt": 64*KB + 1,
-//			"file2.txt": 64*KB + 1,
-//		},
-//		"FolderB": map[string]interface{}{},
-//	}
+//    map[string]interface{} {
+//        "FolderA": map[string]interface{}{
+//            "file1.txt": 64*KB + 1,
+//            "file2.txt": 64*KB + 1,
+//        },
+//        "FolderB": map[string]interface{}{},
+//    }
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))

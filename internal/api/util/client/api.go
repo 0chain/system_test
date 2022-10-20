@@ -456,7 +456,7 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 	return scRestGetBlobberResponse, resp, err
 }
 
-func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest *model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
 	var hashnode *model.BlobberGetHashnodeResponse
 
 	headers := map[string]string{
@@ -814,7 +814,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 		model.InternalTransactionPutRequest{
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+			TransactionData: model.NewUpdateAllocationTransactionData(&model.UpdateAllocationRequest{
 				ID:              allocationID,
 				AddBlobberId:    newBlobberID,
 				RemoveBlobberId: oldBlobberID,
@@ -1108,7 +1108,7 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
 	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType

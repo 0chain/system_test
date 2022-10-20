@@ -1,0 +1,228 @@
+internal/api/model/api.go:516:1: commentFormatting: put a space between `//` and comment text (gocritic)
+//type BlobberGetFileReferencePathRequest struct {
+^
+internal/api/model/api.go:520:1: commentFormatting: put a space between `//` and comment text (gocritic)
+//type BlobberGetFileReferencePathResponse struct {
+^
+internal/api/model/api.go:110:41: hugeParam: updateAllocationRequest is heavy (106 bytes); consider passing it by pointer (gocritic)
+func NewUpdateAllocationTransactionData(updateAllocationRequest UpdateAllocationRequest) TransactionData {
+                                        ^
+internal/api/model/sdk.go:9:1: paramTypeCombine: func(allocationId, filePath string, op int, totalBytes int) could be replaced with func(allocationId, filePath string, op, totalBytes int) (gocritic)
+func (s *StubStatusBar) Started(allocationId, filePath string, op int, totalBytes int) {
+^
+internal/api/model/sdk.go:11:1: paramTypeCombine: func(allocationId, filePath string, op int, completedBytes int, data []byte) could be replaced with func(allocationId, filePath string, op, completedBytes int, data []byte) (gocritic)
+func (s *StubStatusBar) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {
+^
+internal/api/model/sdk.go:14:1: paramTypeCombine: func(allocationId, filePath string, filename string, mimetype string, size int, op int) could be replaced with func(allocationId, filePath, filename, mimetype string, size, op int) (gocritic)
+func (s *StubStatusBar) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
+^
+internal/api/model/sdk.go:17:1: paramTypeCombine: func(allocationID string, filePath string, op int, err error) could be replaced with func(allocationID, filePath string, op int, err error) (gocritic)
+func (s *StubStatusBar) Error(allocationID string, filePath string, op int, err error) {
+^
+internal/api/model/sdk.go:26:1: typeDefFirst: definition of type 'StubStatusBar' should appear before its methods (gocritic)
+type StubStatusBar struct {
+^
+internal/api/model/sdk.go:7:29: `commiting` is a misspelling of `committing` (misspell)
+// Stub status bar used for commiting actions
+                            ^
+internal/api/util/client/api.go:459:60: hugeParam: blobberGetHashnodeRequest is heavy (80 bytes); consider passing it by pointer (gocritic)
+func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+                                                           ^
+internal/api/util/client/api.go:1111:56: hugeParam: blobberGetFileRefsRequest is heavy (112 bytes); consider passing it by pointer (gocritic)
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
+                                                       ^
+internal/api/util/client/sdk.go:19:1: exposedSyncMutex: don't embed sync.Mutex (gocritic)
+type SDKClient struct {
+^
+internal/api/util/client/sdk.go:98:29: filepathJoin: "/" contains a path separator (gocritic)
+		RemotePath: filepath.Join("/", filepath.Base(tmpFile.Name())),
+		                          ^
+internal/api/util/client/sdk.go:112:23: filepathJoin: "/" contains a path separator (gocritic)
+	return filepath.Join("/", filepath.Base(tmpFile.Name()))
+	                     ^
+internal/api/util/client/sdk.go:79:3: SA9003: empty branch (staticcheck)
+		if err != nil {
+		^
+internal/cli/util/history.go:59:40: hugeParam: block is heavy (264 bytes); consider passing it by pointer (gocritic)
+func (ch *ChainHistory) TotalBlockFees(block model.EventDBBlock) int64 {
+                                       ^
+internal/cli/util/history.go:125:57: hugeParam: block is heavy (264 bytes); consider passing it by pointer (gocritic)
+func (ch *ChainHistory) AccountingMinerBlock(id string, block model.EventDBBlock) {
+                                                        ^
+internal/cli/util/history.go:33:2: rangeValCopy: each iteration copies 264 bytes (consider pointers or indexing) (gocritic)
+	for _, block := range ch.blocks {
+	^
+internal/cli/util/history.go:43:2: rangeValCopy: each iteration copies 264 bytes (consider pointers or indexing) (gocritic)
+	for _, block := range ch.blocks {
+	^
+internal/cli/util/history.go:51:2: rangeValCopy: each iteration copies 264 bytes (consider pointers or indexing) (gocritic)
+	for _, block := range ch.blocks {
+	^
+internal/cli/util/history.go:61:2: rangeValCopy: each iteration copies 192 bytes (consider pointers or indexing) (gocritic)
+	for _, tx := range block.Transactions {
+	^
+internal/cli/util/history.go:110:3: rangeValCopy: each iteration copies 192 bytes (consider pointers or indexing) (gocritic)
+		for _, tx := range block.Transactions {
+		^
+internal/cli/util/history.go:129:2: rangeValCopy: each iteration copies 192 bytes (consider pointers or indexing) (gocritic)
+	for _, tx := range block.Transactions {
+	^
+internal/cli/util/history.go:73:9: G107: Potential HTTP request made with variable url (gosec)
+	return http.Get(url)
+	       ^
+internal/cli/util/history.go:111:4: unhandled-error: Unhandled error in call to function fmt.Println (revive)
+			fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", block.MinerID)
+			^
+internal/cli/util/history.go:117:2: unhandled-error: Unhandled error in call to function fmt.Println (revive)
+	fmt.Println("-------------", "accounts for", id, "-------------")
+	^
+internal/cli/util/history.go:131:4: unhandled-error: Unhandled error in call to function fmt.Println (revive)
+			fmt.Println("round", block.Round, "fee", tx.Fee, "data", tx.TransactionData)
+			^
+tests/cli_tests/zboxcli_common_user_functions_test.go:130:6: `moveAllocationFile` is unused (deadcode)
+func moveAllocationFile(t *testing.T, allocationID, remotepath, destination string) {
+     ^
+tests/cli_tests/zboxcli_create_allocation_free_storage_test.go:37:2: `configKeyDataShards` is unused (deadcode)
+	configKeyDataShards       = "free_allocation_settings.data_shards"
+	^
+tests/cli_tests/zboxcli_create_allocation_free_storage_test.go:38:2: `configKeyParityShards` is unused (deadcode)
+	configKeyParityShards     = "free_allocation_settings.parity_shards"
+	^
+tests/cli_tests/zboxcli_create_allocation_free_storage_test.go:39:2: `configKeySize` is unused (deadcode)
+	configKeySize             = "free_allocation_settings.size"
+	^
+tests/cli_tests/zboxcli_create_allocation_free_storage_test.go:40:2: `configKeyDuration` is unused (deadcode)
+	configKeyDuration         = "free_allocation_settings.duration"
+	^
+tests/cli_tests/zboxcli_file_update_test.go:459:6: `updateFileWithCommit` is unused (deadcode)
+func updateFileWithCommit(t *testing.T, allocationID, remotePath, localpath string) {
+     ^
+tests/cli_tests/zwalletcli_register_wallet_test.go:148:6: `loadDelegateWallets` is unused (deadcode)
+func loadDelegateWallets(t *testing.T) map[string]*climodel.Wallet {
+     ^
+tests/cli_tests/zwalletcli_send_and_balance_test.go:371:6: `getNodeBalanceFromASharder` is unused (deadcode)
+func getNodeBalanceFromASharder(t *testing.T, client_id string) *climodel.Balance {
+     ^
+tests/cli_tests/0_blobber_challenge_test.go:362:3: deferInLoop: Possible resource leak, 'defer' is called in the 'for' loop (gocritic)
+		defer res.Body.Close()
+		^
+tests/cli_tests/0_blobber_challenge_test.go:349:1: paramTypeCombine: func(t require.TestingT, sharderBaseURLs []string, blobberId string, offset int, limit int) *climodel.BlobberChallenge could be replaced with func(t require.TestingT, sharderBaseURLs []string, blobberId string, offset, limit int) *climodel.BlobberChallenge (gocritic)
+func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset int, limit int) *climodel.BlobberChallenge {
+^
+tests/cli_tests/block_rewards_test.go:216:1: unnamedResult: consider giving a name to these results (gocritic)
+func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (int64, int64) {
+^
+tests/cli_tests/miner_fees_payment_test.go:358:53: wrapperFunc: use strings.ReplaceAll method in `strings.Replace(txn.TransactionOutput, "}{", "},{", -1)` (gocritic)
+			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+			                                                 ^
+tests/cli_tests/zboxcli_file_download_test.go:83:3: commentFormatting: put a space between `//` and comment text (gocritic)
+		//deleting uploaded file from /dir1 since we will be downloading it now
+		^
+tests/cli_tests/zboxcli_file_upload_test.go:734:3: importShadow: shadow of imported package 'path' (gocritic)
+		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		^
+tests/cli_tests/zboxcli_file_upload_test.go:762:3: importShadow: shadow of imported package 'path' (gocritic)
+		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		^
+tests/cli_tests/zwalletcli_send_and_balance_test.go:47:40: regexpSimplify: can re-write `Send tokens success:  [a-f0-9]{64}` as `Send tokens success: {2}[a-f0-9]{64}` (gocritic)
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		                                     ^
+tests/cli_tests/zwalletcli_send_and_balance_test.go:116:40: regexpSimplify: can re-write `Send tokens success:  [a-f0-9]{64}` as `Send tokens success: {2}[a-f0-9]{64}` (gocritic)
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		                                     ^
+tests/cli_tests/zwalletcli_send_and_balance_test.go:211:40: regexpSimplify: can re-write `Send tokens success:  [a-f0-9]{64}` as `Send tokens success: {2}[a-f0-9]{64}` (gocritic)
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		                                     ^
+tests/cli_tests/zwalletcli_sharder_update_settings_test.go:19:1: cyclomatic complexity 50 of func `TestSharderUpdateSettings` is high (> 25) (gocyclo)
+func TestSharderUpdateSettings(t *testing.T) {
+^
+tests/cli_tests/zwalletcli_miner_update_settings_test.go:17:1: cyclomatic complexity 44 of func `TestMinerUpdateSettings` is high (> 25) (gocyclo)
+func TestMinerUpdateSettings(t *testing.T) {
+^
+tests/cli_tests/zboxcli_sync_test.go:834: File is not `gofmt`-ed with `-s` (gofmt)
+//   - rootFolder: Leave empty or send "/" to create on os temp folder
+tests/cli_tests/zboxcli_wp_lock_unlock_test.go:368:136: `cancelled` is a misspelling of `canceled` (misspell)
+		require.Equal(t, "Failed to unlock tokens in write pool: write_pool_unlock_failed: can't unlock until the allocation is finalized or cancelled", output[0])
+		                                                                                                                                     ^
+tests/cli_tests/zwalletcli_storage_update_config_test.go:41:25: `unrecognised` is a misspelling of `unrecognized` (misspell)
+			require.True(t, ok, "unrecognised setting", name)
+			                     ^
+tests/cli_tests/zwalletcli_storage_update_config_test.go:48:25: `unrecognised` is a misspelling of `unrecognized` (misspell)
+			require.True(t, ok, "unrecognised setting", name)
+			                     ^
+tests/cli_tests/zwalletcli_storage_update_config_test.go:56:25: `unrecognised` is a misspelling of `unrecognized` (misspell)
+			require.True(t, ok, "unrecognised setting", name)
+			                     ^
+tests/cli_tests/zwalletcli_zcnbridge_verify_ethereum_test.go:31:6: func `verifyBridgeTransaction` is unused (unused)
+func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) {
+     ^
+tests/cli_tests/zwalletcli_register_wallet_test.go:159:6: func `loadWallet` is unused (unused)
+func loadWallet(t *testing.T, name string) *climodel.Wallet {
+     ^
+tests/cli_tests/0_owner_update_config_test.go:12: unnecessary leading newline (whitespace)
+func TestOwnerUpdate(t *testing.T) {
+
+tests/cli_tests/0_owner_update_config_test.go:75: unnecessary trailing newline (whitespace)
+
+	})
+tests/cli_tests/block_rewards_test.go:25: unnecessary leading newline (whitespace)
+	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
+
+tests/cli_tests/block_rewards_test.go:67: unnecessary leading newline (whitespace)
+	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
+
+tests/cli_tests/flaky___flaky_test.go:362: unnecessary trailing newline (whitespace)
+
+}
+tests/cli_tests/zboxcli_file_copy_test.go:618: unnecessary trailing newline (whitespace)
+
+}
+internal/currency/currency.go:51: File is not `gofmt`-ed with `-s` (gofmt)
+
+internal/api/util/crypto/bls0chain_herumi.go:248:5: emptyStringTest: replace `len(b0.Mnemonic) == 0` with `b0.Mnemonic == ""` (gocritic)
+	if len(b0.Mnemonic) == 0 {
+	   ^
+internal/api/util/crypto/bls0chain_herumi.go:219:5: emptyStringTest: replace `len(b0.PrivateKey) == 0` with `b0.PrivateKey == ""` (gocritic)
+	if len(b0.PrivateKey) == 0 {
+	   ^
+internal/api/util/crypto/bls0chain_herumi.go:43:5: emptyStringTest: replace `len(mnemonic) == 0` with `mnemonic == ""` (gocritic)
+	if len(mnemonic) == 0 {
+	   ^
+internal/api/util/crypto/bls_herumi.go:55:1: paramTypeCombine: func(out Fr, x Fr, y Fr) could be replaced with func(out, x, y Fr) (gocritic)
+func (b *herumiBls) FrSub(out Fr, x Fr, y Fr) {
+^
+internal/api/util/crypto/crypto.go:88:6: emptyStringTest: replace `len(retSignature) == 0` with `retSignature == ""` (gocritic)
+		if len(retSignature) == 0 {
+		   ^
+internal/api/util/crypto/crypto.go:76:1: paramTypeCombine: func(hash string, signatureScheme string, keys []*model.KeyPair) (string, error) could be replaced with func(hash, signatureScheme string, keys []*model.KeyPair) (string, error) (gocritic)
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []*model.KeyPair) (string, error) {
+^
+internal/api/util/crypto/ed255190chain.go:157:2: commentedOutCode: may want to remove commented-out code (gocritic)
+	// b0.Ids = id
+	^
+internal/api/util/crypto/ed255190chain.go:30:5: emptyStringTest: replace `len(ed.mnemonic) == 0` with `ed.mnemonic == ""` (gocritic)
+	if len(ed.mnemonic) == 0 {
+	   ^
+internal/api/util/crypto/crypto.go:9: File is not `goimports`-ed with -local github.com/golangci/golangci-lint (goimports)
+
+internal/api/util/crypto/crypto.go:166:11: printf: (*testing.common).Errorf call has arguments but no formatting directives (govet)
+		t.Errorf("panic occurred: ", err)
+		        ^
+tests/api_tests/get_blobberFileRef_test.go:397:1: paramTypeCombine: func(url string, registeredWallet *model.Wallet, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest could be replaced with func(url string, registeredWallet *model.Wallet, allocationId, refType, clientSignature, remotePath string) model.BlobberGetFileRefsRequest (gocritic)
+func getBlobberFileRefRequest(url string, registeredWallet *model.Wallet, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest {
+^
+tests/api_tests/register_wallet_test.go:4: File is not `gofmt`-ed with `-s` (gofmt)
+	"encoding/hex"
+tests/api_tests/flaky___broken_scenarios_test.go:6: File is not `goimports`-ed with -local github.com/golangci/golangci-lint (goimports)
+	"encoding/hex"
+tests/api_tests/get_scstats_test.go:3: File is not `goimports`-ed with -local github.com/golangci/golangci-lint (goimports)
+import (
+tests/api_tests/get_blobberFileRef_test.go:17:36: `behaviour` is a misspelling of `behavior` (misspell)
+		t.Skip("Skipping due to sporadic behaviour of api tests")
+		                                 ^
+tests/api_tests/get_blobberFileRef_test.go:83:36: `behaviour` is a misspelling of `behavior` (misspell)
+		t.Skip("Skipping due to sporadic behaviour of api tests")
+		                                 ^
+tests/api_tests/get_blobberFileRef_test.go:116:36: `behaviour` is a misspelling of `behavior` (misspell)
+		t.Skip("Skipping due to sporadic behaviour of api tests")
+		                                 ^

@@ -14,7 +14,7 @@ func TestBlobberFileRefs(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -43,7 +43,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
@@ -62,7 +62,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		// request with refType as updated
 		refType = "updated"
 		blobberFileRefRequest = getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err = apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err = apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
@@ -80,7 +80,7 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with incorrect allocation id should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -106,14 +106,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with invalid remote file path should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -142,14 +142,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with invalid refType should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -177,14 +177,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with no path should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -213,14 +213,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with no refType should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -248,14 +248,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with no path and no refType should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -284,14 +284,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with invalid client signature should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -315,14 +315,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		url := blobber.BaseURL
 		clientSignature := "invalid-signature"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with invalid client id should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -351,14 +351,14 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		wallet.Id = "invalue-client-id"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
 	t.Run("Get file ref with invalid client key should fail", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
+		t.Skip("Skipping due to sporadic behavior of api tests")
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
@@ -387,14 +387,14 @@ func TestBlobberFileRefs(t *testing.T) {
 
 		wallet.Id = "invalid-client-key"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }
 
-func getBlobberFileRefRequest(url string, registeredWallet *model.Wallet, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest {
+func getBlobberFileRefRequest(url string, registeredWallet *model.Wallet, allocationId, refType, clientSignature, remotePath string) model.BlobberGetFileRefsRequest {
 	blobberFileRequest := model.BlobberGetFileRefsRequest{
 		URL:             url,
 		ClientID:        registeredWallet.Id,

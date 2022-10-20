@@ -40,7 +40,7 @@ func (b0 *HerumiScheme) GenerateKeys() (*Wallet, error) {
 
 // GenerateKeysWithEth  generate fresh keys based on eth wallet
 func (b0 *HerumiScheme) GenerateKeysWithEth(mnemonic, password string) (*Wallet, error) {
-	if len(mnemonic) == 0 {
+	if mnemonic == "" {
 		return nil, fmt.Errorf("mnemonic phase is mandatory")
 	}
 	b0.Mnemonic = mnemonic
@@ -216,7 +216,7 @@ func (b0 *HerumiScheme) Add(signature, msg string) (string, error) {
 
 // GetPrivateKeyAsByteArray - converts private key into byte array
 func (b0 *HerumiScheme) GetPrivateKeyAsByteArray() ([]byte, error) {
-	if len(b0.PrivateKey) == 0 {
+	if b0.PrivateKey == "" {
 		return nil, errors.New("get_private_key_as_byte_array", "cannot convert empty private key to byte array")
 	}
 	privateKeyBytes, err := hex.DecodeString(b0.PrivateKey)
@@ -245,7 +245,7 @@ func (b0 *HerumiScheme) GetID() string {
 
 func (b0 *HerumiScheme) generateKeys(password string) (*Wallet, error) {
 	// Check for recovery
-	if len(b0.Mnemonic) == 0 {
+	if b0.Mnemonic == "" {
 		entropy, err := bip39.NewEntropy(256)
 		if err != nil {
 			return nil, errors.Wrap(err, "Generating entropy failed")

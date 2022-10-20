@@ -107,7 +107,7 @@ func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolReq
 	}
 }
 
-func NewUpdateAllocationTransactionData(updateAllocationRequest UpdateAllocationRequest) TransactionData {
+func NewUpdateAllocationTransactionData(updateAllocationRequest *UpdateAllocationRequest) TransactionData {
 	return TransactionData{
 		Name:  "update_allocation_request",
 		Input: updateAllocationRequest,
@@ -513,13 +513,13 @@ type BlobberCommitConnectionRequest struct {
 
 type BlobberCommitConnectionResponse struct{}
 
-//type BlobberGetFileReferencePathRequest struct {
+// type BlobberGetFileReferencePathRequest struct {
 //	URL, ClientID, ClientKey, ClientSignature, AllocationID string
-//}
+// }
 
-//type BlobberGetFileReferencePathResponse struct {
+// type BlobberGetFileReferencePathResponse struct {
 //	sdk.ReferencePathResult
-//}
+// }
 
 type BlobberDownloadFileReadMarker struct {
 	ClientID     string `json:"client_id"`
