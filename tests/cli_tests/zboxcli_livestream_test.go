@@ -127,13 +127,14 @@ func TestStreamUploadDownload(t *testing.T) {
 		defer os.RemoveAll(localfolder)
 
 		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  localpath,
-			"feed":       feed,
-			"delay":      10,
+			"allocation":  allocationID,
+			"remotepath":  remotepath,
+			"localpath":   localpath,
+			"feed":        feed,
+			"delay":       10,
+			"ffmpeg-args": "'-loglevel info'",
 		}))
-		require.Nil(t, err, "error in killing upload command with delay flag")
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
