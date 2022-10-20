@@ -396,7 +396,7 @@ func TestFileUpdate(t *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "does not exist")
+		require.Contains(t, aggregatedOutput, "file_meta_error: Error getting the file meta data from blobbers")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -423,9 +423,7 @@ func TestFileUpdate(t *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.HasSuffix(strings.Join(output, "\n"),
-			`Update failed. bad request: {"code":"max_allocation_size","error":"max_allocation_size: Max size reached for the allocation with this blobber"}`),
-			strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -440,7 +438,7 @@ func generateThumbnail(t *testing.T, localpath string) int {
 	return len(thumbnailBytes)
 }
 
-//nolint
+// nolint
 func updateFileWithThumbnail(t *testing.T, allocationID, remotePath, localpath string, size int64) (string, int) {
 	thumbnail := escapedTestName(t) + "thumbnail.png"
 

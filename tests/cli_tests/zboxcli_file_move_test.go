@@ -283,8 +283,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed https://github.com/0chain/zboxcli/issues/240`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -369,8 +368,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -422,8 +420,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *testing.T) {
@@ -470,8 +467,7 @@ func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
-		// FIXME: Error message is incorrect. Should be `Move failed`
-		require.Equal(t, "Copy failed: Copy request failed. Operation failed.", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

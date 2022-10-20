@@ -130,8 +130,8 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
 
-		// Wait for allocation to expire
-		cliutils.Wait(t, time.Minute*5)
+		// Wait for allocation and challenge completion time to expire
+		cliutils.Wait(t, time.Minute*9)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))

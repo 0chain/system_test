@@ -1,9 +1,11 @@
 package cli_tests
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"reflect"
@@ -21,7 +23,7 @@ import (
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 
-		_ = initialiseTest(t)
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
 		beforeMiners := getSortedMiners(t, sharderUrl)
@@ -63,7 +65,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
 
-		_ = initialiseTest(t)
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
 		beforeSharders := getSortedSharders(t, sharderUrl)
@@ -98,23 +100,24 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 }
 
-func initialiseTest(t *testing.T) string {
+func initialiseTest(t *testing.T, wallet string, funds bool) string {
 	output, err := registerWallet(t, configPath)
 	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, configPath, 3)
-	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	if funds {
+		output, err = executeFaucetWithTokens(t, configPath, 3)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	}
 
-	targetWalletName := escapedTestName(t) + "_TARGET"
-	output, err = registerWalletForName(t, configPath, targetWalletName)
+	output, err = registerWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
-	targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+	targetWallet, err := getWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 	return targetWallet.ClientID
 }
 
-func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string]string, floatMap map[string]float64) {
+func keyValuePairStringToMap(input []string) (stringMap map[string]string, floatMap map[string]float64) {
 	stringMap = map[string]string{}
 	floatMap = map[string]float64{}
 	for _, tapSeparatedKeyValuePair := range input {
@@ -137,12 +140,76 @@ func keyValuePairStringToMap(t *testing.T, input []string) (stringMap map[string
 	return
 }
 
+type settingMaps struct {
+	Messages map[string]string
+	Keys     map[string]string // keys are hexadecimal of length 64
+	Numeric  map[string]float64
+	Boolean  map[string]bool
+	Duration map[string]int64
+}
+
+func newSettingMaps() *settingMaps {
+	return &settingMaps{
+		Messages: make(map[string]string),
+		Keys:     make(map[string]string),
+		Numeric:  make(map[string]float64),
+		Boolean:  make(map[string]bool),
+		Duration: make(map[string]int64),
+	}
+}
+
+func keyValueSettingsToMap(
+	input []string,
+) settingMaps {
+	const sdkPrefix = "0chain-core-sdk"
+	const keyLength = 64
+	var settings = newSettingMaps()
+	for _, tapSeparatedKeyValuePair := range input {
+		kvp := strings.Split(tapSeparatedKeyValuePair, "\t")
+		var key, value string
+		if len(kvp) == 2 {
+			key = strings.TrimSpace(kvp[0])
+			value = strings.TrimSpace(kvp[1])
+		} else if len(kvp) == 1 {
+			key = strings.TrimSpace(kvp[0])
+			value = ""
+		}
+		float, err := strconv.ParseFloat(value, 64)
+		if err == nil {
+			settings.Numeric[key] = float
+			continue
+		}
+		boolean, err := strconv.ParseBool(value)
+		if err == nil {
+			settings.Boolean[key] = boolean
+			continue
+		}
+		duration, err := time.ParseDuration(value)
+		if err == nil {
+			settings.Duration[key] = int64(duration.Seconds())
+			continue
+		}
+		if len(value) >= keyLength {
+			if _, err := hex.DecodeString(value); err == nil {
+				settings.Keys[key] = value
+				continue
+			}
+		}
+		if len(key) >= len(sdkPrefix) && key[:len(sdkPrefix)] == sdkPrefix {
+			settings.Messages[key] = value
+			continue
+		}
+		log.Println("unexpect setting key", key, "value", value)
+	}
+	return *settings
+}
+
 func getMinerScMap(t *testing.T) map[string]float64 {
 	output, err := getMinerSCConfig(t, configPath, true)
 	require.NoError(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
-	_, configAsFloat := keyValuePairStringToMap(t, output)
-	return configAsFloat
+	_, floatMap := keyValuePairStringToMap(output)
+	return floatMap
 }
 
 func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (int64, int64) {

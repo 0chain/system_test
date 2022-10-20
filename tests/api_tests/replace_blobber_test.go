@@ -2,12 +2,13 @@ package api_tests
 
 import (
 	"crypto/rand"
-	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/wait"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/wait"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReplaceBlobber(t *testing.T) {
@@ -61,7 +62,7 @@ func TestReplaceBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
@@ -93,7 +94,7 @@ func TestReplaceBlobber(t *testing.T) {
 		result, err := rand.Int(rand.Reader, big.NewInt(10))
 		require.Nil(t, err)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 

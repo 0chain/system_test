@@ -544,6 +544,25 @@ func createParams(params map[string]interface{}) string {
 	return strings.TrimSpace(builder.String())
 }
 
+func createKeyValueParams(params map[string]string) string {
+	keys := "--keys \""
+	values := "--values \""
+	first := true
+	for k, v := range params {
+		if first {
+			first = false
+		} else {
+			keys += ","
+			values += ","
+		}
+		keys += " " + k
+		values += " " + v
+	}
+	keys += "\""
+	values += "\""
+	return keys + " " + values
+}
+
 func updateAllocation(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return updateAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }

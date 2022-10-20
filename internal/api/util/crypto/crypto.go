@@ -5,17 +5,20 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sync"
+
 	"github.com/0chain/system_test/internal/api/model"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
-	"log"
-	"sync"
 	"testing"
 )
 
 var blsLock sync.Mutex
+
+const BLS0Chain = "bls0chain"
 
 func init() {
 	blsLock.Lock()
@@ -30,13 +33,9 @@ func init() {
 
 func GenerateMnemonics(t *testing.T) string {
 	entropy, err := bip39.NewEntropy(256) //nolint
-	if err != nil {
-		log.Fatalln(err)
-	}
+	require.NoError(t, err)
 	mnemonic, err := bip39.NewMnemonic(entropy) //nolint
-	if err != nil {
-		log.Fatalln(err)
-	}
+	require.NoError(t, err)
 	t.Logf("Generated mnemonic [%s]", mnemonic)
 
 	return mnemonic
@@ -72,6 +71,65 @@ func Sha3256(src []byte) string {
 	sha3256.Write(src)
 	var buffer []byte
 	return hex.EncodeToString(sha3256.Sum(buffer))
+}
+
+func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []*model.KeyPair) (string, error) {
+	retSignature := ""
+	for _, kv := range keys {
+		ss, err := NewSignatureScheme(signatureScheme)
+		if err != nil {
+			return "", err
+		}
+		err = ss.SetPrivateKey(kv.PrivateKey.SerializeToHexStr())
+		if err != nil {
+			return "", err
+		}
+
+		if len(retSignature) == 0 {
+			retSignature, err = ss.Sign(hash)
+		} else {
+			retSignature, err = ss.Add(retSignature, hash)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return retSignature, nil
+}
+
+func ToSecretKey(t *testing.T, wallet *climodel.WalletFile) *bls.SecretKey {
+	defer handlePanic(t)
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	var sk bls.SecretKey
+	sk.SetByCSPRNG()
+	err := sk.DeserializeHexStr(wallet.Keys[0].PrivateKey)
+	require.Nil(t, err, "failed to serialize hex of private key")
+
+	return &sk
+}
+
+func Sign(t *testing.T, data string, sk *bls.SecretKey) string {
+	defer handlePanic(t)
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	sig := sk.Sign(data)
+
+	return sig.SerializeToHexStr()
+}
+
+func SignHexString(t *testing.T, data string, sk *bls.SecretKey) string {
+	defer handlePanic(t)
+	blsLock.Lock()
+	defer blsLock.Unlock()
+
+	hashToSign, err := hex.DecodeString(data)
+	require.NoError(t, err)
+
+	signature := sk.Sign(string(hashToSign)).SerializeToHexStr()
+	return signature
 }
 
 func SignTransaction(t *testing.T, request *model.TransactionPutRequest, pair *model.KeyPair) {

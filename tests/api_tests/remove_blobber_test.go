@@ -1,11 +1,12 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestRemoveBlobber(t *testing.T) {
@@ -26,7 +27,7 @@ func TestRemoveBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, "", oldBlobberID, allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, "", oldBlobberID, allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 

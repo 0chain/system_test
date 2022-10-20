@@ -1,9 +1,10 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3" //nolint
 	"log"
 	"os"
+
+	"gopkg.in/yaml.v3" //nolint
 )
 
 // ConfigPathEnv contains name of env variable
@@ -29,4 +30,13 @@ func Parse(configPath string) *Config {
 	}
 
 	return result
+}
+
+func GetHomeDir() (string, error) {
+	homeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		return "", err
+	}
+	return homeDir, nil
 }
