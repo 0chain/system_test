@@ -456,7 +456,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
 	cmd, stderr, err := cliutils.StartCommandWithStderr(commandString)
-	require.Nil(t, err, "error in uploading a live feed: "+err.Error())
+	require.Nil(t, err, fmt.Sprintf("error in uploading a live feed: %s", err))
 
 	ready := waitTsFilesReady(localFolder)
 	if !ready {
