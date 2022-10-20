@@ -460,7 +460,7 @@ func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, para
 
 	ready := waitTsFilesReady(localFolder)
 	if !ready {
-		cmd.Process.Kill() //nolint: errcheck
+		defer cmd.Process.Kill() //nolint: errcheck
 
 		output := stderr.String()
 
