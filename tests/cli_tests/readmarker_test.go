@@ -19,7 +19,7 @@ func TestReadMarker(t *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-	t.Run("Read-markers retrieved after download", func(t *testing.T) {
+	t.Run("After download reamarkers return a readmarker for each blobber", func(t *testing.T) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotePath := "/dir/"
@@ -36,7 +36,7 @@ func TestReadMarker(t *testing.T) {
 
 		sharderUrl := getSharderUrl(t)
 		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
-		require.Zerof(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
+		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -53,6 +53,7 @@ func TestReadMarker(t *testing.T) {
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
+
 }
 
 func CountReadMarkers(t *testing.T, allocationId string, sharderBaseUrl string) *climodel.ReadMarkersCount {
@@ -68,9 +69,6 @@ func GetReadMarkers(t *testing.T, allocationId, authTicket string, sharderBaseUr
 	params := make(map[string]string)
 	if len(allocationId) > 0 {
 		params["allocation_id"] = allocationId
-	}
-	if len(authTicket) > 0 {
-		params["auth_ticket"] = authTicket
 	}
 	return cliutils.ApiGetList[climodel.ReadMarker](t, url, params, 0, 100)
 }
