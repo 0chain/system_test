@@ -104,19 +104,22 @@ func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff t
 	}
 }
 
-func StartCommandWithStderr(commandString string) (*exec.Cmd, *strings.Builder, error) {
+func StartCommandWithStd(commandString string) (*exec.Cmd, *strings.Builder, *strings.Builder, error) {
 	command := parseCommand(commandString)
 	commandName := command[0]
 	args := command[1:]
 	sanitizedArgs := sanitizeArgs(args)
 
-	errOutput := strings.Builder{}
+	stdErr := strings.Builder{}
+	stdOut := strings.Builder{}
+
 	cmd := exec.Command(commandName, sanitizedArgs...)
 	specific.Setpgid(cmd)
-	cmd.Stderr = &errOutput
+	cmd.Stdout = &stdOut
+	cmd.Stderr = &stdErr
 	err := cmd.Start()
 
-	return cmd, &errOutput, err
+	return cmd, &stdOut, &stdErr, err
 }
 
 func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
