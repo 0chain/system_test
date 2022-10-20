@@ -67,13 +67,9 @@ func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
 func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
 	baseUrl := sharderBaseURL + "/v1/screst/" + StorageScAddress + "/get_blocks"
 	query := fmt.Sprintf("?content=full&start=%d&end=%d", start, end)
-	//url := fmt.Sprintf(sharderBaseURL+"/v1/screst/"+StorageScAddress+
-	//	"/get_blocks?content=full&start=%d&end=%d", start, end)
 	if limit > 0 || offset > 0 {
 		query += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
 	}
-	//return http.Get(url)
-
 	return http.Get(baseUrl + query)
 }
 
@@ -119,10 +115,10 @@ func (ch *ChainHistory) DumpTransactions() {
 }
 
 func (ch *ChainHistory) AccountingMiner(id string) {
-	fmt.Println("-------------", "accounts for", id, "-------------")
-	for _, block := range ch.blocks {
-		if id == block.MinerID {
-			ch.AccountingMinerBlock(id, &block)
+	_, _ = fmt.Println("-------------", "accounts for", id, "-------------")
+	for i := range ch.blocks {
+		if id == ch.blocks[i].MinerID {
+			ch.AccountingMinerBlock(id, &ch.blocks[i])
 		}
 	}
 }

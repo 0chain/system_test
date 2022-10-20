@@ -154,14 +154,11 @@ func (ed *ED255190chainScheme) GetPrivateKey() string {
 
 // SetID sets ID in HexString format
 func (ed *ED255190chainScheme) SetID(id string) error {
-	// b0.Ids = id
-	// return b0.id.SetHexString(id)
 	return errors.New("chain_scheme_set_id", "it is not implemented yet")
 }
 
 // GetID gets ID in hex string format
 func (ed *ED255190chainScheme) GetID() string {
-	//return b0.id.GetHexString()
 	return ""
 }
 

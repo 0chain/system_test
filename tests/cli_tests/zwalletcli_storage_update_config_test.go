@@ -96,7 +96,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
-
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -155,7 +154,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax",
 			output[0], strings.Join(output, "\n"))
 	})
-
 }
 
 func checkSettings(t *testing.T, actual, expected settingMaps) {
@@ -167,9 +165,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 
 	for _, name := range climodel.StorageFloatSettings {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("float setting %s, values actual %g and expected %g don't match\n",
 				name, actualSetting, expectedSetting)
@@ -177,9 +175,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageCurrencySettigs {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("currency"+
 				" setting %s, values actual %g and expected %g don't match\n",
@@ -188,9 +186,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageIntSettings {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("int setting %s, values actual %g and expected %g don't match\n",
 				name, actualSetting, expectedSetting)
@@ -198,9 +196,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageDurationSettings {
 		actualSetting, ok := actual.Duration[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Duration[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("duration setting %s, values actual %d and expected %d don't match\n",
 				name, actualSetting, expectedSetting)
@@ -208,9 +206,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageBoolSettings {
 		actualSetting, ok := actual.Boolean[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Boolean[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("bool setting %s, values actual %t and expected %t don't match\n",
 				name, actualSetting, expectedSetting)
@@ -218,9 +216,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageKeySettings {
 		actualSetting, ok := actual.Keys[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Keys[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("key setting %s, values actual %s and expected %s don't match\n",
 				name, actualSetting, expectedSetting)

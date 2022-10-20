@@ -829,10 +829,11 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 	}
 }
 
+// nolint
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//   - rootFolder: Leave empty or send "/" to create on os temp folder
-//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//  - rootFolder: Leave empty or send "/" to create on os temp folder
+//  - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
 //   - returns local root folder
 //   - sample structure:
 //

@@ -129,14 +129,12 @@ func (sk *herumiSecretKey) GetMasterSecretKey(k int) ([]SecretKey, error) {
 
 	for i, it := range list {
 		msk[i] = &herumiSecretKey{SecretKey: it}
-
 	}
 
 	return msk, nil
 }
 
 func (sk *herumiSecretKey) Set(msk []SecretKey, id ID) error {
-
 	blsMsk := make([]bls.SecretKey, len(msk))
 
 	for i, it := range msk {

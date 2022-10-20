@@ -394,7 +394,7 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 }
 
-func getBlobberFileRefRequest(url string, registeredWallet *model.Wallet, allocationId, refType, clientSignature, remotePath string) model.BlobberGetFileRefsRequest {
+func getBlobberFileRefRequest(url string, registeredWallet *model.Wallet, allocationId, refType, clientSignature, remotePath string) model.BlobberGetFileRefsRequest { // nolint
 	blobberFileRequest := model.BlobberGetFileRefsRequest{
 		URL:             url,
 		ClientID:        registeredWallet.Id,

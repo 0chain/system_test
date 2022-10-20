@@ -14,7 +14,7 @@ func (s *StubStatusBar) Started(allocationId, filePath string, op, totalBytes in
 func (s *StubStatusBar) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
 }
 
-func (s *StubStatusBar) Completed(allocationId, filePath string, filename string, mimetype string, size, op int) {
+func (s *StubStatusBar) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
 }
 
 func (s *StubStatusBar) Error(allocationID, filePath string, op int, err error) {

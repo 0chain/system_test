@@ -28,7 +28,7 @@ func TestBridgeVerify(t *testing.T) {
 	})
 }
 
-func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) {
+func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) { // nolint
 	t.Logf("verifying ethereum transaction...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-verify --hash %s --silent --configDir ./config --config %s --path %s",

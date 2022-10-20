@@ -125,7 +125,7 @@ func (b0 *HerumiScheme) SplitKeys(numSplits int) (*Wallet, error) {
 		return nil, err
 	}
 
-	//Subtract the aggregated private key from the primary private key to derive the last split private key
+	// Subtract the aggregated private key from the primary private key to derive the last split private key
 	lastSk := BlsSignerInstance.NewFr()
 	BlsSignerInstance.FrSub(lastSk, primaryFr, aggregateSk)
 
