@@ -63,7 +63,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"localpath":  localpath,
 			"feed":       feed,
 		}))
-		require.Nil(t, err, "error in killing upload command")
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -202,7 +202,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"feed":        feed,
 			"chunknumber": 10,
 		}))
-		require.Nil(t, err, "startUploadFeed: "+err.Error())
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -271,7 +271,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"remotepath": remotepath,
 			"localpath":  localpath,
 		}))
-		require.Nil(t, err, "error in killing upload command")
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -339,7 +339,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"localpath":  localpath,
 			"delay":      10,
 		}))
-		require.Nil(t, err, "error in killing upload command")
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
@@ -407,7 +407,7 @@ func TestStreamUploadDownload(t *testing.T) {
 			"localpath":   localpath,
 			"chunknumber": 10,
 		}))
-		require.Nil(t, err, "error in killing upload command")
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
