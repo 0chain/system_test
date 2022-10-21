@@ -477,7 +477,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, params string) error {
 	t.Logf("Starting upload of live stream to zbox...")
-	commandString := fmt.Sprintf("./zbox %s %s --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
+	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
 	cmd, stdOut, stderr, err := cliutils.StartCommandWithStd(commandString)
 	require.Nil(t, err, fmt.Sprintf("error in uploading a live feed: %s", err))
 
