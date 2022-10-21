@@ -6,6 +6,7 @@ import (
 	"io"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -421,6 +422,24 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 	return sharders
+}
+
+func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
+	// Get miner list.
+	output, err := getMinersForWallet(t, configPath, wallet)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	sort.Slice(miners.Nodes, func(i, j int) bool {
+		return miners.Nodes[i].ID < miners.Nodes[j].ID
+	})
+
+	return miners
 }
 
 func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
