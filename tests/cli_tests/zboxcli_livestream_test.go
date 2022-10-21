@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,17 +27,19 @@ func TestStreamUploadDownload(t *testing.T) {
 	t.Parallel()
 	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
-
-	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
-
-	if !isStreamAvailable {
-		t.Skipf("No youtube live feed available right now")
-	}
+	defer KillFFMPEG()
 
 	// Success scenarios
 
 	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
 		t.Parallel()
+
+		feed, ok := getFeed()
+
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -53,6 +57,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -64,7 +69,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"feed":       feed,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -105,6 +109,13 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
 		t.Parallel()
+
+		feed, ok := getFeed()
+
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -122,6 +133,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -136,7 +148,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"ffmpeg-args":     "'-loglevel info'",
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -176,6 +187,12 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
 		t.Parallel()
+		feed, ok := getFeed()
+
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -193,6 +210,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -205,7 +223,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"chunknumber": 10,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -247,6 +264,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
 		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -264,6 +282,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -274,7 +293,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"localpath":  localpath,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -331,6 +349,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -342,7 +361,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"delay":      10,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -399,6 +417,7 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
@@ -410,7 +429,6 @@ func TestStreamUploadDownload(t *testing.T) {
 			"chunknumber": 10,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
-		KillFFMPEG()
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -506,11 +524,62 @@ func waitTsFilesReady(localFolder string) bool {
 	}
 }
 
+var feedMutex sync.Mutex
+var feeds = []string{
+	`https://www.youtube.com/watch?v=Dx5qFachd3A`,
+	`https://www.youtube.com/watch?v=fuXfT4Rv_WM`,
+	`https://www.youtube.com/watch?v=oaSLqdnKniA`,
+	"https://youtu.be/OBExtHgg-js",
+	"https://youtu.be/EBvFX1NP4WM",
+	"https://www.twitch.tv/skermz",
+	"https://www.twitch.tv/thinkerbella",
+	"https://www.bitchute.com/video/Rvtbx7Nj4GjS/",
+}
+
+func getFeed() (string, bool) {
+	feedMutex.Lock()
+	defer feedMutex.Unlock()
+	n := len(feeds)
+
+	i := rand.Intn(n)
+	var m int
+	for {
+		if m >= n {
+			return "", false
+		}
+		feed := feeds[i]
+
+		resp, err := http.Get(feed)
+
+		if err == nil && resp.StatusCode != http.StatusOK {
+			return feed, true
+		}
+
+		i++
+
+		if i >= n {
+			i = 0
+		}
+
+		m++
+	}
+
+}
+
 func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
 	feed = ""
 	const feed1 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
 	const feed2 = `https://www.youtube.com/watch?v=fuXfT4Rv_WM`
 	const feed3 = `https://www.youtube.com/watch?v=oaSLqdnKniA`
+
+	//https://youtu.be/OBExtHgg-js
+	//https://youtu.be/EBvFX1NP4WM
+
+	//https://www.twitch.tv/skermz
+	//https://www.twitch.tv/thinkerbella
+
+	//https://www.bitchute.com/video/xx8yFyeP9zwO/
+	//https://www.bitchute.com/video/Rvtbx7Nj4GjS/
 
 	for i := 1; i < 3; i++ {
 		var resp *http.Response
