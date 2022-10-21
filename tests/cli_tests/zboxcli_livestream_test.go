@@ -31,7 +31,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	// Success scenarios
 
-	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
+	t.Run("Uploading remote feed to allocation should work", func(t *testing.T) {
 		t.Parallel()
 
 		feed, ok := getFeed()
