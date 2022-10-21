@@ -262,211 +262,211 @@ func TestStreamUploadDownload(t *testing.T) {
 		}
 	})
 
-	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+	// t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
+	// 	t.Parallel()
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		os.RemoveAll(localpath)
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	os.RemoveAll(localpath)
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  localpath,
-		}))
-		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
+	// 	err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"localpath":  localpath,
+	// 	}))
+	// 	require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
-		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
-		count_m3u8 := 0
-		err = filepath.Walk(localfolder,
-			func(path string, info fs.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				t.Log(info.Name())
-				extension := strings.Split(info.Name(), ".")
-				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 += 1
-					return nil
-				}
-				return nil
-			})
-		require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
-		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
+	// 	// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
+	// 	count_m3u8 := 0
+	// 	err = filepath.Walk(localfolder,
+	// 		func(path string, info fs.FileInfo, err error) error {
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 			t.Log(info.Name())
+	// 			extension := strings.Split(info.Name(), ".")
+	// 			if extension[len(extension)-1] == "m3u8" {
+	// 				count_m3u8 += 1
+	// 				return nil
+	// 			}
+	// 			return nil
+	// 		})
+	// 	require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
+	// 	require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
 
-		// Check all locally created files have been uploaded to allocation
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error listing files in remotepath")
-		require.Len(t, output, 1, "listing files should return output")
+	// 	// Check all locally created files have been uploaded to allocation
+	// 	output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"json":       "",
+	// 	}), true)
+	// 	require.Nil(t, err, "error listing files in remotepath")
+	// 	require.Len(t, output, 1, "listing files should return output")
 
-		files := []climodel.ListFileResult{}
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "error unmarshalling the response from list files")
+	// 	files := []climodel.ListFileResult{}
+	// 	err = json.Unmarshal([]byte(output[0]), &files)
+	// 	require.Nil(t, err, "error unmarshalling the response from list files")
 
-		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
-		}
-	})
+	// 	for _, file := range files {
+	// 		require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
+	// 	}
+	// })
 
-	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
-		t.Parallel()
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
+	// 	t.Parallel()
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		os.RemoveAll(localpath)
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	os.RemoveAll(localpath)
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"localpath":  localpath,
-			"delay":      10,
-		}))
-		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
+	// 	err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"localpath":  localpath,
+	// 		"delay":      10,
+	// 	}))
+	// 	require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
-		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
-		count_m3u8 := 0
-		err = filepath.Walk(localfolder,
-			func(path string, info fs.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				t.Log(info.Name())
-				extension := strings.Split(info.Name(), ".")
-				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 += 1
-					return nil
-				}
-				return nil
-			})
-		require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
-		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
+	// 	// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
+	// 	count_m3u8 := 0
+	// 	err = filepath.Walk(localfolder,
+	// 		func(path string, info fs.FileInfo, err error) error {
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 			t.Log(info.Name())
+	// 			extension := strings.Split(info.Name(), ".")
+	// 			if extension[len(extension)-1] == "m3u8" {
+	// 				count_m3u8 += 1
+	// 				return nil
+	// 			}
+	// 			return nil
+	// 		})
+	// 	require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
+	// 	require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
 
-		// Check all locally created files have been uploaded to allocation
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error listing files in remotepath")
-		require.Len(t, output, 1, "listing files should return output")
+	// 	// Check all locally created files have been uploaded to allocation
+	// 	output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"json":       "",
+	// 	}), true)
+	// 	require.Nil(t, err, "error listing files in remotepath")
+	// 	require.Len(t, output, 1, "listing files should return output")
 
-		files := []climodel.ListFileResult{}
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "error unmarshalling the response from list files")
+	// 	files := []climodel.ListFileResult{}
+	// 	err = json.Unmarshal([]byte(output[0]), &files)
+	// 	require.Nil(t, err, "error unmarshalling the response from list files")
 
-		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
-		}
-	})
+	// 	for _, file := range files {
+	// 		require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
+	// 	}
+	// })
 
-	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
+	// 	t.Parallel()
+	// 	output, err := registerWallet(t, configPath)
+	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
-		}))
-		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
+	// 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"lock": 1,
+	// 	}))
+	// 	require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+	// 	allocationID := strings.Fields(output[0])[2]
 
-		remotepath := "/live/stream.m3u8"
-		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
-		localpath := filepath.Join(localfolder, "up.m3u8")
-		os.RemoveAll(localpath)
-		err = os.MkdirAll(localpath, os.ModePerm)
-		require.Nil(t, err, "Error in creating the folders", localpath)
-		defer os.RemoveAll(localfolder)
+	// 	remotepath := "/live/stream.m3u8"
+	// 	localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+	// 	localpath := filepath.Join(localfolder, "up.m3u8")
+	// 	os.RemoveAll(localpath)
+	// 	err = os.MkdirAll(localpath, os.ModePerm)
+	// 	require.Nil(t, err, "Error in creating the folders", localpath)
+	// 	defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  remotepath,
-			"localpath":   localpath,
-			"chunknumber": 10,
-		}))
-		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
+	// 	err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
+	// 		"allocation":  allocationID,
+	// 		"remotepath":  remotepath,
+	// 		"localpath":   localpath,
+	// 		"chunknumber": 10,
+	// 	}))
+	// 	require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
-		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
-		count_m3u8 := 0
-		err = filepath.Walk(localfolder,
-			func(path string, info fs.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				t.Log(info.Name())
-				extension := strings.Split(info.Name(), ".")
-				if extension[len(extension)-1] == "m3u8" {
-					count_m3u8 += 1
-					return nil
-				}
-				return nil
-			})
-		require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
-		require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
+	// 	// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
+	// 	count_m3u8 := 0
+	// 	err = filepath.Walk(localfolder,
+	// 		func(path string, info fs.FileInfo, err error) error {
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 			t.Log(info.Name())
+	// 			extension := strings.Split(info.Name(), ".")
+	// 			if extension[len(extension)-1] == "m3u8" {
+	// 				count_m3u8 += 1
+	// 				return nil
+	// 			}
+	// 			return nil
+	// 		})
+	// 	require.Nil(t, err, "error in traversing locally created .m3u8 or .ts files")
+	// 	require.Equal(t, count_m3u8, 1, "exactly one .m3u8 file should be created")
 
-		// Check all locally created files have been uploaded to allocation
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, "error listing files in remotepath")
-		require.Len(t, output, 1, "listing files should return output")
+	// 	// Check all locally created files have been uploaded to allocation
+	// 	output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"remotepath": remotepath,
+	// 		"json":       "",
+	// 	}), true)
+	// 	require.Nil(t, err, "error listing files in remotepath")
+	// 	require.Len(t, output, 1, "listing files should return output")
 
-		files := []climodel.ListFileResult{}
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "error unmarshalling the response from list files")
+	// 	files := []climodel.ListFileResult{}
+	// 	err = json.Unmarshal([]byte(output[0]), &files)
+	// 	require.Nil(t, err, "error unmarshalling the response from list files")
 
-		for _, file := range files {
-			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
-			// FIXME: Num of blocks must be equal to ceil(size/chunksize)
-			// require.Equal(t, int64(file.NumBlocks), math.Ceil(float64(file.Size)/float64(chunksize)), "chunksize should be: ", chunksize)
-		}
-	})
+	// 	for _, file := range files {
+	// 		require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
+	// 		// FIXME: Num of blocks must be equal to ceil(size/chunksize)
+	// 		// require.Equal(t, int64(file.NumBlocks), math.Ceil(float64(file.Size)/float64(chunksize)), "chunksize should be: ", chunksize)
+	// 	}
+	// })
 
 	// Failure Scenarios
 	// FIXME: Disabled for now due to process hanging
@@ -541,7 +541,7 @@ func getFeed() (string, bool) {
 	defer feedMutex.Unlock()
 	n := len(feeds)
 
-	i := rand.Intn(n)
+	i := rand.Intn(n) //nolint
 	var m int
 	for {
 		if m >= n {
@@ -549,9 +549,13 @@ func getFeed() (string, bool) {
 		}
 		feed := feeds[i]
 
-		resp, err := http.Get(feed)
+		resp, err := http.Get(feed) //nolint
 
-		if err == nil && resp.StatusCode != http.StatusOK {
+		if err != nil && resp != nil && resp.Body != nil {
+			resp.Body.Close() //nolint
+		}
+
+		if err == nil && resp.StatusCode == http.StatusOK {
 			return feed, true
 		}
 
