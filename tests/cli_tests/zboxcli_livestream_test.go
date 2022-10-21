@@ -510,8 +510,8 @@ func waitTsFilesReady(t *testing.T, localFolder string) bool {
 			files, _ := os.ReadDir(localFolder)
 			c := 0
 			for _, file := range files {
-				t.Log(localFolder, file.Name())
 				if strings.HasSuffix(file.Name(), ".ts") {
+					t.Log(localFolder, file.Name())
 					c++
 				}
 			}
