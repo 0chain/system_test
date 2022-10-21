@@ -96,6 +96,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 		hashmap := make(map[string]string)
 
+		count_ts_locally := 0
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
 
 			if err != nil {
@@ -118,6 +119,7 @@ func TestLivestreamDownload(t *testing.T) {
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
 
+					count_ts_locally += 1
 					num, err := strconv.Atoi(extension[0][2:])
 
 					if err != nil {
@@ -137,6 +139,7 @@ func TestLivestreamDownload(t *testing.T) {
 			return nil
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
+		require.Greater(t, count_ts_locally, 0, "at least one .ts file should be created!")
 
 		count_m3u8 := 0
 		count_ts := 0
@@ -263,6 +266,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 		hashmap := make(map[string]string)
 
+		count_ts_locally := 0
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
 
 			if err != nil {
@@ -286,6 +290,7 @@ func TestLivestreamDownload(t *testing.T) {
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
 
+					count_ts_locally += 1
 					num, err := strconv.Atoi(extension[0][2:])
 
 					if err != nil {
@@ -305,6 +310,7 @@ func TestLivestreamDownload(t *testing.T) {
 			return nil
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
+		require.Greater(t, count_ts_locally, 0, "at least one .ts file should be created")
 
 		count_m3u8 := 0
 		count_ts := 0
@@ -434,6 +440,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 		hashmap := make(map[string]string)
 
+		count_ts_locally := 0
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
 
 			if err != nil {
@@ -456,6 +463,7 @@ func TestLivestreamDownload(t *testing.T) {
 
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
+					count_ts_locally += 1
 
 					num, err := strconv.Atoi(extension[0][2:])
 
@@ -476,7 +484,7 @@ func TestLivestreamDownload(t *testing.T) {
 			return nil
 		})
 		require.Nil(t, err, "error in traversing locally created upload files")
-
+		require.Greater(t, count_ts_locally, 0, "at least one .ts file should be created!")
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
