@@ -139,13 +139,11 @@ func TestStreamUploadDownload(t *testing.T) {
 		defer os.RemoveAll(localfolder)
 
 		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
-			"allocation":      allocationID,
-			"remotepath":      remotepath,
-			"localpath":       localpath,
-			"feed":            feed,
-			"delay":           10,
-			"downloader-args": "'-f best'",
-			"ffmpeg-args":     "'-loglevel info'",
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"localpath":  localpath,
+			"feed":       feed,
+			"delay":      10,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
@@ -554,7 +552,7 @@ func getFeed() (string, bool) {
 
 		resp, err := http.Get(feed) //nolint
 
-		if err != nil && resp != nil && resp.Body != nil {
+		if resp != nil && resp.Body != nil {
 			resp.Body.Close() //nolint
 		}
 
