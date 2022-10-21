@@ -516,7 +516,6 @@ func waitTsFilesReady(t *testing.T, localFolder string) bool {
 			c := 0
 			for _, file := range files {
 				if strings.HasSuffix(file.Name(), ".ts") {
-					t.Log(localFolder, file.Name())
 					c++
 				}
 			}
