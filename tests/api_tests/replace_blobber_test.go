@@ -62,7 +62,7 @@ func TestReplaceBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
@@ -94,7 +94,7 @@ func TestReplaceBlobber(t *testing.T) {
 		result, err := rand.Int(rand.Reader, big.NewInt(10))
 		require.Nil(t, err)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 

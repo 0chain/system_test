@@ -825,13 +825,14 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, updateAllocationTransactionPutResponse)
+	txnHash := updateAllocationTransactionPutResponse.Request.Hash
 
 	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
+				Hash: txnHash,
 			},
 			HttpOkStatus)
 		if err != nil {
