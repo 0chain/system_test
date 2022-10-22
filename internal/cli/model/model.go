@@ -743,7 +743,7 @@ type WriteMarker struct {
 	AllocationID         string
 	Size                 int64
 	BlobberID            string
-	WriteMarkerTimeStamp Timestamp
+	WriteMarkerTimeStamp int64
 	ClientID             string
 	Signature            string
 }
