@@ -5,6 +5,7 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/0chain/system_test/internal/api/model"
