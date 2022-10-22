@@ -57,7 +57,7 @@ func TestAddBlobber(t *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, "", "", allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, "", "", allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
@@ -86,7 +86,7 @@ func TestAddBlobber(t *testing.T) {
 		result, err := rand.Int(rand.Reader, big.NewInt(10))
 		require.Nil(t, err)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, result.String(), "", allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
@@ -115,7 +115,7 @@ func TestAddBlobber(t *testing.T) {
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, "", allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, "", allocationID, client.TxUnsuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 

@@ -109,6 +109,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			return nil, err
 		}
 
+		r := c.httpClient.R()
 		var formattedURL string
 		switch serviceProviderType {
 		case MinerServiceProvider:
@@ -117,16 +118,25 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			formattedURL = urlBuilder.SetPath(ChainGetStats).String()
 		case BlobberServiceProvider:
 			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
+			// /_stats requires username-password as it is an admin API.
+			r.SetBasicAuth("", "")
 		}
 
-		healthResponse, err := c.httpClient.R().Get(formattedURL)
+		healthResponse, err := r.Get(formattedURL)
 		if err == nil && healthResponse.IsSuccess() {
 			log.Printf("%s is UP!", node)
 			result = append(result, node)
 			continue
 		}
 
-		log.Printf("%s is DOWN!", node)
+		status := healthResponse.StatusCode()
+		response := healthResponse.Body()
+		if err != nil {
+			log.Printf("Read error %s for blobber %s.", err.Error(), node)
+			continue
+		}
+
+		log.Printf("%s is DOWN! Status: %d, Message: %s", node, status, string(response))
 	}
 	return result, nil
 }
@@ -815,13 +825,14 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, updateAllocationTransactionPutResponse)
+	txnHash := updateAllocationTransactionPutResponse.Request.Hash
 
 	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			model.TransactionGetConfirmationRequest{
-				Hash: allocationID,
+				Hash: txnHash,
 			},
 			HttpOkStatus)
 		if err != nil {
