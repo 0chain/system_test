@@ -1,0 +1,9 @@
+2022/10/09 19:35:07 CONFIG_PATH environment variable is not set so has defaulted to [./config/api_tests_config.yaml]
+2022/10/09 19:35:08 https://dev-3.devnet-0chain.net/miner01 is UP!
+2022/10/09 19:35:08 https://dev-3.devnet-0chain.net/miner03 is UP!
+2022/10/09 19:35:09 https://dev-3.devnet-0chain.net/miner02 is UP!
+2022/10/09 19:35:09 https://dev-3.devnet-0chain.net/sharder02 is UP!
+2022/10/09 19:35:09 https://dev-3.devnet-0chain.net/sharder01 is UP!
+2022/10/09 19:35:25 https://dev-3.devnet-0chain.net/blobber03 is DOWN!
+signal: interrupt
+FAIL	github.com/0chain/system_test/tests/api_tests	27.042s

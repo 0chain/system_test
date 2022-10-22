@@ -1,11 +1,12 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestRemoveBlobber(t *testing.T) {
@@ -14,7 +15,7 @@ func TestRemoveBlobber(t *testing.T) {
 	t.Run("Remove blobber in allocation, shouldn't work", func(t *testing.T) {
 		t.Parallel()
 
-		wallet := apiClient.RegisterWallet(t, "", "", nil, true, client.HttpOkStatus)
+		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)

@@ -1,0 +1,34 @@
+time=2022-10-10T03:48:49+05:30 level=info msg=CONFIG_PATH environment variable is not set so has defaulted to [./zbox_config.yaml]
+name is TestRepairFile-Attempt_file_repair_on_the_single_file_that_needs_repair
+Printing wallet info
+<nil>
+&{ClientID:f838b49f31ac1f4fa420e32ccd8978b91d5e782c64efc837508cda6f5b509723 ClientPublicKey:82d2f77abcca9e70478f32825063b3019ba8fc4c603fb98b68189a422e500c06d229543aeb5aa3ff5bde97f3c2cd15365af44f6dfb0524d8cdbcbcb28770c690 EncryptionPublicKey:NPJfYCeWLMjWG7FnOaPdcikKH3gS4gcvyygkWCDSD8I= Mnemonics:}
+blobbers list is  [{8f1e1b09f15e138c1abec362d89431b496e72df81531a8aff14bc5eba698129f https://dev.0chain.net/blobber03 865926279168 1665353930 20643455712 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}} {de963b6d7fbe0d9c2ebcab07ca2899e314a3859e454ecbfc5c6aa7694a785d48 https://dev.0chain.net/blobber01 865940094976 1665353926 20580016864 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}} {9630b31c9355e86a25a229be6e37f83b7f4f964bb89f646cec600c80f51b8eef https://dev.0chain.net/blobber04 865959534592 1665353913 20486029312 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}} {a4488010933a43444f89722cace48ccd9da287f9b9b911d678cb9d82454a62f0 https://dev.0chain.net/blobber06 865999978496 1665353949 19402850304 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}} {302b49678daf652e0e9e409863d6072b0333816d6cf289bad27ae6f2157a60fc https://dev.0chain.net/blobber05 866060791808 1665353938 14002683904 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}} {8329a37006106bd3764376cc80ce937fb055ac14b2c3244f0a8ec64add18c172 https://dev.0chain.net/blobber02 866082029568 1665353928 17297309696 {0 1000000000 0.1 744h0m0s} {9c693cb14f29917968d6e8c909ebbea3425b4c1bc64b6732cadc2a1869f49be9 10000000000 1000000000000 50 0.3}}]
+--- FAIL: TestRepairFile (0.00s)
+    --- FAIL: TestRepairFile/Attempt_file_repair_on_the_single_file_that_needs_repair (32.75s)
+        zwalletcli_register_wallet_test.go:110: Registering wallet...
+        zboxcli_update_allocation_test.go:588: Executing faucet...
+        zwalletcli_register_wallet_test.go:185: Getting wallet...
+        zwalletcli_register_wallet_test.go:110: Registering wallet...
+        zboxcli_update_allocation_test.go:588: Executing faucet...
+        zboxcli_create_allocation_test.go:288: Creating new allocation...
+        zboxcli_file_upload_test.go:803: Uploading file...
+        zboxcli_common_user_functions_test.go:215: Get Allocation...
+        zboxcli_stake_unstake_token_test.go:294: Requesting blobber list...
+        zboxcli_repair_file_test.go:170: Repairing allocation...
+        zboxcli_repair_file_test.go:109: 
+            	Error Trace:	/home/naman/Projects/0Chain/system_test/tests/cli_tests/zboxcli_repair_file_test.go:109
+            	Error:      	Not equal: 
+            	            	expected: "Repair file completed, Total files repaired: 2"
+            	            	actual  : "Repair file completed, Total files repaired:  0"
+            	            	
+            	            	Diff:
+            	            	--- Expected
+            	            	+++ Actual
+            	            	@@ -1 +1 @@
+            	            	-Repair file completed, Total files repaired: 2
+            	            	+Repair file completed, Total files repaired:  0
+            	Test:       	TestRepairFile/Attempt_file_repair_on_the_single_file_that_needs_repair
+FAIL
+exit status 1
+FAIL	github.com/0chain/system_test/tests/cli_tests	32.779s
