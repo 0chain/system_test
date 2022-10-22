@@ -842,39 +842,15 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, customBlobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
-
-	var blobberRequirements model.BlobberRequirements
-
-	if customBlobberRequirements != nil {
-		blobberRequirements = *customBlobberRequirements
-	} else {
-		blobberRequirements = model.BlobberRequirements{
-			Size:           10000,
-			DataShards:     1,
-			ParityShards:   1,
-			ExpirationDate: time.Now().Add(time.Minute * 20).Unix(),
-			ReadPriceRange: model.PriceRange{
-				Min: 0,
-				Max: 9223372036854775807,
-			},
-			WritePriceRange: model.PriceRange{
-				Min: 0,
-				Max: 9223372036854775807,
-			},
-			OwnerId:        wallet.Id,
-			OwnerPublicKey: wallet.PublicKey,
-		}
-	}
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
 			ClientID:            wallet.Id,
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: blobberRequirements,
-		},
-		requiredStatusCode)
+		}, requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, scRestGetAllocationBlobbersResponse)

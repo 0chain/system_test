@@ -1,4 +1,5 @@
 name: "0Chain System Tests"
+run-name: "0Chain System tests from [${{ github.ref_name }} - [${{ github.event.head_commit.message }}]"
 concurrency:
   group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
