@@ -326,11 +326,12 @@ func deleteBlobberFile(t *testing.T, blobberDeleteConnectionRequest *climodel.Bl
 	urlForRequest, err = url.Parse(blobberDeleteConnectionRequest.URL)
 	require.Nil(t, err)
 	urlForRequest.Path = path.Join(urlForRequest.Path, "/v1/connection/commit/", allocationID)
+	urlForRequest.RawQuery = query.Encode()
 	// urlForRequest.Path = blobberDeleteConnectionRequest.URL + "/v1/file/commit/" + allocationID
 	req, _ = http.NewRequest(http.MethodPost, urlForRequest.String(), nil)
 	req.Header.Set("X-App-Client-Id", blobberDeleteConnectionRequest.ClientID)
 	req.Header.Set("X-App-Client-Key", blobberDeleteConnectionRequest.ClientKey)
-	req.Header.Set("X-App-Client-Signature", blobberDeleteConnectionRequest.ClientSignature)
+
 	resp, err = client.Do(req)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
