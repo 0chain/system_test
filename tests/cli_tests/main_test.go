@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +29,7 @@ func setupConfig() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(path)
 	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
 	}
 
 	miner01ID = viper.GetString("nodes.miner01ID")
