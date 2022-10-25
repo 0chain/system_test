@@ -665,3 +665,45 @@ type GetGraphBlobberAllocatedRequest struct {
 }
 
 type GetGraphBlobberAllocatedResponse []int
+
+type GetGraphBlobberSavedDataRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberSavedDataResponse []int
+
+type GetGraphBlobberReadDataRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberReadDataResponse []int
+
+type GetGraphBlobberOffersTotalRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberOffersTotalResponse []int
+
+type GetGraphBlobberUnstakeTotalRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberUnstakeTotalResponse []int
+
+type GetGraphBlobberTotalStakeRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberTotalStakeResponse []int
+
+type GetGraphBlobberChallengesOpenRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesOpenResponse []int

@@ -1425,6 +1425,132 @@ func (c *APIClient) V1SharderGetGraphBlobberAllocated(getGraphBlobberAllocatedRe
 	return getGraphBlobberAllocatedResponse, resp, err
 }
 
+func (c *APIClient) V1SharderGetGraphBlobberSavedData(getGraphBlobberSavedDataRequest model.GetGraphBlobberSavedDataRequest, requiredStatusCode int) (*model.GetGraphBlobberSavedDataResponse, *resty.Response, error) {
+	var getGraphBlobberSavedDataResponse *model.GetGraphBlobberSavedDataResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberSavedDataRequest.DataPoints)).
+		AddParams("id", getGraphBlobberSavedDataRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberSavedDataResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberSavedDataResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberReadData(getGraphBlobberReadDataRequest model.GetGraphBlobberReadDataRequest, requiredStatusCode int) (*model.GetGraphBlobberReadDataResponse, *resty.Response, error) {
+	var getGraphBlobberReadDataResponse *model.GetGraphBlobberReadDataResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberReadDataRequest.DataPoints)).
+		AddParams("id", getGraphBlobberReadDataRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberReadDataResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberReadDataResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberOffersTotal(getGraphBlobberOffersTotalRequest model.GetGraphBlobberOffersTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberOffersTotalResponse, *resty.Response, error) {
+	var getGraphBlobberOffersTotalResponse *model.GetGraphBlobberOffersTotalResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberOffersTotalRequest.DataPoints)).
+		AddParams("id", getGraphBlobberOffersTotalRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberOffersTotalResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberOffersTotalResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberUnstakeTotal(getGraphBlobberUnstakeTotalRequest model.GetGraphBlobberUnstakeTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberUnstakeTotalResponse, *resty.Response, error) {
+	var getGraphBlobberUnstakeTotalResponse *model.GetGraphBlobberUnstakeTotalResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberUnstakeTotalRequest.DataPoints)).
+		AddParams("id", getGraphBlobberUnstakeTotalRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberUnstakeTotalResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberUnstakeTotalResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberTotalStake(getGraphBlobberTotalStakeRequest model.GetGraphBlobberTotalStakeRequest, requiredStatusCode int) (*model.GetGraphBlobberTotalStakeResponse, *resty.Response, error) {
+	var getGraphBlobberTotalStakeResponse *model.GetGraphBlobberTotalStakeResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberTotalStakeRequest.DataPoints)).
+		AddParams("id", getGraphBlobberTotalStakeRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberTotalStakeResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberTotalStakeResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberChallangesOpen(getGraphBlobberChallangesOpenRequest model.GetGraphBlobberChallengesOpenRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesOpenResponse, *resty.Response, error) {
+	var getGraphBlobberChallangesOpenResponse *model.GetGraphBlobberChallengesOpenResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetGraphBlobberAllocated).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallangesOpenRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallangesOpenRequest.BlobberID)
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberChallangesOpenResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return getGraphBlobberChallangesOpenResponse, resp, err
+}
+
 func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 

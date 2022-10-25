@@ -548,31 +548,115 @@ func TestAtlusChimney(t *testing.T) {
 
 	t.Run("Get graph of all saved data of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-saved-data?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
+			model.GetGraphBlobberSavedDataRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberSavedDataResponse)
 	})
 
 	t.Run("Get graph of read data of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-read-data?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberReadDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberReadData(
+			model.GetGraphBlobberReadDataRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberReadDataResponse)
 	})
 
 	t.Run("Get graph of total offers of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-offers-total?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberOffersTotalResponse, resp, err := apiClient.V1SharderGetGraphBlobberOffersTotal(
+			model.GetGraphBlobberOffersTotalRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberOffersTotalResponse)
 	})
 
 	t.Run("Get graph of unstaked tokens of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-unstake-total?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberUnstakeTotalResponse, resp, err := apiClient.V1SharderGetGraphBlobberUnstakeTotal(
+			model.GetGraphBlobberUnstakeTotalRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberUnstakeTotalResponse)
 	})
 
 	t.Run("Get graph of staked tokens of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-total-stake?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberTotalStakeResponse, resp, err := apiClient.V1SharderGetGraphBlobberTotalStake(
+			model.GetGraphBlobberTotalStakeRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberTotalStakeResponse)
 	})
 
 	t.Run("Get graph of opened challenges of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
-		//curl --location -g --request GET  'http://192.168.1.100:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/graph-blobber-challenges-open?data-points=17&id='$BLOBBERID
+
+		wallet := apiClient.RegisterWallet(t)
+
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberChallengesOpenResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallangesOpen(
+			model.GetGraphBlobberChallengesOpenRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberChallengesOpenResponse)
 	})
 }
