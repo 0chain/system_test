@@ -71,7 +71,8 @@ func TestAtlusChimney(t *testing.T) {
 
 			totalTotalChallengesBefore := getTotalTotalChallengesResponse.TotalTotalChallenges
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -119,7 +120,8 @@ func TestAtlusChimney(t *testing.T) {
 
 			totalSuccessfulChallengesBefore := getTotalSuccessfulChallengesResponse.TotalSuccessfulChallenges
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -167,7 +169,8 @@ func TestAtlusChimney(t *testing.T) {
 
 			totalAllocatedStorageBefore := getTotalAllocatedStorageResponse.TotalAllocatedStorage
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -233,7 +236,8 @@ func TestAtlusChimney(t *testing.T) {
 
 			totalStoredDataBefore := getTotalStoredDataResponse.TotalStoredData
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -290,7 +294,8 @@ func TestAtlusChimney(t *testing.T) {
 
 			totalBlobberCapacityBefore := getTotalBlobberCapacityResponse.TotalBlobberCapacity
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -316,7 +321,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberServiceChargeResponse, resp, err := apiClient.V1SharderGetGraphBlobberServiceCharge(
@@ -335,7 +341,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberServiceChargeResponse, resp, err := apiClient.V1SharderGetGraphBlobberServiceCharge(
@@ -354,7 +361,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberChallengesPassed, resp, err := apiClient.V1SharderGetGraphBlobberChallengesPassed(
@@ -373,7 +381,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberChallengesPassed, resp, err := apiClient.V1SharderGetGraphBlobberChallengesPassed(
@@ -392,7 +401,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberChallengesCompletedResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallengesCompleted(
@@ -411,7 +421,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberChallengesCompletedResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallengesCompleted(
@@ -430,7 +441,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberInactiveRoundsResponse, resp, err := apiClient.V1SharderGetGraphBlobberInactiveRounds(
@@ -465,7 +477,8 @@ func TestAtlusChimney(t *testing.T) {
 			require.NotNil(t, resp)
 			require.NotNil(t, getGraphBlobberInactiveRoundsBefore)
 
-			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			sdkClient.UploadFile(t, allocationID)
@@ -494,7 +507,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberWritePriceResponse, resp, err := apiClient.V1SharderGetGraphBlobberWritePrice(
@@ -513,7 +527,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberCapacityResponse, resp, err := apiClient.V1SharderGetGraphBlobberCapacity(
@@ -532,7 +547,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberAllocatedResponse, resp, err := apiClient.V1SharderGetGraphBlobberAllocated(
@@ -551,7 +567,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
@@ -570,7 +587,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberReadDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberReadData(
@@ -589,7 +607,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberOffersTotalResponse, resp, err := apiClient.V1SharderGetGraphBlobberOffersTotal(
@@ -608,7 +627,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberUnstakeTotalResponse, resp, err := apiClient.V1SharderGetGraphBlobberUnstakeTotal(
@@ -627,7 +647,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberTotalStakeResponse, resp, err := apiClient.V1SharderGetGraphBlobberTotalStake(
@@ -646,7 +667,8 @@ func TestAtlusChimney(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
 		getGraphBlobberChallengesOpenResponse, resp, err := apiClient.V1SharderGetGraphBlobberChallangesOpen(
