@@ -150,7 +150,7 @@ func TestSharderStake(t *testing.T) {
 
 	// todo rewards not transferred to wallet until a collect reward transaction
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
-		//t.Skip("rewards not transferred to wallet until a collect reward transaction")
+		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
