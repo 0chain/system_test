@@ -14,7 +14,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -24,12 +23,12 @@ import (
 )
 
 func TestLivestreamDownload(t *testing.T) {
-
 	KillFFMPEG()
 
 	defer KillFFMPEG()
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
+
 		feed, ok := getFeed()
 
 		if !ok {
@@ -69,50 +68,17 @@ func TestLivestreamDownload(t *testing.T) {
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
 
-		wg := &sync.WaitGroup{}
-		wg.Add(2)
-
-		errUploadChan := make(chan error, 1)
-		errDownloadChan := make(chan error, 1)
-		signalForDownload := make(chan bool, 1)
-		signalForUpload := make(chan bool, 1)
-
-		go startUploadFeed1(wg, errUploadChan, signalForDownload, signalForUpload, t, "feed", configPath, localfolderForUpload, createParams(map[string]interface{}{
+		err = startUploadAndDownloadFeed(t, "feed", configPath, localfolderForUpload, localfolderForDownload, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForUpload,
 			"feed":       feed,
-		}))
-
-		select {
-		case s := <-signalForDownload:
-			if s == true {
-				break
-			}
-		}
-
-		go startDownloadFeed(wg, errDownloadChan, t, signalForUpload, configPath, localfolderForDownload, createParams(map[string]interface{}{
+		}), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForDownload,
 		}))
-
-		wg.Wait()
-
-		err = <-errUploadChan
-
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
-
-		err = <-errDownloadChan
-		require.Nil(t, err, "error in killing download command")
-
-		close(errDownloadChan)
-		close(errUploadChan)
-		close(signalForUpload)
-		close(signalForDownload)
-
-		require.Nil(t, err, "error in killing download command")
+		require.Nil(t, err, "error in startUploadAndDownloadFeed")
 
 		hashmap := make(map[string]string)
 
@@ -220,7 +186,7 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
-
+		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
 		_ = initialiseTest(t, walletOwner, true)
@@ -254,49 +220,16 @@ func TestLivestreamDownload(t *testing.T) {
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
 
-		wg := &sync.WaitGroup{}
-		wg.Add(2)
-
-		errUploadChan := make(chan error, 1)
-		errDownloadChan := make(chan error, 1)
-		signalForDownload := make(chan bool, 1)
-		signalForUpload := make(chan bool, 1)
-
-		go startUploadFeed1(wg, errUploadChan, signalForDownload, signalForUpload, t, "stream", configPath, localfolderForUpload, createParams(map[string]interface{}{
+		err = startUploadAndDownloadFeed(t, "stream", configPath, localfolderForUpload, localfolderForDownload, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForUpload,
-		}))
-
-		select {
-		case s := <-signalForDownload:
-			if s == true {
-				break
-			}
-		}
-
-		go startDownloadFeed(wg, errDownloadChan, t, signalForUpload, configPath, localfolderForDownload, createParams(map[string]interface{}{
+		}), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForDownload,
 		}))
-
-		wg.Wait()
-
-		err = <-errUploadChan
-
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
-
-		err = <-errDownloadChan
-		require.Nil(t, err, "error in killing download command")
-
-		close(errDownloadChan)
-		close(errUploadChan)
-		close(signalForUpload)
-		close(signalForDownload)
-
-		require.Nil(t, err, "error in killing download command")
+		require.Nil(t, err, "error in startUploadAndDownloadFeed")
 
 		hashmap := make(map[string]string)
 
@@ -405,6 +338,7 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
+
 		feed, ok := getFeed()
 
 		if !ok {
@@ -445,51 +379,17 @@ func TestLivestreamDownload(t *testing.T) {
 		defer os.RemoveAll(localfolderForUpload)
 		defer os.RemoveAll(localfolderForDownload)
 
-		wg := &sync.WaitGroup{}
-		wg.Add(2)
-
-		errUploadChan := make(chan error, 1)
-		errDownloadChan := make(chan error, 1)
-		signalForDownload := make(chan bool, 1)
-		signalForUpload := make(chan bool, 1)
-
-		go startUploadFeed1(wg, errUploadChan, signalForDownload, signalForUpload, t, "feed", configPath, localfolderForUpload, createParams(map[string]interface{}{
+		err = startUploadAndDownloadFeed(t, "feed", configPath, localfolderForUpload, localfolderForDownload, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForUpload,
 			"feed":       feed,
-		}))
-
-		select {
-		case s := <-signalForDownload:
-			if s == true {
-				break
-			}
-		}
-
-		go startDownloadFeed(wg, errDownloadChan, t, signalForUpload, configPath, localfolderForDownload, createParams(map[string]interface{}{
+		}), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpathForDownload,
-			"delay":      10,
 		}))
-
-		wg.Wait()
-
-		err = <-errUploadChan
-
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
-
-		err = <-errDownloadChan
-		require.Nil(t, err, "error in killing download command")
-
-		close(errDownloadChan)
-		close(errUploadChan)
-		close(signalForUpload)
-		close(signalForDownload)
-
-		require.Nil(t, err, "error in killing download command")
+		require.Nil(t, err, "error in startUploadAndDownloadFeed")
 
 		hashmap := make(map[string]string)
 
@@ -597,40 +497,31 @@ func TestLivestreamDownload(t *testing.T) {
 
 }
 
-func startUploadFeed1(wg *sync.WaitGroup, errChan chan error, signalForDownload chan bool, signalForUpload chan bool, t *testing.T, command, cliConfigFilename, localFolder, params string) {
-	defer wg.Done()
+func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
 
+	//	err := startUploadFeed1(t, command, cliConfigFilename, localfolderForUpload, uploadParams)
 	t.Logf("Starting upload of live stream to zbox...")
-	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, params)
+	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
 
-	ready := waitTsFilesReady(t, localFolder)
+	ready := waitTsFilesReady(t, localfolderForUpload)
 	if !ready {
 		defer cmd.Process.Kill() //nolint: errcheck
 
-		errChan <- errors.New("download video files is timeout")
-		return
+		return errors.New("download video files is timeout")
 	}
+	err = startDownloadFeed(t, cliConfigFilename, localfolderForDownload, downloadParams)
+	require.Nil(t, err, "error in startDownloadFeed")
 
-	signalForDownload <- true
-
-	select {
-	case k := <-signalForUpload:
-		if k == true {
-			break
-		}
-	}
-
-	// Kills upload process as well as it's child processes
 	err = cmd.Process.Kill()
-	errChan <- err
+	require.Nil(t, err, "error in killing process")
+
+	return nil
 }
 
-func startDownloadFeed(wg *sync.WaitGroup, errChan chan error, t *testing.T, signalForUpload chan bool, cliConfigFilename, localFolder, params string) {
-
-	defer wg.Done()
+func startDownloadFeed(t *testing.T, cliConfigFilename, localFolder, params string) error {
 
 	t.Logf("Starting download of live stream from zbox.")
 
@@ -638,19 +529,17 @@ func startDownloadFeed(wg *sync.WaitGroup, errChan chan error, t *testing.T, sig
 
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 
-	require.Nil(t, err, "error in downloading a live feed")
+	require.Nil(t, err, "error in downloading the live feed")
 
 	ready := waitTsFilesReady(t, localFolder)
 
 	if !ready {
 		defer cmd.Process.Kill() //nolint: errcheck
 
-		errChan <- errors.New("download video files is timeout")
-		return
+		return errors.New("download video files is timeout")
 	}
-	signalForUpload <- true
 
 	err = cmd.Process.Kill()
 
-	errChan <- err
+	return err
 }
