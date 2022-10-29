@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/0chain/gosdk/core/common"
 	currency "github.com/0chain/system_test/internal/currency"
 )
 
@@ -101,6 +102,35 @@ type Blobber struct {
 
 type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
+}
+
+type RecentlyAddedRefResult struct {
+	Offset int    `json:"offset"`
+	Refs   []ORef `json:"refs"`
+}
+
+type ORef struct {
+	SimilarField
+	ID int64 `json:"id"`
+}
+
+type SimilarField struct {
+	Type                string           `json:"type"`
+	AllocationID        string           `json:"allocation_id"`
+	LookupHash          string           `json:"lookup_hash"`
+	Name                string           `json:"name"`
+	Path                string           `json:"path"`
+	PathHash            string           `json:"path_hash"`
+	ParentPath          string           `json:"parent_path"`
+	PathLevel           int              `json:"level"`
+	Size                int64            `json:"size"`
+	ActualFileSize      int64            `json:"actual_file_size"`
+	ActualFileHash      string           `json:"actual_file_hash"`
+	MimeType            string           `json:"mimetype"`
+	ActualThumbnailSize int64            `json:"actual_thumbnail_size"`
+	ActualThumbnailHash string           `json:"actual_thumbnail_hash"`
+	CreatedAt           common.Timestamp `json:"created_at"`
+	UpdatedAt           common.Timestamp `json:"updated_at"`
 }
 
 type ListFileResult struct {
