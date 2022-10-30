@@ -6,7 +6,6 @@ import (
 	"io"
 	"reflect"
 	"regexp"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -434,10 +433,6 @@ func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
 	err = json.Unmarshal([]byte(output[0]), &miners)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
-
-	sort.Slice(miners.Nodes, func(i, j int) bool {
-		return miners.Nodes[i].ID < miners.Nodes[j].ID
-	})
 
 	return miners
 }

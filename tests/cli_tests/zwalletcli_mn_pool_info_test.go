@@ -41,12 +41,9 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		t.Logf(miner.ID)
-
 		if miner.ID != minerNodeDelegateWallet.ClientID {
 			break
 		}
-
 	}
 
 	var (
@@ -82,7 +79,6 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *testing.T) {
-		//		t.Skip("broken...")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -100,7 +96,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Regexp(t, lockOutputRegex, output[0])
 
 		var poolsInfo climodel.DelegatePool
-		t.Logf("SHARDER ID: %s", sharder.ID)
+
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
 		}), true)
