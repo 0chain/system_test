@@ -14,7 +14,7 @@ func init() {
 
 	err := bls.Init(bls.CurveFp254BNb)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(err) //nolint
 	}
 	BlsSignerInstance = &herumiBls{}
 }
