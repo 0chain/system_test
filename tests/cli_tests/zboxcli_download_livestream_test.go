@@ -42,7 +42,7 @@ func TestLivestreamDownload(t *testing.T) {
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 0.5,
 		}))
-		t.Log(output)
+
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 
 		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
