@@ -1,9 +1,10 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/model"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -25,7 +26,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -75,7 +76,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -123,7 +124,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)

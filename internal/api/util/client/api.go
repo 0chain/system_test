@@ -853,14 +853,14 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
 			ClientID:            wallet.Id,
 			ClientKey:           wallet.PublicKey,
-			BlobberRequirements: blobberRequirements,
+			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
