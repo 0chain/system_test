@@ -498,8 +498,6 @@ func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 }
 
 func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
-
-	//	err := startUploadFeed1(t, command, cliConfigFilename, localfolderForUpload, uploadParams)
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
