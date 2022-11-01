@@ -147,9 +147,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	// todo rewards not transferred to wallet until a collect reward transaction
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
-		//t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -160,26 +158,6 @@ func TestSharderStake(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &blobbers)
-		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-
-		// Pick a random blobber
-		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-
-		// Stake tokens against this blobber
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"tokens":     0.5,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
-
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"id":     sharder.ID,
 			"tokens": 1,
@@ -189,18 +167,9 @@ func TestSharderStake(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-			"provider_type": "blobber",
-			"provider_id":   blobber.Id,
-		}), true)
-		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "transferred reward tokens", output[0])
-
 		poolsInfo, err := pollForPoolInfo(t, sharder.ID)
 		require.Nil(t, err)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		t.Logf("BALANCE: %d\nPOOLS INFO REWARD: %d\n", balance, poolsInfo.Reward)
 		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
 
 		// teardown
