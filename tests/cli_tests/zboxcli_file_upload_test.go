@@ -718,8 +718,7 @@ func TestUpload(t *testing.T) {
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	//FIXME: Filenames longer than 100 characters are rejected https://github.com/0chain/zboxcli/issues/249
-	t.Run("BROKEN Upload File longer than 99 chars should fail gracefully but does not see zboxcli/issues/249", func(t *testing.T) {
+	t.Run("Upload File longer than 100 chars should fail", func(t *testing.T) {
 		t.Parallel()
 
 		allocSize := int64(1 * MB)
@@ -731,9 +730,9 @@ func TestUpload(t *testing.T) {
 			"data":   1,
 		})
 
-		pathTempDir := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(100)
-		filename := fmt.Sprintf("%s%s%s_test.txt", pathTempDir, string(os.PathSeparator), randomFilename)
+		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		randomFilename := cliutils.RandomAlphaNumericString(101)
+		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
@@ -743,36 +742,8 @@ func TestUpload(t *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 3)
-		require.Contains(t, output[1], "consensus_not_met")
-	})
-
-	t.Run("Upload File longer than 167 chars should fail gracefully", func(t *testing.T) {
-		t.Parallel()
-
-		allocSize := int64(1 * MB)
-		fileSize := int64(512 * KB)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"parity": 1,
-			"data":   1,
-		})
-
-		pathTempDir := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(167)
-		filename := fmt.Sprintf("%s%s%s_test.txt", pathTempDir, string(os.PathSeparator), randomFilename)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, false)
-		require.NotNil(t, err, "error uploading file")
-		require.Len(t, output, 3)
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "filename is longer than 100 characters")
 	})
 }
 

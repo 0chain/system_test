@@ -5,6 +5,7 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"sync"
 	"testing"
 
@@ -27,7 +28,7 @@ func init() {
 	err := bls.Init(bls.CurveFp254BNb)
 
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 }
 
