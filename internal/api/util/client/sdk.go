@@ -62,6 +62,7 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 		crypto.BLS0Chain,
 		nil,
 		int64(wallet.Nonce),
+		0,
 	)
 	require.NoError(t, err, ErrInitStorageSDK)
 }
