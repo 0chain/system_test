@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -111,7 +112,7 @@ func getConfigDir() string {
 	var configDir string
 	curr, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	configDir = filepath.Join(curr, "config")
 	return configDir
@@ -121,7 +122,7 @@ func getZCNDir() string {
 	var configDir string
 	home, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	configDir = home + "/.zcn"
 	return configDir

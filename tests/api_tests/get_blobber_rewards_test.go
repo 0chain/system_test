@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
@@ -17,7 +18,8 @@ func TestBlobberRewards(t *testing.T) {
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -62,7 +64,8 @@ func TestBlobberRewards(t *testing.T) {
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -103,7 +106,8 @@ func TestBlobberRewards(t *testing.T) {
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
