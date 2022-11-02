@@ -10,15 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// todo: enable tests
 func TestListAuthorizers(t *testing.T) {
 	t.Parallel()
 
 	t.Run("List authorizers should work", func(t *testing.T) {
-		t.Skip("Temporarily skipping due to deployment issue")
 		t.Parallel()
 
 		output, err := getAuthorizersList(t, true)
+
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
 	})
 }
