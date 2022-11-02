@@ -11,11 +11,7 @@ import (
 )
 
 func TestBlobberRewards(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
-		t.Parallel()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -60,8 +56,6 @@ func TestBlobberRewards(t *testing.T) {
 	})
 
 	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
