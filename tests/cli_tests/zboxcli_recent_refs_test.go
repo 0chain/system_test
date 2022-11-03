@@ -125,7 +125,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 
 		require.Equal(t, 0, result.Offset)
 		require.Len(t, result.Refs, 0)
-
 	})
 
 	t.Run("Refs of someone else's allocation should return zero refs", func(t *testing.T) {
@@ -206,7 +205,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		aggregatedOutput = strings.ToLower(strings.Join(output, " "))
 		require.Contains(t, aggregatedOutput, "invalid argument")
 	})
-
 }
 
 func listRecentlyAddedRefs(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {

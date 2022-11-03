@@ -261,7 +261,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		t.Parallel()
@@ -572,7 +571,6 @@ func getFeed() (string, bool) {
 
 		m++
 	}
-
 }
 
 func KillFFMPEG() {
