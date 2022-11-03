@@ -35,7 +35,6 @@ func TestSharderStake(t *testing.T) {
 	)
 
 	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *testing.T) {
-		t.Skip("broken...")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -148,9 +147,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	// todo rewards not transferred to wallet until a collect reward transaction
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
-		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -165,6 +162,7 @@ func TestSharderStake(t *testing.T) {
 			"id":     sharder.ID,
 			"tokens": 1,
 		}), true)
+
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
