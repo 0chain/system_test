@@ -423,6 +423,20 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	return sharders
 }
 
+func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
+	// Get miner list.
+	output, err := getMinersForWallet(t, configPath, wallet)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	return miners
+}
+
 func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
 	// Get miner's node details (this has the total_stake and pools populated).
 	output, err := getNode(t, configPath, miner_id)
