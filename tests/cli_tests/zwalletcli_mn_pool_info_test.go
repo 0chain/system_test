@@ -36,12 +36,9 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 
 	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
 
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, miner02NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
-
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
-		if miner.ID != minerNodeDelegateWallet.ClientID {
+		if miner.ID == miner03ID {
 			break
 		}
 	}
