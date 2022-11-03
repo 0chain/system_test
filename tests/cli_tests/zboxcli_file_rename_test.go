@@ -254,9 +254,10 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 				"remotepath": path.Join(remotePathPrefix, deleteFileNames[i]),
 				"json":       "",
 			}), true)
-			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+
+			require.NotNil(t, err)
 			require.Len(t, output, 1)
-			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+			require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 		}
 	})
 
@@ -447,7 +448,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "filename is longer than 100 characters")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)

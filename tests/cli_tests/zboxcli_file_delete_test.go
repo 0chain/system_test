@@ -102,9 +102,8 @@ func TestFileDelete(t *testing.T) {
 				"json":       "",
 			}), true)
 
-			require.Nil(t, err, "List files returned nil", err, strings.Join(output, "\n"))
-			require.Len(t, output, 1, "Len of output is not enough")
-			require.Equal(t, "null", output[0], "Output is not 'null'", strings.Join(output, "\n"))
+			require.NotNil(t, err, strings.Join(output, "\n"))
+			require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 		}
 	})
 
@@ -220,9 +219,9 @@ func TestFileDelete(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+
 	})
 
 	t.Run("delete existing non-root directory should work", func(t *testing.T) {
@@ -248,9 +247,8 @@ func TestFileDelete(t *testing.T) {
 			"remotepath": remotepath,
 			"json":       "",
 		}), true)
-		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
 	t.Run("delete existing file with thumbnail should work", func(t *testing.T) {
