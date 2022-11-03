@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLivestreamDownload(t *testing.T) {
+func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 	KillFFMPEG()
 
 	defer KillFFMPEG()
@@ -110,7 +110,7 @@ func TestLivestreamDownload(t *testing.T) {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -262,7 +262,7 @@ func TestLivestreamDownload(t *testing.T) {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -422,7 +422,7 @@ func TestLivestreamDownload(t *testing.T) {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -498,8 +498,6 @@ func TestLivestreamDownload(t *testing.T) {
 }
 
 func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
-
-	//	err := startUploadFeed1(t, command, cliConfigFilename, localfolderForUpload, uploadParams)
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
