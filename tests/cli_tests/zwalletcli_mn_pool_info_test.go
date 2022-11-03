@@ -30,13 +30,13 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		}
 	}
 
-	if _, err := os.Stat("./config/" + miner03NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner03NodeDelegateWalletName+"_wallet.json")
+	if _, err := os.Stat("./config/" + miner02NodeDelegateWalletName + "_wallet.json"); err != nil {
+		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
 	}
 
-	miners := getMinersListForWallet(t, miner03NodeDelegateWalletName)
+	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
 
-	minerNodeDelegateWallet, err := getWalletForName(t, configPath, miner03NodeDelegateWalletName)
+	minerNodeDelegateWallet, err := getWalletForName(t, configPath, miner02NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching minerNodeDelegate wallet")
 
 	var miner climodel.Node
