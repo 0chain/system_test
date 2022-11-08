@@ -71,8 +71,32 @@ func TestFileReferencePath(t *testing.T) {
 		require.Nil(t, err)
 		require.Empty(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
+	})
 
-		// TODO add more assertions once there blobber endpoints are documented
+	t.Run("Get file ref with invalid sign should fail", func(t *testing.T) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		// TODO: replace with native "Upload API" call
+		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, blobberID)
+
+		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		blobberUrl := blobber.BaseURL
+
+		blobberFileRefPathRequest := newBlobberFileRefPathRequest(blobberUrl, sdkWallet, allocation.ID, "invalid_signature", remoteFilePath)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefPaths(t, blobberFileRefPathRequest, client.HttpOkStatus)
+		// FIXME: error should be returned
+		require.Nil(t, err)
+		require.Empty(t, blobberFileRefsResponse)
+		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }
 
