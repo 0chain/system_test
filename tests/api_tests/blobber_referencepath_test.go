@@ -38,8 +38,10 @@ func TestFileReferencePath(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
-		require.Equal(t, blobberFileRefsResponse.Ref.Path, remoteFilePath)
-		require.Equal(t, blobberFileRefsResponse.Ref.Type, "f")
+		require.Equal(t, blobberFileRefsResponse.Ref.Path, "/")
+		require.NotEmpty(t, blobberFileRefsResponse.Ref.Children)
+		require.Equal(t, blobberFileRefsResponse.Ref.Children[0].Path, remoteFilePath)
+		require.Equal(t, blobberFileRefsResponse.Ref.Children[0].Type, "f")
 
 		// TODO add more assertions once there blobber endpoints are documented
 	})
@@ -152,7 +154,8 @@ func TestFileReferencePath(t *testing.T) {
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefPaths(t, blobberFileRefPathRequest, client.HttpOkStatus)
 		// FIXME: error should be returned
 		require.Nil(t, err)
-		require.Empty(t, blobberFileRefsResponse)
+		require.Empty(t, blobberFileRefsResponse.List)
+		// FIXME: Status code should be 404, it's 200 as of now
 		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
 	})
 }
