@@ -22,6 +22,7 @@ import (
 const (
 	HttpOkStatus         = 200
 	HttpBadRequestStatus = 400
+	HttpNotFoundStatus   = 404
 )
 
 // Contains all methods used for http based requests
@@ -51,7 +52,7 @@ const (
 	ClientGetBalance           = "/v1/client/get/balance"
 	GetNetworkDetails          = "/network"
 	GetFileRef                 = "/v1/file/refs/:allocation_id"
-	GetFileRefPath 			   = "/v1/file/objecttree/:allocation_id"
+	GetFileRefPath             = "/v1/file/objecttree/:allocation_id"
 )
 
 // Contains all used service providers
