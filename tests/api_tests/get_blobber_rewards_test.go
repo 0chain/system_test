@@ -31,7 +31,7 @@ func TestBlobberRewards(t *testing.T) {
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
 
@@ -78,7 +78,7 @@ func TestBlobberRewards(t *testing.T) {
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
 
@@ -133,7 +133,7 @@ func TestBlobberRewards(t *testing.T) {
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*20, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
 				if poolDelegateInfo.DelegateID == sdkWallet.Id {

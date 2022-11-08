@@ -1006,7 +1006,8 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 	urlBuilder := NewURLBuilder().
 		SetPath(GetStakePoolStat).
 		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
+		AddParams("provider_id", scRestGetStakePoolStatRequest.ProviderID).
+		AddParams("provider_type", scRestGetStakePoolStatRequest.ProviderType)
 
 	resp, err := c.executeForAllServiceProviders(
 		urlBuilder,
@@ -1020,12 +1021,13 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 	return scRestGetStakePoolStatResponse, resp, err
 }
 
-func (c *APIClient) GetStakePoolStat(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
+func (c *APIClient) GetStakePoolStat(t *testing.T, providerID, providerType string) *model.SCRestGetStakePoolStatResponse {
 	t.Log("Get stake pool stat...")
 
 	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
 		model.SCRestGetStakePoolStatRequest{
-			BlobberID: blobberID,
+			ProviderID: providerID,
+			ProviderType: providerType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)

@@ -624,7 +624,8 @@ type BlobberDownloadFileResponse struct {
 }
 
 type SCRestGetStakePoolStatRequest struct {
-	BlobberID string
+	ProviderType string
+	ProviderID string
 }
 
 type SCRestGetStakePoolStatResponse struct {
