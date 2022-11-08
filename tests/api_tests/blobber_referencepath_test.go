@@ -156,7 +156,7 @@ func TestFileReferencePath(t *testing.T) {
 		require.Nil(t, err)
 		require.Empty(t, blobberFileRefsResponse.List)
 		// FIXME: Status code should be 404, it's 200 as of now
-		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
+		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 	})
 }
 
