@@ -52,7 +52,8 @@ const (
 	ClientGetBalance           = "/v1/client/get/balance"
 	GetNetworkDetails          = "/network"
 	GetFileRef                 = "/v1/file/refs/:allocation_id"
-	GetFileRefPath             = "/v1/file/objecttree/:allocation_id"
+	GetFileRefPath             = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree              = "/v1/file/objecttree/:allocation_id"
 )
 
 // Contains all used service providers
@@ -1126,4 +1127,25 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *testing.T, blobberFileRefPathReq
 		},
 		HttpGETMethod)
 	return blobberFileRefPathResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberObjectTree(t *testing.T, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
+	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
+
+	url := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
+		"X-App-Client-Key":       blobberObjectTreeRequest.ClientKey,
+		"X-App-Client-Signature": blobberObjectTreeRequest.ClientSignature,
+	}
+	resp, err := c.executeForServiceProvider(
+		url,
+		model.ExecutionRequest{
+			Dst:                &blobberObjectTreePathResponse,
+			RequiredStatusCode: requiredStatusCode,
+			Headers:            headers,
+		},
+		HttpGETMethod)
+	return blobberObjectTreePathResponse, resp, err
 }

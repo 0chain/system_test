@@ -426,6 +426,10 @@ type BlobberFileRefPathRequest struct {
 	URL, Path, AllocationID, ClientID, ClientKey, ClientSignature string
 }
 
+type BlobberObjectTreeRequest struct {
+	URL, Path, AllocationID, ClientID, ClientKey, ClientSignature string
+}
+
 type RefsData struct {
 	ID             int    `json:"id"`
 	Type           string `json:"type"`
@@ -519,6 +523,26 @@ type BlobberFileRefPathResponse struct {
 	Meta map[string]interface{}        `json:"meta_data"`
 	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
 	Ref  *Ref
+}
+
+type WriteMarker struct {
+	AllocationRoot         string `gorm:"column:allocation_root;size:64;primaryKey" json:"allocation_root"`
+	PreviousAllocationRoot string `gorm:"column:prev_allocation_root;size:64" json:"prev_allocation_root"`
+	AllocationID           string `gorm:"column:allocation_id;size:64;index:idx_seq,unique,priority:1" json:"allocation_id"`
+	Size                   int64  `gorm:"column:size" json:"size"`
+	BlobberID              string `gorm:"column:blobber_id;size:64" json:"blobber_id"`
+	Timestamp              int64  `gorm:"column:timestamp" json:"timestamp"`
+	ClientID               string `gorm:"column:client_id;size:64" json:"client_id"`
+	Signature              string `gorm:"column:signature;size:64" json:"signature"`
+
+	LookupHash  string `gorm:"column:lookup_hash;size:64;" json:"lookup_hash"`
+	Name        string `gorm:"column:name;size:100;" json:"name"`
+	ContentHash string `gorm:"column:content_hash;size:64;" json:"content_hash"`
+}
+
+type BlobberObjectTreePathResponse struct {
+	*BlobberFileRefPathResponse
+	LatestWM *WriteMarker `json:"latest_write_marker"`
 }
 
 type BlobberUploadFileMeta struct {
