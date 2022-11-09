@@ -10,11 +10,7 @@ import (
 )
 
 func TestHashnodeRoot(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -50,8 +46,6 @@ func TestHashnodeRoot(t *testing.T) {
 	})
 
 	t.Run("Get hashnode root for non-existent allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
