@@ -1,13 +1,10 @@
 package api_tests
 
 import (
-	"bytes"
-	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,24 +14,19 @@ func TestOpenChallenges(t *testing.T) {
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
 		t.Parallel()
 
-		registeredWallet, keyPair := registerWallet(t)
+		wallet := apiClient.RegisterWallet(t)
 
-		blobbers, blobberRequirements := getBlobbersMatchingRequirements(t, registeredWallet, keyPair, 147483648, 2, 2, time.Minute*2)
-		require.NotNil(t, blobbers)
-		require.Greater(t, len(*blobbers), 3)
-		require.NotNil(t, blobberRequirements)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		blobberId := (*allocationBlobbers.Blobbers)[0]
 
-		blobberId := (*blobbers)[0]
-		response, err := v1ScrestOpenChallenges(t, STORAGE_SMART_CONTRACT_ADDRESS, blobberId, util.ConsensusByHttpStatus("200 OK"))
-		require.Equal(t, "200 OK", response.Status())
+		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(
+			model.SCRestOpenChallengeRequest{
+				BlobberID: blobberId,
+			},
+			client.HttpOkStatus)
 		require.Nil(t, err)
-		bytesReader := bytes.NewBuffer(response.Body())
-		d := json.NewDecoder(bytesReader)
-		d.UseNumber()
-
-		var blobberChallenges model.BCChallengeResponse
-		blobberChallenges.Challenges = make([]*model.ChallengeEntity, 0)
-		err = d.Decode(&blobberChallenges)
-		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestOpenChallengeResponse)
 	})
 }

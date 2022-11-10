@@ -1,7 +1,10 @@
-package climodel
+package model
 
 import (
 	"time"
+
+	"github.com/0chain/gosdk/core/common"
+	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
@@ -101,6 +104,35 @@ type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
 }
 
+type RecentlyAddedRefResult struct {
+	Offset int    `json:"offset"`
+	Refs   []ORef `json:"refs"`
+}
+
+type ORef struct {
+	SimilarField
+	ID int64 `json:"id"`
+}
+
+type SimilarField struct {
+	Type                string           `json:"type"`
+	AllocationID        string           `json:"allocation_id"`
+	LookupHash          string           `json:"lookup_hash"`
+	Name                string           `json:"name"`
+	Path                string           `json:"path"`
+	PathHash            string           `json:"path_hash"`
+	ParentPath          string           `json:"parent_path"`
+	PathLevel           int              `json:"level"`
+	Size                int64            `json:"size"`
+	ActualFileSize      int64            `json:"actual_file_size"`
+	ActualFileHash      string           `json:"actual_file_hash"`
+	MimeType            string           `json:"mimetype"`
+	ActualThumbnailSize int64            `json:"actual_thumbnail_size"`
+	ActualThumbnailHash string           `json:"actual_thumbnail_hash"`
+	CreatedAt           common.Timestamp `json:"created_at"`
+	UpdatedAt           common.Timestamp `json:"updated_at"`
+}
+
 type ListFileResult struct {
 	Name            string    `json:"name"`
 	Path            string    `json:"path"`
@@ -188,10 +220,10 @@ type CommitResponse struct {
 		LookupHash      string          `json:"LookupHash"`
 		Hash            string          `json:"Hash"`
 		MimeType        string          `json:"MimeType"`
+		EncryptedKey    string          `json:"EncryptedKey"`
 		Size            int64           `json:"Size"`
 		ActualFileSize  int64           `json:"ActualFileSize"`
 		ActualNumBlocks int             `json:"ActualNumBlocks"`
-		EncryptedKey    string          `json:"EncryptedKey"`
 		CommitMetaTxns  []CommitMetaTxn `json:"CommitMetaTxns"`
 		Collaborators   []Collaborator  `json:"Collaborators"`
 	} `json:"MetaData"`
@@ -247,9 +279,9 @@ type StakePoolSettings struct {
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
 	// MinStake allowed.
-	MinStake int64 `json:"min_stake"`
+	MinStake currency.Coin `json:"min_stake"`
 	// MaxStake allowed.
-	MaxStake int64 `json:"max_stake"`
+	MaxStake currency.Coin `json:"max_stake"`
 	// MaxNumDelegates maximum allowed.
 	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
@@ -276,8 +308,10 @@ type StakePool struct {
 }
 
 type Node struct {
-	SimpleNode `json:"simple_miner"`
-	StakePool  `json:"stake_pool"`
+	SimpleNode  `json:"simple_miner"`
+	StakePool   `json:"stake_pool"`
+	Round       int64 `json:"round"`
+	TotalReward int64 `json:"total_reward"`
 }
 
 type SimpleNode struct {
@@ -452,3 +486,258 @@ type SendTransaction struct {
 	Txn    string `json:"tx"`
 	Nonce  string `json:"nonce"`
 }
+
+type Balance struct {
+	Txn     string `json:"txn"`
+	Round   int64  `json:"round"`
+	Balance int64  `json:"balance"`
+}
+
+type Block struct {
+	Block struct {
+		Version                        string `json:"version"`
+		CreationDate                   int64  `json:"creation_date"`
+		LatestFinalizedMagicBlockHash  string `json:"latest_finalized_magic_block_hash"`
+		LatestFinalizedMagicBlockRound int64  `json:"latest_finalized_magic_block_round"`
+		PrevHash                       string `json:"prev_hash"`
+		PrevVerificationTickets        []struct {
+			VerifierId string `json:"verifier_id"`
+			Signature  string `json:"signature"`
+		} `json:"prev_verification_tickets"`
+		MinerId             string               `json:"miner_id"`
+		Round               int64                `json:"round"`
+		RoundRandomSeed     int64                `json:"round_random_seed"`
+		RoundTimeoutCount   int64                `json:"round_timeout_count"`
+		StateHash           string               `json:"state_hash"`
+		Transactions        []*TransactionEntity `json:"transactions"`
+		VerificationTickets []struct {
+			VerifierId string `json:"verifier_id"`
+			Signature  string `json:"signature"`
+		} `json:"verification_tickets"`
+		Hash            string  `json:"hash"`
+		Signature       string  `json:"signature"`
+		ChainId         string  `json:"chain_id"`
+		ChainWeight     float64 `json:"chain_weight"`
+		RunningTxnCount int     `json:"running_txn_count"`
+	} `json:"block"`
+}
+
+type TransactionEntity struct {
+	PublicKey         string `json:"public_key,omitempty"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id"`
+	ToClientId        string `json:"to_client_id"`
+	TransactionData   string `json:"transaction_data"`
+	TransactionValue  int64  `json:"transaction_value"`
+	CreationDate      int64  `json:"creation_date"`
+	TransactionFee    int64  `json:"transaction_fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output,omitempty"`
+	TxnOutputHash     string `json:"txn_output_hash"`
+	TransactionNonce  int    `json:"transaction_nonce"`
+	Hash              string `json:"hash"`
+	ChainId           string `json:"chain_id"`
+	Signature         string `json:"signature"`
+	TransactionStatus int    `json:"transaction_status"`
+}
+
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
+
+type Transfer struct {
+	Minter string `json:"minter"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Amount int64  `json:"amount"`
+}
+
+type ValidationNode struct {
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+}
+
+type BlobberChallenge struct {
+	BlobberID  string       `json:"blobber_id"`
+	Challenges []Challenges `json:"challenges"`
+}
+
+type Challenges struct {
+	ID             string            `json:"id"`
+	Created        int64             `json:"created"`
+	Validators     []*ValidationNode `json:"validators"`
+	RandomNumber   int64             `json:"seed"`
+	AllocationID   string            `json:"allocation_id"`
+	AllocationRoot string            `json:"allocation_root"`
+	BlobberID      string            `json:"blobber_id"`
+	Responded      bool              `json:"responded"`
+}
+
+type Transaction struct {
+	Hash              string `json:"hash"`
+	Signature         string `json:"signature"`
+	PublicKey         string `json:"public_key,omitempty"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id"`
+	ChainId           string `json:"chain_id"`
+	ToClientId        string `json:"to_client_id"`
+	TransactionData   string `json:"transaction_data"`
+	TransactionValue  int64  `json:"transaction_value"`
+	CreationDate      int64  `json:"creation_date"`
+	TransactionFee    int64  `json:"transaction_fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output,omitempty"`
+	TxnOutputHash     string `json:"txn_output_hash"`
+	TransactionNonce  int    `json:"transaction_nonce"`
+}
+
+type TransactionData struct {
+	Name  string      `json:"name"`
+	Input interface{} `json:"input"`
+}
+
+type EventDBTransaction struct {
+	Hash              string `json:"hash" `
+	BlockHash         string `json:"block_hash"`
+	Round             int64  `json:"round"`
+	Version           string `json:"version"`
+	ClientId          string `json:"client_id" `
+	ToClientId        string `json:"to_client_id" `
+	TransactionData   string `json:"transaction_data"`
+	Value             int64  `json:"value"`
+	Signature         string `json:"signature"`
+	CreationDate      int64  `json:"creation_date"  `
+	Fee               int64  `json:"fee"`
+	TransactionType   int    `json:"transaction_type"`
+	TransactionOutput string `json:"transaction_output"`
+	OutputHash        string `json:"output_hash"`
+	Status            int    `json:"status"`
+}
+
+type EventDBBlock struct {
+	Hash                  string               `json:"hash"`
+	Version               string               `json:"version"`
+	CreationDate          int64                `json:"creation_date" `
+	Round                 int64                `json:"round" `
+	MinerID               string               `json:"miner_id"`
+	RoundRandomSeed       int64                `json:"round_random_seed"`
+	MerkleTreeRoot        string               `json:"merkle_tree_root"`
+	StateHash             string               `json:"state_hash"`
+	ReceiptMerkleTreeRoot string               `json:"receipt_merkle_tree_root"`
+	NumTxns               int                  `json:"num_txns"`
+	MagicBlockHash        string               `json:"magic_block_hash"`
+	PrevHash              string               `json:"prev_hash"`
+	Signature             string               `json:"signature"`
+	ChainId               string               `json:"chain_id"`
+	RunningTxnCount       string               `json:"running_txn_count"`
+	RoundTimeoutCount     int                  `json:"round_timeout_count"`
+	CreatedAt             time.Time            `json:"created_at"`
+	Transactions          []EventDBTransaction `json:"transactions"`
+}
+
+var StorageKeySettings = []string{
+	"owner_id",
+}
+
+var StorageFloatSettings = []string{
+	"cancellation_charge",
+	"free_allocation_settings.read_pool_fraction",
+	"validator_reward",
+	"blobber_slash",
+	"challenge_rate_per_mb_min",
+	"block_reward.sharder_ratio",
+	"block_reward.miner_ratio",
+	"block_reward.blobber_ratio",
+	"block_reward.gamma.alpha",
+	"block_reward.gamma.a",
+	"block_reward.gamma.b",
+	"block_reward.zeta.i",
+	"block_reward.zeta.k",
+	"block_reward.zeta.mu",
+}
+
+var StorageCurrencySettigs = []string{
+	"max_mint",
+	"readpool.min_lock",
+	"writepool.min_lock",
+	"stakepool.min_lock",
+	"max_total_free_allocation",
+	"max_individual_free_allocation",
+	"free_allocation_settings.read_price_range.min",
+	"free_allocation_settings.read_price_range.max",
+	"free_allocation_settings.write_price_range.min",
+	"free_allocation_settings.write_price_range.max",
+	"max_read_price",
+	"max_write_price",
+	"max_write_price",
+	"block_reward.block_reward",
+	"block_reward.qualifying_stake",
+}
+
+var StorageIntSettings = []string{
+
+	"min_alloc_size",
+	"min_blobber_capacity",
+	"free_allocation_settings.data_shards",
+	"free_allocation_settings.parity_shards",
+	"free_allocation_settings.size",
+	"max_blobbers_per_allocation",
+	"failed_challenges_to_cancel",
+	"failed_challenges_to_revoke_min_lock",
+	"max_challenges_per_generation",
+	"validators_per_challenge",
+	"max_delegates",
+	"cost.update_settings",
+	"cost.read_redeem",
+	"cost.commit_connection",
+	"cost.new_allocation_request",
+	"cost.update_allocation_request",
+	"cost.finalize_allocation",
+	"cost.cancel_allocation",
+	"cost.add_free_storage_assigner",
+	"cost.free_allocation_request",
+	"cost.free_update_allocation",
+	"cost.add_curator",
+	"cost.remove_curator",
+	"cost.blobber_health_check",
+	"cost.update_blobber_settings",
+	"cost.pay_blobber_block_rewards",
+	"cost.curator_transfer_allocation",
+	"cost.challenge_request",
+	"cost.challenge_response",
+	"cost.generate_challenges",
+	"cost.add_validator",
+	"cost.update_validator_settings",
+	"cost.add_blobber",
+	"cost.new_read_pool",
+	"cost.read_pool_lock",
+	"cost.read_pool_unlock",
+	"cost.write_pool_lock",
+	"cost.write_pool_unlock",
+	"cost.stake_pool_lock",
+	"cost.stake_pool_unlock",
+	"cost.stake_pool_pay_interests",
+	"cost.commit_settings_changes",
+	"cost.collect_reward",
+}
+var StorageBoolSettings = []string{
+	"challenge_enabled",
+}
+var StorageDurationSettings = []string{
+	"time_unit",
+	"min_offer_duration",
+	"min_alloc_duration",
+	"max_challenge_completion_time",
+	"stakepool.min_lock_period",
+	"free_allocation_settings.duration",
+}
+
+var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)

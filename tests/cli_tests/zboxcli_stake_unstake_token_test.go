@@ -17,7 +17,7 @@ import (
 func TestStakeUnstakeTokens(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Staked tokens should move from wallet to Blobber's stake pool info, unstaking should move them back to wallet", func(t *testing.T) {
+	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -48,9 +48,8 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, pool id: ([a-f0-9]{64})"), output[0])
-		stakePoolID := strings.Fields(output[0])[4]
-		require.Nil(t, err, "Error extracting pool Id from sp-lock output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
+		require.Nil(t, err, "Error extracting txn hash from sp-lock output", strings.Join(output, "\n"))
 
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
@@ -76,7 +75,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Pool Id returned by sp-lock should be found in sp-info with correct balance
 		found := false
 		for _, delegate := range delegates {
-			if delegate.ID == stakePoolID {
+			if delegate.ID == wallet.ClientID {
 				t.Log("Pool ID returned by sp-lock found in stake pool info...")
 				found = true
 				require.Equal(t, int64(5000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
@@ -84,23 +83,23 @@ func TestStakeUnstakeTokens(t *testing.T) {
 					"Delegate ID: ", delegate.DelegateID, "Wallet ID: ", wallet.ClientID)
 			}
 		}
-		require.True(t, found, "Pool id returned by sp-lock not found in blobber's sp-info", strings.Join(output, "\n"))
+		require.True(t, found, fmt.Sprintf("Pool id returned by sp-lock not found in blobber's sp-info: %s, clientID: %s",
+			strings.Join(output, "\n"), wallet.ClientID))
 
 		// Unstake the tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"pool_id":    stakePoolID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens has unlocked, pool deleted", output[0])
+		require.Equal(t, "tokens unlocked, pool deleted", output[0])
 
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ ZCN \(\d*\.?\d+ USD\)$`), output[0])
-		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?ZCN`).FindString(output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
 		newBalanceValue, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 		require.Nil(t, err, "error parsing float from balance")
 		require.GreaterOrEqual(t, newBalanceValue, float64(1.0))
@@ -122,7 +121,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		// Pool Id returned by sp-lock should be deleted from sp-info
 		found = false
 		for _, delegate := range delegates {
-			if delegate.ID == stakePoolID {
+			if delegate.ID == wallet.ClientID {
 				t.Log("Delegate ID found in stake pool information but it should have been deleted after unlocking staked tokens...")
 				found = true
 			}
@@ -130,19 +129,21 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.False(t, found, "Pool id found in blobber's sp-info even after unlocking tokens", strings.Join(output, "\n"))
 	})
 
-	t.Run("Staking tokens without specifying amout of tokens to lock should fail", func(t *testing.T) {
+	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = stakeTokens(t, configPath, "", false)
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": "-",
+		}), false)
 		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
 
-	t.Run("Staking tokens without specifying blobber lead to consensus failed on sharders", func(t *testing.T) {
+	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *testing.T) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -156,7 +157,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: can't get stake pool: value not present", output[0])
+		require.Equal(t, "missing flag: one of 'blobber_id' or 'validator_id' is required", output[0])
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *testing.T) {

@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	apimodel "github.com/0chain/system_test/internal/api/model"
+	//apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
@@ -348,7 +348,7 @@ func sendTokensFromWallet(t *testing.T, cliConfigFilename, toClientID string, to
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func getRoundBlockFromASharder(t *testing.T, round int64) apimodel.Block {
+func getRoundBlockFromASharder(t *testing.T, round int64) climodel.Block {
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -362,13 +362,13 @@ func getRoundBlockFromASharder(t *testing.T, round int64) apimodel.Block {
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body: %v", err)
 
-	var block apimodel.Block
+	var block climodel.Block
 	err = json.Unmarshal(resBody, &block)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 	return block
 }
 
-func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balance {
+func getNodeBalanceFromASharder(t *testing.T, client_id string) *climodel.Balance {
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -376,7 +376,7 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	res, err := apiGetBalance(sharderBaseUrl, client_id)
 	require.Nil(t, err, "Error retrieving client %s balance", client_id)
 	if res.StatusCode == 400 {
-		return &apimodel.Balance{
+		return &climodel.Balance{
 			Txn:     "",
 			Round:   0,
 			Balance: 0,
@@ -388,7 +388,7 @@ func getNodeBalanceFromASharder(t *testing.T, client_id string) *apimodel.Balanc
 	resBody, err := io.ReadAll(res.Body)
 	require.Nil(t, err, "Error reading response body")
 	strBody := string(resBody)
-	var startBalance apimodel.Balance
+	var startBalance climodel.Balance
 	err = json.Unmarshal(resBody, &startBalance)
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strBody, err)
 
@@ -423,6 +423,20 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	return sharders
 }
 
+func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
+	// Get miner list.
+	output, err := getMinersForWallet(t, configPath, wallet)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	return miners
+}
+
 func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
 	// Get miner's node details (this has the total_stake and pools populated).
 	output, err := getNode(t, configPath, miner_id)
@@ -455,6 +469,6 @@ func getMinerSCConfiguration(t *testing.T) map[string]float64 {
 	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 
-	_, returnVal := keyValuePairStringToMap(t, output)
+	_, returnVal := keyValuePairStringToMap(output)
 	return returnVal
 }
