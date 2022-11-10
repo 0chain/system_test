@@ -34,7 +34,6 @@ func TestBlobberRewards(t *testing.T) {
 			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-
 				if poolDelegateInfo.DelegateID == sdkWallet.Id {
 					rewards = poolDelegateInfo.Rewards
 					break
@@ -81,7 +80,6 @@ func TestBlobberRewards(t *testing.T) {
 			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-
 				if poolDelegateInfo.DelegateID == sdkWallet.Id {
 					rewards = poolDelegateInfo.Rewards
 					break
