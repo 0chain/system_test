@@ -10,6 +10,7 @@ import (
 	"time"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,6 +169,7 @@ func TestSharderStake(t *testing.T) {
 
 		poolsInfo, err := pollForPoolInfo(t, sharder.ID)
 		require.Nil(t, err)
+		cliutils.Wait(t, time.Second*15)
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
 
