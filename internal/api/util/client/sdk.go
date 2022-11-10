@@ -93,7 +93,7 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 		Path:       tmpFile.Name(),
 		ActualSize: actualSize,
 		RemoteName: filepath.Base(tmpFile.Name()),
-		RemotePath: filepath.Join("", filepath.Base(tmpFile.Name())),
+		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
 	}
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
