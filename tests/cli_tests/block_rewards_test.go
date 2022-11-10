@@ -306,6 +306,10 @@ func getNodeBaseURL(host string, port int) string {
 	return fmt.Sprintf(`http://%s:%d`, host, port)
 }
 
+func getMinersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+}
+
 func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/herumi/bls-go-binary/bls"
+	"gorm.io/gorm"
 )
 
 type HealthyServiceProviders struct {
@@ -421,6 +422,14 @@ type BlobberGetFileRefsRequest struct {
 	URL, ClientID, ClientKey, ClientSignature, AllocationID, RefType, RemotePath string
 }
 
+type BlobberFileRefPathRequest struct {
+	URL, Path, AllocationID, ClientID, ClientKey, ClientSignature string
+}
+
+type BlobberObjectTreeRequest struct {
+	URL, Path, AllocationID, ClientID, ClientKey, ClientSignature string
+}
+
 type RefsData struct {
 	ID             int    `json:"id"`
 	Type           string `json:"type"`
@@ -463,6 +472,77 @@ type BlobberGetFileRefsResponse struct {
 	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
+}
+
+type CommitMetaTxn struct {
+	RefID     int64     `gorm:"ref_id;not null" json:"ref_id"`
+	TxnID     string    `gorm:"txn_id;size:64;not null" json:"txn_id"`
+	CreatedAt time.Time `gorm:"created_at;timestamp without time zone;not null;default:current_timestamp" json:"created_at"`
+}
+
+type Ref struct {
+	ID                  int64  `gorm:"column:id;primaryKey"`
+	Type                string `gorm:"column:type;size:1" dirlist:"type" filelist:"type"`
+	AllocationID        string `gorm:"column:allocation_id;size:64;not null;index:idx_path_alloc,priority:1;index:idx_lookup_hash_alloc,priority:1" dirlist:"allocation_id" filelist:"allocation_id"`
+	LookupHash          string `gorm:"column:lookup_hash;size:64;not null;index:idx_lookup_hash_alloc,priority:2" dirlist:"lookup_hash" filelist:"lookup_hash"`
+	Name                string `gorm:"column:name;size:100;not null" dirlist:"name" filelist:"name"`
+	Path                string `gorm:"column:path;size:1000;not null;index:idx_path_alloc,priority:2;index:path_idx" dirlist:"path" filelist:"path"`
+	Hash                string `gorm:"column:hash;size:64;not null" dirlist:"hash" filelist:"hash"`
+	NumBlocks           int64  `gorm:"column:num_of_blocks;not null;default:0" dirlist:"num_of_blocks" filelist:"num_of_blocks"`
+	PathHash            string `gorm:"column:path_hash;size:64;not null" dirlist:"path_hash" filelist:"path_hash"`
+	ParentPath          string `gorm:"column:parent_path;size:999"`
+	PathLevel           int    `gorm:"column:level;not null;default:0"`
+	CustomMeta          string `gorm:"column:custom_meta;not null" filelist:"custom_meta"`
+	ContentHash         string `gorm:"column:content_hash;size:64;not null" filelist:"content_hash"`
+	Size                int64  `gorm:"column:size;not null;default:0" dirlist:"size" filelist:"size"`
+	MerkleRoot          string `gorm:"column:merkle_root;size:64;not null" filelist:"merkle_root"`
+	ActualFileSize      int64  `gorm:"column:actual_file_size;not null;default:0" filelist:"actual_file_size"`
+	ActualFileHash      string `gorm:"column:actual_file_hash;size:64;not null" filelist:"actual_file_hash"`
+	MimeType            string `gorm:"column:mimetype;size:64;not null" filelist:"mimetype"`
+	WriteMarker         string `gorm:"column:write_marker;size:64;not null"`
+	ThumbnailSize       int64  `gorm:"column:thumbnail_size;not null;default:0" filelist:"thumbnail_size"`
+	ThumbnailHash       string `gorm:"column:thumbnail_hash;size:64;not null" filelist:"thumbnail_hash"`
+	ActualThumbnailSize int64  `gorm:"column:actual_thumbnail_size;not null;default:0" filelist:"actual_thumbnail_size"`
+	ActualThumbnailHash string `gorm:"column:actual_thumbnail_hash;size:64;not null" filelist:"actual_thumbnail_hash"`
+	EncryptedKey        string `gorm:"column:encrypted_key;size:64" filelist:"encrypted_key"`
+	Children            []*Ref `gorm:"-"`
+	childrenLoaded      bool
+	OnCloud             bool `gorm:"column:on_cloud;default:false" filelist:"on_cloud"`
+
+	CommitMetaTxns []CommitMetaTxn `gorm:"foreignkey:ref_id" filelist:"commit_meta_txns"`
+	CreatedAt      int64           `gorm:"column:created_at;index:idx_created_at,sort:desc" dirlist:"created_at" filelist:"created_at"`
+	UpdatedAt      int64           `gorm:"column:updated_at;index:idx_updated_at,sort:desc;" dirlist:"updated_at" filelist:"updated_at"`
+
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"` // soft deletion
+
+	ChunkSize        int64 `gorm:"column:chunk_size;not null;default:65536" dirlist:"chunk_size" filelist:"chunk_size"`
+	HashToBeComputed bool  `gorm:"-"`
+}
+
+type BlobberFileRefPathResponse struct {
+	Meta map[string]interface{}        `json:"meta_data"`
+	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
+	Ref  *Ref
+}
+
+type WriteMarker struct {
+	AllocationRoot         string `gorm:"column:allocation_root;size:64;primaryKey" json:"allocation_root"`
+	PreviousAllocationRoot string `gorm:"column:prev_allocation_root;size:64" json:"prev_allocation_root"`
+	AllocationID           string `gorm:"column:allocation_id;size:64;index:idx_seq,unique,priority:1" json:"allocation_id"`
+	Size                   int64  `gorm:"column:size" json:"size"`
+	BlobberID              string `gorm:"column:blobber_id;size:64" json:"blobber_id"`
+	Timestamp              int64  `gorm:"column:timestamp" json:"timestamp"`
+	ClientID               string `gorm:"column:client_id;size:64" json:"client_id"`
+	Signature              string `gorm:"column:signature;size:64" json:"signature"`
+
+	LookupHash  string `gorm:"column:lookup_hash;size:64;" json:"lookup_hash"`
+	Name        string `gorm:"column:name;size:100;" json:"name"`
+	ContentHash string `gorm:"column:content_hash;size:64;" json:"content_hash"`
+}
+
+type BlobberObjectTreePathResponse struct {
+	*BlobberFileRefPathResponse
+	LatestWM *WriteMarker `json:"latest_write_marker"`
 }
 
 type BlobberUploadFileMeta struct {
@@ -544,7 +624,8 @@ type BlobberDownloadFileResponse struct {
 }
 
 type SCRestGetStakePoolStatRequest struct {
-	BlobberID string
+	ProviderType string
+	ProviderID string
 }
 
 type SCRestGetStakePoolStatResponse struct {

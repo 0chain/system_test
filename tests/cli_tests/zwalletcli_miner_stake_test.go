@@ -223,7 +223,7 @@ func TestMinerStake(t *testing.T) {
 
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
-			if newMiner.ID != miner.ID {
+			if newMiner.ID == miner02ID {
 				break
 			}
 		}
