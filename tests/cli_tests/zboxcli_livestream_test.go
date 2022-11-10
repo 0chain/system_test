@@ -24,16 +24,11 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
-	t.Parallel()
-	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
 	defer KillFFMPEG()
 
 	// Success scenarios
-
 	t.Run("Uploading remote feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
-
 		feed, ok := getFeed()
 
 		if !ok {
@@ -108,8 +103,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
-		t.Parallel()
-
 		feed, ok := getFeed()
 
 		if !ok {
@@ -184,7 +177,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
 		feed, ok := getFeed()
 
 		if !ok {
@@ -263,8 +255,6 @@ func TestStreamUploadDownload(t *testing.T) {
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		t.Parallel()
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -332,7 +322,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -401,7 +391,7 @@ func TestStreamUploadDownload(t *testing.T) {
 
 	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
-		t.Parallel()
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
