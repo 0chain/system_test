@@ -467,20 +467,12 @@ func TestStreamUploadDownload(t *testing.T) {
 func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, params string) error {
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
-	cmd, stdOut, stderr, err := cliutils.StartCommandWithStd(commandString)
+	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, fmt.Sprintf("error in uploading a live feed: %s", err))
 
 	ready := waitTsFilesReady(t, localFolder)
 	if !ready {
 		defer cmd.Process.Kill() //nolint: errcheck
-
-		output := stderr.String()
-
-		output += stdOut.String()
-
-		if len(output) > 0 {
-			return errors.New("failed to download video files: " + output)
-		}
 
 		return errors.New("download video files is timeout")
 	}
