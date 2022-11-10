@@ -15,7 +15,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -59,7 +59,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -101,7 +101,7 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)

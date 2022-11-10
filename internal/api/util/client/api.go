@@ -1026,7 +1026,7 @@ func (c *APIClient) GetStakePoolStat(t *testing.T, providerID, providerType stri
 
 	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
 		model.SCRestGetStakePoolStatRequest{
-			ProviderID: providerID,
+			ProviderID:   providerID,
 			ProviderType: providerType,
 		},
 		HttpOkStatus)

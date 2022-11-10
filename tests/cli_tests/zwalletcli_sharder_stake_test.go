@@ -148,7 +148,6 @@ func TestSharderStake(t *testing.T) {
 	})
 
 	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
