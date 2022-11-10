@@ -15,6 +15,7 @@ require (
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/gorm v1.24.1
 )
 
 require (
@@ -30,6 +31,8 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.1.2 // indirect
 	github.com/klauspost/reedsolomon v1.11.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
