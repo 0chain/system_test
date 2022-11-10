@@ -36,7 +36,7 @@ func TestBlobberChallenge(t *testing.T) {
 	sharderBaseURLs := getAllSharderBaseURLs(sharders)
 	require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
 
-	blobberList := []climodel.BlobberInfo{}
+	blobberList := []climodel.BlobberDetails{}
 	output, err = listBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
@@ -53,7 +53,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -103,7 +103,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -146,7 +146,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -189,7 +189,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -231,7 +231,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -274,7 +274,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
@@ -321,7 +321,7 @@ func TestBlobberChallenge(t *testing.T) {
 
 		var blobbers []string
 		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+			blobbers = append(blobbers, blobber.ID)
 		}
 
 		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)

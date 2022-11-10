@@ -228,7 +228,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 7)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -246,7 +246,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		// Stake tokens against this blobber
 		fee := 0.1
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.5,
 			"fee":        fee,
 		}), true)
@@ -268,7 +268,7 @@ func TestMinerFeesPayment(t *testing.T) {
 		startBlock = getLatestFinalizedBlock(t)
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"fee":        fee,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))

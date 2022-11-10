@@ -164,16 +164,6 @@ type Settings struct {
 	Service_charge  float64 `json:"service_charge"`
 }
 
-type BlobberInfo struct {
-	Id                  string   `json:"id"`
-	Url                 string   `json:"url"`
-	Capacity            int      `json:"capacity"`
-	Last_health_check   int      `json:"last_health_check"`
-	Allocated           int      `json:"allocated"`
-	Terms               Terms    `json:"terms"`
-	Stake_pool_settings Settings `json:"stake_pool_settings"`
-}
-
 type ChallengePoolInfo struct {
 	Id         string `json:"id"`
 	Balance    int64  `json:"balance"`
@@ -365,14 +355,19 @@ type FileStats struct {
 }
 
 type BlobberDetails struct {
-	ID                string            `json:"id"`
-	BaseURL           string            `json:"url"`
-	Terms             Terms             `json:"terms"`
-	Capacity          int64             `json:"capacity"`
-	Allocated         int64             `json:"allocated"`
-	LastHealthCheck   int64             `json:"last_health_check"`
-	PublicKey         string            `json:"-"`
-	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	ID                 string            `json:"id"`
+	BaseURL            string            `json:"url"`
+	Terms              Terms             `json:"terms"`
+	Capacity           int64             `json:"capacity"`
+	Allocated          int64             `json:"allocated"`
+	LastHealthCheck    int64             `json:"last_health_check"`
+	PublicKey          string            `json:"-"`
+	StakePoolSettings  StakePoolSettings `json:"stake_pool_settings"`
+	TotalServiceCharge currency.Coin     `json:"total_service_charge"`
+	TotalStake         currency.Coin     `json:"total_stake"`
+	UsedAllocation     int64             `json:"used_allocation"`
+	TotalOffers        currency.Coin     `json:"total_offers"`
+	UncollectedRewards currency.Coin     `json:"uncollected_rewards"`
 }
 
 type Validator struct {

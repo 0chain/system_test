@@ -19,6 +19,7 @@ func TestCollectRewards(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *testing.T) {
+		//t.Skip("piers")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -30,7 +31,7 @@ func TestCollectRewards(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -43,7 +44,7 @@ func TestCollectRewards(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.5,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
@@ -81,7 +82,7 @@ func TestCollectRewards(t *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
@@ -100,9 +101,11 @@ func TestCollectRewards(t *testing.T) {
 		}
 		require.Greater(t, rewards, int64(0))
 
+		require.NotEqual(t, 0, blobber.UncollectedRewards, "missing uncollected rewards")
+
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
-			"provider_id":   blobber.Id,
+			"provider_id":   blobber.ID,
 		}), true)
 		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -110,9 +113,20 @@ func TestCollectRewards(t *testing.T) {
 
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
+
+		output, err = getBlobberDetails(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberDetails climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberDetails)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Zero(t, finalBlobberDetails.UncollectedRewards, "rewards should hve been collected")
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *testing.T) {
+		t.Skip("piers")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -121,7 +135,7 @@ func TestCollectRewards(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -134,7 +148,7 @@ func TestCollectRewards(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.5,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
@@ -145,12 +159,13 @@ func TestCollectRewards(t *testing.T) {
 			"provider_type": "blobber",
 			"provider_id":   "invalid-blobber-id",
 		}), false)
-		require.NotNil(t, err)
+		require.Error(t, err)
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "collect_reward_failed")
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *testing.T) {
+		t.Skip("piers")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -159,7 +174,7 @@ func TestCollectRewards(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -172,7 +187,7 @@ func TestCollectRewards(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.5,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
@@ -181,7 +196,7 @@ func TestCollectRewards(t *testing.T) {
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "invalid-provider",
-			"provider_id":   blobber.Id,
+			"provider_id":   blobber.ID,
 		}), false)
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
@@ -189,6 +204,7 @@ func TestCollectRewards(t *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *testing.T) {
+		t.Skip("piers")
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

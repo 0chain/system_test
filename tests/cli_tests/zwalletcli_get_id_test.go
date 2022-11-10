@@ -51,7 +51,7 @@ func TestGetId(t *testing.T) {
 		_, _ = registerWallet(t, configPath)
 
 		blobbers := getBlobbersList(t)
-		blobberUrl := blobbers[0].Url
+		blobberUrl := blobbers[0].BaseURL
 
 		output, err := getId(t, configPath, blobberUrl, false)
 		require.NotNil(t, err, "expected get id to fail", strings.Join(output, "\n"))

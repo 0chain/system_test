@@ -29,7 +29,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -43,7 +43,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.5,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
@@ -59,7 +59,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Use sp-info to check the staked tokens in blobber's stake pool
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
@@ -88,7 +88,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Unstake the tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -106,7 +106,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Pool Id must be deleted from stake pool now
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
@@ -175,7 +175,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -189,7 +189,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     2.0,
 		}), false)
 		require.NotNil(t, err, "Expected error when staking more tokens than in wallet", strings.Join(output, "\n"))
@@ -218,7 +218,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -232,7 +232,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     0.0,
 		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
@@ -261,7 +261,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		blobbers := []climodel.BlobberInfo{}
+		blobbers := []climodel.BlobberDetails{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -275,7 +275,7 @@ func TestStakeUnstakeTokens(t *testing.T) {
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobber.ID,
 			"tokens":     -1.0,
 		}), false)
 		require.NotNil(t, err, "Expected error when staking negative tokens than in stake pool", strings.Join(output, "\n"))
@@ -315,8 +315,8 @@ func unstakeTokens(t *testing.T, cliConfigFilename, params string) ([]string, er
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func getBlobbersList(t *testing.T) []climodel.BlobberInfo {
-	blobbers := []climodel.BlobberInfo{}
+func getBlobbersList(t *testing.T) []climodel.BlobberDetails {
+	blobbers := []climodel.BlobberDetails{}
 	output, err := listBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
