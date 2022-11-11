@@ -355,7 +355,7 @@ func verifyMinerFeesPayment(t *testing.T, block *climodel.Block, expectedMinerFe
 	for _, txn := range block.Block.Transactions {
 		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []climodel.Transfer
-			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.Replace(txn.TransactionOutput, "}{", "},{", -1))), &transfers)
+			err := json.Unmarshal([]byte(fmt.Sprintf("[%s]", strings.ReplaceAll(txn.TransactionOutput, "}{", "},{"))), &transfers)
 			require.Nil(t, err, "Cannot unmarshal the transfers from transaction output: %v\n, txn data: %v\n txn status: %v", txn.TransactionOutput, txn.TransactionData, txn.TransactionStatus)
 
 			for _, transfer := range transfers {

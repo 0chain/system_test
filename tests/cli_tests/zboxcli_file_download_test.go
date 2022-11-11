@@ -80,11 +80,11 @@ func TestDownload(t *testing.T) {
 		originalFirstFileChecksum := generateChecksum(t, fileNameOfFirstDirectory)
 		originalSecondFileChecksum := generateChecksum(t, fileNameOfSecondDirectory)
 
-		//deleting uploaded file from /dir1 since we will be downloading it now
+		// deleting uploaded file from /dir1 since we will be downloading it now
 		err := os.Remove(fileNameOfFirstDirectory)
 		require.Nil(t, err)
 
-		//deleting uploaded file from /dir2 since we will be downloading it now
+		// deleting uploaded file from /dir2 since we will be downloading it now
 		err = os.Remove(fileNameOfSecondDirectory)
 		require.Nil(t, err)
 

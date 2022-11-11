@@ -591,7 +591,6 @@ func TestListFileSystem(t *testing.T) {
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
-
 	})
 
 	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {
