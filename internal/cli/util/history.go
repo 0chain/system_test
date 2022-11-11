@@ -2,7 +2,6 @@ package cliutils
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
 
 	"github.com/0chain/system_test/internal/cli/model"
