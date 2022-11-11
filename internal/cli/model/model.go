@@ -3,6 +3,8 @@ package model
 import (
 	"time"
 
+	"github.com/0chain/gosdk/zboxcore/blockchain"
+
 	"github.com/0chain/gosdk/core/common"
 	currency "github.com/0chain/system_test/internal/currency"
 )
@@ -355,31 +357,34 @@ type FileStats struct {
 }
 
 type BlobberDetails struct {
-	ID                 string            `json:"id"`
-	BaseURL            string            `json:"url"`
-	Terms              Terms             `json:"terms"`
-	Capacity           int64             `json:"capacity"`
-	Allocated          int64             `json:"allocated"`
-	LastHealthCheck    int64             `json:"last_health_check"`
-	PublicKey          string            `json:"-"`
-	StakePoolSettings  StakePoolSettings `json:"stake_pool_settings"`
-	TotalServiceCharge currency.Coin     `json:"total_service_charge"`
-	TotalStake         currency.Coin     `json:"total_stake"`
-	UsedAllocation     int64             `json:"used_allocation"`
-	TotalOffers        currency.Coin     `json:"total_offers"`
-	UncollectedRewards currency.Coin     `json:"uncollected_rewards"`
+	ID                       string                       `json:"id"`
+	BaseURL                  string                       `json:"url"`
+	Terms                    Terms                        `json:"terms"`
+	Capacity                 int64                        `json:"capacity"`
+	Allocated                int64                        `json:"allocated"`
+	LastHealthCheck          int64                        `json:"last_health_check"`
+	PublicKey                string                       `json:"-"`
+	StakePoolSettings        blockchain.StakePoolSettings `json:"stake_pool_settings"`
+	TotalStake               int64                        `json:"total_stake"`
+	UsedAllocation           int64                        `json:"used_allocation"`
+	TotalOffers              int64                        `json:"total_offers"`
+	TotalServiceCharge       int64                        `json:"total_service_charge"`
+	UncollectedServiceCharge int64                        `json:"uncollected_service_charge"`
 }
 
 type Validator struct {
-	ID             string  `json:"validator_id"`
-	BaseURL        string  `json:"url"`
-	PublicKey      string  `json:"-"`
-	DelegateWallet string  `json:"delegate_wallet"`
-	MinStake       int64   `json:"min_stake"`
-	MaxStake       int64   `json:"max_stake"`
-	NumDelegates   int     `json:"num_delegates"`
-	ServiceCharge  float64 `json:"service_charge"`
-	TotalStake     int64   `json:"stake"`
+	ID                       string  `json:"validator_id"`
+	BaseURL                  string  `json:"url"`
+	PublicKey                string  `json:"-"`
+	DelegateWallet           string  `json:"delegate_wallet"`
+	MinStake                 int64   `json:"min_stake"`
+	MaxStake                 int64   `json:"max_stake"`
+	NumDelegates             int     `json:"num_delegates"`
+	ServiceCharge            float64 `json:"service_charge"`
+	StakeTotal               int64   `json:"stake_total"`
+	UnstakeTotal             int64   `json:"unstake_total"`
+	TotalServiceCharge       int64   `json:"total_service_charge"`
+	UncollectedServiceCharge int64   `json:"uncollected_service_charge"`
 }
 
 type FileDiff struct {

@@ -101,7 +101,13 @@ func TestCollectRewards(t *testing.T) {
 		}
 		require.Greater(t, rewards, int64(0))
 
-		require.NotEqual(t, 0, blobber.UncollectedRewards, "missing uncollected rewards")
+		output, err = getBlobberDetails(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		var beforeCollectRewards climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &beforeCollectRewards)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotEqual(t, 0, beforeCollectRewards.UncollectedServiceCharge, "missing uncollected rewards")
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
@@ -117,12 +123,11 @@ func TestCollectRewards(t *testing.T) {
 		output, err = getBlobberDetails(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 		var finalBlobberDetails climodel.BlobberDetails
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberDetails)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.Zero(t, finalBlobberDetails.UncollectedRewards, "rewards should hve been collected")
+		require.Zero(t, finalBlobberDetails.UncollectedServiceCharge, "rewards should hve been collected")
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *testing.T) {
