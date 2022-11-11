@@ -10,7 +10,6 @@ import (
 )
 
 func TestOwnerUpdate(t *testing.T) {
-
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -72,7 +71,6 @@ func TestOwnerUpdate(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0])
-
 	})
 
 	t.Run("should allow update of owner: VestingSC", func(t *testing.T) {

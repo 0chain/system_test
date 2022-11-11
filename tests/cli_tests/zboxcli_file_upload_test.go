@@ -730,9 +730,9 @@ func TestUpload(t *testing.T) {
 			"data":   1,
 		})
 
-		path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		dirPath := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
 		randomFilename := cliutils.RandomAlphaNumericString(101)
-		filename := fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
+		filename := fmt.Sprintf("%s%s%s_test.txt", dirPath, string(os.PathSeparator), randomFilename)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
