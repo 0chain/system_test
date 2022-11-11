@@ -3,20 +3,21 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"os"
+	"path/filepath"
+	"sync"
+	"testing"
+
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
-	"os"
-	"path/filepath"
-	"sync"
-	"testing"
 )
 
 type SDKClient struct {
-	sync.Mutex
+	mu sync.Mutex
 
 	blockWorker string
 	wallet      *model.SdkWallet
@@ -39,8 +40,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 
 // StartSession executes all actions in one sdk client session
 func (c *SDKClient) StartSession(callback func()) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	callback()
 }
 
@@ -77,19 +78,14 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	}
 
 	defer func(name string) {
-		err := os.RemoveAll(name)
-		if err != nil {
-
-		}
+		require.Nil(t, os.RemoveAll(name))
 	}(tmpFile.Name())
 
 	const actualSize int64 = 1024
 
 	rawBuf := make([]byte, actualSize)
 	_, err = rand.Read(rawBuf)
-	if err != nil {
-		require.NoError(t, err)
-	} //nolint:gosec,revive
+	require.Nil(t, err)
 
 	buf := bytes.NewBuffer(rawBuf)
 
@@ -97,19 +93,22 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 		Path:       tmpFile.Name(),
 		ActualSize: actualSize,
 		RemoteName: filepath.Base(tmpFile.Name()),
-		RemotePath: filepath.Join("/", filepath.Base(tmpFile.Name())),
+		RemotePath: filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name())),
 	}
 
-	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	var sdkAllocation *sdk.Allocation
+	sdkAllocation, err = sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
 
-	homeDir, err := config.GetHomeDir()
+	var homeDir string
+	homeDir, err = config.GetHomeDir()
 	require.NoError(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+	var chunkedUpload *sdk.ChunkedUpload
+	chunkedUpload, err = sdk.CreateChunkedUpload(homeDir, sdkAllocation,
 		fileMeta, buf, false, false)
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
-	return filepath.Join("/", filepath.Base(tmpFile.Name()))
+	return filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name()))
 }
