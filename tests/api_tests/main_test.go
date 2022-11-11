@@ -5,13 +5,17 @@ import (
 	"os"
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 )
 
 var (
-	apiClient *client.APIClient
-	sdkClient *client.SDKClient
+	apiClient          *client.APIClient
+	sdkClient          *client.SDKClient
+	sdkWallet          *model.Wallet
+	sdkWalletMnemonics string
 )
 
 func TestMain(m *testing.M) {
@@ -25,6 +29,12 @@ func TestMain(m *testing.M) {
 
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+
+	t := new(testing.T)
+
+	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
+	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
+	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	os.Exit(m.Run())
 }

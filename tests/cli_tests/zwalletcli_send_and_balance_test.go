@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	//apimodel "github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
@@ -44,7 +43,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
@@ -113,7 +112,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 
 		// After send balance checks
 		output, err = getBalance(t, configPath)
@@ -208,7 +207,7 @@ func TestSendAndBalance(t *testing.T) {
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0])
+		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 	})
 
 	t.Run("Send attempt to exceeding balance should fail", func(t *testing.T) {
@@ -368,33 +367,6 @@ func getRoundBlockFromASharder(t *testing.T, round int64) climodel.Block {
 	return block
 }
 
-func getNodeBalanceFromASharder(t *testing.T, client_id string) *climodel.Balance {
-	sharders := getShardersList(t)
-	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-	// Get the starting balance for miner's delegate wallet.
-	res, err := apiGetBalance(sharderBaseUrl, client_id)
-	require.Nil(t, err, "Error retrieving client %s balance", client_id)
-	if res.StatusCode == 400 {
-		return &climodel.Balance{
-			Txn:     "",
-			Round:   0,
-			Balance: 0,
-		}
-	}
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to check client %s balance: %d", client_id, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body")
-	strBody := string(resBody)
-	var startBalance climodel.Balance
-	err = json.Unmarshal(resBody, &startBalance)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strBody, err)
-
-	return &startBalance
-}
-
 func getShardersList(t *testing.T) map[string]climodel.Sharder {
 	return getShardersListForWallet(t, escapedTestName(t))
 }
@@ -421,6 +393,20 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 	return sharders
+}
+
+func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
+	// Get miner list.
+	output, err := getMinersForWallet(t, configPath, wallet)
+	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
+
+	var miners climodel.NodeList
+	err = json.Unmarshal([]byte(output[0]), &miners)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
+	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
+
+	return miners
 }
 
 func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {

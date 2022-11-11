@@ -10,16 +10,12 @@ import (
 )
 
 func TestHashnodeRoot(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -40,7 +36,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
 		require.NotNil(t, getBlobberResponse)
@@ -50,8 +46,6 @@ func TestHashnodeRoot(t *testing.T) {
 	})
 
 	t.Run("Get hashnode root for non-existent allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -70,7 +64,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
@@ -83,7 +77,7 @@ func TestHashnodeRoot(t *testing.T) {
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -103,7 +97,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, *blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)

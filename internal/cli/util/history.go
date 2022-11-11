@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/0chain/system_test/internal/cli/model"
@@ -26,8 +27,8 @@ func NewHistory(from, to int64) *ChainHistory {
 
 func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 	var won int64
-	for _, block := range ch.blocks {
-		if minerId == block.MinerID {
+	for i := range ch.blocks {
+		if minerId == ch.blocks[i].MinerID {
 			won++
 		}
 	}
@@ -36,26 +37,26 @@ func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 
 func (ch *ChainHistory) TotalFees() int64 {
 	var fees int64
-	for _, block := range ch.blocks {
-		fees += ch.TotalBlockFees(block)
+	for i := range ch.blocks {
+		fees += ch.TotalBlockFees(&ch.blocks[i])
 	}
 	return fees
 }
 
 func (ch *ChainHistory) TotalMinerFees(minerId string) int64 {
 	var fees int64
-	for _, block := range ch.blocks {
-		if block.MinerID == minerId {
-			fees += ch.TotalBlockFees(block)
+	for i := range ch.blocks {
+		if ch.blocks[i].MinerID == minerId {
+			fees += ch.TotalBlockFees(&ch.blocks[i])
 		}
 	}
 	return fees
 }
 
-func (ch *ChainHistory) TotalBlockFees(block model.EventDBBlock) int64 {
+func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
 	var fees int64
-	for _, tx := range block.Transactions {
-		fees += tx.Fee
+	for i := range block.Transactions {
+		fees += block.Transactions[i].Fee
 	}
 	return fees
 }
@@ -71,29 +72,31 @@ func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
 // debug dumps
 
 func (ch *ChainHistory) DumpTransactions() {
-	for _, block := range ch.blocks {
-		for _, tx := range block.Transactions {
-			fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", block.MinerID)
+	for i := range ch.blocks {
+		for j := range ch.blocks[i].Transactions {
+			tx := &ch.blocks[i].Transactions[j]
+			_, _ = fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", ch.blocks[i].MinerID)
 		}
 	}
 }
 
 func (ch *ChainHistory) AccountingMiner(id string) {
-	fmt.Println("-------------", "accounts for", id, "-------------")
-	for _, block := range ch.blocks {
-		if id == block.MinerID {
-			ch.AccountingMinerBlock(id, block)
+	_, _ = fmt.Println("-------------", "accounts for", id, "-------------")
+	for i := range ch.blocks {
+		if id == ch.blocks[i].MinerID {
+			ch.AccountingMinerBlock(id, &ch.blocks[i])
 		}
 	}
 }
 
-func (ch *ChainHistory) AccountingMinerBlock(id string, block model.EventDBBlock) {
+func (ch *ChainHistory) AccountingMinerBlock(id string, block *model.EventDBBlock) {
 	if id != block.MinerID {
 		return
 	}
-	for _, tx := range block.Transactions {
+	for i := range block.Transactions {
+		tx := &block.Transactions[i]
 		if tx.Fee > 0 {
-			fmt.Println("round", block.Round, "fee", tx.Fee, "data", tx.TransactionData)
+			_, _ = fmt.Println("round", block.Round, "fee", tx.Fee, "data", tx.TransactionData)
 		}
 	}
 }

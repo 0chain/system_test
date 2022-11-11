@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -14,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
-	"testing"
 )
 
 var blsLock sync.Mutex
@@ -28,7 +28,7 @@ func init() {
 	err := bls.Init(bls.CurveFp254BNb)
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(err) //nolint
 	}
 }
 
@@ -74,7 +74,7 @@ func Sha3256(src []byte) string {
 	return hex.EncodeToString(sha3256.Sum(buffer))
 }
 
-func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []*model.KeyPair) (string, error) {
+func SignHashUsingSignatureScheme(hash, signatureScheme string, keys []*model.KeyPair) (string, error) {
 	retSignature := ""
 	for _, kv := range keys {
 		ss, err := NewSignatureScheme(signatureScheme)
@@ -86,7 +86,7 @@ func SignHashUsingSignatureScheme(hash string, signatureScheme string, keys []*m
 			return "", err
 		}
 
-		if len(retSignature) == 0 {
+		if retSignature == "" {
 			retSignature, err = ss.Sign(hash)
 		} else {
 			retSignature, err = ss.Add(retSignature, hash)
@@ -164,6 +164,6 @@ func blankIfNil(obj interface{}) string {
 
 func handlePanic(t *testing.T) {
 	if err := recover(); err != nil {
-		t.Errorf("panic occurred: ", err)
+		t.Errorf("panic occurred: %v", err)
 	}
 }
