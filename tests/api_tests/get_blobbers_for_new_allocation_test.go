@@ -17,7 +17,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 		wallet := apiClient.RegisterWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 
 		require.NotNil(t, allocationBlobbers.Blobbers)
 		require.Greater(t, len(allocationBlobbers.Blobbers), 3)
@@ -31,7 +31,7 @@ func TestGetBlobbersForNewAllocation(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, model.BlobberRequirements{}, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpOkStatus)
 
 		require.NotNil(t, allocationBlobbers.Blobbers)
 	})

@@ -1,7 +1,7 @@
 package cli_tests
 
 import (
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -22,13 +22,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLivestreamDownload(t *testing.T) {
+func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 	KillFFMPEG()
 
 	defer KillFFMPEG()
 
 	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
-
 		feed, ok := getFeed()
 
 		if !ok {
@@ -83,7 +82,6 @@ func TestLivestreamDownload(t *testing.T) {
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
@@ -94,7 +92,7 @@ func TestLivestreamDownload(t *testing.T) {
 					return err
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -103,14 +101,13 @@ func TestLivestreamDownload(t *testing.T) {
 
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
-
 					num, err := strconv.Atoi(extension[0][2:])
 
 					if err != nil {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -127,20 +124,17 @@ func TestLivestreamDownload(t *testing.T) {
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
-
 			if !info.IsDir() {
-
 				file, err := os.Open(path)
 
 				if err != nil {
 					return err
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -234,7 +228,6 @@ func TestLivestreamDownload(t *testing.T) {
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
@@ -246,7 +239,7 @@ func TestLivestreamDownload(t *testing.T) {
 					return err
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -255,14 +248,13 @@ func TestLivestreamDownload(t *testing.T) {
 
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
-
 					num, err := strconv.Atoi(extension[0][2:])
 
 					if err != nil {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -279,20 +271,18 @@ func TestLivestreamDownload(t *testing.T) {
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
 
 			if !info.IsDir() {
-
 				file, err := os.Open(path)
 
 				if err != nil {
 					log.Println(err)
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -338,7 +328,6 @@ func TestLivestreamDownload(t *testing.T) {
 	})
 
 	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
-
 		feed, ok := getFeed()
 
 		if !ok {
@@ -394,7 +383,6 @@ func TestLivestreamDownload(t *testing.T) {
 		hashmap := make(map[string]string)
 
 		err = filepath.Walk(localfolderForUpload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
@@ -406,7 +394,7 @@ func TestLivestreamDownload(t *testing.T) {
 					return err
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -415,14 +403,13 @@ func TestLivestreamDownload(t *testing.T) {
 
 				extension := strings.Split(info.Name(), ".")
 				if extension[len(extension)-1] == "ts" {
-
 					num, err := strconv.Atoi(extension[0][2:])
 
 					if err != nil {
 						return err
 					}
 
-					num = num + 1
+					num++
 
 					newStr := fmt.Sprintf("up%d.ts", num)
 					hashmap[newStr] = hex.EncodeToString(hash.Sum(nil))
@@ -439,19 +426,17 @@ func TestLivestreamDownload(t *testing.T) {
 		count_m3u8 := 0
 		count_ts := 0
 		err = filepath.Walk(localfolderForDownload, func(path string, info fs.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
 			if !info.IsDir() {
-
 				file, err := os.Open(path)
 
 				if err != nil {
 					log.Println(err)
 				}
 
-				hash := md5.New()
+				hash := md5.New() //nolint:gosec
 				_, err = io.Copy(hash, file)
 
 				if err != nil {
@@ -494,12 +479,9 @@ func TestLivestreamDownload(t *testing.T) {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
 	})
-
 }
 
 func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
-
-	//	err := startUploadFeed1(t, command, cliConfigFilename, localfolderForUpload, uploadParams)
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
@@ -522,7 +504,6 @@ func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localf
 }
 
 func startDownloadFeed(t *testing.T, cliConfigFilename, localFolder, params string) error {
-
 	t.Logf("Starting download of live stream from zbox.")
 
 	commandString := fmt.Sprintf("./zbox download --live %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)

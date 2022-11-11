@@ -144,7 +144,6 @@ func TestMinerStake(t *testing.T) {
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "delegate_pool_add: digging delegate pool: lock amount is greater than balance", output[0])
-
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
@@ -224,7 +223,7 @@ func TestMinerStake(t *testing.T) {
 
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
-			if newMiner.ID != miner.ID {
+			if newMiner.ID == miner02ID {
 				break
 			}
 		}

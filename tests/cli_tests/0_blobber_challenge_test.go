@@ -346,7 +346,7 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	return sharderURLs
 }
 
-func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset int, limit int) *climodel.BlobberChallenge {
+func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset, limit int) *climodel.BlobberChallenge {
 	for _, sharderBaseURL := range sharderBaseURLs {
 		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
 			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)))
@@ -359,7 +359,7 @@ func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberI
 		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
 
 		resBody, err := io.ReadAll(res.Body)
-		defer res.Body.Close()
+		func() { defer res.Body.Close() }()
 
 		require.Nil(t, err, "Error reading response body")
 		var openChallengesInBlobber climodel.BlobberChallenge

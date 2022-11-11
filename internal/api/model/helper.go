@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-func DefaultBlobberRequirements(id string, publicKey string) BlobberRequirements {
+func DefaultBlobberRequirements(id, publicKey string) BlobberRequirements {
 	return BlobberRequirements{
 		Size:           10000,
 		DataShards:     1,

@@ -15,6 +15,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/gorm v1.24.1
 )
 
 require (
@@ -23,9 +24,16 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+<<<<<<< HEAD
 	github.com/klauspost/cpuid/v2 v2.1.1 // indirect
 	github.com/klauspost/reedsolomon v1.11.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
+=======
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.1.2 // indirect
+	github.com/klauspost/reedsolomon v1.11.1 // indirect
+>>>>>>> 509488eea3921c8752e6c38d6278d995cb835945
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

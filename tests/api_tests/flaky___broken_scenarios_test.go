@@ -4,10 +4,11 @@ package api_tests
 
 import (
 	"encoding/hex"
-	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/client"
+
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
 )
