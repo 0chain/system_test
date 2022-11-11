@@ -26,7 +26,11 @@ func TestBlobberRewards(t *testing.T) {
 		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
-		sdkClient.UploadFile(t, allocationID)
+		sdkClient.StartSession(func() {
+			sdkClient.SetWallet(t, wallet, mnemonic)
+
+			sdkClient.UploadFile(t, allocationID)
+		})
 
 		var rewards int64
 

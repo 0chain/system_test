@@ -3,6 +3,8 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/go-resty/resty/v2"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -40,7 +42,9 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(*blobberRequest, client.HttpOkStatus)
+		var getBlobberResponse *model.BlobberGetHashnodeResponse
+		var restyResponse *resty.Response
+		getBlobberResponse, restyResponse, err = apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
 		require.NotNil(t, getBlobberResponse)
@@ -70,7 +74,9 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(*blobberRequest, client.HttpOkStatus)
+		var getBlobberResponse *model.BlobberGetHashnodeResponse
+		var restyResponse *resty.Response
+		getBlobberResponse, restyResponse, err = apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
@@ -103,7 +109,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(*blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)

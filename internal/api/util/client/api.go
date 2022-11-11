@@ -470,7 +470,7 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 	return scRestGetBlobberResponse, resp, err
 }
 
-func (c *APIClient) V1BlobberGetHashNodeRoot(blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetHashNodeRoot(blobberGetHashnodeRequest *model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
 	var hashnode *model.BlobberGetHashnodeResponse
 
 	headers := map[string]string{

@@ -1,13 +1,14 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestAtlusChimney(t *testing.T) {
