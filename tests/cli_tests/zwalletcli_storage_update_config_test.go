@@ -38,14 +38,14 @@ func TestStorageUpdateConfig(t *testing.T) {
 		var err error
 		for _, name := range climodel.StorageKeySettings {
 			value, ok := settings.Keys[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = value
 			newChanges[name] = value // don't change owner_id tested elsewhere
 			expectedChange.Keys[name] = value
 		}
 		for _, name := range climodel.StorageFloatSettings {
 			value, ok := settings.Numeric[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
 			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
 			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
@@ -53,7 +53,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		}
 		for _, name := range climodel.StorageCurrencySettigs {
 			value, ok := settings.Numeric[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
 			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
 			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
@@ -61,21 +61,21 @@ func TestStorageUpdateConfig(t *testing.T) {
 		}
 		for _, name := range climodel.StorageIntSettings {
 			value, ok := settings.Numeric[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatInt(int64(value), 10)
 			newChanges[name] = strconv.FormatInt(int64(value+1), 10)
 			expectedChange.Numeric[name] = value + 1
 		}
 		for _, name := range climodel.StorageBoolSettings {
 			value, ok := settings.Boolean[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatBool(value)
 			newChanges[name] = strconv.FormatBool(!value)
 			expectedChange.Boolean[name] = !value
 		}
 		for _, name := range climodel.StorageDurationSettings {
 			value, ok := settings.Duration[name]
-			require.True(t, ok, "unrecognised setting", name)
+			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatInt(value, 10) + "s"
 			newChanges[name] = strconv.FormatInt(value+1, 10) + "s"
 			expectedChange.Duration[name] = value + 1
@@ -96,7 +96,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 
 		settingsAfter := getStorageConfigMap(t)
 		checkSettings(t, settingsAfter, *expectedChange)
-
 	})
 
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
@@ -155,7 +154,6 @@ func TestStorageUpdateConfig(t *testing.T) {
 			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax",
 			output[0], strings.Join(output, "\n"))
 	})
-
 }
 
 func checkSettings(t *testing.T, actual, expected settingMaps) {
@@ -167,9 +165,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 
 	for _, name := range climodel.StorageFloatSettings {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("float setting %s, values actual %g and expected %g don't match\n",
 				name, actualSetting, expectedSetting)
@@ -177,9 +175,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageCurrencySettigs {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("currency"+
 				" setting %s, values actual %g and expected %g don't match\n",
@@ -188,9 +186,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageIntSettings {
 		actualSetting, ok := actual.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Numeric[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("int setting %s, values actual %g and expected %g don't match\n",
 				name, actualSetting, expectedSetting)
@@ -198,9 +196,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageDurationSettings {
 		actualSetting, ok := actual.Duration[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Duration[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("duration setting %s, values actual %d and expected %d don't match\n",
 				name, actualSetting, expectedSetting)
@@ -208,9 +206,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageBoolSettings {
 		actualSetting, ok := actual.Boolean[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Boolean[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("bool setting %s, values actual %t and expected %t don't match\n",
 				name, actualSetting, expectedSetting)
@@ -218,9 +216,9 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	}
 	for _, name := range climodel.StorageKeySettings {
 		actualSetting, ok := actual.Keys[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		expectedSetting, ok := expected.Keys[name]
-		require.True(t, ok, "unrecognised setting", name)
+		require.True(t, ok, "unrecognized setting", name)
 		if actualSetting != expectedSetting {
 			mismatches += fmt.Sprintf("key setting %s, values actual %s and expected %s don't match\n",
 				name, actualSetting, expectedSetting)

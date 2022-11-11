@@ -221,7 +221,6 @@ func TestFileDelete(t *testing.T) {
 		}), true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
-
 	})
 
 	t.Run("delete existing non-root directory should work", func(t *testing.T) {

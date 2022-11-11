@@ -50,7 +50,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		in := fmt.Sprintf("%v", time.Since(t2))
+		in := time.Since(t2).String()
 		t.Log("Recent refs in: ", in)
 
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
@@ -112,7 +112,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		output, err = listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
-			"in":         fmt.Sprintf("%v", time.Since(t1)),
+			"in":         time.Since(t1).String(),
 			"page":       1,
 		}), true)
 
@@ -125,7 +125,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 
 		require.Equal(t, 0, result.Offset)
 		require.Len(t, result.Refs, 0)
-
 	})
 
 	t.Run("Refs of someone else's allocation should return zero refs", func(t *testing.T) {
@@ -165,7 +164,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 			createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"json":       "",
-				"in":         fmt.Sprintf("%v", time.Since(t1)),
+				"in":         time.Since(t1).String(),
 				"page":       1,
 			}), true)
 
@@ -206,7 +205,6 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		aggregatedOutput = strings.ToLower(strings.Join(output, " "))
 		require.Contains(t, aggregatedOutput, "invalid argument")
 	})
-
 }
 
 func listRecentlyAddedRefs(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {

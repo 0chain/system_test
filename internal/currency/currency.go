@@ -49,8 +49,8 @@ func init() {
 	maxDecimal = decimal.NewFromInt(math.MaxInt64)
 }
 
-//go:generate msgp -io=false -tests=false -v
-//Coin - any quantity that is represented as an integer in the lowest denomination
+// go:generate msgp -io=false -tests=false -v
+// Coin - any quantity that is represented as an integer in the lowest denomination
 type Coin uint64
 
 func ParseZCN(c float64) (Coin, error) {

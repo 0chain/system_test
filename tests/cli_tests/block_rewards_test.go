@@ -23,7 +23,6 @@ import (
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Skip("Till batch-update is merged...")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
-
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -65,7 +64,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
-
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -213,13 +211,13 @@ func getMinerScMap(t *testing.T) map[string]float64 {
 	return floatMap
 }
 
-func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (int64, int64) {
+func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
 	epoch := round / int64(minerScConfig["epoch"])
 	epochDecline := 1.0 - minerScConfig["reward_decline_rate"]
 	declineRate := math.Pow(epochDecline, float64(epoch))
 	blockReward := (minerScConfig["block_reward"] * float64(TOKEN_UNIT)) * declineRate
-	minerReward := int64(blockReward * minerScConfig["share_ratio"])
-	sharderReward := int64(blockReward) - minerReward
+	minerReward = int64(blockReward * minerScConfig["share_ratio"])
+	sharderReward = int64(blockReward) - minerReward
 	return minerReward, sharderReward
 }
 

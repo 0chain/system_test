@@ -615,7 +615,6 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
-
 }
 
 func copyFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {

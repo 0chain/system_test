@@ -15,13 +15,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -35,7 +36,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
@@ -54,7 +55,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		// request with refType as updated
 		refType = "updated"
 		blobberFileRefRequest = getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err = apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err = apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
@@ -75,7 +76,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -92,7 +93,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -102,7 +103,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -122,7 +123,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -132,13 +133,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -151,7 +153,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -161,7 +163,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -181,7 +183,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -191,13 +193,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -210,7 +213,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -220,7 +223,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -240,7 +243,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -250,13 +253,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 		refType := "regular"
@@ -265,7 +269,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		url := blobber.BaseURL
 		clientSignature := "invalid-signature"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, sdkWallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -275,13 +279,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -296,7 +301,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		wallet := CopyWallet(sdkWallet)
 		wallet.Id = "invalue-client-id"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
@@ -306,13 +311,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, blobberRequirements, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
 
@@ -327,14 +333,14 @@ func TestBlobberFileRefs(t *testing.T) {
 		wallet := CopyWallet(sdkWallet)
 		wallet.Id = "invalid-client-key"
 		blobberFileRefRequest := getBlobberFileRefRequest(url, wallet, allocationID, refType, clientSignature, remoteFilePath)
-		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, blobberFileRefRequest, client.HttpOkStatus)
+		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }
 
-func getBlobberFileRefRequest(url string, registeredsdkWallet *model.Wallet, allocationId string, refType string, clientSignature string, remotePath string) model.BlobberGetFileRefsRequest {
+func getBlobberFileRefRequest(url string, registeredsdkWallet *model.Wallet, allocationId, refType, clientSignature, remotePath string) model.BlobberGetFileRefsRequest {
 	blobberFileRequest := model.BlobberGetFileRefsRequest{
 		URL:             url,
 		ClientID:        registeredsdkWallet.Id,

@@ -27,7 +27,7 @@ func NewED255190chainScheme() *ED255190chainScheme {
 // GenerateKeys - implement interface
 func (ed *ED255190chainScheme) GenerateKeys() (*Wallet, error) {
 	// Check for recovery
-	if len(ed.mnemonic) == 0 {
+	if ed.mnemonic == "" {
 		entropy, err := bip39.NewEntropy(256)
 		if err != nil {
 			return nil, errors.New("generate_keys", "Getting entropy failed")
@@ -154,14 +154,11 @@ func (ed *ED255190chainScheme) GetPrivateKey() string {
 
 // SetID sets ID in HexString format
 func (ed *ED255190chainScheme) SetID(id string) error {
-	// b0.Ids = id
-	// return b0.id.SetHexString(id)
 	return errors.New("chain_scheme_set_id", "it is not implemented yet")
 }
 
 // GetID gets ID in hex string format
 func (ed *ED255190chainScheme) GetID() string {
-	//return b0.id.GetHexString()
 	return ""
 }
 

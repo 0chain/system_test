@@ -117,5 +117,4 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't get miner node: value not present"}`, output[0])
 	})
-
 }
