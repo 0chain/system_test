@@ -65,6 +65,8 @@ const (
 	BlobberGetStats                    = "/_stats"
 	GetNetworkDetails                  = "/network"
 	GetFileRef                         = "/v1/file/refs/:allocation_id"
+	GetFileRefPath                     = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                      = "/v1/file/objecttree/:allocation_id"
 )
 
 // Contains all used service providers
@@ -133,7 +135,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 		case BlobberServiceProvider:
 			formattedURL = urlBuilder.SetPath(BlobberGetStats).String()
 			// /_stats requires username-password as it is an admin API.
-			r.SetBasicAuth("", "")
+			r.SetBasicAuth("admin", "password")
 		}
 
 		healthResponse, err := r.Get(formattedURL)
@@ -833,7 +835,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 		model.InternalTransactionPutRequest{
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+			TransactionData: model.NewUpdateAllocationTransactionData(&model.UpdateAllocationRequest{
 				ID:              allocationID,
 				AddBlobberId:    newBlobberID,
 				RemoveBlobberId: oldBlobberID,
@@ -872,7 +874,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
@@ -1022,7 +1024,8 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 	urlBuilder := NewURLBuilder().
 		SetPath(GetStakePoolStat).
 		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("blobber_id", scRestGetStakePoolStatRequest.BlobberID)
+		AddParams("provider_id", scRestGetStakePoolStatRequest.ProviderID).
+		AddParams("provider_type", scRestGetStakePoolStatRequest.ProviderType)
 
 	resp, err := c.executeForAllServiceProviders(
 		urlBuilder,
@@ -1036,12 +1039,13 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 	return scRestGetStakePoolStatResponse, resp, err
 }
 
-func (c *APIClient) GetStakePoolStat(t *testing.T, blobberID string) *model.SCRestGetStakePoolStatResponse {
+func (c *APIClient) GetStakePoolStat(t *testing.T, providerID, providerType string) *model.SCRestGetStakePoolStatResponse {
 	t.Log("Get stake pool stat...")
 
 	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
 		model.SCRestGetStakePoolStatRequest{
-			BlobberID: blobberID,
+			ProviderID:   providerID,
+			ProviderType: providerType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1528,7 +1532,7 @@ func (c *APIClient) V1SharderGetGraphBlobberChallangesOpen(getGraphBlobberChalla
 	return getGraphBlobberChallangesOpenResponse, resp, err
 }
 
-func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
 	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
@@ -1547,4 +1551,46 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 		},
 		HttpGETMethod)
 	return blobberGetFileResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberGetFileRefPaths(t *testing.T, blobberFileRefPathRequest *model.BlobberFileRefPathRequest, requiredStatusCode int) (*model.BlobberFileRefPathResponse, *resty.Response, error) {
+	var blobberFileRefPathResponse *model.BlobberFileRefPathResponse
+
+	url := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberFileRefPathRequest.ClientID,
+		"X-App-Client-Key":       blobberFileRefPathRequest.ClientKey,
+		"X-App-Client-Signature": blobberFileRefPathRequest.ClientSignature,
+	}
+	resp, err := c.executeForServiceProvider(
+		url,
+		model.ExecutionRequest{
+			Dst:                &blobberFileRefPathResponse,
+			RequiredStatusCode: requiredStatusCode,
+			Headers:            headers,
+		},
+		HttpGETMethod)
+	return blobberFileRefPathResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberObjectTree(t *testing.T, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
+	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
+
+	url := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
+
+	headers := map[string]string{
+		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
+		"X-App-Client-Key":       blobberObjectTreeRequest.ClientKey,
+		"X-App-Client-Signature": blobberObjectTreeRequest.ClientSignature,
+	}
+	resp, err := c.executeForServiceProvider(
+		url,
+		model.ExecutionRequest{
+			Dst:                &blobberObjectTreePathResponse,
+			RequiredStatusCode: requiredStatusCode,
+			Headers:            headers,
+		},
+		HttpGETMethod)
+	return blobberObjectTreePathResponse, resp, err
 }

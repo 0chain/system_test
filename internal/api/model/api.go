@@ -265,8 +265,8 @@ type Challenge struct {
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers *[]string `json:"blobbers"`
-	BlobberRequirements
+	Blobbers            []string `json:"blobbers"`
+	BlobberRequirements *BlobberRequirements
 }
 
 type SCRestGetAllocationRequest struct {
@@ -274,7 +274,7 @@ type SCRestGetAllocationRequest struct {
 }
 
 type SCRestGetAllocationBlobbersRequest struct {
-	BlobberRequirements
+	BlobberRequirements *BlobberRequirements
 	ClientID, ClientKey string
 }
 
@@ -310,28 +310,6 @@ type UpdateAllocationRequest struct {
 
 type SCRestGetBlobberRequest struct {
 	BlobberID string
-}
-
-type BlobberGetHashnodeRequest struct {
-	URL, ClientId, ClientKey, ClientSignature, AllocationID string
-}
-
-type BlobberGetHashnodeResponse struct {
-	// hash data
-	AllocationID   string `json:"allocation_id,omitempty"`
-	Type           string `json:"type,omitempty"`
-	Name           string `json:"name,omitempty"`
-	Path           string `json:"path,omitempty"`
-	ContentHash    string `json:"content_hash,omitempty"`
-	MerkleRoot     string `json:"merkle_root,omitempty"`
-	ActualFileHash string `json:"actual_file_hash,omitempty"`
-	ChunkSize      int64  `json:"chunk_size,omitempty"`
-	Size           int64  `json:"size,omitempty"`
-	ActualFileSize int64  `json:"actual_file_size,omitempty"`
-
-	// other data
-	ParentPath string                        `json:"-"`
-	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
 type SCRestGetBlobberResponse struct {
@@ -601,6 +579,10 @@ type BlobberCommitConnectionResponse struct{}
 //	sdk.ReferencePathResult
 // }
 
+type BlobberGetHashnodeRequest struct {
+	URL, ClientId, ClientKey, ClientSignature, AllocationID string
+}
+
 type BlobberDownloadFileReadMarker struct {
 	ClientID     string `json:"client_id"`
 	ClientKey    string `json:"client_public_key"`
@@ -655,3 +637,155 @@ type StakePoolDelegatePoolInfo struct {
 	Status       string `json:"status"`
 	RoundCreated int64  `json:"round_created"`
 }
+
+type AllocationBlobbers interface{}
+
+func ConvertInterfaceStringArray(blobbers AllocationBlobbers) []string {
+	var blobbersInterfaceArray = blobbers.([]interface{})
+	var blobbersStringArray []string
+	for _, v := range blobbersInterfaceArray {
+		blobbersStringArray = append(blobbersStringArray, v.(string))
+	}
+	return blobbersStringArray
+}
+
+type BlobberGetHashnodeResponse struct {
+	// hash data
+	AllocationID   string `json:"allocation_id,omitempty"`
+	Type           string `json:"type,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Path           string `json:"path,omitempty"`
+	ContentHash    string `json:"content_hash,omitempty"`
+	MerkleRoot     string `json:"merkle_root,omitempty"`
+	ActualFileHash string `json:"actual_file_hash,omitempty"`
+	ChunkSize      int64  `json:"chunk_size,omitempty"`
+	Size           int64  `json:"size,omitempty"`
+	ActualFileSize int64  `json:"actual_file_size,omitempty"`
+
+	// other data
+	ParentPath string                        `json:"-"`
+	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
+}
+
+type GetTotalStoredDataResponse struct {
+	TotalStoredData int `json:"total-stored-data"`
+}
+
+type GetTotalBlobberCapacityResponse struct {
+	TotalBlobberCapacity int `json:"total-blobber-capacity"`
+}
+
+type GetAverageWritePriceResponse struct {
+	AverageWritePrice int `json:"average-write-price"`
+}
+
+type GetTotalMintedResponse struct {
+	TotalMinted int `json:"total-minted"`
+}
+
+type GetTotalTotalChallengesResponse struct {
+	TotalTotalChallenges int `json:"total-total-challenges"`
+}
+
+type GetTotalSuccessfulChallengesResponse struct {
+	TotalSuccessfulChallenges int `json:"total-successful-challenges"`
+}
+
+type GetTotalAllocatedStorage struct {
+	TotalAllocatedStorage int `json:"total-allocated-storage"`
+}
+
+type GetTotalStakedResponse struct {
+	TotalStaked int `json:"total-staked"`
+}
+
+type GetGraphBlobberInactiveRoundsRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberInactiveRoundsResponse []int
+
+type GetGraphBlobberChallengesCompletedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesCompletedResponse []int
+
+type GetGraphBlobberChallengesPassedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesPassedResponse []int
+
+type GetGraphBlobberServiceChargeRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberServiceChargeResponse []int
+
+type GetGraphBlobberWritePriceRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberWritePriceResponse []int
+
+type GetGraphBlobberCapacityRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberCapacityResponse []int
+
+type GetGraphBlobberAllocatedRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberAllocatedResponse []int
+
+type GetGraphBlobberSavedDataRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberSavedDataResponse []int
+
+type GetGraphBlobberReadDataRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberReadDataResponse []int
+
+type GetGraphBlobberOffersTotalRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberOffersTotalResponse []int
+
+type GetGraphBlobberUnstakeTotalRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberUnstakeTotalResponse []int
+
+type GetGraphBlobberTotalStakeRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberTotalStakeResponse []int
+
+type GetGraphBlobberChallengesOpenRequest struct {
+	DataPoints int
+	BlobberID  string
+}
+
+type GetGraphBlobberChallengesOpenResponse []int

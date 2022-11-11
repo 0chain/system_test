@@ -156,7 +156,7 @@ func TestObjectTree(t *testing.T) {
 		// FIXME: error should be returned
 		require.Nil(t, err)
 		require.Empty(t, blobberObjectTreeResponse)
-		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
+		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }
 
