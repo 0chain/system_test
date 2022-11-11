@@ -41,7 +41,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -73,8 +74,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Share unencrypted file to public using auth ticket with zero expiration", func(t *testing.T) {
@@ -97,7 +98,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -128,8 +130,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Share unencrypted file to public using auth ticket", func(t *testing.T) {
@@ -152,7 +154,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -182,8 +185,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Shared encrypted file to public using auth ticket should fail to download", func(t *testing.T) {
@@ -207,7 +210,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -261,7 +265,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -325,7 +330,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -383,7 +389,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -414,8 +421,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Share encrypted file using auth ticket - proxy re-encryption", func(t *testing.T) {
@@ -439,7 +446,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -477,8 +485,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Share encrypted huge file using auth ticket - proxy re-encryption", func(t *testing.T) {
@@ -502,7 +510,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -533,11 +542,6 @@ func TestShareFile(t *testing.T) {
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Name = %s",
-			filepath.Base(file),
-		)
-
 		// download with authticket and lookuphash should work
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
@@ -548,7 +552,8 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(file))
 
 		os.Remove(file) //nolint
 		// download with authticket should work
@@ -560,7 +565,8 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(file))
 		os.Remove(file) //nolint
 	})
 
@@ -585,7 +591,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -663,7 +670,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -729,7 +737,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -794,7 +803,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -859,7 +869,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -898,8 +909,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Folder not shared should fail to download - proxy re-encryption", func(t *testing.T) {
@@ -924,7 +935,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		remoteOwnerPathSubfolder := "/subfolder2/subfolder3/" + filepath.Base(file)
 		uploadParams = map[string]interface{}{
@@ -936,7 +948,8 @@ func TestShareFile(t *testing.T) {
 		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1101,7 +1114,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1171,8 +1185,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
@@ -1214,7 +1228,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1271,8 +1286,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
