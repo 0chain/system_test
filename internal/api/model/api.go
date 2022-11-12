@@ -108,7 +108,7 @@ func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolReq
 	}
 }
 
-func NewUpdateAllocationTransactionData(updateAllocationRequest UpdateAllocationRequest) TransactionData {
+func NewUpdateAllocationTransactionData(updateAllocationRequest *UpdateAllocationRequest) TransactionData {
 	return TransactionData{
 		Name:  "update_allocation_request",
 		Input: updateAllocationRequest,
@@ -506,8 +506,8 @@ type Ref struct {
 	ActualThumbnailHash string `gorm:"column:actual_thumbnail_hash;size:64;not null" filelist:"actual_thumbnail_hash"`
 	EncryptedKey        string `gorm:"column:encrypted_key;size:64" filelist:"encrypted_key"`
 	Children            []*Ref `gorm:"-"`
-	childrenLoaded      bool
-	OnCloud             bool `gorm:"column:on_cloud;default:false" filelist:"on_cloud"`
+	childrenLoaded      bool   //nolint
+	OnCloud             bool   `gorm:"column:on_cloud;default:false" filelist:"on_cloud"`
 
 	CommitMetaTxns []CommitMetaTxn `gorm:"foreignkey:ref_id" filelist:"commit_meta_txns"`
 	CreatedAt      int64           `gorm:"column:created_at;index:idx_created_at,sort:desc" dirlist:"created_at" filelist:"created_at"`
@@ -593,13 +593,13 @@ type BlobberCommitConnectionRequest struct {
 
 type BlobberCommitConnectionResponse struct{}
 
-//type BlobberGetFileReferencePathRequest struct {
+// type BlobberGetFileReferencePathRequest struct {
 //	URL, ClientID, ClientKey, ClientSignature, AllocationID string
-//}
+// }
 
-//type BlobberGetFileReferencePathResponse struct {
+// type BlobberGetFileReferencePathResponse struct {
 //	sdk.ReferencePathResult
-//}
+// }
 
 type BlobberDownloadFileReadMarker struct {
 	ClientID     string `json:"client_id"`
@@ -625,7 +625,7 @@ type BlobberDownloadFileResponse struct {
 
 type SCRestGetStakePoolStatRequest struct {
 	ProviderType string
-	ProviderID string
+	ProviderID   string
 }
 
 type SCRestGetStakePoolStatResponse struct {

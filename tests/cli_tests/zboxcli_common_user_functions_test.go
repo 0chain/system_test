@@ -127,7 +127,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationI
 	return filename
 }
 
-func moveAllocationFile(t *testing.T, allocationID, remotepath, destination string) {
+func moveAllocationFile(t *testing.T, allocationID, remotepath, destination string) { // nolint
 	output, err := moveFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": "/" + remotepath,
