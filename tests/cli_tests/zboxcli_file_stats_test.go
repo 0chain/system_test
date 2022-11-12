@@ -466,7 +466,11 @@ func TestFileStats(t *testing.T) {
 			"remotepath": remoteFilePath,
 			"localpath":  "tmp/",
 		}), true)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, StatusCompletedCB)
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 
 		cliutils.Wait(t, 2*time.Minute)
 		// get file stats after download

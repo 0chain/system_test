@@ -1057,7 +1057,7 @@ func TestDownload(t *testing.T) {
 		}), false)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 2)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
@@ -1125,7 +1125,7 @@ func TestDownload(t *testing.T) {
 		}), false)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 2)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
