@@ -452,9 +452,6 @@ func TestFileStats(t *testing.T) {
 			} else {
 				require.Equal(t, true, data.BlockchainAware)
 			}
-
-			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
-			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 
 		// Delete the uploaded file, since we will be downloading it now
@@ -485,12 +482,16 @@ func TestFileStats(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &stats)
 		require.Nil(t, err)
 
+		var skippedBlobber int
 		for _, data := range stats {
 			require.Equal(t, fname, data.Name)
 			require.Equal(t, remoteFilePath, data.Path)
-			require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			if data.NumOfBlockDownloads == 0 {
+				skippedBlobber++
+			} else {
+				require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			}
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
-			require.Equal(t, int64(1), data.NumOfBlockDownloads)
 			require.Equal(t, int64(1), data.NumOfUpdates)
 			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			if data.WriteMarkerTxn == "" {
@@ -498,10 +499,8 @@ func TestFileStats(t *testing.T) {
 			} else {
 				require.Equal(t, true, data.BlockchainAware)
 			}
-
-			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
-			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
+		require.Equal(t, 1, skippedBlobber)
 	})
 }
 
