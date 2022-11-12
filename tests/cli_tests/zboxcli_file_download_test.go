@@ -121,7 +121,7 @@ func TestDownload(t *testing.T) {
 		require.Len(t, outputList[1], 2)
 
 		require.Contains(t, outputList[1][1], StatusCompletedCB)
-		require.Contains(t, outputList[1][1], filepath.Base(fileNameOfFirstDirectory))
+		require.Contains(t, outputList[1][1], filepath.Base(fileNameOfSecondDirectory))
 		downloadedFileFromSecondDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfSecondDirectory))
 		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
@@ -222,7 +222,8 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.Error(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
@@ -275,7 +276,9 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "consensus_not_met")
+		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
 	t.Run("Download Entire Shared Folder Should Fail", func(t *testing.T) {
@@ -327,7 +330,7 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: please get files from folder, and download them one by one", output[0])
+		require.Contains(t, output[0], "invalid_operation: cannot downoad directory")
 	})
 
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
@@ -1212,7 +1215,8 @@ func TestDownload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0)
 
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[len(output)-1])
+		require.Contains(t, output[len(output)-1], "consensus_not_met")
+		require.Contains(t, output[len(output)-1], "file meta data")
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *testing.T) {
@@ -1233,7 +1237,8 @@ func TestDownload(t *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *testing.T) {
@@ -1327,7 +1332,8 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
