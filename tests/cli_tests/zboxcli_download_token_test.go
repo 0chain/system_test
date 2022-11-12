@@ -102,6 +102,10 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
+
 		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 }
