@@ -119,12 +119,6 @@ func TestCollectRewards(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		blobberWallet, err := getWallet(t, blobberWalletPath)
-		blobberWallet = blobberWallet
-		wallet, err := getWallet(t, configPath)
-
-		require.Nil(t, err, "error getting wallet")
-
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -147,8 +141,6 @@ func TestCollectRewards(t *testing.T) {
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
-
-		//balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		// Upload and download a file so blobber can accumulate rewards
 		allocSize := int64(2048)
@@ -184,7 +176,6 @@ func TestCollectRewards(t *testing.T) {
 		var beforeCollectRewards climodel.BlobberDetails
 		err = json.Unmarshal([]byte(output[0]), &beforeCollectRewards)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		//require.NotEqual(t, 0, beforeCollectRewards.UncollectedServiceCharge, "missing uncollected rewards")
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
@@ -196,9 +187,6 @@ func TestCollectRewards(t *testing.T) {
 
 		cliutils.Wait(t, 1*time.Second)
 
-		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
-		//require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
-		balanceAfter = balanceAfter
 		output, err = getBlobberDetails(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
