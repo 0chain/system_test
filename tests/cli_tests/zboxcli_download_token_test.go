@@ -102,11 +102,13 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
 		require.Equal(t, true,
 			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
 
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
 	})
 }
 
