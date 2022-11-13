@@ -19,7 +19,6 @@ func TestBridgeMint(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
-		t.Skip("Skipping due to deployment issue")
 		t.Parallel()
 
 		output, err := mintWrappedZcnTokens(t, TransactionHash, false)
