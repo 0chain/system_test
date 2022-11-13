@@ -1200,11 +1200,16 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
 
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
+
 	})
 
 	t.Run("Share unencrypted file using auth ticket - download accounting test", func(t *testing.T) {
@@ -1303,8 +1308,13 @@ func TestShareFile(t *testing.T) {
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
+
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 }
 
