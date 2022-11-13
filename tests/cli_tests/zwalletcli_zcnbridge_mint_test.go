@@ -59,7 +59,7 @@ func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, 
 func mintWrappedZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-mint-wzcn %s --silent "+
+		"./zwallet bridge-mint-wzcn --hash %s --silent "+
 			"--configDir ./config --config %s --path %s",
 		transactionHash,
 		configPath,
