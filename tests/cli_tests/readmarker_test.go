@@ -53,10 +53,9 @@ func TestReadMarker(t *testing.T) {
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
-
 }
 
-func CountReadMarkers(t *testing.T, allocationId string, sharderBaseUrl string) *climodel.ReadMarkersCount {
+func CountReadMarkers(t *testing.T, allocationId, sharderBaseUrl string) *climodel.ReadMarkersCount {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/count_readmarkers")
 	params := map[string]string{
 		"allocation_id": allocationId,
@@ -64,7 +63,7 @@ func CountReadMarkers(t *testing.T, allocationId string, sharderBaseUrl string) 
 	return cliutils.ApiGet[climodel.ReadMarkersCount](t, url, params)
 }
 
-func GetReadMarkers(t *testing.T, allocationId, authTicket string, sharderBaseUrl string) []climodel.ReadMarker {
+func GetReadMarkers(t *testing.T, allocationId, authTicket, sharderBaseUrl string) []climodel.ReadMarker {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/readmarkers")
 	params := make(map[string]string)
 	if len(allocationId) > 0 {
