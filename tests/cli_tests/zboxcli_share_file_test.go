@@ -1209,7 +1209,6 @@ func TestShareFile(t *testing.T) {
 		require.Equal(t, true,
 			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
-
 	})
 
 	t.Run("Share unencrypted file using auth ticket - download accounting test", func(t *testing.T) {

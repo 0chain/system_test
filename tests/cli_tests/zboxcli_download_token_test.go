@@ -108,7 +108,6 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		require.Equal(t, true,
 			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
-
 	})
 }
 
