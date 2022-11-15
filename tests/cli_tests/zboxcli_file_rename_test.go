@@ -255,9 +255,8 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 				"json":       "",
 			}), true)
 
-			require.NotNil(t, err)
+			require.Error(t, err)
 			require.Len(t, output, 1)
-			require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 		}
 	})
 
