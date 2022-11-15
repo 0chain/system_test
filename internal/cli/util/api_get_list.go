@@ -13,7 +13,7 @@ import (
 func ApiGet[T any](t *testing.T, url string, params map[string]string) *T {
 	url = addParms(url, params)
 
-	res, err := http.Get(url)
+	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "with request", url)
 	defer res.Body.Close()
