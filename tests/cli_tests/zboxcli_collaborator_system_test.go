@@ -148,8 +148,8 @@ func TestCollaborator(t *testing.T) {
 		require.Nil(t, err, "Error in downloading the file as collaborator", strings.Join(output, "\n"))
 		defer os.Remove("tmp" + remotepath)
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
-		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(localpath))
 	})
 
 	t.Run("Add Collaborator _ collaborator must not be able to share the file", func(t *testing.T) {
@@ -308,7 +308,8 @@ func TestCollaborator(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0], "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *testing.T) {
@@ -612,8 +613,8 @@ func TestCollaborator(t *testing.T) {
 		defer os.Remove(updatedLocalPath)
 		require.Nil(t, err, "failed in updating the file as collaborator", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(localpath))
-		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(localpath))
 	})
 
 	t.Run("Add Collaborator _ collaborator should NOT be able to copy the file", func(t *testing.T) {
@@ -688,7 +689,8 @@ func TestCollaborator(t *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(localpath))
 
 		remotepath := "/" + filepath.Base(localpath)
 
@@ -725,9 +727,9 @@ func TestCollaborator(t *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.NotNil(t, err, "Unexpected success in downloading the file as collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 2, "Unexpected number of output lines", strings.Join(output, "\n"))
-		expectedOutput := "Error in file operation: File content didn't match with uploaded file"
-		require.Equal(t, expectedOutput, output[1], "Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3, "Unexpected number of output lines", strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "decryption_error")
 	})
 }
 

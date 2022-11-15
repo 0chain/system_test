@@ -759,11 +759,9 @@ func uploadWithParamForWallet(t *testing.T, wallet, cliConfigFilename string, pa
 
 	require.Len(t, output, 2)
 
-	expected := fmt.Sprintf(
-		"Status completed callback. Type = application/octet-stream. Name = %s",
-		filepath.Base(filename),
-	)
-	require.Equal(t, expected, output[1])
+	aggregatedOutput := strings.Join(output, " ")
+	require.Contains(t, aggregatedOutput, StatusCompletedCB)
+	require.Contains(t, aggregatedOutput, filepath.Base(filename))
 }
 
 func uploadFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
