@@ -49,6 +49,7 @@ func ApiGetList[T any](t *testing.T, url string, params map[string]string, from,
 	}
 }
 
+//nolint
 func getNext(t *testing.T, url string, from, to, limit, offset int64, params map[string]string) []byte {
 	params["start"] = strconv.FormatInt(from, 10)
 	params["end"] = strconv.FormatInt(to, 10)
