@@ -17,7 +17,7 @@ import (
 )
 
 type SDKClient struct {
-	sync.Mutex
+	mutex sync.Mutex
 
 	blockWorker string
 	wallet      *model.SdkWallet
@@ -39,8 +39,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics string) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	c.wallet = &model.SdkWallet{
 		ClientID:  wallet.Id,
 		ClientKey: wallet.PublicKey,
@@ -68,8 +68,8 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 }
 
 func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
@@ -94,7 +94,7 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 		Path:       tmpFile.Name(),
 		ActualSize: actualSize,
 		RemoteName: filepath.Base(tmpFile.Name()),
-		RemotePath: filepath.Join("/", filepath.Base(tmpFile.Name())),
+		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
 	}
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
@@ -108,5 +108,5 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
-	return filepath.Join("/", filepath.Base(tmpFile.Name()))
+	return filepath.Join("", filepath.Base(tmpFile.Name()))
 }

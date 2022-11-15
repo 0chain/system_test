@@ -459,7 +459,7 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 	return scRestGetBlobberResponse, resp, err
 }
 
-func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeRequest *model.BlobberGetHashnodeRequest, requiredStatusCode int) (*model.BlobberGetHashnodeResponse, *resty.Response, error) {
 	var hashnode *model.BlobberGetHashnodeResponse
 
 	headers := map[string]string{
@@ -817,7 +817,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 		model.InternalTransactionPutRequest{
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUpdateAllocationTransactionData(model.UpdateAllocationRequest{
+			TransactionData: model.NewUpdateAllocationTransactionData(&model.UpdateAllocationRequest{
 				ID:              allocationID,
 				AddBlobberId:    newBlobberID,
 				RemoveBlobberId: oldBlobberID,
@@ -856,14 +856,14 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 	wallet.IncNonce()
 }
 
-func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
+func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
 		&model.SCRestGetAllocationBlobbersRequest{
 			ClientID:            wallet.Id,
 			ClientKey:           wallet.PublicKey,
-			BlobberRequirements: blobberRequirements,
+			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1026,7 +1026,7 @@ func (c *APIClient) GetStakePoolStat(t *testing.T, providerID, providerType stri
 
 	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
 		model.SCRestGetStakePoolStatRequest{
-			ProviderID: providerID,
+			ProviderID:   providerID,
 			ProviderType: providerType,
 		},
 		HttpOkStatus)
@@ -1089,7 +1089,7 @@ func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCod
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
+func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
 	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
