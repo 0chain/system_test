@@ -2,9 +2,11 @@ package cliutils
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -102,6 +104,21 @@ func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff t
 			return cmd, err
 		}
 	}
+}
+
+func StartCommandWithStd(commandString string) (cmd *exec.Cmd, stdOut, stdErr *strings.Builder, err error) {
+	command := parseCommand(commandString)
+	commandName := command[0]
+	args := command[1:]
+	sanitizedArgs := sanitizeArgs(args)
+
+	cmd = exec.Command(commandName, sanitizedArgs...)
+	specific.Setpgid(cmd)
+	cmd.Stdout = stdOut
+	cmd.Stderr = stdErr
+	err = cmd.Start()
+
+	return cmd, stdOut, stdErr, err
 }
 
 func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
@@ -211,4 +228,21 @@ func Contains(slice []string, val string) (int, bool) {
 		}
 	}
 	return -1, false
+}
+
+// GetSubPaths will return [/ /a /a/b /a/b/c /a/b/c/d /a/b/c/d/e] for
+// path /a/b/c/d/e
+func GetSubPaths(p string) (paths []string, err error) {
+	if !filepath.IsAbs(p) {
+		return nil, fmt.Errorf("path %s is not absolute", p)
+	}
+
+	p = filepath.Clean(p)
+	splittedPaths := strings.Split(p, "/")
+	for i := 0; i < len(splittedPaths); i++ {
+		subPath := filepath.Join(string(os.PathSeparator), strings.Join(splittedPaths[0:i+1], string(os.PathSeparator)))
+		paths = append(paths, subPath)
+	}
+
+	return
 }

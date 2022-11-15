@@ -1,9 +1,12 @@
 package cli_tests
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -20,20 +24,17 @@ import (
 )
 
 func TestStreamUploadDownload(t *testing.T) {
-	t.Parallel()
-	// 24*7 lofi playlist that we will use to test --feed --sync flags
 	KillFFMPEG()
-
-	feed, isStreamAvailable := checkYoutubeFeedAvailabiity()
-
-	if !isStreamAvailable {
-		t.Skipf("No youtube live feed available right now")
-	}
+	defer KillFFMPEG()
 
 	// Success scenarios
+	t.Run("Uploading remote feed to allocation should work", func(t *testing.T) {
+		feed, ok := getFeed()
 
-	t.Run("Uploading youtube feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -51,18 +52,18 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, "feed", configPath, createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
 			"feed":       feed,
 		}))
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -102,7 +103,12 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with delay flag must work", func(t *testing.T) {
-		t.Parallel()
+		feed, ok := getFeed()
+
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -120,19 +126,19 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
 			"feed":       feed,
 			"delay":      10,
 		}))
-		require.Nil(t, err, "error in killing upload command with delay flag")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -171,7 +177,12 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload from feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
+		feed, ok := getFeed()
+
+		if !ok {
+			t.Skipf("No live feed available right now")
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -189,19 +200,19 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "feed", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  remotepath,
 			"localpath":   localpath,
 			"feed":        feed,
 			"chunknumber": 10,
 		}))
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -242,7 +253,8 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation should work", func(t *testing.T) {
-		t.Parallel()
+		t.Skip("github runner has no any audio/camera device to test this feature yet")
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -260,17 +272,17 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
 		}))
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -309,7 +321,8 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *testing.T) {
-		t.Parallel()
+		t.Skip("github runner has no any audio/camera device to test this feature yet")
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -327,18 +340,18 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"localpath":  localpath,
 			"delay":      10,
 		}))
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -377,7 +390,8 @@ func TestStreamUploadDownload(t *testing.T) {
 	})
 
 	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *testing.T) {
-		t.Parallel()
+		t.Skip("github runner has no any audio/camera device to test this feature yet")
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -395,18 +409,18 @@ func TestStreamUploadDownload(t *testing.T) {
 		remotepath := "/live/stream.m3u8"
 		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
 		localpath := filepath.Join(localfolder, "up.m3u8")
+		os.RemoveAll(localpath)
 		err = os.MkdirAll(localpath, os.ModePerm)
 		require.Nil(t, err, "Error in creating the folders", localpath)
 		defer os.RemoveAll(localfolder)
 
-		err = startUploadFeed(t, configPath, "stream", createParams(map[string]interface{}{
+		err = startUploadFeed(t, configPath, "stream", localfolder, createParams(map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  remotepath,
 			"localpath":   localpath,
 			"chunknumber": 10,
 		}))
-		require.Nil(t, err, "error in killing upload command")
-		KillFFMPEG()
+		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
 		// Check some .ts files and 1 .m3u8 file must have been created on localpath by youtube-dl
 		count_m3u8 := 0
@@ -450,47 +464,101 @@ func TestStreamUploadDownload(t *testing.T) {
 	// FIXME: Disabled for now due to process hanging
 }
 
-func startUploadFeed(t *testing.T, cmdName, cliConfigFilename, params string) error {
+func startUploadFeed(t *testing.T, cliConfigFilename, cmdName, localFolder, params string) error {
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, cmdName, params)
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
-	require.Nil(t, err, "error in uploading a live feed")
+	require.Nil(t, err, fmt.Sprintf("error in uploading a live feed: %s", err))
 
-	// Need atleast 3-4 .ts files uploaded
+	ready := waitTsFilesReady(t, localFolder)
+	if !ready {
+		defer cmd.Process.Kill() //nolint: errcheck
+
+		return errors.New("download video files is timeout")
+	}
+
+	// waiting for .ts files to upload
 	cliutils.Wait(t, 30*time.Second)
-
-	// Kills upload process as well as it's child processes
-	err = cmd.Process.Kill()
-	return err
+	cmd.Process.Kill() //nolint: errcheck
+	return nil
 }
 
-func checkYoutubeFeedAvailabiity() (feed string, isStreamAvailable bool) {
-	feed = ""
-	const feed1 = `https://www.youtube.com/watch?v=Dx5qFachd3A`
-	const feed2 = `https://www.youtube.com/watch?v=21qNxnCS8WU`
+func waitTsFilesReady(t *testing.T, localFolder string) bool {
+	// Need atleast 3-4 .ts files downloaded and generated by youtube-dl and ffmpeg
+	ctx, cancel := context.WithTimeout(context.TODO(), 3*time.Minute)
+	defer cancel()
 
-	for i := 1; i < 3; i++ {
-		var resp *http.Response
-		var err error
-		switch i {
-		case 1:
-			resp, err = http.Get(feed1)
-			feed = feed1
-		case 2:
-			resp, err = http.Get(feed2)
-			feed = feed2
-		}
-		if err == nil && resp.StatusCode == 200 {
-			return feed, true
+	for {
+		select {
+		case <-ctx.Done():
+			return false
+		case <-time.After(1 * time.Second):
+			files, _ := os.ReadDir(localFolder)
+			c := 0
+			for _, file := range files {
+				if strings.HasSuffix(file.Name(), ".ts") {
+					c++
+				}
+			}
+
+			if c > 2 {
+				return true
+			}
 		}
 	}
-	return "", false
+}
+
+var feedMutex sync.Mutex
+var feeds = []string{
+	`https://www.youtube.com/watch?v=GfMA7VPkDYw`,
+	`https://www.youtube.com/watch?v=IggdFxXbnsA`,
+	"https://youtu.be/OBExtHgg-js",
+	"https://youtu.be/EBvFX1NP4WM",
+	"https://www.twitch.tv/videos/1628184971",
+	"https://www.twitch.tv/videos/1626720273",
+	"https://veoh.com/watch/v1422286563pBZAwaK",
+	"https://veoh.com/watch/v17432006xmkFQTa",
+	"https://odysee.com/@samuel_earp_artist:c/how-to-paint-a-landscape-in-gouache:8",
+	"https://odysee.com/@fireship:6/how-to-never-write-bug:4",
+}
+
+func getFeed() (string, bool) {
+	feedMutex.Lock()
+	defer feedMutex.Unlock()
+	n := len(feeds)
+
+	i := rand.Intn(n) //nolint
+	var m int
+	for {
+		if m >= n {
+			return "", false
+		}
+		feed := feeds[i]
+
+		resp, err := http.Get(feed) //nolint
+
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close() //nolint
+		}
+
+		if err == nil && resp.StatusCode == http.StatusOK {
+			return feed, true
+		}
+
+		i++
+
+		if i >= n {
+			i = 0
+		}
+
+		m++
+	}
 }
 
 func KillFFMPEG() {
 	if runtime.GOOS == "windows" {
 		_ = exec.Command("Taskkill", "/IM", "ffmpeg.exe", "/F").Run()
-	} else if runtime.GOOS == "linux" {
+	} else {
 		_ = exec.Command("killall", "ffmpeg").Run()
 	}
 }

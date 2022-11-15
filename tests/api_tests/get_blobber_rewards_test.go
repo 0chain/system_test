@@ -4,34 +4,26 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBlobberRewards(t *testing.T) {
-	t.Parallel()
-
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
-		t.Parallel()
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		mnemonic := crypto.GenerateMnemonics(t)
-		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
-
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
@@ -39,11 +31,10 @@ func TestBlobberRewards(t *testing.T) {
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-
-				if poolDelegateInfo.DelegateID == wallet.Id {
+				if poolDelegateInfo.DelegateID == sdkWallet.Id {
 					rewards = poolDelegateInfo.Rewards
 					break
 				}
@@ -52,51 +43,44 @@ func TestBlobberRewards(t *testing.T) {
 			return rewards > 0
 		})
 
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		apiClient.CollectRewards(t, wallet, blobberID, 3, client.TxSuccessfulStatus)
+		apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
-		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
 		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 
 	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
-		t.Parallel()
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		mnemonic := crypto.GenerateMnemonics(t)
-		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
-
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
 
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*10, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-
-				if poolDelegateInfo.DelegateID == wallet.Id {
+				if poolDelegateInfo.DelegateID == sdkWallet.Id {
 					rewards = poolDelegateInfo.Rewards
 					break
 				}
@@ -105,24 +89,18 @@ func TestBlobberRewards(t *testing.T) {
 			return rewards > 0
 		})
 
-		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
 		require.Equal(t, balanceAfter, balanceBefore)
 	})
 
 	t.Run("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", func(t *testing.T) {
-		t.Skip("Skipping due to sporadic behaviour of api tests")
-		t.Parallel()
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		mnemonic := crypto.GenerateMnemonics(t)
-		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-		sdkClient.SetWallet(t, wallet, mnemonic)
-
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		numberOfBlobbersBefore := len(allocation.Blobbers)
@@ -130,7 +108,7 @@ func TestBlobberRewards(t *testing.T) {
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
 		var numberOfBlobbersAfter int
 
@@ -142,21 +120,21 @@ func TestBlobberRewards(t *testing.T) {
 		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 
-		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
 
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
 		var rewards int64
 
 		wait.PoolImmediately(t, time.Minute*20, func() bool {
-			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID)
+			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
-				if poolDelegateInfo.DelegateID == wallet.Id {
+				if poolDelegateInfo.DelegateID == sdkWallet.Id {
 					rewards = poolDelegateInfo.Rewards
 					break
 				}
@@ -165,9 +143,9 @@ func TestBlobberRewards(t *testing.T) {
 			return rewards > 0
 		})
 
-		apiClient.CollectRewards(t, wallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
 
-		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
 		require.Equal(t, balanceAfter, balanceBefore+rewards)

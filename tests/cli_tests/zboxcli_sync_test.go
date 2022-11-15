@@ -529,7 +529,9 @@ func TestSyncWithBlobbers(t *testing.T) {
 			}
 		}
 		require.NotNil(t, foundItem, "The original file doesn't exist anymore", files)
-		require.Equal(t, 128*KB, foundItem.Size, "The original file doesn't exist anymore", files)
+		// Double the number because the size is calculated to be (ActualFileSize/Data-shards)*total-blobbers
+		// In our case we have 2-data shards and 2-parity shards. So it will double the size.
+		require.Equal(t, 128*KB*2, foundItem.Size, "The original file doesn't exist anymore", files)
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *testing.T) {
@@ -719,20 +721,16 @@ func TestSyncWithBlobbers(t *testing.T) {
 			"allocation": allocationID,
 			"localpath":  localpath,
 		}, true)
-		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 
-		require.True(t,
-			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.NotNil(t, err)
+		require.Len(t, output, 2)
+		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 
+		// no file must be uploaded to allocation
 		output, err = listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
-		var files []climodel.AllocationFile
-		err = json.Unmarshal([]byte(output[0]), &files)
-		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-
-		require.Len(t, files, 0, "no file must be uploaded to allocation", files)
+		require.Equal(t, output[0], "[]")
 	})
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *testing.T) {
@@ -829,20 +827,21 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 	}
 }
 
+// nolint
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//   - rootFolder: Leave empty or send "/" to create on os temp folder
-//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//  - rootFolder: Leave empty or send "/" to create on os temp folder
+//  - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
 //   - returns local root folder
 //   - sample structure:
 //
-//	map[string]interface{}{
-//		"FolderA": map[string]interface{}{
-//			"file1.txt": 64*KB + 1,
-//			"file2.txt": 64*KB + 1,
-//		},
-//		"FolderB": map[string]interface{}{},
-//	}
+//    map[string]interface{} {
+//        "FolderA": map[string]interface{}{
+//            "file1.txt": 64*KB + 1,
+//            "file2.txt": 64*KB + 1,
+//        },
+//        "FolderB": map[string]interface{}{},
+//    }
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))

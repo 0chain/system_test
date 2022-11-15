@@ -23,7 +23,6 @@ import (
 func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t.Skip("Till batch-update is merged...")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
-
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -65,7 +64,6 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 
 	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
-
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -213,13 +211,13 @@ func getMinerScMap(t *testing.T) map[string]float64 {
 	return floatMap
 }
 
-func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (int64, int64) {
+func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
 	epoch := round / int64(minerScConfig["epoch"])
 	epochDecline := 1.0 - minerScConfig["reward_decline_rate"]
 	declineRate := math.Pow(epochDecline, float64(epoch))
 	blockReward := (minerScConfig["block_reward"] * float64(TOKEN_UNIT)) * declineRate
-	minerReward := int64(blockReward * minerScConfig["share_ratio"])
-	sharderReward := int64(blockReward) - minerReward
+	minerReward = int64(blockReward * minerScConfig["share_ratio"])
+	sharderReward = int64(blockReward) - minerReward
 	return minerReward, sharderReward
 }
 
@@ -306,6 +304,10 @@ func getShardersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]str
 
 func getNodeBaseURL(host string, port int) string {
 	return fmt.Sprintf(`http://%s:%d`, host, port)
+}
+
+func getMinersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
 func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {

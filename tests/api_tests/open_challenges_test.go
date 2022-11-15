@@ -16,7 +16,8 @@ func TestOpenChallenges(t *testing.T) {
 
 		wallet := apiClient.RegisterWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, nil, client.HttpOkStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		blobberId := (*allocationBlobbers.Blobbers)[0]
 
 		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(

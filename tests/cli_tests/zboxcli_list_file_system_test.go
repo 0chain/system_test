@@ -531,8 +531,7 @@ func TestListFileSystem(t *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	//FIXME: Listing a file in another allocation does not fail but returns no output see https://github.com/0chain/zboxcli/issues/246
-	t.Run("BROKEN List Files in Other's Wallet Should Fail but does not see zboxcli/issues/246", func(t *testing.T) {
+	t.Run("List Files in Other's Wallet Should Fail", func(t *testing.T) {
 		t.Parallel()
 
 		var otherAllocationID string
@@ -588,9 +587,10 @@ func TestListFileSystem(t *testing.T) {
 			"json":       "",
 			"remotepath": remotepath,
 		}), false)
-		require.Nil(t, err, err)
+
+		require.NotNil(t, err)
 		require.Len(t, output, 1)
-		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 	})
 
 	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {

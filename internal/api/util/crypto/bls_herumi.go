@@ -3,6 +3,7 @@ package crypto
 import (
 	"errors"
 	"io"
+	"log"
 
 	"github.com/herumi/bls-go-binary/bls"
 )
@@ -13,7 +14,7 @@ func init() {
 
 	err := bls.Init(bls.CurveFp254BNb)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err) //nolint
 	}
 	BlsSignerInstance = &herumiBls{}
 }
@@ -52,7 +53,7 @@ func (b *herumiBls) SetRandFunc(randReader io.Reader) {
 	bls.SetRandFunc(randReader)
 }
 
-func (b *herumiBls) FrSub(out Fr, x Fr, y Fr) {
+func (b *herumiBls) FrSub(out, x, y Fr) {
 	o1, _ := out.(*herumiFr)
 	x1, _ := x.(*herumiFr)
 	y1, _ := y.(*herumiFr)
@@ -129,14 +130,12 @@ func (sk *herumiSecretKey) GetMasterSecretKey(k int) ([]SecretKey, error) {
 
 	for i, it := range list {
 		msk[i] = &herumiSecretKey{SecretKey: it}
-
 	}
 
 	return msk, nil
 }
 
 func (sk *herumiSecretKey) Set(msk []SecretKey, id ID) error {
-
 	blsMsk := make([]bls.SecretKey, len(msk))
 
 	for i, it := range msk {
