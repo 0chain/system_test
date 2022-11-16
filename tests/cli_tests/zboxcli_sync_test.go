@@ -529,7 +529,9 @@ func TestSyncWithBlobbers(t *testing.T) {
 			}
 		}
 		require.NotNil(t, foundItem, "The original file doesn't exist anymore", files)
-		require.Equal(t, 128*KB, foundItem.Size, "The original file doesn't exist anymore", files)
+		// Double the number because the size is calculated to be (ActualFileSize/Data-shards)*total-blobbers
+		// In our case we have 2-data shards and 2-parity shards. So it will double the size.
+		require.Equal(t, 128*KB*2, foundItem.Size, "The original file doesn't exist anymore", files)
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *testing.T) {
@@ -825,20 +827,21 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 	}
 }
 
+// nolint
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//   - rootFolder: Leave empty or send "/" to create on os temp folder
-//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//  - rootFolder: Leave empty or send "/" to create on os temp folder
+//  - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
 //   - returns local root folder
 //   - sample structure:
 //
-//	map[string]interface{}{
-//		"FolderA": map[string]interface{}{
-//			"file1.txt": 64*KB + 1,
-//			"file2.txt": 64*KB + 1,
-//		},
-//		"FolderB": map[string]interface{}{},
-//	}
+//    map[string]interface{} {
+//        "FolderA": map[string]interface{}{
+//            "file1.txt": 64*KB + 1,
+//            "file2.txt": 64*KB + 1,
+//        },
+//        "FolderB": map[string]interface{}{},
+//    }
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))

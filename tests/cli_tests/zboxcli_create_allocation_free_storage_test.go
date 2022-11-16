@@ -33,11 +33,6 @@ const (
 
 	freeTokensIndividualLimit = 10.0
 	freeTokensTotalLimit      = 100.0
-
-	configKeyDataShards       = "free_allocation_settings.data_shards"
-	configKeyParityShards     = "free_allocation_settings.parity_shards"
-	configKeySize             = "free_allocation_settings.size"
-	configKeyDuration         = "free_allocation_settings.duration"
 	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
