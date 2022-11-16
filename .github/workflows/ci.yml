@@ -78,9 +78,11 @@ jobs:
       - name: Success
         if: ${{ steps.check-ci.outputs.conclusion == 'success' }}
         run: echo "master is successful!"
-      - name: Not Success
+      - name: Not Successful
         if: ${{ steps.check-ci.outputs.conclusion != 'success' }}
-        run: echo "master is NOT successful!"      
+        run: |
+          echo "master is NOT successful!"
+          exit 1
         
   system-tests:
     name: "System Tests"
