@@ -63,6 +63,27 @@ jobs:
           skip-pkg-cache: true
           only-new-issues: true
 
+  ensure-master-is-green:
+    name: "Ensure master is green"
+    runs-on: self-hosted
+    steps:
+      - name: Check CI
+        id: check-ci
+        uses: LASER-Yi/workflow-status@v0.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: ci.yml
+          branch: master
+          event: push
+      - name: Success
+        if: ${{ steps.check-ci.outputs.conclusion == 'success' }}
+        run: echo "master is successful!"
+      - name: Not Successful
+        if: ${{ steps.check-ci.outputs.conclusion != 'success' }}
+        run: |
+          echo "master is NOT successful!"
+          exit 1
+        
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
