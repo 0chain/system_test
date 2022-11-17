@@ -64,6 +64,7 @@ jobs:
           only-new-issues: true
 
   ensure-master-is-green:
+    if: github.ref != 'refs/heads/master'
     name: "Ensure master is green"
     runs-on: self-hosted
     steps:
