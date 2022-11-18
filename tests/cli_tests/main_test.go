@@ -88,6 +88,13 @@ func TestMain(m *testing.M) {
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
+	goMaxProcs, ok := os.LookupEnv("GOMAXPROCS")
+	if !ok {
+		log.Printf("GOMAXPROCS environment variable is not set")
+	} else {
+		log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
+	}
+
 	configDir, _ = filepath.Abs(configDir)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
