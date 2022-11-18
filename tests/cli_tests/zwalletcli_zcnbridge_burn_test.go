@@ -14,7 +14,6 @@ func TestBridgeBurn(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Burning WZCN tokens", func(t *testing.T) {
-		t.Skip("Insufficient balance")
 		t.Parallel()
 
 		err := PrepareBridgeClient(t)
@@ -28,7 +27,6 @@ func TestBridgeBurn(t *testing.T) {
 
 	// todo: enable test
 	t.Run("Burning ZCN tokens", func(t *testing.T) {
-		t.Skip("Skipping due to transaction execution errr (context deadline error)")
 		t.Parallel()
 
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
@@ -36,18 +34,39 @@ func TestBridgeBurn(t *testing.T) {
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification successful")
 	})
+
+	t.Run("Get ZCN burn ticket", func(t *testing.T) {
+		//t.Skipf("Skipping due to context deadline error when burning ZCN tokens")
+		t.Parallel()
+
+		output, err := getZcnBurnTicket(t, "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95", false)
+		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification [OK]")
+	})
+
+	t.Run("Get WZCN burn ticket", func(t *testing.T) {
+		t.Skipf("Skipping due to Authorizer failing to register in the 0chain")
+		t.Parallel()
+
+		output, err := getWrappedZcnBurnTicket(t, "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95", false)
+		require.Nil(t, err, "error: '%s'", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification [OK]")
+	})
 }
 
 //nolint
 func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-zcn --amount %s --path %s --bridge_config %s",
+		"./zwallet bridge-burn-zcn --token %s --path %s --bridge_config %s --wallet %s --configDir ./config --config %s",
 		amount,
 		configDir,
 		bridgeClientConfigFile,
+		escapedTestName(t)+"_wallet.json",
+		configPath,
 	)
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)

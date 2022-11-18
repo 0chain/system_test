@@ -6,4 +6,4 @@ bridge:
     EthereumNodeURL: https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4
     GasLimit: 300000
     Value: 0
-    ConsensusThreshold: 0.7
+    ConsensusThreshold: 75
