@@ -12,8 +12,6 @@ import (
 )
 
 func TestHashnodeRoot(t *testing.T) {
-	t.Parallel()
-
 	goMaxProcs := runtime.GOMAXPROCS(0)
 	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
 
@@ -78,7 +76,6 @@ func TestHashnodeRoot(t *testing.T) {
 	})
 
 	t.Run("Get hashnode root with bad signature should fail", func(t *testing.T) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
