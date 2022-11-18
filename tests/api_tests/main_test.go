@@ -3,6 +3,7 @@ package api_tests
 import (
 	"log"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -25,12 +26,8 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	goMaxProcs, ok := os.LookupEnv("GOMAXPROCS")
-	if !ok {
-		log.Printf("GOMAXPROCS environment variable is not set")
-	} else {
-		log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
-	}
+	goMaxProcs := runtime.GOMAXPROCS(0)
+	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
 
 	parsedConfig := config.Parse(configPath)
 
