@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	goMaxProcs := runtime.GOMAXPROCS(0)
+	goMaxProcs := runtime.GOMAXPROCS(24)
 	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
 
 	parsedConfig := config.Parse(configPath)

@@ -11,6 +11,8 @@ import (
 )
 
 func TestBlobberFileRefs(t *testing.T) {
+	t.Parallel()
+	
 	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

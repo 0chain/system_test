@@ -11,6 +11,8 @@ import (
 )
 
 func TestObjectTree(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Get object tree with allocation id, remote path should work", func(t *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
