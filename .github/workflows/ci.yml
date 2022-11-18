@@ -184,7 +184,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
-      - name: "Set build status to ${{ job.status }}"
+      - name: "Parse status of ${{ env.WORKFLOW_CONCLUSION }}"
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "WORKFLOW_CONCLUSION=failure" >> $GITHUB_ENV
+          fi
+      - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
         uses: Sibz/github-status-action@v1
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
