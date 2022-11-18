@@ -89,7 +89,7 @@ func TestMain(m *testing.M) {
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	goMaxProcs := runtime.GOMAXPROCS(24)
+	goMaxProcs := runtime.GOMAXPROCS(0)
 	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
 
 	configDir, _ = filepath.Abs(configDir)
