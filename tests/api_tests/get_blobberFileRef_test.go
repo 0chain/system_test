@@ -190,7 +190,6 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with no refType should fail", func(t *testing.T) {
-		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -221,7 +220,6 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with no path and no refType should fail", func(t *testing.T) {
-		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -252,7 +250,6 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client signature should fail", func(t *testing.T) {
-		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -279,7 +276,6 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client id should fail", func(t *testing.T) {
-		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -312,7 +308,6 @@ func TestBlobberFileRefs(t *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid client key should fail", func(t *testing.T) {
-		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
