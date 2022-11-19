@@ -62,6 +62,7 @@ jobs:
           skip-build-cache: true
           skip-pkg-cache: true
           only-new-issues: true
+
   ensure-master-is-green:
     if: github.ref != 'refs/heads/master'
     name: "Ensure master is green"
@@ -69,19 +70,17 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: LASER-Yi/workflow-status@v0.0.2
+        uses: 0chain/actions/get-build-state@feature/add-status-action
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: ci.yml
-          branch: master
-          event: push
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          sha: master
       - name: Success
-        if: ${{ steps.check-ci.outputs.conclusion == 'success' }}
+        if: ${{ env.BUILD_STATE == 'success' }}
         run: echo "master is successful!"
       - name: Not Successful
-        if: ${{ steps.check-ci.outputs.conclusion != 'success' }}
+        if: ${{ env.BUILD_STATE != 'success' }}
         run: |
-          echo "master is NOT successful!"
+          echo "master is NOT successful! was: { {env.BUILD_STATE }}"
           exit 1
         
   system-tests:
@@ -96,7 +95,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@feature/gomaxprocs-tweak
+        uses: 0chain/actions/set-pr-status@feature/add-status-action
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
@@ -137,7 +136,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/gomaxprocs-tweak
+        uses: 0chain/actions/deploy-0chain@feature/add-status-action
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -154,7 +153,7 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@feature/gomaxprocs-tweak
+        uses: 0chain/actions/run-system-tests@feature/add-status-action
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -167,7 +166,7 @@ jobs:
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@feature/gomaxprocs-tweak
+        uses: 0chain/actions/set-pr-status@feature/add-status-action
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"
@@ -176,14 +175,20 @@ jobs:
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
-  set-build-status:
-    name: "Set build status"
-    if: ${{ always() }}
+
+  set-build-conclusion:
+    name: "Set build conclusion"
+    if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
     needs: [ golangci, system-tests ]
     runs-on: self-hosted
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
-      - name: "Set build status to ${{ job.status }}"
+      - name: "Parse status of ${{ env.WORKFLOW_CONCLUSION }}"
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "WORKFLOW_CONCLUSION=failure" >> $GITHUB_ENV
+          fi
+      - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
         uses: Sibz/github-status-action@v1
         with:
           authToken: ${{secrets.GITHUB_TOKEN}}
