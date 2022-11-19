@@ -179,7 +179,7 @@ jobs:
 
   set-build-conclusion:
     name: "Set build conclusion"
-    if: ${{ always() && github.ref == 'refs/heads/master' }}
+    if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
     needs: [ golangci, system-tests ]
     runs-on: self-hosted
     steps:
