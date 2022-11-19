@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -20,9 +18,6 @@ import (
 )
 
 func TestBlobberChallenge(t *testing.T) {
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
-
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

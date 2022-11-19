@@ -1,8 +1,6 @@
 package api_tests
 
 import (
-	"log"
-	"runtime"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -12,9 +10,6 @@ import (
 )
 
 func TestHashnodeRoot(t *testing.T) {
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
-
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -76,6 +71,7 @@ func TestHashnodeRoot(t *testing.T) {
 	})
 
 	t.Run("Get hashnode root with bad signature should fail", func(t *testing.T) {
+		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)

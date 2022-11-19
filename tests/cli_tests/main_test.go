@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -88,9 +87,6 @@ func TestMain(m *testing.M) {
 		configPath = "./zbox_config.yaml"
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
-
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
 
 	configDir, _ = filepath.Abs(configDir)
 
