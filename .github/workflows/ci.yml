@@ -73,6 +73,7 @@ jobs:
         uses: 0chain/actions/get-build-state@feature/add-status-action
         with:
           github_token: ${{ github.token }}
+          repository: "0chain/system_test"
           sha: master
       - name: Success
         if: ${{ env.BUILD_STATE == 'success' }}
