@@ -1,13 +1,16 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetSCStats(t *testing.T) {
+func TestGetSCStats(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Get miner stats call should return successfully", func(t *testing.T) {

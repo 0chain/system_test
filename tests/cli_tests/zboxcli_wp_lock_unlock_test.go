@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -11,7 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWritePoolLockUnlock(t *testing.T) {
+func TestWritePoolLockUnlock(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *testing.T) {

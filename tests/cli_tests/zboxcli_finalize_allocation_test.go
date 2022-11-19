@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -11,7 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFinalizeAllocation(t *testing.T) {
+func TestFinalizeAllocation(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *testing.T) {

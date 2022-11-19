@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strings"
 	"testing"
@@ -9,17 +10,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOwnerUpdate(t *testing.T) {
+func TestOwnerUpdate(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	output, err := registerWallet(t, configPath)
+	output, err := registerWallet(testSetup, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-	newOwnerWallet, err := getWallet(t, configPath)
+	newOwnerWallet, err := getWallet(testSetup, configPath)
 	require.Nil(t, err, "error fetching wallet")
 
-	newOwnerName := escapedTestName(t)
+	newOwnerName := escapedTestName(testSetup)
 
 	t.Run("should allow update of owner: StorageSC", func(t *testing.T) {
 		ownerKey := "owner_id"

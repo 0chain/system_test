@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,7 +21,9 @@ import (
 
 const StatusCompletedCB = "Status completed callback"
 
-func TestDownload(t *testing.T) {
+func TestDownload(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded

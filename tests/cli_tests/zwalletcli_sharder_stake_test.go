@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"regexp"
 	"strings"
@@ -14,14 +15,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSharderStake(t *testing.T) {
+func TestSharderStake(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+	sharders := getShardersListForWallet(testSetup, sharder01NodeDelegateWalletName)
 
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+	sharderNodeDelegateWallet, err := getWalletForName(testSetup, configPath, sharder01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var sharder climodel.Sharder

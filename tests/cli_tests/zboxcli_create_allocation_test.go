@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -11,7 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateAllocation(t *testing.T) {
+func TestCreateAllocation(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Create allocation with name Should Work", func(t *testing.T) {

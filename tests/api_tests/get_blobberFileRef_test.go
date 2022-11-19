@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/gosdk/core/encryption"
@@ -10,7 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberFileRefs(t *testing.T) {
+func TestBlobberFileRefs(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {

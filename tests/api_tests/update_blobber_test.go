@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -9,7 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdateBlobber(t *testing.T) {
+func TestUpdateBlobber(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *testing.T) {

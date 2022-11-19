@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -8,7 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetSCState(t *testing.T) {
+func TestGetSCState(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {

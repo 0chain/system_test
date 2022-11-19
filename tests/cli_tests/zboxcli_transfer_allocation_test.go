@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,7 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("transfer allocation by curator should work", func(t *testing.T) {

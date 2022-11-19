@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strconv"
 	"strings"
@@ -16,7 +17,9 @@ import (
 
 var settingUpdateSleepTime = time.Second * 10
 
-func TestStorageUpdateConfig(t *testing.T) {
+func TestStorageUpdateConfig(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}

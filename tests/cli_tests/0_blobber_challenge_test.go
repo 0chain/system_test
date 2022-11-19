@@ -3,12 +3,11 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,15 +18,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberChallenge(t *testing.T) {
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
+func TestBlobberChallenge(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
 
-	output, err := registerWallet(t, configPath)
+	output, err := registerWallet(testSetup, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 	// Get sharder list.
-	output, err = getSharders(t, configPath)
+	output, err = getSharders(testSetup, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 1)
 	require.Equal(t, "MagicBlock Sharders", output[0])
@@ -42,7 +40,7 @@ func TestBlobberChallenge(t *testing.T) {
 	require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
 
 	blobberList := []climodel.BlobberInfo{}
-	output, err = listBlobbers(t, configPath, "--json")
+	output, err = listBlobbers(testSetup, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 

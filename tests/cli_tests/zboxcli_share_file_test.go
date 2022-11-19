@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -18,7 +19,9 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-func TestShareFile(t *testing.T) {
+func TestShareFile(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *testing.T) {
 		t.Parallel()

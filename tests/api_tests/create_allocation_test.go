@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -8,7 +9,9 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 )
 
-func TestCreateAllocation(t *testing.T) {
+func TestCreateAllocation(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {

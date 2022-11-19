@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,7 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileDownloadTokenMovement(t *testing.T) {
+func TestFileDownloadTokenMovement(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Downloader's readpool balance should reduce by download cost", func(t *testing.T) {

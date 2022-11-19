@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -11,7 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateDir(t *testing.T) {
+func TestCreateDir(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("create root dir", func(t *testing.T) {

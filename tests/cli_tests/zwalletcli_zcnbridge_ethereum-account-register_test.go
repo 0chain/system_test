@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io/fs"
 	"log"
 	"os"
@@ -25,7 +26,8 @@ const (
 	password = "password"
 )
 
-func TestEthRegisterAccount(t *testing.T) {
+func TestEthRegisterAccount(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
 	t.Parallel()
 
 	t.Run("Register ethereum account in local key storage", func(t *testing.T) {

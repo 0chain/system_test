@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -11,7 +12,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestMultisigWallet(t *testing.T) {
+func TestMultisigWallet(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *testing.T) {

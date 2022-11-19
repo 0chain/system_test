@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -8,7 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenChallenges(t *testing.T) {
+func TestOpenChallenges(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {

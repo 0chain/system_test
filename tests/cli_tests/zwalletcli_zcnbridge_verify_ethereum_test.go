@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +15,9 @@ const (
 	Address = "0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230"
 )
 
-func TestBridgeVerify(t *testing.T) {
+func TestBridgeVerify(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Verify ethereum transaction", func(t *testing.T) {

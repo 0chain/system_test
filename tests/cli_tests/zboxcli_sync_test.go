@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path"
 	"path/filepath"
@@ -16,7 +17,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSyncWithBlobbers(t *testing.T) {
+func TestSyncWithBlobbers(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Sync path with 1 file to empty allocation should work", func(t *testing.T) {
@@ -830,18 +833,21 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 // nolint
 // This will create files and folders based on defined structure recursively inside the root folder
 //
-//  - rootFolder: Leave empty or send "/" to create on os temp folder
-//  - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//   - rootFolder: Leave empty or send "/" to create on os temp folder
+//
+//   - structure: Map of the desired folder structure to be created; Int values will represent a file with that size, Map values will be considered as folders
+//
 //   - returns local root folder
+//
 //   - sample structure:
 //
-//    map[string]interface{} {
-//        "FolderA": map[string]interface{}{
-//            "file1.txt": 64*KB + 1,
-//            "file2.txt": 64*KB + 1,
-//        },
-//        "FolderB": map[string]interface{}{},
-//    }
+//     map[string]interface{} {
+//     "FolderA": map[string]interface{}{
+//     "file1.txt": 64*KB + 1,
+//     "file2.txt": 64*KB + 1,
+//     },
+//     "FolderB": map[string]interface{}{},
+//     }
 func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))

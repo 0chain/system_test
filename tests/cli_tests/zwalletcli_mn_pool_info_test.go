@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"regexp"
 	"strings"
@@ -11,16 +12,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerSharderPoolInfo(t *testing.T) {
+func TestMinerSharderPoolInfo(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+	sharders := getShardersListForWallet(testSetup, sharder01NodeDelegateWalletName)
 
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+	sharderNodeDelegateWallet, err := getWalletForName(testSetup, configPath, sharder01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var sharder climodel.Sharder
@@ -34,7 +37,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
 	}
 
-	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
+	miners := getMinersListForWallet(testSetup, miner02NodeDelegateWalletName)
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {

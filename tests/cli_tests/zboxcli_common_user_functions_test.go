@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -21,7 +22,9 @@ const (
 	TOKEN_UNIT int64 = 1e10
 )
 
-func TestCommonUserFunctions(t *testing.T) {
+func TestCommonUserFunctions(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *testing.T) {

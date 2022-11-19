@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"net/http"
 	"reflect"
@@ -15,13 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerFeesPayment(t *testing.T) {
+func TestMinerFeesPayment(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Skip("Skipped till re-done")
-	mnconfig := getMinerSCConfiguration(t)
+	mnconfig := getMinerSCConfiguration(testSetup)
 	minerShare := mnconfig["share_ratio"]
 
-	miners := getMinersList(t)
-	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+	miners := getMinersList(testSetup)
+	miner := getMinersDetail(testSetup, miners.Nodes[0].SimpleNode.ID).SimpleNode
 	require.NotEmpty(t, miner)
 
 	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {

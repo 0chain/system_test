@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -15,7 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileMove(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("move file to existing directory", func(t *testing.T) {

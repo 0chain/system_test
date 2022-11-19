@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -75,7 +76,9 @@ func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
 }
 
 // cmd: bridge-client-init
-func TestBridgeClientInit(t *testing.T) {
+func TestBridgeClientInit(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
 		output, err := createDefaultClientBridgeConfig(t)
 
@@ -153,7 +156,9 @@ func TestBridgeClientInit(t *testing.T) {
 }
 
 // cmd: bridge-owner-init
-func TestBridgeOwnerInit(t *testing.T) {
+func TestBridgeOwnerInit(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Run("Init bridge owner config to default path and file", func(t *testing.T) {
 		output, err := bridgeOwnerInit(
 			t,
@@ -177,12 +182,13 @@ func TestBridgeOwnerInit(t *testing.T) {
 
 // cmd: bridge-client-init
 func bridgeClientInit(
-	t *testing.T,
+	testSetup *testing.T,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
 	opts ...*Option,
 ) ([]string, error) {
+	t := test.SystemTest{T: testSetup}
 	t.Logf("Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet bridge-client-init" +
@@ -195,7 +201,7 @@ func bridgeClientInit(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
@@ -208,11 +214,12 @@ func bridgeClientInit(
 
 // cmd: bridge-owner-init
 func bridgeOwnerInit(
-	t *testing.T,
+	testSetup *testing.T,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, authorizersaddress, ethereumnodeurl string,
 	gaslimit, value int64,
 	opts ...*Option,
 ) ([]string, error) {
+	t := test.SystemTest{T: testSetup}
 	t.Logf("Init bridge owner config (owner.yaml) in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet bridge-owner-init" +
@@ -225,7 +232,7 @@ func bridgeOwnerInit(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
@@ -250,7 +257,7 @@ func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
 }
 
 func runCreateBridgeClientTestConfig(
-	t *testing.T,
+	testSetup *testing.T,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
@@ -266,7 +273,7 @@ func runCreateBridgeClientTestConfig(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)

@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"log"
 	"math"
@@ -20,7 +21,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.SystemTest{T: testSetup}
+
 	t.Skip("Till batch-update is merged...")
 	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)

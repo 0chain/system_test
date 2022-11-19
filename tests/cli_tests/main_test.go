@@ -127,6 +127,14 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
-	exitRun := m.Run()
+	exitRun := wrappedTestRunner{m}.Run()
 	os.Exit(exitRun)
+}
+
+type wrappedTestRunner struct {
+	*testing.M
+}
+
+func (w *wrappedTestRunner) Run() (code int) {
+	return w.M.Run()
 }

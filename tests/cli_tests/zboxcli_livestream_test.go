@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io/fs"
 	"math/rand"
 	"net/http"
@@ -23,7 +24,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStreamUploadDownload(t *testing.T) {
+func TestStreamUploadDownload(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	KillFFMPEG()
 	defer KillFFMPEG()
 

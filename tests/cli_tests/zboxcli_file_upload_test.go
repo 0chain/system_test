@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,7 +19,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestUpload(t *testing.T) {
+func TestUpload(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	// Success Scenarios

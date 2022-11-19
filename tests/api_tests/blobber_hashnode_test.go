@@ -1,8 +1,7 @@
 package api_tests
 
 import (
-	"log"
-	"runtime"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -11,9 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHashnodeRoot(t *testing.T) {
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
+func TestHashnodeRoot(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
 
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
 		wallet := apiClient.RegisterWallet(t)

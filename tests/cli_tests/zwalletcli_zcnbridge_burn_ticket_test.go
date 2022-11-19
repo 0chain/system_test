@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -11,7 +12,9 @@ import (
 )
 
 // todo: enable tests
-func TestBurnTicket(t *testing.T) {
+func TestBurnTicket(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Get ZCN burn ticket", func(t *testing.T) {
@@ -35,7 +38,7 @@ func TestBurnTicket(t *testing.T) {
 	})
 }
 
-//nolint
+// nolint
 func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	t.Logf("Get ZCN burn ticket...")
 	cmd := fmt.Sprintf(
@@ -54,7 +57,7 @@ func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	}
 }
 
-//nolint
+// nolint
 func getWrappedZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(

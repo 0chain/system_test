@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"crypto/rand"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math/big"
 	"testing"
 	"time"
@@ -12,7 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddBlobber(t *testing.T) {
+func TestAddBlobber(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
 	t.Parallel()
 
 	t.Run("Add new blobber to allocation, should work", func(t *testing.T) {

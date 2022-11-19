@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"log"
 	"net/http"
@@ -36,7 +37,9 @@ const (
 	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
-func TestCreateAllocationFreeStorage(t *testing.T) {
+func TestCreateAllocationFreeStorage(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")
 
@@ -44,32 +47,32 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	assigner := escapedTestName(t) + "_ASSIGNER"
+	assigner := escapedTestName(testSetup) + "_ASSIGNER"
 
 	// register SC owner wallet
-	output, err := registerWalletForName(t, configPath, scOwnerWallet)
+	output, err := registerWalletForName(testSetup, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	// register assigner wallet
-	output, err = registerWalletForName(t, configPath, assigner)
+	output, err = registerWalletForName(testSetup, configPath, assigner)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	// Open the wallet file themselves to get private key for signing data
-	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
-	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
+	ownerWallet := readWalletFile(testSetup, "./config/"+scOwnerWallet+"_wallet.json")
+	assignerWallet := readWalletFile(testSetup, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err = registerWallet(t, configPath)
+	output, err = registerWallet(testSetup, configPath)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	output, err = getStorageSCConfig(t, configPath, true)
+	output, err = getStorageSCConfig(testSetup, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
 	cfg, _ := keyValuePairStringToMap(output)
 
 	// miners list
-	output, err = getMiners(t, configPath)
+	output, err = getMiners(testSetup, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -78,11 +81,11 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
-	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
+	freeAllocAssignerTxn := freeAllocationAssignerTxn(testSetup, ownerWallet, assignerWallet)
 	err = sendTxn(miners, freeAllocAssignerTxn)
 	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
 
-	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
+	output, err = verifyTransaction(testSetup, configPath, freeAllocAssignerTxn.Hash)
 	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
 	require.Len(t, output, 3)
 	require.Equal(t, "Transaction verification success", output[0])

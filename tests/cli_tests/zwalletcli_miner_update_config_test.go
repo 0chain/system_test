@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strings"
 	"testing"
@@ -12,7 +13,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestMinerUpdateConfig(t *testing.T) {
+func TestMinerUpdateConfig(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
 		configKey := "reward_rate"
 		newValue := "0.1"

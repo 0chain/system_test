@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +11,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestRecoverWallet(t *testing.T) {
+func TestRecoverWallet(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Recover wallet valid mnemonic", func(t *testing.T) {

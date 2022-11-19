@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"path/filepath"
 	"regexp"
@@ -15,7 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
+func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Skip()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING

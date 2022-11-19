@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/gosdk/core/encryption"
@@ -10,7 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestObjectTree(t *testing.T) {
+func TestObjectTree(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Get object tree with allocation id, remote path should work", func(t *testing.T) {

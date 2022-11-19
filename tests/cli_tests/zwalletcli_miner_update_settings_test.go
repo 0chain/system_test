@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"regexp"
 	"strings"
@@ -14,13 +15,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerUpdateSettings(t *testing.T) { // nolint cyclomatic complexity 44
+func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic complexity 44
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	mnConfig := getMinerSCConfiguration(t)
-	output, err := listMiners(t, configPath, "--json")
+	mnConfig := getMinerSCConfiguration(testSetup)
+	output, err := listMiners(testSetup, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
@@ -44,7 +47,7 @@ func TestMinerUpdateSettings(t *testing.T) { // nolint cyclomatic complexity 44
 	// Revert miner settings after test is complete
 	t.Cleanup(func() {
 		t.Log("start revert")
-		output, err := minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := minerUpdateSettings(testSetup, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": miner.Settings.MaxNumDelegates,
 			"min_stake":     miner.Settings.MinStake / 1e10,

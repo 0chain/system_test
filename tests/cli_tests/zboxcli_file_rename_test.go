@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"path"
 	"path/filepath"
 	"strings"
@@ -15,7 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("rename file", func(t *testing.T) {

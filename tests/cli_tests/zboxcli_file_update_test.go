@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/base64"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"os"
 	"path/filepath"
@@ -15,7 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileUpdate(t *testing.T) {
+func TestFileUpdate(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("update file with thumbnail", func(t *testing.T) {

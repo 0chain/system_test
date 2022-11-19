@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,7 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileDelete(t *testing.T) {
+func TestFileDelete(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("delete existing file in root directory should work", func(t *testing.T) {

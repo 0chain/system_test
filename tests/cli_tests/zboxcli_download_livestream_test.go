@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"io/fs"
 	"log"
@@ -22,7 +23,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
+func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
+	t := test.SystemTest{T: testSetup}
 	KillFFMPEG()
 
 	defer KillFFMPEG()

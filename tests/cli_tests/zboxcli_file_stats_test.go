@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"os"
 	"path"
@@ -17,7 +18,9 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-func TestFileStats(t *testing.T) {
+func TestFileStats(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded

@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"os"
 	"regexp"
@@ -21,18 +22,20 @@ const maxDuration = "max_duration"
 const minDuration = "min_duration"
 const minLock = "min_lock"
 
-func Test___FlakyVestingPoolAdd(t *testing.T) {
+func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
+	output, err := registerWallet(testSetup, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-	output, err = getVestingPoolSCConfig(t, configPath, true)
+	output, err = getVestingPoolSCConfig(testSetup, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
 
 	vpConfigMap := configFromKeyValuePair(output)
-	validDuration := getValidDuration(t, vpConfigMap)
+	validDuration := getValidDuration(testSetup, vpConfigMap)
 
 	// VP-ADD cases
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *testing.T) {

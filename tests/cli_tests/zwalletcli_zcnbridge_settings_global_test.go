@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strings"
 	"testing"
@@ -31,21 +32,23 @@ var (
 	newValue  string
 )
 
-func TestZCNBridgeGlobalSettings(t *testing.T) {
+func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+zcnscOwner+"_wallet.json")
 	}
 
 	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := registerWallet(t, configPath)
+	output, err := registerWallet(testSetup, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	// register SC owner wallet
-	output, err = registerWalletForName(t, configPath, zcnscOwner)
+	output, err = registerWalletForName(testSetup, configPath, zcnscOwner)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	// get global config
-	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)
+	output, err = getZCNBridgeGlobalSCConfig(testSetup, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -54,7 +57,7 @@ func TestZCNBridgeGlobalSettings(t *testing.T) {
 	// ensure revert in config is run regardless of test result
 	defer func() {
 		oldValue := cfgBefore[configKey]
-		output, err = updateZCNBridgeSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err = updateZCNBridgeSCConfig(testSetup, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": oldValue,
 		}, true)

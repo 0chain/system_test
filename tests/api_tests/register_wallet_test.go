@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/hex"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -9,7 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRegisterWallet(t *testing.T) {
+func TestRegisterWallet(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Register wallet API call should be successful given a valid request", func(t *testing.T) {

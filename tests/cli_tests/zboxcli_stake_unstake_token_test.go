@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,7 +15,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStakeUnstakeTokens(t *testing.T) {
+func TestStakeUnstakeTokens(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *testing.T) {

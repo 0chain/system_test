@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strings"
 	"testing"
@@ -13,16 +14,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidatorConfigUpdate(t *testing.T) {
+func TestValidatorConfigUpdate(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
 
-	output, err := registerWallet(t, configPath)
+	output, err := registerWallet(testSetup, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
+	output, err = listValidators(testSetup, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
 
@@ -34,19 +37,19 @@ func TestValidatorConfigUpdate(t *testing.T) {
 	intialValidatorInfo := validatorList[0]
 
 	t.Cleanup(func() {
-		output, err := registerWallet(t, configPath)
+		output, err := registerWallet(testSetup, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "max_stake": intToZCN(intialValidatorInfo.MaxStake)}))
+		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "max_stake": intToZCN(intialValidatorInfo.MaxStake)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
+		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
+		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
+		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 

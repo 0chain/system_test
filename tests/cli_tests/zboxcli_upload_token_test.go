@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -15,7 +16,9 @@ import (
 
 const tokenUnit float64 = 1e+10
 
-func TestFileUploadTokenMovement(t *testing.T) {
+func TestFileUploadTokenMovement(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	balance := 0.8 // 800.000 mZCN

@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -13,7 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerSCUserPoolInfo(t *testing.T) {
+func TestMinerSCUserPoolInfo(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

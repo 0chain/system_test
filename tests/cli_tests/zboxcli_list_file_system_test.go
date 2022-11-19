@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -21,7 +22,9 @@ import (
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
-func TestListFileSystem(t *testing.T) {
+func TestListFileSystem(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded

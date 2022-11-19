@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddRemoveCurator(t *testing.T) {
+func TestAddRemoveCurator(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Add Curator _ must fail when the allocation doesn't exist", func(t *testing.T) {

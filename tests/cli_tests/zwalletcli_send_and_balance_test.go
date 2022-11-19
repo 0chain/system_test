@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"reflect"
 	"regexp"
@@ -19,7 +20,9 @@ import (
 // address of minersc
 const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 
-func TestSendAndBalance(t *testing.T) {
+func TestSendAndBalance(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Send with description", func(t *testing.T) {

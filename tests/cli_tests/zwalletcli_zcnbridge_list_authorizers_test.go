@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestListAuthorizers(t *testing.T) {
+func TestListAuthorizers(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("List authorizers should work", func(t *testing.T) {
@@ -22,7 +25,7 @@ func TestListAuthorizers(t *testing.T) {
 	})
 }
 
-//nolint
+// nolint
 func getAuthorizersList(t *testing.T, retry bool) ([]string, error) {
 	t.Logf("Getting  list of authorizers...")
 	cmd := fmt.Sprintf(

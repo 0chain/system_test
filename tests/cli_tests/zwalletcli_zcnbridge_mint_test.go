@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -15,7 +16,9 @@ const (
 )
 
 // todo: enable tests
-func TestBridgeMint(t *testing.T) {
+func TestBridgeMint(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
@@ -39,7 +42,7 @@ func TestBridgeMint(t *testing.T) {
 	})
 }
 
-//nolint
+// nolint
 func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
@@ -56,7 +59,7 @@ func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, 
 	}
 }
 
-//nolint
+// nolint
 func mintWrappedZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(

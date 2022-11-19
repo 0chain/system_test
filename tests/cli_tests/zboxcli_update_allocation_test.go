@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -22,7 +23,9 @@ var (
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
 )
 
-func TestUpdateAllocation(t *testing.T) {
+func TestUpdateAllocation(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Update Name Should Work", func(t *testing.T) {

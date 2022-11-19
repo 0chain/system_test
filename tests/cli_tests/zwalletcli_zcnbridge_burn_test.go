@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeBurn(t *testing.T) {
+func TestBridgeBurn(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Burning WZCN tokens", func(t *testing.T) {
@@ -38,7 +41,7 @@ func TestBridgeBurn(t *testing.T) {
 	})
 }
 
-//nolint
+// nolint
 func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
@@ -56,7 +59,7 @@ func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 	}
 }
 
-//nolint
+// nolint
 func burnEth(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(

@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"regexp"
 	"strings"
@@ -16,25 +17,26 @@ import (
 
 const sharderAccessDenied = "update_sharder_settings: access denied"
 
-func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50 of func `
-	mnConfig := getMinerSCConfiguration(t)
+func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic complexity 50 of func `
+	t := test.SystemTest{T: testSetup}
+	mnConfig := getMinerSCConfiguration(testSetup)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
+	output, err := minerInfo(testSetup, configPath, createParams(map[string]interface{}{
 		"id": sharder01ID,
 	}), true)
-	require.Nil(t, err, "error fetching sharder settings")
-	require.Len(t, output, 1)
+	require.Nil(testSetup, err, "error fetching sharder settings")
+	require.Len(testSetup, output, 1)
 
 	var oldSharderInfo climodel.Node
 	err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
 	require.Nil(t, err, "error unmarhsalling mn-info json output")
 	require.NotEmpty(t, oldSharderInfo)
 
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+	sharders := getShardersListForWallet(testSetup, sharder01NodeDelegateWalletName)
 
 	found := false
 	var sharder climodel.Sharder
@@ -54,15 +56,15 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 
 	// revert sharder node settings after test
 	t.Cleanup(func() {
-		currRound := getCurrentRound(t)
+		currRound := getCurrentRound(testSetup)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 				// dummy transactions to increase round
 				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
+					_, _ = executeFaucetWithTokens(testSetup, configPath, 2.0)
 				}
-				currRound = getCurrentRound(t)
+				currRound = getCurrentRound(testSetup)
 			}
 		}
 
@@ -70,7 +72,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Nil(t, err)
 		old_min_stake, err := oldSharderInfo.Settings.MinStake.Int64()
 		require.Nil(t, err)
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(testSetup, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
 			"max_stake":     intToZCN(old_max_stake),

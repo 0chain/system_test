@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
@@ -13,7 +14,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestRegisterWallet(t *testing.T) {
+func TestRegisterWallet(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Parallel()
 
 	t.Run("Register wallet outputs expected", func(t *testing.T) {

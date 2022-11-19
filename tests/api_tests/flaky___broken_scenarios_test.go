@@ -4,6 +4,7 @@ package api_tests
 
 import (
 	"encoding/hex"
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"testing"
 
@@ -16,7 +17,9 @@ import (
 /*
 Tests in here are skipped until the feature has been fixed
 */
-func Test___BrokenScenariosRegisterWallet(t *testing.T) {
+func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Skip()
 	t.Parallel()
 

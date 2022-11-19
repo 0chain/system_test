@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"os"
 	"regexp"
@@ -17,12 +18,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerStake(t *testing.T) {
+func TestMinerStake(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	output, err := listMiners(t, configPath, "--json")
+	output, err := listMiners(testSetup, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 

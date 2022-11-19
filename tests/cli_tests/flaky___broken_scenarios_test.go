@@ -4,6 +4,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -22,7 +23,9 @@ Tests in here are skipped until the feature has been fixed
 
 //nolint:gocyclo
 
-func Test___FlakyBrokenScenarios(t *testing.T) {
+func Test___FlakyBrokenScenarios(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	t.Skip()
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)

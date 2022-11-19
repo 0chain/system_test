@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"strings"
 	"testing"
@@ -12,9 +13,11 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestFaucetUpdateConfig(t *testing.T) {
+func TestFaucetUpdateConfig(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
+
 	// register SC owner wallet
-	output, err := registerWalletForName(t, configPath, scOwnerWallet)
+	output, err := registerWalletForName(testSetup, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	t.Run("should allow update of max_pour_amount", func(t *testing.T) {

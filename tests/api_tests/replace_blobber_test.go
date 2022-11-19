@@ -9,12 +9,13 @@ import (
 	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
-func TestReplaceBlobber(t *testing.T) {
-	t.Parallel()
+func TestReplaceBlobber(testSetup *testing.T) {
+	t := test.SystemTest{T: testSetup}
 
 	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
 		t.Parallel()
