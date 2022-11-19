@@ -80,7 +80,7 @@ jobs:
       - name: Not Successful
         if: ${{ env.BUILD_STATE != 'success' }}
         run: |
-          echo "master is NOT successful! was: { {env.BUILD_STATE }}"
+          echo "master is NOT successful! was: {{ env.BUILD_STATE }}"
           exit 1
         
   system-tests:
