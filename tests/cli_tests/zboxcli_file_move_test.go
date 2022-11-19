@@ -337,7 +337,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
 
@@ -470,7 +470,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
 	})
@@ -515,7 +515,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
 
