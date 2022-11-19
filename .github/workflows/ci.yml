@@ -72,7 +72,7 @@ jobs:
         id: check-ci
         uses: 0chain/actions/get-build-state@feature/add-status-action
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ github.token }}
           sha: master
       - name: Success
         if: ${{ env.BUILD_STATE == 'success' }}
