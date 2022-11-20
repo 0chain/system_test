@@ -13,6 +13,10 @@ type SystemTest struct {
 	*testing.T
 }
 
+func (w *SystemTest) Run(name string, testCaseFunction func(t *testing.T)) bool {
+	return w.RunWithCustomTimeout(name, DefaultTestTimeout, testCaseFunction)
+}
+
 func (w *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, f func(t *testing.T)) bool {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -51,8 +55,4 @@ func executeTest(t *testing.T, testFunction func(t *testing.T)) {
 		}
 	}()
 	testFunction(t)
-}
-
-func (w *SystemTest) Run(name string, testCaseFunction func(t *testing.T)) bool {
-	return w.RunWithCustomTimeout(name, DefaultTestTimeout, testCaseFunction)
 }
