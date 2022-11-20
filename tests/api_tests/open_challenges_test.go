@@ -24,6 +24,7 @@ func TestOpenChallenges(testSetup *testing.T) {
 		blobberId := (*allocationBlobbers.Blobbers)[0]
 
 		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(
+			t,
 			model.SCRestOpenChallengeRequest{
 				BlobberID: blobberId,
 			},

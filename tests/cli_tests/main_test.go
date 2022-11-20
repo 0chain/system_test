@@ -2,12 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/config"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
@@ -38,6 +40,15 @@ func setupConfig() {
 	miner03ID = viper.GetString("nodes.miner03ID")
 	sharder01ID = viper.GetString("nodes.sharder01ID")
 	sharder02ID = viper.GetString("nodes.sharder02ID")
+
+	parsedConfig := config.Parse(filepath.Join(".", path, "config.yaml"))
+	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
+	if err != nil {
+		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
+	} else {
+		test.DefaultTestTimeout = defaultTestTimeout
+		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
+	}
 }
 
 const (
@@ -89,9 +100,6 @@ func TestMain(m *testing.M) {
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
-
 	configDir, _ = filepath.Abs(configDir)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
@@ -127,14 +135,6 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
-	exitRun := wrappedTestRunner{m}.Run()
+	exitRun := m.Run()
 	os.Exit(exitRun)
-}
-
-type wrappedTestRunner struct {
-	*testing.M
-}
-
-func (w *wrappedTestRunner) Run() (code int) {
-	return w.M.Run()
 }

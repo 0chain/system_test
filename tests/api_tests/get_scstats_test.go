@@ -16,7 +16,7 @@ func TestGetSCStats(testSetup *testing.T) {
 	t.Run("Get miner stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
 
-		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(client.HttpOkStatus)
+		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, minerGetStatsResponse)
@@ -34,7 +34,7 @@ func TestGetSCStats(testSetup *testing.T) {
 	t.Run("Get sharder stats call should return successfully", func(t *testing.T) {
 		t.Parallel()
 
-		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(client.HttpOkStatus)
+		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, sharderGetStatsResponse)

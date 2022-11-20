@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var DefaultTestTimeout = 20 * time.Second
+
 type SystemTest struct {
 	*testing.T
 }
@@ -25,23 +27,23 @@ func executeTest(t *testing.T, testFunction func(t *testing.T)) (ret Void) {
 
 func (w *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, f func(t *testing.T)) bool {
 	timeoutWrappedTestCase := func(t *testing.T) {
+		t.Logf("Test case [%s] start.", name)
 		result := make(chan Void, 1)
 		go func() {
 			result <- executeTest(t, f)
 		}()
 		select {
 		case <-time.After(timeout):
-			t.Fatalf("Test case timed out after [%v]", timeout)
+			t.Logf("Test case [%s] timed out after [%v]", name, timeout)
+			t.Fatalf("Test case [%s] end.", name)
 		case _ = <-result:
-			t.Logf("Test case completed successfully")
 		}
+		t.Logf("Test case [%s] end.", name)
 	}
 
 	return w.T.Run(name, timeoutWrappedTestCase)
 }
 
 func (w *SystemTest) Run(name string, testCaseFunction func(t *testing.T)) bool {
-	defaultTimeout := 60 * time.Second
-
-	return w.RunWithCustomTimeout(name, defaultTimeout, testCaseFunction)
+	return w.RunWithCustomTimeout(name, DefaultTestTimeout, testCaseFunction)
 }

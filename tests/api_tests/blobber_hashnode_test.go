@@ -3,6 +3,7 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -48,7 +49,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.Run("Get hashnode root for non-existent allocation should fail", func(t *testing.T) {
+	t.RunWithCustomTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *testing.T) { //TODO: why is this so slow?
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

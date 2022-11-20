@@ -3,6 +3,7 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
@@ -83,7 +84,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.Run("Get file ref with invalid allocation id should fail", func(t *testing.T) {
+	t.RunWithCustomTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *testing.T) { //TODO: Why is this so slow
 		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

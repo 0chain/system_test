@@ -3,6 +3,7 @@ package api_tests
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
@@ -78,7 +79,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
-	t.Run("Get file ref with incorrect allocation id should fail", func(t *testing.T) {
+	t.RunWithCustomTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *testing.T) { //todo - too slow
 		t.Parallel()
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

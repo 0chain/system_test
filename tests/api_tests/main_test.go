@@ -5,10 +5,11 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"log"
 	"os"
-	"runtime"
 	"testing"
+	"time"
 )
 
 var (
@@ -25,13 +26,18 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	goMaxProcs := runtime.GOMAXPROCS(0)
-	log.Printf("GOMAXPROCS environment variable is set to [%v]", goMaxProcs)
-
 	parsedConfig := config.Parse(configPath)
 
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+
+	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
+	if err != nil {
+		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
+	} else {
+		test.DefaultTestTimeout = defaultTestTimeout
+		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
+	}
 
 	t := new(testing.T)
 

@@ -21,6 +21,7 @@ func TestGetSCState(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
+			t,
 			model.SCStateGetRequest{
 				SCAddress: client.FaucetSmartContractAddress,
 				Key:       wallet.Id,
@@ -37,6 +38,7 @@ func TestGetSCState(testSetup *testing.T) {
 		wallet := apiClient.RegisterWallet(t)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
+			t,
 			model.SCStateGetRequest{
 				SCAddress: client.FaucetSmartContractAddress,
 				Key:       wallet.Id,

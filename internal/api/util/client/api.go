@@ -237,7 +237,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	return nil
 }
 
-func (c *APIClient) executeForServiceProvider(url string, executionRequest model.ExecutionRequest, method int) (*resty.Response, error) { //nolint
+func (c *APIClient) executeForServiceProvider(t *testing.T, url string, executionRequest model.ExecutionRequest, method int) (*resty.Response, error) { //nolint
 	var (
 		resp *resty.Response
 		err  error
@@ -256,7 +256,7 @@ func (c *APIClient) executeForServiceProvider(url string, executionRequest model
 		return nil, fmt.Errorf("%s: %w", url, ErrGetFromResource)
 	}
 
-	log.Printf("%s returned %s with status %s", url, resp.String(), resp.Status())
+	t.Logf("%s returned %s with status %s", url, resp.String(), resp.Status())
 	if executionRequest.Dst != nil {
 		err = json.Unmarshal(resp.Body(), executionRequest.Dst)
 		if err != nil {
@@ -267,7 +267,7 @@ func (c *APIClient) executeForServiceProvider(url string, executionRequest model
 	return resp, nil
 }
 
-func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
+func (c *APIClient) executeForAllServiceProviders(t *testing.T, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
 		resp   *resty.Response
 		errors []error
@@ -292,7 +292,7 @@ func (c *APIClient) executeForAllServiceProviders(urlBuilder *URLBuilder, execut
 		}
 		formattedURL := urlBuilder.String()
 
-		newResp, err := c.executeForServiceProvider(formattedURL, executionRequest, method)
+		newResp, err := c.executeForServiceProvider(t, formattedURL, executionRequest, method)
 		if err != nil {
 			errors = append(errors, err)
 			continue
@@ -334,6 +334,7 @@ func (c *APIClient) V1ClientPut(t *testing.T, clientPutRequest model.Wallet, req
 
 	urlBuilder := NewURLBuilder().SetPath(ClientPut)
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Body:               clientPutRequest,
@@ -389,6 +390,7 @@ func (c *APIClient) V1TransactionPut(t *testing.T, internalTransactionPutRequest
 	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Body:               transactionPutRequest,
@@ -403,7 +405,7 @@ func (c *APIClient) V1TransactionPut(t *testing.T, internalTransactionPutRequest
 	return transactionPutResponse, resp, err
 }
 
-func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionGetConfirmation(t *testing.T, transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
 	var transactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	urlBuilder := NewURLBuilder().
@@ -411,6 +413,7 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 		AddParams("hash", transactionGetConfirmationRequest.Hash)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &transactionGetConfirmationResponse,
@@ -422,12 +425,13 @@ func (c *APIClient) V1TransactionGetConfirmation(transactionGetConfirmationReque
 	return transactionGetConfirmationResponse, resp, err
 }
 
-func (c *APIClient) V1ClientGetBalance(clientGetBalanceRequest model.ClientGetBalanceRequest, requiredStatusCode int) (*model.ClientGetBalanceResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1ClientGetBalance(t *testing.T, clientGetBalanceRequest model.ClientGetBalanceRequest, requiredStatusCode int) (*model.ClientGetBalanceResponse, *resty.Response, error) { //nolint
 	var clientGetBalanceResponse *model.ClientGetBalanceResponse
 
 	urlBuilder := NewURLBuilder().SetPath(ClientGetBalance).AddParams("client_id", clientGetBalanceRequest.ClientID)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &clientGetBalanceResponse,
@@ -439,7 +443,7 @@ func (c *APIClient) V1ClientGetBalance(clientGetBalanceRequest model.ClientGetBa
 	return clientGetBalanceResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBlobberRequest, requiredStatusCode int) (*model.SCRestGetBlobberResponse, *resty.Response, error) {
+func (c *APIClient) V1SCRestGetBlobber(t *testing.T, scRestGetBlobberRequest model.SCRestGetBlobberRequest, requiredStatusCode int) (*model.SCRestGetBlobberResponse, *resty.Response, error) {
 	var scRestGetBlobberResponse *model.SCRestGetBlobberResponse
 
 	urlBuilder := NewURLBuilder().
@@ -448,6 +452,7 @@ func (c *APIClient) V1SCRestGetBlobber(scRestGetBlobberRequest model.SCRestGetBl
 		AddParams("blobber_id", scRestGetBlobberRequest.BlobberID)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &scRestGetBlobberResponse,
@@ -471,7 +476,8 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeReq
 
 	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
 
-	resp, err := c.executeForServiceProvider(url,
+	resp, err := c.executeForServiceProvider(t,
+		url,
 		model.ExecutionRequest{
 			Headers:            headers,
 			Dst:                &hashnode,
@@ -482,7 +488,7 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *testing.T, blobberGetHashnodeReq
 	return hashnode, resp, err
 }
 
-func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRestGetAllocationRequest, requiredStatusCode int) (*model.SCRestGetAllocationResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SCRestGetAllocation(t *testing.T, scRestGetAllocationRequest model.SCRestGetAllocationRequest, requiredStatusCode int) (*model.SCRestGetAllocationResponse, *resty.Response, error) { //nolint
 	var scRestGetAllocationResponse *model.SCRestGetAllocationResponse
 
 	urlBuilder := NewURLBuilder().
@@ -491,6 +497,7 @@ func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRes
 		AddParams("allocation", scRestGetAllocationRequest.AllocationID)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &scRestGetAllocationResponse,
@@ -502,7 +509,7 @@ func (c *APIClient) V1SCRestGetAllocation(scRestGetAllocationRequest model.SCRes
 	return scRestGetAllocationResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SCRestGetAllocationBlobbers(t *testing.T, scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
 	scRestGetAllocationBlobbersResponse := new(model.SCRestGetAllocationBlobbersResponse)
 
 	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
@@ -518,6 +525,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersReq
 	var blobbers *[]string
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &blobbers,
@@ -532,7 +540,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(scRestGetAllocationBlobbersReq
 	return scRestGetAllocationBlobbersResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestOpenChallenge(scRestOpenChallengeRequest model.SCRestOpenChallengeRequest, requiredStatusCode int) (*model.SCRestOpenChallengeResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SCRestOpenChallenge(t *testing.T, scRestOpenChallengeRequest model.SCRestOpenChallengeRequest, requiredStatusCode int) (*model.SCRestOpenChallengeResponse, *resty.Response, error) { //nolint
 	var scRestOpenChallengeResponse *model.SCRestOpenChallengeResponse
 
 	urlBuilder := NewURLBuilder().
@@ -541,6 +549,7 @@ func (c *APIClient) V1SCRestOpenChallenge(scRestOpenChallengeRequest model.SCRes
 		AddParams("blobber", scRestOpenChallengeRequest.BlobberID)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &scRestOpenChallengeResponse,
@@ -552,13 +561,14 @@ func (c *APIClient) V1SCRestOpenChallenge(scRestOpenChallengeRequest model.SCRes
 	return scRestOpenChallengeResponse, resp, err
 }
 
-func (c *APIClient) V1MinerGetStats(requiredStatusCode int) (*model.GetMinerStatsResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1MinerGetStats(t *testing.T, requiredStatusCode int) (*model.GetMinerStatsResponse, *resty.Response, error) { //nolint
 	var getMinerStatsResponse *model.GetMinerStatsResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(MinerGetStatus)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &getMinerStatsResponse,
@@ -570,13 +580,14 @@ func (c *APIClient) V1MinerGetStats(requiredStatusCode int) (*model.GetMinerStat
 	return getMinerStatsResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetStats(requiredStatusCode int) (*model.GetSharderStatsResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SharderGetStats(t *testing.T, requiredStatusCode int) (*model.GetSharderStatsResponse, *resty.Response, error) { //nolint
 	var getSharderStatusResponse *model.GetSharderStatsResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(SharderGetStatus)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &getSharderStatusResponse,
@@ -588,13 +599,14 @@ func (c *APIClient) V1SharderGetStats(requiredStatusCode int) (*model.GetSharder
 	return getSharderStatusResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetSCState(scStateGetRequest model.SCStateGetRequest, requiredStatusCode int) (*model.SCStateGetResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SharderGetSCState(t *testing.T, scStateGetRequest model.SCStateGetRequest, requiredStatusCode int) (*model.SCStateGetResponse, *resty.Response, error) { //nolint
 	var scStateGetResponse *model.SCStateGetResponse
 
 	urlBuilder := NewURLBuilder().
 		SetPath(SCStateGet)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			FormData: map[string]string{
@@ -664,6 +676,7 @@ func (c *APIClient) ExecuteFaucet(t *testing.T, wallet *model.Wallet, requiredTr
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: faucetTransactionPutResponse.Entity.Hash,
 			},
@@ -705,6 +718,7 @@ func (c *APIClient) ExecuteFaucetWithAssertions(t *testing.T, wallet *model.Wall
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: faucetTransactionPutResponse.Entity.Hash,
 			},
@@ -784,6 +798,7 @@ func (c *APIClient) CreateAllocation(t *testing.T,
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: createAllocationTransactionPutResponse.Entity.Hash,
 			},
@@ -834,6 +849,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: txnHash,
 			},
@@ -860,6 +876,7 @@ func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, bl
 	t.Log("Get allocation blobbers...")
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
+		t,
 		&model.SCRestGetAllocationBlobbersRequest{
 			ClientID:            wallet.Id,
 			ClientKey:           wallet.PublicKey,
@@ -883,6 +900,7 @@ func (c *APIClient) GetAllocation(t *testing.T, allocationID string, requiredSta
 
 	wait.PoolImmediately(t, time.Second*30, func() bool {
 		scRestGetAllocation, resp, err = c.V1SCRestGetAllocation(
+			t,
 			model.SCRestGetAllocationRequest{
 				AllocationID: allocationID,
 			},
@@ -901,6 +919,7 @@ func (c *APIClient) GetWalletBalance(t *testing.T, wallet *model.Wallet, require
 	t.Log("Get wallet balance...")
 
 	clientGetBalanceResponse, resp, err := c.V1ClientGetBalance(
+		t,
 		model.ClientGetBalanceRequest{
 			ClientID: wallet.Id,
 		},
@@ -930,6 +949,7 @@ func (c *APIClient) UpdateBlobber(t *testing.T, wallet *model.Wallet, scRestGetB
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		updateBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: updateBlobberTransactionPutResponse.Entity.Hash,
 			},
@@ -976,6 +996,7 @@ func (c *APIClient) CreateStakePool(t *testing.T, wallet *model.Wallet, provider
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: createStakePoolTransactionPutResponse.Entity.Hash,
 			},
@@ -1000,7 +1021,7 @@ func (c *APIClient) CreateStakePool(t *testing.T, wallet *model.Wallet, provider
 	return createStakePoolTransactionGetConfirmationResponse.Hash
 }
 
-func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SCRestGetStakePoolStat(t *testing.T, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
 	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1010,6 +1031,7 @@ func (c *APIClient) V1SCRestGetStakePoolStat(scRestGetStakePoolStatRequest model
 		AddParams("provider_type", scRestGetStakePoolStatRequest.ProviderType)
 
 	resp, err := c.executeForAllServiceProviders(
+		t,
 		urlBuilder,
 		model.ExecutionRequest{
 			Dst:                &scRestGetStakePoolStatResponse,
@@ -1025,6 +1047,7 @@ func (c *APIClient) GetStakePoolStat(t *testing.T, providerID, providerType stri
 	t.Log("Get stake pool stat...")
 
 	scRestGetStakePoolStat, resp, err := c.V1SCRestGetStakePoolStat(
+		t,
 		model.SCRestGetStakePoolStatRequest{
 			ProviderID:   providerID,
 			ProviderType: providerType,
@@ -1054,6 +1077,7 @@ func (c *APIClient) CollectRewards(t *testing.T, wallet *model.Wallet, providerI
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		collectRewardTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
 			model.TransactionGetConfirmationRequest{
 				Hash: collectRewardTransactionPutResponse.Entity.Hash,
 			},
@@ -1078,6 +1102,7 @@ func (c *APIClient) CollectRewards(t *testing.T, wallet *model.Wallet, providerI
 
 func (c *APIClient) GetBlobber(t *testing.T, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
 	scRestGetBlobberResponse, resp, err := c.V1SCRestGetBlobber(
+		t,
 		model.SCRestGetBlobberRequest{
 			BlobberID: blobberID,
 		},
@@ -1100,6 +1125,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *testing.T, blobberGetFileRefsRequest
 		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
 	}
 	resp, err := c.executeForServiceProvider(
+		t,
 		url,
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
@@ -1121,6 +1147,7 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *testing.T, blobberFileRefPathReq
 		"X-App-Client-Signature": blobberFileRefPathRequest.ClientSignature,
 	}
 	resp, err := c.executeForServiceProvider(
+		t,
 		url,
 		model.ExecutionRequest{
 			Dst:                &blobberFileRefPathResponse,
@@ -1142,6 +1169,7 @@ func (c *APIClient) V1BlobberObjectTree(t *testing.T, blobberObjectTreeRequest *
 		"X-App-Client-Signature": blobberObjectTreeRequest.ClientSignature,
 	}
 	resp, err := c.executeForServiceProvider(
+		t,
 		url,
 		model.ExecutionRequest{
 			Dst:                &blobberObjectTreePathResponse,
