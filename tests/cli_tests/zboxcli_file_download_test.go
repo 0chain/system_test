@@ -290,58 +290,6 @@ func TestDownload(t *testing.T) {
 		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
 	})
 
-	t.Run("Download Entire Shared Folder Should Fail", func(t *testing.T) {
-		t.Parallel()
-
-		var authTicket, filename string
-
-		filesize := int64(10)
-		remotepath := "/"
-
-		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 1,
-			})
-			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-			require.NotEqual(t, "", filename)
-
-			// Delete the uploaded file from tmp folder if it exist,
-			// since we will be downloading it now
-			err := os.RemoveAll("tmp/" + filepath.Base(filename))
-			require.Nil(t, err)
-
-			shareParam := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"remotepath": remotepath,
-			})
-
-			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-
-			authTicket, err = extractAuthToken(output[0])
-			require.Nil(t, err, "extract auth token failed")
-			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
-		})
-
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
-		require.Nil(t, err)
-
-		// Download file using auth-ticket: should work
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"authticket": authTicket,
-			"localpath":  "tmp/dir",
-			"remotepath": "/",
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: please get files from folder, and download them one by one", output[0])
-	})
-
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
 		t.Parallel()
 
@@ -1026,6 +974,42 @@ func TestDownload(t *testing.T) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		startBlock := 1
+		endBlock := 40
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"startblock": startBlock,
+			"endblock":   endBlock,
+		}), true)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "Invalid block number")
+	})
+
+	t.Run("Download really small file with startblock and endblock should work", func(t *testing.T) {
+		t.Parallel()
+
+		// 1 block is of size 65536
+		allocSize := int64(655360 * 4)
+		filesize := int64(10240)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
