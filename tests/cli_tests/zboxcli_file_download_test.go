@@ -968,43 +968,7 @@ func TestDownload(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
-	t.Run("Download File With endblock greater than number of blocks should fail", func(t *testing.T) {
-		t.Parallel()
-
-		// 1 block is of size 65536
-		allocSize := int64(655360 * 4)
-		filesize := int64(655360 * 2)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
-		require.Nil(t, err)
-
-		startBlock := 1
-		endBlock := 40
-		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-			"startblock": startBlock,
-			"endblock":   endBlock,
-		}), true)
-
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Invalid block number")
-	})
-
-	t.Run("Download really small file with startblock and endblock should work", func(t *testing.T) {
+	t.Run("Download File With endblock greater than number of blocks should work", func(t *testing.T) {
 		t.Parallel()
 
 		// 1 block is of size 65536
