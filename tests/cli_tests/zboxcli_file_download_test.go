@@ -998,10 +998,10 @@ func TestDownload(t *testing.T) {
 			"endblock":   endBlock,
 		}), true)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Invalid block number")
+		require.Contains(t, aggregatedOutput, "Status completed callback.")
 	})
 
 	t.Run("Download with endblock less than startblock should fail", func(t *testing.T) {
