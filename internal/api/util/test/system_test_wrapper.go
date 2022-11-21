@@ -30,8 +30,7 @@ func (w *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 
 		select {
 		case <-time.After(timeout):
-			t.Logf("Test case [%s] timed out after [%v]", name, timeout)
-			t.Fatalf("Test case [%s] end.", name)
+			t.Errorf("Test case [%s] timed out after [%v]", name, timeout)
 		case _ = <-testCaseChannel:
 		}
 
