@@ -1,6 +1,7 @@
 package test
 
 import (
+	"log"
 	"runtime/debug"
 	"sync"
 	"testing"
@@ -14,6 +15,11 @@ type SystemTest struct {
 }
 
 func (w *SystemTest) Run(name string, testCaseFunction func(t *testing.T)) bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic - [%v] occurred while executing test", err)
+		}
+	}()
 	return w.RunWithCustomTimeout(name, DefaultTestTimeout, testCaseFunction)
 }
 
@@ -22,6 +28,12 @@ func (w *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 	wg.Add(1)
 
 	timeoutWrappedTestCase := func(t *testing.T) {
+		defer func() {
+			if err := recover(); err != nil {
+				t.Errorf("Panic - [%v] occurred while timing out test", err)
+			}
+		}()
+
 		t.Logf("Test case [%s] start.", name)
 
 		testCaseChannel := make(chan struct{}, 1)
