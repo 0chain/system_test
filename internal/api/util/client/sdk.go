@@ -17,7 +17,7 @@ import (
 )
 
 type SDKClient struct {
-	mutex sync.Mutex
+	Mutex sync.Mutex
 
 	blockWorker string
 	wallet      *model.SdkWallet
@@ -39,8 +39,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 	c.wallet = &model.SdkWallet{
 		ClientID:  wallet.Id,
 		ClientKey: wallet.PublicKey,
@@ -67,8 +67,8 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 }
 
 func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
