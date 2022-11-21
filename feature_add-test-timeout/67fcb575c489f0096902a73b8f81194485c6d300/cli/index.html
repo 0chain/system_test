@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite [feature_add-test-timeout/67fcb575] ran against [dev-2.devnet-0chain.net] at [2022-11-21_01.17.40]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite [feature_add-test-timeout/67fcb575] ran against [dev-2.devnet-0chain.net] at [2022-11-21_01.17.40]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>72</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>26</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>6</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>40</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">November 21, 2022 01:40:36</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  skipped" id="24"></div>
+            
+                <div class="testResultGroup failed " id="25"></div>
+            
+                <div class="testResultGroup failed " id="26"></div>
+            
+                <div class="testResultGroup failed " id="27"></div>
+            
+                <div class="testResultGroup failed " id="28"></div>
+            
+                <div class="testResultGroup failed " id="29"></div>
+            
+                <div class="testResultGroup failed " id="30"></div>
+            
+                <div class="testResultGroup failed " id="31"></div>
+            
+                <div class="testResultGroup failed " id="32"></div>
+            
+                <div class="testResultGroup failed " id="33"></div>
+            
+                <div class="testResultGroup failed " id="34"></div>
+            
+                <div class="testResultGroup failed " id="35"></div>
+            
+                <div class="testResultGroup failed " id="36"></div>
+            
+                <div class="testResultGroup failed " id="37"></div>
+            
+                <div class="testResultGroup failed " id="38"></div>
+            
+                <div class="testResultGroup failed " id="39"></div>
+            
+                <div class="testResultGroup failed " id="40"></div>
+            
+                <div class="testResultGroup failed " id="41"></div>
+            
+                <div class="testResultGroup failed " id="42"></div>
+            
+                <div class="testResultGroup failed " id="43"></div>
+            
+                <div class="testResultGroup failed " id="44"></div>
+            
+                <div class="testResultGroup failed " id="45"></div>
+            
+                <div class="testResultGroup  skipped" id="46"></div>
+            
+                <div class="testResultGroup failed " id="47"></div>
+            
+                <div class="testResultGroup  skipped" id="48"></div>
+            
+                <div class="testResultGroup failed " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup failed " id="52"></div>
+            
+                <div class="testResultGroup  " id="53"></div>
+            
+                <div class="testResultGroup failed " id="54"></div>
+            
+                <div class="testResultGroup failed " id="55"></div>
+            
+                <div class="testResultGroup failed " id="56"></div>
+            
+                <div class="testResultGroup failed " id="57"></div>
+            
+                <div class="testResultGroup failed " id="58"></div>
+            
+                <div class="testResultGroup failed " id="59"></div>
+            
+                <div class="testResultGroup failed " id="60"></div>
+            
+                <div class="testResultGroup  skipped" id="61"></div>
+            
+                <div class="testResultGroup  skipped" id="62"></div>
+            
+                <div class="testResultGroup  skipped" id="63"></div>
+            
+                <div class="testResultGroup failed " id="64"></div>
+            
+                <div class="testResultGroup failed " id="65"></div>
+            
+                <div class="testResultGroup failed " id="66"></div>
+            
+                <div class="testResultGroup failed " id="67"></div>
+            
+                <div class="testResultGroup failed " id="68"></div>
+            
+                <div class="testResultGroup failed " id="69"></div>
+            
+                <div class="testResultGroup failed " id="70"></div>
+            
+                <div class="testResultGroup failed " id="71"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAddRemoveCurator","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_add_remove_curator_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":178.8,"Output":["","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_stake_unstake_token_test.go:297: Requesting blobber list...\n","--- PASS: TestBlobberChallenge (178.80s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_blobber_challenge_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Copying_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.4,"Output":["","    system_test_wrapper.go:25: Test case [Copying a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    zboxcli_file_copy_test.go:628: Copying file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Copying a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Copying_a_file_greater_than_1_MB_should_generate_randomized_challenges (22.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Deleting_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.45,"Output":["","    system_test_wrapper.go:25: Test case [Deleting a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    zboxcli_collaborator_test.go:824: Deleting file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Deleting a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Deleting_a_file_greater_than_1_MB_should_generate_randomized_challenges (22.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Downloading_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":37.55,"Output":["","    system_test_wrapper.go:25: Test case [Downloading a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    utils.go:152: Waiting 15s...\n","    zboxcli_file_download_test.go:1400: Downloading file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Downloading a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Downloading_a_file_greater_than_1_MB_should_generate_randomized_challenges (37.55s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Moving_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.64,"Output":["","    system_test_wrapper.go:25: Test case [Moving a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    zboxcli_file_move_test.go:558: Moving file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Moving a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Moving_a_file_greater_than_1_MB_should_generate_randomized_challenges (22.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Renaming_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.45,"Output":["","    system_test_wrapper.go:25: Test case [Renaming a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    zboxcli_common_user_functions_test.go:170: Renaming file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Renaming a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Renaming_a_file_greater_than_1_MB_should_generate_randomized_challenges (22.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Updating_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.56,"Output":["","    system_test_wrapper.go:25: Test case [Updating a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    zboxcli_common_user_functions_test.go:191: Updating file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Updating a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Updating_a_file_greater_than_1_MB_should_generate_randomized_challenges (23.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberChallenge/Uploading_a_file_greater_than_1_MB_should_generate_randomized_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.92,"Output":["","    system_test_wrapper.go:25: Test case [Uploading a file greater than 1 MB should generate randomized challenges] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_file_upload_test.go:775: Uploading file...\n","    0_blobber_challenge_test.go:400: Checking for new challenges to open...\n","    system_test_wrapper.go:37: Test case [Uploading a file greater than 1 MB should generate randomized challenges] end.\n","--- PASS: TestBlobberChallenge/Uploading_a_file_greater_than_1_MB_should_generate_randomized_challenges (21.92s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":220.77,"Output":["","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_stake_unstake_token_test.go:297: Requesting blobber list...\n","","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","--- PASS: TestBlobberConfigUpdate (220.77s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_blobber_config_update_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_all_params_at_once_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.03,"Output":["","    system_test_wrapper.go:25: Test case [update all params at once should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update all params at once should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_all_params_at_once_should_work (11.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_capacity_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.05,"Output":["","    system_test_wrapper.go:25: Test case [update blobber capacity should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber capacity should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_capacity_should_work (11.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    system_test_wrapper.go:25: Test case [update blobber max offer duration should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber max offer duration should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.02,"Output":["","    system_test_wrapper.go:25: Test case [update blobber max stake should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber max stake should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_stake_should_work (11.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.06,"Output":["","    system_test_wrapper.go:25: Test case [update blobber min lock demand should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    utils.go:152: Waiting 3s...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber min lock demand should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work (14.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.05,"Output":["","    system_test_wrapper.go:25: Test case [update blobber min stake should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber min stake should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_stake_should_work (11.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    system_test_wrapper.go:25: Test case [update blobber number of delegates should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber number of delegates should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_read_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.06,"Output":["","    system_test_wrapper.go:25: Test case [update blobber read price should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber read price should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_read_price_should_work (11.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_service_charge_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.03,"Output":["","    system_test_wrapper.go:25: Test case [update blobber service charge should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber service charge should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_service_charge_should_work (11.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_write_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.02,"Output":["","    system_test_wrapper.go:25: Test case [update blobber write price should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:371: Requesting blobber info...\n","    system_test_wrapper.go:37: Test case [update blobber write price should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_blobber_write_price_should_work (11.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_no_params_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.79,"Output":["","    system_test_wrapper.go:25: Test case [update no params should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    system_test_wrapper.go:37: Test case [update no params should work] end.\n","--- PASS: TestBlobberConfigUpdate/update_no_params_should_work (10.79s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.4,"Output":["","    system_test_wrapper.go:25: Test case [update with invalid blobber ID should fail] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    utils.go:66: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:66: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:69: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id invalid-blobber-id --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:72: \u001b[31mThe verbose output for the command is:\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:22.105709 wallet_base.go:262: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:76: \u001b[31m0box-sdk        [INFO]   2022/11/21 01:34:22.105890 sdk.go:73: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:22.202380 transaction_base.go:138: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:76: \u001b[31m0box-sdk        [DEBUG]  2022/11/21 01:34:22.281791 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\",\"https://dev-2.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder01\",\"https://dev-2.devnet-0chain.net/sharder02\"]}\n","    utils.go:76: \u001b[31mrequesting blobber:\n","    utils.go:76: \u001b[31minternal_error: missing blobber: invalid-blobber-id\n","    system_test_wrapper.go:37: Test case [update with invalid blobber ID should fail] end.\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail (10.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.23,"Output":["","    system_test_wrapper.go:25: Test case [update with invalid blobber wallet/owner should fail] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    utils.go:69: \u001b[31mCommand failed on final attempt [1/1] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id b88c9f2fbdb3b62ee0bdc69a58d36a81a2d292ce6af8545a811f4145a87f96e6 --silent --wallet TestBlobberConfigUpdate-update_with_invalid_blobber_wallet-owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [update_blobber_settings_failed: access denied, allowed for delegate_wallet owner only]\n","    utils.go:72: \u001b[31mThe verbose output for the command is:\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:33.194939 wallet_base.go:262: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:76: \u001b[31m0box-sdk        [INFO]   2022/11/21 01:34:33.195012 sdk.go:73: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:33.294813 transaction_base.go:138: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:76: \u001b[31m0box-sdk        [DEBUG]  2022/11/21 01:34:33.375565 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\",\"https://dev-2.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:76: \u001b[31mupdate_blobber_settings_failed: access denied, allowed for delegate_wallet owner only\n","    system_test_wrapper.go:37: Test case [update with invalid blobber wallet/owner should fail] end.\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail (16.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_without_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.18,"Output":["","    system_test_wrapper.go:25: Test case [update without blobber ID should fail] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:376: Updating blobber info...\n","    utils.go:66: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNE","WLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:66: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNE","WLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:69: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update  --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e","- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNEWLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:72: \u001b[31mThe verbose output for the command is:\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:11.763477 wallet_base.go:262: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:76: \u001b[31m0box-sdk        [INFO]   2022/11/21 01:34:11.763515 sdk.go:73: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:76: \u001b[31m0chain-core-sdk [INFO]   2022/11/21 01:34:11.856365 transaction_base.go:138: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:76: \u001b[31m0box-sdk        [DEBUG]  2022/11/21 01:34:11.936844 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner03\",\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:76: \u001b[31mError: required flag(s) \"blobber_id\" not set\n","    utils.go:76: \u001b[31mUsage:\n","    utils.go:76: \u001b[31mzbox bl-update [flags]\n","    utils.go:76: \u001b[31mFlags:\n","    utils.go:76: \u001b[31m--blobber_id string             blobber ID, required\n","    utils.go:76: \u001b[31m--capacity int                  update blobber capacity bid, optional\n","    utils.go:76: \u001b[31m-h, --help                          help for bl-update\n","    utils.go:76: \u001b[31m--max_offer_duration duration   update max_offer_duration, optional\n","    utils.go:76: \u001b[31m--max_stake float               update max_stake, optional\n","    utils.go:76: \u001b[31m--min_lock_demand float         update min_lock_demand, optional\n","    utils.go:76: \u001b[31m--min_stake float               update min_stake, optional\n","    utils.go:76: \u001b[31m--num_delegates int             update num_delegates, optional\n","    utils.go:76: \u001b[31m--read_price float              update read_price, optional\n","    utils.go:76: \u001b[31m--service_charge float          update service_charge, optional\n","    utils.go:76: \u001b[31m--write_price float             update write_price, optional\n","    utils.go:76: \u001b[31mGlobal Flags:\n","    utils.go:76: \u001b[31m--config string              config file (default is config.yaml)\n","    utils.go:76: \u001b[31m--configDir string           configuration directory (default is $HOME/.zcn)\n","    utils.go:76: \u001b[31m--network string             network file to overwrite the network details (if required, default is network.yaml)\n","    utils.go:76: \u001b[31m--silent                     Do not show interactive sdk logs (shown by default)\n","    utils.go:76: \u001b[31m--wallet string              wallet file (default is wallet.json)\n","    utils.go:76: \u001b[31m--wallet_client_id string    wallet client_id\n","    utils.go:76: \u001b[31m--wallet_client_key string   wallet client_key\n","    utils.go:76: \u001b[31m--withNonce int              nonce that will be used in transaction (default is 0)\n","    utils.go:76: \u001b[31mrequired flag(s) \"blobber_id\" not set\n","    system_test_wrapper.go:37: Test case [update without blobber ID should fail] end.\n","--- PASS: TestBlobberConfigUpdate/update_without_blobber_ID_should_fail (10.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestBlockRewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    block_rewards_test.go:27: Till batch-update is merged...\n","--- SKIP: TestBlockRewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"block_rewards_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCancelAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_cancel_allocation_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCollaborator","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_collaborator_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCollectRewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_collect_rewards_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_common_user_functions_test.go","TestFunctionDetail":{"Line":25,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_allocation_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    utils.go:152: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:261: Retrieving storage config...\n","    zwalletcli_miner_update_settings_test.go:497: Updating miner settings...\n","    crypto.go:64: Generated public key [7b630ba670dac2f22d43c2399b70eff378689a53ee03ea20957bb7e73df016200fea410ba5102558b0c39617e5afd2c1843b161a1dedec15e1ab40543a78a518] and secret key [c06b6f6945ba02d5a3be86b8779deca63bb636ce7e46804a479c50e53c864915]\n","    zwalletcli_register_wallet_test.go:192: Verifying transaction...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_allocation_free_storage_test.go","TestFunctionDetail":{"Line":40,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateDir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_create_dir_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestDownload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_download_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_copy_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_delete_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileDownloadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_download_token_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMetadata","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_meta_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileMove","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_move_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_rename_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileStats","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_stats_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_update_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFileUploadTokenMovement","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_upload_token_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestFinalizeAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_finalize_allocation_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestListFileSystem","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_list_file_test.go","TestFunctionDetail":{"Line":25,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestLivestreamDownload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":90.01,"Output":["","    utils.go:152: Waiting 15s...\n","    zboxcli_list_file_test.go:661: Listing individual file in allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_download_livestream_test.go","TestFunctionDetail":{"Line":26,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestLivestreamDownload/Downloading_feed_to_allocation_with_delay_flag","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45,"Output":["","    system_test_wrapper.go:25: Test case [Downloading feed to allocation with delay flag] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_register_wallet_test.go:170: Getting wallet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_livestream_test.go:346: [Allocation created: 8a45ef458a166bee3933404231b073ab0450aa37b97e604dfc6f67548682eb73]\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_download_livestream_test.go:487: Starting upload of live stream to zbox...\n","    system_test_wrapper.go:33: Test case [Downloading feed to allocation with delay flag] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [Downloading feed to allocation with delay flag] end.\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestLivestreamDownload/Downloading_local_webcam_feed_to_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [Downloading local webcam feed to allocation] start.\n","    zboxcli_download_livestream_test.go:185: github runner has no any audio/camera device to test this feature yet\n","    system_test_wrapper.go:37: Test case [Downloading local webcam feed to allocation] end.\n","    --- SKIP: TestLivestreamDownload/Downloading_local_webcam_feed_to_allocation (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestLivestreamDownload/Downloading_youtube_feed_to_allocation_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45,"Output":["","    system_test_wrapper.go:25: Test case [Downloading youtube feed to allocation should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_register_wallet_test.go:170: Getting wallet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_download_livestream_test.go:487: Starting upload of live stream to zbox...\n","    zboxcli_download_livestream_test.go:509: Starting download of live stream from zbox.\n","    system_test_wrapper.go:33: Test case [Downloading youtube feed to allocation should work] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [Downloading youtube feed to allocation should work] end.\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestMinerFeesPayment","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    miner_fees_payment_test.go:22: Skipped till re-done\n","--- SKIP: TestMinerFeesPayment (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"miner_fees_payment_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":113.54,"Output":["","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_register_wallet_test.go:170: Getting wallet...\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_owner_update_config_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_FaucetSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.4,"Output":["","    system_test_wrapper.go:25: Test case [should allow update of owner: FaucetSC] start.\n","    zwalletcli_faucet_update_config_test.go:172: Updating faucet config...\n","    utils.go:152: Waiting 5s...\n","    zwalletcli_faucet_update_config_test.go:160: Retrieving faucet config...\n","    zwalletcli_faucet_update_config_test.go:172: Updating faucet config...\n","    system_test_wrapper.go:37: Test case [should allow update of owner: FaucetSC] end.\n","    zwalletcli_faucet_update_config_test.go:172: Updating faucet config...\n","--- PASS: TestOwnerUpdate/should_allow_update_of_owner:_FaucetSC (18.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_MinerSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.6,"Output":["","    system_test_wrapper.go:25: Test case [should allow update of owner: MinerSC] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zwalletcli_miner_update_config_test.go:117: Updating miner config...\n","    utils.go:152: Waiting 5s...\n","    zwalletcli_miner_update_config_test.go:105: Retrieving miner config...\n","    zwalletcli_miner_update_config_test.go:117: Updating miner config...\n","    system_test_wrapper.go:37: Test case [should allow update of owner: MinerSC] end.\n","    zwalletcli_miner_update_config_test.go:117: Updating miner config...\n","--- PASS: TestOwnerUpdate/should_allow_update_of_owner:_MinerSC (20.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_StorageSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":48.35,"Output":["","    system_test_wrapper.go:25: Test case [should allow update of owner: StorageSC] start.\n","    zwalletcli_storage_update_config_test.go:235: Updating storage config...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    0_owner_update_config_test.go:53: fetching lfb in: 2s...\n","    utils.go:152: Waiting 5s...\n","    system_test_wrapper.go:33: Test case [should allow update of owner: StorageSC] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [should allow update of owner: StorageSC] end.\n","    zwalletcli_storage_update_config_test.go:235: Updating storage config...\n","    zwalletcli_storage_update_config_test.go:261: Retrieving storage config...\n","    0_owner_update_config_test.go:68: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/cli_tests/0_owner_update_config_test.go:68\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/cli_tests/system_test_wrapper.go:47\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tNot equal: \n","        \t            \texpected: \"c0ff8a955b46a0f0ca5528265ac2646c38ec7e852ee00b2d21a3af822c4125f4\"\n","        \t            \tactual  : \"1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802\"\n","        \t            \t\n","        \t            \tDiff:\n","        \t            \t--- Expected\n","        \t            \t+++ Actual\n","        \t            \t@@ -1 +1 @@\n","        \t            \t-c0ff8a955b46a0f0ca5528265ac2646c38ec7e852ee00b2d21a3af822c4125f4\n","        \t            \t+1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802\n","        \tTest:       \tTestOwnerUpdate/should_allow_update_of_owner:_StorageSC\n","        \tMessages:   \tnew value [c0ff8a955b46a0f0ca5528265ac2646c38ec7e852ee00b2d21a3af822c4125f4] for owner was not set\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestOwnerUpdate/should_allow_update_of_owner:_VestingSC","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.61,"Output":["","    system_test_wrapper.go:25: Test case [should allow update of owner: VestingSC] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    flaky___unused_for_mainnet_test.go:2007: Updating vesting config...\n","    utils.go:152: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1995: Retrieving vesting config...\n","    flaky___unused_for_mainnet_test.go:2007: Updating vesting config...\n","    system_test_wrapper.go:37: Test case [should allow update of owner: VestingSC] end.\n","    flaky___unused_for_mainnet_test.go:2007: Updating vesting config...\n","--- PASS: TestOwnerUpdate/should_allow_update_of_owner:_VestingSC (20.61s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestReadPoolLockUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_rp_lock_unlock_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestRecentlyAddedRefs","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_recent_refs_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestShareFile","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_share_file_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStakeUnstakeTokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_stake_unstake_token_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStreamUploadDownload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":135.01,"Output":["","    zboxcli_livestream_test.go:78: TestStreamUploadDownload-Uploading_remote_feed_to_allocation_should_work\n","    zboxcli_livestream_test.go:78: up.m3u8\n","    zboxcli_livestream_test.go:78: up.m3u8.tmp\n","    zboxcli_livestream_test.go:78: up0.ts\n","    zboxcli_livestream_test.go:78: up1.ts\n","    zboxcli_livestream_test.go:78: up10.ts\n","    zboxcli_livestream_test.go:78: up11.ts\n","    zboxcli_livestream_test.go:78: up12.ts\n","    zboxcli_livestream_test.go:78: up13.ts\n","    zboxcli_livestream_test.go:78: up14.ts\n","    zboxcli_livestream_test.go:78: up15.ts\n","    zboxcli_livestream_test.go:78: up16.ts\n","    zboxcli_livestream_test.go:78: up17.ts\n","    zboxcli_livestream_test.go:78: up18.ts\n","    zboxcli_livestream_test.go:78: up19.ts\n","    zboxcli_livestream_test.go:78: up2.ts\n","    zboxcli_livestream_test.go:78: up20.ts\n","    zboxcli_livestream_test.go:78: up3.ts\n","    zboxcli_livestream_test.go:78: up4.ts\n","    zboxcli_livestream_test.go:78: up5.ts\n","    zboxcli_livestream_test.go:78: up6.ts\n","    zboxcli_livestream_test.go:78: up7.ts\n","    zboxcli_livestream_test.go:78: up8.ts\n","    zboxcli_livestream_test.go:78: up9.ts\n","    utils.go:152: Waiting 15s...\n","    zboxcli_list_file_test.go:661: Listing individual file in allocation...\n","    zboxcli_livestream_test.go:153: TestStreamUploadDownload-Upload_from_feed_with_delay_flag_must_work\n","    zboxcli_livestream_test.go:153: up.m3u8\n","    zboxcli_livestream_test.go:153: up.m3u8.tmp\n","    zboxcli_livestream_test.go:153: up0.ts\n","    zboxcli_livestream_test.go:153: up1.ts\n","    zboxcli_livestream_test.go:153: up2.ts\n","    zboxcli_livestream_test.go:153: up3.ts\n","    zboxcli_livestream_test.go:153: up4.ts\n","    zboxcli_livestream_test.go:153: up5.ts\n","    zboxcli_livestream_test.go:153: up6.ts\n","    utils.go:152: Waiting 15s...\n","    zboxcli_list_file_test.go:661: Listing individual file in allocation...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_livestream_test.go","TestFunctionDetail":{"Line":27,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStreamUploadDownload/Upload_from_feed_with_a_different_chunknumber_must_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45,"Output":["","    system_test_wrapper.go:25: Test case [Upload from feed with a different chunknumber must work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_livestream_test.go:471: Starting upload of live stream to zbox...\n","    utils.go:152: Waiting 30s...\n","    system_test_wrapper.go:33: Test case [Upload from feed with a different chunknumber must work] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [Upload from feed with a different chunknumber must work] end.\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStreamUploadDownload/Upload_from_feed_with_delay_flag_must_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45,"Output":["","    system_test_wrapper.go:25: Test case [Upload from feed with delay flag must work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_livestream_test.go:471: Starting upload of live stream to zbox...\n","    utils.go:152: Waiting 30s...\n","    system_test_wrapper.go:33: Test case [Upload from feed with delay flag must work] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [Upload from feed with delay flag must work] end.\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestStreamUploadDownload/Upload_local_webcam_feed_with_a_different_chunknumber_must_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [Upload local webcam feed with a different chunknumber must work] start.\n","    zboxcli_livestream_test.go:396: github runner has no any audio/camera device to test this feature yet\n","    system_test_wrapper.go:37: Test case [Upload local webcam feed with a different chunknumber must work] end.\n","    --- SKIP: TestStreamUploadDownload/Upload_local_webcam_feed_with_a_different_chunknumber_must_work (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestStreamUploadDownload/Uploading_local_webcam_feed_to_allocation_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [Uploading local webcam feed to allocation should work] start.\n","    zboxcli_livestream_test.go:259: github runner has no any audio/camera device to test this feature yet\n","    system_test_wrapper.go:37: Test case [Uploading local webcam feed to allocation should work] end.\n","    --- SKIP: TestStreamUploadDownload/Uploading_local_webcam_feed_to_allocation_should_work (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestStreamUploadDownload/Uploading_local_webcam_feed_to_allocation_with_delay_specified_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [Uploading local webcam feed to allocation with delay specified should work] start.\n","    zboxcli_livestream_test.go:327: github runner has no any audio/camera device to test this feature yet\n","    system_test_wrapper.go:37: Test case [Uploading local webcam feed to allocation with delay specified should work] end.\n","    --- SKIP: TestStreamUploadDownload/Uploading_local_webcam_feed_to_allocation_with_delay_specified_should_work (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStreamUploadDownload/Uploading_remote_feed_to_allocation_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":45,"Output":["","    system_test_wrapper.go:25: Test case [Uploading remote feed to allocation should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_update_allocation_test.go:610: Executing faucet...\n","    zboxcli_create_allocation_test.go:291: Creating new allocation...\n","    zboxcli_livestream_test.go:471: Starting upload of live stream to zbox...\n","    utils.go:152: Waiting 30s...\n","    system_test_wrapper.go:33: Test case [Uploading remote feed to allocation should work] timed out after [45s]\n","    system_test_wrapper.go:37: Test case [Uploading remote feed to allocation should work] end.\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestSyncWithBlobbers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_sync_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_transfer_allocation_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_update_allocation_test.go","TestFunctionDetail":{"Line":26,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_upload_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_validator_config_update_test.go:144: Requesting validator list...\n"],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_validator_config_update_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_blobber_max_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [update blobber max stake should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_validator_config_update_test.go:154: Updating validator info...\n","    zboxcli_validator_config_update_test.go:149: Requesting validator info...\n","    system_test_wrapper.go:37: Test case [update blobber max stake should work] end.\n"],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestValidatorConfigUpdate/update_blobber_min_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_wrapper.go:25: Test case [update blobber min stake should work] start.\n","    zwalletcli_register_wallet_test.go:111: Registering wallet...\n","    zboxcli_validator_config_update_test.go:154: Updating validator info...\n","panic: Fail in goroutine after TestLivestreamDownload has completed [recovered]\n","\tpanic: Fail in goroutine after TestLivestreamDownload has completed\n","\n","goroutine 318 [running]:\n","testing.(*common).Fail(0xc00058ba00)\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:817 +0xe5\n","testing.(*common).Fail(0xc000502d00)\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:811 +0x47\n","testing.(*common).Errorf(0xc000502d00, {0xa5f165?, 0x841?}, {0xc000141100?, 0x4bafc0?, 0xc000526298?})\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:934 +0x65\n","github.com/0chain/system_test/internal/api/util/test.handlePanic(0xc000502d00)\n","\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_wrapper.go:55 +0xa6\n","panic({0x9bbe00, 0xc0002ab810})\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/runtime/panic.go:838 +0x207\n","testing.(*common).Fail(0xc00058ba00)\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:817 +0xe5\n","testing.(*common).Fail(0xc000502d00)\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:811 +0x47\n","testing.(*common).Errorf(0xc000502d00, {0xa3ad28?, 0xc000502d00?}, {0xc0002ab7c0?, 0x48ecef?, 0xf9cf00?})\n","\t/root/actions-runner2/_work/_tool/go/1.18.6/x64/src/testing/testing.go:934 +0x65\n","github.com/stretchr/testify/assert.Fail({0xb54040, 0xc000502d00}, {0xc0005af3b0, 0x4f}, {0xc000141688, 0x1, 0x1})\n","\t/root/actions-runner2/_work/_tool/go/pkg/mod/github.com/stretchr/testify@v1.8.0/assert/assertions.go:264 +0x384\n","github.com/stretchr/testify/assert.Nil({0xb54040, 0xc000502d00}, {0x9c9e20, 0xc0002ab760}, {0xc000141688, 0x1, 0x1})\n","\t/root/actions-runner2/_work/_tool/go/pkg/mod/github.com/stretchr/testify@v1.8.0/assert/assertions.go:553 +0xda\n","github.com/stretchr/testify/require.Nil({0xb55980, 0xc000502d00}, {0x9c9e20, 0xc0002ab760}, {0xc000141688, 0x1, 0x1})\n","\t/root/actions-runner2/_work/_tool/go/pkg/mod/github.com/stretchr/testify@v1.8.0/require/require.go:1208 +0x96\n","github.com/0chain/system_test/tests/cli_tests.TestLivestreamDownload.func3(0xc000502d00)\n","\t/root/actions-runner2/_work/system_test/system_test/tests/cli_tests/zboxcli_download_livestream_test.go:383 +0xdb1\n","github.com/0chain/system_test/internal/api/util/test.executeTest.func1()\n","\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_wrapper.go:47 +0x83\n","created by github.com/0chain/system_test/internal/api/util/test.executeTest\n","\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_wrapper.go:44 +0x98\n"],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
