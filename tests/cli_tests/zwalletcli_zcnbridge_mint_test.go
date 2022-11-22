@@ -22,8 +22,14 @@ func TestBridgeMint(t *testing.T) {
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
 		// burn some tokens on 0chain
-		output, err := burnZcn(t, "2", bridgeClientConfigFile, true)
+		output, err = burnZcn(t, "2", bridgeClientConfigFile, true)
 		require.Nil(t, err, "error burning tokens")
 		require.Greater(t, len(output), 0)
 		
