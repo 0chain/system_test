@@ -18,6 +18,8 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
+const StatusCompletedCB = "Status completed callback"
+
 func TestDownload(t *testing.T) {
 	t.Parallel()
 
@@ -53,11 +55,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -112,24 +112,16 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, errorList[0], strings.Join(outputList[0], "\n"))
 		require.Len(t, outputList[0], 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(fileNameOfFirstDirectory),
-		)
-
-		require.Equal(t, expected, outputList[0][1])
+		require.Contains(t, outputList[0][1], StatusCompletedCB)
+		require.Contains(t, outputList[0][1], filepath.Base(fileNameOfFirstDirectory))
 		downloadedFileFromFirstDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfFirstDirectory))
 
 		require.Equal(t, originalFirstFileChecksum, downloadedFileFromFirstDirectoryChecksum)
 		require.Nil(t, errorList[1], strings.Join(outputList[1], "\n"))
 		require.Len(t, outputList[1], 2)
 
-		expected = fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(fileNameOfSecondDirectory),
-		)
-
-		require.Equal(t, expected, outputList[1][1])
+		require.Contains(t, outputList[1][1], StatusCompletedCB)
+		require.Contains(t, outputList[1][1], filepath.Base(fileNameOfSecondDirectory))
 		downloadedFileFromSecondDirectoryChecksum := generateChecksum(t, "tmp/"+filepath.Base(fileNameOfSecondDirectory))
 		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
@@ -161,11 +153,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -198,11 +188,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -234,7 +222,8 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.Error(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
@@ -287,59 +276,9 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
-	})
-
-	t.Run("Download Entire Shared Folder Should Fail", func(t *testing.T) {
-		t.Parallel()
-
-		var authTicket, filename string
-
-		filesize := int64(10)
-		remotepath := "/"
-
-		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 1,
-			})
-			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-			require.NotEqual(t, "", filename)
-
-			// Delete the uploaded file from tmp folder if it exist,
-			// since we will be downloading it now
-			err := os.RemoveAll("tmp/" + filepath.Base(filename))
-			require.Nil(t, err)
-
-			shareParam := createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"remotepath": remotepath,
-			})
-
-			output, err := shareFolderInAllocation(t, configPath, shareParam)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-
-			authTicket, err = extractAuthToken(output[0])
-			require.Nil(t, err, "extract auth token failed")
-			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
-		})
-
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
-		require.Nil(t, err)
-
-		// Download file using auth-ticket: should work
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"authticket": authTicket,
-			"localpath":  "tmp/dir",
-			"remotepath": "/",
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: please get files from folder, and download them one by one", output[0])
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "consensus_not_met")
+		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
 	t.Run("Download Shared File Should Work", func(t *testing.T) {
@@ -392,11 +331,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -439,11 +376,8 @@ func TestDownload(t *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 		downloadedFileChecksum := generateChecksum(t, strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename))
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
@@ -497,11 +431,6 @@ func TestDownload(t *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-
 		file := "tmp/" + filepath.Base(filename)
 
 		// Download file using auth-ticket: should work
@@ -512,7 +441,8 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 
 		os.Remove(file) //nolint
 
@@ -525,7 +455,8 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 	})
 
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
@@ -578,11 +509,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -642,11 +571,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -823,11 +750,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/tmp2/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -879,11 +804,8 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
 
 		info, err := os.Stat("tmp/" + filepath.Base(filename))
 		require.Nil(t, err, "error getting file stats")
@@ -973,11 +895,8 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
 
 		info, err := os.Stat("tmp/" + filepath.Base(filename))
 		require.Nil(t, err, "error getting file stats")
@@ -1020,12 +939,12 @@ func TestDownload(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
-	t.Run("Download File With endblock greater than number of blocks should fail", func(t *testing.T) {
+	t.Run("Download File With endblock greater than number of blocks should work", func(t *testing.T) {
 		t.Parallel()
 
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
-		filesize := int64(655360 * 2)
+		filesize := int64(10240)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -1050,10 +969,10 @@ func TestDownload(t *testing.T) {
 			"endblock":   endBlock,
 		}), true)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Invalid block number")
+		require.Contains(t, aggregatedOutput, "Status completed callback.")
 	})
 
 	t.Run("Download with endblock less than startblock should fail", func(t *testing.T) {
@@ -1086,7 +1005,7 @@ func TestDownload(t *testing.T) {
 		}), false)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 2)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
@@ -1154,7 +1073,7 @@ func TestDownload(t *testing.T) {
 		}), false)
 
 		require.NotNil(t, err)
-		require.Len(t, output, 2)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
@@ -1187,11 +1106,9 @@ func TestDownload(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
@@ -1246,7 +1163,8 @@ func TestDownload(t *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0)
 
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[len(output)-1])
+		require.Contains(t, output[len(output)-1], "consensus_not_met")
+		require.Contains(t, output[len(output)-1], "file meta data")
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *testing.T) {
@@ -1267,7 +1185,8 @@ func TestDownload(t *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *testing.T) {
@@ -1361,7 +1280,8 @@ func TestDownload(t *testing.T) {
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0])
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {

@@ -366,8 +366,8 @@ func TestTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference
 		}), true)
 		require.Nil(t, err, "Error in file operation", strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output length", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(filename), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
 	})
 
 	t.Run("transfer allocation and download with auth ticket should fail", func(t *testing.T) {
