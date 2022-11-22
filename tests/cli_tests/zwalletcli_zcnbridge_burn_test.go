@@ -47,7 +47,7 @@ func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 		configDir,
 		bridgeClientConfigFile,
 	)
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --configDir ./config --config %s ", configPath)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)

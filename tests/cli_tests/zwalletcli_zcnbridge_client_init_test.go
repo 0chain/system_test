@@ -47,11 +47,11 @@ func PrepareBridgeClient(t *testing.T) error {
 func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
 	return runCreateBridgeClientTestConfig(
 		t,
-		"password",
-		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
-		"0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB",
-		"0x930E1BE76461587969Cb7eB9BFe61166b1E70244",
-		"https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4",
+		"02289b9",
+		"0xD8c9156e782C68EE671C09b6b92de76C97948432",
+		"0x0c2aa005C6FF9F4B46Ae566D9bc61E33B482D8E6",
+		"0xbD2048E2348b8Eb597D356AF23EAfAa246F88375",
+		"https://goerli.infura.io/v3/773bfe30452f40f998e5d0f2f8a29888",
 		75,
 		300000,
 		0,

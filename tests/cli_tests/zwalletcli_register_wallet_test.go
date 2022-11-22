@@ -110,6 +110,12 @@ func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]stri
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
+func registerDefaultWallet(t *testing.T, cliConfigFilename, name string) ([]string, error) {
+	t.Log("Registering wallet...")
+	return cliutils.RunCommand(t, "./zbox register --silent "+
+		"--wallet "+name+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
 func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, name string) error {
 	_, err := registerWalletForName(t, cliConfigFilename, name)
 	if err != nil {

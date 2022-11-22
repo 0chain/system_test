@@ -22,7 +22,7 @@ func TestBridgeMint(t *testing.T) {
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := registerWallet(t, configPath)
+		output, err := registerDefaultWallet(t, configPath, "wallet.json")
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
