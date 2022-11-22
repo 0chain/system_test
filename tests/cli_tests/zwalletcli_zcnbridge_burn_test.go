@@ -42,7 +42,7 @@ func TestBridgeBurn(t *testing.T) {
 func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-zcn --amount %s --path %s --bridge_config %s",
+		"./zwallet bridge-burn-zcn --token %s --path %s --bridge_config %s",
 		amount,
 		configDir,
 		bridgeClientConfigFile,

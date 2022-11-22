@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -11,7 +12,7 @@ import (
 )
 
 const (
-	TransactionHash = "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95"
+	// TransactionHash = "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95"
 )
 
 // todo: enable tests
@@ -21,21 +22,30 @@ func TestBridgeMint(t *testing.T) {
 	t.Run("Mint WZCN tokens", func(t *testing.T) {
 		t.Parallel()
 
-		output, err := mintWrappedZcnTokens(t, TransactionHash, false)
+		// burn some tokens on 0chain
+		output, err := burnZcn(t, "2", bridgeClientConfigFile, true)
+		require.Nil(t, err, "error burning tokens")
+		require.Greater(t, len(output), 0)
+		
+		// get hash from output
+		hashregex := regexp.MustCompile("[a-f0-9]{64}")
+		transactionHash := hashregex.FindStringSubmatch(output[0])[1]
+
+		output, err = mintWrappedZcnTokens(t, transactionHash, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 
-	t.Run("Mint ZCN tokens", func(t *testing.T) {
-		t.Skip("Skipping due to deployment issue")
-		t.Parallel()
+	// t.Run("Mint ZCN tokens", func(t *testing.T) {
+	// 	t.Skip("Skipping due to deployment issue")
+	// 	t.Parallel()
 
-		output, err := mintZcnTokens(t, TransactionHash, false)
-		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification [OK]")
-	})
+	// 	output, err := mintZcnTokens(t, TransactionHash, false)
+	// 	require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+	// 	require.Greater(t, len(output), 0)
+	// 	require.Contains(t, output[len(output)-1], "Verification [OK]")
+	// })
 }
 
 //nolint
