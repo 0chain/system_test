@@ -14,7 +14,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var settingUpdateSleepTime = time.Second * 10
+var settingUpdateSleepTime = time.Second * 60
 
 func TestStorageUpdateConfig(t *testing.T) {
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
