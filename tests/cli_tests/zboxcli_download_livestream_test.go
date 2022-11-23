@@ -29,7 +29,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 	defer KillFFMPEG()
 
-	t.Run("Downloading youtube feed to allocation should work", func(t *test.SystemTest) {
+	t.RunSequentially("Downloading youtube feed to allocation should work", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -181,7 +181,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.Run("Downloading local webcam feed to allocation", func(t *test.SystemTest) {
+	t.RunSequentially("Downloading local webcam feed to allocation", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
@@ -329,7 +329,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.Run("Downloading feed to allocation with delay flag", func(t *test.SystemTest) {
+	t.RunSequentially("Downloading feed to allocation with delay flag", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {

@@ -67,35 +67,35 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 	}()
 
-	t.Run("should allow update of min_mint_amount", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
 		testKey(t, "min_mint_amount", "1")
 	})
 
-	t.Run("should allow update of min_burn_amount", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
 		testKey(t, "min_burn_amount", "2")
 	})
 
-	t.Run("should allow update of min_stake_amount", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
 		testKey(t, "min_stake_amount", "3")
 	})
 
-	t.Run("should allow update of max_fee", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
 		testKey(t, "max_fee", "4")
 	})
 
-	t.Run("should allow update of percent_authorizers", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
 		testKey(t, "percent_authorizers", "5")
 	})
 
-	t.Run("should allow update of min_authorizers", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
 		testKey(t, "min_authorizers", "6")
 	})
 
-	t.Run("should allow update of burn_address", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
 		testKey(t, "burn_address", "7")
 	})
 
-	t.Run("should allow update of owner_id", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
 		testKey(t, "owner_id", "8")
 	})
 }

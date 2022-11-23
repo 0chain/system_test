@@ -20,7 +20,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	t.Run("Get Global Config Should Work", func(t *test.SystemTest) {
+	t.RunSequentially("Get Global Config Should Work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -37,7 +37,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Greater(t, len(cfg), 0, "Configuration map must include some items")
 	})
 
-	t.Run("Update Global Config - Update mutable config should work", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - Update mutable config should work", func(t *test.SystemTest) {
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "200"
 
@@ -79,7 +79,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.Run("Update Global Config - Update multiple mutable config should work", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - Update multiple mutable config should work", func(t *test.SystemTest) {
 		configKey1 := "server_chain.block.proposal.max_wait_time"
 		newValue1 := "190ms"
 
@@ -130,7 +130,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.Run("Update Global Config - Update immutable config must fail", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - Update immutable config must fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -149,7 +149,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Equal(t, "update_globals: validation: server_chain.owner cannot be modified via a transaction", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -187,7 +187,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 	// FIXME! Maybe this is better to fail the command from zwallet or gosdk in case of no parameters.
 	// Currently in this case transaction is getting executed, but nothing is getting updated.
-	t.Run("Update Global Config - update with suppliying no parameter must update nothing", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - update with suppliying no parameter must update nothing", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -208,7 +208,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Update Global Config - update with invalid key must fail", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - update with invalid key must fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -224,7 +224,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Equal(t, "update_globals: validation: 'invalid.key' is not a valid global setting", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Update Global Config - update with invalid value must fail", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config - update with invalid value must fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -240,7 +240,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Equal(t, "update_globals: validation: server_chain.block.proposal.max_wait_time value abc cannot be parsed as a time.duration", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Update Global Config with a non-owner wallet Should Fail ", func(t *test.SystemTest) {
+	t.RunSequentially("Update Global Config with a non-owner wallet Should Fail ", func(t *test.SystemTest) {
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "215"
 

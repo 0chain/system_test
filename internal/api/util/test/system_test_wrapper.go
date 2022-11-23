@@ -24,10 +24,40 @@ func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool
 			log.Printf("Panic - [%v] occurred while executing test", err)
 		}
 	}()
-	return s.RunWithCustomTimeout(name, DefaultTestTimeout, testCaseFunction)
+	return s.run(name, DefaultTestTimeout, testCaseFunction, true)
 }
 
-func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, testFunction func(w *SystemTest)) bool {
+func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
+	s.T.Helper()
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic - [%v] occurred while executing test", err)
+		}
+	}()
+	return s.run(name, timeout, testCaseFunction, true)
+}
+
+func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *SystemTest)) bool {
+	s.T.Helper()
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic - [%v] occurred while executing test", err)
+		}
+	}()
+	return s.run(name, DefaultTestTimeout, testCaseFunction, false)
+}
+
+func (s *SystemTest) RunSequentiallyWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
+	s.T.Helper()
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic - [%v] occurred while executing test", err)
+		}
+	}()
+	return s.run(name, timeout, testCaseFunction, false)
+}
+
+func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {
 	s.T.Helper()
 	timeoutWrappedTestCase := func(t *testing.T) {
 		t.Helper()
@@ -41,16 +71,19 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 		}()
 
 		dt := time.Now()
-		ws.Logf("Test case [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
+		ws.Logf("Test case [%s] scheduled at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 
 		testCaseChannel := make(chan struct{}, 1)
 
-		go executeTest(ws, name, testFunction, testCaseChannel, &wg)
+		if runInParallel {
+			s.Parallel()
+		}
+		go executeTest(ws, name, testFunction, testCaseChannel, &wg, runInParallel)
 
 		select {
 		case <-time.After(timeout):
 			dt = time.Now()
-			ws.Errorf("Test case [%s] timed out after [%s] at [%s]", name, timeout, dt.Format("01-02-2006 15:04:05"))
+			ws.Errorf("Test case [%s] timed out after [%s]", name, timeout)
 		case _ = <-testCaseChannel:
 		}
 
@@ -61,14 +94,13 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 	return s.T.Run(name, timeoutWrappedTestCase)
 }
 
-func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
+func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup, runInParallel bool) {
 	s.Helper()
 	dt := time.Now()
-	s.Logf("executeTest [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
+	s.Logf("Test case [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 	go func() {
 		defer wg.Done()
 		defer handlePanic(s)
-		s.Logf("testFunction [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 		testFunction(s)
 	}()
 	wg.Wait()
@@ -83,7 +115,7 @@ func handlePanic(s *SystemTest) {
 
 func handleTestCaseExit() {
 	if err := recover(); err != nil {
-		log.Printf("Test case already exited - [%v]", err)
+		log.Printf("Suppressed test function panic - [%v]", err)
 	}
 }
 
@@ -190,4 +222,10 @@ func (s *SystemTest) TempDir() string {
 	s.T.Helper()
 	defer handleTestCaseExit()
 	return s.T.TempDir()
+}
+
+func (s *SystemTest) Parallel() {
+	s.T.Helper()
+	defer handleTestCaseExit()
+	s.T.Parallel()
 }

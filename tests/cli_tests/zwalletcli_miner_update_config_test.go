@@ -16,7 +16,7 @@ import (
 func TestMinerUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"
 		newValue := "0.1"
 
@@ -33,7 +33,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -57,7 +57,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_settings: unsupported key unknown_key", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing keys param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing keys param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -78,7 +78,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing values param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing values param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}

@@ -53,7 +53,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("update blobber max stake should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber max stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -75,7 +75,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMaxStake), intToZCN(finalValidatorInfo.MaxStake))
 	})
 
-	t.Run("update blobber min stake should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber min stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -97,7 +97,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMinStake), intToZCN(finalValidatorInfo.MinStake))
 	})
 
-	t.Run("update validator number of delegates should work", func(t *test.SystemTest) {
+	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -118,7 +118,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalValidatorInfo.NumDelegates)
 	})
 
-	t.Run("update blobber service charge should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber service charge should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 

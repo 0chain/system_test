@@ -15,8 +15,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create allocation API call should be successful given a valid request", func(t *test.SystemTest) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

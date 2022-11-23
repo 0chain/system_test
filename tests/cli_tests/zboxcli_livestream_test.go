@@ -31,7 +31,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	defer KillFFMPEG()
 
 	// Success scenarios
-	t.Run("Uploading remote feed to allocation should work", func(t *test.SystemTest) {
+	t.RunSequentially("Uploading remote feed to allocation should work", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -105,7 +105,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Upload from feed with delay flag must work", func(t *test.SystemTest) {
+	t.RunSequentially("Upload from feed with delay flag must work", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -179,7 +179,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Upload from feed with a different chunknumber must work", func(t *test.SystemTest) {
+	t.RunSequentially("Upload from feed with a different chunknumber must work", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -255,7 +255,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Uploading local webcam feed to allocation should work", func(t *test.SystemTest) {
+	t.RunSequentially("Uploading local webcam feed to allocation should work", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
@@ -323,7 +323,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Uploading local webcam feed to allocation with delay specified should work", func(t *test.SystemTest) {
+	t.RunSequentially("Uploading local webcam feed to allocation with delay specified should work", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
@@ -392,7 +392,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Upload local webcam feed with a different chunknumber must work", func(t *test.SystemTest) {
+	t.RunSequentially("Upload local webcam feed with a different chunknumber must work", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)

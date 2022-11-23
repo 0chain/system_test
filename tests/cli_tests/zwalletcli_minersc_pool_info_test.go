@@ -17,7 +17,7 @@ import (
 func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
+	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -64,7 +64,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *test.SystemTest) {
+	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -111,7 +111,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *test.SystemTest) {
+	t.RunSequentially("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

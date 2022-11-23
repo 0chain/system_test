@@ -14,7 +14,7 @@ import (
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
+	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -49,7 +49,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.RunWithCustomTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
+	t.RunSequentiallyWithCustomTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -74,8 +74,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.Run("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
-
+	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

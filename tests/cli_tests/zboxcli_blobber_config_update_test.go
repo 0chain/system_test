@@ -74,7 +74,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("update blobber capacity should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// register wallet for normal user
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -96,7 +96,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, int64(newCapacity), finalBlobberInfo.Capacity)
 	})
 
-	t.Run("update blobber max offer duration should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber max offer duration should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -117,7 +117,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 	})
 
-	t.Run("update blobber max stake should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber max stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -142,7 +142,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMaxStake), intToZCN(max_stake))
 	})
 
-	t.Run("update blobber min stake should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber min stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -167,7 +167,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMinStake), intToZCN(min_stake))
 	})
 
-	t.Run("update blobber min lock demand should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber min lock demand should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -189,7 +189,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
 	})
 
-	t.Run("update blobber number of delegates should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber number of delegates should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -210,7 +210,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 	})
 
-	t.Run("update blobber service charge should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber service charge should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -231,7 +231,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 	})
 
-	t.Run("update no params should work", func(t *test.SystemTest) {
+	t.RunSequentially("update no params should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -243,7 +243,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, "blobber settings updated successfully", output[0])
 	})
 
-	t.Run("update without blobber ID should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update without blobber ID should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -253,7 +253,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, "Error: required flag(s) \"blobber_id\" not set", output[0])
 	})
 
-	t.Run("update with invalid blobber ID should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with invalid blobber ID should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -263,7 +263,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, "internal_error: missing blobber: invalid-blobber-id", output[1])
 	})
 
-	t.Run("update with invalid blobber wallet/owner should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with invalid blobber wallet/owner should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -274,7 +274,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update blobber read price should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber read price should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -297,7 +297,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
 	})
 
-	t.Run("update blobber write price should work", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber write price should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -320,7 +320,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newWritePrice, intToZCN(finalBlobberInfo.Terms.Write_price))
 	})
 
-	t.Run("update all params at once should work", func(t *test.SystemTest) {
+	t.RunSequentially("update all params at once should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 

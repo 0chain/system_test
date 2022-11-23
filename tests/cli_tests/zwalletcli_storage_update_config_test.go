@@ -101,7 +101,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		checkSettings(t, settingsAfter, *expectedChange)
 	})
 
-	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -114,7 +114,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -130,7 +130,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 			", can't set value "+value, output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update max_read_price to invalid value should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update max_read_price to invalid value should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {

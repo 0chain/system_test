@@ -25,7 +25,7 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 	t := test.NewSystemTest(testSetup)
 
 	t.Skip("Till batch-update is merged...")
-	t.Run("Miner share on block fees and rewards", func(t *test.SystemTest) {
+	t.RunSequentially("Miner share on block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -66,7 +66,7 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 		}
 	})
 
-	t.Run("Sharder share on block fees and rewards", func(t *test.SystemTest) {
+	t.RunSequentially("Sharder share on block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
