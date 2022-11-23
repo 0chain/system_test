@@ -40,7 +40,8 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 			}
 		}()
 
-		ws.Logf("Test case [%s] start.", name)
+		dt := time.Now()
+		ws.Logf("Test case [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 
 		testCaseChannel := make(chan struct{}, 1)
 
@@ -48,11 +49,13 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 
 		select {
 		case <-time.After(timeout):
-			ws.Errorf("Test case [%s] timed out after [%v]", name, timeout)
+			dt = time.Now()
+			ws.Errorf("Test case [%s] timed out after [%s] at [%s]", name, timeout, dt.Format("01-02-2006 15:04:05"))
 		case _ = <-testCaseChannel:
 		}
 
-		ws.Logf("Test case [%s] end.", name)
+		dt = time.Now()
+		ws.Logf("Test case [%s] end at ", name, dt.Format("01-02-2006 15:04:05"))
 	}
 
 	return s.T.Run(name, timeoutWrappedTestCase)
