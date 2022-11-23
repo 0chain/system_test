@@ -14,13 +14,7 @@ import (
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Parallel()
-
 	t.Run("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
-		t.Parallel()
-		sdkClient.Mutex.Lock()
-		defer sdkClient.Mutex.Unlock()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -57,10 +51,6 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref for empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
-		sdkClient.Mutex.Lock()
-		defer sdkClient.Mutex.Unlock()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -92,10 +82,6 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid allocation id should fail", func(t *test.SystemTest) {
-		t.Parallel()
-		sdkClient.Mutex.Lock()
-		defer sdkClient.Mutex.Unlock()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -126,9 +112,6 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
-		t.Parallel()
-		sdkClient.Mutex.Lock()
-		defer sdkClient.Mutex.Unlock()
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
@@ -157,9 +140,6 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
-		t.Parallel()
-		sdkClient.Mutex.Lock()
-		defer sdkClient.Mutex.Unlock()
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
