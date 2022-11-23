@@ -17,7 +17,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Add Curator _ must fail when the allocation doesn't exist", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -37,7 +36,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ attempt to add curator by anyone except allocation owner must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -68,7 +66,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ must fail when 'curator' parameter is missing", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -92,7 +89,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Curator must be able to transfer the allocation ownership", func(t *test.SystemTest) {
-		t.Parallel()
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
@@ -145,7 +141,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Owner added as curator must be able to transfer the ownership", func(t *test.SystemTest) {
-		t.Parallel()
+
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -190,7 +186,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Owner must be able to add itself as curator", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -221,7 +216,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Curator must be added to allocation curators' list", func(t *test.SystemTest) {
-		t.Parallel()
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 
@@ -266,7 +260,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", func(t *test.SystemTest) {
-		t.Parallel()
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
@@ -326,7 +319,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *test.SystemTest) {
-		t.Parallel()
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 

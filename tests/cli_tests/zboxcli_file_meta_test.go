@@ -28,7 +28,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	// Success Scenarios
 
 	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -54,7 +53,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
@@ -85,7 +83,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta in Sub Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -113,7 +110,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var authTicket, filename, lookupHash string
 
@@ -170,7 +166,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	// FIXME: POSSIBLE BUG: Using lookuphash with remotepath causes no effects. lookuphash
 	// is simply ignored
 	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		filesize := int64(2)
@@ -223,7 +218,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta for Encrypted File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
@@ -272,7 +266,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var otherAllocationID, otherfile string
 		allocationID := setupAllocation(t, configPath)
@@ -337,7 +330,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta for Missing remotepath and authticket Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -350,7 +342,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get Folder Meta in Empty Directory Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -365,7 +356,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta by Lookup Hash Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		filesize := int64(2)
@@ -389,7 +379,6 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))

@@ -23,7 +23,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Sync path with 1 file to empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -60,7 +59,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with 1 file encrypted to empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -97,7 +95,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -171,7 +168,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -245,7 +241,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files encrypted to empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -287,7 +282,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files to empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -329,7 +323,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files in nested directories to empty allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -377,7 +370,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path to NON-empty allocation (No filename Clashes) should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		originalFileName := "no clash filename.txt"
 
@@ -456,7 +448,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path to NON-empty allocation (Replace Existing File) should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		originalFileName := "must Be Updated File.txt"
 
@@ -538,7 +529,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -587,7 +577,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with cache flag should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -650,7 +639,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with uploadonly flag should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -699,7 +687,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Attempt to Sync to allocation not owned must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -737,7 +724,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := "invalid-allocation-id"
 

@@ -18,7 +18,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-3) // In hours
@@ -49,7 +48,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -61,7 +59,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
@@ -75,7 +72,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		cmd := fmt.Sprintf(
 			"./zbox alloc-fini --silent "+

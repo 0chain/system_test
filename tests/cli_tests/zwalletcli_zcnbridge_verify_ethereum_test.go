@@ -22,7 +22,6 @@ func TestBridgeVerify(testSetup *testing.T) {
 
 	t.Run("Verify ethereum transaction", func(t *test.SystemTest) {
 		t.Skip("Skip till fixed")
-		t.Parallel()
 
 		output, err := verifyBridgeTransaction(t, Address, false)
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))

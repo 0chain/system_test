@@ -17,8 +17,9 @@ import (
 func TestReplaceBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	t.Parallel()
+
 	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -52,7 +53,6 @@ func TestReplaceBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -82,7 +82,6 @@ func TestReplaceBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -115,7 +114,6 @@ func TestReplaceBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)

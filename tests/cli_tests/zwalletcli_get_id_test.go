@@ -18,7 +18,6 @@ func TestGetId(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("get miner id should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		miners := getMinersList(t)
 		minerUrl := fmt.Sprint("http://", miners.Nodes[0].Host, ":", miners.Nodes[0].Port)
@@ -31,7 +30,6 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get sharder id should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		_, _ = registerWallet(t, configPath)
 
@@ -49,7 +47,6 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get blobber id should not work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		_, _ = registerWallet(t, configPath)
 

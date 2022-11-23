@@ -21,7 +21,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -133,7 +132,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -147,7 +145,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -164,7 +161,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -207,7 +203,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -250,7 +245,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

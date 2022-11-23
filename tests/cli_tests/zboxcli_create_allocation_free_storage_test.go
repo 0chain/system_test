@@ -92,8 +92,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	require.Equal(t, "TransactionStatus: 1", output[1])
 	require.Greater(t, len(output[2]), 0, output[2])
 
-	t.Parallel()
-
 	t.RunSequentially("Create free storage from marker with accounting", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 

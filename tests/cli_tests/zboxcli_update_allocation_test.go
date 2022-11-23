@@ -29,7 +29,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Update Name Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		_ = setupWallet(t, configPath)
 
@@ -59,7 +58,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Expiry Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
@@ -85,7 +83,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(256)
@@ -110,7 +107,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
@@ -136,7 +132,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Negative Expiry Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
@@ -162,7 +157,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Negative Size Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(-256)
@@ -186,7 +180,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update All Negative Parameters Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
@@ -215,7 +208,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size to less than occupied size should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
 
@@ -252,7 +244,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -268,7 +259,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := "123abc"
 
@@ -284,7 +274,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Expired Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours
@@ -333,7 +322,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := -allocationBeforeUpdate.Size + 1023
@@ -352,7 +340,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Other's Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var otherAllocationID string
 
@@ -404,7 +391,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		expiry := 1
@@ -427,7 +413,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		size := "ab"

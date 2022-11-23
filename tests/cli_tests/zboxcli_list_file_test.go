@@ -32,7 +32,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	t.Run("No Files in Allocation Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -47,7 +46,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files in Root Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -82,7 +80,6 @@ func TestListFileSystem(testSetup *testing.T) {
 
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
 	t.Run("List Encrypted Files Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
@@ -133,7 +130,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files and Check Lookup Hash Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -169,7 +165,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files in a Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -202,7 +197,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files in Nested Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -235,7 +229,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List a File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -270,7 +263,6 @@ func TestListFileSystem(testSetup *testing.T) {
 
 	//FIXME: POSSIBLE BUG: Can't use lookuphash on self-owned wallet with remotepath doesn't work
 	t.Run("List Files Using Lookup Hash and RemotePath Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -318,7 +310,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files in Shared Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var authTicket, filename string
 
@@ -371,7 +362,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List a Shared File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var authTicket, filename string
 
@@ -425,7 +415,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Shared Files Using Lookup Hash Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var authTicket, filename, lookupHash string
 
@@ -482,7 +471,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List All Files Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -519,7 +507,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
@@ -535,7 +522,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List Files in Other's Wallet Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
@@ -597,7 +583,6 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("List All Files Should Work On An Empty Allocation", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 

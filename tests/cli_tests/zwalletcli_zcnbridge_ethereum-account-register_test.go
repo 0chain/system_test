@@ -28,7 +28,6 @@ const (
 
 func TestEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
 		deleteDefaultAccountInStorage(t, address)

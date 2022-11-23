@@ -22,7 +22,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	t.Parallel()
 
 	t.Run("rename file", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -93,7 +92,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("Rename file concurrently to existing directory, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -164,7 +162,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("Rename and delete file concurrently, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -264,7 +261,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -329,7 +325,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -406,7 +401,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -482,7 +476,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to containing special characters", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -554,7 +547,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename root path should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 
@@ -576,7 +568,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 
@@ -596,7 +587,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
@@ -672,7 +662,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with no allocation param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
@@ -689,7 +678,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with no remotepath param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
@@ -705,7 +693,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with no destname param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)

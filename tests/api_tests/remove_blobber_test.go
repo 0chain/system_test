@@ -18,7 +18,6 @@ func TestRemoveBlobber(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Remove blobber in allocation, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)

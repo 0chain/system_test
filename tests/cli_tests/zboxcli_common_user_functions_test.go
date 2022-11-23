@@ -28,7 +28,6 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -58,7 +57,6 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	})
 
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

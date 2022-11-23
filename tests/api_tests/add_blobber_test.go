@@ -18,7 +18,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Add new blobber to allocation, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -47,7 +46,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -73,7 +71,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
@@ -102,7 +99,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)

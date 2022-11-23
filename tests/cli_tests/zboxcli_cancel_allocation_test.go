@@ -23,7 +23,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -36,7 +35,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		dt := time.Now()
 		t.Logf("Test case [No allocation param should fail] before parallel at [%s] ", dt.Format("01-02-2006 15:04:05"))
-		t.Parallel()
+
 		dt = time.Now()
 		t.Logf("Test case [No allocation param should fail] after parallel at [%s] ", dt.Format("01-02-2006 15:04:05"))
 
@@ -58,7 +57,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
@@ -71,7 +69,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := "123abc"
 
@@ -84,7 +81,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours

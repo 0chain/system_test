@@ -39,7 +39,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 
 	// VP-ADD cases
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -67,7 +66,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with single destination and description should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -95,7 +93,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with multiple destinations should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -129,7 +126,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with multiple destinations and description should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -164,7 +160,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with locking insufficient tokens should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -191,7 +186,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with excess locked tokens should work and allow unlocking", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -228,7 +222,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in future should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -268,7 +261,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in future for multiple destination wallets should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -318,7 +310,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in past should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -349,7 +340,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in past for multiple destinations should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -387,7 +377,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with invalid destination should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -407,7 +396,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with one valid destination and one invalid destination should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -434,7 +422,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool for duration less than min duration should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -466,7 +453,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with duration greater than max duration should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -498,7 +484,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with lock less than min lock should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -529,7 +514,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with description greater than max description length should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -562,7 +546,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with destinations greater than max destinations should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -599,7 +582,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without destination flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -614,7 +596,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without duration flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -629,7 +610,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without lock flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -646,7 +626,6 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 
 func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -660,7 +639,6 @@ func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
 
 	// VP-DELETE cases
 	t.Run("Vesting pool delete should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -707,7 +685,6 @@ func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool delete with invalid pool_id should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -721,7 +698,6 @@ func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Deleting someone else's vesting pool should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -761,7 +737,6 @@ func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool delete without pool id flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -786,7 +761,6 @@ func vestingPoolDelete(t *test.SystemTest, cliConfigFilename, params string, ret
 
 func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -801,7 +775,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	// VP-INFO cases
 	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
 	t.Run("Vesting pool info with valid pool_id should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -858,7 +831,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info for pool with multiple destinations should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -932,7 +904,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 
 	// FIXME: vp-info can show information of vp belonging to other wallets
 	t.Run("Vesting pool info for pool belonging to someone else's wallet must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -971,7 +942,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info with invalid pool_id should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -988,7 +958,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info without pool id flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1003,7 +972,6 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 
 func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1017,7 +985,6 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 
 	// VP-STOP cases
 	t.Run("Vesting pool stop for pool with one destination should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1092,7 +1059,6 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 
 	// FIXME: this only stops last destination flag.
 	t.Run("Vesting pool stop for multiple destinations should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1177,7 +1143,6 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop for someone else's pool must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1219,7 +1184,6 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop without pool id must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1240,7 +1204,6 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop without destination should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1256,10 +1219,8 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 
 func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1336,7 +1297,6 @@ func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1457,7 +1417,6 @@ func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 
 func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1472,7 +1431,6 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	// VP-TRIGGER cases
 	// FIXME: vp-trigger is not working, tokens still keep on being sent in a timely manner as opposed to being release all at once.
 	t.Run("Vesting pool trigger for one destination pool should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1525,7 +1483,6 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger for a pool with multiple destinations should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1628,7 +1585,6 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger without pool id flag should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1640,7 +1596,6 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger with invalid pool id should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1656,7 +1611,6 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 
 func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1670,7 +1624,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 
 	// VP-UNLOCK cases
 	t.Run("Vesting pool unlock with excess tokens in pool should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1720,7 +1673,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool unlock by destination wallet should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1774,7 +1726,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Unlocking someone else's vesting pool should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1815,7 +1766,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool unlock for one destination and no excess tokens in pool should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1852,7 +1802,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting unlock without pool id must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -1864,7 +1813,6 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting unlock with invalid pool id must fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

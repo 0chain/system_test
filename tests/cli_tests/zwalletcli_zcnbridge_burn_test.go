@@ -18,7 +18,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 	t.Run("Burning WZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Insufficient balance")
-		t.Parallel()
 
 		err := PrepareBridgeClient(t)
 		require.NoError(t, err)
@@ -32,7 +31,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 	// todo: enable test
 	t.Run("Burning ZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to transaction execution errr (context deadline error)")
-		t.Parallel()
 
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))

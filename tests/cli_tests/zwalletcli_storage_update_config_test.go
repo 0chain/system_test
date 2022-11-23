@@ -131,7 +131,6 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update max_read_price to invalid value should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")

@@ -27,7 +27,6 @@ func TestUpload(testSetup *testing.T) {
 	// Success Scenarios
 
 	t.Run("Upload File With half Size of the Allocation Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)
@@ -58,7 +57,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload multiple files less than size of the Allocation Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(256 * KB)
@@ -91,7 +89,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -120,7 +117,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload file concurrently to root directory, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -172,7 +168,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -201,7 +196,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to a Directory without Filename Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -248,7 +242,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Nested Directory Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -277,7 +270,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File with Thumbnail Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(10 * 1024 * 1024)
 		fileSize := int64(256)
@@ -309,7 +301,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(10 * 1024 * 1024)
 
@@ -339,7 +330,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Video File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(400 * 1024 * 1024)
 
@@ -364,7 +354,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Large File Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
@@ -396,7 +385,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
@@ -424,7 +412,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Data shards do not require more allocation space", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)
@@ -453,7 +440,6 @@ func TestUpload(testSetup *testing.T) {
 
 	//FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(2 * MB)
@@ -478,7 +464,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(513 * KB)
@@ -503,7 +488,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(257 * KB)
@@ -529,7 +513,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -567,7 +550,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		fileSize := int64(256)
 
@@ -592,7 +574,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Other's Allocation Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var otherAllocationID string
 
@@ -641,7 +622,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 
@@ -666,7 +646,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Blank File Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(0)
@@ -691,7 +670,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -705,7 +683,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload to Allocation without remotepath and authticket Should Fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 2048,
@@ -722,7 +699,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File longer than 100 chars should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)

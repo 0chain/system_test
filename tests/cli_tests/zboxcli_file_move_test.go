@@ -22,7 +22,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Parallel()
 
 	t.Run("move file to existing directory", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -93,7 +92,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("Move file concurrently to existing directory, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -178,7 +176,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -248,7 +245,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to same directory (no change) should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -313,7 +309,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -407,7 +402,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move non-existing file should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 
@@ -427,7 +421,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
@@ -502,7 +495,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file with no allocation param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
 		output, err := registerWallet(t, configPath)
@@ -518,7 +510,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file with no remotepath param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
 		output, err := registerWallet(t, configPath)
@@ -534,7 +525,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file with no destpath param should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
 		output, err := registerWallet(t, configPath)

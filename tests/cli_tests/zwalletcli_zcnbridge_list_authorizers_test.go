@@ -17,7 +17,6 @@ func TestListAuthorizers(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("List authorizers should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := getAuthorizersList(t, true)
 

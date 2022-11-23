@@ -24,7 +24,6 @@ func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Register wallet API call should be successful, ignoring invalid creation date", func(t *test.SystemTest) {
-		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
 		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
@@ -46,7 +45,6 @@ func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - client id invalid", func(t *test.SystemTest) {
-		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
 		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
@@ -60,7 +58,6 @@ func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - public key invalid", func(t *test.SystemTest) {
-		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)
 		expectedKeyPair := crypto.GenerateKeys(t, mnemonic)
@@ -76,7 +73,6 @@ func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Register wallet API call should be unsuccessful given an invalid request - empty json body", func(t *test.SystemTest) {
-		t.Parallel()
 
 		walletRequest := model.Wallet{}
 		walletResponse, httpResponse, err := apiClient.V1ClientPut(t, walletRequest, client.HttpBadRequestStatus)

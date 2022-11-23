@@ -15,7 +15,6 @@ func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Alloc blobbers API call should be successful given a valid request", func(t *test.SystemTest) {
-		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
 
@@ -29,7 +28,7 @@ func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 
 	// FIXME lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319
 	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *test.SystemTest) {
-		t.Parallel()
+
 		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
 
 		wallet := apiClient.RegisterWallet(t)

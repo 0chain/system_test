@@ -30,7 +30,6 @@ func TestFileStats(testSetup *testing.T) {
 	const chunksize = 64 * 1024
 
 	t.Run("get file stats in root directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -72,7 +71,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats in sub directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -114,7 +112,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats in nested sub directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -156,7 +153,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats on an empty allocation", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -193,7 +189,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats for a file that does not exists", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -231,7 +226,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats for an allocation you dont own", func(t *test.SystemTest) {
-		t.Parallel()
 
 		otherAllocationID := ""
 		remotepath := "/"
@@ -293,7 +287,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no params supplied", func(t *test.SystemTest) {
-		t.Parallel()
 
 		setupAllocation(t, configPath)
 
@@ -304,7 +297,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no allocation param supplied", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -324,7 +316,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no remotepath param supplied", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -338,7 +329,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats before and after update", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
@@ -415,7 +405,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats before and after download", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocSize := int64(2048)
 

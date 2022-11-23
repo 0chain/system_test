@@ -51,7 +51,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -79,7 +78,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -108,7 +106,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

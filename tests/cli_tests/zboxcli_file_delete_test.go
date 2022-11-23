@@ -20,7 +20,6 @@ func TestFileDelete(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -50,7 +49,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Delete file concurrently in existing directory, should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -111,7 +109,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -141,7 +138,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file with encryption should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -183,7 +179,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete shared file by owner should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -227,7 +222,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing non-root directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -254,7 +248,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -292,7 +285,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -320,7 +312,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file that does not exist should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -337,7 +328,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
@@ -351,7 +341,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
@@ -365,7 +354,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
-		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -405,7 +393,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		var allocationID, filename string
 		remotepath := "/"
@@ -437,7 +424,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete shared file by collaborator should fail", func(t *test.SystemTest) {
-		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 

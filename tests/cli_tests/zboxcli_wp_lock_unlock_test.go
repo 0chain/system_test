@@ -18,7 +18,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -86,7 +85,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Unlocking tokens from finalized allocation should work", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -157,7 +155,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -202,7 +199,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -247,7 +243,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock zero write tokens", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -292,7 +287,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -324,7 +318,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to unlock unexpired write tokens", func(t *test.SystemTest) {
-		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

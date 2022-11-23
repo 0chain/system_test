@@ -19,7 +19,6 @@ func TestBurnTicket(testSetup *testing.T) {
 
 	t.Run("Get ZCN burn ticket", func(t *test.SystemTest) {
 		t.Skipf("Skipping due to context deadline error when burning ZCN tokens")
-		t.Parallel()
 
 		output, err := getZcnBurnTicket(t, "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95", false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
@@ -29,7 +28,6 @@ func TestBurnTicket(testSetup *testing.T) {
 
 	t.Run("Get WZCN burn ticket", func(t *test.SystemTest) {
 		t.Skipf("Skipping due to Authorizer failing to register in the 0chain")
-		t.Parallel()
 
 		output, err := getWrappedZcnBurnTicket(t, "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95", false)
 		require.Nil(t, err, "error: '%s'", strings.Join(output, "\n"))
