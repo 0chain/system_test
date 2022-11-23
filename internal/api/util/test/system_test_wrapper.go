@@ -37,11 +37,11 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 		ws := &SystemTest{T: t}
 		defer func() {
 			if err := recover(); err != nil {
-				t.Errorf("Panic - [%v] occurred while timing out test", err)
+				ws.Errorf("Panic - [%v] occurred while timing out test", err)
 			}
 		}()
 
-		t.Logf("Test case [%s] start.", name)
+		ws.Logf("Test case [%s] start.", name)
 
 		testCaseChannel := make(chan struct{}, 1)
 
@@ -49,11 +49,11 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 
 		select {
 		case <-time.After(timeout):
-			t.Errorf("Test case [%s] timed out after [%v]", name, timeout)
+			ws.Errorf("Test case [%s] timed out after [%v]", name, timeout)
 		case _ = <-testCaseChannel:
 		}
 
-		t.Logf("Test case [%s] end.", name)
+		ws.Logf("Test case [%s] end.", name)
 	}
 
 	return s.T.Run(name, timeoutWrappedTestCase)
@@ -76,9 +76,9 @@ func handlePanic(s *SystemTest) {
 	}
 }
 
-func handleTestCaseExit(s *SystemTest) {
+func handleTestCaseExit() {
 	if err := recover(); err != nil {
-		s.Errorf("Test case already exited - [%v]", err)
+		log.Printf("Test case already exited - [%v]", err)
 	}
 }
 
@@ -86,13 +86,13 @@ func handleTestCaseExit(s *SystemTest) {
 
 func (s *SystemTest) Cleanup(f func()) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	s.T.Cleanup(f)
 }
 
 func (s *SystemTest) Error(args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Error(args)
 	} else {
@@ -102,7 +102,7 @@ func (s *SystemTest) Error(args ...any) {
 
 func (s *SystemTest) Errorf(format string, args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Errorf(format, args)
 	} else {
@@ -112,25 +112,25 @@ func (s *SystemTest) Errorf(format string, args ...any) {
 
 func (s *SystemTest) Fai() {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	s.T.Fail()
 }
 
 func (s *SystemTest) FailNow() {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	s.T.FailNow()
 }
 
 func (s *SystemTest) Failed() bool {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	return s.T.Failed()
 }
 
 func (s *SystemTest) Fatal(args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Fatal(args)
 	} else {
@@ -140,7 +140,7 @@ func (s *SystemTest) Fatal(args ...any) {
 
 func (s *SystemTest) Fatalf(format string, args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Fatalf(format, args)
 	} else {
@@ -150,7 +150,7 @@ func (s *SystemTest) Fatalf(format string, args ...any) {
 
 func (s *SystemTest) Log(args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Log(args)
 	} else {
@@ -161,7 +161,7 @@ func (s *SystemTest) Log(args ...any) {
 
 func (s *SystemTest) Logf(format string, args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Logf(format, args)
 	} else {
@@ -172,20 +172,20 @@ func (s *SystemTest) Logf(format string, args ...any) {
 
 func (s *SystemTest) Name() string {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	return s.T.Name()
 }
 
 func (s *SystemTest) Setenv(key, value string) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	s.T.Setenv(key, value)
 
 }
 
 func (s *SystemTest) Skip(args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Skip(args)
 	} else {
@@ -195,13 +195,13 @@ func (s *SystemTest) Skip(args ...any) {
 
 func (s *SystemTest) SkipNow() {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	s.T.SkipNow()
 }
 
 func (s *SystemTest) Skipf(format string, args ...any) {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	if len(args) > 0 {
 		s.T.Skipf(format, args)
 	} else {
@@ -211,12 +211,12 @@ func (s *SystemTest) Skipf(format string, args ...any) {
 
 func (s *SystemTest) Skipped() bool {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	return s.T.Skipped()
 }
 
 func (s *SystemTest) TempDir() string {
 	s.T.Helper()
-	defer handleTestCaseExit(s)
+	defer handleTestCaseExit()
 	return s.T.TempDir()
 }

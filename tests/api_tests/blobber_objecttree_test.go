@@ -80,7 +80,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunWithCustomTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow
+	t.RunWithCustomTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

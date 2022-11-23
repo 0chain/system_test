@@ -49,7 +49,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.RunWithCustomTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow?
+	t.RunWithCustomTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
