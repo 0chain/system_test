@@ -227,5 +227,5 @@ func (s *SystemTest) TempDir() string {
 func (s *SystemTest) Parallel() {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	s.
+	s.T.Parallel()
 }
