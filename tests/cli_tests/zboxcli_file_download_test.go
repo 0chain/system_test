@@ -22,7 +22,7 @@ import (
 const StatusCompletedCB = "Status completed callback"
 
 func TestDownload(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
@@ -31,7 +31,7 @@ func TestDownload(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	// Success Scenarios
-	t.Run("Download File from Root Directory Should Work", func(t *testing.T) {
+	t.Run("Download File from Root Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -66,7 +66,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download File Concurrently Should Work from two Different Directory", func(t *testing.T) {
+	t.Run("Download File Concurrently Should Work from two Different Directory", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(4096)
@@ -129,7 +129,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalSecondFileChecksum, downloadedFileFromSecondDirectoryChecksum)
 	})
 
-	t.Run("Download File from a Directory Should Work", func(t *testing.T) {
+	t.Run("Download File from a Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -164,7 +164,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download File from Nested Directory Should Work", func(t *testing.T) {
+	t.Run("Download File from Nested Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -200,7 +200,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
-	t.Run("Download Entire Directory Should Work but does not see blobber/issues/588", func(t *testing.T) {
+	t.Run("Download Entire Directory Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -230,7 +230,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
-	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *testing.T) {
+	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename string
@@ -239,7 +239,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -284,7 +284,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
-	t.Run("Download Entire Shared Folder Should Fail", func(t *testing.T) {
+	t.Run("Download Entire Shared Folder Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename string
@@ -293,7 +293,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Entire Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -336,7 +336,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[0], "invalid_operation: cannot downoad directory")
 	})
 
-	t.Run("Download Shared File Should Work", func(t *testing.T) {
+	t.Run("Download Shared File Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename, originalFileChecksum string
@@ -345,7 +345,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -394,7 +394,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Encrypted File Should Work", func(t *testing.T) {
+	t.Run("Download Encrypted File Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(10 * MB)
@@ -437,7 +437,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared Encrypted File Should Work", func(t *testing.T) {
+	t.Run("Download Shared Encrypted File Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename string
@@ -456,7 +456,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, viewerWallet)
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -514,7 +514,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 	})
 
-	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *testing.T) {
+	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename, originalFileChecksum string
@@ -523,7 +523,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/dir/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -572,7 +572,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *testing.T) {
+	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, lookuphash, filename, originalFileChecksum string
@@ -581,7 +581,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/dir/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -634,7 +634,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared File without Paying Should Not Work", func(t *testing.T) {
+	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename string
@@ -643,7 +643,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -683,7 +683,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 3)
 	})
 
-	t.Run("Download Shared File by Paying Should Work", func(t *testing.T) {
+	t.Run("Download Shared File by Paying Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var allocationID, authTicket, filename string
@@ -692,7 +692,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocation(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
@@ -732,7 +732,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
 
-	t.Run("Download File Thumbnail Should Work", func(t *testing.T) {
+	t.Run("Download File Thumbnail Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -778,7 +778,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
 
-	t.Run("Download to Non-Existent Path Should Work", func(t *testing.T) {
+	t.Run("Download to Non-Existent Path Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -813,7 +813,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download File With Only startblock Should Work", func(t *testing.T) {
+	t.Run("Download File With Only startblock Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -868,7 +868,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With Only endblock Should Not Work", func(t *testing.T) {
+	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -901,7 +901,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
-	t.Run("Download File With startblock And endblock Should Work", func(t *testing.T) {
+	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536, we upload 20 blocks and download 1 block
@@ -959,7 +959,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *testing.T) {
+	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -994,7 +994,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
-	t.Run("Download File With endblock greater than number of blocks should fail", func(t *testing.T) {
+	t.Run("Download File With endblock greater than number of blocks should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -1030,7 +1030,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "Invalid block number")
 	})
 
-	t.Run("Download with endblock less than startblock should fail", func(t *testing.T) {
+	t.Run("Download with endblock less than startblock should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -1065,7 +1065,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.Run("Download with negative startblock should fail", func(t *testing.T) {
+	t.Run("Download with negative startblock should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -1098,7 +1098,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
 	})
 
-	t.Run("Download with negative endblock should fail", func(t *testing.T) {
+	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// 1 block is of size 65536
@@ -1133,7 +1133,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.Run("Download File With blockspermarker Flag Should Work", func(t *testing.T) {
+	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -1171,7 +1171,7 @@ func TestDownload(testSetup *testing.T) {
 
 	// Failure Scenarios
 
-	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *testing.T) {
+	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -1189,7 +1189,7 @@ func TestDownload(testSetup *testing.T) {
 			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: 12334qe, error: record not found", output[0])
 	})
 
-	t.Run("Download File from Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Download File from Other's Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var otherAllocationID, otherFilename string
@@ -1198,7 +1198,7 @@ func TestDownload(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
 				"size": allocSize,
 			})
@@ -1222,7 +1222,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "file meta data")
 	})
 
-	t.Run("Download Non-Existent File Should Fail", func(t *testing.T) {
+	t.Run("Download Non-Existent File Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		remotepath := "/"
@@ -1244,7 +1244,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[0], "file meta data")
 	})
 
-	t.Run("Download without any Parameter Should Fail", func(t *testing.T) {
+	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -1257,7 +1257,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
-	t.Run("Download from Allocation without other Parameter Should Fail", func(t *testing.T) {
+	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -1274,7 +1274,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
-	t.Run("Download File Without read-lock Should Fail", func(t *testing.T) {
+	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -1302,7 +1302,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.Run("Download File using Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -1339,7 +1339,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[0], "file meta data")
 	})
 
-	t.Run("Download File to Existing File Should Fail", func(t *testing.T) {
+	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -1369,7 +1369,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 }
 
-func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraParam map[string]interface{}) string {
+func setupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
 	tokens := float64(1)
 	if tok, ok := extraParam["tokens"]; ok {
 		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
@@ -1391,11 +1391,11 @@ func setupAllocationAndReadLock(t *testing.T, cliConfigFilename string, extraPar
 	return allocationID
 }
 
-func downloadFile(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func downloadFile(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return downloadFileForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 15*time.Second) // TODO replace with pollers
 	t.Logf("Downloading file...")
 	cmd := fmt.Sprintf(
@@ -1412,7 +1412,7 @@ func downloadFileForWallet(t *testing.T, wallet, cliConfigFilename, param string
 	}
 }
 
-func generateChecksum(t *testing.T, filePath string) string {
+func generateChecksum(t *test.SystemTest, filePath string) string {
 	t.Logf("Generating checksum for file [%v]...", filePath)
 
 	output, err := cliutils.RunCommandWithoutRetry("shasum -a 256 " + filePath)

@@ -17,17 +17,17 @@ import (
 )
 
 func TestMinerFeesPayment(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Skip("Skipped till re-done")
-	mnconfig := getMinerSCConfiguration(testSetup)
+	mnconfig := getMinerSCConfiguration(t)
 	minerShare := mnconfig["share_ratio"]
 
-	miners := getMinersList(testSetup)
-	miner := getMinersDetail(testSetup, miners.Nodes[0].SimpleNode.ID).SimpleNode
+	miners := getMinersList(t)
+	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
 	require.NotEmpty(t, miner)
 
-	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *testing.T) {
+	t.Run("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -62,7 +62,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("Vp-add with fee should pay fee to the miners", func(t *testing.T) {
+	t.Run("Vp-add with fee should pay fee to the miners", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -103,7 +103,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *testing.T) {
+	t.Run("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -163,7 +163,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *testing.T) {
+	t.Run("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -221,7 +221,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *testing.T) {
+	t.Run("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -290,7 +290,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 }
 
 func getBlockContainingTransaction(
-	t *testing.T,
+	t *test.SystemTest,
 	startBlock, endBlock *climodel.LatestFinalizedBlock,
 	wallet *climodel.Wallet,
 	txnData string,
@@ -313,7 +313,7 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
 }
 
-func getLatestFinalizedBlock(t *testing.T) *climodel.LatestFinalizedBlock {
+func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -333,7 +333,7 @@ func getLatestFinalizedBlock(t *testing.T) *climodel.LatestFinalizedBlock {
 	return &block
 }
 
-func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *climodel.Node) (expectedMinerFee int64) {
+func getExpectedMinerFees(t *test.SystemTest, fee, minerShare float64, blockMiner *climodel.Node) (expectedMinerFee int64) {
 	// Expected miner fee is calculating using this formula:
 	// Fee * minerShare * miner.ServiceCharge
 	// Stakeholders' reward is:
@@ -354,7 +354,7 @@ func getExpectedMinerFees(t *testing.T, fee, minerShare float64, blockMiner *cli
 	return expectedMinerFee
 }
 
-func verifyMinerFeesPayment(t *testing.T, block *climodel.Block, expectedMinerFee int64) bool {
+func verifyMinerFeesPayment(t *test.SystemTest, block *climodel.Block, expectedMinerFee int64) bool {
 	for _, txn := range block.Block.Transactions {
 		if strings.Contains(txn.TransactionData, "payFees") && strings.Contains(txn.TransactionData, fmt.Sprintf("%d", block.Block.Round)) {
 			var transfers []climodel.Transfer

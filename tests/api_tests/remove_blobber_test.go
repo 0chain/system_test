@@ -13,11 +13,11 @@ import (
 )
 
 func TestRemoveBlobber(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Remove blobber in allocation, shouldn't work", func(t *testing.T) {
+	t.Run("Remove blobber in allocation, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

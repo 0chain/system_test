@@ -15,11 +15,11 @@ import (
 )
 
 func TestFileDelete(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("delete existing file in root directory should work", func(t *testing.T) {
+	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -49,7 +49,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Delete file concurrently in existing directory, should work", func(t *testing.T) {
+	t.Run("Delete file concurrently in existing directory, should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		const allocSize int64 = 2048
@@ -110,7 +110,7 @@ func TestFileDelete(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("delete existing file in sub directory should work", func(t *testing.T) {
+	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -140,7 +140,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file with encryption should work", func(t *testing.T) {
+	t.Run("delete existing file with encryption should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -182,7 +182,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by owner should work", func(t *testing.T) {
+	t.Run("delete shared file by owner should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
@@ -226,7 +226,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing non-root directory should work", func(t *testing.T) {
+	t.Run("delete existing non-root directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -253,7 +253,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing file with thumbnail should work", func(t *testing.T) {
+	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -291,7 +291,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing root directory should work", func(t *testing.T) {
+	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -319,7 +319,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete file that does not exist should work", func(t *testing.T) {
+	t.Run("delete file that does not exist should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -336,7 +336,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("%s deleted", remotepath+"doesnotexist"), output[0])
 	})
 
-	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
+	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_, err := registerWallet(t, configPath)
@@ -350,7 +350,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: remotepath flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("delete file by not supplying allocation ID should fail", func(t *testing.T) {
+	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_, err := registerWallet(t, configPath)
@@ -364,7 +364,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file in root directory with wallet balance accounting", func(t *testing.T) {
+	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -404,7 +404,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("delete existing file in someone else's allocation should fail", func(t *testing.T) {
+	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var allocationID, filename string
@@ -436,7 +436,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by collaborator should fail", func(t *testing.T) {
+	t.Run("delete shared file by collaborator should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"

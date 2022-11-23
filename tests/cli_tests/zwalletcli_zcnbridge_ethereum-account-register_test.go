@@ -27,10 +27,10 @@ const (
 )
 
 func TestEthRegisterAccount(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("Register ethereum account in local key storage", func(t *testing.T) {
+	t.Run("Register ethereum account in local key storage", func(t *test.SystemTest) {
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
@@ -38,7 +38,7 @@ func TestEthRegisterAccount(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Imported account 0x"+address)
 	})
 
-	t.Run("List ethereum account registered in local key storage", func(t *testing.T) {
+	t.Run("List ethereum account registered in local key storage", func(t *test.SystemTest) {
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.NoError(t, err, strings.Join(output, "\n"))
@@ -54,7 +54,7 @@ func TestEthRegisterAccount(testSetup *testing.T) {
 	})
 }
 
-func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]string, error) {
+func importAccount(t *test.SystemTest, password, mnemonic string, retry bool) ([]string, error) {
 	t.Logf("Register ethereum account using mnemonic and protected with password...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --password %s --mnemonic \"%s\" --silent "+
@@ -73,7 +73,7 @@ func importAccount(t *testing.T, password, mnemonic string, retry bool) ([]strin
 	}
 }
 
-func listAccounts(t *testing.T, retry bool) ([]string, error) {
+func listAccounts(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("List ethereum accounts...")
 	cmd := fmt.Sprintf("./zwallet bridge-list-accounts --path %s", configDir)
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
@@ -85,7 +85,7 @@ func listAccounts(t *testing.T, retry bool) ([]string, error) {
 	}
 }
 
-func deleteDefaultAccountInStorage(t *testing.T, address string) {
+func deleteDefaultAccountInStorage(t *test.SystemTest, address string) {
 	keyDir := path.Join(configDir, "wallets")
 	if _, err := os.Stat(keyDir); err != nil {
 		t.Skipf("wallets folder at location is missing: %s", keyDir)

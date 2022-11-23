@@ -12,11 +12,11 @@ import (
 )
 
 func TestRecoverWallet(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Recover wallet valid mnemonic", func(t *testing.T) {
+	t.Run("Recover wallet valid mnemonic", func(t *test.SystemTest) {
 		t.Parallel()
 		validMnemonic := "pull floor crop best weasel suit solid gown" +
 			" filter kitten loan absent noodle nation potato planet demise" +
@@ -30,7 +30,7 @@ func TestRecoverWallet(testSetup *testing.T) {
 	})
 
 	//FIXME: POSSIBLE BUG: Blank wallet created if mnemonic is invalid (same issue in missing mnemonic test)
-	t.Run("Recover wallet invalid mnemonic", func(t *testing.T) {
+	t.Run("Recover wallet invalid mnemonic", func(t *test.SystemTest) {
 		t.Parallel()
 		inValidMnemonic := "floor crop best weasel suit solid gown" +
 			" filter kitten loan absent noodle nation potato planet demise" +
@@ -44,7 +44,7 @@ func TestRecoverWallet(testSetup *testing.T) {
 		require.Equal(t, "Error: Invalid mnemonic", output[0])
 	})
 
-	t.Run("Recover wallet no mnemonic", func(t *testing.T) {
+	t.Run("Recover wallet no mnemonic", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := cliutils.RunCommandWithoutRetry("./zwallet recoverwallet --silent " +
@@ -57,7 +57,7 @@ func TestRecoverWallet(testSetup *testing.T) {
 	})
 }
 
-func recoverWalletFromMnemonic(t *testing.T, configPath, mnemonic string, retry bool) ([]string, error) {
+func recoverWalletFromMnemonic(t *test.SystemTest, configPath, mnemonic string, retry bool) ([]string, error) {
 	t.Logf("Recovering wallet from mnemonic...")
 	cmd := "./zwallet recoverwallet " +
 		"--silent --wallet " + escapedTestName(t) + "_wallet.json" + " " +

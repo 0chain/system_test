@@ -21,11 +21,11 @@ import (
 const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 
 func TestSendAndBalance(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Send with description", func(t *testing.T) {
+	t.Run("Send with description", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -50,7 +50,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
-	t.Run("Send with json flag", func(t *testing.T) {
+	t.Run("Send with json flag", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -81,7 +81,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.NotEmpty(t, sendTxnOutput.Nonce)
 	})
 
-	t.Run("Balance checks before and after ZCN sent", func(t *testing.T) {
+	t.Run("Balance checks before and after ZCN sent", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -128,7 +128,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Regexp(t, successfulBalanceOutputRegex, output[0])
 	})
 
-	t.Run("Send without description should fail", func(t *testing.T) {
+	t.Run("Send without description should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -145,7 +145,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// cannot verify transaction payload at this moment due to transaction hash not being printed.
 	})
 
-	t.Run("Send attempt on zero ZCN wallet should fail", func(t *testing.T) {
+	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -168,7 +168,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	t.Run("Send attempt to invalid address should fail", func(t *testing.T) {
+	t.Run("Send attempt to invalid address should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -188,7 +188,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	t.Run("Send with zero token should fail", func(t *testing.T) {
+	t.Run("Send with zero token should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -213,7 +213,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 	})
 
-	t.Run("Send attempt to exceeding balance should fail", func(t *testing.T) {
+	t.Run("Send attempt to exceeding balance should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -239,7 +239,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	t.Run("Send attempt with negative token should fail", func(t *testing.T) {
+	t.Run("Send attempt with negative token should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -265,7 +265,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	t.Run("Send attempt with very long description should fail", func(t *testing.T) {
+	t.Run("Send attempt with very long description should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		targetWallet := escapedTestName(t) + "_TARGET"
@@ -298,7 +298,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Equal(t, wantFailureMsg, output[0])
 	})
 
-	t.Run("Send attempt to self should fail", func(t *testing.T) {
+	t.Run("Send attempt to self should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -321,7 +321,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 }
 
-func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc, params string, retry bool) ([]string, error) {
+func sendZCN(t *test.SystemTest, cliConfigFilename, toClientID, tokens, desc, params string, retry bool) ([]string, error) {
 	t.Logf("Sending ZCN...")
 	cmd := "./zwallet send --silent --tokens " + tokens +
 		" --desc \"" + desc + "\"" +
@@ -334,11 +334,11 @@ func sendZCN(t *testing.T, cliConfigFilename, toClientID, tokens, desc, params s
 	}
 }
 
-func sendTokens(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
+func sendTokens(t *test.SystemTest, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64) ([]string, error) {
 	return sendTokensFromWallet(t, cliConfigFilename, toClientID, tokens, desc, fee, escapedTestName(t))
 }
 
-func sendTokensFromWallet(t *testing.T, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64, wallet string) ([]string, error) {
+func sendTokensFromWallet(t *test.SystemTest, cliConfigFilename, toClientID string, tokens float64, desc string, fee float64, wallet string) ([]string, error) {
 	t.Logf("Sending ZCN...")
 	cmd := fmt.Sprintf(`./zwallet send --silent --tokens %v --desc %q --to_client_id %s `, tokens, desc, toClientID)
 
@@ -350,7 +350,7 @@ func sendTokensFromWallet(t *testing.T, cliConfigFilename, toClientID string, to
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func getRoundBlockFromASharder(t *testing.T, round int64) climodel.Block {
+func getRoundBlockFromASharder(t *test.SystemTest, round int64) climodel.Block {
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
@@ -370,11 +370,11 @@ func getRoundBlockFromASharder(t *testing.T, round int64) climodel.Block {
 	return block
 }
 
-func getShardersList(t *testing.T) map[string]climodel.Sharder {
+func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {
 	return getShardersListForWallet(t, escapedTestName(t))
 }
 
-func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.Sharder {
+func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
 	found := false
@@ -398,7 +398,7 @@ func getShardersListForWallet(t *testing.T, wallet string) map[string]climodel.S
 	return sharders
 }
 
-func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
+func getMinersListForWallet(t *test.SystemTest, wallet string) climodel.NodeList {
 	// Get miner list.
 	output, err := getMinersForWallet(t, configPath, wallet)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
@@ -412,7 +412,7 @@ func getMinersListForWallet(t *testing.T, wallet string) climodel.NodeList {
 	return miners
 }
 
-func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
+func getMinersDetail(t *test.SystemTest, miner_id string) *climodel.Node {
 	// Get miner's node details (this has the total_stake and pools populated).
 	output, err := getNode(t, configPath, miner_id)
 	require.Nil(t, err, "get node %s failed", miner_id, strings.Join(output, "\n"))
@@ -425,7 +425,7 @@ func getMinersDetail(t *testing.T, miner_id string) *climodel.Node {
 	return &nodeRes
 }
 
-func getMinersList(t *testing.T) *climodel.NodeList {
+func getMinersList(t *test.SystemTest) *climodel.NodeList {
 	// Get miner list.
 	output, err := getMiners(t, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
@@ -438,7 +438,7 @@ func getMinersList(t *testing.T) *climodel.NodeList {
 	return &miners
 }
 
-func getMinerSCConfiguration(t *testing.T) map[string]float64 {
+func getMinerSCConfiguration(t *test.SystemTest) map[string]float64 {
 	// Get MinerSC Global Config
 	output, err := getMinerSCConfig(t, configPath, true)
 	require.Nil(t, err, "get miners sc config failed", strings.Join(output, "\n"))

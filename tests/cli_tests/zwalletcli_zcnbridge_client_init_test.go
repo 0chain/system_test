@@ -30,7 +30,7 @@ const (
 	OptionKeyPassword      = "password"      // OptionKeyPassword bridge config filename
 )
 
-func PrepareBridgeClient(t *testing.T) error {
+func PrepareBridgeClient(t *test.SystemTest) error {
 	_, err := prepareBridgeClientConfig(t)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func PrepareBridgeClient(t *testing.T) error {
 }
 
 // Tests prerequisites
-func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
+func prepareBridgeClientConfig(t *test.SystemTest) ([]string, error) {
 	return runCreateBridgeClientTestConfig(
 		t,
 		"password",
@@ -62,7 +62,7 @@ func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
 }
 
 // Use it to import account to the given home folder
-func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
+func prepareBridgeClientWallet(t *test.SystemTest) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --%s %s --%s %q --%s %s",
 		OptionConfigFolder, configDir,
@@ -77,9 +77,9 @@ func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
 
 // cmd: bridge-client-init
 func TestBridgeClientInit(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
-	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
+	t.Run("Init bridge client config to default path and file", func(t *test.SystemTest) {
 		output, err := createDefaultClientBridgeConfig(t)
 
 		defaultPath := filepath.Join(getZCNDir(), DefaultConfigBridgeFileName)
@@ -91,7 +91,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 
 	customPath := filepath.Join(getConfigDir(), "test")
 
-	t.Run("Init bridge client config to custom path and default file", func(t *testing.T) {
+	t.Run("Init bridge client config to custom path and default file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -122,7 +122,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 
-	t.Run("Init bridge client config to custom path and custom config file", func(t *testing.T) {
+	t.Run("Init bridge client config to custom path and custom config file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -157,9 +157,9 @@ func TestBridgeClientInit(testSetup *testing.T) {
 
 // cmd: bridge-owner-init
 func TestBridgeOwnerInit(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
-	t.Run("Init bridge owner config to default path and file", func(t *testing.T) {
+	t.Run("Init bridge owner config to default path and file", func(t *test.SystemTest) {
 		output, err := bridgeOwnerInit(
 			t,
 			"password",
@@ -182,13 +182,12 @@ func TestBridgeOwnerInit(testSetup *testing.T) {
 
 // cmd: bridge-client-init
 func bridgeClientInit(
-	testSetup *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
 	opts ...*Option,
 ) ([]string, error) {
-	t := test.SystemTest{T: testSetup}
 	t.Logf("Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet bridge-client-init" +
@@ -201,7 +200,7 @@ func bridgeClientInit(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
@@ -214,12 +213,11 @@ func bridgeClientInit(
 
 // cmd: bridge-owner-init
 func bridgeOwnerInit(
-	testSetup *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, authorizersaddress, ethereumnodeurl string,
 	gaslimit, value int64,
 	opts ...*Option,
 ) ([]string, error) {
-	t := test.SystemTest{T: testSetup}
 	t.Logf("Init bridge owner config (owner.yaml) in HOME (~/.zcn) folder")
 
 	cmd := "./zwallet bridge-owner-init" +
@@ -232,7 +230,7 @@ func bridgeOwnerInit(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
@@ -243,7 +241,7 @@ func bridgeOwnerInit(
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
+func createDefaultClientBridgeConfig(t *test.SystemTest) ([]string, error) {
 	return bridgeClientInit(t,
 		"password",
 		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
@@ -257,7 +255,7 @@ func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
 }
 
 func runCreateBridgeClientTestConfig(
-	testSetup *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
@@ -273,7 +271,7 @@ func runCreateBridgeClientTestConfig(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(testSetup)+"_wallet.json", configPath)
+	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
 		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)

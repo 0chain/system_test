@@ -13,11 +13,11 @@ import (
 )
 
 func TestFinalizeAllocation(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *testing.T) {
+	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
@@ -48,7 +48,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
-	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -60,7 +60,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 	})
 
-	t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
@@ -74,7 +74,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: not allowed, unknown finalization initiator", output[len(output)-1])
 	})
 
-	t.Run("No allocation param should fail", func(t *testing.T) {
+	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		cmd := fmt.Sprintf(
@@ -91,7 +91,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 }
 
-func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func finalizeAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+

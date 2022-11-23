@@ -16,11 +16,11 @@ const (
 )
 
 func TestBridgeVerify(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Verify ethereum transaction", func(t *testing.T) {
+	t.Run("Verify ethereum transaction", func(t *test.SystemTest) {
 		t.Skip("Skip till fixed")
 		t.Parallel()
 
@@ -31,7 +31,7 @@ func TestBridgeVerify(testSetup *testing.T) {
 	})
 }
 
-func verifyBridgeTransaction(t *testing.T, address string, retry bool) ([]string, error) { // nolint
+func verifyBridgeTransaction(t *test.SystemTest, address string, retry bool) ([]string, error) { // nolint
 	t.Logf("verifying ethereum transaction...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-verify --hash %s --silent --configDir ./config --config %s --path %s",

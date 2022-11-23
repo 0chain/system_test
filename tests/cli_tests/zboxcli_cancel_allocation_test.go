@@ -18,11 +18,11 @@ var (
 )
 
 func TestCancelAllocation(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Cancel allocation immediately should work", func(t *testing.T) {
+	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -33,7 +33,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
-	t.Run("No allocation param should fail", func(t *testing.T) {
+	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		cmd := fmt.Sprintf(
@@ -49,7 +49,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
 	})
 
-	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
+	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
@@ -62,7 +62,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: only owner can cancel an allocation", output[len(output)-1])
 	})
 
-	t.Run("Cancel Non-existent Allocation Should Fail", func(t *testing.T) {
+	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := "123abc"
@@ -75,7 +75,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
 	})
 
-	t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
+	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
@@ -105,7 +105,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 }
 
-func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+

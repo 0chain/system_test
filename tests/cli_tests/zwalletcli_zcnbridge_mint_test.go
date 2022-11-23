@@ -17,11 +17,11 @@ const (
 
 // todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Mint WZCN tokens", func(t *testing.T) {
+	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
 		t.Parallel()
 
@@ -31,7 +31,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 
-	t.Run("Mint ZCN tokens", func(t *testing.T) {
+	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
 		t.Parallel()
 
@@ -43,7 +43,7 @@ func TestBridgeMint(testSetup *testing.T) {
 }
 
 // nolint
-func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
+func mintZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-zcn %s --silent "+
@@ -60,7 +60,7 @@ func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, 
 }
 
 // nolint
-func mintWrappedZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
+func mintWrappedZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-wzcn %s --silent "+

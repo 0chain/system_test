@@ -10,11 +10,11 @@ import (
 )
 
 func TestCreateAllocation(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Create allocation API call should be successful given a valid request", func(t *testing.T) {
+	t.Run("Create allocation API call should be successful given a valid request", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

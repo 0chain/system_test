@@ -14,9 +14,9 @@ import (
 )
 
 func TestMinerUpdateConfig(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
-	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
+	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"
 		newValue := "0.1"
 
@@ -33,7 +33,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *testing.T) {
+	t.Run("update with bad config key should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -57,7 +57,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_settings: unsupported key unknown_key", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing keys param should fail", func(t *testing.T) {
+	t.Run("update with missing keys param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -78,7 +78,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing values param should fail", func(t *testing.T) {
+	t.Run("update with missing values param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -100,7 +100,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	})
 }
 
-func getMinerSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+func getMinerSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving miner config...")
 
@@ -113,7 +113,7 @@ func getMinerSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]str
 	}
 }
 
-func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateMinerSCConfig(t *test.SystemTest, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating miner config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -130,7 +130,7 @@ func updateMinerSCConfig(t *testing.T, walletName string, param map[string]inter
 	}
 }
 
-// func updateMinerSCConfig(t *testing.T, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
+// func updateMinerSCConfig(t *test.SystemTest, walletName string, param map[string]interface{}, nonce int64, retry bool) ([]string, error) {
 // 	t.Logf("Updating miner config...")
 // 	p := createParams(param)
 // 	cmd := fmt.Sprintf(

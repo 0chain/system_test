@@ -3,13 +3,13 @@ package cliutils
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"math/big"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/cli/util/specific"
@@ -47,7 +47,7 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 	return output, err
 }
 
-func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
@@ -82,7 +82,7 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 	}
 }
 
-func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
+func StartCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
 	var count int
 	for {
 		count++
@@ -148,7 +148,7 @@ func RandomAlphaNumericString(n int) string {
 	return string(ret)
 }
 
-func Wait(t *testing.T, duration time.Duration) {
+func Wait(t *test.SystemTest, duration time.Duration) {
 	t.Logf("Waiting %s...", duration)
 	time.Sleep(duration)
 }

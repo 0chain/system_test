@@ -16,15 +16,15 @@ import (
 )
 
 func TestSharderStake(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	sharders := getShardersListForWallet(testSetup, sharder01NodeDelegateWalletName)
+	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
-	sharderNodeDelegateWallet, err := getWalletForName(testSetup, configPath, sharder01NodeDelegateWalletName)
+	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var sharder climodel.Sharder
@@ -38,7 +38,7 @@ func TestSharderStake(testSetup *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *testing.T) {
+	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -76,7 +76,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.Run("Multiple stakes against a sharder should not create multiple pools", func(t *testing.T) {
+	t.Run("Multiple stakes against a sharder should not create multiple pools", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -122,7 +122,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, poolsInfo.Pools[sharder.ID][0].ID, w.ClientID)
 	})
 
-	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
+	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -135,7 +135,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, `delegate_pool_add: digging delegate pool: lock amount is greater than balance`, output[0])
 	})
 
-	t.Run("Staking negative tokens against valid sharder should fail", func(t *testing.T) {
+	t.Run("Staking negative tokens against valid sharder should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -151,7 +151,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
+	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -185,7 +185,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
+	t.Run("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -199,7 +199,7 @@ func TestSharderStake(testSetup *testing.T) {
 }
 
 // waitForRoundsGT waits for at least r rounds passed
-func waitForRoundsGT(t *testing.T, r int) error {
+func waitForRoundsGT(t *test.SystemTest, r int) error {
 	var (
 		lfb      = getLatestFinalizedBlock(t)
 		endRound = lfb.Round + int64(r)
@@ -219,7 +219,7 @@ func waitForRoundsGT(t *testing.T, r int) error {
 	}
 }
 
-func waitForStakePoolActive(t *testing.T) {
+func waitForStakePoolActive(t *test.SystemTest) {
 	vs := getMinerSCConfiguration(t)
 	round, ok := vs["reward_round_frequency"]
 	require.True(t, ok, "could not get reward_round_frequency from minersc config")

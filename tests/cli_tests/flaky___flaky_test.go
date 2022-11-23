@@ -17,12 +17,12 @@ import (
 )
 
 func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Skip()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
-	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
+	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
@@ -85,10 +85,11 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("transfer allocation accounting test", func(t *testing.T) {
+	t.Run("transfer allocation accounting test", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -176,10 +177,11 @@ func Test___FlakyTransferAllocation(t *testing.T) { // nolint:gocyclo // team pr
 	})
 }
 
-func Test___FlakyFileRename(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
+	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -232,10 +234,11 @@ func Test___FlakyFileRename(t *testing.T) { // nolint:gocyclo // team preference
 	})
 }
 
-func Test___FlakyFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("File copy - Users should not be charged for moving a file ", func(t *testing.T) {
+	t.Run("File copy - Users should not be charged for moving a file ", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -300,10 +303,11 @@ func Test___FlakyFileCopy(t *testing.T) { // nolint:gocyclo // team preference i
 	})
 }
 
-func Test___FlakyFileMove(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func Test___FlakyFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("File move - Users should not be charged for moving a file ", func(t *testing.T) {
+	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

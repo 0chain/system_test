@@ -24,12 +24,12 @@ import (
 )
 
 func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 	KillFFMPEG()
 
 	defer KillFFMPEG()
 
-	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
+	t.Run("Downloading youtube feed to allocation should work", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -181,7 +181,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
+	t.Run("Downloading local webcam feed to allocation", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
@@ -329,7 +329,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
+	t.Run("Downloading feed to allocation with delay flag", func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -483,7 +483,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 	})
 }
 
-func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
+func startUploadAndDownloadFeed(t *test.SystemTest, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
 	t.Logf("Starting upload of live stream to zbox...")
 	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
@@ -505,7 +505,7 @@ func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localf
 	return nil
 }
 
-func startDownloadFeed(t *testing.T, cliConfigFilename, localFolder, params string) error {
+func startDownloadFeed(t *test.SystemTest, cliConfigFilename, localFolder, params string) error {
 	t.Logf("Starting download of live stream from zbox.")
 
 	commandString := fmt.Sprintf("./zbox download --live %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)

@@ -17,12 +17,12 @@ import (
 const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
 	balance := 0.8 // 800.000 mZCN
-	t.Run("Challenge pool should be 0 before any write", func(t *testing.T) {
+	t.Run("Challenge pool should be 0 before any write", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -58,7 +58,7 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 		require.Equal(t, float64(0), float64(challengePool.Balance))
 	})
 
-	t.Run("Total balance in blobber pool equals locked tokens", func(t *testing.T) {
+	t.Run("Total balance in blobber pool equals locked tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -85,7 +85,7 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 	})
 }
 
-func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpath string) ([]string, error) {
+func getUploadCostInUnit(t *test.SystemTest, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
 	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
@@ -93,7 +93,7 @@ func getUploadCostInUnit(t *testing.T, cliConfigFilename, allocationID, localpat
 	return output, err
 }
 
-func challengePoolInfo(t *testing.T, cliConfigFilename, allocationID string) ([]string, error) {
+func challengePoolInfo(t *test.SystemTest, cliConfigFilename, allocationID string) ([]string, error) {
 	t.Logf("Getting challenge pool info...")
 	return cliutils.RunCommand(t, "./zbox cp-info --allocation "+allocationID+" --json --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

@@ -17,11 +17,11 @@ import (
 )
 
 func TestFileDownloadTokenMovement(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Downloader's readpool balance should reduce by download cost", func(t *testing.T) {
+	t.Run("Downloader's readpool balance should reduce by download cost", func(t *test.SystemTest) {
 		t.Parallel()
 
 		walletOwner := escapedTestName(t)
@@ -114,21 +114,21 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 	})
 }
 
-func readPoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+func readPoolInfo(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return readPoolInfoWithWallet(t, escapedTestName(t), cliConfigFilename)
 }
 
-func readPoolInfoWithWallet(t *testing.T, wallet, cliConfigFilename string) ([]string, error) {
+func readPoolInfoWithWallet(t *test.SystemTest, wallet, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func readPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func readPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking read tokens...")
 	cmd := fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
@@ -138,11 +138,11 @@ func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params stri
 	}
 }
 
-func getDownloadCost(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func getDownloadCost(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return getDownloadCostWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func getDownloadCostWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func getDownloadCostWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Getting download cost...")
 	cmd := fmt.Sprintf("./zbox get-download-cost %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {

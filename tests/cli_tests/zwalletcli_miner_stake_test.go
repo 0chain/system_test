@@ -19,13 +19,13 @@ import (
 )
 
 func TestMinerStake(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	output, err := listMiners(testSetup, configPath, "--json")
+	output, err := listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
@@ -46,7 +46,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *testing.T) {
+	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -86,7 +86,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.Run("Multiple stakes against a miner should create multiple pools", func(t *testing.T) {
+	t.Run("Multiple stakes against a miner should create multiple pools", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -134,7 +134,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
 	})
 
-	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
+	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -150,7 +150,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
-	t.Run("Staking tokens against invalid node id should fail", func(t *testing.T) {
+	t.Run("Staking tokens against invalid node id should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -168,7 +168,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, "delegate_pool_add: miner not found or genesis miner used", output[0])
 	})
 
-	t.Run("Staking negative tokens against valid miner should fail", func(t *testing.T) {
+	t.Run("Staking negative tokens against valid miner should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -187,7 +187,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// todo rewards not transferred to wallet until a collect reward transaction
-	t.Run("Staking tokens against miner should return intrests to wallet", func(t *testing.T) {
+	t.Run("Staking tokens against miner should return intrests to wallet", func(t *test.SystemTest) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
@@ -221,7 +221,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *testing.T) {
+	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
@@ -267,7 +267,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.Settings.MaxNumDelegates, newMiner.Settings.MaxNumDelegates), output[0])
 	})
 
-	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *testing.T) {
+	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -298,7 +298,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
 	})
 
-	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *testing.T) {
+	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -324,7 +324,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
-	t.Run("Staking tokens more than max_stake of a miner node through multiple stakes should fail", func(t *testing.T) {
+	t.Run("Staking tokens more than max_stake of a miner node through multiple stakes should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -365,7 +365,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
-	t.Run("Unlock tokens with invalid node id should fail", func(t *testing.T) {
+	t.Run("Unlock tokens with invalid node id should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -399,7 +399,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 }
 
-func pollForPoolInfo(t *testing.T, minerID string) (climodel.DelegatePool, error) {
+func pollForPoolInfo(t *test.SystemTest, minerID string) (climodel.DelegatePool, error) {
 	t.Log(`polling for pool info till it is "ACTIVE"...`)
 	timeout := time.After(time.Minute * 5)
 
@@ -427,11 +427,11 @@ func pollForPoolInfo(t *testing.T, minerID string) (climodel.DelegatePool, error
 	}
 }
 
-func minerSharderPoolInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func minerSharderPoolInfo(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return minerSharderPoolInfoForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
 
-func minerSharderPoolInfoForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+func minerSharderPoolInfoForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("fetching mn-pool-info...")
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-pool-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
@@ -440,7 +440,7 @@ func minerSharderPoolInfoForWallet(t *testing.T, cliConfigFilename, params, wall
 	}
 }
 
-func getBalanceFromSharders(t *testing.T, clientId string) int64 {
+func getBalanceFromSharders(t *test.SystemTest, clientId string) int64 {
 	output, err := getSharders(t, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 1)
@@ -472,11 +472,11 @@ func getBalanceFromSharders(t *testing.T, clientId string) int64 {
 	return startBalance.Balance
 }
 
-func minerOrSharderLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func minerOrSharderLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return minerOrSharderLockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
 
-func minerOrSharderLockForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+func minerOrSharderLockForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("locking tokens against miner/sharder...")
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
@@ -485,11 +485,11 @@ func minerOrSharderLockForWallet(t *testing.T, cliConfigFilename, params, wallet
 	}
 }
 
-func minerOrSharderUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func minerOrSharderUnlock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return minerOrSharderUnlockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
 
-func minerOrSharderUnlockForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+func minerOrSharderUnlockForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("unlocking tokens from miner/sharder pool...")
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)

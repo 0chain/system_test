@@ -15,11 +15,11 @@ import (
 )
 
 func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("transfer allocation by curator should work", func(t *testing.T) {
+	t.Run("transfer allocation by curator should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -57,7 +57,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation by owner should work", func(t *testing.T) {
+	t.Run("transfer allocation by owner should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -82,7 +82,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 	})
 
-	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *testing.T) {
+	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -109,7 +109,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation to self", func(t *testing.T) {
+	t.Run("transfer allocation to self", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -139,7 +139,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer an expired allocation", func(t *testing.T) {
+	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -189,7 +189,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer a canceled allocation", func(t *testing.T) {
+	t.Run("transfer a canceled allocation", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -233,7 +233,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer a finalized allocation", func(t *testing.T) {
+	t.Run("transfer a finalized allocation", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -292,7 +292,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation and download non-encrypted file", func(t *testing.T) {
+	t.Run("transfer allocation and download non-encrypted file", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -373,7 +373,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Contains(t, output[1], filepath.Base(filename))
 	})
 
-	t.Run("transfer allocation and download with auth ticket should fail", func(t *testing.T) {
+	t.Run("transfer allocation and download with auth ticket should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -484,7 +484,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		*/
 	})
 
-	t.Run("transfer allocation and update allocation", func(t *testing.T) {
+	t.Run("transfer allocation and update allocation", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -561,7 +561,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 	})
 
-	t.Run("transfer allocation with no allocation param should fail", func(t *testing.T) {
+	t.Run("transfer allocation with no allocation param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
@@ -581,7 +581,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation with no new_owner_key param should fail", func(t *testing.T) {
+	t.Run("transfer allocation with no new_owner_key param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
@@ -601,7 +601,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation with no new_owner param should fail", func(t *testing.T) {
+	t.Run("transfer allocation with no new_owner param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
@@ -621,7 +621,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation with invalid allocation param should fail", func(t *testing.T) {
+	t.Run("transfer allocation with invalid allocation param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
@@ -648,7 +648,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	// FIXME is this expected to fail?
-	t.Run("transfer allocation with invalid new_owner param", func(t *testing.T) {
+	t.Run("transfer allocation with invalid new_owner param", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -687,7 +687,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	// FIXME is this expected to fail?
-	t.Run("transfer allocation with invalid new_owner_key param should fail", func(t *testing.T) {
+	t.Run("transfer allocation with invalid new_owner_key param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -725,7 +725,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation and upload file", func(t *testing.T) {
+	t.Run("transfer allocation and upload file", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -805,11 +805,11 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 }
 
-func transferAllocationOwnership(t *testing.T, param map[string]interface{}, retry bool) ([]string, error) {
+func transferAllocationOwnership(t *test.SystemTest, param map[string]interface{}, retry bool) ([]string, error) {
 	return transferAllocationOwnershipWithWallet(t, escapedTestName(t), param, retry)
 }
 
-func transferAllocationOwnershipWithWallet(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
+func transferAllocationOwnershipWithWallet(t *test.SystemTest, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Transferring allocation ownership...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -826,7 +826,7 @@ func transferAllocationOwnershipWithWallet(t *testing.T, walletName string, para
 	}
 }
 
-func pollForAllocationTransferToEffect(t *testing.T, newOwner, allocationID string) bool {
+func pollForAllocationTransferToEffect(t *test.SystemTest, newOwner, allocationID string) bool {
 	t.Logf("Polling for 5 minutes until allocation ownership changed...")
 	timeout := time.After(time.Minute * 5)
 

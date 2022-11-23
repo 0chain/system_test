@@ -13,11 +13,11 @@ import (
 )
 
 func TestWritePoolLockUnlock(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *testing.T) {
+	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -85,7 +85,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Unlocking tokens from finalized allocation should work", func(t *testing.T) {
+	t.Run("Unlocking tokens from finalized allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -156,7 +156,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *testing.T) {
+	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -201,7 +201,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock negative write tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -246,7 +246,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock zero write tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock zero write tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -291,7 +291,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Missing tokens flag should result in error", func(t *testing.T) {
+	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -323,7 +323,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
 
-	t.Run("Should not be able to unlock unexpired write tokens", func(t *testing.T) {
+	t.Run("Should not be able to unlock unexpired write tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -372,11 +372,11 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 }
 
-func writePoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return writePoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking write tokens...")
 	cmd := fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
@@ -386,7 +386,7 @@ func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params str
 	}
 }
 
-func writePoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolUnlock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Unlocking write tokens...")
 	cmd := fmt.Sprintf("./zbox wp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
 	if retry {

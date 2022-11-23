@@ -15,9 +15,9 @@ import (
 )
 
 func TestReplaceBlobber(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
-	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
+	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -51,7 +51,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
 	})
 
-	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *testing.T) {
+	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -81,7 +81,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *testing.T) {
+	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -114,7 +114,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *testing.T) {
+	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

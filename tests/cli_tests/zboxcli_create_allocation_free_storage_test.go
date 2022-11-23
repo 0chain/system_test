@@ -38,7 +38,7 @@ const (
 )
 
 func TestCreateAllocationFreeStorage(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")
@@ -47,32 +47,32 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	assigner := escapedTestName(testSetup) + "_ASSIGNER"
+	assigner := escapedTestName(t) + "_ASSIGNER"
 
 	// register SC owner wallet
-	output, err := registerWalletForName(testSetup, configPath, scOwnerWallet)
+	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	// register assigner wallet
-	output, err = registerWalletForName(testSetup, configPath, assigner)
+	output, err = registerWalletForName(t, configPath, assigner)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	// Open the wallet file themselves to get private key for signing data
-	ownerWallet := readWalletFile(testSetup, "./config/"+scOwnerWallet+"_wallet.json")
-	assignerWallet := readWalletFile(testSetup, "./config/"+assigner+"_wallet.json")
+	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
+	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err = registerWallet(testSetup, configPath)
+	output, err = registerWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	output, err = getStorageSCConfig(testSetup, configPath, true)
+	output, err = getStorageSCConfig(t, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
 	cfg, _ := keyValuePairStringToMap(output)
 
 	// miners list
-	output, err = getMiners(testSetup, configPath)
+	output, err = getMiners(t, configPath)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -81,11 +81,11 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
-	freeAllocAssignerTxn := freeAllocationAssignerTxn(testSetup, ownerWallet, assignerWallet)
+	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
 	err = sendTxn(miners, freeAllocAssignerTxn)
 	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
 
-	output, err = verifyTransaction(testSetup, configPath, freeAllocAssignerTxn.Hash)
+	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
 	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
 	require.Len(t, output, 3)
 	require.Equal(t, "Transaction verification success", output[0])
@@ -94,7 +94,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
+	t.Run("Create free storage from marker with accounting", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -150,7 +150,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
 	})
 
-	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
+	t.Run("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -166,7 +166,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
 	})
 
-	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
+	t.Run("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -182,7 +182,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
+	t.Run("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -215,7 +215,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
 	})
 
-	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
+	t.Run("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
 		// register correct recipient wallet
@@ -260,7 +260,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
+	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -302,7 +302,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	})
 }
 
-func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
+func readWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
 	f, err := os.Open(file)
@@ -347,7 +347,7 @@ func apiPutTransaction(minerBaseURL string, txn *climodel.Transaction) (*http.Re
 	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
 }
 
-func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile) *climodel.Transaction {
+func freeAllocationAssignerTxn(t *test.SystemTest, from, assigner *climodel.WalletFile) *climodel.Transaction {
 	txn := &climodel.Transaction{}
 	txn.Version = "1.0"
 	txn.ClientId = from.ClientID

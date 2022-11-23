@@ -13,11 +13,11 @@ import (
 )
 
 func TestMultisigWallet(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *testing.T) {
+	t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 3, 2
 
@@ -29,7 +29,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
-	t.Run("Wallet Creation should succeed when threshold is equal to num-signers", func(t *testing.T) {
+	t.Run("Wallet Creation should succeed when threshold is equal to num-signers", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 3, 3
 
@@ -41,7 +41,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
-	t.Run("Wallet Creation should fail when threshold is 0", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when threshold is 0", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 3, 0
 
@@ -53,7 +53,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 
-	t.Run("Wallet Creation should fail when threshold is -1", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when threshold is -1", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 3, -1
 
@@ -65,7 +65,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Contains(t, output, "Error: threshold should be bigger than 0")
 	})
 
-	t.Run("Wallet Creation should fail when signers is < 2", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when signers is < 2", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 1, 1
 
@@ -77,7 +77,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Contains(t, output, "Error: too few signers. Minimum numsigners required is 2")
 	})
 
-	t.Run("Wallet Creation should fail when threshold is greater than num-signers", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when threshold is greater than num-signers", func(t *test.SystemTest) {
 		t.Parallel()
 		numSigners, threshold := 3, 4
 
@@ -91,7 +91,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 			numSigners))
 	})
 
-	t.Run("Wallet Creation should fail when args not set", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when args not set", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
@@ -105,7 +105,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Contains(t, output, "Error: numsigners flag is missing")
 	})
 
-	t.Run("Wallet Creation should fail when threshold not set", func(t *testing.T) {
+	t.Run("Wallet Creation should fail when threshold not set", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
@@ -118,7 +118,7 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 }
 
-func createMultiSigWallet(t *testing.T, cliConfigFilename string, numSigners, threshold int, retry bool) ([]string, error) {
+func createMultiSigWallet(t *test.SystemTest, cliConfigFilename string, numSigners, threshold int, retry bool) ([]string, error) {
 	t.Logf("Creating multisig wallet...")
 	cmd := fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",

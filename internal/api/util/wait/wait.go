@@ -1,12 +1,12 @@
 package wait
 
 import (
-	"testing"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"time"
 )
 
 // PoolImmediately pools passed function for a certain amount of time
-func PoolImmediately(t *testing.T, duration time.Duration, predicate func() bool) {
+func PoolImmediately(t *test.SystemTest, duration time.Duration, predicate func() bool) {
 	backoffPeriod := time.Second * 2
 	ticker := time.NewTicker(backoffPeriod)
 

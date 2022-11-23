@@ -11,11 +11,11 @@ import (
 )
 
 func TestRegisterWallet(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Register wallet API call should be successful given a valid request", func(t *testing.T) {
+	t.Run("Register wallet API call should be successful given a valid request", func(t *test.SystemTest) {
 		t.Parallel()
 
 		mnemonic := crypto.GenerateMnemonics(t)

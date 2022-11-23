@@ -17,7 +17,7 @@ import (
 )
 
 func TestRecentlyAddedRefs(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
@@ -25,7 +25,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	t.Run("Recently Added Refs Should be listed", func(t *testing.T) {
+	t.Run("Recently Added Refs Should be listed", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -85,7 +85,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *testing.T) {
+	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -130,7 +130,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		require.Len(t, result.Refs, 0)
 	})
 
-	t.Run("Refs of someone else's allocation should return zero refs", func(t *testing.T) {
+	t.Run("Refs of someone else's allocation should return zero refs", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -179,7 +179,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		require.Len(t, result.Refs, 0)
 	})
 
-	t.Run("Invalid parameters should return error", func(t *testing.T) {
+	t.Run("Invalid parameters should return error", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -210,11 +210,11 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	})
 }
 
-func listRecentlyAddedRefs(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func listRecentlyAddedRefs(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return listRecentlyAddedRefsForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func listRecentlyAddedRefsForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+func listRecentlyAddedRefsForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Log("Listing recently added refs")
 	cmd := fmt.Sprintf(
 		"./zbox recent-refs %s --silent --wallet %s --configDir ./config --config %s ",

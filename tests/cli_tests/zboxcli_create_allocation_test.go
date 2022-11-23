@@ -13,11 +13,11 @@ import (
 )
 
 func TestCreateAllocation(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Create allocation with name Should Work", func(t *testing.T) {
+	t.Run("Create allocation with name Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -43,7 +43,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation without providing any additional parameters Should Work", func(t *testing.T) {
+	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -60,7 +60,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *testing.T) {
+	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -77,7 +77,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with smallest possible size (1024) Should Work", func(t *testing.T) {
+	t.Run("Create allocation with smallest possible size (1024) Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -94,7 +94,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with parity specified Should Work", func(t *testing.T) {
+	t.Run("Create allocation with parity specified Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -111,7 +111,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with data specified Should Work", func(t *testing.T) {
+	t.Run("Create allocation with data specified Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -128,7 +128,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with read price range Should Work", func(t *testing.T) {
+	t.Run("Create allocation with read price range Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -145,7 +145,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with write price range Should Work", func(t *testing.T) {
+	t.Run("Create allocation with write price range Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -161,7 +161,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -173,7 +173,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: allocation_creation_failed: Too many blobbers selected, max available 40", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -185,7 +185,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: allocation_creation_failed: Too many blobbers selected, max available 40", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -197,7 +197,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: allocation_creation_failed: Too many blobbers selected, max available 40", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -209,7 +209,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -221,7 +221,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with expire smaller than limit (expire < 5m) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with expire smaller than limit (expire < 5m) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -233,7 +233,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation duration", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -245,7 +245,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
 	})
 
-	t.Run("Create allocation with invalid expiry Should Fail", func(t *testing.T) {
+	t.Run("Create allocation with invalid expiry Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -257,7 +257,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "invalid argument \"-1\" for \"--expire\" flag: time: missing unit in duration \"-1\"", output[len(output)-1])
 	})
 
-	t.Run("Create allocation by providing expiry in wrong format (expire 1hour) Should Fail", func(t *testing.T) {
+	t.Run("Create allocation by providing expiry in wrong format (expire 1hour) Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_ = setupWallet(t, configPath)
@@ -270,7 +270,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 }
 
-func setupWallet(t *testing.T, configPath string) []string {
+func setupWallet(t *test.SystemTest, configPath string) []string {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -283,11 +283,11 @@ func setupWallet(t *testing.T, configPath string) []string {
 	return output
 }
 
-func createNewAllocation(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return createNewAllocationForWallet(t, escapedTestName(t), cliConfigFilename, params)
 }
 
-func createNewAllocationForWallet(t *testing.T, wallet, cliConfigFilename, params string) ([]string, error) {
+func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
@@ -297,7 +297,7 @@ func createNewAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param
 		wallet+"_allocation.txt"), 3, time.Second*5)
 }
 
-func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
@@ -306,6 +306,6 @@ func createNewAllocationWithoutRetry(t *testing.T, cliConfigFilename, params str
 		escapedTestName(t)+"_allocation.txt"))
 }
 
-func createAllocationTestTeardown(t *testing.T, allocationID string) {
+func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
 	_, _ = cancelAllocation(t, configPath, allocationID, false)
 }

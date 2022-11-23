@@ -17,11 +17,11 @@ import (
 )
 
 func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("copy file to existing directory", func(t *testing.T) {
+	t.Run("copy file to existing directory", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -96,7 +96,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("Copy file concurrently to existing directory, should work", func(t *testing.T) {
+	t.Run("Copy file concurrently to existing directory, should work", func(t *test.SystemTest) {
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -179,7 +179,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Equal(t, 2, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to non-existing directory should work", func(t *testing.T) {
+	t.Run("copy file to non-existing directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -253,7 +253,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to same directory should fail", func(t *testing.T) {
+	t.Run("copy file to same directory should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -318,7 +318,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to dir with existing children should work", func(t *testing.T) {
+	t.Run("copy file to dir with existing children should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -383,7 +383,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to another directory with existing file with same name should fail", func(t *testing.T) {
+	t.Run("copy file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -476,7 +476,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy non-existing file should fail", func(t *testing.T) {
+	t.Run("copy non-existing file should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -496,7 +496,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.Run("copy file from someone else's allocation should fail", func(t *testing.T) {
+	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
@@ -571,7 +571,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file with no allocation param should fail", func(t *testing.T) {
+	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
@@ -587,7 +587,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
-	t.Run("copy file with no remotepath param should fail", func(t *testing.T) {
+	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
@@ -603,7 +603,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	t.Run("copy file with no destpath param should fail", func(t *testing.T) {
+	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
@@ -620,11 +620,11 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 }
 
-func copyFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func copyFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	return copyFileForWallet(t, cliConfigFilename, escapedTestName(t), param, retry)
 }
 
-func copyFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
+func copyFileForWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Copying file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(

@@ -17,7 +17,7 @@ import (
 )
 
 func TestFileMetadata(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
@@ -27,7 +27,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	// Success Scenarios
 
-	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *testing.T) {
+	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -53,7 +53,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, int64(0), meta.Size)
 	})
 
-	t.Run("Get File Meta in Root Directory Should Work", func(t *testing.T) {
+	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -84,7 +84,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
-	t.Run("Get File Meta in Sub Directory Should Work", func(t *testing.T) {
+	t.Run("Get File Meta in Sub Directory Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -112,7 +112,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, filesize, meta.Size)
 	})
 
-	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *testing.T) {
+	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var authTicket, filename, lookupHash string
@@ -121,7 +121,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -169,7 +169,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	// FIXME: POSSIBLE BUG: Using lookuphash with remotepath causes no effects. lookuphash
 	// is simply ignored
-	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *testing.T) {
+	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -222,7 +222,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
-	t.Run("Get File Meta for Encrypted File Should Work", func(t *testing.T) {
+	t.Run("Get File Meta for Encrypted File Should Work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -271,7 +271,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	// Failure Scenarios
 
-	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *testing.T) {
+	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		var otherAllocationID, otherfile string
@@ -280,7 +280,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		filesize := int64(10)
 		remotepath := "/"
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			otherfile = generateFileAndUpload(t, otherAllocationID, remotepath, 1)
@@ -336,7 +336,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta for Missing remotepath and authticket Should Fail", func(t *testing.T) {
+	t.Run("Get File Meta for Missing remotepath and authticket Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -349,7 +349,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get Folder Meta in Empty Directory Should Fail", func(t *testing.T) {
+	t.Run("Get Folder Meta in Empty Directory Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -364,7 +364,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta by Lookup Hash Should Fail", func(t *testing.T) {
+	t.Run("Get File Meta by Lookup Hash Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -388,7 +388,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta Without Parameter Should Fail", func(t *testing.T) {
+	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := getFileMeta(t, configPath, "", false)
@@ -402,11 +402,11 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 }
 
-func getFileMeta(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileMeta(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return getFileMetaWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func getFileMetaWithWallet(t *testing.T, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileMetaWithWallet(t *test.SystemTest, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(

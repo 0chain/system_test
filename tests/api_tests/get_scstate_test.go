@@ -10,11 +10,11 @@ import (
 )
 
 func TestGetSCState(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Get SCState of faucet SC, should work", func(t *testing.T) {
+	t.Run("Get SCState of faucet SC, should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -32,7 +32,7 @@ func TestGetSCState(testSetup *testing.T) {
 		require.NotNil(t, scStateGetResponse)
 	})
 
-	t.Run("Get SCState of faucet SC, shouldn't work", func(t *testing.T) {
+	t.Run("Get SCState of faucet SC, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

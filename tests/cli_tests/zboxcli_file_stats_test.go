@@ -19,7 +19,7 @@ import (
 )
 
 func TestFileStats(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
@@ -29,7 +29,7 @@ func TestFileStats(testSetup *testing.T) {
 
 	const chunksize = 64 * 1024
 
-	t.Run("get file stats in root directory should work", func(t *testing.T) {
+	t.Run("get file stats in root directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -71,7 +71,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats in sub directory should work", func(t *testing.T) {
+	t.Run("get file stats in sub directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -113,7 +113,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats in nested sub directory should work", func(t *testing.T) {
+	t.Run("get file stats in nested sub directory should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -155,7 +155,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats on an empty allocation", func(t *testing.T) {
+	t.Run("get file stats on an empty allocation", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -192,7 +192,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats for a file that does not exists", func(t *testing.T) {
+	t.Run("get file stats for a file that does not exists", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -230,7 +230,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats for an allocation you dont own", func(t *testing.T) {
+	t.Run("get file stats for an allocation you dont own", func(t *test.SystemTest) {
 		t.Parallel()
 
 		otherAllocationID := ""
@@ -238,7 +238,7 @@ func TestFileStats(testSetup *testing.T) {
 		filesize := int64(533)
 		remoteFilePath := ""
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			filename := generateFileAndUpload(t, otherAllocationID, remotepath, filesize)
@@ -292,7 +292,7 @@ func TestFileStats(testSetup *testing.T) {
 		require.Len(t, stats, 0)
 	})
 
-	t.Run("get file stats with no params supplied", func(t *testing.T) {
+	t.Run("get file stats with no params supplied", func(t *test.SystemTest) {
 		t.Parallel()
 
 		setupAllocation(t, configPath)
@@ -303,7 +303,7 @@ func TestFileStats(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats with no allocation param supplied", func(t *testing.T) {
+	t.Run("get file stats with no allocation param supplied", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -323,7 +323,7 @@ func TestFileStats(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats with no remotepath param supplied", func(t *testing.T) {
+	t.Run("get file stats with no remotepath param supplied", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath)
@@ -337,7 +337,7 @@ func TestFileStats(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats before and after update", func(t *testing.T) {
+	t.Run("get file stats before and after update", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
@@ -414,7 +414,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats before and after download", func(t *testing.T) {
+	t.Run("get file stats before and after download", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocSize := int64(2048)
@@ -507,7 +507,7 @@ func TestFileStats(testSetup *testing.T) {
 	})
 }
 
-func getFileStats(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileStats(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Logf("Getting file stats...")
 	cmd := fmt.Sprintf(
 		"./zbox stats %s --silent --wallet %s --configDir ./config --config %s",

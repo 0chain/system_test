@@ -15,17 +15,17 @@ import (
 )
 
 func TestValidatorConfigUpdate(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
 
-	output, err := registerWallet(testSetup, configPath)
+	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	output, err = listValidators(testSetup, configPath, createParams(map[string]interface{}{"json": ""}))
+	output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
 
@@ -37,23 +37,23 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	intialValidatorInfo := validatorList[0]
 
 	t.Cleanup(func() {
-		output, err := registerWallet(testSetup, configPath)
+		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "max_stake": intToZCN(intialValidatorInfo.MaxStake)}))
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "max_stake": intToZCN(intialValidatorInfo.MaxStake)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "min_stake": intToZCN(intialValidatorInfo.MinStake)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(testSetup, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
+		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("update blobber max stake should work", func(t *testing.T) {
+	t.Run("update blobber max stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -75,7 +75,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMaxStake), intToZCN(finalValidatorInfo.MaxStake))
 	})
 
-	t.Run("update blobber min stake should work", func(t *testing.T) {
+	t.Run("update blobber min stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -97,7 +97,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, float64(newMinStake), intToZCN(finalValidatorInfo.MinStake))
 	})
 
-	t.Run("update validator number of delegates should work", func(t *testing.T) {
+	t.Run("update validator number of delegates should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -118,7 +118,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalValidatorInfo.NumDelegates)
 	})
 
-	t.Run("update blobber service charge should work", func(t *testing.T) {
+	t.Run("update blobber service charge should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -140,17 +140,17 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	})
 }
 
-func listValidators(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func listValidators(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting validator list...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-validators %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func getValidatorInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func getValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting validator info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func updateValidatorInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func updateValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Updating validator info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, blobberOwnerWallet, cliConfigFilename), 3, time.Second*2)
 }

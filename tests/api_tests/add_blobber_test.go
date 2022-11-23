@@ -14,10 +14,10 @@ import (
 )
 
 func TestAddBlobber(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 	t.Parallel()
 
-	t.Run("Add new blobber to allocation, should work", func(t *testing.T) {
+	t.Run("Add new blobber to allocation, should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -46,7 +46,7 @@ func TestAddBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 	})
 
-	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *testing.T) {
+	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -72,7 +72,7 @@ func TestAddBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *testing.T) {
+	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -101,7 +101,7 @@ func TestAddBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *testing.T) {
+	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

@@ -15,11 +15,11 @@ import (
 )
 
 func TestRegisterWallet(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Register wallet outputs expected", func(t *testing.T) {
+	t.Run("Register wallet outputs expected", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -32,7 +32,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 		require.Equal(t, "Wallet registered", output[3])
 	})
 
-	t.Run("Get wallet outputs expected", func(t *testing.T) {
+	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
 		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
@@ -45,7 +45,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 		require.NotNil(t, wallet.EncryptionPublicKey)
 	})
 
-	t.Run("Balance call fails due to zero ZCN in wallet", func(t *testing.T) {
+	t.Run("Balance call fails due to zero ZCN in wallet", func(t *test.SystemTest) {
 		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
@@ -54,7 +54,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 		ensureZeroBalance(t, output, err)
 	})
 
-	t.Run("Balance of 1 is returned after faucet execution", func(t *testing.T) {
+	t.Run("Balance of 1 is returned after faucet execution", func(t *test.SystemTest) {
 		t.Parallel()
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
@@ -83,7 +83,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 }
 
-func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename string) error {
+func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
 	_, err := registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 	if err != nil {
 		return err
@@ -103,17 +103,17 @@ func registerWalletAndLockReadTokens(t *testing.T, cliConfigFilename string) err
 	return err
 }
 
-func registerWallet(t *testing.T, cliConfigFilename string) ([]string, error) {
+func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
-func registerWalletForName(t *testing.T, cliConfigFilename, name string) ([]string, error) {
+func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
 	t.Logf("Registering wallet...")
 	return cliutils.RunCommand(t, "./zbox register --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, name string) error {
+func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) error {
 	_, err := registerWalletForName(t, cliConfigFilename, name)
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func registerWalletForNameAndLockReadTokens(t *testing.T, cliConfigFilename, nam
 	return err
 }
 
-func lockReadTokensForWalletName(t *testing.T, cliConfigFilename, wallet string, tokens float64) error {
+func lockReadTokensForWalletName(t *test.SystemTest, cliConfigFilename, wallet string, tokens float64) error {
 	_, err := executeFaucetWithTokensForWallet(t, wallet, cliConfigFilename, tokens)
 	if err != nil {
 		return err
@@ -143,12 +143,12 @@ func lockReadTokensForWalletName(t *testing.T, cliConfigFilename, wallet string,
 	return err
 }
 
-func getBalance(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
-func ensureZeroBalance(t *testing.T, output []string, err error) {
+func ensureZeroBalance(t *test.SystemTest, output []string, err error) {
 	if err != nil {
 		require.Len(t, output, 1)
 		require.Equal(t, "Failed to get balance:", output[0])
@@ -157,16 +157,16 @@ func ensureZeroBalance(t *testing.T, output []string, err error) {
 	require.Equal(t, "Balance: 0 SAS (0.00 USD)", output[0])
 }
 
-func getBalanceForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+func getBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
 		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func getWallet(t *testing.T, cliConfigFilename string) (*climodel.Wallet, error) {
+func getWallet(t *test.SystemTest, cliConfigFilename string) (*climodel.Wallet, error) {
 	return getWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.Wallet, error) {
+func getWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	t.Logf("Getting wallet...")
 	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
@@ -188,13 +188,13 @@ func getWalletForName(t *testing.T, cliConfigFilename, name string) (*climodel.W
 	return wallet, err
 }
 
-func verifyTransaction(t *testing.T, cliConfigFilename, txn string) ([]string, error) {
+func verifyTransaction(t *test.SystemTest, cliConfigFilename, txn string) ([]string, error) {
 	t.Logf("Verifying transaction...")
 	return cliutils.RunCommand(t, "./zwallet verify --silent --wallet "+escapedTestName(t)+""+
 		"_wallet.json"+" --hash "+txn+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func escapedTestName(t *testing.T) string {
+func escapedTestName(t *test.SystemTest) string {
 	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
 		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
 		"?", "-")

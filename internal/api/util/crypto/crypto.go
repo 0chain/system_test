@@ -5,16 +5,15 @@ import (
 	_ "crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"log"
-	"sync"
-	"testing"
-
 	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39" //nolint
 	"golang.org/x/crypto/sha3"
+	"log"
+	"sync"
 )
 
 var blsLock sync.Mutex
@@ -32,7 +31,7 @@ func init() {
 	}
 }
 
-func GenerateMnemonics(t *testing.T) string {
+func GenerateMnemonics(t *test.SystemTest) string {
 	entropy, err := bip39.NewEntropy(256) //nolint
 	require.NoError(t, err)
 	mnemonic, err := bip39.NewMnemonic(entropy) //nolint
@@ -42,7 +41,7 @@ func GenerateMnemonics(t *testing.T) string {
 	return mnemonic
 }
 
-func GenerateKeys(t *testing.T, mnemonics string) *model.KeyPair {
+func GenerateKeys(t *test.SystemTest, mnemonics string) *model.KeyPair {
 	defer handlePanic(t)
 	blsLock.Lock()
 	defer func() {
@@ -98,7 +97,7 @@ func SignHashUsingSignatureScheme(hash, signatureScheme string, keys []*model.Ke
 	return retSignature, nil
 }
 
-func ToSecretKey(t *testing.T, wallet *climodel.WalletFile) *bls.SecretKey {
+func ToSecretKey(t *test.SystemTest, wallet *climodel.WalletFile) *bls.SecretKey {
 	defer handlePanic(t)
 	blsLock.Lock()
 	defer blsLock.Unlock()
@@ -111,7 +110,7 @@ func ToSecretKey(t *testing.T, wallet *climodel.WalletFile) *bls.SecretKey {
 	return &sk
 }
 
-func Sign(t *testing.T, data string, sk *bls.SecretKey) string {
+func Sign(t *test.SystemTest, data string, sk *bls.SecretKey) string {
 	defer handlePanic(t)
 	blsLock.Lock()
 	defer blsLock.Unlock()
@@ -121,7 +120,7 @@ func Sign(t *testing.T, data string, sk *bls.SecretKey) string {
 	return sig.SerializeToHexStr()
 }
 
-func SignHexString(t *testing.T, data string, sk *bls.SecretKey) string {
+func SignHexString(t *test.SystemTest, data string, sk *bls.SecretKey) string {
 	defer handlePanic(t)
 	blsLock.Lock()
 	defer blsLock.Unlock()
@@ -133,7 +132,7 @@ func SignHexString(t *testing.T, data string, sk *bls.SecretKey) string {
 	return signature
 }
 
-func SignTransaction(t *testing.T, request *model.TransactionPutRequest, pair *model.KeyPair) {
+func SignTransaction(t *test.SystemTest, request *model.TransactionPutRequest, pair *model.KeyPair) {
 	defer handlePanic(t)
 	blsLock.Lock()
 	defer blsLock.Unlock()
@@ -162,7 +161,7 @@ func blankIfNil(obj interface{}) string {
 	return fmt.Sprintf("%v", obj)
 }
 
-func handlePanic(t *testing.T) {
+func handlePanic(t *test.SystemTest) {
 	if err := recover(); err != nil {
 		t.Errorf("panic occurred: %v", err)
 	}

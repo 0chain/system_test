@@ -13,11 +13,11 @@ import (
 )
 
 func TestBlobberFileRefs(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {
+	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -82,7 +82,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
-	t.RunWithCustomTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *testing.T) { //todo - too slow
+	t.RunWithCustomTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //todo - too slow
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -113,7 +113,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid remote file path should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid remote file path should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -147,7 +147,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid refType should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid refType should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -181,7 +181,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no path should fail", func(t *testing.T) {
+	t.Run("Get file ref with no path should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -215,7 +215,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no refType should fail", func(t *testing.T) {
+	t.Run("Get file ref with no refType should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -249,7 +249,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no path and no refType should fail", func(t *testing.T) {
+	t.Run("Get file ref with no path and no refType should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -283,7 +283,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client signature should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid client signature should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -313,7 +313,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client id should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid client id should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -349,7 +349,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client key should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid client key should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()

@@ -13,7 +13,7 @@ import (
 )
 
 func TestMinerSharderPoolInfo(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
@@ -21,9 +21,9 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	sharders := getShardersListForWallet(testSetup, sharder01NodeDelegateWalletName)
+	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
-	sharderNodeDelegateWallet, err := getWalletForName(testSetup, configPath, sharder01NodeDelegateWalletName)
+	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var sharder climodel.Sharder
@@ -37,7 +37,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
 	}
 
-	miners := getMinersListForWallet(testSetup, miner02NodeDelegateWalletName)
+	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
 
 	var miner climodel.Node
 	for _, miner = range miners.Nodes {
@@ -50,7 +50,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.Run("Miner pool info after locking against miner should work", func(t *testing.T) {
+	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -78,7 +78,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 	})
 
-	t.Run("Miner pool info after locking against sharder should work", func(t *testing.T) {
+	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -107,7 +107,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 	})
 
-	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *testing.T) {
+	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)

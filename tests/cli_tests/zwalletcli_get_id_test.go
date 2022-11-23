@@ -13,11 +13,11 @@ import (
 )
 
 func TestGetId(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("get miner id should work", func(t *testing.T) {
+	t.Run("get miner id should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		miners := getMinersList(t)
@@ -30,7 +30,7 @@ func TestGetId(testSetup *testing.T) {
 		require.Equal(t, "ID: "+miners.Nodes[0].ID, output[len(output)-1], strings.Join(output, "\n"))
 	})
 
-	t.Run("get sharder id should work", func(t *testing.T) {
+	t.Run("get sharder id should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_, _ = registerWallet(t, configPath)
@@ -48,7 +48,7 @@ func TestGetId(testSetup *testing.T) {
 		require.Equal(t, "ID: "+sharder.ID, output[len(output)-1], strings.Join(output, "\n"))
 	})
 
-	t.Run("get blobber id should not work", func(t *testing.T) {
+	t.Run("get blobber id should not work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		_, _ = registerWallet(t, configPath)
@@ -63,7 +63,7 @@ func TestGetId(testSetup *testing.T) {
 	})
 }
 
-func getId(t *testing.T, cliConfigFilename, url string, retry bool) ([]string, error) {
+func getId(t *test.SystemTest, cliConfigFilename, url string, retry bool) ([]string, error) {
 	t.Logf("getting id for [%s]...", url)
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet getid --silent --configDir ./config --url %s --config %s", url, cliConfigFilename), 3, time.Second)

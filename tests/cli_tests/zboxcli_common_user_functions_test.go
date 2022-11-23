@@ -23,11 +23,11 @@ const (
 )
 
 func TestCommonUserFunctions(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *testing.T) {
+	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -57,7 +57,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *testing.T) {
+	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -97,20 +97,20 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create Allocation - Blobbers must lock appropriate amount of tokens in stake pool", func(t *testing.T) {
+	t.Run("Create Allocation - Blobbers must lock appropriate amount of tokens in stake pool", func(t *test.SystemTest) {
 		t.Skip("To be covered after addition of stakePool table to eventsDB")
 	})
 
-	t.Run("Update Allocation - Blobbers' lock in stake pool must increase according to updated size", func(t *testing.T) {
+	t.Run("Update Allocation - Blobbers' lock in stake pool must increase according to updated size", func(t *test.SystemTest) {
 		t.Skip("To be covered after addition of stakePool table to eventsDB")
 	})
 }
 
-func uploadRandomlyGeneratedFile(t *testing.T, allocationID, remotePath string, fileSize int64) string {
+func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64) string {
 	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize)
 }
 
-func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationID, remotePath string, fileSize int64) string {
+func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64) string {
 	filename := generateRandomTestFileName(t)
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
@@ -130,7 +130,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *testing.T, walletName, allocationI
 	return filename
 }
 
-func moveAllocationFile(t *testing.T, allocationID, remotepath, destination string) { // nolint
+func moveAllocationFile(t *test.SystemTest, allocationID, remotepath, destination string) { // nolint
 	output, err := moveFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": "/" + remotepath,
@@ -139,7 +139,7 @@ func moveAllocationFile(t *testing.T, allocationID, remotepath, destination stri
 	require.Nil(t, err, "error in moving the file: ", strings.Join(output, "\n"))
 }
 
-func renameAllocationFile(t *testing.T, allocationID, remotepath, newName string) {
+func renameAllocationFile(t *test.SystemTest, allocationID, remotepath, newName string) {
 	output, err := renameFile(t, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": "/" + remotepath,
@@ -148,11 +148,11 @@ func renameAllocationFile(t *testing.T, allocationID, remotepath, newName string
 	require.Nil(t, err, "error in renaming the file: ", strings.Join(output, "\n"))
 }
 
-func updateFileWithRandomlyGeneratedData(t *testing.T, allocationID, remotepath string, size int64) string {
+func updateFileWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath string, size int64) string {
 	return updateFileWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, size)
 }
 
-func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, allocationID, remotepath string, size int64) string {
+func updateFileWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath string, size int64) string {
 	localfile := generateRandomTestFileName(t)
 	err := createFileWithSize(localfile, size)
 	require.Nil(t, err)
@@ -166,7 +166,7 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *testing.T, walletName, all
 	return localfile
 }
 
-func renameFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func renameFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -183,11 +183,11 @@ func renameFile(t *testing.T, cliConfigFilename string, param map[string]interfa
 	}
 }
 
-func updateFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	return updateFileWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateFileWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating file...")
 
 	p := createParams(param)
@@ -205,7 +205,7 @@ func updateFileWithWallet(t *testing.T, walletName, cliConfigFilename string, pa
 	}
 }
 
-func getAllocation(t *testing.T, allocationID string) (allocation climodel.Allocation) {
+func getAllocation(t *test.SystemTest, allocationID string) (allocation climodel.Allocation) {
 	output, err := getAllocationWithRetry(t, configPath, allocationID, 1)
 	require.Nil(t, err, "error fetching allocation")
 	require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
@@ -214,7 +214,7 @@ func getAllocation(t *testing.T, allocationID string) (allocation climodel.Alloc
 	return
 }
 
-func getAllocationWithRetry(t *testing.T, cliConfigFilename, allocationID string, retry int) ([]string, error) {
+func getAllocationWithRetry(t *test.SystemTest, cliConfigFilename, allocationID string, retry int) ([]string, error) {
 	t.Logf("Get Allocation...")
 	output, err := cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox get --allocation %s --json --silent --wallet %s --configDir ./config --config %s",

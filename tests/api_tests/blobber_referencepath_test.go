@@ -12,11 +12,11 @@ import (
 )
 
 func TestFileReferencePath(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Get file ref with allocation id, remote path should work", func(t *testing.T) {
+	t.Run("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -56,7 +56,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.Run("Get file ref for empty allocation should work", func(t *testing.T) {
+	t.Run("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -91,7 +91,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.Run("Get file ref with invalid allocation id should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid allocation id should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -125,7 +125,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid sign should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -156,7 +156,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid remotepath should fail", func(t *testing.T) {
+	t.Run("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()

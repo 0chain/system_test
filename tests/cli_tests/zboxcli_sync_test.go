@@ -18,11 +18,11 @@ import (
 )
 
 func TestSyncWithBlobbers(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Sync path with 1 file to empty allocation should work", func(t *testing.T) {
+	t.Run("Sync path with 1 file to empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -59,7 +59,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with 1 file encrypted to empty allocation should work", func(t *testing.T) {
+	t.Run("Sync path with 1 file encrypted to empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -96,7 +96,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *testing.T) {
+	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -170,7 +170,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *testing.T) {
+	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -244,7 +244,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Sync path with multiple files encrypted to empty allocation should work", func(t *testing.T) {
+	t.Run("Sync path with multiple files encrypted to empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -286,7 +286,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with multiple files to empty allocation should work", func(t *testing.T) {
+	t.Run("Sync path with multiple files to empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -328,7 +328,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with multiple files in nested directories to empty allocation should work", func(t *testing.T) {
+	t.Run("Sync path with multiple files in nested directories to empty allocation should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -376,7 +376,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path to NON-empty allocation (No filename Clashes) should work", func(t *testing.T) {
+	t.Run("Sync path to NON-empty allocation (No filename Clashes) should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		originalFileName := "no clash filename.txt"
@@ -455,7 +455,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.NotNil(t, foundItem, "The original file doesn't exist anymore", files)
 	})
 
-	t.Run("Sync path to NON-empty allocation (Replace Existing File) should work", func(t *testing.T) {
+	t.Run("Sync path to NON-empty allocation (Replace Existing File) should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		originalFileName := "must Be Updated File.txt"
@@ -537,7 +537,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Equal(t, 128*KB*2, foundItem.Size, "The original file doesn't exist anymore", files)
 	})
 
-	t.Run("Sync path with chunk number specified should work", func(t *testing.T) {
+	t.Run("Sync path with chunk number specified should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -586,7 +586,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with cache flag should work", func(t *testing.T) {
+	t.Run("Sync path with cache flag should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -649,7 +649,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Len(t, localCacheFileList, 8, "all files and folders must be appeared in the local cache list")
 	})
 
-	t.Run("Sync path with uploadonly flag should work", func(t *testing.T) {
+	t.Run("Sync path with uploadonly flag should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -698,7 +698,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Attempt to Sync to allocation not owned must fail", func(t *testing.T) {
+	t.Run("Attempt to Sync to allocation not owned must fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -736,7 +736,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Equal(t, output[0], "[]")
 	})
 
-	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *testing.T) {
+	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
 		t.Parallel()
 
 		allocationID := "invalid-allocation-id"
@@ -768,7 +768,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 }
 
 // This will traverse the tree and asserts the existent of the files
-func assertFileExistenceRecursively(t *testing.T, structure map[string]interface{}, files []climodel.AllocationFile) {
+func assertFileExistenceRecursively(t *test.SystemTest, structure map[string]interface{}, files []climodel.AllocationFile) {
 	for name, value := range structure {
 		switch v := value.(type) {
 		case int:
@@ -786,11 +786,11 @@ func assertFileExistenceRecursively(t *testing.T, structure map[string]interface
 	}
 }
 
-func syncFolder(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func syncFolder(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	return syncFolderWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func syncFolderWithWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func syncFolderWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Syncing folder...")
 
 	p := createParams(param)
@@ -808,11 +808,11 @@ func syncFolderWithWallet(t *testing.T, wallet, cliConfigFilename string, param 
 	}
 }
 
-func getDifferences(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func getDifferences(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	return getDifferencesWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func getDifferencesWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Get Differences...")
 
 	p := createParams(param)
@@ -848,7 +848,7 @@ func getDifferencesWithWallet(t *testing.T, wallet, cliConfigFilename string, pa
 //     },
 //     "FolderB": map[string]interface{}{},
 //     }
-func createMockFolders(t *testing.T, rootFolder string, structure map[string]interface{}) (string, error) {
+func createMockFolders(t *test.SystemTest, rootFolder string, structure map[string]interface{}) (string, error) {
 	if rootFolder == "" || rootFolder == "/" {
 		rootFolder = filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
 	}

@@ -10,11 +10,11 @@ import (
 )
 
 func TestOpenChallenges(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
+	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *test.SystemTest) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

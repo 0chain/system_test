@@ -12,11 +12,11 @@ import (
 )
 
 func TestBlobberRewards(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *testing.T) {
+	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -63,7 +63,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		require.Equal(t, balanceAfter, balanceBefore+rewards)
 	})
 
-	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *testing.T) {
+	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()
@@ -108,7 +108,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		require.Equal(t, balanceAfter, balanceBefore)
 	})
 
-	t.RunWithCustomTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 60*time.Second, func(t *testing.T) {
+	t.RunWithCustomTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Parallel()
 		sdkClient.Mutex.Lock()
 		defer sdkClient.Mutex.Unlock()

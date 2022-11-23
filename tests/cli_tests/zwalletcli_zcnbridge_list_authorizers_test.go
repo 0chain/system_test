@@ -12,11 +12,11 @@ import (
 )
 
 func TestListAuthorizers(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("List authorizers should work", func(t *testing.T) {
+	t.Run("List authorizers should work", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := getAuthorizersList(t, true)
@@ -26,7 +26,7 @@ func TestListAuthorizers(testSetup *testing.T) {
 }
 
 // nolint
-func getAuthorizersList(t *testing.T, retry bool) ([]string, error) {
+func getAuthorizersList(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Getting  list of authorizers...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-list-auth --silent "+

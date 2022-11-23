@@ -13,11 +13,11 @@ import (
 )
 
 func TestReadPoolLockUnlock(testSetup *testing.T) {
-	t := test.SystemTest{T: testSetup}
+	t := &test.SystemTest{T: testSetup}
 
 	t.Parallel()
 
-	t.Run("Locking read pool tokens moves tokens from wallet to read pool", func(t *testing.T) {
+	t.Run("Locking read pool tokens moves tokens from wallet to read pool", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -66,7 +66,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *testing.T) {
+	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -96,7 +96,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock negative read tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock negative read tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -127,7 +127,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock zero read tokens", func(t *testing.T) {
+	t.Run("Should not be able to lock zero read tokens", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -158,7 +158,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 1.00\d ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Missing tokens flag should result in error", func(t *testing.T) {
+	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
 		t.Parallel()
 
 		output, err := registerWallet(t, configPath)
@@ -188,7 +188,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 }
 
-func readPoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func readPoolUnlock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Unlocking read tokens...")
 	cmd := fmt.Sprintf("./zbox rp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
 	if retry {
