@@ -95,21 +95,13 @@ func (s *SystemTest) Cleanup(f func()) {
 func (s *SystemTest) Error(args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Error(args)
-	} else {
-		s.T.Error()
-	}
+	s.T.Error(args...)
 }
 
 func (s *SystemTest) Errorf(format string, args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Errorf(format, args)
-	} else {
-		s.T.Errorf(format)
-	}
+	s.T.Errorf(format, args...)
 }
 
 func (s *SystemTest) Fai() {
@@ -133,43 +125,25 @@ func (s *SystemTest) Failed() bool {
 func (s *SystemTest) Fatal(args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Fatal(args)
-	} else {
-		s.T.Fatal()
-	}
+	s.T.Fatal(args...)
 }
 
 func (s *SystemTest) Fatalf(format string, args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Fatalf(format, args)
-	} else {
-		s.T.Fatalf(format)
-	}
+	s.T.Fatalf(format, args...)
 }
 
 func (s *SystemTest) Log(args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Log(args)
-	} else {
-		s.T.Log()
-	}
-
+	s.T.Log(args...)
 }
 
 func (s *SystemTest) Logf(format string, args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Logf(format, args)
-	} else {
-		s.T.Logf(format)
-	}
-
+	s.T.Logf(format, args...)
 }
 
 func (s *SystemTest) Name() string {
@@ -188,11 +162,7 @@ func (s *SystemTest) Setenv(key, value string) {
 func (s *SystemTest) Skip(args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Skip(args)
-	} else {
-		s.T.Skip()
-	}
+	s.T.Skip(args...)
 }
 
 func (s *SystemTest) SkipNow() {
@@ -204,11 +174,7 @@ func (s *SystemTest) SkipNow() {
 func (s *SystemTest) Skipf(format string, args ...any) {
 	s.T.Helper()
 	defer handleTestCaseExit()
-	if len(args) > 0 {
-		s.T.Skipf(format, args)
-	} else {
-		s.T.Skipf(format)
-	}
+	s.T.Skipf(format, args...)
 }
 
 func (s *SystemTest) Skipped() bool {
