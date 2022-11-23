@@ -29,11 +29,10 @@ func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool
 
 func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, testFunction func(w *SystemTest)) bool {
 	s.T.Helper()
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	timeoutWrappedTestCase := func(t *testing.T) {
 		t.Helper()
+		wg := sync.WaitGroup{}
+		wg.Add(1)
 		ws := &SystemTest{T: t}
 		defer func() {
 			if err := recover(); err != nil {
