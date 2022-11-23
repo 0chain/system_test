@@ -41,7 +41,7 @@ func setupConfig() {
 	sharder01ID = viper.GetString("nodes.sharder01ID")
 	sharder02ID = viper.GetString("nodes.sharder02ID")
 
-	parsedConfig := config.Parse(filepath.Join(".", path, "config.yaml"))
+	parsedConfig := config.Parse(filepath.Join(".", path, "cli_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)

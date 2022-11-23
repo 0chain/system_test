@@ -15,7 +15,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var settingUpdateSleepTime = time.Second * 10
+var settingUpdateSleepTime = time.Second * 60
 
 func TestStorageUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
