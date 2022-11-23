@@ -34,7 +34,11 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
+		dt := time.Now()
+		t.Logf("Test case [No allocation param should fail] before parallel at [%s] ", dt.Format("01-02-2006 15:04:05"))
 		t.Parallel()
+		dt = time.Now()
+		t.Logf("Test case [No allocation param should fail] after parallel at [%s] ", dt.Format("01-02-2006 15:04:05"))
 
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
@@ -43,7 +47,11 @@ func TestCancelAllocation(testSetup *testing.T) {
 			configPath,
 		)
 
+		dt = time.Now()
+		t.Logf("Test case [No allocation param should fail] about to run command at [%s] ", dt.Format("01-02-2006 15:04:05"))
 		output, err := cliutils.RunCommandWithoutRetry(cmd)
+		dt = time.Now()
+		t.Logf("Test case [No allocation param should fail] finished running command at [%s] ", dt.Format("01-02-2006 15:04:05"))
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 4)
 		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])

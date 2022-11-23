@@ -45,7 +45,7 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 
 		testCaseChannel := make(chan struct{}, 1)
 
-		go executeTest(ws, testFunction, testCaseChannel, &wg)
+		go executeTest(ws, name, testFunction, testCaseChannel, &wg)
 
 		select {
 		case <-time.After(timeout):
@@ -55,17 +55,20 @@ func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, te
 		}
 
 		dt = time.Now()
-		ws.Logf("Test case [%s] end at ", name, dt.Format("01-02-2006 15:04:05"))
+		ws.Logf("Test case [%s] end at [%s]", name, dt.Format("01-02-2006 15:04:05"))
 	}
 
 	return s.T.Run(name, timeoutWrappedTestCase)
 }
 
-func executeTest(s *SystemTest, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
+func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
 	s.Helper()
+	dt := time.Now()
+	s.Logf("executeTest [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 	go func() {
 		defer wg.Done()
 		defer handlePanic(s)
+		s.Logf("testFunction [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
 		testFunction(s)
 	}()
 	wg.Wait()
