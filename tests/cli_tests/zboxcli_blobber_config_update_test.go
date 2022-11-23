@@ -15,7 +15,7 @@ import (
 )
 
 func TestBlobberConfigUpdate(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")

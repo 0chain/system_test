@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}
 
-	t := new(testing.T)
+	t := test.NewSystemTest(new(testing.T))
 
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)

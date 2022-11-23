@@ -25,7 +25,7 @@ import (
 )
 
 func TestStreamUploadDownload(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	KillFFMPEG()
 	defer KillFFMPEG()

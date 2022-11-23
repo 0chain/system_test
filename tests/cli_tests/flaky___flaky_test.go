@@ -17,7 +17,7 @@ import (
 )
 
 func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Skip()
 
@@ -86,7 +86,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 }
 
 func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("transfer allocation accounting test", func(t *test.SystemTest) {
@@ -178,7 +178,7 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 }
 
 func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
@@ -235,7 +235,7 @@ func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo // team pr
 }
 
 func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("File copy - Users should not be charged for moving a file ", func(t *test.SystemTest) {
@@ -304,7 +304,7 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo // team pref
 }
 
 func Test___FlakyFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {

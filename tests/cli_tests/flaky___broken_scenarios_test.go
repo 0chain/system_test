@@ -24,7 +24,7 @@ Tests in here are skipped until the feature has been fixed
 //nolint:gocyclo
 
 func Test___FlakyBrokenScenarios(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Skip()
 	balance := 0.8 // 800.000 mZCN

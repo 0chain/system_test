@@ -14,7 +14,7 @@ import (
 )
 
 func TestMinerUpdateConfig(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"

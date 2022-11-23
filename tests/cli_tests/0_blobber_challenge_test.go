@@ -19,7 +19,7 @@ import (
 )
 
 func TestBlobberChallenge(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

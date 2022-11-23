@@ -12,7 +12,7 @@ import (
 )
 
 func TestHashnodeRoot(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)

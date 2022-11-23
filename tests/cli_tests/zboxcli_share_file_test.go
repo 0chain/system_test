@@ -20,7 +20,7 @@ import (
 )
 
 func TestShareFile(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {

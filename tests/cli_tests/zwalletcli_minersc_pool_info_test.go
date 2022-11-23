@@ -15,7 +15,7 @@ import (
 )
 
 func TestMinerSCUserPoolInfo(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)

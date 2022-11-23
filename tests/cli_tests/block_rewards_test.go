@@ -22,7 +22,7 @@ import (
 )
 
 func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Skip("Till batch-update is merged...")
 	t.Run("Miner share on block fees and rewards", func(t *test.SystemTest) {

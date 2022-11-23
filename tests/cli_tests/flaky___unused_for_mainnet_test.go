@@ -23,7 +23,7 @@ const minDuration = "min_duration"
 const minLock = "min_lock"
 
 func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 
@@ -645,7 +645,7 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -785,7 +785,7 @@ func vestingPoolDelete(t *test.SystemTest, cliConfigFilename, params string, ret
 }
 
 func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1002,7 +1002,7 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolStop(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1255,7 +1255,7 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
@@ -1456,7 +1456,7 @@ func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1655,7 +1655,7 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -1879,7 +1879,7 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 }
 
 func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}

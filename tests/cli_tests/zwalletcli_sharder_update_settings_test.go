@@ -18,7 +18,7 @@ import (
 const sharderAccessDenied = "update_sharder_settings: access denied"
 
 func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic complexity 50 of func `
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {

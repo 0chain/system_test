@@ -12,7 +12,7 @@ import (
 )
 
 func TestAddRemoveCurator(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 

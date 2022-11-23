@@ -27,7 +27,7 @@ const (
 )
 
 func TestEthRegisterAccount(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
 	t.Run("Register ethereum account in local key storage", func(t *test.SystemTest) {

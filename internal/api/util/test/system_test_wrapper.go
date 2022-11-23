@@ -13,6 +13,10 @@ type SystemTest struct {
 	*testing.T
 }
 
+func NewSystemTest(t *testing.T) *SystemTest {
+	return &SystemTest{T: t}
+}
+
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
 	defer func() {

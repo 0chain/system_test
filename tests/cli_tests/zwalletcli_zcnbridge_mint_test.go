@@ -17,7 +17,7 @@ const (
 
 // todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 

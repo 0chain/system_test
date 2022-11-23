@@ -33,7 +33,7 @@ var (
 )
 
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+zcnscOwner+"_wallet.json")

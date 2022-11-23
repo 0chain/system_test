@@ -15,7 +15,7 @@ import (
 )
 
 func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 

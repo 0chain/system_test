@@ -23,7 +23,7 @@ import (
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
 func TestListFileSystem(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 

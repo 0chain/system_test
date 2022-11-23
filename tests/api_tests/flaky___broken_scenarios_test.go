@@ -18,7 +18,7 @@ import (
 Tests in here are skipped until the feature has been fixed
 */
 func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Skip()
 	t.Parallel()

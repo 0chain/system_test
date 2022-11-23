@@ -14,7 +14,7 @@ import (
 )
 
 func TestFaucetUpdateConfig(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)

@@ -77,7 +77,7 @@ func prepareBridgeClientWallet(t *test.SystemTest) ([]string, error) {
 
 // cmd: bridge-client-init
 func TestBridgeClientInit(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Run("Init bridge client config to default path and file", func(t *test.SystemTest) {
 		output, err := createDefaultClientBridgeConfig(t)
@@ -157,7 +157,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 
 // cmd: bridge-owner-init
 func TestBridgeOwnerInit(testSetup *testing.T) {
-	t := &test.SystemTest{T: testSetup}
+	t := test.NewSystemTest(testSetup)
 
 	t.Run("Init bridge owner config to default path and file", func(t *test.SystemTest) {
 		output, err := bridgeOwnerInit(
