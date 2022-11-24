@@ -19,88 +19,61 @@ func NewSystemTest(t *testing.T) *SystemTest {
 
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Panic - [%v] occurred while executing test", err)
-		}
-	}()
 	return s.run(name, DefaultTestTimeout, testCaseFunction, true)
 }
 
 func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Panic - [%v] occurred while executing test", err)
-		}
-	}()
 	return s.run(name, timeout, testCaseFunction, true)
 }
 
 func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Panic - [%v] occurred while executing test", err)
-		}
-	}()
 	return s.run(name, DefaultTestTimeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) RunSequentiallyWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Panic - [%v] occurred while executing test", err)
-		}
-	}()
 	return s.run(name, timeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {
 	s.T.Helper()
-	timeoutWrappedTestCase := func(t *testing.T) {
-		t.Helper()
+	timeoutWrappedTestCase := func(testSetup *testing.T) {
+		t := &SystemTest{T: testSetup}
+		testSetup.Helper()
+		defer handlePanic(s)
+
 		wg := sync.WaitGroup{}
 		wg.Add(1)
-		ws := &SystemTest{T: t}
-		defer func() {
-			if err := recover(); err != nil {
-				ws.Errorf("Panic - [%v] occurred while timing out test", err)
-			}
-		}()
 
-		dt := time.Now()
-		ws.Logf("Test case [%s] scheduled at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
+		t.Logf("Test case [%s] scheduled at [%s] ", name, time.Now().Format("01-02-2006 15:04:05"))
 
 		testCaseChannel := make(chan struct{}, 1)
 
 		if runInParallel {
-			s.Parallel()
+			t.Parallel()
 		}
-		go executeTest(ws, name, testFunction, testCaseChannel, &wg, runInParallel)
+		go executeTest(t, name, testFunction, testCaseChannel, &wg)
 
 		select {
 		case <-time.After(timeout):
-			dt = time.Now()
-			ws.Errorf("Test case [%s] timed out after [%s]", name, timeout)
+			t.Errorf("Test case [%s] timed out after [%s]", name, timeout)
 		case _ = <-testCaseChannel:
 		}
 
-		dt = time.Now()
-		ws.Logf("Test case [%s] end at [%s]", name, dt.Format("01-02-2006 15:04:05"))
+		t.Logf("Test case [%s] exit at [%s]", name, time.Now().Format("01-02-2006 15:04:05"))
 	}
 
 	return s.T.Run(name, timeoutWrappedTestCase)
 }
 
-func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup, runInParallel bool) {
-	s.Helper()
-	dt := time.Now()
-	s.Logf("Test case [%s] start at [%s] ", name, dt.Format("01-02-2006 15:04:05"))
+func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
+	defer handlePanic(s)
 	go func() {
 		defer wg.Done()
 		defer handlePanic(s)
+		s.Logf("Test case [%s] start at [%s] ", name, time.Now().Format("01-02-2006 15:04:05"))
 		testFunction(s)
 	}()
 	wg.Wait()
@@ -191,7 +164,6 @@ func (s *SystemTest) Setenv(key, value string) {
 	s.T.Helper()
 	defer handleTestCaseExit()
 	s.T.Setenv(key, value)
-
 }
 
 func (s *SystemTest) Skip(args ...any) {
