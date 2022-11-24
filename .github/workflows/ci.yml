@@ -62,6 +62,7 @@ jobs:
           skip-build-cache: true
           skip-pkg-cache: true
           only-new-issues: true
+
   ensure-master-is-green:
     if: github.ref != 'refs/heads/master'
     name: "Ensure master is green"
@@ -69,19 +70,18 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: LASER-Yi/workflow-status@v0.0.2
+        uses: 0chain/actions/get-build-state@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: ci.yml
-          branch: master
-          event: push
+          github_token: ${{ github.token }}
+          repository: "0chain/system_test"
+          sha: master
       - name: Success
-        if: ${{ steps.check-ci.outputs.conclusion == 'success' }}
+        if: ${{ env.BUILD_STATE == 'success' }}
         run: echo "master is successful!"
       - name: Not Successful
-        if: ${{ steps.check-ci.outputs.conclusion != 'success' }}
+        if: ${{ env.BUILD_STATE != 'success' }}
         run: |
-          echo "master is NOT successful!"
+          echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
           exit 1
         
   system-tests:
