@@ -69,6 +69,7 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 }
 
 func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
+	s.T.Helper()
 	defer handlePanic(s)
 	go func() {
 		defer wg.Done()
