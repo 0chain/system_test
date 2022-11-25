@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,6 @@ func TestGetId(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("get miner id should work", func(t *test.SystemTest) {
-
 		miners := getMinersList(t)
 		minerUrl := fmt.Sprint("http://", miners.Nodes[0].Host, ":", miners.Nodes[0].Port)
 
@@ -30,7 +30,6 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get sharder id should work", func(t *test.SystemTest) {
-
 		_, _ = registerWallet(t, configPath)
 
 		sharders := getShardersList(t)
@@ -47,7 +46,6 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get blobber id should not work", func(t *test.SystemTest) {
-
 		_, _ = registerWallet(t, configPath)
 
 		blobbers := getBlobbersList(t)

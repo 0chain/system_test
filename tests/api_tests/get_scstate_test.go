@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -15,7 +16,6 @@ func TestGetSCState(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Get SCState of faucet SC, should work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -32,7 +32,6 @@ func TestGetSCState(testSetup *testing.T) {
 	})
 
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(

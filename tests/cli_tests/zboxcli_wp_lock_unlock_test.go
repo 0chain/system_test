@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", 60*time.Second, func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -85,7 +85,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 10*time.Minute, func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -155,7 +154,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	}) //todo: this test takes on average 9 mins 20 seconds.. i'm not joking!!!
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -199,7 +197,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -243,7 +240,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock zero write tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -287,7 +283,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -318,7 +313,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to unlock unexpired write tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

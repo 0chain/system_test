@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -29,7 +30,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Update Name Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5"}
@@ -58,7 +58,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Expiry Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
 
@@ -83,7 +82,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(256)
 
@@ -107,7 +105,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
 		size := int64(2048)
@@ -132,7 +129,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Negative Expiry Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
 
@@ -157,7 +153,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Negative Size Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(-256)
 
@@ -180,7 +175,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update All Negative Parameters Should Work", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
 		size := int64(-512)
@@ -208,7 +202,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size to less than occupied size should fail", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
 
 		filename := generateRandomTestFileName(t)
@@ -244,7 +237,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
@@ -259,7 +251,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-
 		allocationID := "123abc"
 
 		params := createParams(map[string]interface{}{
@@ -274,7 +265,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours
 
@@ -322,7 +312,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := -allocationBeforeUpdate.Size + 1023
 
@@ -340,7 +329,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Other's Allocation Should Fail", func(t *test.SystemTest) {
-
 		var otherAllocationID string
 
 		myAllocationID := setupAllocation(t, configPath)
@@ -391,7 +379,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		expiry := 1
 
@@ -413,7 +400,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		size := "ab"
 

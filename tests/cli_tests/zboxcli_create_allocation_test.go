@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create allocation with name Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		name := cliutils.RandomAlphaNumericString(10)
@@ -43,7 +43,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5"}
@@ -59,7 +58,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "5m", "size": "256000", "lock": "0.5"}
@@ -75,7 +73,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with smallest possible size (1024) Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1h", "size": "1024", "lock": "0.5"}
@@ -91,7 +88,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with parity specified Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1h", "size": "1024", "parity": "1", "lock": "0.5"}
@@ -107,7 +103,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with data specified Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1h", "size": "1024", "data": "1", "lock": "0.5"}
@@ -123,7 +118,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1h", "size": "1024", "read_price": "0-9999", "lock": "0.5"}
@@ -139,7 +133,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with write price range Should Work", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1h", "size": "1024", "write_price": "0-9999", "lock": "0.5"}
@@ -154,7 +147,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "expire": "1h"}
@@ -165,7 +157,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "expire": "1h"}
@@ -176,7 +167,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "expire": "1h"}
@@ -187,7 +177,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "expire": "1h"}
@@ -198,7 +187,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"size": 256, "lock": "0.5"}
@@ -209,7 +197,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with expire smaller than limit (expire < 5m) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "3m", "lock": "0.5", "size": 1024}
@@ -220,7 +207,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{}
@@ -231,7 +217,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with invalid expiry Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "-1", "lock": "0.5"}
@@ -242,7 +227,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation by providing expiry in wrong format (expire 1hour) Should Fail", func(t *test.SystemTest) {
-
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "1hour", "lock": "0.5"}

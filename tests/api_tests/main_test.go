@@ -1,15 +1,16 @@
 package api_tests
 
 import (
+	"log"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"log"
-	"os"
-	"testing"
-	"time"
 )
 
 var (

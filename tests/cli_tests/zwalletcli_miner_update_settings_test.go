@@ -3,12 +3,13 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -63,7 +64,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	cooldownPeriod := int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
 	lastRoundOfSettingUpdate := int64(0)
 
-	//TODO these tests run sequentially and are painfully slow
+	// TODO these tests run sequentially and are painfully slow
 
 	t.RunSequentiallyWithTimeout("Miner update min_stake by delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)

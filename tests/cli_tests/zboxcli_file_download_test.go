@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +11,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -31,7 +32,6 @@ func TestDownload(testSetup *testing.T) {
 
 	// Success Scenarios
 	t.Run("Download File from Root Directory Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -65,7 +65,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File Concurrently Should Work from two Different Directory", func(t *test.SystemTest) {
-
 		allocSize := int64(4096)
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
@@ -127,7 +126,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File from a Directory Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/dir/"
@@ -161,7 +159,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File from Nested Directory Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
@@ -196,7 +193,6 @@ func TestDownload(testSetup *testing.T) {
 
 	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
 	t.Run("Download Entire Directory Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
@@ -225,7 +221,6 @@ func TestDownload(testSetup *testing.T) {
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
 	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
-
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -278,7 +273,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Shared File Should Work", func(t *test.SystemTest) {
-
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -335,7 +329,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Encrypted File Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(10 * MB)
 		filesize := int64(10)
 		remotepath := "/"
@@ -377,7 +370,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Shared Encrypted File Should Work", func(t *test.SystemTest) {
-
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -453,7 +445,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *test.SystemTest) {
-
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -510,7 +501,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *test.SystemTest) {
-
 		var authTicket, lookuphash, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -571,7 +561,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
-
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -619,7 +608,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Shared File by Paying Should Work", func(t *test.SystemTest) {
-
 		var allocationID, authTicket, filename string
 
 		filesize := int64(10)
@@ -667,7 +655,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File Thumbnail Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -712,7 +699,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download to Non-Existent Path Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -746,7 +732,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With Only startblock Should Work", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -800,7 +785,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -832,7 +816,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536, we upload 20 blocks and download 1 block
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -889,7 +872,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -923,7 +905,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should work", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(10240)
@@ -958,7 +939,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download with endblock less than startblock should fail", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -992,7 +972,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download with negative startblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -1024,7 +1003,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
-
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -1058,7 +1036,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1095,7 +1072,6 @@ func TestDownload(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -1112,7 +1088,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File from Other's Allocation Should Fail", func(t *test.SystemTest) {
-
 		var otherAllocationID, otherFilename string
 
 		allocSize := int64(2048)
@@ -1144,7 +1119,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *test.SystemTest) {
-
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -1165,7 +1139,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -1177,7 +1150,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10000,
 			"tokens": 1,
@@ -1193,7 +1165,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1220,7 +1191,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1256,7 +1226,6 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"

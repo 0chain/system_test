@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"io/fs"
 	"math/rand"
 	"net/http"
@@ -19,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -31,7 +32,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	defer KillFFMPEG()
 
 	// Success scenarios
-	t.RunSequentiallyWithTimeout("Uploading remote feed to allocation should work", 90*time.Second, func(t *test.SystemTest) { //todo slow
+	t.RunSequentiallyWithTimeout("Uploading remote feed to allocation should work", 90*time.Second, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -105,7 +106,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 90*time.Second, func(t *test.SystemTest) { //todo slow
+	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 90*time.Second, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {

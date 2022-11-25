@@ -2,13 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.Parallel()
 
 	t.Run("transfer allocation by curator should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -57,7 +57,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation by owner should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -81,7 +80,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -107,7 +105,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation to self", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -136,7 +133,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -185,7 +181,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer a canceled allocation", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -228,7 +223,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.RunWithTimeout("transfer a finalized allocation", 5*time.Minute, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -286,7 +280,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	}) //todo: unacceptably slow
 
 	t.RunWithTimeout("transfer allocation and download non-encrypted file", 90*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -366,7 +359,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	}) //todo:slow
 
 	t.RunWithTimeout("transfer allocation and download with auth ticket should fail", 90*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -476,7 +468,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	}) //todo:slow
 
 	t.RunWithTimeout("transfer allocation and update allocation", 90*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(4096),
 		})
@@ -552,7 +543,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	}) //todo:slow
 
 	t.Run("transfer allocation with no allocation param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -571,7 +561,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation with no new_owner_key param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -590,7 +579,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation with no new_owner param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -609,7 +597,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.Run("transfer allocation with invalid allocation param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -635,7 +622,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	// FIXME is this expected to fail?
 	t.Run("transfer allocation with invalid new_owner param", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -673,7 +659,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	// FIXME is this expected to fail?
 	t.Run("transfer allocation with invalid new_owner_key param should fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -710,7 +695,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	})
 
 	t.RunWithTimeout("transfer allocation and upload file", 90*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(20480),
 		})

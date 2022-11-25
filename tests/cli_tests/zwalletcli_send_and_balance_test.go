@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -26,7 +27,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Send with description", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -50,7 +50,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send with json flag", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -80,7 +79,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Balance checks before and after ZCN sent", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -126,7 +124,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send without description should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -142,7 +139,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -164,7 +160,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to invalid address should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -183,7 +178,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send with zero token should fail", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -207,7 +201,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to exceeding balance should fail", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -232,7 +225,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt with negative token should fail", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -257,7 +249,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt with very long description should fail", func(t *test.SystemTest) {
-
 		targetWallet := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -289,7 +280,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to self should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 

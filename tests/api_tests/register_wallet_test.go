@@ -2,8 +2,9 @@ package api_tests
 
 import (
 	"encoding/hex"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -16,7 +17,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Register wallet API call should be successful given a valid request", func(t *test.SystemTest) {
-
 		mnemonic := crypto.GenerateMnemonics(t)
 
 		registeredWallet, rawHttpResponse, err := apiClient.RegisterWalletForMnemonicWithoutAssertion(t, mnemonic, client.HttpOkStatus)

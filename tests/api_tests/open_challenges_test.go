@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -15,7 +16,6 @@ func TestOpenChallenges(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

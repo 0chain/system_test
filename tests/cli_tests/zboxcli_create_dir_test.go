@@ -2,10 +2,11 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -18,7 +19,6 @@ func TestCreateDir(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("create root dir", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/rootdir"
@@ -41,7 +41,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create nested dir", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/parent"
@@ -70,7 +69,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create with 100-char dir", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
@@ -97,7 +95,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with 101-char dirname", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
@@ -125,7 +122,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create dir with existing dirname should work", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/existingdir"
@@ -141,7 +137,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create dir with no leading slash should not work", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "noleadingslash"
@@ -152,7 +147,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create with existing dir but different case", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/existingdir"
@@ -181,7 +175,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create with non-existent parent dir", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/nonexistent/child"
@@ -204,7 +197,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create with dir containing special characters", func(t *test.SystemTest) {
-
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/abc!@#$%^&*()<>{}[]:;'?,."
@@ -227,7 +219,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with missing dirname param", func(t *test.SystemTest) {
-
 		wallet := escapedTestName(t)
 
 		allocID := setupAllocation(t, configPath)
@@ -239,7 +230,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with empty dirname param", func(t *test.SystemTest) {
-
 		wallet := escapedTestName(t)
 
 		allocID := setupAllocation(t, configPath)
@@ -251,7 +241,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with missing allocation", func(t *test.SystemTest) {
-
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
@@ -267,7 +256,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with empty allocation", func(t *test.SystemTest) {
-
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
@@ -284,7 +272,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with invalid allocation", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -299,7 +286,6 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with someone else's allocation", func(t *test.SystemTest) {
-
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		allocID := setupAllocation(t, configPath)

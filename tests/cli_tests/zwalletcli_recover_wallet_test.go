@@ -1,10 +1,11 @@
 package cli_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -17,7 +18,6 @@ func TestRecoverWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Recover wallet valid mnemonic", func(t *test.SystemTest) {
-
 		validMnemonic := "pull floor crop best weasel suit solid gown" +
 			" filter kitten loan absent noodle nation potato planet demise" +
 			" online ten affair rich panel rent sell"
@@ -31,7 +31,6 @@ func TestRecoverWallet(testSetup *testing.T) {
 
 	//FIXME: POSSIBLE BUG: Blank wallet created if mnemonic is invalid (same issue in missing mnemonic test)
 	t.Run("Recover wallet invalid mnemonic", func(t *test.SystemTest) {
-
 		inValidMnemonic := "floor crop best weasel suit solid gown" +
 			" filter kitten loan absent noodle nation potato planet demise" +
 			" online ten affair rich panel rent sell"
@@ -45,7 +44,6 @@ func TestRecoverWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Recover wallet no mnemonic", func(t *test.SystemTest) {
-
 		output, err := cliutils.RunCommandWithoutRetry("./zwallet recoverwallet --silent " +
 			"--wallet " + escapedTestName(t) + "_wallet.json" + " " +
 			"--configDir ./config --config " + configPath)

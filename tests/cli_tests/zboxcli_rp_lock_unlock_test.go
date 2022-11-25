@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,6 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Locking read pool tokens moves tokens from wallet to read pool", 70*time.Second, func(t *test.SystemTest) { //TOOD: slow
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -66,7 +66,6 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -95,7 +94,6 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative read tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -125,7 +123,6 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock zero read tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -155,7 +152,6 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

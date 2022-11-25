@@ -4,13 +4,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -333,7 +334,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 	// When owner downloads the file the cost is deduced from the read pool,
 	// But it seems the collaborators can download the file for free
 	t.Run("Add Collaborator _ file owner must pay for collaborators' reads", func(t *test.SystemTest) {
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
