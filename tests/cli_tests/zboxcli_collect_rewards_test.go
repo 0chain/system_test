@@ -21,7 +21,7 @@ func TestCollectRewards(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Test collect reward with valid pool and blobber id should pass", 90*time.Second, func(t *test.SystemTest) { //TODO slow
+	t.RunWithTimeout("Test collect reward with valid pool and blobber id should pass", 90*time.Second, func(t *test.SystemTest) { // TODO slow
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

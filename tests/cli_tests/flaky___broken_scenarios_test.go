@@ -35,7 +35,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME The test is failing due to sync function inability to detect the file changes in local folder see https://github.com/0chain/zboxcli/issues/250
 	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -118,7 +117,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME The test is failling due to sync function inability to detect the file changes in local folder see <tbd>
 	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -221,7 +219,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync. see <tbd>
 	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 

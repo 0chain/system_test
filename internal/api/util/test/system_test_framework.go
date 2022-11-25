@@ -93,7 +93,7 @@ func handleTestCaseExit() {
 	}
 }
 
-//Boilerplate due to go's very unhelpful lack of polymorphism...
+// Boilerplate due to go's very unhelpful lack of polymorphism...
 
 func (s *SystemTest) Cleanup(f func()) {
 	s.T.Helper()

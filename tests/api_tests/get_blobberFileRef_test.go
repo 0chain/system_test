@@ -76,7 +76,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //todo - too slow (70s)
+	t.RunSequentiallyWithTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { // todo - too slow (70s)
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
