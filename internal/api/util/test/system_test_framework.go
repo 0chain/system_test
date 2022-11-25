@@ -63,8 +63,8 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		case _ = <-testCaseChannel:
 		}
 
-		t.testComplete = true
 		t.Logf("Test case [%s] exit at [%s]", name, time.Now().Format("01-02-2006 15:04:05"))
+		t.testComplete = true
 	}
 
 	return s.T.Run(name, timeoutWrappedTestCase)
