@@ -10,38 +10,39 @@ import (
 var DefaultTestTimeout = 20 * time.Second
 
 type SystemTest struct {
-	*testing.T
+	Unwrap       *testing.T
 	testComplete bool
+	isChildTest  bool
 }
 
 func NewSystemTest(t *testing.T) *SystemTest {
-	return &SystemTest{T: t, testComplete: false}
+	return &SystemTest{Unwrap: t, testComplete: false, isChildTest: false}
 }
 
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	return s.run(name, DefaultTestTimeout, testCaseFunction, true)
 }
 
 func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	return s.run(name, timeout, testCaseFunction, true)
 }
 
 func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *SystemTest)) bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	return s.run(name, DefaultTestTimeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	return s.run(name, timeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	timeoutWrappedTestCase := func(testSetup *testing.T) {
-		t := &SystemTest{T: testSetup}
+		t := &SystemTest{Unwrap: testSetup, testComplete: false, isChildTest: true}
 		testSetup.Helper()
 		defer handlePanic(t)
 
@@ -53,7 +54,11 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		testCaseChannel := make(chan struct{}, 1)
 
 		if runInParallel {
-			t.Parallel()
+			if !s.isChildTest {
+				t.Parallel()
+			} else {
+				t.Logf("[WARN] Not running test case [%s] in parallel as it is a child test. Use t.Unwrap.run() then t.Parallel() if you wish to do this.", name)
+			}
 		}
 		go executeTest(t, name, testFunction, testCaseChannel, &wg)
 
@@ -67,11 +72,11 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		t.testComplete = true
 	}
 
-	return s.T.Run(name, timeoutWrappedTestCase)
+	return s.Unwrap.Run(name, timeoutWrappedTestCase)
 }
 
 func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), testCaseChannel chan struct{}, wg *sync.WaitGroup) {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handlePanic(s)
 	go func() {
 		defer wg.Done()
@@ -98,135 +103,135 @@ func handleTestCaseExit() {
 // Boilerplate due to go's very unhelpful lack of polymorphism...
 
 func (s *SystemTest) Cleanup(f func()) {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handleTestCaseExit()
-	s.T.Cleanup(f)
+	s.Unwrap.Cleanup(f)
 }
 
 func (s *SystemTest) Error(args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Error(args...)
+		s.Unwrap.Error(args...)
 	}
 }
 
 func (s *SystemTest) Errorf(format string, args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Errorf(format, args...)
+		s.Unwrap.Errorf(format, args...)
 	}
 }
 
 func (s *SystemTest) Fai() {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Fail()
+		s.Unwrap.Fail()
 	}
 }
 
 func (s *SystemTest) FailNow() {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.FailNow()
+		s.Unwrap.FailNow()
 	}
 }
 
 func (s *SystemTest) Failed() bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handleTestCaseExit()
-	return s.T.Failed()
+	return s.Unwrap.Failed()
 }
 
 func (s *SystemTest) Fatal(args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Fatal(args...)
+		s.Unwrap.Fatal(args...)
 	}
 }
 
 func (s *SystemTest) Fatalf(format string, args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Fatalf(format, args...)
+		s.Unwrap.Fatalf(format, args...)
 	}
 }
 
 func (s *SystemTest) Log(args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Log(args...)
+		s.Unwrap.Log(args...)
 	}
 }
 
 func (s *SystemTest) Logf(format string, args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Logf(format, args...)
+		s.Unwrap.Logf(format, args...)
 	}
 }
 
 func (s *SystemTest) Name() string {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handleTestCaseExit()
-	return s.T.Name()
+	return s.Unwrap.Name()
 }
 
 func (s *SystemTest) Setenv(key, value string) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Setenv(key, value)
+		s.Unwrap.Setenv(key, value)
 	}
 }
 
 func (s *SystemTest) Skip(args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Skip(args...)
+		s.Unwrap.Skip(args...)
 	}
 }
 
 func (s *SystemTest) SkipNow() {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.SkipNow()
+		s.Unwrap.SkipNow()
 	}
 }
 
 func (s *SystemTest) Skipf(format string, args ...any) {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Skipf(format, args...)
+		s.Unwrap.Skipf(format, args...)
 	}
 }
 
 func (s *SystemTest) Skipped() bool {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handleTestCaseExit()
-	return s.T.Skipped()
+	return s.Unwrap.Skipped()
 }
 
 func (s *SystemTest) TempDir() string {
-	s.T.Helper()
+	s.Unwrap.Helper()
 	defer handleTestCaseExit()
-	return s.T.TempDir()
+	return s.Unwrap.TempDir()
 }
 
 func (s *SystemTest) Parallel() {
 	if !s.testComplete {
-		s.T.Helper()
+		s.Unwrap.Helper()
 		defer handleTestCaseExit()
-		s.T.Parallel()
+		s.Unwrap.Parallel()
 	}
 }
