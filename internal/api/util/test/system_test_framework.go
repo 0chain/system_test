@@ -11,10 +11,11 @@ var DefaultTestTimeout = 20 * time.Second
 
 type SystemTest struct {
 	*testing.T
+	testComplete bool
 }
 
 func NewSystemTest(t *testing.T) *SystemTest {
-	return &SystemTest{T: t}
+	return &SystemTest{T: t, testComplete: false}
 }
 
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
@@ -42,7 +43,7 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 	timeoutWrappedTestCase := func(testSetup *testing.T) {
 		t := &SystemTest{T: testSetup}
 		testSetup.Helper()
-		defer handlePanic(s)
+		defer handlePanic(t)
 
 		wg := sync.WaitGroup{}
 		wg.Add(1)
@@ -62,6 +63,7 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		case _ = <-testCaseChannel:
 		}
 
+		t.testComplete = true
 		t.Logf("Test case [%s] exit at [%s]", name, time.Now().Format("01-02-2006 15:04:05"))
 	}
 
@@ -102,27 +104,35 @@ func (s *SystemTest) Cleanup(f func()) {
 }
 
 func (s *SystemTest) Error(args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Error(args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Error(args...)
+	}
 }
 
 func (s *SystemTest) Errorf(format string, args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Errorf(format, args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Errorf(format, args...)
+	}
 }
 
 func (s *SystemTest) Fai() {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Fail()
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Fail()
+	}
 }
 
 func (s *SystemTest) FailNow() {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.FailNow()
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.FailNow()
+	}
 }
 
 func (s *SystemTest) Failed() bool {
@@ -132,27 +142,35 @@ func (s *SystemTest) Failed() bool {
 }
 
 func (s *SystemTest) Fatal(args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Fatal(args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Fatal(args...)
+	}
 }
 
 func (s *SystemTest) Fatalf(format string, args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Fatalf(format, args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Fatalf(format, args...)
+	}
 }
 
 func (s *SystemTest) Log(args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Log(args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Log(args...)
+	}
 }
 
 func (s *SystemTest) Logf(format string, args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Logf(format, args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Logf(format, args...)
+	}
 }
 
 func (s *SystemTest) Name() string {
@@ -162,27 +180,35 @@ func (s *SystemTest) Name() string {
 }
 
 func (s *SystemTest) Setenv(key, value string) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Setenv(key, value)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Setenv(key, value)
+	}
 }
 
 func (s *SystemTest) Skip(args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Skip(args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Skip(args...)
+	}
 }
 
 func (s *SystemTest) SkipNow() {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.SkipNow()
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.SkipNow()
+	}
 }
 
 func (s *SystemTest) Skipf(format string, args ...any) {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Skipf(format, args...)
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Skipf(format, args...)
+	}
 }
 
 func (s *SystemTest) Skipped() bool {
@@ -198,7 +224,9 @@ func (s *SystemTest) TempDir() string {
 }
 
 func (s *SystemTest) Parallel() {
-	s.T.Helper()
-	defer handleTestCaseExit()
-	s.T.Parallel()
+	if !s.testComplete {
+		s.T.Helper()
+		defer handleTestCaseExit()
+		s.T.Parallel()
+	}
 }

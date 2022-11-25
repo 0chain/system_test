@@ -16,6 +16,7 @@ import (
 )
 
 func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	// todo: some allocation transfer operations are very slow
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -358,7 +359,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Contains(t, output[1], filepath.Base(filename))
 	}) //todo:slow
 
-	t.RunWithTimeout("transfer allocation and download with auth ticket should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and download with auth ticket should fail", 2*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -467,7 +468,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		*/
 	}) //todo:slow
 
-	t.RunWithTimeout("transfer allocation and update allocation", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and update allocation", 2*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(4096),
 		})
@@ -694,7 +695,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("transfer allocation and upload file", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and upload file", 2*time.Minute, func(t *test.SystemTest) { // todo: very slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(20480),
 		})

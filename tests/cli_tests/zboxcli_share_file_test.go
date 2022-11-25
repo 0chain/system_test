@@ -478,7 +478,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 

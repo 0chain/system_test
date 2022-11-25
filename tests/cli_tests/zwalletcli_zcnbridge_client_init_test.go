@@ -80,7 +80,7 @@ func prepareBridgeClientWallet(t *test.SystemTest) ([]string, error) {
 func TestBridgeClientInit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("Init bridge client config to default path and file", func(t *test.SystemTest) {
+	t.RunSequentially("Init bridge client config to default path and file", func(t *test.SystemTest) {
 		output, err := createDefaultClientBridgeConfig(t)
 
 		defaultPath := filepath.Join(getZCNDir(), DefaultConfigBridgeFileName)
@@ -92,7 +92,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 
 	customPath := filepath.Join(getConfigDir(), "test")
 
-	t.Run("Init bridge client config to custom path and default file", func(t *test.SystemTest) {
+	t.RunSequentially("Init bridge client config to custom path and default file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -123,7 +123,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 
-	t.Run("Init bridge client config to custom path and custom config file", func(t *test.SystemTest) {
+	t.RunSequentially("Init bridge client config to custom path and custom config file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 

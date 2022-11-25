@@ -95,7 +95,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
 		//TODO: 60s can't be reasonable for this operation
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
