@@ -24,7 +24,6 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
 	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *test.SystemTest) {
-
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.

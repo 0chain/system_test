@@ -106,21 +106,6 @@ func StartCommand(t *test.SystemTest, commandString string, maxAttempts int, bac
 	}
 }
 
-func StartCommandWithStd(commandString string) (cmd *exec.Cmd, stdOut, stdErr *strings.Builder, err error) {
-	command := parseCommand(commandString)
-	commandName := command[0]
-	args := command[1:]
-	sanitizedArgs := sanitizeArgs(args)
-
-	cmd = exec.Command(commandName, sanitizedArgs...)
-	specific.Setpgid(cmd)
-	cmd.Stdout = stdOut
-	cmd.Stderr = stdErr
-	err = cmd.Start()
-
-	return cmd, stdOut, stdErr, err
-}
-
 func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
 	command := parseCommand(commandString)
 	commandName := command[0]

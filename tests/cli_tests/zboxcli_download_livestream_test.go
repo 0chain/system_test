@@ -329,7 +329,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { //todo this is unacceptably slow
+	t.RunSequentiallyWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { // todo this is unacceptably slow
 		feed, ok := getFeed()
 
 		if !ok {

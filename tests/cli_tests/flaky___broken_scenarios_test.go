@@ -408,7 +408,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
