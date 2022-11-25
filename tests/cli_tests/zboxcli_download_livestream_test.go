@@ -29,7 +29,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 	defer KillFFMPEG()
 
-	t.RunSequentially("Downloading youtube feed to allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -329,7 +329,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.RunSequentially("Downloading feed to allocation with delay flag", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { //todo this is unacceptably slow
 		feed, ok := getFeed()
 
 		if !ok {

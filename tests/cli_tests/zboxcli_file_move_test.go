@@ -91,7 +91,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("Move file concurrently to existing directory, should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Move file concurrently to existing directory, should work", 60*time.Second, func(t *test.SystemTest) { //todo:too slow
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256

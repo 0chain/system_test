@@ -94,7 +94,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Sync path with 1 file to empty allocation and download the file should work", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -167,7 +167,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Sync path with 1 file encrypted to empty allocation and download the file should work", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -686,7 +686,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.Run("Attempt to Sync to allocation not owned must fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Attempt to Sync to allocation not owned must fail", 2*time.Minute, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
@@ -721,7 +721,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, output[0], "[]")
-	})
+	}) //todo: too slow
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
 

@@ -12,6 +12,7 @@ import (
 )
 
 func TestAddRemoveCurator(testSetup *testing.T) {
+	//TODO:curator operations are very sloe
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -88,7 +89,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		require.Equal(t, "Error: curator flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Curator _ Curator must be able to transfer the allocation ownership", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Curator _ Curator must be able to transfer the allocation ownership", 60*time.Second, func(t *test.SystemTest) {
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
@@ -140,7 +141,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "unexpected output:", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Curator _ Owner added as curator must be able to transfer the ownership", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Curator _ Owner added as curator must be able to transfer the ownership", 60*time.Second, func(t *test.SystemTest) {
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
@@ -259,7 +260,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		require.Equal(t, curatorWallet.ClientID, allocation.Curators[0], "Curator must've added to the allocation curators list")
 	})
 
-	t.Run("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", func(t *test.SystemTest) {
+	t.RunWithTimeout("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", 60*time.Second, func(t *test.SystemTest) {
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
@@ -318,7 +319,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error transferring allocation:curator_transfer_allocation_failed: only curators or the owner can transfer allocations;", strings.Join(output, "\n"))
 	})
 
-	t.Run("Remove Curator _ Curator must be removed from the allocation curators list", func(t *test.SystemTest) {
+	t.RunWithTimeout("Remove Curator _ Curator must be removed from the allocation curators list", 60*time.Second, func(t *test.SystemTest) {
 
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 

@@ -116,7 +116,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload file concurrently to root directory, should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload file concurrently to root directory, should work", 60*time.Second, func(t *test.SystemTest) {
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -329,7 +329,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload Video File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload Video File Should Work", 2*time.Minute, func(t *test.SystemTest) { //todo: slow
 
 		allocSize := int64(400 * 1024 * 1024)
 
@@ -353,7 +353,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload Large File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload Large File Should Work", 2*time.Minute, func(t *test.SystemTest) {
 
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)

@@ -17,7 +17,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", 60*time.Second, func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -84,7 +84,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Unlocking tokens from finalized allocation should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -152,7 +152,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-	})
+	}) //todo: this test takes on average 9 mins 20 seconds.. i'm not joking!!!
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
 

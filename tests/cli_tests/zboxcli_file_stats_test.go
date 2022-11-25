@@ -328,7 +328,7 @@ func TestFileStats(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats before and after update", func(t *test.SystemTest) {
+	t.RunWithTimeout("get file stats before and after update", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
@@ -404,7 +404,7 @@ func TestFileStats(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("get file stats before and after download", func(t *test.SystemTest) {
+	t.RunWithTimeout("get file stats before and after download", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
 
 		allocSize := int64(2048)
 

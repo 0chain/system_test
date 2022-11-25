@@ -17,6 +17,7 @@ import (
 )
 
 func TestCollaborator(testSetup *testing.T) {
+	//todo: some slow operations in here
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -94,7 +95,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "Unexpected output in add collaborator", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Collaborator _ collaborator must be able to read the file", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator must be able to read the file", 60*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -244,7 +245,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Len(t, meta.Collaborators, 0, "Collaborator must be removed from file collaborators list")
 	})
 
-	t.Run("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", func(t *test.SystemTest) {
+	t.RunWithTimeout("Remove Collaborator _ file shouldn't be accessible by collaborator anymore", 60*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -339,7 +340,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Remove Collaborator from a file owned by somebody else must fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Remove Collaborator from a file owned by somebody else must fail", 60*time.Second, func(t *test.SystemTest) {
 
 		ownerWalletName := escapedTestName(t) + "_owner"
 		anotherWalletName := escapedTestName(t) + "_another"
@@ -437,7 +438,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Add Collaborator _ collaborator should NOT be able to rename the file", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to rename the file", 60*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -648,7 +649,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.Run("Add Collaborator _ collaborator should NOT be able to download encrypted file", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to download encrypted file", 60*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 

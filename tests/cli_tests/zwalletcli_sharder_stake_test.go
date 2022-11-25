@@ -38,7 +38,7 @@ func TestSharderStake(testSetup *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.RunSequentially("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Staking tokens against valid sharder with valid tokens should work, unlocking should work", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -76,7 +76,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.RunSequentially("Multiple stakes against a sharder should not create multiple pools", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Multiple stakes against a sharder should not create multiple pools", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -151,7 +151,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	t.RunSequentially("Staking tokens against sharder should return intrests to wallet", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Staking tokens against sharder should return intrests to wallet", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

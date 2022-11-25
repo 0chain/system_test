@@ -10,11 +10,13 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestFileDelete(testSetup *testing.T) {
+	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -48,7 +50,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Delete file concurrently in existing directory, should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 60*time.Second, func(t *test.SystemTest) {
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -137,7 +139,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file with encryption should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file with encryption should work", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -221,7 +223,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing non-root directory should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -353,7 +355,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file in root directory with wallet balance accounting", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
@@ -392,7 +394,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
 
 		var allocationID, filename string
 		remotepath := "/"
@@ -423,7 +425,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by collaborator should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete shared file by collaborator should fail", 60*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 

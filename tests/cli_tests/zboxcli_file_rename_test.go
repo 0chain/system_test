@@ -91,7 +91,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("Rename file concurrently to existing directory, should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 60*time.Second, func(t *test.SystemTest) {
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -161,7 +161,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}
 	})
 
-	t.Run("Rename and delete file concurrently, should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) {
 
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
@@ -258,7 +258,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			require.Error(t, err)
 			require.Len(t, output, 1)
 		}
-	})
+	}) //todo: unacceptably slow
 
 	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
 
@@ -546,7 +546,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename root path should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("rename root path should fail", 60*time.Second, func(t *test.SystemTest) {
 
 		allocSize := int64(2048)
 
@@ -565,7 +565,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
-	})
+	}) //todo: too slow
 
 	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
 
@@ -586,7 +586,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
@@ -659,7 +659,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}
 		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
 		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
-	})
+	}) //todo: too slow
 
 	t.Run("rename file with no allocation param should fail", func(t *test.SystemTest) {
 

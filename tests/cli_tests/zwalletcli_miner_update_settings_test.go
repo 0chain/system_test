@@ -63,7 +63,9 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	cooldownPeriod := int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
 	lastRoundOfSettingUpdate := int64(0)
 
-	t.RunSequentially("Miner update min_stake by delegate wallet should work", func(t *test.SystemTest) {
+	//TODO these tests run sequentially and are painfully slow
+
+	t.RunSequentiallyWithTimeout("Miner update min_stake by delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -102,7 +104,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
-	t.RunSequentially("Miner update num_delegates by delegate wallet should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update num_delegates by delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -138,7 +140,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, 5, minerInfo.Settings.MaxNumDelegates)
 	})
 
-	t.RunSequentially("Miner update max_stake with delegate wallet should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update max_stake with delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -177,7 +179,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, 99, int(intToZCN(max_stake)))
 	})
 
-	t.RunSequentially("Miner update multiple settings with delegate wallet should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update multiple settings with delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -222,7 +224,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
-	t.RunSequentially("Miner update min_stake with less than global min stake should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update min_stake with less than global min stake should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -247,7 +249,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -1 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
 	})
 
-	t.RunSequentially("Miner update num_delegates greater than global max_delegates should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update num_delegates greater than global max_delegates should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -272,7 +274,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200", output[0])
 	})
 
-	t.RunSequentially("Miner update max_stake greater than global max_stake should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update max_stake greater than global max_stake should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -297,7 +299,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000", output[0])
 	})
 
-	t.RunSequentially("Miner update max_stake less than min_stake should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update max_stake less than min_stake should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -322,7 +324,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000", output[0])
 	})
 
-	t.RunSequentially("Miner update min_stake negative value should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update min_stake negative value should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -348,7 +350,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		t.Log("end test")
 	})
 
-	t.RunSequentially("Miner update max_stake negative value should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update max_stake negative value should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -373,7 +375,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
 	})
 
-	t.RunSequentially("Miner update num_delegate negative value should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update num_delegate negative value should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -398,7 +400,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: invalid non-positive number_of_delegates: -1", output[0])
 	})
 
-	t.RunSequentially("Miner update without miner id flag should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update without miner id flag should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -419,7 +421,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 	})
 
-	t.RunSequentially("Miner update with nothing to update should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update with nothing to update should fail", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -446,7 +448,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		t.Log("end test")
 	})
 
-	t.RunSequentially("Miner update settings from non-delegate wallet should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner update settings from non-delegate wallet should fail", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

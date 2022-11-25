@@ -22,7 +22,7 @@ func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool
 	return s.run(name, DefaultTestTimeout, testCaseFunction, true)
 }
 
-func (s *SystemTest) RunWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
+func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
 	return s.run(name, timeout, testCaseFunction, true)
 }
@@ -32,7 +32,7 @@ func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *Syste
 	return s.run(name, DefaultTestTimeout, testCaseFunction, false)
 }
 
-func (s *SystemTest) RunSequentiallyWithCustomTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
+func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.T.Helper()
 	return s.run(name, timeout, testCaseFunction, false)
 }

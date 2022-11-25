@@ -85,7 +85,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.Run("Multiple stakes against a miner should create multiple pools", func(t *test.SystemTest) {
+	t.RunWithTimeout("Multiple stakes against a miner should create multiple pools", 90*time.Second, func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -261,7 +261,8 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.Settings.MaxNumDelegates, newMiner.Settings.MaxNumDelegates), output[0])
 	})
 
-	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *test.SystemTest) {
+	///todo: again, too slow for a failure case
+	t.RunWithTimeout("Staking more tokens than max_stake of miner node should fail", 90*time.Second, func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -316,7 +317,8 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
-	t.Run("Staking tokens more than max_stake of a miner node through multiple stakes should fail", func(t *test.SystemTest) {
+	// TODO: way too slow
+	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 2*time.Minute, func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

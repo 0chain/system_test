@@ -227,7 +227,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer a finalized allocation", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer a finalized allocation", 5*time.Minute, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
@@ -283,9 +283,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
-	})
+	}) //todo: unacceptably slow
 
-	t.Run("transfer allocation and download non-encrypted file", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and download non-encrypted file", 90*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
@@ -363,9 +363,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Len(t, output, 2, "download file - Unexpected output length", strings.Join(output, "\n"))
 		require.Contains(t, output[1], StatusCompletedCB)
 		require.Contains(t, output[1], filepath.Base(filename))
-	})
+	}) //todo:slow
 
-	t.Run("transfer allocation and download with auth ticket should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and download with auth ticket should fail", 90*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
@@ -473,9 +473,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
 			"download file - Unexpected output", strings.Join(output, "\n"))
 		*/
-	})
+	}) //todo:slow
 
-	t.Run("transfer allocation and update allocation", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and update allocation", 90*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(4096),
@@ -549,7 +549,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-	})
+	}) //todo:slow
 
 	t.Run("transfer allocation with no allocation param should fail", func(t *test.SystemTest) {
 
@@ -709,7 +709,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("transfer allocation and upload file", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and upload file", 90*time.Second, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(20480),
@@ -785,7 +785,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
-	})
+	}) //todo:slow
 }
 
 func transferAllocationOwnership(t *test.SystemTest, param map[string]interface{}, retry bool) ([]string, error) {

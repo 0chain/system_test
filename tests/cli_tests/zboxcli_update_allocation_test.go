@@ -273,7 +273,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't get existing allocation: value not present", output[3])
 	})
 
-	t.Run("Update Expired Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours

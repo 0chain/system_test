@@ -17,7 +17,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Locking read pool tokens moves tokens from wallet to read pool", func(t *test.SystemTest) {
+	t.RunWithTimeout("Locking read pool tokens moves tokens from wallet to read pool", 70*time.Second, func(t *test.SystemTest) { //TOOD: slow
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

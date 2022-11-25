@@ -888,7 +888,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
@@ -991,7 +991,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.Run("Download with negative startblock should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download with negative startblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
@@ -1219,7 +1219,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
 
 		allocSize := int64(2048)
 		filesize := int64(256)

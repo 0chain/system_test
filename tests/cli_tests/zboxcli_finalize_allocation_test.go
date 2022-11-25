@@ -17,7 +17,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
+		//TODO: unacceptably slow
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-3) // In hours

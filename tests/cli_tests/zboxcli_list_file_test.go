@@ -521,7 +521,7 @@ func TestListFileSystem(testSetup *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	t.Run("List Files in Other's Wallet Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("List Files in Other's Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) { //todo: too slow
 
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
