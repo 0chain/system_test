@@ -24,7 +24,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 
 	newOwnerName := escapedTestName(t)
 
-	t.RunSequentially("should allow update of owner: StorageSC", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("should allow update of owner: StorageSC", 60*time.Second, func(t *test.SystemTest) {
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 

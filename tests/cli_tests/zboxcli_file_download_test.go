@@ -195,7 +195,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
-	t.Run("Download Entire Directory Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 60*time.Second, func(t *test.SystemTest) { // todo: slow
 
 		allocSize := int64(2048)
 		filesize := int64(256)
@@ -277,7 +277,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
-	t.Run("Download Shared File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
 
 		var authTicket, filename, originalFileChecksum string
 
@@ -334,7 +334,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Encrypted File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Encrypted File Should Work", 60*time.Second, func(t *test.SystemTest) {
 
 		allocSize := int64(10 * MB)
 		filesize := int64(10)

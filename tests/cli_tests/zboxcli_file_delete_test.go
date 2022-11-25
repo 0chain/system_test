@@ -180,7 +180,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by owner should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete shared file by owner should work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 

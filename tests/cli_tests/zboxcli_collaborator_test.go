@@ -95,7 +95,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "Unexpected output in add collaborator", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Add Collaborator _ collaborator must be able to read the file", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator must be able to read the file", 2*time.Minute, func(t *test.SystemTest) { // todo: too slow
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -438,7 +438,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Equal(t, "add_collaborator_failed: Failed to add collaborator on all blobbers.", output[0], "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to rename the file", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to rename the file", 90*time.Second, func(t *test.SystemTest) {
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
@@ -649,7 +649,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to download encrypted file", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to download encrypted file", 2*time.Minute, func(t *test.SystemTest) { // todo: too slow
 
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 

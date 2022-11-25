@@ -285,7 +285,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	}) //todo: unacceptably slow
 
-	t.RunWithTimeout("transfer allocation and download non-encrypted file", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation and download non-encrypted file", 2*time.Minute, func(t *test.SystemTest) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),

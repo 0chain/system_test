@@ -24,7 +24,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	t.Run("should allow update setting updates", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update setting updates", func(t *test.SystemTest) {
 		_ = initialiseTest(t, scOwnerWallet, false)
 
 		// ATM the owner is the only string setting and that is handled elsewhere

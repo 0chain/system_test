@@ -29,7 +29,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 	defer KillFFMPEG()
 
-	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 90*time.Second, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -179,7 +179,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
-	})
+	}) // TODO: TOO LONG
 
 	t.RunSequentially("Downloading local webcam feed to allocation", func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
