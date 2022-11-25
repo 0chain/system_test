@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"io/fs"
 	"log"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"gopkg.in/errgo.v2/errors"
 

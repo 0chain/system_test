@@ -2,10 +2,11 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -18,7 +19,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Wallet Creation should succeed when 0 < threshold <= num-signers", func(t *test.SystemTest) {
-
 		numSigners, threshold := 3, 2
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
@@ -30,7 +30,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should succeed when threshold is equal to num-signers", func(t *test.SystemTest) {
-
 		numSigners, threshold := 3, 3
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, true)
@@ -42,7 +41,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when threshold is 0", func(t *test.SystemTest) {
-
 		numSigners, threshold := 3, 0
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
@@ -54,7 +52,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when threshold is -1", func(t *test.SystemTest) {
-
 		numSigners, threshold := 3, -1
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
@@ -66,7 +63,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when signers is < 2", func(t *test.SystemTest) {
-
 		numSigners, threshold := 1, 1
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
@@ -78,7 +74,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when threshold is greater than num-signers", func(t *test.SystemTest) {
-
 		numSigners, threshold := 3, 4
 
 		output, err := createMultiSigWallet(t, configPath, numSigners, threshold, false)
@@ -92,7 +87,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when args not set", func(t *test.SystemTest) {
-
 		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--silent --wallet %s --configDir ./config --config %s", escapedTestName(t)+
 			"_wallet.json", configPath))
@@ -105,7 +99,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Wallet Creation should fail when threshold not set", func(t *test.SystemTest) {
-
 		output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet createmswallet "+
 			"--numsigners %d --silent --wallet %s --configDir ./config "+
 			"--config %s", 3, escapedTestName(t)+"_wallet.json", configPath))

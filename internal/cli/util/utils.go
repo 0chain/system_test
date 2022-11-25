@@ -3,7 +3,6 @@ package cliutils
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"math/big"
 	"os"
 	"os/exec"
@@ -11,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/cli/util/specific"
 

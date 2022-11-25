@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -20,7 +21,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Register wallet outputs expected", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
@@ -32,7 +32,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
@@ -45,7 +44,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 
@@ -54,7 +52,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
 

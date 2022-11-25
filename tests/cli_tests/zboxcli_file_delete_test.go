@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,6 +10,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +23,6 @@ func TestFileDelete(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -51,7 +51,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 60*time.Second, func(t *test.SystemTest) {
-
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -111,7 +110,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -140,7 +138,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete existing file with encryption should work", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -181,7 +178,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete shared file by owner should work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -224,7 +220,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -250,7 +245,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -287,7 +281,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -314,7 +307,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file that does not exist should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -330,7 +322,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
-
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -343,7 +334,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
-
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -356,7 +346,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete existing file in root directory with wallet balance accounting", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -395,7 +384,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
-
 		var allocationID, filename string
 		remotepath := "/"
 		filesize := int64(2)
@@ -426,7 +414,6 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("delete shared file by collaborator should fail", 60*time.Second, func(t *test.SystemTest) {
-
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)

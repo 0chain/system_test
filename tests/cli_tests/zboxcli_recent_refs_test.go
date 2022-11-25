@@ -3,12 +3,13 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -26,7 +27,6 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	t.RunWithTimeout("Recently Added Refs Should be listed", 60*time.Second, func(t *test.SystemTest) { //todo: slow
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -85,7 +85,6 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -129,7 +128,6 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Refs of someone else's allocation should return zero refs", 60*time.Second, func(t *test.SystemTest) { //todo: slow
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -177,7 +175,6 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 	})
 
 	t.Run("Invalid parameters should return error", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})

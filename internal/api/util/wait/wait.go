@@ -1,8 +1,9 @@
 package wait
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 )
 
 // PoolImmediately pools passed function for a certain amount of time

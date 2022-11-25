@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,6 @@ func TestCollectRewards(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Test collect reward with valid pool and blobber id should pass", 90*time.Second, func(t *test.SystemTest) { // TODO slow
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -115,7 +115,6 @@ func TestCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
-
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -153,7 +152,6 @@ func TestCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -191,7 +189,6 @@ func TestCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

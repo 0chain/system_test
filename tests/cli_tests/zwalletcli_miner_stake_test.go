@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"io"
 	"os"
 	"regexp"
@@ -12,6 +11,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -47,7 +48,6 @@ func TestMinerStake(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Staking tokens against valid miner with valid tokens should work", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -86,7 +86,6 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Multiple stakes against a miner should create multiple pools", 90*time.Second, func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -133,7 +132,6 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -148,7 +146,6 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Staking tokens against invalid node id should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -165,7 +162,6 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -217,7 +213,6 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *test.SystemTest) {
-
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
 			if newMiner.ID == miner02ID {
@@ -263,7 +258,6 @@ func TestMinerStake(testSetup *testing.T) {
 
 	///todo: again, too slow for a failure case
 	t.RunWithTimeout("Staking more tokens than max_stake of miner node should fail", 90*time.Second, func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -293,7 +287,6 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -319,7 +312,6 @@ func TestMinerStake(testSetup *testing.T) {
 	// FIXME: This does not fail. Is this by design or a bug?
 	// TODO: way too slow
 	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 2*time.Minute, func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -359,7 +351,6 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Unlock tokens with invalid node id should fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

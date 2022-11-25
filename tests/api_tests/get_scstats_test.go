@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,6 @@ func TestGetSCStats(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Get miner stats call should return successfully", func(t *test.SystemTest) {
-
 		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -31,7 +31,6 @@ func TestGetSCStats(testSetup *testing.T) {
 	})
 
 	t.Run("Get sharder stats call should return successfully", func(t *test.SystemTest) {
-
 		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)

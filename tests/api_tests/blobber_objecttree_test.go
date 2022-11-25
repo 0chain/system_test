@@ -1,9 +1,10 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
@@ -81,7 +82,6 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)

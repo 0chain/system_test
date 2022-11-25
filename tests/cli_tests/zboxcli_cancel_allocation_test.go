@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 
@@ -23,7 +24,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := cancelAllocation(t, configPath, allocationID, true)
@@ -57,7 +57,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
-
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
 		// otherAllocationID should not be cancelable from this level
@@ -69,7 +68,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-
 		allocationID := "123abc"
 
 		output, err := cancelAllocation(t, configPath, allocationID, false)
@@ -81,7 +79,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours
 

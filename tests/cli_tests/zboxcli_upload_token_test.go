@@ -3,11 +3,12 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -23,7 +24,6 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Challenge pool should be 0 before any write", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -58,7 +58,6 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 	})
 
 	t.Run("Total balance in blobber pool equals locked tokens", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 

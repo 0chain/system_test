@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"path/filepath"
 	"regexp"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
@@ -88,7 +89,6 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("transfer allocation accounting test", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(1024000),
 		})
@@ -178,7 +178,6 @@ func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -233,7 +232,6 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo // team pref
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("File copy - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -300,7 +298,6 @@ func Test___FlakyFileMove(testSetup *testing.T) { // nolint:gocyclo // team pref
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

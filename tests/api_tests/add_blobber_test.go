@@ -2,10 +2,11 @@ package api_tests
 
 import (
 	"crypto/rand"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -18,7 +19,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Add new blobber to allocation, should work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -46,7 +46,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -71,7 +70,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -99,7 +97,6 @@ func TestAddBlobber(testSetup *testing.T) {
 	})
 
 	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *test.SystemTest) {
-
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

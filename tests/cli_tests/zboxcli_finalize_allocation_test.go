@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -49,7 +50,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, false)
@@ -60,7 +60,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
-
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
 		// Then try updating with otherAllocationID: should not work
@@ -73,7 +72,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-
 		cmd := fmt.Sprintf(
 			"./zbox alloc-fini --silent "+
 				"--wallet %s --configDir ./config --config %s",

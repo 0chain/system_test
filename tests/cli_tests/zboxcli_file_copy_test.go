@@ -3,12 +3,13 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Parallel()
 
 	t.Run("copy file to existing directory", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -180,7 +180,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to non-existing directory should work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -253,7 +252,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to same directory should fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -317,7 +315,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to dir with existing children should work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -381,7 +378,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -473,7 +469,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy non-existing file should fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -492,7 +487,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
-
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
@@ -566,7 +560,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -581,7 +574,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -596,7 +588,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

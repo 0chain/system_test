@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -23,7 +24,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Sync path with 1 file to empty allocation should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -59,7 +59,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with 1 file encrypted to empty allocation should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -95,7 +94,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Sync path with 1 file to empty allocation and download the file should work", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -168,7 +166,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Sync path with 1 file encrypted to empty allocation and download the file should work", 60*time.Second, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -241,7 +238,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files encrypted to empty allocation should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -282,7 +278,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files to empty allocation should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -323,7 +318,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with multiple files in nested directories to empty allocation should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -370,7 +364,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path to NON-empty allocation (No filename Clashes) should work", func(t *test.SystemTest) {
-
 		originalFileName := "no clash filename.txt"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -448,7 +441,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path to NON-empty allocation (Replace Existing File) should work", func(t *test.SystemTest) {
-
 		originalFileName := "must Be Updated File.txt"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
@@ -529,7 +521,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -577,7 +568,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with cache flag should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -639,7 +629,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.Run("Sync path with uploadonly flag should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -687,7 +676,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Attempt to Sync to allocation not owned must fail", 2*time.Minute, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		defer createAllocationTestTeardown(t, allocationID)
 
@@ -724,7 +712,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	}) //todo: too slow
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
-
 		allocationID := "invalid-allocation-id"
 
 		// The folder structure tree

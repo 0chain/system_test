@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/base64"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"os"
 	"path/filepath"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("update file with thumbnail", 60*time.Second, func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -60,7 +60,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("File Update with same size - Users should not be charged, blobber should not be paid", 60*time.Second, func(t *test.SystemTest) {
-
 		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
 		// of size 1 MB. Get write pool info and check nothing has been deducted.
 
@@ -117,7 +116,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("update thumbnail of uploaded file", 60*time.Second, func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -176,7 +174,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.Run("update with another file of same size should work", func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
@@ -206,7 +203,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.Run("update with another file of bigger size should work", func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
@@ -237,7 +233,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("update non-encrypted file with encrypted file should work", 60*time.Second, func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -282,7 +277,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("update encrypted file with non-encrypted file should work", 60*time.Second, func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -326,7 +320,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("update encrypted file with encrypted file should work", 60*time.Second, func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -375,7 +368,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.Run("update file that does not exists should fail", func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
@@ -397,7 +389,6 @@ func TestFileUpdate(testSetup *testing.T) {
 	})
 
 	t.Run("update with another file of size larger than allocation should fail", func(t *test.SystemTest) {
-
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
 

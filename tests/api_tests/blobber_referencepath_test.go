@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
 	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"

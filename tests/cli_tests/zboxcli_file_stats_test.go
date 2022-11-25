@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"math"
 	"os"
 	"path"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -30,7 +31,6 @@ func TestFileStats(testSetup *testing.T) {
 	const chunksize = 64 * 1024
 
 	t.Run("get file stats in root directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -71,7 +71,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats in sub directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/dir/"
@@ -112,7 +111,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats in nested sub directory should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/nested/dir/"
@@ -153,7 +151,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats on an empty allocation", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -189,7 +186,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats for a file that does not exists", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -226,7 +222,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats for an allocation you dont own", func(t *test.SystemTest) {
-
 		otherAllocationID := ""
 		remotepath := "/"
 		filesize := int64(533)
@@ -287,7 +282,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no params supplied", func(t *test.SystemTest) {
-
 		setupAllocation(t, configPath)
 
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{}), false)
@@ -297,7 +291,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no allocation param supplied", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -316,7 +309,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.Run("get file stats with no remotepath param supplied", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
@@ -329,7 +321,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("get file stats before and after update", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
 		remotepath := "/"
@@ -405,7 +396,6 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("get file stats before and after download", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
-
 		allocSize := int64(2048)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{

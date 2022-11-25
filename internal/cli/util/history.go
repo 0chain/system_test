@@ -3,11 +3,12 @@ package cliutils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
 )
 
 const (

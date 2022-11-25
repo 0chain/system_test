@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	t.Parallel()
 
 	t.Run("rename file", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -92,7 +92,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 60*time.Second, func(t *test.SystemTest) {
-
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -162,7 +161,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) {
-
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -261,7 +259,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	}) //todo: unacceptably slow
 
 	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -325,7 +322,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -401,7 +397,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -476,7 +471,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to containing special characters", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -547,7 +541,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("rename root path should fail", 60*time.Second, func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 
 		remotePath := "/"
@@ -568,7 +561,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	}) //todo: too slow
 
 	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -587,7 +579,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
-
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
@@ -662,7 +653,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	}) //todo: too slow
 
 	t.Run("rename file with no allocation param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -678,7 +668,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with no remotepath param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -693,7 +682,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with no destname param should fail", func(t *test.SystemTest) {
-
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))

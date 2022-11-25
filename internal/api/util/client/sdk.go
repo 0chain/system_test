@@ -3,6 +3,10 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"os"
+	"path/filepath"
+	"sync"
+
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
@@ -10,9 +14,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"os"
-	"path/filepath"
-	"sync"
 )
 
 type SDKClient struct {

@@ -3,13 +3,14 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,6 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
-
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 

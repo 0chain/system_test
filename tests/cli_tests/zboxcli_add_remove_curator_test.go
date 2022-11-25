@@ -2,10 +2,11 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Add Curator _ must fail when the allocation doesn't exist", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -37,7 +37,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ attempt to add curator by anyone except allocation owner must fail", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -67,7 +66,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ must fail when 'curator' parameter is missing", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -90,7 +88,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Add Curator _ Curator must be able to transfer the allocation ownership", 60*time.Second, func(t *test.SystemTest) {
-
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
@@ -142,7 +139,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Add Curator _ Owner added as curator must be able to transfer the ownership", 60*time.Second, func(t *test.SystemTest) {
-
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
@@ -187,7 +183,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Owner must be able to add itself as curator", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
@@ -217,7 +212,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.Run("Add Curator _ Curator must be added to allocation curators' list", func(t *test.SystemTest) {
-
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 
 		output, err := registerWallet(t, configPath)
@@ -261,7 +255,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Remove Curator _ Curator must no longer be able to transfer the allocation ownership", 60*time.Second, func(t *test.SystemTest) {
-
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
@@ -320,7 +313,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Remove Curator _ Curator must be removed from the allocation curators list", 60*time.Second, func(t *test.SystemTest) {
-
 		curatorWalletName := escapedTestName(t) + "_CURATOR"
 
 		output, err := registerWallet(t, configPath)
