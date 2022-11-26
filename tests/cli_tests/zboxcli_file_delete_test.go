@@ -50,7 +50,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // TODO: unacceptably slow
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 3*time.Minute, func(t *test.SystemTest) { // TODO: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 

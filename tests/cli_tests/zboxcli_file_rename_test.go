@@ -91,7 +91,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -160,7 +160,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}
 	})
 
-	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: unacceptably slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -256,7 +256,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			require.Error(t, err)
 			require.Len(t, output, 1)
 		}
-	}) //todo: unacceptably slow
+	})
 
 	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
 		allocSize := int64(2048)
