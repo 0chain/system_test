@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -15,37 +16,44 @@ import (
 func TestBridgeBurn(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Burning WZCN tokens without WZCN tokens on balance, shouldn't work", func(t *testing.T) {
+	t.Run("Burning WZCN tokens on balance, should work", func(t *testing.T) {
 		t.Parallel()
 
-		//err := PrepareBridgeClient(t)
-		//require.NoError(t, err)
-
-		output, err := executeFaucetWithTokens(t, configPath, 10)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		fmt.Println(bridgeClientConfigFile)
-		output, err = burnEth(t, "10", bridgeClientConfigFile, true)
+		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
-		// todo: enable test: require.Nil(t, err, "error trying to burn WZCN tokens: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification:") // : WZCN burn [OK]")
+		require.Contains(t, output[len(output)-1], "Verification:")
 	})
 
-	t.Run("Burning WZCN tokens with available WZCN tokens on balance, should work", func(t *testing.T) {
+	t.Run("Get WZCN burn ticket, should work", func(t *testing.T) {
 		t.Parallel()
 
-		err := PrepareBridgeClient(t)
-		require.NoError(t, err)
-
-		output, err := executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = burnEth(t, "10", bridgeClientConfigFile, true)
-		require.Nil(t, err)
-		// todo: enable test: require.Nil(t, err, "error trying to burn WZCN tokens: %s", strings.Join(output, "\n"))
+		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
+		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification:") // : WZCN burn [OK]")
+		require.Contains(t, output[len(output)-1], "Verification:")
+
+		reg := regexp.MustCompile("0x[a-f0-9]{64}")
+		allHashes := reg.FindAllString(strings.Join(output, " "), -1)
+		ethTxHash := allHashes[len(allHashes)-1]
+
+		output, err = getWrappedZcnBurnTicket(t, ethTxHash, true)
+		require.Nil(t, err)
+
+		ethereumTxAddress := strings.TrimSpace(strings.Split(output[len(output)-2], ":")[1])
+		require.True(t, reg.MatchString(ethereumTxAddress))
+
+		amount := strings.TrimSpace(strings.Split(output[len(output)-3], ":")[1])
+		var amountInt int
+		amountInt, err = strconv.Atoi(amount)
+		require.Nil(t, err)
+		require.Equal(t, 1, amountInt)
+
+		nonce := strings.TrimSpace(strings.Split(output[len(output)-4], ":")[1])
+		var nonceInt int
+		nonceInt, err = strconv.Atoi(nonce)
+		require.Nil(t, err)
+		require.Equal(t, 1, nonceInt)
 	})
 
 	t.Run("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", func(t *testing.T) {
@@ -77,9 +85,11 @@ func TestBridgeBurn(t *testing.T) {
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 
-		hash := strings.TrimSpace(strings.Split(output[len(output)-2], ":")[1])
+		reg := regexp.MustCompile("[a-f0-9]{64}")
+		allHashes := reg.FindAllString(strings.Join(output, " "), -1)
+		zcnTxHash := allHashes[len(allHashes)-1]
 
-		output, err = getZcnBurnTicket(t, hash, false)
+		output, err = getZcnBurnTicket(t, zcnTxHash, true)
 		require.Nil(t, err)
 
 		amount := strings.TrimSpace(strings.Split(output[len(output)-2], ":")[1])
@@ -93,15 +103,6 @@ func TestBridgeBurn(t *testing.T) {
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
 		require.Equal(t, 1, nonceInt)
-	})
-
-	t.Run("Get WZCN burn ticket, should work", func(t *testing.T) {
-		t.Parallel()
-
-		output, err := getWrappedZcnBurnTicket(t, "0xdc935479f948d100f561d40d64ff75c5a20cd3a29ee4468360e04f54c880db77", false)
-		require.Nil(t, err, "error: '%s'", strings.Join(output, "\n"))
-		//require.Greater(t, len(output), 0)
-		//require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 }
 

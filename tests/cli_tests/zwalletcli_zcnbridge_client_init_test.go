@@ -266,6 +266,7 @@ func runCreateBridgeClientTestConfig(
 		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
 		" --value " + strconv.FormatInt(value, 10)
 
+	fmt.Println(cmd)
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	for _, opt := range opts {
