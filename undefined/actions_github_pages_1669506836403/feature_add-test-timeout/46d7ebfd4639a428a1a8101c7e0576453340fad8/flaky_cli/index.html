@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [feature_add-test-timeout/46d7ebfd] ran against [dev-3.devnet-0chain.net] at [2022-11-26_23.35.33]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [feature_add-test-timeout/46d7ebfd] ran against [dev-3.devnet-0chain.net] at [2022-11-26_23.35.33]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>71</strong>Duration: <strong>7ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>67</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>2</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>2</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">November 27, 2022 00:53:36</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  skipped" id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  skipped" id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+                <div class="testResultGroup  " id="33"></div>
+            
+                <div class="testResultGroup  " id="34"></div>
+            
+                <div class="testResultGroup  " id="35"></div>
+            
+                <div class="testResultGroup  " id="36"></div>
+            
+                <div class="testResultGroup  " id="37"></div>
+            
+                <div class="testResultGroup  " id="38"></div>
+            
+                <div class="testResultGroup  " id="39"></div>
+            
+                <div class="testResultGroup  " id="40"></div>
+            
+                <div class="testResultGroup  " id="41"></div>
+            
+                <div class="testResultGroup  " id="42"></div>
+            
+                <div class="testResultGroup  " id="43"></div>
+            
+                <div class="testResultGroup  " id="44"></div>
+            
+                <div class="testResultGroup  " id="45"></div>
+            
+                <div class="testResultGroup  " id="46"></div>
+            
+                <div class="testResultGroup  " id="47"></div>
+            
+                <div class="testResultGroup  " id="48"></div>
+            
+                <div class="testResultGroup  " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup  " id="52"></div>
+            
+                <div class="testResultGroup  " id="53"></div>
+            
+                <div class="testResultGroup  " id="54"></div>
+            
+                <div class="testResultGroup  " id="55"></div>
+            
+                <div class="testResultGroup  " id="56"></div>
+            
+                <div class="testResultGroup  " id="57"></div>
+            
+                <div class="testResultGroup  " id="58"></div>
+            
+                <div class="testResultGroup  " id="59"></div>
+            
+                <div class="testResultGroup  " id="60"></div>
+            
+                <div class="testResultGroup  " id="61"></div>
+            
+                <div class="testResultGroup  " id="62"></div>
+            
+                <div class="testResultGroup  " id="63"></div>
+            
+                <div class="testResultGroup failed " id="64"></div>
+            
+                <div class="testResultGroup  " id="65"></div>
+            
+                <div class="testResultGroup  " id="66"></div>
+            
+                <div class="testResultGroup failed " id="67"></div>
+            
+                <div class="testResultGroup  " id="68"></div>
+            
+                <div class="testResultGroup  " id="69"></div>
+            
+                <div class="testResultGroup  " id="70"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___broken_scenarios_test.go:30: \n","--- SKIP: Test___FlakyBrokenScenarios (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":27,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileCopy (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":231,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":31.83,"Output":["","    flaky___flaky_test.go:234: Test case [File copy - Users should not be charged for moving a file ] scheduled at [11-27-2022 00:47:04] \n","","","    system_test_framework.go:84: Test case [File copy - Users should not be charged for moving a file ] start at [11-27-2022 00:47:04] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    utils.go:138: Waiting 10s...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_file_copy_test.go:609: Copying file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:234: Test case [File copy - Users should not be charged for moving a file ] exit at [11-27-2022 00:47:31]\n","--- PASS: Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_ (31.83s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileMove (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":297,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.95,"Output":["","    flaky___flaky_test.go:300: Test case [File move - Users should not be charged for moving a file ] scheduled at [11-27-2022 00:47:36] \n","","","    system_test_framework.go:84: Test case [File move - Users should not be charged for moving a file ] start at [11-27-2022 00:47:36] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_file_move_test.go:539: Moving file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:300: Test case [File move - Users should not be charged for moving a file ] exit at [11-27-2022 00:47:52]\n","--- PASS: Test___FlakyFileMove/File_move_-_Users_should_not_be_charged_for_moving_a_file_ (21.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileRename (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":177,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.83,"Output":["","    flaky___flaky_test.go:180: Test case [File Rename - Users should not be charged for renaming a file] scheduled at [11-27-2022 00:46:42] \n","","","    system_test_framework.go:84: Test case [File Rename - Users should not be charged for renaming a file] start at [11-27-2022 00:46:42] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:180: Test case [File Rename - Users should not be charged for renaming a file] exit at [11-27-2022 00:46:59]\n","--- PASS: Test___FlakyFileRename/File_Rename_-_Users_should_not_be_charged_for_renaming_a_file (21.83s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:23: \n","--- SKIP: Test___FlakyScenariosCommonUserFunctions (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyTransferAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":88,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":221.56,"Output":["","    flaky___flaky_test.go:91: Test case [transfer allocation accounting test] scheduled at [11-27-2022 00:43:01] \n","","","    system_test_framework.go:84: Test case [transfer allocation accounting test] start at [11-27-2022 00:43:01] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:781: Transferring allocation ownership...\n","    zboxcli_transfer_allocation_test.go:798: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation 87ea1d580cf1adbf5b304baec4e673a3de7465f9c46d8b7912ebd17b6adaf3f9 --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2022/11/27 00:43:40.508420 wallet_base.go:262: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2022/11/27 00:43:40.508456 sdk.go:73: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2022/11/27 00:43:40.601350 transaction_base.go:138: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.680868 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.765607 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.766296 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.792815 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.798256 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/11/27 00:43:40.798284 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:43:40.798293 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation 87ea1d580cf1adbf5b304baec4e673a3de7465f9c46d8b7912ebd17b6adaf3f9 --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2022/11/27 00:44:00.827668 wallet_base.go:262: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2022/11/27 00:44:00.827706 sdk.go:73: ******* Storage SDK Version: v1.8.8-8-g3c6d3d6c *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2022/11/27 00:44:00.929553 transaction_base.go:138: ******* Wallet SDK Version:v1.8.8-8-g3c6d3d6c ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.009570 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.097076 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.097617 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.124147 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.124457 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2022/11/27 00:44:01.124488 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2022/11/27 00:44:01.124506 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:63: \u001b[32mCommand passed on retry [3/3]. Output: [[]]\n","    utils.go:138: Waiting 10s...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:138: Waiting 5s...\n","    utils.go:138: Waiting 2m0s...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:91: Test case [transfer allocation accounting test] exit at [11-27-2022 00:46:42]\n","--- PASS: Test___FlakyTransferAllocation/transfer_allocation_accounting_test (221.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.59,"Output":["","","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolAdd (10.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":26,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_destination_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.57,"Output":["","    flaky___unused_for_mainnet_test.go:568: Test case [Vesting pool add without destination flag should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool add without destination flag should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:568: Test case [Vesting pool add without destination flag should fail] exit at [11-27-2022 00:52:59]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_destination_flag_should_fail (5.57s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_duration_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.65,"Output":["","    flaky___unused_for_mainnet_test.go:581: Test case [Vesting pool add without duration flag should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool add without duration flag should fail] start at [11-27-2022 00:52:53] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:581: Test case [Vesting pool add without duration flag should fail] exit at [11-27-2022 00:52:59]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_duration_flag_should_fail (5.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_add_without_lock_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.58,"Output":["","    flaky___unused_for_mainnet_test.go:594: Test case [Vesting pool add without lock flag should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool add without lock flag should fail] start at [11-27-2022 00:52:53] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:594: Test case [Vesting pool add without lock flag should fail] exit at [11-27-2022 00:52:59]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_add_without_lock_flag_should_fail (5.58s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_for_duration_less_than_min_duration_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.94,"Output":["","    flaky___unused_for_mainnet_test.go:413: Test case [Vesting pool for duration less than min duration should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool for duration less than min duration should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:413: Test case [Vesting pool for duration less than min duration should fail] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_for_duration_less_than_min_duration_should_fail (17.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_description_greater_than_max_description_length_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.05,"Output":["","    flaky___unused_for_mainnet_test.go:502: Test case [Vesting pool with description greater than max description length should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with description greater than max description length should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:502: Test case [Vesting pool with description greater than max description length should fail] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_description_greater_than_max_description_length_should_fail (18.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_destinations_greater_than_max_destinations_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.69,"Output":["","    flaky___unused_for_mainnet_test.go:533: Test case [Vesting pool with destinations greater than max destinations should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with destinations greater than max destinations should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:533: Test case [Vesting pool with destinations greater than max destinations should fail] exit at [11-27-2022 00:53:28]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_destinations_greater_than_max_destinations_should_fail (34.69s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_duration_greater_than_max_duration_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.98,"Output":["","    flaky___unused_for_mainnet_test.go:443: Test case [Vesting pool with duration greater than max duration should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with duration greater than max duration should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:443: Test case [Vesting pool with duration greater than max duration should fail] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_duration_greater_than_max_duration_should_fail (17.98s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_excess_locked_tokens_should_work_and_allow_unlocking","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.13,"Output":["","    flaky___unused_for_mainnet_test.go:184: Test case [Vesting pool with excess locked tokens should work and allow unlocking] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with excess locked tokens should work and allow unlocking] start at [11-27-2022 00:52:53] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:184: Test case [Vesting pool with excess locked tokens should work and allow unlocking] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_excess_locked_tokens_should_work_and_allow_unlocking (18.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_invalid_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":9.02,"Output":["","    flaky___unused_for_mainnet_test.go:370: Test case [Vesting pool with invalid destination should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with invalid destination should fail] start at [11-27-2022 00:52:53] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:370: Test case [Vesting pool with invalid destination should fail] exit at [11-27-2022 00:53:02]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_invalid_destination_should_fail (9.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_lock_less_than_min_lock_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.06,"Output":["","    flaky___unused_for_mainnet_test.go:473: Test case [Vesting pool with lock less than min lock should fail] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with lock less than min lock should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:473: Test case [Vesting pool with lock less than min lock should fail] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_lock_less_than_min_lock_should_fail (18.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_locking_insufficient_tokens_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.86,"Output":["","    flaky___unused_for_mainnet_test.go:159: Test case [Vesting pool with locking insufficient tokens should fail] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with locking insufficient tokens should fail] start at [11-27-2022 00:53:02] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:159: Test case [Vesting pool with locking insufficient tokens should fail] exit at [11-27-2022 00:53:20]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_locking_insufficient_tokens_should_fail (17.86s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_and_description_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.32,"Output":["","    flaky___unused_for_mainnet_test.go:126: Test case [Vesting pool with multiple destinations and description should work] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with multiple destinations and description should work] start at [11-27-2022 00:52:59] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:126: Test case [Vesting pool with multiple destinations and description should work] exit at [11-27-2022 00:53:22]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_and_description_should_work (23.32s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.56,"Output":["","    flaky___unused_for_mainnet_test.go:94: Test case [Vesting pool with multiple destinations should work] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with multiple destinations should work] start at [11-27-2022 00:53:11] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:94: Test case [Vesting pool with multiple destinations should work] exit at [11-27-2022 00:53:35]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_multiple_destinations_should_work (23.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_one_valid_destination_and_one_invalid_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.44,"Output":["","    flaky___unused_for_mainnet_test.go:388: Test case [Vesting pool with one valid destination and one invalid destination should fail] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with one valid destination and one invalid destination should fail] start at [11-27-2022 00:52:59] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:388: Test case [Vesting pool with one valid destination and one invalid destination should fail] exit at [11-27-2022 00:53:13]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_one_valid_destination_and_one_invalid_destination_should_fail (14.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination,_valid_duration_and_valid_tokens_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.94,"Output":["","    flaky___unused_for_mainnet_test.go:42: Test case [Vesting pool with single destination, valid duration and valid tokens should work] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with single destination, valid duration and valid tokens should work] start at [11-27-2022 00:52:53] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:42: Test case [Vesting pool with single destination, valid duration and valid tokens should work] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination,_valid_duration_and_valid_tokens_should_work (17.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination_and_description_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.75,"Output":["","    flaky___unused_for_mainnet_test.go:68: Test case [Vesting pool with single destination and description should work] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with single destination and description should work] start at [11-27-2022 00:53:11] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:68: Test case [Vesting pool with single destination and description should work] exit at [11-27-2022 00:53:29]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_single_destination_and_description_should_work (17.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_for_multiple_destination_wallets_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.59,"Output":["","    flaky___unused_for_mainnet_test.go:257: Test case [Vesting pool with start time in future for multiple destination wallets should work] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with start time in future for multiple destination wallets should work] start at [11-27-2022 00:53:11] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:257: Test case [Vesting pool with start time in future for multiple destination wallets should work] exit at [11-27-2022 00:53:36]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_for_multiple_destination_wallets_should_work (24.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.96,"Output":["","    flaky___unused_for_mainnet_test.go:219: Test case [Vesting pool with start time in future should work] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with start time in future should work] start at [11-27-2022 00:53:11] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:219: Test case [Vesting pool with start time in future should work] exit at [11-27-2022 00:53:29]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_future_should_work (17.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_for_multiple_destinations_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.26,"Output":["","    flaky___unused_for_mainnet_test.go:334: Test case [Vesting pool with start time in past for multiple destinations should fail] scheduled at [11-27-2022 00:52:53] \n","","","    system_test_framework.go:84: Test case [Vesting pool with start time in past for multiple destinations should fail] start at [11-27-2022 00:52:59] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:334: Test case [Vesting pool with start time in past for multiple destinations should fail] exit at [11-27-2022 00:53:22]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_for_multiple_destinations_should_fail (23.26s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.97,"Output":["","    flaky___unused_for_mainnet_test.go:305: Test case [Vesting pool with start time in past should fail] scheduled at [11-27-2022 00:52:53] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with start time in past should fail] start at [11-27-2022 00:52:53] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:305: Test case [Vesting pool with start time in past should fail] exit at [11-27-2022 00:53:11]\n","--- PASS: Test___FlakyVestingPoolAdd/Vesting_pool_with_start_time_in_past_should_fail (17.97s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.6,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolDelete (10.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":608,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Deleting_someone_else's_vesting_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.65,"Output":["","    flaky___unused_for_mainnet_test.go:679: Test case [Deleting someone else's vesting pool should fail] scheduled at [11-27-2022 00:48:08] \n","","","","    system_test_framework.go:84: Test case [Deleting someone else's vesting pool should fail] start at [11-27-2022 00:48:08] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:729: Deleting vesting pool...\n","    flaky___unused_for_mainnet_test.go:679: Test case [Deleting someone else's vesting pool should fail] exit at [11-27-2022 00:48:35]\n","--- PASS: Test___FlakyVestingPoolDelete/Deleting_someone_else's_vesting_pool_should_fail (26.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.54,"Output":["","    flaky___unused_for_mainnet_test.go:622: Test case [Vesting pool delete should work] scheduled at [11-27-2022 00:48:08] \n","","","","    system_test_framework.go:84: Test case [Vesting pool delete should work] start at [11-27-2022 00:48:08] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","    utils.go:138: Waiting 1s...\n","    flaky___unused_for_mainnet_test.go:729: Deleting vesting pool...\n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:622: Test case [Vesting pool delete should work] exit at [11-27-2022 00:48:36]\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_should_work (27.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.74,"Output":["","    flaky___unused_for_mainnet_test.go:667: Test case [Vesting pool delete with invalid pool_id should fail] scheduled at [11-27-2022 00:48:08] \n","","","","    system_test_framework.go:84: Test case [Vesting pool delete with invalid pool_id should fail] start at [11-27-2022 00:48:08] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:729: Deleting vesting pool...\n","","    flaky___unused_for_mainnet_test.go:667: Test case [Vesting pool delete with invalid pool_id should fail] exit at [11-27-2022 00:48:17]\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_with_invalid_pool_id_should_fail (8.74s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolDelete/Vesting_pool_delete_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.55,"Output":["","    flaky___unused_for_mainnet_test.go:717: Test case [Vesting pool delete without pool id flag should fail] scheduled at [11-27-2022 00:48:08] \n","","","","    system_test_framework.go:84: Test case [Vesting pool delete without pool id flag should fail] start at [11-27-2022 00:48:08] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:729: Deleting vesting pool...\n","    flaky___unused_for_mainnet_test.go:717: Test case [Vesting pool delete without pool id flag should fail] exit at [11-27-2022 00:48:14]\n","--- PASS: Test___FlakyVestingPoolDelete/Vesting_pool_delete_without_pool_id_flag_should_fail (5.55s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.59,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolInfo (10.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":739,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_belonging_to_someone_else's_wallet_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.46,"Output":["","    flaky___unused_for_mainnet_test.go:881: Test case [Vesting pool info for pool belonging to someone else's wallet must fail] scheduled at [11-27-2022 00:48:47] \n","","","    system_test_framework.go:84: Test case [Vesting pool info for pool belonging to someone else's wallet must fail] start at [11-27-2022 00:48:47] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:881: Test case [Vesting pool info for pool belonging to someone else's wallet must fail] exit at [11-27-2022 00:49:10]\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_belonging_to_someone_else's_wallet_must_fail (23.46s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.85,"Output":["","    flaky___unused_for_mainnet_test.go:809: Test case [Vesting pool info for pool with multiple destinations should work] scheduled at [11-27-2022 00:48:47] \n","","","","    system_test_framework.go:84: Test case [Vesting pool info for pool with multiple destinations should work] start at [11-27-2022 00:48:47] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:809: Test case [Vesting pool info for pool with multiple destinations should work] exit at [11-27-2022 00:49:10]\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_for_pool_with_multiple_destinations_should_work (23.85s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":9.13,"Output":["","    flaky___unused_for_mainnet_test.go:918: Test case [Vesting pool info with invalid pool_id should fail] scheduled at [11-27-2022 00:48:47] \n","","","    system_test_framework.go:84: Test case [Vesting pool info with invalid pool_id should fail] start at [11-27-2022 00:48:47] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:918: Test case [Vesting pool info with invalid pool_id should fail] exit at [11-27-2022 00:48:56]\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_with_invalid_pool_id_should_fail (9.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_with_valid_pool_id_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.37,"Output":["","    flaky___unused_for_mainnet_test.go:754: Test case [Vesting pool info with valid pool_id should work] scheduled at [11-27-2022 00:48:47] \n","","","    system_test_framework.go:84: Test case [Vesting pool info with valid pool_id should work] start at [11-27-2022 00:48:47] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:754: Test case [Vesting pool info with valid pool_id should work] exit at [11-27-2022 00:49:08]\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_with_valid_pool_id_should_work (21.37s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolInfo/Vesting_pool_info_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.64,"Output":["","    flaky___unused_for_mainnet_test.go:933: Test case [Vesting pool info without pool id flag should fail] scheduled at [11-27-2022 00:48:47] \n","","","    system_test_framework.go:84: Test case [Vesting pool info without pool id flag should fail] start at [11-27-2022 00:48:47] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:933: Test case [Vesting pool info without pool id flag should fail] exit at [11-27-2022 00:48:52]\n","--- PASS: Test___FlakyVestingPoolInfo/Vesting_pool_info_without_pool_id_flag_should_fail (5.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.66,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolStop (10.66s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":945,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":41.44,"Output":["","    flaky___unused_for_mainnet_test.go:1032: Test case [Vesting pool stop for multiple destinations should work] scheduled at [11-27-2022 00:49:21] \n","","","","    system_test_framework.go:84: Test case [Vesting pool stop for multiple destinations should work] start at [11-27-2022 00:49:21] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1964: Stopping vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1032: Test case [Vesting pool stop for multiple destinations should work] exit at [11-27-2022 00:50:02]\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_multiple_destinations_should_work (41.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_pool_with_one_destination_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":30.16,"Output":["","    flaky___unused_for_mainnet_test.go:959: Test case [Vesting pool stop for pool with one destination should work] scheduled at [11-27-2022 00:49:21] \n","","","","    system_test_framework.go:84: Test case [Vesting pool stop for pool with one destination should work] start at [11-27-2022 00:49:21] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","    flaky___unused_for_mainnet_test.go:1964: Stopping vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:959: Test case [Vesting pool stop for pool with one destination should work] exit at [11-27-2022 00:49:51]\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_pool_with_one_destination_should_work (30.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_for_someone_else's_pool_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.4,"Output":["","    flaky___unused_for_mainnet_test.go:1115: Test case [Vesting pool stop for someone else's pool must fail] scheduled at [11-27-2022 00:49:21] \n","","","","    system_test_framework.go:84: Test case [Vesting pool stop for someone else's pool must fail] start at [11-27-2022 00:49:21] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1964: Stopping vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1115: Test case [Vesting pool stop for someone else's pool must fail] exit at [11-27-2022 00:49:47]\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_for_someone_else's_pool_must_fail (26.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_without_destination_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.52,"Output":["","    flaky___unused_for_mainnet_test.go:1174: Test case [Vesting pool stop without destination should fail] scheduled at [11-27-2022 00:49:21] \n","","","","    system_test_framework.go:84: Test case [Vesting pool stop without destination should fail] start at [11-27-2022 00:49:21] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1964: Stopping vesting pool...\n","    flaky___unused_for_mainnet_test.go:1174: Test case [Vesting pool stop without destination should fail] exit at [11-27-2022 00:49:27]\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_without_destination_should_fail (5.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolStop/Vesting_pool_stop_without_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.11,"Output":["","    flaky___unused_for_mainnet_test.go:1155: Test case [Vesting pool stop without pool id must fail] scheduled at [11-27-2022 00:49:21] \n","","","    system_test_framework.go:84: Test case [Vesting pool stop without pool id must fail] start at [11-27-2022 00:49:21] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1964: Stopping vesting pool...\n","    flaky___unused_for_mainnet_test.go:1155: Test case [Vesting pool stop without pool id must fail] exit at [11-27-2022 00:49:32]\n","--- PASS: Test___FlakyVestingPoolStop/Vesting_pool_stop_without_pool_id_must_fail (11.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyVestingPoolTokenAccounting (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1187,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_multiple_destinations_should_move_some_balance_to_pending_which_should_be_unlockable","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":38.3,"Output":["","    flaky___unused_for_mainnet_test.go:1265: Test case [Vesting pool with multiple destinations should move some balance to pending which should be unlockable] scheduled at [11-27-2022 00:50:02] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with multiple destinations should move some balance to pending which should be unlockable] start at [11-27-2022 00:50:02] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    utils.go:138: Waiting 1s...\n","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    utils.go:138: Waiting 1s...\n","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","    flaky___unused_for_mainnet_test.go:1265: Test case [Vesting pool with multiple destinations should move some balance to pending which should be unlockable] exit at [11-27-2022 00:50:41]\n","--- PASS: Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_multiple_destinations_should_move_some_balance_to_pending_which_should_be_unlockable (38.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_one_destination_should_move_some_balance_to_pending_which_should_be_unlockable","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.09,"Output":["","    flaky___unused_for_mainnet_test.go:1190: Test case [Vesting pool with one destination should move some balance to pending which should be unlockable] scheduled at [11-27-2022 00:50:02] \n","","","","    system_test_framework.go:84: Test case [Vesting pool with one destination should move some balance to pending which should be unlockable] start at [11-27-2022 00:50:02] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    utils.go:138: Waiting 1s...\n","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","    flaky___unused_for_mainnet_test.go:1190: Test case [Vesting pool with one destination should move some balance to pending which should be unlockable] exit at [11-27-2022 00:50:31]\n","--- PASS: Test___FlakyVestingPoolTokenAccounting/Vesting_pool_with_one_destination_should_move_some_balance_to_pending_which_should_be_unlockable (28.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.66,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolTrigger (10.66s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1383,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Triggering_someone_else's_pool_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.47,"Output":["","    flaky___unused_for_mainnet_test.go:1512: Test case [Triggering someone else's pool must fail] scheduled at [11-27-2022 00:50:51] \n","","","","    system_test_framework.go:84: Test case [Triggering someone else's pool must fail] start at [11-27-2022 00:50:51] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1953: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1512: Test case [Triggering someone else's pool must fail] exit at [11-27-2022 00:51:18]\n","--- PASS: Test___FlakyVestingPoolTrigger/Triggering_someone_else's_pool_must_fail (26.47s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_a_pool_with_multiple_destinations_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.45,"Output":["","    flaky___unused_for_mainnet_test.go:1449: Test case [Vesting pool trigger for a pool with multiple destinations should work] scheduled at [11-27-2022 00:50:51] \n","","","","    system_test_framework.go:84: Test case [Vesting pool trigger for a pool with multiple destinations should work] start at [11-27-2022 00:50:51] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1953: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:1449: Test case [Vesting pool trigger for a pool with multiple destinations should work] exit at [11-27-2022 00:51:19]\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_a_pool_with_multiple_destinations_should_work (27.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_one_destination_pool_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.64,"Output":["","    flaky___unused_for_mainnet_test.go:1398: Test case [Vesting pool trigger for one destination pool should work] scheduled at [11-27-2022 00:50:51] \n","","","","    system_test_framework.go:84: Test case [Vesting pool trigger for one destination pool should work] start at [11-27-2022 00:50:51] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","    flaky___unused_for_mainnet_test.go:1953: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    flaky___unused_for_mainnet_test.go:1398: Test case [Vesting pool trigger for one destination pool should work] exit at [11-27-2022 00:51:13]\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_for_one_destination_pool_should_work (21.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_with_invalid_pool_id_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.75,"Output":["","    flaky___unused_for_mainnet_test.go:1560: Test case [Vesting pool trigger with invalid pool id should fail] scheduled at [11-27-2022 00:50:51] \n","","","","    system_test_framework.go:84: Test case [Vesting pool trigger with invalid pool id should fail] start at [11-27-2022 00:50:51] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1953: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1560: Test case [Vesting pool trigger with invalid pool id should fail] exit at [11-27-2022 00:51:00]\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_with_invalid_pool_id_should_fail (8.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_without_pool_id_flag_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.54,"Output":["","    flaky___unused_for_mainnet_test.go:1550: Test case [Vesting pool trigger without pool id flag should fail] scheduled at [11-27-2022 00:50:51] \n","","","","    system_test_framework.go:84: Test case [Vesting pool trigger without pool id flag should fail] start at [11-27-2022 00:50:51] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1953: Triggering vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1550: Test case [Vesting pool trigger without pool id flag should fail] exit at [11-27-2022 00:50:57]\n","--- PASS: Test___FlakyVestingPoolTrigger/Vesting_pool_trigger_without_pool_id_flag_should_fail (5.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.59,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","--- PASS: Test___FlakyVestingPoolUnlock (10.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1573,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Unlocking_someone_else's_vesting_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.44,"Output":["","    flaky___unused_for_mainnet_test.go:1687: Test case [Unlocking someone else's vesting pool should fail] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Unlocking someone else's vesting pool should fail] start at [11-27-2022 00:51:29] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1687: Test case [Unlocking someone else's vesting pool should fail] exit at [11-27-2022 00:51:56]\n","--- PASS: Test___FlakyVestingPoolUnlock/Unlocking_someone_else's_vesting_pool_should_fail (26.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_by_destination_wallet_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.6,"Output":["","    flaky___unused_for_mainnet_test.go:1635: Test case [Vesting pool unlock by destination wallet should work] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Vesting pool unlock by destination wallet should work] start at [11-27-2022 00:51:29] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","","    flaky___unused_for_mainnet_test.go:1635: Test case [Vesting pool unlock by destination wallet should work] exit at [11-27-2022 00:51:56]\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_by_destination_wallet_should_work (26.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_for_one_destination_and_no_excess_tokens_in_pool_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.22,"Output":["","    flaky___unused_for_mainnet_test.go:1726: Test case [Vesting pool unlock for one destination and no excess tokens in pool should fail] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Vesting pool unlock for one destination and no excess tokens in pool should fail] start at [11-27-2022 00:51:29] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1726: Test case [Vesting pool unlock for one destination and no excess tokens in pool should fail] exit at [11-27-2022 00:51:52]\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_for_one_destination_and_no_excess_tokens_in_pool_should_fail (22.22s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_with_excess_tokens_in_pool_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.52,"Output":["","    flaky___unused_for_mainnet_test.go:1587: Test case [Vesting pool unlock with excess tokens in pool should work] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Vesting pool unlock with excess tokens in pool should work] start at [11-27-2022 00:51:29] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    flaky___unused_for_mainnet_test.go:1986: Adding a new vesting pool...\n","","    utils.go:138: Waiting 1s...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1975: fetching vesting pool info...\n","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1587: Test case [Vesting pool unlock with excess tokens in pool should work] exit at [11-27-2022 00:51:57]\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_pool_unlock_with_excess_tokens_in_pool_should_work (27.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_unlock_with_invalid_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.78,"Output":["","    flaky___unused_for_mainnet_test.go:1771: Test case [Vesting unlock with invalid pool id must fail] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Vesting unlock with invalid pool id must fail] start at [11-27-2022 00:51:29] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1771: Test case [Vesting unlock with invalid pool id must fail] exit at [11-27-2022 00:51:38]\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_unlock_with_invalid_pool_id_must_fail (8.78s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUnlock/Vesting_unlock_without_pool_id_must_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.57,"Output":["","    flaky___unused_for_mainnet_test.go:1761: Test case [Vesting unlock without pool id must fail] scheduled at [11-27-2022 00:51:29] \n","","","","    system_test_framework.go:84: Test case [Vesting unlock without pool id must fail] start at [11-27-2022 00:51:29] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1938: Unlocking a vesting pool...\n","","    flaky___unused_for_mainnet_test.go:1761: Test case [Vesting unlock without pool id must fail] exit at [11-27-2022 00:51:35]\n","--- PASS: Test___FlakyVestingPoolUnlock/Vesting_unlock_without_pool_id_must_fail (5.57s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.4,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___unused_for_mainnet_test.go","TestFunctionDetail":{"Line":1784,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/should_allow_update_of_max_destinations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.86,"Output":["","    flaky___unused_for_mainnet_test.go:1794: Test case [should allow update of max_destinations] scheduled at [11-27-2022 00:52:02] \n","","","","    system_test_framework.go:84: Test case [should allow update of max_destinations] start at [11-27-2022 00:52:02] \n","","    utils.go:138: Waiting 5s...\n","","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    utils.go:138: Waiting 5s...\n","    flaky___unused_for_mainnet_test.go:1905: Retrieving vesting config...\n","    zboxcli_update_allocation_test.go:581: Executing faucet...\n","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","    flaky___unused_for_mainnet_test.go:1794: Test case [should allow update of max_destinations] exit at [11-27-2022 00:52:26]\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/should_allow_update_of_max_destinations (23.86s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.77,"Output":["","    flaky___unused_for_mainnet_test.go:1852: Test case [update by non-smartcontract owner should fail] scheduled at [11-27-2022 00:52:02] \n","","","","    system_test_framework.go:84: Test case [update by non-smartcontract owner should fail] start at [11-27-2022 00:52:02] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    flaky___unused_for_mainnet_test.go:1852: Test case [update by non-smartcontract owner should fail] exit at [11-27-2022 00:52:11]\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_by_non-smartcontract_owner_should_fail (8.77s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_max_destinations_to_invalid_value_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":40.02,"Output":["","    flaky___unused_for_mainnet_test.go:1838: Test case [update max_destinations to invalid value should fail] scheduled at [11-27-2022 00:52:02] \n","","","    system_test_framework.go:84: Test case [update max_destinations to invalid value should fail] start at [11-27-2022 00:52:02] \n","","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    flaky___unused_for_mainnet_test.go:1838: Test case [update max_destinations to invalid value should fail] timed out after [40s]\n","    flaky___unused_for_mainnet_test.go:1838: Test case [update max_destinations to invalid value should fail] exit at [11-27-2022 00:52:42]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_bad_config_key_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.33,"Output":["","    flaky___unused_for_mainnet_test.go:1869: Test case [update with bad config key should fail] scheduled at [11-27-2022 00:52:02] \n","","","","    system_test_framework.go:84: Test case [update with bad config key should fail] start at [11-27-2022 00:52:02] \n","","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    flaky___unused_for_mainnet_test.go:1869: Test case [update with bad config key should fail] exit at [11-27-2022 00:52:06]\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_bad_config_key_should_fail (3.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_missing_keys_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.11,"Output":["","    flaky___unused_for_mainnet_test.go:1880: Test case [update with missing keys param should fail] scheduled at [11-27-2022 00:52:02] \n","","","    system_test_framework.go:84: Test case [update with missing keys param should fail] start at [11-27-2022 00:52:02] \n","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    flaky___unused_for_mainnet_test.go:1880: Test case [update with missing keys param should fail] exit at [11-27-2022 00:52:03]\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_missing_keys_param_should_fail (0.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyVestingPoolUpdateConfig/update_with_missing_values_param_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.5,"Output":["","    flaky___unused_for_mainnet_test.go:1889: Test case [update with missing values param should fail] scheduled at [11-27-2022 00:52:02] \n","","","","    system_test_framework.go:84: Test case [update with missing values param should fail] start at [11-27-2022 00:52:02] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    flaky___unused_for_mainnet_test.go:1917: Updating vesting config...\n","","    flaky___unused_for_mainnet_test.go:1889: Test case [update with missing values param should fail] exit at [11-27-2022 00:52:08]\n","--- PASS: Test___FlakyVestingPoolUpdateConfig/update_with_missing_values_param_should_fail (5.50s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
