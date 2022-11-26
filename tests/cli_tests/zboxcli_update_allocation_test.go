@@ -328,7 +328,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1023 < 1024", output[0])
 	})
 
-	t.Run("Update Other's Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Other's Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
 		var otherAllocationID string
 
 		myAllocationID := setupAllocation(t, configPath)

@@ -23,6 +23,7 @@ import (
 const StatusCompletedCB = "Status completed callback"
 
 func TestDownload(testSetup *testing.T) {
+	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
@@ -220,7 +221,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
-	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 60*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -369,7 +370,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared Encrypted File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared Encrypted File Should Work", 60*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -444,7 +445,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 	})
 
-	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download From Shared Folder by Remotepath Should Work", 60*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -500,7 +501,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download From Shared Folder by Lookup Hash Should Work", 60*time.Second, func(t *test.SystemTest) {
 		var authTicket, lookuphash, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -560,7 +561,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 60*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -607,7 +608,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 3)
 	})
 
-	t.Run("Download Shared File by Paying Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File by Paying Should Work", 60*time.Second, func(t *test.SystemTest) {
 		var allocationID, authTicket, filename string
 
 		filesize := int64(10)

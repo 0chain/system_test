@@ -47,7 +47,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 60*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
