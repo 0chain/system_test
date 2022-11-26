@@ -63,6 +63,27 @@ jobs:
           skip-pkg-cache: true
           only-new-issues: true
 
+  ensure-master-is-green:
+    if: github.ref != 'refs/heads/master'
+    name: "Ensure master is green"
+    runs-on: self-hosted
+    steps:
+      - name: Check CI
+        id: check-ci
+        uses: 0chain/actions/get-build-state@master
+        with:
+          github_token: ${{ github.token }}
+          repository: "0chain/system_test"
+          sha: master
+      - name: Success
+        if: ${{ env.BUILD_STATE == 'success' }}
+        run: echo "master is successful!"
+      - name: Not Successful
+        if: ${{ env.BUILD_STATE != 'success' }}
+        run: |
+          echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
+          exit 1
+        
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
@@ -155,3 +176,24 @@ jobs:
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
+
+  set-build-conclusion:
+    name: "Set build conclusion"
+    if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
+    needs: [ golangci, system-tests ]
+    runs-on: self-hosted
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v3
+      - name: "Parse status of ${{ env.WORKFLOW_CONCLUSION }}"
+        run: |
+          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
+            echo "WORKFLOW_CONCLUSION=failure" >> $GITHUB_ENV
+          fi
+      - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
+        uses: Sibz/github-status-action@v1
+        with:
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: '0Chain System Tests CI'
+          description: "Build status: ${{ env.WORKFLOW_CONCLUSION }}"
+          state: ${{ env.WORKFLOW_CONCLUSION }}
+          sha: ${{github.event.pull_request.head.sha || github.sha}}
