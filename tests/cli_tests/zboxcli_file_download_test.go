@@ -65,7 +65,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download File Concurrently Should Work from two Different Directory", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File Concurrently Should Work from two Different Directory", 6*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(4096)
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}

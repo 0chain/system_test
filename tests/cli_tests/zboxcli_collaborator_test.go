@@ -33,7 +33,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -67,7 +67,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		dirName := "/NewFolder"
 		output, err = createDir(t, configPath, allocationID, dirName, true)
@@ -107,7 +107,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -161,7 +161,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -200,7 +200,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -251,7 +251,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -310,7 +310,7 @@ func TestCollaborator(testSetup *testing.T) {
 		anotherWalletName := escapedTestName(t) + "_another"
 
 		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		output, err := registerWalletForName(t, configPath, anotherWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -339,7 +339,7 @@ func TestCollaborator(testSetup *testing.T) {
 		anotherWalletName := escapedTestName(t) + "_another"
 
 		allocationID := setupAllocationWithWallet(t, ownerWalletName, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		output, err := registerWalletForName(t, configPath, anotherWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -385,7 +385,7 @@ func TestCollaborator(testSetup *testing.T) {
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -440,7 +440,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
 		remotepath := "/tmp/" + filepath.Base(localpath)
@@ -480,7 +480,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
 		remotepath := "/tmp/" + filepath.Base(localpath)
@@ -519,7 +519,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
 		remotepath := "/tmp/" + filepath.Base(localpath)
@@ -559,7 +559,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
 		remotepath := "/tmp/" + filepath.Base(localpath)
@@ -606,7 +606,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/tmp", 128*KB)
 		remotepath := "/tmp/" + filepath.Base(localpath)
@@ -649,7 +649,7 @@ func TestCollaborator(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := generateRandomTestFileName(t)
 		err = createFileWithSize(localpath, 128*KB)

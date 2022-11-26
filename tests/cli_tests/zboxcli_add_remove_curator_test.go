@@ -49,7 +49,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		anotherClientWalletName := escapedTestName(t) + "_ANOTHER_WALLET"
 		output, err = registerWalletForName(t, configPath, anotherClientWalletName)
@@ -78,7 +78,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID})
 		output, err = addCurator(t, params, false)
@@ -115,7 +115,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
 		output, err = addCurator(t, params, true)
@@ -162,7 +162,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
 		output, err = addCurator(t, params, true)
@@ -198,7 +198,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": wallet.ClientID})
 		output, err = addCurator(t, params, true)
@@ -235,7 +235,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		allocation := getAllocation(t, allocationID)
 		require.Len(t, allocation.Curators, 0, "Curator list must be empty at the beginning")
@@ -282,7 +282,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
 		output, err = addCurator(t, params, true)
@@ -333,7 +333,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "curator": curatorWallet.ClientID})
 		output, err = addCurator(t, params, true)

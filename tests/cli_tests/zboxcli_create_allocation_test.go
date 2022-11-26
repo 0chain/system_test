@@ -274,5 +274,8 @@ func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, para
 }
 
 func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
-	_, _ = cancelAllocation(t, configPath, allocationID, false)
+	t.Cleanup(func() {
+		_, _ = cancelAllocation(t, configPath, allocationID, false)
+	})
+
 }

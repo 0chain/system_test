@@ -32,7 +32,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	defer KillFFMPEG()
 
 	// Success scenarios
-	t.RunSequentiallyWithTimeout("Uploading remote feed to allocation should work", 90*time.Second, func(t *test.SystemTest) { // todo slow
+	t.RunSequentiallyWithTimeout("Uploading remote feed to allocation should work", 2*time.Minute, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -106,7 +106,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 90*time.Second, func(t *test.SystemTest) { // todo slow
+	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 2*time.Minute, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -180,7 +180,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Upload from feed with a different chunknumber must work", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload from feed with a different chunknumber must work", 2*time.Minute, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {

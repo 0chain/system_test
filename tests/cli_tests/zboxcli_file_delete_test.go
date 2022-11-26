@@ -24,7 +24,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		const remotepath = "/"
 		filesize := int64(1 * KB)
@@ -50,7 +50,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 3*time.Minute, func(t *test.SystemTest) { // TODO: slow
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // TODO: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -111,7 +111,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/root/"
 		filesize := int64(1 * KB)
@@ -139,7 +139,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.RunWithTimeout("delete existing file with encryption should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 
@@ -187,7 +187,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -221,7 +221,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/root/"
 		filesize := int64(1 * KB)
@@ -246,7 +246,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -282,7 +282,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -308,7 +308,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete file that does not exist should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 
@@ -347,7 +347,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.RunWithTimeout("delete existing file in root directory with wallet balance accounting", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -423,7 +423,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
