@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
+
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 )
 
 func TestExecuteFaucet(t *testing.T) {
