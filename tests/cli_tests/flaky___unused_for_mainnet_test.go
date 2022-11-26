@@ -1029,7 +1029,7 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	})
 
 	// FIXME: this only stops last destination flag.
-	t.Run("Vesting pool stop for multiple destinations should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Vesting pool stop for multiple destinations should work", 90*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -1866,7 +1866,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("update with bad config key should fail", 90*time.Second, func(t *test.SystemTest) {
 		configKey := "unknown_key"
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,

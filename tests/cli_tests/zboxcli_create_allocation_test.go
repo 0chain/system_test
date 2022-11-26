@@ -277,5 +277,4 @@ func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
 	t.Cleanup(func() {
 		_, _ = cancelAllocation(t, configPath, allocationID, false)
 	})
-
 }

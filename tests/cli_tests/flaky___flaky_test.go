@@ -88,7 +88,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("transfer allocation accounting test", func(t *test.SystemTest) {
+	t.RunWithTimeout("transfer allocation accounting test", 6*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(1024000),
 		})
