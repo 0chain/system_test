@@ -4,11 +4,13 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
+	"github.com/0chain/system_test/internal/api/util/test"
 )
 
 var (
@@ -30,7 +32,15 @@ func TestMain(m *testing.M) {
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 
-	t := new(testing.T)
+	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
+	if err != nil {
+		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
+	} else {
+		test.DefaultTestTimeout = defaultTestTimeout
+		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
+	}
+
+	t := test.NewSystemTest(new(testing.T))
 
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)

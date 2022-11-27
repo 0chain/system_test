@@ -7,16 +7,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestWritePoolLockUnlock(t *testing.T) {
+func TestWritePoolLockUnlock(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -82,9 +84,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Unlocking tokens from finalized allocation should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -151,11 +151,9 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
-	})
+	}) //todo: this test takes on average 9 mins 20 seconds.. i'm not joking!!!
 
-	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -198,9 +196,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock negative write tokens", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -243,9 +239,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock zero write tokens", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Should not be able to lock zero write tokens", 60*time.Second, func(t *test.SystemTest) { //todo: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -288,9 +282,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Missing tokens flag should result in error", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -320,9 +312,7 @@ func TestWritePoolLockUnlock(t *testing.T) {
 		require.Equal(t, "missing required 'tokens' flag", output[0])
 	})
 
-	t.Run("Should not be able to unlock unexpired write tokens", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Should not be able to unlock unexpired write tokens", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -369,11 +359,11 @@ func TestWritePoolLockUnlock(t *testing.T) {
 	})
 }
 
-func writePoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return writePoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking write tokens...")
 	cmd := fmt.Sprintf("./zbox wp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
@@ -383,7 +373,7 @@ func writePoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params str
 	}
 }
 
-func writePoolUnlock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func writePoolUnlock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Unlocking write tokens...")
 	cmd := fmt.Sprintf("./zbox wp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
 	if retry {

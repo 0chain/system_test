@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -15,12 +17,13 @@ const (
 )
 
 // todo: enable tests
-func TestBridgeMint(t *testing.T) {
+func TestBridgeMint(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Mint WZCN tokens", func(t *testing.T) {
+	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
-		t.Parallel()
 
 		output, err := mintWrappedZcnTokens(t, TransactionHash, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
@@ -28,9 +31,8 @@ func TestBridgeMint(t *testing.T) {
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 
-	t.Run("Mint ZCN tokens", func(t *testing.T) {
+	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
-		t.Parallel()
 
 		output, err := mintZcnTokens(t, TransactionHash, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
@@ -39,8 +41,8 @@ func TestBridgeMint(t *testing.T) {
 	})
 }
 
-//nolint
-func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
+// nolint
+func mintZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-zcn %s --silent "+
@@ -56,8 +58,8 @@ func mintZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, 
 	}
 }
 
-//nolint
-func mintWrappedZcnTokens(t *testing.T, transactionHash string, retry bool) ([]string, error) {
+// nolint
+func mintWrappedZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-wzcn %s --silent "+

@@ -2,6 +2,9 @@ package api_tests
 
 import (
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -9,8 +12,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHashnodeRoot(t *testing.T) {
-	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
+func TestHashnodeRoot(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -45,7 +50,7 @@ func TestHashnodeRoot(t *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.Run("Get hashnode root for non-existent allocation should fail", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -70,9 +75,7 @@ func TestHashnodeRoot(t *testing.T) {
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.Run("Get hashnode root with bad signature should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

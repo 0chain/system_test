@@ -9,13 +9,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 )
 
-func TestFileMetadata(t *testing.T) {
+func TestFileMetadata(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
@@ -24,9 +28,7 @@ func TestFileMetadata(t *testing.T) {
 
 	// Success Scenarios
 
-	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// Upload a sample file
@@ -50,9 +52,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, int64(0), meta.Size)
 	})
 
-	t.Run("Get File Meta in Root Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -81,9 +81,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
-	t.Run("Get File Meta in Sub Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta in Sub Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/dir/"
@@ -109,16 +107,14 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, filesize, meta.Size)
 	})
 
-	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *test.SystemTest) {
 		var authTicket, filename, lookupHash string
 
 		filesize := int64(2)
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -166,9 +162,7 @@ func TestFileMetadata(t *testing.T) {
 
 	// FIXME: POSSIBLE BUG: Using lookuphash with remotepath causes no effects. lookuphash
 	// is simply ignored
-	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta by Path and Lookup Hash Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		filesize := int64(2)
 		remotepath := "/"
@@ -219,9 +213,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
-	t.Run("Get File Meta for Encrypted File Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta for Encrypted File Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -268,16 +260,14 @@ func TestFileMetadata(t *testing.T) {
 
 	// Failure Scenarios
 
-	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Get File Meta on Another Wallet File Should Fail", 60*time.Second, func(t *test.SystemTest) {
 		var otherAllocationID, otherfile string
 		allocationID := setupAllocation(t, configPath)
 
 		filesize := int64(10)
 		remotepath := "/"
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			otherfile = generateFileAndUpload(t, otherAllocationID, remotepath, 1)
@@ -333,9 +323,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta for Missing remotepath and authticket Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta for Missing remotepath and authticket Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -346,9 +334,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get Folder Meta in Empty Directory Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get Folder Meta in Empty Directory Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -361,9 +347,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "file_meta_error: Error getting the file meta data from blobbers", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta by Lookup Hash Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta by Lookup Hash Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		filesize := int64(2)
 		remotepath := "/"
@@ -385,9 +369,7 @@ func TestFileMetadata(t *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Get File Meta Without Parameter Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
@@ -399,11 +381,11 @@ func TestFileMetadata(t *testing.T) {
 	})
 }
 
-func getFileMeta(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileMeta(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return getFileMetaWithWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func getFileMetaWithWallet(t *testing.T, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileMetaWithWallet(t *test.SystemTest, walletName, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Getting file metadata...")
 	cmd := fmt.Sprintf(

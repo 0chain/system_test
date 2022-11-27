@@ -7,15 +7,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFinalizeAllocation(t *testing.T) {
+func TestFinalizeAllocation(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Finalize Expired Allocation Should Work after challenge completion time + expiry", func(t *testing.T) {
-		t.Parallel()
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
+		//TODO: unacceptably slow
 
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-3) // In hours
@@ -45,9 +49,7 @@ func TestFinalizeAllocation(t *testing.T) {
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
-	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, false)
@@ -57,9 +59,7 @@ func TestFinalizeAllocation(t *testing.T) {
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
 	})
 
-	t.Run("Finalize Other's Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
 		// Then try updating with otherAllocationID: should not work
@@ -71,9 +71,7 @@ func TestFinalizeAllocation(t *testing.T) {
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: not allowed, unknown finalization initiator", output[len(output)-1])
 	})
 
-	t.Run("No allocation param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		cmd := fmt.Sprintf(
 			"./zbox alloc-fini --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -88,7 +86,7 @@ func TestFinalizeAllocation(t *testing.T) {
 	})
 }
 
-func finalizeAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func finalizeAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-fini --allocation %s "+

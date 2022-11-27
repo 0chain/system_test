@@ -10,17 +10,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCollectRewards(t *testing.T) {
+func TestCollectRewards(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Test collect reward with valid pool and blobber id should pass", 90*time.Second, func(t *test.SystemTest) { // TODO slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -112,8 +114,7 @@ func TestCollectRewards(t *testing.T) {
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
 	})
 
-	t.Run("Test collect reward with invalid blobber id should fail", func(t *testing.T) {
-		t.Parallel()
+	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -150,8 +151,7 @@ func TestCollectRewards(t *testing.T) {
 		require.Contains(t, output[0], "collect_reward_failed")
 	})
 
-	t.Run("Test collect reward with invalid provider type should fail", func(t *testing.T) {
-		t.Parallel()
+	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -188,8 +188,7 @@ func TestCollectRewards(t *testing.T) {
 		require.Contains(t, output[0], "provider type must be blobber or validator")
 	})
 
-	t.Run("Test collect reward with no provider id or type should fail", func(t *testing.T) {
-		t.Parallel()
+	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -201,7 +200,7 @@ func TestCollectRewards(t *testing.T) {
 	})
 }
 
-func collectRewards(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func collectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("collecting rewards...")
 	cmd := fmt.Sprintf("./zbox collect-reward %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
 	if retry {

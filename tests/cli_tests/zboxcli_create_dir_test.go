@@ -6,17 +6,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateDir(t *testing.T) {
+func TestCreateDir(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("create root dir", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create root dir", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/rootdir"
@@ -38,9 +40,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create nested dir", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create nested dir", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/parent"
@@ -68,9 +68,7 @@ func TestCreateDir(t *testing.T) {
 		require.Contains(t, files, climodel.AllocationFile{Name: "child", Path: "/parent/child", Type: "d"})
 	})
 
-	t.Run("create with 100-char dir", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create with 100-char dir", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
@@ -96,9 +94,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with 101-char dirname", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with 101-char dirname", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
@@ -125,9 +121,7 @@ func TestCreateDir(t *testing.T) {
 		require.Len(t, files, 0)
 	})
 
-	t.Run("create dir with existing dirname should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create dir with existing dirname should work", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/existingdir"
@@ -142,9 +136,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, dirname+" directory created", output[0])
 	})
 
-	t.Run("create dir with no leading slash should not work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create dir with no leading slash should not work", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "noleadingslash"
@@ -154,9 +146,7 @@ func TestCreateDir(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "not absolute")
 	})
 
-	t.Run("create with existing dir but different case", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create with existing dir but different case", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/existingdir"
@@ -184,9 +174,7 @@ func TestCreateDir(t *testing.T) {
 		require.Contains(t, files, climodel.AllocationFile{Name: "existingDir", Path: "/existingDir", Type: "d"})
 	})
 
-	t.Run("create with non-existent parent dir", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create with non-existent parent dir", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/nonexistent/child"
@@ -208,9 +196,7 @@ func TestCreateDir(t *testing.T) {
 		require.Contains(t, files, climodel.AllocationFile{Name: "child", Path: "/nonexistent/child", Type: "d"})
 	})
 
-	t.Run("create with dir containing special characters", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create with dir containing special characters", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/abc!@#$%^&*()<>{}[]:;'?,."
@@ -232,9 +218,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with missing dirname param", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with missing dirname param", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
 		allocID := setupAllocation(t, configPath)
@@ -245,9 +229,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, "Error: dirname flag is missing", output[0])
 	})
 
-	t.Run("create attempt with empty dirname param", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with empty dirname param", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
 		allocID := setupAllocation(t, configPath)
@@ -258,9 +240,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, "CreateDir failed:  invalid_name: Invalid name for dir", output[0])
 	})
 
-	t.Run("create attempt with missing allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with missing allocation", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
@@ -275,9 +255,7 @@ func TestCreateDir(t *testing.T) {
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
-	t.Run("create attempt with empty allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with empty allocation", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
 		output, err := registerWallet(t, configPath)
@@ -293,9 +271,7 @@ func TestCreateDir(t *testing.T) {
 			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: , error: record not found", output[0])
 	})
 
-	t.Run("create attempt with invalid allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with invalid allocation", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -309,9 +285,7 @@ func TestCreateDir(t *testing.T) {
 			"can't get allocation: error retrieving allocation: invalidallocation, error: record not found", output[0])
 	})
 
-	t.Run("create attempt with someone else's allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("create attempt with someone else's allocation", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		allocID := setupAllocation(t, configPath)
@@ -327,11 +301,11 @@ func TestCreateDir(t *testing.T) {
 	})
 }
 
-func createDir(t *testing.T, cliConfigFilename, allocationID, dirname string, retry bool) ([]string, error) {
+func createDir(t *test.SystemTest, cliConfigFilename, allocationID, dirname string, retry bool) ([]string, error) {
 	return createDirForWallet(t, cliConfigFilename, escapedTestName(t), true, allocationID, true, dirname, retry)
 }
 
-func createDirForWallet(t *testing.T, cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string, retry bool) ([]string, error) {
+func createDirForWallet(t *test.SystemTest, cliConfigFilename, wallet string, withAllocationFlag bool, allocationID string, withDirnameFlag bool, dirname string, retry bool) ([]string, error) {
 	cmd := "./zbox createdir --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename
 	if withAllocationFlag {
 		cmd += ` --allocation "` + allocationID + `"`
@@ -347,11 +321,11 @@ func createDirForWallet(t *testing.T, cliConfigFilename, wallet string, withAllo
 	}
 }
 
-func listAll(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func listAll(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	return listAllWithWallet(t, escapedTestName(t), cliConfigFilename, allocationID, retry)
 }
 
-func listAllWithWallet(t *testing.T, wallet, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func listAllWithWallet(t *test.SystemTest, wallet, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing all...")
 	cmd := "./zbox list-all --silent --allocation " + allocationID +

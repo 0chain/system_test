@@ -4,17 +4,19 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRegisterWallet(t *testing.T) {
+func TestRegisterWallet(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Register wallet API call should be successful given a valid request", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Register wallet API call should be successful given a valid request", func(t *test.SystemTest) {
 		mnemonic := crypto.GenerateMnemonics(t)
 
 		registeredWallet, rawHttpResponse, err := apiClient.RegisterWalletForMnemonicWithoutAssertion(t, mnemonic, client.HttpOkStatus)

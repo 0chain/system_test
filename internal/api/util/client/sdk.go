@@ -6,18 +6,18 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"testing"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
 
 type SDKClient struct {
-	mutex sync.Mutex
+	Mutex sync.Mutex
 
 	blockWorker string
 	wallet      *model.SdkWallet
@@ -38,9 +38,9 @@ func NewSDKClient(blockWorker string) *SDKClient {
 	return sdkClient
 }
 
-func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonics string) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 	c.wallet = &model.SdkWallet{
 		ClientID:  wallet.Id,
 		ClientKey: wallet.PublicKey,
@@ -66,9 +66,9 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {

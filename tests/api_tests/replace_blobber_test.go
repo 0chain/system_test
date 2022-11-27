@@ -9,16 +9,17 @@ import (
 	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
-func TestReplaceBlobber(t *testing.T) {
+func TestReplaceBlobber(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Replace blobber in allocation, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -50,9 +51,7 @@ func TestReplaceBlobber(t *testing.T) {
 		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
 	})
 
-	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -80,9 +79,7 @@ func TestReplaceBlobber(t *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -113,9 +110,7 @@ func TestReplaceBlobber(t *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

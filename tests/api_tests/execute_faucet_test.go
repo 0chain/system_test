@@ -4,16 +4,17 @@ import (
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
 )
 
-func TestExecuteFaucet(t *testing.T) {
+func TestExecuteFaucet(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Execute Faucet API call should be successful given a valid request", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Execute Faucet API call should be successful given a valid request", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 
 		apiClient.ExecuteFaucetWithAssertions(t, wallet, client.TxSuccessfulStatus)

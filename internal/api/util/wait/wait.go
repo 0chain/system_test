@@ -1,13 +1,15 @@
 package wait
 
 import (
-	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 )
 
 // PoolImmediately pools passed function for a certain amount of time
-func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool) {
-	ticker := time.NewTicker(time.Millisecond * 500)
+func PoolImmediately(t *test.SystemTest, duration time.Duration, predicate func() bool) {
+	backoffPeriod := time.Second * 2
+	ticker := time.NewTicker(backoffPeriod)
 
 	defer ticker.Stop()
 
@@ -16,13 +18,13 @@ func PoolImmediately(t *testing.T, duration time.Duration, callback func() bool)
 	for range ticker.C {
 		select {
 		case <-after:
-			t.Fatal("Wait pool received a timeout")
+			t.Fatal("Timed out waiting for wait condition to pass")
 		default:
-			if callback() {
-				t.Log("Wait pool callback has succeed")
+			if predicate() {
+				t.Log("Wait condition has succeed")
 				return
 			}
-			t.Log("Wait pool callback has failed, continue...")
+			t.Logf("Wait condition failed. Waiting an additional [%v]...", backoffPeriod)
 		}
 	}
 }

@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/config"
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
@@ -37,6 +41,15 @@ func setupConfig() {
 	miner03ID = viper.GetString("nodes.miner03ID")
 	sharder01ID = viper.GetString("nodes.sharder01ID")
 	sharder02ID = viper.GetString("nodes.sharder02ID")
+
+	parsedConfig := config.Parse(filepath.Join(".", path, "cli_tests_config.yaml"))
+	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
+	if err != nil {
+		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
+	} else {
+		test.DefaultTestTimeout = defaultTestTimeout
+		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
+	}
 }
 
 const (

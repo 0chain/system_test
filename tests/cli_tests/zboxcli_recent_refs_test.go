@@ -9,22 +9,24 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestRecentlyAddedRefs(t *testing.T) {
+func TestRecentlyAddedRefs(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	t.Run("Recently Added Refs Should be listed", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Recently Added Refs Should be listed", 60*time.Second, func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -82,9 +84,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		}
 	})
 
-	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -127,9 +127,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Len(t, result.Refs, 0)
 	})
 
-	t.Run("Refs of someone else's allocation should return zero refs", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Refs of someone else's allocation should return zero refs", 60*time.Second, func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -176,9 +174,7 @@ func TestRecentlyAddedRefs(t *testing.T) {
 		require.Len(t, result.Refs, 0)
 	})
 
-	t.Run("Invalid parameters should return error", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Invalid parameters should return error", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -207,11 +203,11 @@ func TestRecentlyAddedRefs(t *testing.T) {
 	})
 }
 
-func listRecentlyAddedRefs(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func listRecentlyAddedRefs(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return listRecentlyAddedRefsForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func listRecentlyAddedRefsForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+func listRecentlyAddedRefsForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Log("Listing recently added refs")
 	cmd := fmt.Sprintf(
 		"./zbox recent-refs %s --silent --wallet %s --configDir ./config --config %s ",

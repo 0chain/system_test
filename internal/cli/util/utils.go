@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/cli/util/specific"
 
@@ -47,7 +48,7 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 	return output, err
 }
 
-func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
@@ -82,7 +83,7 @@ func RunCommand(t *testing.T, commandString string, maxAttempts int, backoff tim
 	}
 }
 
-func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
+func StartCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
 	var count int
 	for {
 		count++
@@ -104,21 +105,6 @@ func StartCommand(t *testing.T, commandString string, maxAttempts int, backoff t
 			return cmd, err
 		}
 	}
-}
-
-func StartCommandWithStd(commandString string) (cmd *exec.Cmd, stdOut, stdErr *strings.Builder, err error) {
-	command := parseCommand(commandString)
-	commandName := command[0]
-	args := command[1:]
-	sanitizedArgs := sanitizeArgs(args)
-
-	cmd = exec.Command(commandName, sanitizedArgs...)
-	specific.Setpgid(cmd)
-	cmd.Stdout = stdOut
-	cmd.Stderr = stdErr
-	err = cmd.Start()
-
-	return cmd, stdOut, stdErr, err
 }
 
 func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
@@ -148,7 +134,7 @@ func RandomAlphaNumericString(n int) string {
 	return string(ret)
 }
 
-func Wait(t *testing.T, duration time.Duration) {
+func Wait(t *test.SystemTest, duration time.Duration) {
 	t.Logf("Waiting %s...", duration)
 	time.Sleep(duration)
 }

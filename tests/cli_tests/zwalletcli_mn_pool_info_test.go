@@ -7,11 +7,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerSharderPoolInfo(t *testing.T) {
+func TestMinerSharderPoolInfo(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -47,9 +51,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.Run("Miner pool info after locking against miner should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -75,9 +77,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 	})
 
-	t.Run("Miner pool info after locking against sharder should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -104,9 +104,7 @@ func TestMinerSharderPoolInfo(t *testing.T) {
 		require.Nil(t, err, "error unmarshalling Miner Sharder pools")
 	})
 
-	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

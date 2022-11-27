@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 
@@ -21,16 +23,16 @@ import (
 
 var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
-func TestListFileSystem(t *testing.T) {
+func TestListFileSystem(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	t.Run("No Files in Allocation Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("No Files in Allocation Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -43,9 +45,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("List Files in Root Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files in Root Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the root directory
@@ -78,9 +78,7 @@ func TestListFileSystem(t *testing.T) {
 	})
 
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
-	t.Run("List Encrypted Files Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Encrypted Files Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -129,9 +127,7 @@ func TestListFileSystem(t *testing.T) {
 		require.NotEqual(t, "", result.EncryptionKey)
 	})
 
-	t.Run("List Files and Check Lookup Hash Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files and Check Lookup Hash Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		filesize := int64(2)
@@ -165,9 +161,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List Files in a Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files in a Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the a directory
@@ -198,9 +192,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List Files in Nested Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files in Nested Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the a directory
@@ -231,9 +223,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List a File Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List a File Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// First Upload a file to the a directory
@@ -266,9 +256,7 @@ func TestListFileSystem(t *testing.T) {
 	})
 
 	//FIXME: POSSIBLE BUG: Can't use lookuphash on self-owned wallet with remotepath doesn't work
-	t.Run("List Files Using Lookup Hash and RemotePath Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files Using Lookup Hash and RemotePath Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		filesize := int64(2)
@@ -314,16 +302,14 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List Files in Shared Directory Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Files in Shared Directory Should Work", func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -367,16 +353,14 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List a Shared File Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List a Shared File Should Work", func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
 		remotepath := "/"
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share File from Another Wallet", func(t *testing.T) {
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -421,9 +405,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, "f", result.Type)
 	})
 
-	t.Run("List Shared Files Using Lookup Hash Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List Shared Files Using Lookup Hash Should Work", func(t *test.SystemTest) {
 		var authTicket, filename, lookupHash string
 
 		filesize := int64(2)
@@ -431,7 +413,7 @@ func TestListFileSystem(t *testing.T) {
 		numFiles := 3
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Share Folder from Another Wallet", func(t *testing.T) {
+		t.Run("Share Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -478,9 +460,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Len(t, listResults, 3)
 	})
 
-	t.Run("List All Files Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List All Files Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		generateFileAndUpload(t, allocationID, "/", int64(10))
@@ -515,9 +495,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Equal(t, totalFolders, numFolder)
 	})
 
-	t.Run("No Parameter Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
 			"List files with no parameter failed due to error", err,
@@ -531,16 +509,14 @@ func TestListFileSystem(t *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	t.Run("List Files in Other's Wallet Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("List Files in Other's Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) { //todo: too slow
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
 
 		filesize := int64(10)
 		remotepath := "/"
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			generateFileAndUpload(t, otherAllocationID, remotepath, 1)
@@ -593,9 +569,7 @@ func TestListFileSystem(t *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "error from server list response:", strings.Join(output, "\n"))
 	})
 
-	t.Run("List All Files Should Work On An Empty Allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List All Files Should Work On An Empty Allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := listAllFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -626,7 +600,7 @@ func createFileWithSize(name string, size int64) error {
 	return os.WriteFile(name, buffer, os.ModePerm)
 }
 
-func generateRandomTestFileName(t *testing.T) string {
+func generateRandomTestFileName(t *test.SystemTest) string {
 	path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
 
 	//FIXME: Filenames longer than 100 characters are rejected see https://github.com/0chain/zboxcli/issues/249
@@ -634,11 +608,11 @@ func generateRandomTestFileName(t *testing.T) string {
 	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 }
 
-func shareFolderInAllocation(t *testing.T, cliConfigFilename, param string) ([]string, error) {
+func shareFolderInAllocation(t *test.SystemTest, cliConfigFilename, param string) ([]string, error) {
 	return shareFolderInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param)
 }
 
-func shareFolderInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string) ([]string, error) {
+func shareFolderInAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string) ([]string, error) {
 	t.Logf("Sharing file/folder...")
 	cmd := fmt.Sprintf(
 		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
@@ -649,12 +623,12 @@ func shareFolderInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, p
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func listFilesInAllocation(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func listFilesInAllocation(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return listFilesInAllocationForWallet(t, escapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func listFilesInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 15*time.Second) // TODO replace with poller
+func listFilesInAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
 	t.Logf("Listing individual file in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
@@ -669,8 +643,8 @@ func listFilesInAllocationForWallet(t *testing.T, wallet, cliConfigFilename, par
 	}
 }
 
-func listAllFilesInAllocation(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 15*time.Second) // TODO replace with poller
+func listAllFilesInAllocation(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
 	t.Logf("Listing all files in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",

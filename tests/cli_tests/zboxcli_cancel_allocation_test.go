@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -16,12 +18,12 @@ var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
 )
 
-func TestCancelAllocation(t *testing.T) {
+func TestCancelAllocation(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Cancel allocation immediately should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := cancelAllocation(t, configPath, allocationID, true)
@@ -30,9 +32,7 @@ func TestCancelAllocation(t *testing.T) {
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
-	t.Run("No allocation param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -46,9 +46,7 @@ func TestCancelAllocation(t *testing.T) {
 		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
 	})
 
-	t.Run("Cancel Other's Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
 		// otherAllocationID should not be cancelable from this level
@@ -59,9 +57,7 @@ func TestCancelAllocation(t *testing.T) {
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: only owner can cancel an allocation", output[len(output)-1])
 	})
 
-	t.Run("Cancel Non-existent Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID := "123abc"
 
 		output, err := cancelAllocation(t, configPath, allocationID, false)
@@ -72,9 +68,7 @@ func TestCancelAllocation(t *testing.T) {
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
 	})
 
-	t.Run("Cancel Expired Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours
 
@@ -102,7 +96,7 @@ func TestCancelAllocation(t *testing.T) {
 	})
 }
 
-func cancelAllocation(t *testing.T, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
+func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s --silent "+

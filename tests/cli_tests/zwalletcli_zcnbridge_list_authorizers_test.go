@@ -6,24 +6,26 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestListAuthorizers(t *testing.T) {
+func TestListAuthorizers(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("List authorizers should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("List authorizers should work", func(t *test.SystemTest) {
 		output, err := getAuthorizersList(t, true)
 
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
 	})
 }
 
-//nolint
-func getAuthorizersList(t *testing.T, retry bool) ([]string, error) {
+// nolint
+func getAuthorizersList(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Getting  list of authorizers...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-list-auth --silent "+

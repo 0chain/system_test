@@ -9,18 +9,22 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileDelete(t *testing.T) {
+func TestFileDelete(testSetup *testing.T) {
+	//todo: slow operations
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("delete existing file in root directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file in root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		const remotepath = "/"
 		filesize := int64(1 * KB)
@@ -46,9 +50,7 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Delete file concurrently in existing directory, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // TODO: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -107,11 +109,9 @@ func TestFileDelete(t *testing.T) {
 		}
 	})
 
-	t.Run("delete existing file in sub directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file in sub directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/root/"
 		filesize := int64(1 * KB)
@@ -137,11 +137,9 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file with encryption should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file with encryption should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 
@@ -179,9 +177,7 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by owner should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete shared file by owner should work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -191,7 +187,7 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -223,11 +219,9 @@ func TestFileDelete(t *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing non-root directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/root/"
 		filesize := int64(1 * KB)
@@ -250,11 +244,9 @@ func TestFileDelete(t *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing file with thumbnail should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file with thumbnail should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -288,11 +280,9 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing root directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -316,11 +306,9 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete file that does not exist should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("delete file that does not exist should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 
@@ -333,9 +321,7 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("%s deleted", remotepath+"doesnotexist"), output[0])
 	})
 
-	t.Run("delete file by not supplying remotepath should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -347,9 +333,7 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, output[0], "Error: remotepath flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("delete file by not supplying allocation ID should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err)
 
@@ -361,11 +345,9 @@ func TestFileDelete(t *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing file in root directory with wallet balance accounting", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file in root directory with wallet balance accounting", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		remotepath := "/"
 		filesize := int64(1 * KB)
@@ -401,9 +383,7 @@ func TestFileDelete(t *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("delete existing file in someone else's allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
 		var allocationID, filename string
 		remotepath := "/"
 		filesize := int64(2)
@@ -433,9 +413,7 @@ func TestFileDelete(t *testing.T) {
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 
-	t.Run("delete shared file by collaborator should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("delete shared file by collaborator should fail", 60*time.Second, func(t *test.SystemTest) {
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -445,7 +423,7 @@ func TestFileDelete(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
 		remotepath := "/" + filepath.Base(localpath)

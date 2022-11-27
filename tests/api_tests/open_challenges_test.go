@@ -3,17 +3,19 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenChallenges(t *testing.T) {
+func TestOpenChallenges(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -21,6 +23,7 @@ func TestOpenChallenges(t *testing.T) {
 		blobberId := (*allocationBlobbers.Blobbers)[0]
 
 		scRestOpenChallengeResponse, resp, err := apiClient.V1SCRestOpenChallenge(
+			t,
 			model.SCRestOpenChallengeRequest{
 				BlobberID: blobberId,
 			},

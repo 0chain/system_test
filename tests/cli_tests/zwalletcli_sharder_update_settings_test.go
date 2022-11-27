@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -16,7 +18,8 @@ import (
 
 const sharderAccessDenied = "update_sharder_settings: access denied"
 
-func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50 of func `
+func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic complexity 50 of func `
+	t := test.NewSystemTest(testSetup)
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -82,7 +85,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
-	t.Run("Sharder update min_stake by delegate wallet should work", func(t *testing.T) {
+	t.RunSequentially("Sharder update min_stake by delegate wallet should work", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -118,7 +121,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
-	t.Run("Sharder update num_delegates by delegate wallet should work", func(t *testing.T) {
+	t.RunSequentially("Sharder update num_delegates by delegate wallet should work", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -152,7 +155,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, 5, sharderInfo.Settings.MaxNumDelegates)
 	})
 
-	t.Run("Sharder update max_stake by delegate wallet should work", func(t *testing.T) {
+	t.RunSequentially("Sharder update max_stake by delegate wallet should work", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -188,7 +191,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, 99, int(intToZCN(max_stake)))
 	})
 
-	t.Run("Sharder update multiple settings with delegate wallet should work", func(t *testing.T) {
+	t.RunSequentially("Sharder update multiple settings with delegate wallet should work", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -230,7 +233,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, 98, int(intToZCN(max_stake)))
 	})
 
-	t.Run("Sharder update with min_stake less than global min should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update with min_stake less than global min should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -253,7 +256,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Sharder update with num_delegates more than global max_delegates should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update with num_delegates more than global max_delegates should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -276,7 +279,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update max_stake more than global max_stake should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update max_stake more than global max_stake should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -299,7 +302,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update min_stake greater than max_stake should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update min_stake greater than max_stake should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -323,7 +326,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update min_stake negative value should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update min_stake negative value should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -346,7 +349,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update max_stake negative value should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update max_stake negative value should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -369,7 +372,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update num_delegates negative value should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update num_delegates negative value should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -392,7 +395,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Sharder update without sharder id flag should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update without sharder id flag should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -411,7 +414,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Equal(t, "missing id flag", output[0])
 	})
 
-	t.Run("Sharder update with nothing to update should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update with nothing to update should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -434,7 +437,7 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 	})
 
-	t.Run("Sharder update settings from non-delegate wallet should fail", func(t *testing.T) {
+	t.RunSequentially("Sharder update settings from non-delegate wallet should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -476,11 +479,11 @@ func TestSharderUpdateSettings(t *testing.T) { //nolint cyclomatic complexity 50
 	})
 }
 
-func sharderUpdateSettings(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func sharderUpdateSettings(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharder01NodeDelegateWalletName, retry)
 }
 
-func sharderUpdateSettingsForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+func sharderUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Logf("Updating Sharder node info...")
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-node-settings --sharder %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)

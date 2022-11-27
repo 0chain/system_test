@@ -2,6 +2,9 @@ package api_tests
 
 import (
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
@@ -10,8 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestObjectTree(t *testing.T) {
-	t.Run("Get object tree with allocation id, remote path should work", func(t *testing.T) {
+func TestObjectTree(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -45,7 +50,7 @@ func TestObjectTree(t *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.Run("Get file ref for empty allocation should work", func(t *testing.T) {
+	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -76,7 +81,7 @@ func TestObjectTree(t *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.Run("Get file ref with invalid allocation id should fail", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -106,7 +111,7 @@ func TestObjectTree(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid sign should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -133,7 +138,7 @@ func TestObjectTree(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid remotepath should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
