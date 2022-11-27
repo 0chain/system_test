@@ -178,7 +178,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// todo rewards not transferred to wallet until a collect reward transaction
-	t.RunSequentiallyWithTimeout("Staking tokens against miner should return interest to wallet", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Staking tokens against miner should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)

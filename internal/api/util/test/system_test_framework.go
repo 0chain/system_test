@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-const sequentialTestMarker = "[SEQUENTIAL]: "
-
 var DefaultTestTimeout = 20 * time.Second
 
 type SystemTest struct {
@@ -38,7 +36,7 @@ func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCase
 
 func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
-	return s.run(sequentialTestMarker+name, timeout, testCaseFunction, false)
+	return s.run(name, timeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {

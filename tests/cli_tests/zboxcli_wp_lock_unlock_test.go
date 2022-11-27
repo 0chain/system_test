@@ -239,7 +239,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
-	t.Run("Should not be able to lock zero write tokens", func(t *test.SystemTest) {
+	t.RunWithTimeout("Should not be able to lock zero write tokens", 60*time.Second, func(t *test.SystemTest) { //todo: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

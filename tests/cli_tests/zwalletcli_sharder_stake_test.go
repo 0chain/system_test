@@ -152,7 +152,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	t.RunSequentiallyWithTimeout("Staking tokens against sharder should return interest to wallet", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Staking tokens against sharder should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
