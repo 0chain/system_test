@@ -37,6 +37,21 @@ func (ub *URLBuilder) AddParams(name, value string) *URLBuilder {
 	return ub
 }
 
+func (ub *URLBuilder) ParseStrictly(rawURL string) error {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
+
+	ub.formattedURL = *parsedURL
+	return nil
+}
+
+func (ub *URLBuilder) SetHostPrefix(hostPrefix string) *URLBuilder {
+	ub.formattedURL.Host = fmt.Sprintf("%s.%s", hostPrefix, ub.formattedURL.Host)
+	return ub
+}
+
 func (ub *URLBuilder) MustShiftParse(rawURL string) error {
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {

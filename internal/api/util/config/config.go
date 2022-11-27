@@ -14,7 +14,8 @@ const ConfigPathEnv = "CONFIG_PATH"
 const DefaultConfigPath = "./config/api_tests_config.yaml"
 
 type Config struct {
-	BlockWorker string `yaml:"block_worker"`
+	BlockWorker   string `yaml:"block_worker"`
+	ZeroBoxWorker string `yaml:"0box_worker"`
 }
 
 func Parse(configPath string) *Config {

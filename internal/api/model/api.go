@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/herumi/bls-go-binary/bls"
@@ -679,9 +680,7 @@ type GetAverageWritePriceResponse struct {
 	AverageWritePrice int `json:"average-write-price"`
 }
 
-type GetTotalMintedResponse struct {
-	TotalMinted int `json:"total-minted"`
-}
+type GetTotalMintedResponse int
 
 type GetTotalTotalChallengesResponse struct {
 	TotalTotalChallenges int `json:"total-total-challenges"`
@@ -700,92 +699,100 @@ type GetTotalStakedResponse struct {
 }
 
 type GetGraphBlobberInactiveRoundsRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberInactiveRoundsResponse []int
 
 type GetGraphBlobberChallengesCompletedRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberChallengesCompletedResponse []int
 
 type GetGraphBlobberChallengesPassedRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberChallengesPassedResponse []int
 
 type GetGraphBlobberServiceChargeRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberServiceChargeResponse []int
 
 type GetGraphBlobberWritePriceRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberWritePriceResponse []int
 
 type GetGraphBlobberCapacityRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberCapacityResponse []int
 
 type GetGraphBlobberAllocatedRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberAllocatedResponse []int
 
 type GetGraphBlobberSavedDataRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberSavedDataResponse []int
 
 type GetGraphBlobberReadDataRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberReadDataResponse []int
 
 type GetGraphBlobberOffersTotalRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberOffersTotalResponse []int
 
 type GetGraphBlobberUnstakeTotalRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberUnstakeTotalResponse []int
 
 type GetGraphBlobberTotalStakeRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberTotalStakeResponse []int
 
 type GetGraphBlobberChallengesOpenRequest struct {
-	DataPoints int
-	BlobberID  string
+	DataPoints    int
+	BlobberID, To string
 }
 
 type GetGraphBlobberChallengesOpenResponse []int
+
+type GetCurrentRoundResponse struct {
+	CurrentRound int `json:"current_round"`
+}
+
+func (cr *GetCurrentRoundResponse) CurrentRoundToString() string {
+	return strconv.Itoa(cr.CurrentRound)
+}

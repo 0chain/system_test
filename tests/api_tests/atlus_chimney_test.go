@@ -20,7 +20,7 @@ func TestAtlusChimney(t *testing.T) {
 		getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.NotZero(t, getTotalMintedResponse.TotalMinted, 0)
+		require.NotNil(t, getTotalMintedResponse)
 	})
 
 	t.Run("Check if amount of total minted tokens changed after faucet execution, should work", func(t *testing.T) {
@@ -31,19 +31,20 @@ func TestAtlusChimney(t *testing.T) {
 		getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.NotZero(t, getTotalMintedResponse.TotalMinted, 0)
+		require.NotNil(t, getTotalMintedResponse, 0)
 
-		totalMintedBefore := getTotalMintedResponse.TotalMinted
+		totalMintedBefore := getTotalMintedResponse
 
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
-		getTotalMintedResponse, resp, err = apiClient.V1SharderGetTotalMinted(client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotZero(t, getTotalMintedResponse.TotalMinted, 0)
+		wait.PoolImmediately(t, time.Minute, func() bool {
+			getTotalMintedResponse, resp, err = apiClient.V1SharderGetTotalMinted(client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, getTotalMintedResponse, 0)
 
-		totalMintedAfter := getTotalMintedResponse.TotalMinted
-		require.Greater(t, totalMintedAfter, totalMintedBefore)
+			return *getTotalMintedResponse > *totalMintedBefore
+		})
 	})
 
 	t.Run("Get total total challenges, should work", func(t *testing.T) {
@@ -572,15 +573,23 @@ func TestAtlusChimney(t *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
+		getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, getCurrentRoundResponse)
+
+		currentRoundString := getCurrentRoundResponse.CurrentRoundToString()
+
 		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
 			model.GetGraphBlobberSavedDataRequest{
 				DataPoints: 17,
 				BlobberID:  blobberId,
+				To:         currentRoundString,
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.NotZero(t, *getGraphBlobberSavedDataResponse)
+		require.NotNil(t, *getGraphBlobberSavedDataResponse)
 	})
 
 	t.Run("Get graph of read data of a certain blobber, should work", func(t *testing.T) {
@@ -600,7 +609,7 @@ func TestAtlusChimney(t *testing.T) {
 			client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.NotZero(t, *getGraphBlobberReadDataResponse)
+		require.NotNil(t, *getGraphBlobberReadDataResponse)
 	})
 
 	t.Run("Get graph of total offers of a certain blobber, should work", func(t *testing.T) {
