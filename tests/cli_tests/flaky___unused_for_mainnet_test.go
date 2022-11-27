@@ -1835,7 +1835,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.Run("update max_destinations to invalid value should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("update max_destinations to invalid value should fail", 60*time.Second, func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "x"
 

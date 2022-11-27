@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const sequentialTestMarker = "[SEQUENTIAL]: "
+
 var DefaultTestTimeout = 20 * time.Second
 
 type SystemTest struct {
@@ -21,7 +23,12 @@ func NewSystemTest(t *testing.T) *SystemTest {
 
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
-	return s.run(name, DefaultTestTimeout, testCaseFunction, true)
+	return s.RunWithTimeout(name, DefaultTestTimeout, testCaseFunction)
+}
+
+func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *SystemTest)) bool {
+	s.Unwrap.Helper()
+	return s.RunSequentiallyWithTimeout(name, DefaultTestTimeout, testCaseFunction)
 }
 
 func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
@@ -29,14 +36,9 @@ func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCase
 	return s.run(name, timeout, testCaseFunction, true)
 }
 
-func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *SystemTest)) bool {
-	s.Unwrap.Helper()
-	return s.run(name, DefaultTestTimeout, testCaseFunction, false)
-}
-
 func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
-	return s.run(name, timeout, testCaseFunction, false)
+	return s.run(sequentialTestMarker+name, timeout, testCaseFunction, false)
 }
 
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {

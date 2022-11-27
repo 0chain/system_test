@@ -276,7 +276,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunWithTimeout("update encrypted file with non-encrypted file should work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("update encrypted file with non-encrypted file should work", 90*time.Second, func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
