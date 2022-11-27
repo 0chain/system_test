@@ -256,7 +256,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Uploading local webcam feed to allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
@@ -324,7 +324,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Uploading local webcam feed to allocation with delay specified should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation with delay specified should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
@@ -393,7 +393,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Upload local webcam feed with a different chunknumber must work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload local webcam feed with a different chunknumber must work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -333,7 +334,7 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 	// The test is failing due to a possible bug.
 	// When owner downloads the file the cost is deduced from the read pool,
 	// But it seems the collaborators can download the file for free
-	t.Run("Add Collaborator _ file owner must pay for collaborators' reads", func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Collaborator _ file owner must pay for collaborators' reads", 60*time.Second, func(t *test.SystemTest) {
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)

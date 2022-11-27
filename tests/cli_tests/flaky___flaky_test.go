@@ -24,7 +24,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
-	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *test.SystemTest) {
+	t.RunWithTimeout("File Update with a different size - Blobbers should be paid for the extra file size", (1*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
@@ -231,7 +231,7 @@ func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo // team pr
 func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	t.Run("File copy - Users should not be charged for moving a file ", func(t *test.SystemTest) {
+	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

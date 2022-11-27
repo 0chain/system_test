@@ -509,7 +509,7 @@ func TestListFileSystem(testSetup *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("List Files in Other's Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("List Files in Other's Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
 
@@ -628,7 +628,7 @@ func listFilesInAllocation(t *test.SystemTest, cliConfigFilename, param string, 
 }
 
 func listFilesInAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 15*time.Second) // TODO replace with poller
+	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
 	t.Logf("Listing individual file in allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",

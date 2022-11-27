@@ -28,7 +28,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
 	require.NotEmpty(t, miner)
 
-	t.RunSequentially("Send ZCN between wallets with Fee flag - Fee must be paid to miners", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Send ZCN between wallets with Fee flag - Fee must be paid to miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -63,7 +63,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.RunSequentially("Vp-add with fee should pay fee to the miners", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Vp-add with fee should pay fee to the miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -104,7 +104,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.RunSequentially("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -164,7 +164,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.RunSequentially("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -222,7 +222,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 	})
 
-	t.RunSequentially("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

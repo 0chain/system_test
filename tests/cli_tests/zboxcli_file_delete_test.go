@@ -22,7 +22,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file in root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -109,7 +109,7 @@ func TestFileDelete(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file in sub directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -244,7 +244,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing file with thumbnail should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -280,7 +280,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("delete existing root directory should work", 60*time.Second, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 

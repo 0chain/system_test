@@ -191,7 +191,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload File to a Directory without Filename Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload File to a Directory without Filename Should Work", 60*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(1024)
 

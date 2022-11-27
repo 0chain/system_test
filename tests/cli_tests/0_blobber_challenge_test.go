@@ -20,6 +20,7 @@ import (
 )
 
 func TestBlobberChallenge(testSetup *testing.T) {
+	// todo: all of these tests poll for up to 2mins30s - is this reasonable?
 	t := test.NewSystemTest(testSetup)
 
 	output, err := registerWallet(t, configPath)
@@ -49,7 +50,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
-	t.RunSequentially("Uploading a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Uploading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -80,7 +81,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
 	})
 
-	t.RunSequentially("Downloading a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -123,7 +124,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
-	t.RunSequentially("Moving a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Moving a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -166,7 +167,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
-	t.RunSequentially("Deleting a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Deleting a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -208,7 +209,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
-	t.RunSequentially("Copying a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Copying a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -251,7 +252,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after a move operation")
 	})
 
-	t.RunSequentially("Updating a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Updating a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
@@ -298,7 +299,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, passed, "expected new challenges to be created after an update operation")
 	})
 
-	t.RunSequentially("Renaming a file greater than 1 MB should generate randomized challenges", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Renaming a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,

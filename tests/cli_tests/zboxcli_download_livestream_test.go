@@ -182,7 +182,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	}) // TODO: TOO LONG
 
-	t.RunSequentially("Downloading local webcam feed to allocation", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading local webcam feed to allocation", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
