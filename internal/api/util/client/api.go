@@ -272,7 +272,7 @@ func (c *APIClient) executeForServiceProvider(t *test.SystemTest, url string, ex
 func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
 		resp   *resty.Response
-		errors []error
+		respErrors []error
 	)
 
 	var expectedExecutionResponseCounter, notExpectedExecutionResponseCounter int
@@ -296,7 +296,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, executionRequest, method)
 		if err != nil {
-			errors = append(errors, err)
+			respErrors = append(respErrors, err)
 			continue
 		}
 
@@ -312,15 +312,15 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 		return nil, ErrExecutionConsensus
 	}
 
-	return resp, selectMostFrequentError(errors)
+	return resp, selectMostFrequentError(respErrors)
 }
 
-func selectMostFrequentError(errors []error) error {
+func selectMostFrequentError(respErrors []error) error {
 	frequencyCounters := make(map[error]int)
 	var maxMatch int
 	var result error
 
-	for _, error := range errors {
+	for _, error := range respErrors {
 		frequencyCounters[error]++
 		if frequencyCounters[error] > maxMatch {
 			maxMatch = frequencyCounters[error]
