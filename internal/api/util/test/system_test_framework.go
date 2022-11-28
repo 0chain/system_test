@@ -12,11 +12,11 @@ var DefaultTestTimeout = 20 * time.Second
 type SystemTest struct {
 	Unwrap       *testing.T
 	testComplete bool
-	isChildTest  bool
+	childTest    bool
 }
 
 func NewSystemTest(t *testing.T) *SystemTest {
-	return &SystemTest{Unwrap: t, testComplete: false, isChildTest: false}
+	return &SystemTest{Unwrap: t, testComplete: false, childTest: false}
 }
 
 func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
@@ -42,7 +42,7 @@ func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Durati
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {
 	s.Unwrap.Helper()
 	timeoutWrappedTestCase := func(testSetup *testing.T) {
-		t := &SystemTest{Unwrap: testSetup, testComplete: false, isChildTest: true}
+		t := &SystemTest{Unwrap: testSetup, testComplete: false, childTest: true}
 		testSetup.Helper()
 		defer handlePanic(t)
 
@@ -54,7 +54,7 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		testCaseChannel := make(chan struct{}, 1)
 
 		if runInParallel {
-			if !s.isChildTest {
+			if !s.childTest {
 				t.Parallel()
 			} else {
 				t.Logf("[WARN] Not running test case [%s] in parallel as it is a child test. Use t.Unwrap.run() then t.Parallel() if you wish to do this.", name)
@@ -124,7 +124,7 @@ func (s *SystemTest) Errorf(format string, args ...any) {
 	}
 }
 
-func (s *SystemTest) Fai() {
+func (s *SystemTest) Fail() {
 	if !s.testComplete {
 		s.Unwrap.Helper()
 		defer handleTestCaseExit()
