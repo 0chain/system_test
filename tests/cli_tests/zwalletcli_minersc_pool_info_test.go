@@ -8,13 +8,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerSCUserPoolInfo(t *testing.T) {
-	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *testing.T) {
+func TestMinerSCUserPoolInfo(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -61,7 +65,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		}
 	})
 
-	t.Run("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *testing.T) {
+	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -108,7 +112,7 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 		}
 	})
 
-	t.Run("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Getting MinerSC pools info for a different client id than wallet owner should work", 100*time.Second, func(t *test.SystemTest) { //TODO: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -177,11 +181,11 @@ func TestMinerSCUserPoolInfo(t *testing.T) {
 	})
 }
 
-func stakePoolsInMinerSCInfo(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func stakePoolsInMinerSCInfo(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return stakePoolsInMinerSCInfoForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
 
-func stakePoolsInMinerSCInfoForWallet(t *testing.T, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+func stakePoolsInMinerSCInfoForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("fetching mn-user-info...")
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-user-info %s --json --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)

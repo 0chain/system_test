@@ -9,18 +9,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("copy file to existing directory", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file to existing directory", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -93,7 +95,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("Copy file concurrently to existing directory, should work", func(t *testing.T) {
+	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: way too slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -176,9 +178,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, 2, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to non-existing directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file to non-existing directory should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -250,9 +250,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to same directory should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file to same directory should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -315,9 +313,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to dir with existing children should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file to dir with existing children should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -380,9 +376,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file to another directory with existing file with same name should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -473,9 +467,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy non-existing file should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy non-existing file should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -493,9 +485,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.Run("copy file from someone else's allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
@@ -568,9 +558,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy file with no allocation param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -584,9 +572,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
-	t.Run("copy file with no remotepath param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -600,9 +586,7 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	t.Run("copy file with no destpath param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -617,11 +601,11 @@ func TestFileCopy(t *testing.T) { // nolint:gocyclo // team preference is to hav
 	})
 }
 
-func copyFile(t *testing.T, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func copyFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	return copyFileForWallet(t, cliConfigFilename, escapedTestName(t), param, retry)
 }
 
-func copyFileForWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
+func copyFileForWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Copying file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
