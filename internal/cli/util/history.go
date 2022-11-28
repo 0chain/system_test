@@ -2,7 +2,8 @@ package cliutils
 
 import (
 	"fmt"
-	"testing"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/cli/model"
 )
@@ -60,7 +61,7 @@ func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
 	return fees
 }
 
-func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
+func (ch *ChainHistory) ReadBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/get_blocks")
 	params := map[string]string{
 		"contents": "full",

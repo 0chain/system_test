@@ -2,15 +2,14 @@ package cliutils
 
 import (
 	"encoding/json"
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"strconv"
-	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
-func ApiGet[T any](t *testing.T, url string, params map[string]string) *T {
+func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T {
 	url = addParms(url, params)
 
 	res, err := http.Get(url) //nolint:gosec
@@ -30,7 +29,7 @@ func ApiGet[T any](t *testing.T, url string, params map[string]string) *T {
 	return result
 }
 
-func ApiGetList[T any](t *testing.T, url string, params map[string]string, from, to int64) []T {
+func ApiGetList[T any](t *test.SystemTest, url string, params map[string]string, from, to int64) []T {
 	var out []T
 	var offset int64
 	for {
@@ -50,7 +49,7 @@ func ApiGetList[T any](t *testing.T, url string, params map[string]string, from,
 }
 
 //nolint
-func getNext(t *testing.T, url string, from, to, limit, offset int64, params map[string]string) []byte {
+func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, params map[string]string) []byte {
 	params["start"] = strconv.FormatInt(from, 10)
 	params["end"] = strconv.FormatInt(to, 10)
 	if limit > 0 {
