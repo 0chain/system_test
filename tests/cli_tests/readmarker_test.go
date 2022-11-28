@@ -8,18 +8,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
 
-func TestReadMarker(t *testing.T) {
+func TestReadMarker(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
 	const defaultBlobberCount = 4
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-	t.Run("After download reamarkers return a readmarker for each blobber", func(t *testing.T) {
+	t.Run("After download reamarkers return a readmarker for each blobber", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotePath := "/dir/"
@@ -47,7 +50,7 @@ func TestReadMarker(t *testing.T) {
 
 		time.Sleep(time.Second * 20)
 
-		readMarkers := GetReadMarkers(t, allocationId, "", sharderUrl)
+		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
 		require.Len(t, readMarkers, defaultBlobberCount)
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
@@ -55,7 +58,7 @@ func TestReadMarker(t *testing.T) {
 	})
 }
 
-func CountReadMarkers(t *testing.T, allocationId, sharderBaseUrl string) *climodel.ReadMarkersCount {
+func CountReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) *climodel.ReadMarkersCount {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/count_readmarkers")
 	params := map[string]string{
 		"allocation_id": allocationId,
@@ -63,7 +66,7 @@ func CountReadMarkers(t *testing.T, allocationId, sharderBaseUrl string) *climod
 	return cliutils.ApiGet[climodel.ReadMarkersCount](t, url, params)
 }
 
-func GetReadMarkers(t *testing.T, allocationId, authTicket, sharderBaseUrl string) []climodel.ReadMarker {
+func GetReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) []climodel.ReadMarker {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/readmarkers")
 	params := make(map[string]string)
 	if len(allocationId) > 0 {
