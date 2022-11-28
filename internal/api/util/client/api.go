@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -166,14 +167,14 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 
 	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "error fetching network details from url: " + formattedURL)
 	}
 
 	var networkServiceProviders *model.HealthyServiceProviders
 
 	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 	}
 
 	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
@@ -212,7 +213,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 		err = json.Unmarshal(resp.Body(), &nodes)
 		if err != nil {
-			return ErrNetworkHealthy
+			return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 		}
 
 		if len(nodes.Nodes) == 0 {
@@ -271,7 +272,7 @@ func (c *APIClient) executeForServiceProvider(t *test.SystemTest, url string, ex
 func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
 		resp   *resty.Response
-		errors []error
+		respErrors []error
 	)
 
 	var expectedExecutionResponseCounter, notExpectedExecutionResponseCounter int
@@ -295,7 +296,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, executionRequest, method)
 		if err != nil {
-			errors = append(errors, err)
+			respErrors = append(respErrors, err)
 			continue
 		}
 
@@ -311,15 +312,15 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 		return nil, ErrExecutionConsensus
 	}
 
-	return resp, selectMostFrequentError(errors)
+	return resp, selectMostFrequentError(respErrors)
 }
 
-func selectMostFrequentError(errors []error) error {
+func selectMostFrequentError(respErrors []error) error {
 	frequencyCounters := make(map[error]int)
 	var maxMatch int
 	var result error
 
-	for _, error := range errors {
+	for _, error := range respErrors {
 		frequencyCounters[error]++
 		if frequencyCounters[error] > maxMatch {
 			maxMatch = frequencyCounters[error]
