@@ -271,7 +271,7 @@ func (c *APIClient) executeForServiceProvider(t *test.SystemTest, url string, ex
 
 func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
-		resp   *resty.Response
+		resp       *resty.Response
 		respErrors []error
 	)
 
