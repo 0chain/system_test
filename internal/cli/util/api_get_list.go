@@ -2,11 +2,12 @@ package cliutils
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/stretchr/testify/require"
 )
 
 func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T {
