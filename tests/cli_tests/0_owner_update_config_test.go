@@ -6,10 +6,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 )
 
-func TestOwnerUpdate(t *testing.T) {
+func TestOwnerUpdate(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
@@ -21,7 +25,7 @@ func TestOwnerUpdate(t *testing.T) {
 
 	newOwnerName := escapedTestName(t)
 
-	t.Run("should allow update of owner: StorageSC", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("should allow update of owner: StorageSC", 60*time.Second, func(t *test.SystemTest) {
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -73,7 +77,7 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0])
 	})
 
-	t.Run("should allow update of owner: VestingSC", func(t *testing.T) {
+	t.RunSequentially("should allow update of owner: VestingSC", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -115,7 +119,7 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("should allow update of owner: MinerSC", func(t *testing.T) {
+	t.RunSequentially("should allow update of owner: MinerSC", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -157,7 +161,7 @@ func TestOwnerUpdate(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("should allow update of owner: FaucetSC", func(t *testing.T) {
+	t.RunSequentially("should allow update of owner: FaucetSC", func(t *test.SystemTest) {
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 

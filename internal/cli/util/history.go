@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 )
@@ -73,7 +73,7 @@ func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http
 	return http.Get(baseUrl + query)
 }
 
-func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
+func (ch *ChainHistory) ReadBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	var offset int64
 	for {
 		blocks := getBlocks(t, ch.from, ch.to, MaxQueryLimit, offset, sharderBaseUrl)
@@ -85,7 +85,7 @@ func (ch *ChainHistory) ReadBlocks(t *testing.T, sharderBaseUrl string) {
 	}
 }
 
-func getBlocks(t *testing.T, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDBBlock {
+func getBlocks(t *test.SystemTest, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDBBlock {
 	res, err := apiGetBlocks(from, to, limit, offset, sharderBaseUrl)
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
 	defer res.Body.Close()

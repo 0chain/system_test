@@ -13,17 +13,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("rename file", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -92,9 +94,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("Rename file concurrently to existing directory, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -163,9 +163,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}
 	})
 
-	t.Run("Rename and delete file concurrently, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: unacceptably slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -263,9 +261,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}
 	})
 
-	t.Run("rename file to same filename (no change)", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -328,9 +324,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, found, "file not found: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -405,9 +399,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -481,9 +473,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to containing special characters", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file to containing special characters", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -553,9 +543,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("File Rename - Users should not be charged for renaming a file", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -604,9 +592,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("rename root path should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("rename root path should fail", 60*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		remotePath := "/"
@@ -624,11 +610,9 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
-	})
+	}) //todo: too slow
 
-	t.Run("rename non-existing file should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -646,9 +630,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.Run("rename file from someone else's allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
@@ -720,11 +702,9 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		}
 		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
 		require.False(t, foundAtDest, "file is found at destination: ", strings.Join(output, "\n"))
-	})
+	}) //todo: too slow
 
-	t.Run("rename file with no allocation param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -739,9 +719,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
-	t.Run("rename file with no remotepath param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -755,9 +733,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
-	t.Run("rename file with no destname param should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("rename file with no destname param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -772,7 +748,7 @@ func TestFileRename(t *testing.T) { // nolint:gocyclo // team preference is to h
 	})
 }
 
-func renameFileWithWallet(t *testing.T, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
+func renameFileWithWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(

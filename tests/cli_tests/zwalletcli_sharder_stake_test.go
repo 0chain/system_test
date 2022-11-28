@@ -9,12 +9,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestSharderStake(t *testing.T) {
+func TestSharderStake(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
@@ -35,7 +39,7 @@ func TestSharderStake(t *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.Run("Staking tokens against valid sharder with valid tokens should work, unlocking should work", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Staking tokens against valid sharder with valid tokens should work, unlocking should work", 80*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -73,7 +77,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.Run("Multiple stakes against a sharder should not create multiple pools", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Multiple stakes against a sharder should not create multiple pools", 80*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -119,7 +123,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, poolsInfo.Pools[sharder.ID][0].ID, w.ClientID)
 	})
 
-	t.Run("Staking tokens with insufficient balance should fail", func(t *testing.T) {
+	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -132,7 +136,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, `delegate_pool_add: digging delegate pool: lock amount is greater than balance`, output[0])
 	})
 
-	t.Run("Staking negative tokens against valid sharder should fail", func(t *testing.T) {
+	t.RunSequentially("Staking negative tokens against valid sharder should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -148,7 +152,7 @@ func TestSharderStake(t *testing.T) {
 		require.Equal(t, `invalid token amount: negative`, output[0])
 	})
 
-	t.Run("Staking tokens against sharder should return intrests to wallet", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Staking tokens against sharder should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -182,7 +186,7 @@ func TestSharderStake(t *testing.T) {
 		}
 	})
 
-	t.Run("Unlock tokens with invalid pool id should fail", func(t *testing.T) {
+	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -196,7 +200,7 @@ func TestSharderStake(t *testing.T) {
 }
 
 // waitForRoundsGT waits for at least r rounds passed
-func waitForRoundsGT(t *testing.T, r int) error {
+func waitForRoundsGT(t *test.SystemTest, r int) error {
 	var (
 		lfb      = getLatestFinalizedBlock(t)
 		endRound = lfb.Round + int64(r)
@@ -216,7 +220,7 @@ func waitForRoundsGT(t *testing.T, r int) error {
 	}
 }
 
-func waitForStakePoolActive(t *testing.T) {
+func waitForStakePoolActive(t *test.SystemTest) {
 	vs := getMinerSCConfiguration(t)
 	round, ok := vs["reward_round_frequency"]
 	require.True(t, ok, "could not get reward_round_frequency from minersc config")

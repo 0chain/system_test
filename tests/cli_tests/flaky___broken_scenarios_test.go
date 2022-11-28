@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +25,9 @@ Tests in here are skipped until the feature has been fixed
 
 //nolint:gocyclo
 
-func Test___FlakyBrokenScenarios(t *testing.T) {
+func Test___FlakyBrokenScenarios(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Skip()
 	balance := 0.8 // 800.000 mZCN
 	err := os.MkdirAll("tmp", os.ModePerm)
@@ -31,11 +36,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	t.Parallel()
 
 	// FIXME The test is failing due to sync function inability to detect the file changes in local folder see https://github.com/0chain/zboxcli/issues/250
-	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localFolderRoot := filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
 		err := os.MkdirAll(localFolderRoot, os.ModePerm)
@@ -115,11 +118,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	// FIXME The test is failling due to sync function inability to detect the file changes in local folder see <tbd>
-	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -219,11 +220,9 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync. see <tbd>
-	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		// We want to exclude the folder containing this file from being synced
 		excludedFileName := "file1.txt"
@@ -335,9 +334,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// The test is failing due to a possible bug.
 	// When owner downloads the file the cost is deduced from the read pool,
 	// But it seems the collaborators can download the file for free
-	t.Run("Add Collaborator _ file owner must pay for collaborators' reads", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Add Collaborator _ file owner must pay for collaborators' reads", 60*time.Second, func(t *test.SystemTest) {
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
 		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
@@ -347,7 +344,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 4 * MB})
-		defer createAllocationTestTeardown(t, allocationID)
+		createAllocationTestTeardown(t, allocationID)
 
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 1*MB)
 		remotepath := "/" + filepath.Base(localpath)
@@ -411,9 +408,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	})
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
-	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -490,7 +485,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// FIXME: Commented out because these cases hang the broken test suite till timeout
 
 	// FIXME: add param validation
-	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *testing.T) {
+	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *test.SystemTest) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -527,8 +522,8 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// })
 
 	// FIXME: add param validation
-	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *testing.T) {
-	// 	t.Parallel()
+	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *test.SystemTest) {
+	//
 
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -567,7 +562,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// })
 
 	// FIXME: add param validation
-	// t.Run("Uploading youtube feed with negative delay should fail", func(t *testing.T) {
+	// t.Run("Uploading youtube feed with negative delay should fail", func(t *test.SystemTest) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -602,7 +597,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// })
 
 	// FIXME: add param validation
-	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *testing.T) {
+	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *test.SystemTest) {
 	// 	output, err := registerWallet(t, configPath)
 	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
@@ -636,7 +631,7 @@ func Test___FlakyBrokenScenarios(t *testing.T) {
 	// })
 }
 
-// func runUploadFeed(t *testing.T, cliConfigFilename, params string) error {
+// func runUploadFeed(t *test.SystemTest, cliConfigFilename, params string) error {
 // 	t.Logf("Starting upload of live stream to zbox...")
 // 	commandString := fmt.Sprintf("./zbox upload %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
 // 	_, err := cliutils.RunCommandWithoutRetry(commandString)

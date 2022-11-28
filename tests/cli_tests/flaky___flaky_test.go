@@ -9,18 +9,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/stretchr/testify/require"
 )
 
-func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
+func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Skip()
+	t.Parallel()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
-	t.Run("File Update with a different size - Blobbers should be paid for the extra file size", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("File Update with a different size - Blobbers should be paid for the extra file size", (1*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
@@ -81,12 +84,10 @@ func Test___FlakyScenariosCommonUserFunctions(t *testing.T) {
 	})
 }
 
-func Test___FlakyTransferAllocation(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	t.Parallel()
+func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.NewSystemTest(testSetup)
 
-	t.Run("transfer allocation accounting test", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("transfer allocation accounting test", 6*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(1024000),
 		})
