@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -166,14 +167,14 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 
 	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "error fetching network details from url: " + formattedURL)
 	}
 
 	var networkServiceProviders *model.HealthyServiceProviders
 
 	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 	}
 
 	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
@@ -212,7 +213,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 		err = json.Unmarshal(resp.Body(), &nodes)
 		if err != nil {
-			return ErrNetworkHealthy
+			return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 		}
 
 		if len(nodes.Nodes) == 0 {
