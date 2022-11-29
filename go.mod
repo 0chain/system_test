@@ -23,6 +23,7 @@ require (
 	github.com/0chain/errors v1.0.3
 	github.com/0chain/gosdk v1.8.9
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/google/go-cmp v0.5.9
 	github.com/herumi/bls-go-binary v1.28.2
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0

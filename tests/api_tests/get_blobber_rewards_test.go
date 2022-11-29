@@ -25,12 +25,20 @@ func TestBlobberRewards(t *testing.T) {
 
 		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
-		// TODO: replace with native "Upload API" call
-		//sdkClient.StartSession(func() {
-		//	sdkClient.SetWallet(t, wallet, mnemonic)
-		//
-		//	sdkClient.UploadFile(t, allocationID)
-		//})
+		sdkClient.StartSession(func() {
+			//mnemonic := crypto.GenerateMnemonics(t)
+			//
+			//registeredWallet, rawHttpResponse, err := apiClient.RegisterWalletForMnemonicWithoutAssertion(t, mnemonic, client.HttpOkStatus)
+			//require.Nil(t, err)
+			//require.NotNil(t, rawHttpResponse)
+			//
+			//sdkClient.SetWallet(t, registeredWallet, mnemonic)
+
+			sdkClient.UploadFile(t, allocationID)
+		})
+
+		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+		balanceBefore := walletBalance.Balance
 
 		var rewards int64
 
@@ -46,10 +54,6 @@ func TestBlobberRewards(t *testing.T) {
 
 			return rewards > 0
 		})
-
-		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
-		balanceBefore := walletBalance.Balance
-
 		apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)

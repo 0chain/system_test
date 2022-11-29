@@ -793,6 +793,6 @@ type GetCurrentRoundResponse struct {
 	CurrentRound int `json:"current_round"`
 }
 
-func (cr *GetCurrentRoundResponse) CurrentRoundToString() string {
-	return strconv.Itoa(cr.CurrentRound)
+func (cr *GetCurrentRoundResponse) CurrentRoundTwiceToString() string {
+	return strconv.Itoa(cr.CurrentRound * 2)
 }

@@ -1,6 +1,8 @@
 package api_tests
 
 import (
+	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
 
@@ -578,7 +580,7 @@ func TestAtlusChimney(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotNil(t, getCurrentRoundResponse)
 
-		currentRoundString := getCurrentRoundResponse.CurrentRoundToString()
+		currentRoundString := getCurrentRoundResponse.CurrentRoundTwiceToString()
 
 		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
 			model.GetGraphBlobberSavedDataRequest{
@@ -590,6 +592,58 @@ func TestAtlusChimney(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, *getGraphBlobberSavedDataResponse)
+	})
+
+	t.Run("Check if a graph of all data of a certain blobber will change after file upload, should work", func(t *testing.T) {
+		t.Parallel()
+
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		sdkClient.StartSession(func() {
+			sdkClient.UploadFile(t, allocationID)
+		})
+
+		getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, getCurrentRoundResponse)
+
+		currentRoundTwiceString := getCurrentRoundResponse.CurrentRoundTwiceToString()
+
+		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
+			model.GetGraphBlobberSavedDataRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+				To:         currentRoundTwiceString,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, *getGraphBlobberSavedDataResponse)
+		getGraphBlobberSavedDataResponseBefore := *getGraphBlobberSavedDataResponse
+
+		wait.PoolImmediately(t, time.Minute*4, func() bool {
+			getGraphBlobberSavedDataResponse, resp, err = apiClient.V1SharderGetGraphBlobberSavedData(
+				model.GetGraphBlobberSavedDataRequest{
+					DataPoints: 17,
+					BlobberID:  blobberId,
+					To:         currentRoundTwiceString,
+				},
+				client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, *getGraphBlobberSavedDataResponse)
+
+			fmt.Println(getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
+
+			return !cmp.Equal(*getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
+		})
 	})
 
 	t.Run("Get graph of read data of a certain blobber, should work", func(t *testing.T) {
