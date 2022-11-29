@@ -133,7 +133,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `delegate_pool_add: digging delegate pool: lock amount is greater than balance`, output[0])
+		require.Equal(t, `stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance`, output[0])
 	})
 
 	t.RunSequentially("Staking negative tokens against valid sharder should fail", func(t *test.SystemTest) {
@@ -195,7 +195,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
+		require.Equal(t, "delegate_pool_del: error getting miner node: value not present", output[0])
 	})
 }
 

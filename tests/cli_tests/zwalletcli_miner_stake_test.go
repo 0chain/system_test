@@ -141,7 +141,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_add: digging delegate pool: lock amount is greater than balance", output[0])
+		require.Equal(t, "stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance", output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
@@ -158,7 +158,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_add: miner not found or genesis miner used", output[0])
+		require.Equal(t, "stake_pool_lock_failed: can't get stake pool: delegate_pool_add: miner not found or genesis miner used", output[0])
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *test.SystemTest) {
@@ -283,7 +283,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock"), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
