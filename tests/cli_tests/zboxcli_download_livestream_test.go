@@ -30,7 +30,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 	defer KillFFMPEG()
 
-	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 400*time.Second, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -486,7 +486,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 func startUploadAndDownloadFeed(t *test.SystemTest, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
 	t.Logf("Starting upload of live stream to zbox...")
-	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
+	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
