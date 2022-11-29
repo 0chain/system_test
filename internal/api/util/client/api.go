@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/core/block"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -20,9 +21,10 @@ import (
 
 // Statuses of http based responses
 const (
-	HttpOkStatus         = 200
-	HttpBadRequestStatus = 400
-	HttpNotFoundStatus   = 404
+	HttpOkStatus          = 200
+	HttpBadRequestStatus  = 400
+	HttpNotFoundStatus    = 404
+	HttpNotModifiedStatus = 304
 )
 
 // Contains all methods used for http based requests
@@ -34,26 +36,27 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetHashNodeRoot            = "/v1/hashnode/root/:allocation"
-	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
-	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
-	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
-	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus             = "/v1/miner/get/stats"
-	SharderGetStatus           = "/v1/sharder/get/stats"
-	SCStateGet                 = "/v1/scstate/get"
-	SCRestGetAllocation        = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers          = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats              = "/v1/chain/get/stats"
-	BlobberGetStats            = "/_stats"
-	ClientPut                  = "/v1/client/put"
-	TransactionPut             = "/v1/transaction/put"
-	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
-	ClientGetBalance           = "/v1/client/get/balance"
-	GetNetworkDetails          = "/network"
-	GetFileRef                 = "/v1/file/refs/:allocation_id"
-	GetFileRefPath             = "/v1/file/referencepath/:allocation_id"
-	GetObjectTree              = "/v1/file/objecttree/:allocation_id"
+	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
+	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
+	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
+	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
+	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus               = "/v1/miner/get/stats"
+	SharderGetStatus             = "/v1/sharder/get/stats"
+	SCStateGet                   = "/v1/scstate/get"
+	SCRestGetAllocation          = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers            = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                = "/v1/chain/get/stats"
+	BlobberGetStats              = "/_stats"
+	ClientPut                    = "/v1/client/put"
+	TransactionPut               = "/v1/transaction/put"
+	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
+	ClientGetBalance             = "/v1/client/get/balance"
+	GetNetworkDetails            = "/network"
+	GetFileRef                   = "/v1/file/refs/:allocation_id"
+	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
+	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
 )
 
 // Contains all used service providers
@@ -1129,6 +1132,25 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *testing.T, blobberFileRefPathReq
 		},
 		HttpGETMethod)
 	return blobberFileRefPathResponse, resp, err
+}
+
+func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *testing.T, LFMB *model.LatestFinalizedMagicBlock, requiredStatusCode int) (*block.Block, *resty.Response, error) {
+	var getLFMBResponse *block.Block
+	t.Log("Get latest finalized magic block")
+	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedMagicBlock)
+	if LFMB.LFMB.Hash != "" {
+		urlBuilder = urlBuilder.AddParams("node-lfmb-hash", string(LFMB.LFMB.Hash))
+	}
+
+	resp, err := c.executeForAllServiceProviders(
+		urlBuilder,
+		model.ExecutionRequest{
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return getLFMBResponse, resp, err
 }
 
 func (c *APIClient) V1BlobberObjectTree(t *testing.T, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {

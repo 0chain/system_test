@@ -5,6 +5,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/0chain/gosdk/core/block"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"
 )
@@ -641,6 +642,10 @@ type SCRestGetStakePoolStatResponse struct {
 	Penalty      int64                       `json:"penalty"`
 	Rewards      int64                       `json:"rewards"`
 	Settings     StakePoolSettings           `json:"settings"`
+}
+
+type LatestFinalizedMagicBlock struct {
+	LFMB *block.Block
 }
 
 type StakePoolDelegatePoolInfo struct {
