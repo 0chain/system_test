@@ -14,11 +14,11 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
-	hash, err := getCurrentHash(t)
-	require.Nil(t, err)
-
 	t.Run("Lfmb node hash not modified, should return http 304 and empty body", func(t *test.SystemTest) {
 		t.Parallel()
+
+		hash, err := getCurrentHash(t)
+		require.Nil(t, err)
 
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, hash, http.StatusNotModified)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusNotModified)
@@ -29,6 +29,9 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 
 	t.Run("No param provided, should return http 200 and current return whole lfmb message as before", func(t *test.SystemTest) {
 		t.Parallel()
+
+		hash, err := getCurrentHash(t)
+		require.Nil(t, err)
 
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, "", http.StatusOK)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusOK)
