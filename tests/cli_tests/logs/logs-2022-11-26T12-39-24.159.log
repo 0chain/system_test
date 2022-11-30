@@ -1,2 +1,0 @@
-2022-11-26T12:38:37.726+0100	INFO	zcnbridge/config_helper.go:18	Bridge config has been initialized from /Volumes/Files/go/src/0chain.io/system_test/tests/cli_tests/config/bridge.yaml
-2022-11-26T12:38:37.894+0100	INFO	zcnbridge/authorizers_query.go:115	Got authorizers	{"amount": 3}
