@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
@@ -594,7 +593,7 @@ func TestAtlusChimney(t *testing.T) {
 		require.NotNil(t, *getGraphBlobberSavedDataResponse)
 	})
 
-	t.Run("Check if a graph of all data of a certain blobber will change after file upload, should work", func(t *testing.T) {
+	t.Run("Check if a graph of saved data of a certain blobber will change after file upload, should work", func(t *testing.T) {
 		t.Parallel()
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -640,25 +639,29 @@ func TestAtlusChimney(t *testing.T) {
 			require.NotNil(t, resp)
 			require.NotNil(t, *getGraphBlobberSavedDataResponse)
 
-			fmt.Println(getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
-
 			return !cmp.Equal(*getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
 		})
 	})
 
 	t.Run("Get graph of read data of a certain blobber, should work", func(t *testing.T) {
-		t.Parallel()
-
 		wallet := apiClient.RegisterWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
 
+		getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, getCurrentRoundResponse)
+
+		currentRoundTwiceString := getCurrentRoundResponse.CurrentRoundTwiceToString()
+
 		getGraphBlobberReadDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberReadData(
 			model.GetGraphBlobberReadDataRequest{
 				DataPoints: 17,
 				BlobberID:  blobberId,
+				To:         currentRoundTwiceString,
 			},
 			client.HttpOkStatus)
 		require.Nil(t, err)
@@ -666,7 +669,61 @@ func TestAtlusChimney(t *testing.T) {
 		require.NotNil(t, *getGraphBlobberReadDataResponse)
 	})
 
-	t.Run("Get graph of total offers of a certain blobber, should work", func(t *testing.T) {
+	t.Run("Check if a graph of read data of a certain blobber will change after file upload, should work", func(t *testing.T) {
+		//t.Skip("Skip until fixed")
+		t.Parallel()
+
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		sdkClient.StartSession(func() {
+			fileName := sdkClient.UploadFile(t, allocationID)
+			sdkClient.DownloadFile(t, allocationID, fileName)
+		})
+
+		getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, getCurrentRoundResponse)
+
+		currentRoundTwiceString := getCurrentRoundResponse.CurrentRoundTwiceToString()
+
+		getGraphBlobberReadDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberReadData(
+			model.GetGraphBlobberReadDataRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+				To:         currentRoundTwiceString,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, *getGraphBlobberReadDataResponse)
+		getGraphBlobberReadDataResponseBefore := *getGraphBlobberReadDataResponse
+
+		wait.PoolImmediately(t, time.Minute*10, func() bool {
+			getGraphBlobberReadDataResponse, resp, err = apiClient.V1SharderGetGraphBlobberReadData(
+				model.GetGraphBlobberReadDataRequest{
+					DataPoints: 17,
+					BlobberID:  blobberId,
+					To:         currentRoundTwiceString,
+				},
+				client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, *getGraphBlobberReadDataResponse)
+
+			return !cmp.Equal(*getGraphBlobberReadDataResponse, getGraphBlobberReadDataResponseBefore)
+		})
+	})
+
+	//////
+
+	t.Run("Check graph of total offers of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -685,6 +742,28 @@ func TestAtlusChimney(t *testing.T) {
 		require.NotNil(t, resp)
 		require.NotZero(t, *getGraphBlobberOffersTotalResponse)
 	})
+
+	t.Run("Check if a graph of total offers of a certain blobber will change after stake pool creation, should work", func(t *testing.T) {
+		t.Parallel()
+
+		wallet := apiClient.RegisterWallet(t)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+		getGraphBlobberOffersTotalResponse, resp, err := apiClient.V1SharderGetGraphBlobberOffersTotal(
+			model.GetGraphBlobberOffersTotalRequest{
+				DataPoints: 17,
+				BlobberID:  blobberId,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberOffersTotalResponse)
+	})
+
+	////
 
 	t.Run("Get graph of unstaked tokens of a certain blobber, should work", func(t *testing.T) {
 		t.Parallel()

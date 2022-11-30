@@ -3,10 +3,14 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"errors"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
@@ -111,4 +115,25 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	require.Nil(t, chunkedUpload.Start())
 
 	return filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name()))
+}
+
+func (c *SDKClient) DownloadFile(t *testing.T, allocationID, remotePath string) {
+	allocation, err := sdk.GetAllocation(allocationID)
+	require.Nil(t, err)
+
+	var workingDir string
+	workingDir, err = os.Getwd()
+	require.Nil(t, err)
+
+	localPath := filepath.Join(workingDir, path.Base(remotePath))
+	err = allocation.DownloadFile(localPath, remotePath, new(model.StatusCallback))
+	require.Nil(t, err)
+
+	wait.PoolImmediately(t, time.Second*30, func() bool {
+		if _, err := os.Stat(localPath); errors.Is(err, os.ErrNotExist) {
+			return false
+		}
+		err = os.Remove(localPath)
+		return err == nil
+	})
 }

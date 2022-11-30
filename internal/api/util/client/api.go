@@ -892,12 +892,22 @@ func (c *APIClient) UpdateAllocationBlobbers(t *testing.T, wallet *model.Wallet,
 func (c *APIClient) GetAllocationBlobbers(t *testing.T, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
+	var scRestGetAllocationBlobberRequest model.SCRestGetAllocationBlobbersRequest
+	scRestGetAllocationBlobberRequest.ClientID = wallet.Id
+	scRestGetAllocationBlobberRequest.ClientKey = wallet.PublicKey
+
+	scRestGetAllocationBlobberRequest.Size = blobberRequirements.Size
+	scRestGetAllocationBlobberRequest.DataShards = blobberRequirements.DataShards
+	scRestGetAllocationBlobberRequest.ParityShards = blobberRequirements.ParityShards
+	scRestGetAllocationBlobberRequest.ExpirationDate = blobberRequirements.ExpirationDate
+	scRestGetAllocationBlobberRequest.ReadPriceRange = blobberRequirements.ReadPriceRange
+	scRestGetAllocationBlobberRequest.WritePriceRange = blobberRequirements.WritePriceRange
+	scRestGetAllocationBlobberRequest.OwnerId = blobberRequirements.OwnerId
+	scRestGetAllocationBlobberRequest.OwnerPublicKey = blobberRequirements.OwnerPublicKey
+
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
-		&model.SCRestGetAllocationBlobbersRequest{
-			ClientID:            wallet.Id,
-			ClientKey:           wallet.PublicKey,
-			BlobberRequirements: blobberRequirements,
-		}, requiredStatusCode)
+		&scRestGetAllocationBlobberRequest,
+		requiredStatusCode)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, scRestGetAllocationBlobbersResponse)
@@ -1467,7 +1477,7 @@ func (c *APIClient) V1SharderGetGraphBlobberReadData(getGraphBlobberReadDataRequ
 		SetPath(GetGraphBlobberReadData).
 		AddParams("data-points", strconv.Itoa(getGraphBlobberReadDataRequest.DataPoints)).
 		AddParams("id", getGraphBlobberReadDataRequest.BlobberID).
-		AddParams("from", "").
+		AddParams("from", "0").
 		AddParams("to", getGraphBlobberReadDataRequest.To).
 		String()
 

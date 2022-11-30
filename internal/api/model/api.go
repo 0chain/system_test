@@ -266,8 +266,8 @@ type Challenge struct {
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers            []string `json:"blobbers"`
-	BlobberRequirements *BlobberRequirements
+	BlobberRequirements
+	Blobbers []string `json:"blobbers"`
 }
 
 type SCRestGetAllocationRequest struct {
@@ -275,7 +275,7 @@ type SCRestGetAllocationRequest struct {
 }
 
 type SCRestGetAllocationBlobbersRequest struct {
-	BlobberRequirements *BlobberRequirements
+	BlobberRequirements
 	ClientID, ClientKey string
 }
 
