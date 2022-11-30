@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -22,12 +24,12 @@ var (
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
 )
 
-func TestUpdateAllocation(t *testing.T) {
+func TestUpdateAllocation(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Update Name Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Name Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5"}
@@ -55,9 +57,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, name, alloc.Name, "allocation name is not created properly")
 	})
 
-	t.Run("Update Expiry Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Expiry Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
 
@@ -81,9 +81,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update Size Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Size Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(256)
 
@@ -106,9 +104,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update All Parameters Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
 		size := int64(2048)
@@ -132,9 +128,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 	})
 
-	t.Run("Update Negative Expiry Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Negative Expiry Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
 
@@ -158,9 +152,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update Negative Size Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Negative Size Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(-256)
 
@@ -182,9 +174,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update All Negative Parameters Should Work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update All Negative Parameters Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
 		size := int64(-512)
@@ -211,9 +201,7 @@ func TestUpdateAllocation(t *testing.T) {
 		)
 	})
 
-	t.Run("Update Size to less than occupied size should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Size to less than occupied size should fail", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
 
 		filename := generateRandomTestFileName(t)
@@ -248,9 +236,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
-	t.Run("Update Nothing Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
@@ -264,9 +250,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 
 	// TODO is it normal to create read pool?
-	t.Run("Update Non-existent Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID := "123abc"
 
 		params := createParams(map[string]interface{}{
@@ -280,9 +264,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't get existing allocation: value not present", output[3])
 	})
 
-	t.Run("Update Expired Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-1) // In hours
 
@@ -329,9 +311,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 
-	t.Run("Update Size To Less Than 1024 Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := -allocationBeforeUpdate.Size + 1023
 
@@ -348,15 +328,13 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1023 < 1024", output[0])
 	})
 
-	t.Run("Update Other's Allocation Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Update Other's Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
 		var otherAllocationID string
 
 		myAllocationID := setupAllocation(t, configPath)
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			// Updating the otherAllocationID should work here
@@ -400,9 +378,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: only owner can update the allocation", output[0])
 	})
 
-	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		expiry := 1
 
@@ -423,9 +399,7 @@ func TestUpdateAllocation(t *testing.T) {
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Update Mistake Size Parameter Should Fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		size := "ab"
 
@@ -447,7 +421,7 @@ func TestUpdateAllocation(t *testing.T) {
 	})
 }
 
-func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, climodel.Allocation) {
+func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string) (string, climodel.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
@@ -457,7 +431,7 @@ func setupAndParseAllocation(t *testing.T, cliConfigFilename string) (string, cl
 	return allocationID, allocation
 }
 
-func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]climodel.Allocation {
+func parseListAllocations(t *test.SystemTest, cliConfigFilename string) map[string]climodel.Allocation {
 	output, err := listAllocations(t, cliConfigFilename)
 	require.Nil(t, err, "list allocations failed", err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
@@ -475,11 +449,11 @@ func parseListAllocations(t *testing.T, cliConfigFilename string) map[string]cli
 	return allocationMap
 }
 
-func setupAllocation(t *testing.T, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	return setupAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, extraParams...)
 }
 
-func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 1.0
 	// Then create new allocation
 	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
@@ -516,7 +490,7 @@ func setupAllocationWithWallet(t *testing.T, walletName, cliConfigFilename strin
 	return allocationID
 }
 
-func assertOutputMatchesAllocationRegex(t *testing.T, re *regexp.Regexp, str string) {
+func assertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, str string) {
 	match := re.FindStringSubmatch(str)
 	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
 }
@@ -563,11 +537,11 @@ func createKeyValueParams(params map[string]string) string {
 	return keys + " " + values
 }
 
-func updateAllocation(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func updateAllocation(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return updateAllocationWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func updateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
@@ -583,7 +557,7 @@ func updateAllocationWithWallet(t *testing.T, wallet, cliConfigFilename, params 
 	}
 }
 
-func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
+func listAllocations(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Listing allocations...")
 	cmd := fmt.Sprintf(
@@ -597,13 +571,13 @@ func listAllocations(t *testing.T, cliConfigFilename string) ([]string, error) {
 
 // executeFaucetWithTokens executes faucet command with given tokens.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
-func executeFaucetWithTokens(t *testing.T, cliConfigFilename string, tokens float64) ([]string, error) {
+func executeFaucetWithTokens(t *test.SystemTest, cliConfigFilename string, tokens float64) ([]string, error) {
 	return executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
 }
 
 // executeFaucetWithTokensForWallet executes faucet command with given tokens and wallet.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
-func executeFaucetWithTokensForWallet(t *testing.T, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
+func executeFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
 	t.Logf("Executing faucet...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName "+
 		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",

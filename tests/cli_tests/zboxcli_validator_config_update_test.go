@@ -8,12 +8,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidatorConfigUpdate(t *testing.T) {
+func TestValidatorConfigUpdate(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
@@ -50,7 +54,7 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("update blobber max stake should work", func(t *testing.T) {
+	t.RunSequentially("update blobber max stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -72,7 +76,7 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		require.Equal(t, float64(newMaxStake), intToZCN(finalValidatorInfo.MaxStake))
 	})
 
-	t.Run("update blobber min stake should work", func(t *testing.T) {
+	t.RunSequentially("update blobber min stake should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -94,7 +98,7 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		require.Equal(t, float64(newMinStake), intToZCN(finalValidatorInfo.MinStake))
 	})
 
-	t.Run("update validator number of delegates should work", func(t *testing.T) {
+	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -115,7 +119,7 @@ func TestValidatorConfigUpdate(t *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalValidatorInfo.NumDelegates)
 	})
 
-	t.Run("update blobber service charge should work", func(t *testing.T) {
+	t.RunSequentially("update blobber service charge should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
@@ -137,17 +141,17 @@ func TestValidatorConfigUpdate(t *testing.T) {
 	})
 }
 
-func listValidators(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func listValidators(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting validator list...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-validators %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func getValidatorInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func getValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting validator info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func updateValidatorInfo(t *testing.T, cliConfigFilename, params string) ([]string, error) {
+func updateValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Updating validator info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, blobberOwnerWallet, cliConfigFilename), 3, time.Second*2)
 }

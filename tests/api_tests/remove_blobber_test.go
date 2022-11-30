@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -11,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRemoveBlobber(t *testing.T) {
+func TestRemoveBlobber(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Remove blobber in allocation, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Remove blobber in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +31,7 @@ const (
 	OptionKeyPassword      = "password"      // OptionKeyPassword bridge config filename
 )
 
-func PrepareBridgeClient(t *testing.T) error {
+func PrepareBridgeClient(t *test.SystemTest) error {
 	_, err := prepareBridgeClientConfig(t)
 	if err != nil {
 		return err
@@ -44,7 +46,7 @@ func PrepareBridgeClient(t *testing.T) error {
 }
 
 // Tests prerequisites
-func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
+func prepareBridgeClientConfig(t *test.SystemTest) ([]string, error) {
 	return runCreateBridgeClientTestConfig(
 		t,
 		"\"02289b9\"",
@@ -61,7 +63,7 @@ func prepareBridgeClientConfig(t *testing.T) ([]string, error) {
 }
 
 // Use it to import account to the given home folder
-func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
+func prepareBridgeClientWallet(t *test.SystemTest) ([]string, error) {
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --%s %s --%s %q --%s %s",
 		OptionConfigFolder, configDir,
@@ -75,8 +77,10 @@ func prepareBridgeClientWallet(t *testing.T) ([]string, error) {
 }
 
 // cmd: bridge-client-init
-func TestBridgeClientInit(t *testing.T) {
-	t.Run("Init bridge client config to default path and file", func(t *testing.T) {
+func TestBridgeClientInit(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.RunSequentially("Init bridge client config to default path and file", func(t *test.SystemTest) {
 		output, err := createDefaultClientBridgeConfig(t)
 
 		defaultPath := filepath.Join(getZCNDir(), DefaultConfigBridgeFileName)
@@ -88,7 +92,7 @@ func TestBridgeClientInit(t *testing.T) {
 
 	customPath := filepath.Join(getConfigDir(), "test")
 
-	t.Run("Init bridge client config to custom path and default file", func(t *testing.T) {
+	t.RunSequentially("Init bridge client config to custom path and default file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -119,7 +123,7 @@ func TestBridgeClientInit(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("Client client config file was saved to %s", customPath), output[len(output)-1])
 	})
 
-	t.Run("Init bridge client config to custom path and custom config file", func(t *testing.T) {
+	t.RunSequentially("Init bridge client config to custom path and custom config file", func(t *test.SystemTest) {
 		//goland:noinspection GoUnhandledErrorResult
 		defer os.RemoveAll(customPath)
 
@@ -153,8 +157,10 @@ func TestBridgeClientInit(t *testing.T) {
 }
 
 // cmd: bridge-owner-init
-func TestBridgeOwnerInit(t *testing.T) {
-	t.Run("Init bridge owner config to default path and file", func(t *testing.T) {
+func TestBridgeOwnerInit(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.Run("Init bridge owner config to default path and file", func(t *test.SystemTest) {
 		output, err := bridgeOwnerInit(
 			t,
 			"password",
@@ -177,7 +183,7 @@ func TestBridgeOwnerInit(t *testing.T) {
 
 // cmd: bridge-client-init
 func bridgeClientInit(
-	t *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
@@ -208,7 +214,7 @@ func bridgeClientInit(
 
 // cmd: bridge-owner-init
 func bridgeOwnerInit(
-	t *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, authorizersaddress, ethereumnodeurl string,
 	gaslimit, value int64,
 	opts ...*Option,
@@ -236,7 +242,7 @@ func bridgeOwnerInit(
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
-func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
+func createDefaultClientBridgeConfig(t *test.SystemTest) ([]string, error) {
 	return bridgeClientInit(t,
 		"password",
 		"0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947",
@@ -250,7 +256,7 @@ func createDefaultClientBridgeConfig(t *testing.T) ([]string, error) {
 }
 
 func runCreateBridgeClientTestConfig(
-	t *testing.T,
+	t *test.SystemTest,
 	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
 	consensusthreshold float64,
 	gaslimit, value int64,
