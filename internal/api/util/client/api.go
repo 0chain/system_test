@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/core/block"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
@@ -1134,12 +1133,11 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *testing.T, blobberFileRefPathReq
 	return blobberFileRefPathResponse, resp, err
 }
 
-func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *testing.T, LFMB *model.LatestFinalizedMagicBlock, requiredStatusCode int) (*block.Block, *resty.Response, error) {
-	var getLFMBResponse *block.Block
+func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *testing.T, hash string, requiredStatusCode int) (*resty.Response, error) {
 	t.Log("Get latest finalized magic block")
 	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedMagicBlock)
-	if LFMB.LFMB.Hash != "" {
-		urlBuilder = urlBuilder.AddParams("node-lfmb-hash", string(LFMB.LFMB.Hash))
+	if hash != "" {
+		urlBuilder = urlBuilder.AddParams("node-lfmb-hash", hash)
 	}
 
 	resp, err := c.executeForAllServiceProviders(
@@ -1150,7 +1148,7 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *testing.T, LFMB *mode
 		HttpPOSTMethod,
 		SharderServiceProvider)
 
-	return getLFMBResponse, resp, err
+	return resp, err
 }
 
 func (c *APIClient) V1BlobberObjectTree(t *testing.T, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
