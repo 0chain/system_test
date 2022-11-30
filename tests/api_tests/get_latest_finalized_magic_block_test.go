@@ -32,10 +32,11 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, "", http.StatusOK)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusOK)
 		require.Nil(t, err, string(resp.Body()))
-
 		require.NotEmpty(t, string(resp.Body()))
+
 		var res map[string]interface{}
-		json.Unmarshal(resp.Body(), &res)
+		err = json.Unmarshal(resp.Body(), &res)
+		require.Nil(t, err, res)
 		require.Equal(t, hash, res["hash"])
 	})
 
@@ -51,8 +52,8 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 		require.NotEmpty(t, string(resp.Body()))
 
 		var res map[string]interface{}
-		json.Unmarshal(resp.Body(), &res)
-
+		err = json.Unmarshal(resp.Body(), &res)
+		require.Nil(t, err, res)
 		require.NotEqual(t, false_hash, res["hash"])
 	})
 }
