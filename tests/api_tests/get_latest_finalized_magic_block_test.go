@@ -3,19 +3,21 @@ package api_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
 )
 
-func TestGetLatestFinalizedMagicBlock(t *testing.T) {
+func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
-	t.Run("Lfmb node hash not modified, should return http 304 and empty body", func(t *testing.T) {
-		t.Parallel()
+	hash, err := getCurrentHash(t)
+	require.Nil(t, err)
 
-		hash, err := getCurrentHash(t)
-		require.Nil(t, err)
+	t.Run("Lfmb node hash not modified, should return http 304 and empty body", func(t *test.SystemTest) {
+		t.Parallel()
 
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, hash, http.StatusNotModified)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusNotModified)
@@ -24,11 +26,8 @@ func TestGetLatestFinalizedMagicBlock(t *testing.T) {
 		require.Empty(t, string(resp.Body()))
 	})
 
-	t.Run("No param provided, should return http 200 and current return whole lfmb message as before", func(t *testing.T) {
+	t.Run("No param provided, should return http 200 and current return whole lfmb message as before", func(t *test.SystemTest) {
 		t.Parallel()
-
-		hash, err := getCurrentHash(t)
-		require.Nil(t, err)
 
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, "", http.StatusOK)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusOK)
@@ -40,15 +39,12 @@ func TestGetLatestFinalizedMagicBlock(t *testing.T) {
 		require.Equal(t, hash, res["hash"])
 	})
 
-	t.Run("Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has", func(t *testing.T) {
+	t.Run("Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has", func(t *test.SystemTest) {
 		t.Parallel()
 
-		hash, err := getCurrentHash(t)
-		require.Nil(t, err)
+		false_hash := "ed79cae70d439c11258236da1dfa6fc550f7cc569768304623e8fbd7d70efae5"
 
-		hash = "ed79cae70d439c11258236da1dfa6fc550f7cc569768304623e8fbd7d70efae5"
-
-		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, hash, http.StatusOK)
+		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, false_hash, http.StatusOK)
 		require.Equal(t, resp.RawResponse.StatusCode, http.StatusOK)
 		require.Nil(t, err, string(resp.Body()))
 
@@ -57,25 +53,20 @@ func TestGetLatestFinalizedMagicBlock(t *testing.T) {
 		var res map[string]interface{}
 		json.Unmarshal(resp.Body(), &res)
 
-		require.NotEqual(t, hash, res["hash"])
+		require.NotEqual(t, false_hash, res["hash"])
 	})
 }
 
-func getCurrentHash(t *testing.T) (string, error) {
+func getCurrentHash(t *test.SystemTest) (string, error) {
 
-	resp, err := http.Get("https://test.0chain.net/sharder01/v1/block/get/latest_finalized_magic_block")
-
-	if err != nil {
-		return "", err
-	}
+	resp, err := http.Get(apiClient.HealthyServiceProviders.Sharders[0] + "/v1/block/get/latest_finalized_magic_block")
+	require.Nil(t, err)
+	defer resp.Body.Close()
 
 	var res map[string]interface{}
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&res)
-
-	if err != nil {
-		return "", err
-	}
+	require.Nil(t, err, res)
 
 	resultHash := res["hash"]
 

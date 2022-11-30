@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/util/crypto"
 
 	"github.com/herumi/bls-go-binary/bls"
@@ -36,7 +38,9 @@ const (
 	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
-func TestCreateAllocationFreeStorage(t *testing.T) {
+func TestCreateAllocationFreeStorage(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")
 
@@ -89,9 +93,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	require.Equal(t, "TransactionStatus: 1", output[1])
 	require.Greater(t, len(output[2]), 0, output[2])
 
-	t.Parallel()
-
-	t.Run("Create free storage from marker with accounting", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -147,7 +149,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
 	})
 
-	t.Run("Create free storage with malformed marker should fail", func(t *testing.T) {
+	t.RunSequentially("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -163,7 +165,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
 	})
 
-	t.Run("Create free storage with invalid marker contents should fail", func(t *testing.T) {
+	t.RunSequentially("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
 		// register recipient wallet
 		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -179,7 +181,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.Run("Create free storage with invalid marker signature should fail", func(t *testing.T) {
+	t.RunSequentially("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -212,7 +214,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
 	})
 
-	t.Run("Create free storage with wrong recipient wallet should fail", func(t *testing.T) {
+	t.RunSequentially("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
 		// register correct recipient wallet
@@ -257,7 +259,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *testing.T) {
+	t.RunSequentially("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// register recipient wallet
@@ -299,7 +301,7 @@ func TestCreateAllocationFreeStorage(t *testing.T) {
 	})
 }
 
-func readWalletFile(t *testing.T, file string) *climodel.WalletFile {
+func readWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 	wallet := &climodel.WalletFile{}
 
 	f, err := os.Open(file)
@@ -344,7 +346,7 @@ func apiPutTransaction(minerBaseURL string, txn *climodel.Transaction) (*http.Re
 	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
 }
 
-func freeAllocationAssignerTxn(t *testing.T, from, assigner *climodel.WalletFile) *climodel.Transaction {
+func freeAllocationAssignerTxn(t *test.SystemTest, from, assigner *climodel.WalletFile) *climodel.Transaction {
 	txn := &climodel.Transaction{}
 	txn.Version = "1.0"
 	txn.ClientId = from.ClientID

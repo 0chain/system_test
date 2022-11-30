@@ -15,14 +15,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.NewSystemTest(testSetup)
+
 	t.Skip("Till batch-update is merged...")
-	t.Run("Miner share on block fees and rewards", func(t *testing.T) {
+	t.RunSequentially("Miner share on block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -63,7 +67,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 		}
 	})
 
-	t.Run("Sharder share on block fees and rewards", func(t *testing.T) {
+	t.RunSequentially("Sharder share on block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -99,7 +103,7 @@ func TestBlockRewards(t *testing.T) { // nolint:gocyclo // team preference is to
 	})
 }
 
-func initialiseTest(t *testing.T, wallet string, funds bool) string {
+func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	output, err := registerWallet(t, configPath)
 	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -203,7 +207,7 @@ func keyValueSettingsToMap(
 	return *settings
 }
 
-func getMinerScMap(t *testing.T) map[string]float64 {
+func getMinerScMap(t *test.SystemTest) map[string]float64 {
 	output, err := getMinerSCConfig(t, configPath, true)
 	require.NoError(t, err, "get miners sc config failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
@@ -211,7 +215,7 @@ func getMinerScMap(t *testing.T) map[string]float64 {
 	return floatMap
 }
 
-func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
+func blockRewards(t *test.SystemTest, round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
 	epoch := round / int64(minerScConfig["epoch"])
 	epochDecline := 1.0 - minerScConfig["reward_decline_rate"]
 	declineRate := math.Pow(epochDecline, float64(epoch))
@@ -221,7 +225,7 @@ func blockRewards(t *testing.T, round int64, minerScConfig map[string]float64) (
 	return minerReward, sharderReward
 }
 
-func getSharderUrl(t *testing.T) string {
+func getSharderUrl(t *test.SystemTest) string {
 	// Get sharder list.
 	output, err := getSharders(t, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
@@ -238,11 +242,11 @@ func getSharderUrl(t *testing.T) string {
 	return getNodeBaseURL(sharder.Host, sharder.Port)
 }
 
-func getNode(t *testing.T, cliConfigFilename, nodeID string) ([]string, error) {
+func getNode(t *test.SystemTest, cliConfigFilename, nodeID string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func getMiners(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
@@ -254,7 +258,7 @@ func apiGetSharders(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/getSharderList")
 }
 
-func getSortedMiners(t *testing.T, sharderBaseURL string) climodel.NodeList {
+func getSortedMiners(t *test.SystemTest, sharderBaseURL string) climodel.NodeList {
 	res, err := apiGetMiners(sharderBaseURL)
 	require.NoError(t, err, "retrieving miners")
 	defer res.Body.Close()
@@ -274,7 +278,7 @@ func getSortedMiners(t *testing.T, sharderBaseURL string) climodel.NodeList {
 	return miners
 }
 
-func getSortedSharders(t *testing.T, sharderBaseURL string) climodel.NodeList {
+func getSortedSharders(t *test.SystemTest, sharderBaseURL string) climodel.NodeList {
 	res, err := apiGetSharders(sharderBaseURL)
 	require.NoError(t, err, "retrieving miners")
 	defer res.Body.Close()
@@ -294,11 +298,11 @@ func getSortedSharders(t *testing.T, sharderBaseURL string) climodel.NodeList {
 	return sharders
 }
 
-func getSharders(t *testing.T, cliConfigFilename string) ([]string, error) {
+func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return getShardersForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getShardersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
@@ -306,7 +310,7 @@ func getNodeBaseURL(host string, port int) string {
 	return fmt.Sprintf(`http://%s:%d`, host, port)
 }
 
-func getMinersForWallet(t *testing.T, cliConfigFilename, wallet string) ([]string, error) {
+func getMinersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
