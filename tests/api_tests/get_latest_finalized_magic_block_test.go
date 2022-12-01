@@ -15,8 +15,6 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Lfmb node hash not modified, should return http 304 and empty body", func(t *test.SystemTest) {
-		t.Parallel()
-
 		hash, err := getCurrentHash(t)
 		require.Nil(t, err)
 
@@ -28,8 +26,6 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	})
 
 	t.Run("No param provided, should return http 200 and current return whole lfmb message as before", func(t *test.SystemTest) {
-		t.Parallel()
-
 		hash, err := getCurrentHash(t)
 		require.Nil(t, err)
 
@@ -45,8 +41,6 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	})
 
 	t.Run("Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has", func(t *test.SystemTest) {
-		t.Parallel()
-
 		false_hash := "ed79cae70d439c11258236da1dfa6fc550f7cc569768304623e8fbd7d70efae5"
 
 		resp, err := apiClient.V1BlockGetLatestFinalizedMagicBlock(t, false_hash, http.StatusOK)
