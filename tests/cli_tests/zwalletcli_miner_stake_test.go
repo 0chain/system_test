@@ -283,7 +283,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock"), output[0])
+		require.Equal(t, "stake_pool_lock_failed: too large stake to lock", output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
