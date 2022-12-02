@@ -195,7 +195,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_del: error getting miner node: value not present", output[0])
+		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
 	})
 }
 
