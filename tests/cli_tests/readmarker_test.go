@@ -22,7 +22,7 @@ func TestReadMarker(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-	t.Run("After download reamarkers return a readmarker for each blobber", func(t *test.SystemTest) {
+	t.RunWithTimeout("After download reamarkers return a readmarker for each blobber", 80*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotePath := "/dir/"
