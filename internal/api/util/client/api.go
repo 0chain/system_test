@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -21,9 +22,10 @@ import (
 
 // Statuses of http based responses
 const (
-	HttpOkStatus         = 200
-	HttpBadRequestStatus = 400
-	HttpNotFoundStatus   = 404
+	HttpOkStatus          = 200
+	HttpBadRequestStatus  = 400
+	HttpNotFoundStatus    = 404
+	HttpNotModifiedStatus = 304
 )
 
 // Contains all methods used for http based requests
@@ -35,26 +37,27 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetHashNodeRoot            = "/v1/hashnode/root/:allocation"
-	GetBlobbers                = "/v1/screst/:sc_address/getblobbers"
-	GetStakePoolStat           = "/v1/screst/:sc_address/getStakePoolStat"
-	GetAllocationBlobbers      = "/v1/screst/:sc_address/alloc_blobbers"
-	SCRestGetOpenChallenges    = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus             = "/v1/miner/get/stats"
-	SharderGetStatus           = "/v1/sharder/get/stats"
-	SCStateGet                 = "/v1/scstate/get"
-	SCRestGetAllocation        = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers          = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats              = "/v1/chain/get/stats"
-	BlobberGetStats            = "/_stats"
-	ClientPut                  = "/v1/client/put"
-	TransactionPut             = "/v1/transaction/put"
-	TransactionGetConfirmation = "/v1/transaction/get/confirmation"
-	ClientGetBalance           = "/v1/client/get/balance"
-	GetNetworkDetails          = "/network"
-	GetFileRef                 = "/v1/file/refs/:allocation_id"
-	GetFileRefPath             = "/v1/file/referencepath/:allocation_id"
-	GetObjectTree              = "/v1/file/objecttree/:allocation_id"
+	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
+	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
+	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
+	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
+	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus               = "/v1/miner/get/stats"
+	SharderGetStatus             = "/v1/sharder/get/stats"
+	SCStateGet                   = "/v1/scstate/get"
+	SCRestGetAllocation          = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers            = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                = "/v1/chain/get/stats"
+	BlobberGetStats              = "/_stats"
+	ClientPut                    = "/v1/client/put"
+	TransactionPut               = "/v1/transaction/put"
+	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
+	ClientGetBalance             = "/v1/client/get/balance"
+	GetNetworkDetails            = "/network"
+	GetFileRef                   = "/v1/file/refs/:allocation_id"
+	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
+	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
 )
 
 // Contains all used service providers
@@ -166,14 +169,14 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 
 	resp, err := c.httpClient.R().Get(formattedURL)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "error fetching network details from url: " + formattedURL)
 	}
 
 	var networkServiceProviders *model.HealthyServiceProviders
 
 	err = json.Unmarshal(resp.Body(), &networkServiceProviders)
 	if err != nil {
-		return ErrNetworkHealthy
+		return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 	}
 
 	healthyMiners, err := c.getHealthyMiners(networkServiceProviders.Miners)
@@ -212,7 +215,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 		err = json.Unmarshal(resp.Body(), &nodes)
 		if err != nil {
-			return ErrNetworkHealthy
+			return errors.New(ErrNetworkHealthy.Error() + "failed to unmarshall network service providers. Body: " + string(resp.Body()))
 		}
 
 		if len(nodes.Nodes) == 0 {
@@ -270,8 +273,8 @@ func (c *APIClient) executeForServiceProvider(t *test.SystemTest, url string, ex
 
 func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
-		resp   *resty.Response
-		errors []error
+		resp       *resty.Response
+		respErrors []error
 	)
 
 	var expectedExecutionResponseCounter, notExpectedExecutionResponseCounter int
@@ -295,7 +298,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, executionRequest, method)
 		if err != nil {
-			errors = append(errors, err)
+			respErrors = append(respErrors, err)
 			continue
 		}
 
@@ -311,15 +314,15 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 		return nil, ErrExecutionConsensus
 	}
 
-	return resp, selectMostFrequentError(errors)
+	return resp, selectMostFrequentError(respErrors)
 }
 
-func selectMostFrequentError(errors []error) error {
+func selectMostFrequentError(respErrors []error) error {
 	frequencyCounters := make(map[error]int)
 	var maxMatch int
 	var result error
 
-	for _, error := range errors {
+	for _, error := range respErrors {
 		frequencyCounters[error]++
 		if frequencyCounters[error] > maxMatch {
 			maxMatch = frequencyCounters[error]
@@ -1157,6 +1160,25 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefP
 		},
 		HttpGETMethod)
 	return blobberFileRefPathResponse, resp, err
+}
+
+func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash string, requiredStatusCode int) (*resty.Response, error) {
+	t.Log("Get latest finalized magic block")
+	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedMagicBlock)
+	if hash != "" {
+		urlBuilder = urlBuilder.AddParams("node-lfmb-hash", hash)
+	}
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		model.ExecutionRequest{
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return resp, err
 }
 
 func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
