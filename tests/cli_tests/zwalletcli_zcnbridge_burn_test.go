@@ -8,27 +8,27 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeBurn(t *testing.T) {
-	t.Parallel()
+func TestBridgeBurn(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
 
-	t.Run("Burning WZCN tokens on balance, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*3, func(t *test.SystemTest) {
+		t.Skip()
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
 	})
 
-	t.Run("Get WZCN burn ticket, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Get WZCN burn ticket, should work", func(t *test.SystemTest) {
+		t.Skip()
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
@@ -57,17 +57,13 @@ func TestBridgeBurn(t *testing.T) {
 		require.Equal(t, 1, nonceInt)
 	})
 
-	t.Run("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*5, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
 	})
 
-	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*5, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -76,9 +72,7 @@ func TestBridgeBurn(t *testing.T) {
 		require.Greater(t, len(output), 0)
 	})
 
-	t.Run("Get ZCN burn ticket, should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*5, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -108,7 +102,7 @@ func TestBridgeBurn(t *testing.T) {
 }
 
 //nolint
-func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-burn-zcn --token %s --path %s --bridge_config %s --wallet %s --configDir ./config --config %s",
@@ -127,7 +121,7 @@ func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 }
 
 //nolint
-func burnEth(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s",
@@ -145,7 +139,7 @@ func burnEth(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 }
 
 //nolint
-func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
+func getZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
 	t.Logf("Get ZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-get-zcn-burn --hash %s --silent "+
@@ -164,7 +158,7 @@ func getZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
 }
 
 //nolint
-func getWrappedZcnBurnTicket(t *testing.T, hash string, retry bool) ([]string, error) {
+func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-get-wzcn-burn --hash %s --silent "+
