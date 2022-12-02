@@ -2,6 +2,8 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
+	"github.com/stretchr/testify/require"
 	"regexp"
 	"strconv"
 	"strings"
@@ -10,25 +12,22 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
-
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 )
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*3, func(t *test.SystemTest) {
-		t.Skip()
+	t.Parallel()
+
+	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*4, func(t *test.SystemTest) {
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
 	})
 
-	t.Run("Get WZCN burn ticket, should work", func(t *test.SystemTest) {
-		t.Skip()
+	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
@@ -57,13 +56,13 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Equal(t, 1, nonceInt)
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -72,7 +71,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Greater(t, len(output), 0)
 	})
 
-	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -114,7 +113,7 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -129,10 +128,11 @@ func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 		configDir,
 		bridgeClientConfigFile,
 	)
+
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -151,7 +151,7 @@ func getZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, er
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -170,7 +170,7 @@ func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]str
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
