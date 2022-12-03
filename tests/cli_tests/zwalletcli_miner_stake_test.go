@@ -85,7 +85,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
 	})
 
-	t.RunWithTimeout("Multiple stakes against a miner should create multiple pools", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 90*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
