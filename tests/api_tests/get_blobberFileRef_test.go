@@ -2,6 +2,9 @@ package api_tests
 
 import (
 	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/gosdk/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
@@ -10,8 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberFileRefs(t *testing.T) {
-	t.Run("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *testing.T) {
+func TestBlobberFileRefs(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.RunSequentially("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -72,7 +77,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
-	t.Run("Get file ref with incorrect allocation id should fail", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { // todo - too slow (70s)
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -99,7 +104,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid remote file path should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid remote file path should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -129,7 +134,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid refType should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid refType should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -159,7 +164,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no path should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with no path should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -189,7 +194,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no refType should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with no refType should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -219,7 +224,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with no path and no refType should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with no path and no refType should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -249,7 +254,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client signature should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid client signature should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -275,7 +280,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client id should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid client id should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -307,7 +312,7 @@ func TestBlobberFileRefs(t *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.Run("Get file ref with invalid client key should fail", func(t *testing.T) {
+	t.RunSequentially("Get file ref with invalid client key should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)

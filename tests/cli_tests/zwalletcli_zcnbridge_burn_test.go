@@ -6,16 +6,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeBurn(t *testing.T) {
+func TestBridgeBurn(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Burning WZCN tokens", func(t *testing.T) {
+	t.Run("Burning WZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Insufficient balance")
-		t.Parallel()
 
 		err := PrepareBridgeClient(t)
 		require.NoError(t, err)
@@ -27,9 +30,8 @@ func TestBridgeBurn(t *testing.T) {
 	})
 
 	// todo: enable test
-	t.Run("Burning ZCN tokens", func(t *testing.T) {
+	t.Run("Burning ZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to transaction execution errr (context deadline error)")
-		t.Parallel()
 
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, "error trying to burn ZCN tokens: %s", strings.Join(output, "\n"))
@@ -38,8 +40,8 @@ func TestBridgeBurn(t *testing.T) {
 	})
 }
 
-//nolint
-func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+// nolint
+func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-burn-zcn --amount %s --path %s --bridge_config %s",
@@ -56,8 +58,8 @@ func burnZcn(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([
 	}
 }
 
-//nolint
-func burnEth(t *testing.T, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+// nolint
+func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s",

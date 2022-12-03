@@ -11,13 +11,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 )
 
-func TestFileStats(t *testing.T) {
+func TestFileStats(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
@@ -26,9 +30,7 @@ func TestFileStats(t *testing.T) {
 
 	const chunksize = 64 * 1024
 
-	t.Run("get file stats in root directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats in root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -68,9 +70,7 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats in sub directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats in sub directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/dir/"
@@ -110,9 +110,7 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats in nested sub directory should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats in nested sub directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/nested/dir/"
@@ -152,9 +150,7 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats on an empty allocation", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats on an empty allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -189,9 +185,7 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats for a file that does not exists", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats for a file that does not exists", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -227,15 +221,13 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats for an allocation you dont own", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats for an allocation you dont own", func(t *test.SystemTest) {
 		otherAllocationID := ""
 		remotepath := "/"
 		filesize := int64(533)
 		remoteFilePath := ""
 
-		t.Run("Get Other Allocation ID", func(t *testing.T) {
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
 			filename := generateFileAndUpload(t, otherAllocationID, remotepath, filesize)
@@ -289,9 +281,7 @@ func TestFileStats(t *testing.T) {
 		require.Len(t, stats, 0)
 	})
 
-	t.Run("get file stats with no params supplied", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats with no params supplied", func(t *test.SystemTest) {
 		setupAllocation(t, configPath)
 
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{}), false)
@@ -300,9 +290,7 @@ func TestFileStats(t *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats with no allocation param supplied", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats with no allocation param supplied", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		remotepath := "/"
@@ -320,9 +308,7 @@ func TestFileStats(t *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats with no remotepath param supplied", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("get file stats with no remotepath param supplied", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
@@ -334,9 +320,7 @@ func TestFileStats(t *testing.T) {
 		require.Equal(t, output[0], "Error: remotepath flag is missing", strings.Join(output, "\n"))
 	})
 
-	t.Run("get file stats before and after update", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("get file stats before and after update", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
 
 		remotepath := "/"
@@ -411,9 +395,7 @@ func TestFileStats(t *testing.T) {
 		}
 	})
 
-	t.Run("get file stats before and after download", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("get file stats before and after download", 3*time.Minute, func(t *test.SystemTest) { //todo: too slow
 		allocSize := int64(2048)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -452,9 +434,6 @@ func TestFileStats(t *testing.T) {
 			} else {
 				require.Equal(t, true, data.BlockchainAware)
 			}
-
-			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
-			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
 
 		// Delete the uploaded file, since we will be downloading it now
@@ -466,7 +445,11 @@ func TestFileStats(t *testing.T) {
 			"remotepath": remoteFilePath,
 			"localpath":  "tmp/",
 		}), true)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, StatusCompletedCB)
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 
 		cliutils.Wait(t, 2*time.Minute)
 		// get file stats after download
@@ -481,12 +464,16 @@ func TestFileStats(t *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &stats)
 		require.Nil(t, err)
 
+		var skippedBlobber int
 		for _, data := range stats {
 			require.Equal(t, fname, data.Name)
 			require.Equal(t, remoteFilePath, data.Path)
-			require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			if data.NumOfBlockDownloads == 0 {
+				skippedBlobber++
+			} else {
+				require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			}
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
-			require.Equal(t, int64(1), data.NumOfBlockDownloads)
 			require.Equal(t, int64(1), data.NumOfUpdates)
 			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			if data.WriteMarkerTxn == "" {
@@ -494,14 +481,12 @@ func TestFileStats(t *testing.T) {
 			} else {
 				require.Equal(t, true, data.BlockchainAware)
 			}
-
-			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
-			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
 		}
+		require.Equal(t, 1, skippedBlobber)
 	})
 }
 
-func getFileStats(t *testing.T, cliConfigFilename, param string, retry bool) ([]string, error) {
+func getFileStats(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	t.Logf("Getting file stats...")
 	cmd := fmt.Sprintf(
 		"./zbox stats %s --silent --wallet %s --configDir ./config --config %s",

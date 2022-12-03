@@ -17,17 +17,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
+func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
+	t := test.NewSystemTest(testSetup)
 	KillFFMPEG()
 
 	defer KillFFMPEG()
 
-	t.Run("Downloading youtube feed to allocation should work", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 400*time.Second, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -177,9 +180,9 @@ func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 		for _, file := range files {
 			require.Regexp(t, regexp.MustCompile(`up(\d+).ts`), file.Name, "files created locally must be found uploaded to allocation")
 		}
-	})
+	}) // TODO: TOO LONG
 
-	t.Run("Downloading local webcam feed to allocation", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Downloading local webcam feed to allocation", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
@@ -327,7 +330,7 @@ func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 		}
 	})
 
-	t.Run("Downloading feed to allocation with delay flag", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { // todo this is unacceptably slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -481,9 +484,9 @@ func TestLivestreamDownload(t *testing.T) { // nolint cyclomatic complexity 48
 	})
 }
 
-func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
+func startUploadAndDownloadFeed(t *test.SystemTest, command, cliConfigFilename, localfolderForUpload, localfolderForDownload, uploadParams, downloadParams string) error {
 	t.Logf("Starting upload of live stream to zbox...")
-	commandString := fmt.Sprintf("./zbox %s %s --silent --delay 10 --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
+	commandString := fmt.Sprintf("./zbox %s %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, command, uploadParams)
 
 	cmd, err := cliutils.StartCommand(t, commandString, 3, 15*time.Second)
 	require.Nil(t, err, "error in uploading a live feed")
@@ -503,7 +506,7 @@ func startUploadAndDownloadFeed(t *testing.T, command, cliConfigFilename, localf
 	return nil
 }
 
-func startDownloadFeed(t *testing.T, cliConfigFilename, localFolder, params string) error {
+func startDownloadFeed(t *test.SystemTest, cliConfigFilename, localFolder, params string) error {
 	t.Logf("Starting download of live stream from zbox.")
 
 	commandString := fmt.Sprintf("./zbox download --live %s --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, params)
