@@ -344,7 +344,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.RunWithTimeout("Upload Large File Should Work", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload Large File Should Work", 3*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
