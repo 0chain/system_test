@@ -53,6 +53,8 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 	yellow := "\033[33m"
 	green := "\033[32m"
 
+	maxAttempts = 1
+
 	var count int
 	for {
 		count++
