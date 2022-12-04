@@ -2,8 +2,9 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
-	"github.com/go-resty/resty/v2"
+	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -11,12 +12,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHashnodeRoot(t *testing.T) {
-	t.Parallel()
+func TestHashnodeRoot(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
 
-	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -42,9 +41,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		var getBlobberResponse *model.BlobberGetHashnodeResponse
-		var restyResponse *resty.Response
-		getBlobberResponse, restyResponse, err = apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, restyResponse)
 		require.NotNil(t, getBlobberResponse)
@@ -53,9 +50,7 @@ func TestHashnodeRoot(t *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.Run("Get hashnode root for non-existent allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -74,17 +69,13 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		var getBlobberResponse *model.BlobberGetHashnodeResponse
-		var restyResponse *resty.Response
-		getBlobberResponse, restyResponse, err = apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.Run("Get hashnode root with bad signature should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -109,7 +100,7 @@ func TestHashnodeRoot(t *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)

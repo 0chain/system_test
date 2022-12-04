@@ -10,17 +10,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileDownloadTokenMovement(t *testing.T) {
+func TestFileDownloadTokenMovement(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Downloader's readpool balance should reduce by download cost", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -84,8 +86,8 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		output, err = downloadFileForWallet(t, walletOwner, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
@@ -102,25 +104,30 @@ func TestFileDownloadTokenMovement(t *testing.T) {
 		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 }
 
-func readPoolInfo(t *testing.T, cliConfigFilename string) ([]string, error) {
+func readPoolInfo(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return readPoolInfoWithWallet(t, escapedTestName(t), cliConfigFilename)
 }
 
-func readPoolInfoWithWallet(t *testing.T, wallet, cliConfigFilename string) ([]string, error) {
+func readPoolInfoWithWallet(t *test.SystemTest, wallet, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 30*time.Second) // TODO replace with poller
 	t.Logf("Getting read pool info...")
 	return cliutils.RunCommand(t, "./zbox rp-info"+" --json --silent --wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func readPoolLock(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func readPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func readPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking read tokens...")
 	cmd := fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
@@ -130,11 +137,11 @@ func readPoolLockWithWallet(t *testing.T, wallet, cliConfigFilename, params stri
 	}
 }
 
-func getDownloadCost(t *testing.T, cliConfigFilename, params string, retry bool) ([]string, error) {
+func getDownloadCost(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return getDownloadCostWithWallet(t, escapedTestName(t), cliConfigFilename, params, retry)
 }
 
-func getDownloadCostWithWallet(t *testing.T, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func getDownloadCostWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Getting download cost...")
 	cmd := fmt.Sprintf("./zbox get-download-cost %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {

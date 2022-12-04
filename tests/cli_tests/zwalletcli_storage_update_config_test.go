@@ -8,20 +8,24 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var settingUpdateSleepTime = time.Second * 10
+var settingUpdateSleepTime = time.Second * 60
 
-func TestStorageUpdateConfig(t *testing.T) {
+func TestStorageUpdateConfig(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	t.Run("should allow update setting updates", func(t *testing.T) {
+	t.RunSequentiallyWithTimeout("should allow update setting updates", 3*time.Minute, func(t *test.SystemTest) { // todo: too slow
 		_ = initialiseTest(t, scOwnerWallet, false)
 
 		// ATM the owner is the only string setting and that is handled elsewhere
@@ -98,7 +102,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		checkSettings(t, settingsAfter, *expectedChange)
 	})
 
-	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -111,7 +115,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *testing.T) {
+	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
@@ -127,9 +131,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 			", can't set value "+value, output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update max_read_price to invalid value should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentially("update max_read_price to invalid value should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -156,7 +158,7 @@ func TestStorageUpdateConfig(t *testing.T) {
 	})
 }
 
-func checkSettings(t *testing.T, actual, expected settingMaps) {
+func checkSettings(t *test.SystemTest, actual, expected settingMaps) {
 	require.Len(t, actual.Keys, len(climodel.StorageKeySettings))
 	require.Len(t, actual.Numeric, len(climodel.StorageFloatSettings)+len(climodel.StorageIntSettings)+len(climodel.StorageCurrencySettigs))
 	require.Len(t, actual.Boolean, len(climodel.StorageBoolSettings))
@@ -228,7 +230,7 @@ func checkSettings(t *testing.T, actual, expected settingMaps) {
 	require.Len(t, mismatches, 0, "expected and actual setting mismatches after update discovered:\n", mismatches)
 }
 
-func updateStorageSCConfig(t *testing.T, walletName string, param map[string]string, retry bool) ([]string, error) {
+func updateStorageSCConfig(t *test.SystemTest, walletName string, param map[string]string, retry bool) ([]string, error) {
 	t.Logf("Updating storage config...")
 	p := createKeyValueParams(param)
 	cmd := fmt.Sprintf(
@@ -244,7 +246,7 @@ func updateStorageSCConfig(t *testing.T, walletName string, param map[string]str
 	}
 }
 
-func getStorageConfigMap(t *testing.T) settingMaps {
+func getStorageConfigMap(t *test.SystemTest) settingMaps {
 	output, err := getStorageSCConfig(t, configPath, true)
 
 	require.NoError(t, err, strings.Join(output, "\n"))
@@ -253,7 +255,7 @@ func getStorageConfigMap(t *testing.T) settingMaps {
 	return keyValueSettingsToMap(output)
 }
 
-func getStorageSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+func getStorageSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving storage config...")
 	cmd := "./zwallet sc-config --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename

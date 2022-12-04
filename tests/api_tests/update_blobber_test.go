@@ -3,18 +3,20 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdateBlobber(t *testing.T) {
+func TestUpdateBlobber(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 

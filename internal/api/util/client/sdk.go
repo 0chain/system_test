@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"crypto/rand"
 	"errors"
+	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"os"
 	"path"
 	"path/filepath"
 	"sync"
-	"testing"
 	"time"
 
 	"github.com/0chain/gosdk/core/conf"
@@ -49,7 +49,7 @@ func (c *SDKClient) StartSession(callback func()) {
 	callback()
 }
 
-func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics string) {
+func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonics string) {
 	c.wallet = &model.SdkWallet{
 		ClientID:  wallet.Id,
 		ClientKey: wallet.PublicKey,
@@ -75,7 +75,7 @@ func (c *SDKClient) SetWallet(t *testing.T, wallet *model.Wallet, mnemonics stri
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		require.NoError(t, err)
@@ -117,7 +117,7 @@ func (c *SDKClient) UploadFile(t *testing.T, allocationID string) string {
 	return filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name()))
 }
 
-func (c *SDKClient) DownloadFile(t *testing.T, allocationID, remotePath string) {
+func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotePath string) {
 	allocation, err := sdk.GetAllocation(allocationID)
 	require.Nil(t, err)
 

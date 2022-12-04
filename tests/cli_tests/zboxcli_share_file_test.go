@@ -12,17 +12,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 )
 
-func TestShareFile(t *testing.T) {
-	t.Parallel()
-	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *testing.T) {
-		t.Parallel()
+func TestShareFile(testSetup *testing.T) {
+	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
+	t := test.NewSystemTest(testSetup)
 
+	t.Parallel()
+	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket with zero expiration", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -41,7 +44,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -73,13 +77,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share unencrypted file to public using auth ticket with zero expiration", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -97,7 +99,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -128,13 +131,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share unencrypted file to public using auth ticket", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share unencrypted file to public using auth ticket", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -152,7 +153,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -182,13 +184,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Shared encrypted file to public using auth ticket should fail to download", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Shared encrypted file to public using auth ticket should fail to download", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -207,7 +207,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -241,9 +242,7 @@ func TestShareFile(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "invalid ed25519 curve point")
 	})
 
-	t.Run("Revoke auth ticket on publicly-shared unencrypted file should fail to download", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Revoke auth ticket on publicly-shared unencrypted file should fail to download", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -261,7 +260,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -305,9 +305,7 @@ func TestShareFile(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
-	t.Run("Expired auth ticket of a publicly-shared file should fail to download", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Expired auth ticket of a publicly-shared file should fail to download", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -325,7 +323,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -358,13 +357,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
-	t.Run("Share to public a folder with no encrypted file using auth ticket", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -383,7 +380,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -414,13 +412,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share encrypted file using auth ticket - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share encrypted file using auth ticket - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -439,7 +435,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -477,13 +474,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share encrypted huge file using auth ticket - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -502,7 +497,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -533,11 +529,6 @@ func TestShareFile(t *testing.T) {
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(file),
-		)
-
 		// download with authticket and lookuphash should work
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
@@ -548,7 +539,8 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(file))
 
 		os.Remove(file) //nolint
 		// download with authticket should work
@@ -560,13 +552,12 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		require.Equal(t, expected, output[len(output)-1])
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(file))
 		os.Remove(file) //nolint
 	})
 
-	t.Run("Revoke auth ticket of encrypted file - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Revoke auth ticket of encrypted file - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -585,7 +576,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -642,9 +634,7 @@ func TestShareFile(t *testing.T) {
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
-	t.Run("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -663,7 +653,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -704,13 +695,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0],
+		require.Contains(t, output[0], "consensus_not_met",
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Auth ticket for wrong clientId should fail to download - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Auth ticket for wrong clientId should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -729,7 +718,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -769,13 +759,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
-	t.Run("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -794,7 +782,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -833,14 +822,12 @@ func TestShareFile(t *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "Error cipher: message authentication failed")
 	})
 
-	t.Run("Share folder with encrypted file using auth ticket - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share folder with encrypted file using auth ticket - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -859,7 +846,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -898,13 +886,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Folder not shared should fail to download - proxy re-encryption", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -924,7 +910,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		remoteOwnerPathSubfolder := "/subfolder2/subfolder3/" + filepath.Base(file)
 		uploadParams = map[string]interface{}{
@@ -936,7 +923,8 @@ func TestShareFile(t *testing.T) {
 		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -975,13 +963,11 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: No minimum consensus for file meta data of file", output[0],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "file meta data")
 	})
 
-	t.Run("Share non-existent file should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share non-existent file should fail", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1010,9 +996,7 @@ func TestShareFile(t *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Share someone else's allocation file should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share someone else's allocation file should fail", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1047,9 +1031,7 @@ func TestShareFile(t *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Share file with missing allocation should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Share file with missing allocation should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -1064,9 +1046,7 @@ func TestShareFile(t *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Share file with missing remotepath should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("Share file with missing remotepath should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
@@ -1081,9 +1061,7 @@ func TestShareFile(t *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.Run("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1101,7 +1079,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1171,8 +1150,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
@@ -1186,16 +1165,18 @@ func TestShareFile(t *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
 
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 
-	t.Run("Share unencrypted file using auth ticket - download accounting test", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1214,7 +1195,8 @@ func TestShareFile(t *testing.T) {
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1271,8 +1253,8 @@ func TestShareFile(t *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
 
 		// waiting 60 seconds for blobber to redeem tokens
 		cliutils.Wait(t, 60*time.Second)
@@ -1288,16 +1270,21 @@ func TestShareFile(t *testing.T) {
 		require.NotEmpty(t, finalReadPool)
 
 		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
-		// todo: finalReadPool.OwnerBalance might be in ZCN format
-		require.Equal(t, expectedRPBalance, float64(finalReadPool.Balance))
+
+		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
+		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
+		// So the download cost will be in between initial balance and expected balance.
+		require.Equal(t, true,
+			finalReadPool.Balance < initialReadPool.Balance &&
+				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 }
 
-func shareFile(t *testing.T, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func shareFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	return shareFileWithWallet(t, escapedTestName(t), cliConfigFilename, param)
 }
 
-func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+func shareFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
 	t.Logf("Sharing file...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(
@@ -1310,7 +1297,7 @@ func shareFileWithWallet(t *testing.T, wallet, cliConfigFilename string, param m
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func registerAndCreateAllocation(t *testing.T, configPath, wallet string) (string, *climodel.Wallet) {
+func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	// Output:
