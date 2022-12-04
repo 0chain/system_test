@@ -189,13 +189,14 @@ func TestSharderStake(testSetup *testing.T) {
 	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		wallet, err := getWallet(t, configPath)
 
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
-		require.Equal(t, "stake_pool_unlock_failed: no such delegate pool: "+sharder.ID, output[0])
+		require.Equal(t, "stake_pool_unlock_failed: no such delegate pool: "+wallet.ClientID, output[0])
 	})
 }
 

@@ -158,7 +158,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens against invalid miner but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "stake_pool_lock_failed: can't get stake pool: delegate_pool_add: miner not found or genesis miner used", output[0])
+		require.Equal(t, "stake_pool_lock_failed: can't get stake pool: get_stake_pool: miner not found or genesis miner used", output[0])
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *test.SystemTest) {
@@ -370,7 +370,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
-		require.Equal(t, "stake_pool_unlock_failed: can't get related stake pool: delegate_pool_add: miner not found or genesis miner used", output[0])
+		require.Equal(t, "stake_pool_unlock_failed: can't get related stake pool: get_stake_pool: miner not found or genesis miner used", output[0])
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
