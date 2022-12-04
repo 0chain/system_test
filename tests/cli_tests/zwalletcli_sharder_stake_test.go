@@ -69,12 +69,9 @@ func TestSharderStake(testSetup *testing.T) {
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
 		}), true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
+		require.NotNil(t, err, "expected error when requesting unlocked pool but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
-		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
-		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
-		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
+		require.Equal(t, `resource_not_found: can't find pool stats`, output[0])
 	})
 
 	t.RunSequentiallyWithTimeout("Multiple stakes against a sharder should not create multiple pools", 80*time.Second, func(t *test.SystemTest) {
@@ -159,7 +156,8 @@ func TestSharderStake(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		initialBalance := 1.0
+		output, err = executeFaucetWithTokens(t, configPath, initialBalance)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
@@ -171,12 +169,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, lockOutputRegex, output[0])
 
-		poolsInfo, err := pollForPoolInfo(t, sharder.ID)
-		require.Nil(t, err)
 		cliutils.Wait(t, time.Second*15)
-		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.GreaterOrEqual(t, balance, poolsInfo.Reward)
-
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
@@ -184,6 +177,10 @@ func TestSharderStake(testSetup *testing.T) {
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
+
+		balance := getBalanceFromSharders(t, wallet.ClientID)
+		require.Greater(t, balance, initialBalance)
+
 	})
 
 	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
