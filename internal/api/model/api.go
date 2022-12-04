@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -97,9 +96,6 @@ func NewCollectRewardTransactionData(providerID string, providerType int) Transa
 }
 
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
-	fmt.Println("\n\n\n\n\n")
-	fmt.Println(*scRestGetAllocationBlobbersResponse)
-	fmt.Println("\n\n\n\n\n")
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,
@@ -110,6 +106,13 @@ func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolReq
 	return TransactionData{
 		Name:  "stake_pool_lock",
 		Input: &createStakePoolRequest,
+	}
+}
+
+func NewDeleteStackPoolTransactionData(deleteStakePoolRequest DeleteStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "stake_pool_unlock",
+		Input: &deleteStakePoolRequest,
 	}
 }
 
@@ -347,6 +350,12 @@ type StakePoolSettings struct {
 type CreateStakePoolRequest struct {
 	ProviderType int    `json:"provider_type,omitempty"`
 	ProviderID   string `json:"provider_id,omitempty"`
+}
+
+type DeleteStakePoolRequest struct {
+	ProviderType int    `json:"provider_type,omitempty"`
+	ProviderID   string `json:"provider_id,omitempty"`
+	PoolID       string `json:"pool_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -786,12 +795,12 @@ type GetGraphBlobberTotalStakeRequest struct {
 
 type GetGraphBlobberTotalStakeResponse []int
 
-type GetGraphBlobberChallengesOpenRequest struct {
+type GetGraphBlobberChallengesOpenedRequest struct {
 	DataPoints    int
 	BlobberID, To string
 }
 
-type GetGraphBlobberChallengesOpenResponse []int
+type GetGraphBlobberChallengesOpenedResponse []int
 
 type GetCurrentRoundResponse struct {
 	CurrentRound int `json:"current_round"`

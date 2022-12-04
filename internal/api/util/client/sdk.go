@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"errors"
+	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/zcnbridge"
+	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -53,6 +57,32 @@ func NewSDKClient(blockWorker string) *SDKClient {
 		MinConfirmation:         50,
 		ConfirmationChainLength: 3,
 	})
+
+	clientBytes, err := ioutil.ReadFile(filepath.Join(configDir, walletFileName))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	clientConfig := string(clientBytes)
+
+	var wallet zcncrypto.Wallet
+	err = json.Unmarshal(clientBytes, &wallet)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = zcncore.SetWalletInfo(clientConfig, false)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = zcncore.InitZCNSDK(blockWorker, "bls0chain",
+		zcncore.WithChainID(""),
+		zcncore.WithMinConfirmation(50),
+		zcncore.WithMinSubmit(50),
+		zcncore.WithConfirmationChainLength(3))
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	configDir, err := filepath.Abs(configDir)
 	if err != nil {

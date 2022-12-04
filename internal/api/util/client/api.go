@@ -47,11 +47,15 @@ const (
 	GetGraphBlobberCapacity            = "/v1/screst/:sc_address/graph-blobber-capacity"
 	GetGraphBlobberWritePrice          = "/v1/screst/:sc_address/graph-blobber-write-price"
 	GetGraphBlobberServiceCharge       = "/v1/screst/:sc_address/graph-blobber-service-charge"
-	GetGraphBlobberChallengesCompleted = "/v1/screst/:sc_address/graph-blobber-challenges-completed"
-	GetGraphBlobberInactiveRounds      = "/v1/screst/:sc_address/graph-blobber-inactive-rounds"
+	GetGraphBlobberUnstakeTotal        = "/v2/graph-blobber-unstake-total"
+	GetGraphBlobberTotalOffers         = "/v2/graph-blobber-offers-total"
+	GetGraphBlobberChallengesCompleted = "/v2/graph-blobber-challenges-completed"
+	GetGraphBlobberChallengesPassed    = "/v2/graph-blobber-challenges-passed"
+	GetGraphBlobberChallengesOpened    = "/v2/graph-blobber-challenges-open"
+	GetGraphBlobberInactiveRounds      = "/v2/graph-blobber-inactive-rounds"
 	GetGraphBlobberSavedData           = "/v2/graph-blobber-saved-data"
 	GetGraphBlobberReadData            = "/v2/graph-blobber-read-data"
-	GetTotalTotalChallenges            = "/v1/screst/:sc_address/total-total-challenges"
+	GetTotalTotalChallenges            = "/v2/total-total-challenges"
 	GetTotalMinted                     = "/v2/total-minted"
 	GetAverageWritePrice               = "/v1/screst/:sc_address/average-write-price"
 	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
@@ -1021,7 +1025,6 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 	wallet.IncNonce()
 }
 
-// CreateStakePoolWrapper does not provide deep test of used components
 func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
 	t.Log("Create stake pool...")
 
@@ -1068,6 +1071,55 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 	wallet.IncNonce()
 
 	return createStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) DeleteStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID, poolID string, requiredTransactionStatus int) string {
+	t.Log("Delete stake pool...")
+
+	deleteStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewDeleteStackPoolTransactionData(
+				model.DeleteStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+					PoolID:       poolID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, deleteStakePoolTransactionPutResponse)
+
+	var deleteStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		deleteStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: deleteStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if deleteStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return deleteStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return deleteStakePoolTransactionGetConfirmationResponse.Hash
 }
 
 func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
@@ -1331,43 +1383,57 @@ func (c *APIClient) V1SharderGetTotalSuccessfulChallenges(t *test.SystemTest, re
 func (c *APIClient) V1SharderGetGraphBlobberInactiveRounds(t *test.SystemTest, getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberInactiveRoundsResponse *model.GetGraphBlobberInactiveRoundsResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberInactiveRounds).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberInactiveRoundsRequest.DataPoints)).
-		AddParams("id", getGraphBlobberInactiveRoundsRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberInactiveRounds).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberInactiveRoundsRequest.DataPoints)).
+		AddParams("id", getGraphBlobberInactiveRoundsRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberInactiveRoundsRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberInactiveRoundsResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberInactiveRoundsResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(t *test.SystemTest, getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesCompletedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesCompletedResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(t *test.SystemTest, getGraphBlobberChallengesCompletedRequest model.GetGraphBlobberChallengesCompletedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesCompletedResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberChallengesCompletedResponse *model.GetGraphBlobberChallengesCompletedResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberChallengesCompleted).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesPassedRequest.DataPoints)).
-		AddParams("id", getGraphBlobberChallengesPassedRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberChallengesCompleted).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesCompletedRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallengesCompletedRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberChallengesCompletedRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberChallengesCompletedResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberChallengesCompletedResponse, resp, err
 }
@@ -1375,23 +1441,59 @@ func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(t *test.SystemTe
 func (c *APIClient) V1SharderGetGraphBlobberChallengesPassed(t *test.SystemTest, getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesPassedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesPassedResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberChallengesPassedResponse *model.GetGraphBlobberChallengesPassedResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberChallengesCompleted).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesPassedRequest.DataPoints)).
-		AddParams("id", getGraphBlobberChallengesPassedRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberChallengesPassed).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallengesPassedRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallengesPassedRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberChallengesPassedRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberChallengesPassedResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberChallengesPassedResponse, resp, err
+}
+
+func (c *APIClient) V1SharderGetGraphBlobberChallengesOpened(t *test.SystemTest, getGraphBlobberChallangesOpenRequest model.GetGraphBlobberChallengesOpenedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesOpenedResponse, *resty.Response, error) {
+	var getGraphBlobberChallangesOpenedResponse *model.GetGraphBlobberChallengesOpenedResponse
+
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
+
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberChallengesOpened).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberChallangesOpenRequest.DataPoints)).
+		AddParams("id", getGraphBlobberChallangesOpenRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberChallangesOpenRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
+		t,
+		formattedURL,
+		model.ExecutionRequest{
+			Dst:                &getGraphBlobberChallangesOpenedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod)
+
+	return getGraphBlobberChallangesOpenedResponse, resp, err
 }
 
 func (c *APIClient) V1SharderGetGraphBlobberServiceCharge(t *test.SystemTest, getGraphBlobberServiceChargeRequest model.GetGraphBlobberServiceChargeRequest, requiredStatusCode int) (*model.GetGraphBlobberServiceChargeResponse, *resty.Response, error) { //nolint
@@ -1543,21 +1645,28 @@ func (c *APIClient) V1SharderGetGraphBlobberReadData(t *test.SystemTest, getGrap
 func (c *APIClient) V1SharderGetGraphBlobberOffersTotal(t *test.SystemTest, getGraphBlobberOffersTotalRequest model.GetGraphBlobberOffersTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberOffersTotalResponse, *resty.Response, error) {
 	var getGraphBlobberOffersTotalResponse *model.GetGraphBlobberOffersTotalResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberAllocated).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberOffersTotalRequest.DataPoints)).
-		AddParams("id", getGraphBlobberOffersTotalRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberTotalOffers).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberOffersTotalRequest.DataPoints)).
+		AddParams("id", getGraphBlobberOffersTotalRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberOffersTotalRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberOffersTotalResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberOffersTotalResponse, resp, err
 }
@@ -1565,21 +1674,28 @@ func (c *APIClient) V1SharderGetGraphBlobberOffersTotal(t *test.SystemTest, getG
 func (c *APIClient) V1SharderGetGraphBlobberUnstakeTotal(t *test.SystemTest, getGraphBlobberUnstakeTotalRequest model.GetGraphBlobberUnstakeTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberUnstakeTotalResponse, *resty.Response, error) {
 	var getGraphBlobberUnstakeTotalResponse *model.GetGraphBlobberUnstakeTotalResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberAllocated).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberUnstakeTotalRequest.DataPoints)).
-		AddParams("id", getGraphBlobberUnstakeTotalRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberUnstakeTotal).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberUnstakeTotalRequest.DataPoints)).
+		AddParams("id", getGraphBlobberUnstakeTotalRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberUnstakeTotalRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberUnstakeTotalResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberUnstakeTotalResponse, resp, err
 }
@@ -1604,28 +1720,6 @@ func (c *APIClient) V1SharderGetGraphBlobberTotalStake(t *test.SystemTest, getGr
 		SharderServiceProvider)
 
 	return getGraphBlobberTotalStakeResponse, resp, err
-}
-
-func (c *APIClient) V1SharderGetGraphBlobberChallangesOpen(t *test.SystemTest, getGraphBlobberChallangesOpenRequest model.GetGraphBlobberChallengesOpenRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesOpenResponse, *resty.Response, error) {
-	var getGraphBlobberChallangesOpenResponse *model.GetGraphBlobberChallengesOpenResponse
-
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberAllocated).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberChallangesOpenRequest.DataPoints)).
-		AddParams("id", getGraphBlobberChallangesOpenRequest.BlobberID)
-
-	resp, err := c.executeForAllServiceProviders(
-		t,
-		urlBuilder,
-		model.ExecutionRequest{
-			Dst:                &getGraphBlobberChallangesOpenResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpGETMethod,
-		SharderServiceProvider)
-
-	return getGraphBlobberChallangesOpenResponse, resp, err
 }
 
 func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {

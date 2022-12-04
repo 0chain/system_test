@@ -34,4 +34,4 @@ tests/cli/tmp/
 tests/cli/__debug_bin
 tests/cli_tests/*.png
 
-tests/cli/logs/
+**/logs
