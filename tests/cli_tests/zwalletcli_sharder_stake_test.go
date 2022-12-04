@@ -64,7 +64,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, "error unlocking tokens against a node")
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens will be unlocked next VC", output[0])
+		require.Equal(t, "tokens unlocked", output[0])
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": sharder.ID,
@@ -195,7 +195,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")
 		require.Len(t, output, 1)
-		require.Equal(t, "delegate_pool_del: pool does not exist for deletion", output[0])
+		require.Equal(t, "stake_pool_unlock_failed: no such delegate pool: "+sharder.ID, output[0])
 	})
 }
 
