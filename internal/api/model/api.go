@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -96,6 +97,9 @@ func NewCollectRewardTransactionData(providerID string, providerType int) Transa
 }
 
 func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCRestGetAllocationBlobbersResponse) TransactionData {
+	fmt.Println("\n\n\n\n\n")
+	fmt.Println(*scRestGetAllocationBlobbersResponse)
+	fmt.Println("\n\n\n\n\n")
 	return TransactionData{
 		Name:  "new_allocation_request",
 		Input: *scRestGetAllocationBlobbersResponse,

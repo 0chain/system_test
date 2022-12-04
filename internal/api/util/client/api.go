@@ -829,6 +829,10 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
 
+	fmt.Println("\n\n\n")
+	fmt.Println(createAllocationTransactionPutResponse)
+	fmt.Println("\n\n\n")
+
 	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {

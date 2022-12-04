@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/google/go-cmp/cmp"
 	"testing"
@@ -19,31 +20,93 @@ func TestAtlusChimney(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Get total minted tokens, should work", func(t *test.SystemTest) {
+		t.Skip()
 		getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, getTotalMintedResponse)
 	})
 
-	t.Run("Check if amount of total minted tokens changed after faucet execution, should work", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+	t.RunWithTimeout("Check if amount of total minted tokens changed after a blobber receives rewards, should work", time.Minute*10, func(t *test.SystemTest) {
+		t.Skip()
+		sdkClient.StartSession(func() {
+			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, getTotalMintedResponse, 0)
+			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		totalMintedBefore := getTotalMintedResponse
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+			blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+			require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		wait.PoolImmediately(t, time.Minute, func() bool {
-			getTotalMintedResponse, resp, err = apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
+			getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
 			require.NotNil(t, getTotalMintedResponse, 0)
 
-			return *getTotalMintedResponse > *totalMintedBefore
+			totalMintedBefore := getTotalMintedResponse
+
+			apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+			balanceBefore := walletBalance.Balance
+
+			var rewards int64
+
+			wait.PoolImmediately(t, time.Minute*10, func() bool {
+				stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
+
+				for _, poolDelegateInfo := range stakePoolInfo.Delegate {
+					if poolDelegateInfo.DelegateID == sdkWallet.Id {
+						rewards = poolDelegateInfo.Rewards
+						break
+					}
+				}
+
+				return rewards > 0
+			})
+			apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
+
+			walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+			balanceAfter := walletBalance.Balance
+
+			require.Equal(t, balanceAfter, balanceBefore+rewards)
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalMintedResponse, resp, err = apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+				require.NotNil(t, getTotalMintedResponse, 0)
+
+				return *getTotalMintedResponse > *totalMintedBefore
+			})
+		})
+	})
+
+	t.RunWithTimeout("Check if amount of total minted tokens changed after minting zcn tokens, should work", time.Minute*10, func(t *test.SystemTest) {
+		sdkClient.StartSession(func() {
+			getTotalMintedResponse, resp, err := apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, getTotalMintedResponse, 0)
+
+			totalMintedBefore := getTotalMintedResponse
+
+			burnTicketHash := sdkClient.BurnWZCN(t, 1)
+			sdkClient.MintZCN(t, burnTicketHash)
+
+			wait.PoolImmediately(t, time.Minute*5, func() bool {
+				getTotalMintedResponse, resp, err = apiClient.V1SharderGetTotalMinted(t, client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+				require.NotNil(t, getTotalMintedResponse, 0)
+
+				return *getTotalMintedResponse > *totalMintedBefore
+			})
 		})
 	})
 
@@ -575,41 +638,26 @@ func TestAtlusChimney(testSetup *testing.T) {
 		require.NotNil(t, *getGraphBlobberSavedDataResponse)
 	})
 
-	t.Run("Check if a graph of saved data of a certain blobber will change after file upload, should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
-
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
-
+	t.RunWithTimeout("Check if a graph of saved data of a certain blobber will change after file upload, should work", time.Minute*10, func(t *test.SystemTest) {
 		sdkClient.StartSession(func() {
+			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+			blobberId := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, make([]*model.StorageNode, 0))
+
+			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
 			sdkClient.UploadFile(t, allocationID)
-		})
 
-		getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(t, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, getCurrentRoundResponse)
+			getCurrentRoundResponse, resp, err := apiClient.GetCurrentRound(t, client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotNil(t, getCurrentRoundResponse)
 
-		currentRoundTwiceString := getCurrentRoundResponse.CurrentRoundTwiceToString()
+			currentRoundTwiceString := getCurrentRoundResponse.CurrentRoundTwiceToString()
 
-		getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
-			t,
-			model.GetGraphBlobberSavedDataRequest{
-				DataPoints: 17,
-				BlobberID:  blobberId,
-				To:         currentRoundTwiceString,
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, *getGraphBlobberSavedDataResponse)
-		getGraphBlobberSavedDataResponseBefore := *getGraphBlobberSavedDataResponse
-
-		wait.PoolImmediately(t, time.Minute*4, func() bool {
-			getGraphBlobberSavedDataResponse, resp, err = apiClient.V1SharderGetGraphBlobberSavedData(
+			getGraphBlobberSavedDataResponse, resp, err := apiClient.V1SharderGetGraphBlobberSavedData(
 				t,
 				model.GetGraphBlobberSavedDataRequest{
 					DataPoints: 17,
@@ -620,12 +668,30 @@ func TestAtlusChimney(testSetup *testing.T) {
 			require.Nil(t, err)
 			require.NotNil(t, resp)
 			require.NotNil(t, *getGraphBlobberSavedDataResponse)
+			getGraphBlobberSavedDataResponseBefore := *getGraphBlobberSavedDataResponse
 
-			return !cmp.Equal(*getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
+			wait.PoolImmediately(t, time.Minute*10, func() bool {
+				getGraphBlobberSavedDataResponse, resp, err = apiClient.V1SharderGetGraphBlobberSavedData(
+					t,
+					model.GetGraphBlobberSavedDataRequest{
+						DataPoints: 17,
+						BlobberID:  blobberId,
+						To:         currentRoundTwiceString,
+					},
+					client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+				require.NotNil(t, *getGraphBlobberSavedDataResponse)
+
+				fmt.Println(*getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
+
+				return !cmp.Equal(*getGraphBlobberSavedDataResponse, getGraphBlobberSavedDataResponseBefore)
+			})
 		})
 	})
 
 	t.Run("Get graph of read data of a certain blobber, should work", func(t *test.SystemTest) {
+		t.Skip()
 		wallet := apiClient.RegisterWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -653,6 +719,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 	})
 
 	t.Run("Check if a graph of read data of a certain blobber will change after file upload, should work", func(t *test.SystemTest) {
+		t.Skip()
 		//t.Skip("Skip until fixed")
 		t.Parallel()
 
@@ -709,6 +776,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 	//////
 
 	t.Run("Check graph of total offers of a certain blobber, should work", func(t *test.SystemTest) {
+		t.Skip()
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)
@@ -730,6 +798,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 	})
 
 	t.Run("Check if a graph of total offers of a certain blobber will change after stake pool creation, should work", func(t *test.SystemTest) {
+		t.Skip()
 		t.Parallel()
 
 		wallet := apiClient.RegisterWallet(t)

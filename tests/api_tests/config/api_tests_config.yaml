@@ -1,2 +1,13 @@
 block_worker: https://dev.0chain.net/dns
 default_test_case_timeout: 20s
+ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
+ethereum_node_url: https://goerli.infura.io/v3/6141be73a15d47748af0dc14f53d57d7
+authorizers_address: 0x6c8A3a4541C4142D47e178bFBA2b6Aa7a6f3eFd4
+bridge_address: 0x8172d63f8ef93e0a3bf688791CA3d95253BE32B5
+token_address: 0x2A2289eD5D918A9595A030da18CCf6b886678b77
+confirmation_chain_length: 3
+min_confirmation: 50
+min_submit: 50
+signature_scheme: bls0chain
+store_unlock_duration_sec: 2
+

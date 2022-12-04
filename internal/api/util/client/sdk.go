@@ -2,10 +2,13 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"errors"
+	"github.com/0chain/gosdk/zcnbridge"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,11 +23,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	walletFileName       = "wallet.json"
+	configDir            = "./config"
+	configBridgeFileName = "bridge.yaml"
+	configChainFileName  = "api_tests_config.yaml"
+	logPath              = "logs"
+	loglevel             = "info"
+	development          = false
+)
+
 type SDKClient struct {
 	mu sync.Mutex
 
 	blockWorker string
 	wallet      *model.SdkWallet
+
+	bridge *zcnbridge.BridgeClient
 }
 
 func NewSDKClient(blockWorker string) *SDKClient {
@@ -38,6 +53,22 @@ func NewSDKClient(blockWorker string) *SDKClient {
 		MinConfirmation:         50,
 		ConfirmationChainLength: 3,
 	})
+
+	configDir, err := filepath.Abs(configDir)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	cfg := &zcnbridge.BridgeSDKConfig{
+		ConfigDir:        &configDir,
+		ConfigBridgeFile: &configBridgeFileName,
+		ConfigChainFile:  &configChainFileName,
+		LogPath:          &logPath,
+		LogLevel:         &loglevel,
+		Development:      &development,
+	}
+
+	sdkClient.bridge = zcnbridge.SetupBridgeClientSDK(cfg)
 
 	return sdkClient
 }
@@ -136,4 +167,18 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotePath st
 		err = os.Remove(localPath)
 		return err == nil
 	})
+}
+
+func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {
+	transaction, err := c.bridge.BurnWZCN(context.Background(), amount)
+	require.NoError(t, err)
+	return transaction.Hash().String()
+}
+
+func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {
+	payload, err := c.bridge.QueryZChainMintPayload(hash)
+	require.NoError(t, err)
+
+	_, err = c.bridge.MintZCN(context.Background(), payload)
+	require.NoError(t, err)
 }
