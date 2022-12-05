@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -25,49 +26,75 @@ import (
 func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip("Till batch-update is merged...")
-	t.RunSequentially("Miner share on block fees and rewards", func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	//t.Skip("Till batch-update is merged...")
+	//t.RunSequentially("Miner share on block fees and rewards", func(t *test.SystemTest) {
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
-		sharderUrl := getSharderUrl(t)
-		beforeMiners := getSortedMiners(t, sharderUrl)
-		require.True(t, len(beforeMiners.Nodes) > 0, "no miners found")
+	sharderUrl := getSharderUrl(t)
+	beforeMiners := getSortedMiners(t, sharderUrl)
+	require.True(t, len(beforeMiners.Nodes) > 0, "no miners found")
+	for _, m := range beforeMiners.Nodes {
+		createStakePool(t, m.ID, 0.1)
+	}
 
-		time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 1)
 
-		afterMiners := getSortedMiners(t, sharderUrl)
-		require.EqualValues(t, len(afterMiners.Nodes), len(beforeMiners.Nodes), "miner count changed during test")
+	afterMiners := getSortedMiners(t, sharderUrl)
+	require.EqualValues(t, len(afterMiners.Nodes), len(beforeMiners.Nodes), "miner count changed during test")
 
-		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound := beforeMiners.Nodes[0].Round + 1
-		endRound := afterMiners.Nodes[0].Round + 1
-		for i, m := range beforeMiners.Nodes {
-			require.EqualValues(t, m.ID, afterMiners.Nodes[i].ID, "miners changed during test")
-			require.EqualValues(t, startRound-1, m.Round)
-			require.EqualValues(t, endRound-1, afterMiners.Nodes[i].Round)
+	// we add rewards at the end of the round, and they don't appear until the next round
+	startRound := beforeMiners.Nodes[0].Round + 1
+	endRound := afterMiners.Nodes[0].Round + 1
+	var minerTotalRewards = make(map[string]int64, len(beforeMiners.Nodes))
+	for i, m := range beforeMiners.Nodes {
+		require.EqualValues(t, m.ID, afterMiners.Nodes[i].ID, "miners changed during test")
+		require.EqualValues(t, startRound-1, m.Round)
+		require.EqualValues(t, endRound-1, afterMiners.Nodes[i].Round)
+		minerTotalRewards[m.ID] = 0
+	}
+
+	minerScConfig := getMinerScMap(t)
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl)
+
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		"epoch changed during test, start %v finish %v",
+		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
+
+	minerBlockRewardPerRound, _ := blockRewards(startRound, minerScConfig)
+	//numMinerDelegatesRewarded := minerScConfig["NumMinerDelegatesRewarded"]
+	//numDelegatesPerMiner := 1
+
+	for round := history.From(); round <= history.To(); round++ {
+		roundHistory := history.RoundHistory(t, round)
+		for _, pReward := range roundHistory.ProviderRewards {
+			switch pReward.RewardType {
+			case climodel.BlockReward:
+				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					"block reward only paid to round lottery winner")
+				expectedServiceCharge := int64(float64(minerBlockRewardPerRound) * 0.1)
+				require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 2, "service charge round %d", round)
+			case climodel.FeeReward:
+			default:
+				require.Failf(t, "check reward type %s", pReward.RewardType.String())
+			}
+			minerTotalRewards[pReward.ProviderId] += pReward.Amount
 		}
+	}
 
-		minerScConfig := getMinerScMap(t)
-		history := cliutil.NewHistory(startRound, endRound)
-		history.ReadBlocks(t, sharderUrl)
-
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-			"epoch changed during test, start %v finish %v",
-			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-		minerBlockRewardPerRound, _ := blockRewards(t, startRound, minerScConfig)
-		for i, beforeMiner := range beforeMiners.Nodes {
-			id := beforeMiner.ID
-			timesWon := history.TimesWonBestMiner(id)
-			expectedBlockRewards := timesWon * minerBlockRewardPerRound
-			recordedFees := history.TotalMinerFees(id)
-			expectedRewards := expectedBlockRewards + recordedFees
-			actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
-			require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
-		}
-	})
+	//for i, beforeMiner := range beforeMiners.Nodes {
+	//	id := beforeMiner.ID
+	//	timesWon := history.TimesWonBestMiner(id)
+	//	expectedBlockRewards := timesWon * minerBlockRewardPerRound
+	//	recordedFees := history.TotalMinerFees(id)
+	//	expectedRewards := expectedBlockRewards + recordedFees
+	//	actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
+	//	require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
+	//}
+	//})
 
 	t.RunSequentially("Sharder share on block fees and rewards", func(t *test.SystemTest) {
+		t.Skip("piers")
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -92,7 +119,7 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
-		_, sharderBlockRewards := blockRewards(t, startRound, minerScConfig)
+		_, sharderBlockRewards := blockRewards(startRound, minerScConfig)
 		numberOfRounds := endRound - startRound
 		totalBlockRewardsPerSharder := numberOfRounds * sharderBlockRewards / int64(len(beforeSharders.Nodes))
 		for i, beforeSharder := range beforeSharders.Nodes {
@@ -108,7 +135,7 @@ func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	if funds {
-		output, err = executeFaucetWithTokens(t, configPath, 3)
+		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	}
 
@@ -215,7 +242,7 @@ func getMinerScMap(t *test.SystemTest) map[string]float64 {
 	return floatMap
 }
 
-func blockRewards(t *test.SystemTest, round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
+func blockRewards(round int64, minerScConfig map[string]float64) (minerReward, sharderReward int64) {
 	epoch := round / int64(minerScConfig["epoch"])
 	epochDecline := 1.0 - minerScConfig["reward_decline_rate"]
 	declineRate := math.Pow(epochDecline, float64(epoch))
@@ -320,4 +347,15 @@ func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
 
 func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
+}
+
+func createStakePool(t *test.SystemTest, id string, tokens float64) {
+	output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		"id":     id,
+		"tokens": tokens,
+	}), true)
+	require.Nil(t, err,
+		"error staking tokens against node")
+	require.Len(t, output, 1)
+	require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 }

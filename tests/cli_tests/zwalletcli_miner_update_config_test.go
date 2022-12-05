@@ -102,7 +102,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 }
 
 func getMinerSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 5*time.Second)
+	//cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving miner config...")
 
 	cmd := "./zwallet mn-config --silent --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename

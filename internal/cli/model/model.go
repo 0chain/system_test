@@ -622,6 +622,52 @@ type EventDBTransaction struct {
 	Status            int    `json:"status"`
 }
 
+type Reward int
+
+const (
+	BlockReward Reward = iota
+	FeeReward
+	ValidationReward
+	FileDownloadReward
+	ChallengePassReward
+	ChallengeSlashPenalty
+	CancellationChargeReward
+	MinLockDemandReward
+)
+
+var rewardString = []string{
+	"block_reward",
+	"fees",
+	"validation",
+	"file download",
+	"challenge pass",
+	"challenge slash",
+	"cancellation charge",
+	"min lock demand",
+}
+
+func (r Reward) String() string {
+	return rewardString[r]
+}
+
+func (r Reward) Int() int {
+	return int(r)
+}
+
+type RewardProvider struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
+	ProviderId  string `json:"provider_id" gorm:"index:idx_provider,priority:2"`
+	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+}
+
+type RewardDelegate struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
+	PoolID      string `json:"pool_id" gorm:"index:idx_pool,priority:2"`
+	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+}
+
 type EventDBBlock struct {
 	Hash                  string               `json:"hash"`
 	Version               string               `json:"version"`

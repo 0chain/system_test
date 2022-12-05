@@ -1,24 +1,34 @@
 package cliutils
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"strconv"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/require"
 )
 
 const (
 	MaxQueryLimit    = 20
 	StorageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	MinerScAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 )
 
 type ChainHistory struct {
-	from, to int64
-	blocks   []model.EventDBBlock
+	from, to        int64
+	blocks          []model.EventDBBlock
+	delegateRewards []model.RewardDelegate
+	providerRewards []model.RewardProvider
+	roundHistories  map[int64]RoundHistory
+}
+
+type RoundHistory struct {
+	Block           model.EventDBBlock
+	DelegateRewards []model.RewardDelegate
+	ProviderRewards []model.RewardProvider
 }
 
 func NewHistory(from, to int64) *ChainHistory {
@@ -26,6 +36,20 @@ func NewHistory(from, to int64) *ChainHistory {
 		from: from,
 		to:   to,
 	}
+}
+
+func (ch *ChainHistory) RoundHistory(t *test.SystemTest, round int64) RoundHistory {
+	require.NotNil(t, ch.roundHistories, "requestingB round history")
+	require.Len(t, ch.roundHistories, int(round), "requested round in histories")
+	return ch.roundHistories[round]
+}
+
+func (ch *ChainHistory) From() int64 {
+	return ch.from
+}
+
+func (ch *ChainHistory) To() int64 {
+	return ch.to
 }
 
 func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
@@ -64,43 +88,86 @@ func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
 	return fees
 }
 
-func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
-	baseUrl := sharderBaseURL + "/v1/screst/" + StorageScAddress + "/get_blocks"
-	query := fmt.Sprintf("?content=full&start=%d&end=%d", start, end)
-	if limit > 0 || offset > 0 {
-		query += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
-	}
-	return http.Get(baseUrl + query)
+func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string) {
+	ch.readBlocks(t, sharderBaseUrl)
+	ch.readDelegateRewards(t, sharderBaseUrl)
+	ch.readProviderRewards(t, sharderBaseUrl)
+	ch.organise(t)
 }
 
-func (ch *ChainHistory) ReadBlocks(t *test.SystemTest, sharderBaseUrl string) {
-	var offset int64
-	for {
-		blocks := getBlocks(t, ch.from, ch.to, MaxQueryLimit, offset, sharderBaseUrl)
-		offset += int64(len(blocks))
-		ch.blocks = append(ch.blocks, blocks...)
-		if len(blocks) < MaxQueryLimit {
-			break
+func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/get_blocks")
+	params := map[string]string{
+		"contents": "full",
+	}
+	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to)
+}
+
+func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl string) {
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + MinerScAddress + "/delegate-rewards")
+	params := map[string]string{
+		"start": strconv.FormatInt(ch.from, 10),
+		"end":   strconv.FormatInt(ch.to, 10),
+	}
+	ch.delegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to)
+}
+
+func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl string) {
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + MinerScAddress + "/provider-rewards")
+	params := map[string]string{
+		"start": strconv.FormatInt(ch.from, 10),
+		"end":   strconv.FormatInt(ch.to, 10),
+	}
+	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to)
+}
+
+func (ch *ChainHistory) organise(t *test.SystemTest) {
+	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from)
+
+	for _, bk := range ch.blocks {
+		ch.roundHistories[bk.Round] = RoundHistory{
+			Block: bk,
 		}
 	}
-}
 
-func getBlocks(t *test.SystemTest, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDBBlock {
-	res, err := apiGetBlocks(from, to, limit, offset, sharderBaseUrl)
-	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
-	defer res.Body.Close()
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
-		"failed API request to get blocks %d to %d, status code: %d", from, to, res.StatusCode)
-	require.NotNil(t, res.Body, "balance API response must not be nil")
+	var currentRound int64
+	var currentHistory RoundHistory
+	for _, pr := range ch.providerRewards {
+		require.True(t, pr.BlockNumber >= currentRound, "provider rewards out of order")
+		if currentRound < pr.BlockNumber {
+			if currentRound > 0 {
+				ch.roundHistories[currentRound] = currentHistory
+			}
+			var ok bool
+			currentHistory, ok = ch.roundHistories[pr.BlockNumber]
+			require.True(t, ok, "should have block information for provider rewards")
+			currentRound = pr.BlockNumber
+		}
+		currentHistory.ProviderRewards = append(currentHistory.ProviderRewards, pr)
+	}
+	if currentRound > 0 {
+		ch.roundHistories[currentRound] = currentHistory
+	}
 
-	resBody, err := io.ReadAll(res.Body)
-	require.NoError(t, err, "reading response body: %v", err)
+	currentRound = 0
+	currentHistory = RoundHistory{}
+	for _, dr := range ch.delegateRewards {
+		require.GreaterOrEqual(t, dr.BlockNumber, currentRound, "delegate rewards out of order")
+		if currentRound < dr.BlockNumber {
+			if currentRound > 0 {
+				ch.roundHistories[currentRound] = currentHistory
+			}
+			var ok bool
+			currentHistory, ok = ch.roundHistories[dr.BlockNumber]
+			require.True(t, ok, "should have block information for provider rewards")
+			currentRound = dr.BlockNumber
+		}
+		currentHistory.DelegateRewards = append(currentHistory.DelegateRewards, dr)
+	}
+	if currentRound > 0 {
+		ch.roundHistories[currentRound] = currentHistory
+	}
 
-	var blocks []model.EventDBBlock
-	err = json.Unmarshal(resBody, &blocks)
-	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
-
-	return blocks
 }
 
 // debug dumps

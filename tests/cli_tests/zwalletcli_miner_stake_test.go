@@ -46,9 +46,9 @@ func TestMinerStake(testSetup *testing.T) {
 	)
 
 	t.Parallel()
-
-	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
-		output, err := registerWallet(t, configPath)
+	/*
+		//	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
+		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
@@ -83,53 +83,54 @@ func TestMinerStake(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.Nil(t, err, "error unmarshalling Miner SC User Pool")
 		require.Equal(t, int(climodel.Deleting), poolsInfo.Status)
-	})
+		//	})
+	*/
 
-	t.RunWithTimeout("Multiple stakes against a miner should create multiple pools", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	//t.RunWithTimeout("Multiple stakes against a miner should create multiple pools", 90*time.Second, func(t *test.SystemTest) {
+	output, err = registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokens(t, configPath, 2.0)
+	require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
-		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
-		require.Nil(t, err, "error unmarshalling Miner SC user pool info")
+	var poolsInfoBefore climodel.MinerSCUserPoolsInfo
+	output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+	require.Nil(t, err, "error fetching Miner SC User pools")
+	require.Len(t, output, 1)
+	err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
+	require.Nil(t, err, "error unmarshalling Miner SC user pool info")
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner.ID,
-			"tokens": 1,
-		}), true)
-		require.Nil(t, err,
-			"error staking tokens against node")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
+	output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		"id":     miner.ID,
+		"tokens": 1,
+	}), true)
+	require.Nil(t, err,
+		"error staking tokens against node")
+	require.Len(t, output, 1)
+	require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 
-		// wait for pool to be active from pending status, usually need to wait for 50 rounds
-		waitForStakePoolActive(t)
+	// wait for pool to be active from pending status, usually need to wait for 50 rounds
+	waitForStakePoolActive(t)
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner.ID,
-			"tokens": 1,
-		}), true)
-		require.Nil(t, err, "error staking tokens against node")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
+	output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		"id":     miner.ID,
+		"tokens": 1,
+	}), true)
+	require.Nil(t, err, "error staking tokens against node")
+	require.Len(t, output, 1)
+	require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
 
-		var poolsInfo climodel.MinerSCUserPoolsInfo
-		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
-		require.Len(t, output, 1)
+	var poolsInfo climodel.MinerSCUserPoolsInfo
+	output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+	require.Nil(t, err, "error fetching Miner SC User pools")
+	require.Len(t, output, 1)
 
-		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
-		require.NoError(t, err)
-		require.Len(t, poolsInfo.Pools[miner.ID], 1)
+	err = json.Unmarshal([]byte(output[0]), &poolsInfo)
+	require.NoError(t, err)
+	require.Len(t, poolsInfo.Pools[miner.ID], 1)
 
-		require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
-	})
+	require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
+	//})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
