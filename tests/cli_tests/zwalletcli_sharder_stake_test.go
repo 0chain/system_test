@@ -179,7 +179,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, initialBalance)
+		require.Greater(t, balance, int64(initialBalance))
 
 	})
 
