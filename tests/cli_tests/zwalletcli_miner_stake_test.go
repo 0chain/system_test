@@ -251,7 +251,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: max delegates already reached: %d (%d)", newMiner.Settings.MaxNumDelegates, newMiner.Settings.MaxNumDelegates), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: max_delegates reached: %d, no more stake pools allowed", newMiner.Settings.MaxNumDelegates), output[0])
 	})
 
 	///todo: again, too slow for a failure case
@@ -288,7 +288,7 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
@@ -300,7 +300,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner01ID,
-			"tokens":   0.5,
+			"tokens":   1.0,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
