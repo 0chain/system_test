@@ -80,7 +80,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 			if delegate.ID == wallet.ClientID {
 				t.Log("Pool ID returned by sp-lock found in stake pool info...")
 				found = true
-				require.Equal(t, int64(5000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
+				require.Equal(t, int64(10000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
 				require.Equal(t, wallet.ClientID, delegate.DelegateID, "Delegate ID of pool created by sp-lock is not equal to the wallet ID of User.",
 					"Delegate ID: ", delegate.DelegateID, "Wallet ID: ", wallet.ClientID)
 			}

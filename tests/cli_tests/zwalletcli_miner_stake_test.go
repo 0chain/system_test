@@ -294,7 +294,7 @@ func TestMinerStake(testSetup *testing.T) {
 		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
 		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner01ID,
-			"min_stake": 1,
+			"min_stake": 2,
 		}), true)
 		require.NoError(t, err, output)
 
@@ -304,7 +304,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is less than min allowed: %d \\u003c %d", 5000000000, 10000000000), output[0])
+		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is less than min allowed: %d \\u003c %d", 10000000000, 20000000000), output[0])
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
