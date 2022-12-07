@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +22,9 @@ func TestReadMarker(testSetup *testing.T) {
 	t.Parallel()
 
 	const blobbersRequiredForDownload = 3 // download needs (data shards + 1) number of blobbers
+
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 	sharderUrl := getSharderUrl(t)
 
 	t.RunWithTimeout("After downloading a file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
@@ -296,6 +300,62 @@ func TestReadMarker(testSetup *testing.T) {
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
 		require.Len(t, readMarkers, blobbersRequiredForDownload)
+
+		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
+		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
+	})
+
+	t.RunWithTimeout("After downloading a file by blocks, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
+		// 1 block is of size 65536, we upload 20 blocks and download 1 block
+		allocSize := int64(655360 * 4)
+		filesize := int64(655360 * 2)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(filename),
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var stats map[string]climodel.FileStats
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+
+		startBlock := 1
+		endBlock := 6
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+			"startblock": startBlock,
+			"endblock":   endBlock,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		time.Sleep(time.Second * 20)
+
+		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
+		require.Len(t, readMarkers, blobbersRequiredForDownload)
+
+		for _, rm := range readMarkers {
+			require.Equal(t, rm.ReadCounter, int64(6))
+		}
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
