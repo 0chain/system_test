@@ -165,6 +165,141 @@ func TestReadMarker(testSetup *testing.T) {
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
+
+	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+		var authTicket, filename string
+
+		filesize := int64(10)
+		remotepath := "/"
+		var allocationID string
+
+		// register viewer wallet
+		viewerWalletName := escapedTestName(t) + "_viewer"
+		err := registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+
+		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+		require.NotNil(t, viewerWallet)
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
+			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"size":   10 * 1024,
+				"tokens": 1,
+			})
+			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+				"encrypt": "",
+			})
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err := os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation":          allocationID,
+				"remotepath":          remotepath + filepath.Base(filename),
+				"encryptionpublickey": viewerWallet.EncryptionPublicKey,
+			})
+
+			output, err := shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		file := "tmp/" + filepath.Base(filename)
+
+		// Download file using auth-ticket: should work
+		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"localpath":  file,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[len(output)-1], StatusCompletedCB)
+		require.Contains(t, output[len(output)-1], filepath.Base(filename))
+
+		time.Sleep(time.Second * 20)
+
+		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
+		require.Len(t, readMarkers, blobbersRequiredForDownload)
+
+		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
+		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
+	})
+
+	t.RunWithTimeout("After downloading a shared encrypted file by lookuphash, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+		var authTicket, filename string
+
+		filesize := int64(10)
+		remotepath := "/"
+		var allocationID string
+
+		// register viewer wallet
+		viewerWalletName := escapedTestName(t) + "_viewer"
+		err := registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+
+		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
+		require.Nil(t, err)
+		require.NotNil(t, viewerWallet)
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
+			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"size":   10 * 1024,
+				"tokens": 1,
+			})
+			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+				"encrypt": "",
+			})
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err := os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation":          allocationID,
+				"remotepath":          remotepath + filepath.Base(filename),
+				"encryptionpublickey": viewerWallet.EncryptionPublicKey,
+			})
+
+			output, err := shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		file := "tmp/" + filepath.Base(filename)
+
+		// Download file using auth-ticket and lookuphash: should work
+		output, err := downloadFileForWallet(t, viewerWalletName, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
+			"lookuphash": GetReferenceLookup(allocationID, remotepath+filepath.Base(filename)),
+			"localpath":  file,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		time.Sleep(time.Second * 20)
+
+		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
+		require.Len(t, readMarkers, blobbersRequiredForDownload)
+
+		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
+		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
+	})
 }
 
 func CountReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) *climodel.ReadMarkersCount {
