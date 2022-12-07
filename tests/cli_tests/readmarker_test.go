@@ -18,7 +18,7 @@ import (
 
 func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	const defaultBlobberCount = 4
+	const blobbersRequiredForDownload = 3 // download needs (data shards + 1) number of blobbers
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -51,7 +51,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
-		require.Len(t, readMarkers, defaultBlobberCount)
+		require.Len(t, readMarkers, blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
