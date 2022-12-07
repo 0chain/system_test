@@ -43,9 +43,10 @@ const (
 
 // Contains all used url paths in the client
 const (
-	GetGraphBlobberAllocated           = "/v1/screst/:sc_address/graph-blobber-allocated"
-	GetGraphBlobberCapacity            = "/v1/screst/:sc_address/graph-blobber-capacity"
-	GetGraphBlobberWritePrice          = "/v1/screst/:sc_address/graph-blobber-write-price"
+	GetGraphTotalLocked                = "/v2/graph-total-locked"
+	GetGraphBlobberAllocated           = "/v2/graph-blobber-allocated"
+	GetGraphBlobberCapacity            = "/v2/graph-blobber-capacity"
+	GetGraphBlobberWritePrice          = "/v2/graph-blobber-write-price"
 	GetGraphBlobberServiceCharge       = "/v1/screst/:sc_address/graph-blobber-service-charge"
 	GetGraphBlobberUnstakeTotal        = "/v2/graph-blobber-unstake-total"
 	GetGraphBlobberTotalOffers         = "/v2/graph-blobber-offers-total"
@@ -58,10 +59,10 @@ const (
 	GetTotalTotalChallenges            = "/v2/total-total-challenges"
 	GetTotalMinted                     = "/v2/total-minted"
 	GetAverageWritePrice               = "/v1/screst/:sc_address/average-write-price"
-	GetTotalBlobberCapacity            = "/v1/screst/:sc_address/total-blobber-capacity"
-	GetTotalStaked                     = "/v1/screst/:sc_address/total-staked"
+	GetTotalBlobberCapacity            = "/v2/total-blobber-capacity"
+	GetTotalStaked                     = "/v2/total-staked"
 	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
-	GetTotalAllocatedStorage           = "/v1/screst/:sc_address/total-allocation-storage"
+	GetTotalAllocatedStorage           = "/v2/total-allocation-storage"
 	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
 	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
 	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
@@ -833,10 +834,6 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
 
-	fmt.Println("\n\n\n")
-	fmt.Println(createAllocationTransactionPutResponse)
-	fmt.Println("\n\n\n")
-
 	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
@@ -910,6 +907,97 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 		}
 
 		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+}
+
+func (c *APIClient) UpdateAllocationSize(t *test.SystemTest, wallet *model.Wallet, allocationID string, size int64, requiredTransactionStatus int) {
+	t.Log("Update allocation...")
+
+	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewUpdateAllocationTransactionData(&model.UpdateAllocationRequest{
+				ID:   allocationID,
+				Size: size,
+			}),
+			Value: tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, updateAllocationTransactionPutResponse)
+	txnHash := updateAllocationTransactionPutResponse.Request.Hash
+
+	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnHash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+}
+
+func (c *APIClient) CancelAllocation(t *test.SystemTest, wallet *model.Wallet, allocationID string, requiredTransactionStatus int) {
+	t.Log("Cancel allocation...")
+
+	cancelAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCancelAllocationTransactionData(allocationID),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, cancelAllocationTransactionPutResponse)
+	txnHash := cancelAllocationTransactionPutResponse.Request.Hash
+
+	var cancelAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		cancelAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnHash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if cancelAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return cancelAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
 	})
 
 	wallet.IncNonce()
@@ -1122,6 +1210,188 @@ func (c *APIClient) DeleteStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 	return deleteStakePoolTransactionGetConfirmationResponse.Hash
 }
 
+func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, allocationID string, requiredTransactionStatus int) string {
+	t.Log("Create write pool...")
+
+	createWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCreateWritePoolTransactionData(
+				model.CreateWritePoolRequest{
+					AllocationID: allocationID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createWritePoolTransactionPutResponse)
+
+	var createWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createWritePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createWritePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createWritePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) DeleteWritePool(t *test.SystemTest, wallet *model.Wallet, allocationID string, requiredTransactionStatus int) string {
+	t.Log("Delete write pool...")
+
+	deleteWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewDeleteWritePoolTransactionData(
+				model.DeleteWritePoolRequest{
+					AllocationID: allocationID,
+				}),
+			Value: tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, deleteWritePoolTransactionPutResponse)
+
+	var deleteWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		deleteWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: deleteWritePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if deleteWritePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return deleteWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return deleteWritePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) string {
+	t.Log("Create read pool...")
+
+	createReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCreateReadPoolTransactionData(),
+			Value:           tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createReadPoolTransactionPutResponse)
+
+	var createReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createReadPoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createReadPoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createReadPoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) DeleteReadPool(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) string {
+	t.Log("Delete read pool...")
+
+	deleteReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewDeleteReadPoolTransactionData(),
+			Value:           tokenomics.IntToZCN(0.5)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, deleteReadPoolTransactionPutResponse)
+
+	var deleteReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		deleteReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: deleteReadPoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if deleteReadPoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return deleteReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return deleteReadPoolTransactionGetConfirmationResponse.Hash
+}
+
 func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
 	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
 
@@ -1215,7 +1485,35 @@ func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredSta
 	return scRestGetBlobberResponse
 }
 
-func (c *APIClient) V1SharderGetTotalStoredData(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStoredDataResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetGraphTotalLocked(t *test.SystemTest, getGraphTotalLockedRequest model.GetGraphTotalLockedRequest, requiredStatusCode int) (*model.GetGraphTotalLockedResponse, *resty.Response, error) {
+	var getGraphTotalLockedResponse *model.GetGraphTotalLockedResponse
+
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
+
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphTotalLocked).
+		AddParams("data-points", strconv.Itoa(getGraphTotalLockedRequest.DataPoints)).
+		AddParams("from", "0").
+		AddParams("to", getGraphTotalLockedRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
+		t,
+		formattedURL,
+		model.ExecutionRequest{
+			Dst:                &getGraphTotalLockedResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod)
+
+	return getGraphTotalLockedResponse, resp, err
+}
+
+func (c *APIClient) V2ZBoxGetTotalStoredData(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStoredDataResponse, *resty.Response, error) { //nolint
 	var getTotalStoredDataResponse *model.GetTotalStoredDataResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1235,27 +1533,32 @@ func (c *APIClient) V1SharderGetTotalStoredData(t *test.SystemTest, requiredStat
 	return getTotalStoredDataResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalStaked(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStakedResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalStaked(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStakedResponse, *resty.Response, error) { //nolint
 	var getTotalStakedResponse *model.GetTotalStakedResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalStaked).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalStaked).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getTotalStakedResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getTotalStakedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetAverageWritePrice(t *test.SystemTest, requiredStatusCode int) (*model.GetAverageWritePriceResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetAverageWritePrice(t *test.SystemTest, requiredStatusCode int) (*model.GetAverageWritePriceResponse, *resty.Response, error) { //nolint
 	var getAverageWritePriceResponse *model.GetAverageWritePriceResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1275,7 +1578,7 @@ func (c *APIClient) V1SharderGetAverageWritePrice(t *test.SystemTest, requiredSt
 	return getAverageWritePriceResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalBlobberCapacity(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalBlobberCapacityResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalBlobberCapacity(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalBlobberCapacityResponse, *resty.Response, error) { //nolint
 	var getTotalBlobberCapacityResponse *model.GetTotalBlobberCapacityResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1295,7 +1598,7 @@ func (c *APIClient) V1SharderGetTotalBlobberCapacity(t *test.SystemTest, require
 	return getTotalBlobberCapacityResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalMinted(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalMintedResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalMinted(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalMintedResponse, *resty.Response, error) { //nolint
 	var getTotalMintedResponse *model.GetTotalMintedResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1320,47 +1623,57 @@ func (c *APIClient) V1SharderGetTotalMinted(t *test.SystemTest, requiredStatusCo
 	return getTotalMintedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalAllocatedStorage(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalAllocatedStorage, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalAllocatedStorage(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalAllocatedStorage, *resty.Response, error) { //nolint
 	var getTotalAllocatedStorage *model.GetTotalAllocatedStorage
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalAllocatedStorage).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalAllocatedStorage).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getTotalAllocatedStorage,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getTotalAllocatedStorage, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalTotalChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalTotalChallengesResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalTotalChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalTotalChallengesResponse, *resty.Response, error) { //nolint
 	var getTotalTotalChallengesResponse *model.GetTotalTotalChallengesResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalTotalChallenges).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalTotalChallenges).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getTotalTotalChallengesResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getTotalTotalChallengesResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetTotalSuccessfulChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalSuccessfulChallengesResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetTotalSuccessfulChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalSuccessfulChallengesResponse, *resty.Response, error) { //nolint
 	var getTotalSuccessfulChallengesResponse *model.GetTotalSuccessfulChallengesResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1380,7 +1693,7 @@ func (c *APIClient) V1SharderGetTotalSuccessfulChallenges(t *test.SystemTest, re
 	return getTotalSuccessfulChallengesResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberInactiveRounds(t *test.SystemTest, getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetGraphBlobberInactiveRounds(t *test.SystemTest, getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberInactiveRoundsResponse *model.GetGraphBlobberInactiveRoundsResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1409,7 +1722,7 @@ func (c *APIClient) V1SharderGetGraphBlobberInactiveRounds(t *test.SystemTest, g
 	return getGraphBlobberInactiveRoundsResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(t *test.SystemTest, getGraphBlobberChallengesCompletedRequest model.GetGraphBlobberChallengesCompletedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesCompletedResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetGraphBlobberChallengesCompleted(t *test.SystemTest, getGraphBlobberChallengesCompletedRequest model.GetGraphBlobberChallengesCompletedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesCompletedResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberChallengesCompletedResponse *model.GetGraphBlobberChallengesCompletedResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1438,7 +1751,7 @@ func (c *APIClient) V1SharderGetGraphBlobberChallengesCompleted(t *test.SystemTe
 	return getGraphBlobberChallengesCompletedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberChallengesPassed(t *test.SystemTest, getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesPassedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesPassedResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetGraphBlobberChallengesPassed(t *test.SystemTest, getGraphBlobberChallengesPassedRequest model.GetGraphBlobberChallengesPassedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesPassedResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberChallengesPassedResponse *model.GetGraphBlobberChallengesPassedResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1467,7 +1780,7 @@ func (c *APIClient) V1SharderGetGraphBlobberChallengesPassed(t *test.SystemTest,
 	return getGraphBlobberChallengesPassedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberChallengesOpened(t *test.SystemTest, getGraphBlobberChallangesOpenRequest model.GetGraphBlobberChallengesOpenedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesOpenedResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberChallengesOpened(t *test.SystemTest, getGraphBlobberChallangesOpenRequest model.GetGraphBlobberChallengesOpenedRequest, requiredStatusCode int) (*model.GetGraphBlobberChallengesOpenedResponse, *resty.Response, error) {
 	var getGraphBlobberChallangesOpenedResponse *model.GetGraphBlobberChallengesOpenedResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1496,7 +1809,7 @@ func (c *APIClient) V1SharderGetGraphBlobberChallengesOpened(t *test.SystemTest,
 	return getGraphBlobberChallangesOpenedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberServiceCharge(t *test.SystemTest, getGraphBlobberServiceChargeRequest model.GetGraphBlobberServiceChargeRequest, requiredStatusCode int) (*model.GetGraphBlobberServiceChargeResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V2ZBoxGetGraphBlobberServiceCharge(t *test.SystemTest, getGraphBlobberServiceChargeRequest model.GetGraphBlobberServiceChargeRequest, requiredStatusCode int) (*model.GetGraphBlobberServiceChargeResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberServiceChargeResponse *model.GetGraphBlobberServiceChargeResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1518,73 +1831,94 @@ func (c *APIClient) V1SharderGetGraphBlobberServiceCharge(t *test.SystemTest, ge
 	return getGraphBlobberServiceChargeResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberWritePrice(t *test.SystemTest, getGraphBlobberWritePriceRequest model.GetGraphBlobberWritePriceRequest, requiredStatusCode int) (*model.GetGraphBlobberWritePriceResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberWritePrice(t *test.SystemTest, getGraphBlobberWritePriceRequest model.GetGraphBlobberWritePriceRequest, requiredStatusCode int) (*model.GetGraphBlobberWritePriceResponse, *resty.Response, error) {
 	var getGraphBlobberWritePriceResponse *model.GetGraphBlobberWritePriceResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberWritePrice).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberWritePriceRequest.DataPoints)).
-		AddParams("id", getGraphBlobberWritePriceRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberWritePrice).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberWritePriceRequest.DataPoints)).
+		AddParams("id", getGraphBlobberWritePriceRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberWritePriceRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberWritePriceResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberWritePriceResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberCapacity(t *test.SystemTest, getGraphBlobberCapacityRequest model.GetGraphBlobberCapacityRequest, requiredStatusCode int) (*model.GetGraphBlobberCapacityResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberCapacity(t *test.SystemTest, getGraphBlobberCapacityRequest model.GetGraphBlobberCapacityRequest, requiredStatusCode int) (*model.GetGraphBlobberCapacityResponse, *resty.Response, error) {
 	var getGraphBlobberCapacityResponse *model.GetGraphBlobberCapacityResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberCapacity).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberCapacityRequest.DataPoints)).
-		AddParams("id", getGraphBlobberCapacityRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberCapacity).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberCapacityRequest.DataPoints)).
+		AddParams("id", getGraphBlobberCapacityRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberCapacityRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberCapacityResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberCapacityResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberAllocated(t *test.SystemTest, getGraphBlobberAllocatedRequest model.GetGraphBlobberAllocatedRequest, requiredStatusCode int) (*model.GetGraphBlobberAllocatedResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberAllocated(t *test.SystemTest, getGraphBlobberAllocatedRequest model.GetGraphBlobberAllocatedRequest, requiredStatusCode int) (*model.GetGraphBlobberAllocatedResponse, *resty.Response, error) {
 	var getGraphBlobberAllocatedResponse *model.GetGraphBlobberAllocatedResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberAllocated).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberAllocatedRequest.DataPoints)).
-		AddParams("id", getGraphBlobberAllocatedRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberAllocated).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberAllocatedRequest.DataPoints)).
+		AddParams("id", getGraphBlobberAllocatedRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberAllocatedRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberAllocatedResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberAllocatedResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberSavedData(t *test.SystemTest, getGraphBlobberSavedDataRequest model.GetGraphBlobberSavedDataRequest, requiredStatusCode int) (*model.GetGraphBlobberSavedDataResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberSavedData(t *test.SystemTest, getGraphBlobberSavedDataRequest model.GetGraphBlobberSavedDataRequest, requiredStatusCode int) (*model.GetGraphBlobberSavedDataResponse, *resty.Response, error) {
 	var getGraphBlobberSavedDataResponse *model.GetGraphBlobberSavedDataResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1613,7 +1947,7 @@ func (c *APIClient) V1SharderGetGraphBlobberSavedData(t *test.SystemTest, getGra
 	return getGraphBlobberSavedDataResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberReadData(t *test.SystemTest, getGraphBlobberReadDataRequest model.GetGraphBlobberReadDataRequest, requiredStatusCode int) (*model.GetGraphBlobberReadDataResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberReadData(t *test.SystemTest, getGraphBlobberReadDataRequest model.GetGraphBlobberReadDataRequest, requiredStatusCode int) (*model.GetGraphBlobberReadDataResponse, *resty.Response, error) {
 	var getGraphBlobberReadDataResponse *model.GetGraphBlobberReadDataResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1642,7 +1976,7 @@ func (c *APIClient) V1SharderGetGraphBlobberReadData(t *test.SystemTest, getGrap
 	return getGraphBlobberReadDataResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberOffersTotal(t *test.SystemTest, getGraphBlobberOffersTotalRequest model.GetGraphBlobberOffersTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberOffersTotalResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberOffersTotal(t *test.SystemTest, getGraphBlobberOffersTotalRequest model.GetGraphBlobberOffersTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberOffersTotalResponse, *resty.Response, error) {
 	var getGraphBlobberOffersTotalResponse *model.GetGraphBlobberOffersTotalResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1671,7 +2005,7 @@ func (c *APIClient) V1SharderGetGraphBlobberOffersTotal(t *test.SystemTest, getG
 	return getGraphBlobberOffersTotalResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberUnstakeTotal(t *test.SystemTest, getGraphBlobberUnstakeTotalRequest model.GetGraphBlobberUnstakeTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberUnstakeTotalResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberUnstakeTotal(t *test.SystemTest, getGraphBlobberUnstakeTotalRequest model.GetGraphBlobberUnstakeTotalRequest, requiredStatusCode int) (*model.GetGraphBlobberUnstakeTotalResponse, *resty.Response, error) {
 	var getGraphBlobberUnstakeTotalResponse *model.GetGraphBlobberUnstakeTotalResponse
 
 	urlBuilder := NewURLBuilder()
@@ -1700,7 +2034,7 @@ func (c *APIClient) V1SharderGetGraphBlobberUnstakeTotal(t *test.SystemTest, get
 	return getGraphBlobberUnstakeTotalResponse, resp, err
 }
 
-func (c *APIClient) V1SharderGetGraphBlobberTotalStake(t *test.SystemTest, getGraphBlobberTotalStakeRequest model.GetGraphBlobberTotalStakeRequest, requiredStatusCode int) (*model.GetGraphBlobberTotalStakeResponse, *resty.Response, error) {
+func (c *APIClient) V2ZBoxGetGraphBlobberTotalStake(t *test.SystemTest, getGraphBlobberTotalStakeRequest model.GetGraphBlobberTotalStakeRequest, requiredStatusCode int) (*model.GetGraphBlobberTotalStakeResponse, *resty.Response, error) {
 	var getGraphBlobberTotalStakeResponse *model.GetGraphBlobberTotalStakeResponse
 
 	urlBuilder := NewURLBuilder().
@@ -1807,7 +2141,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	return blobberObjectTreePathResponse, resp, err
 }
 
-func (c *APIClient) GetCurrentRound(t *test.SystemTest, requiredStatusCode int) (*model.GetCurrentRoundResponse, *resty.Response, error) {
+func (c *APIClient) V1SharderGetCurrentRound(t *test.SystemTest, requiredStatusCode int) (*model.GetCurrentRoundResponse, *resty.Response, error) {
 	var getCurrentRoundResponse *model.GetCurrentRoundResponse
 
 	urlBuilder := NewURLBuilder().

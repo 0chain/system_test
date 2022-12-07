@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/zcnbridge"
 	"github.com/0chain/gosdk/zcncore"
@@ -84,13 +85,14 @@ func NewSDKClient(blockWorker string) *SDKClient {
 		log.Fatalln(err)
 	}
 
-	configDir, err := filepath.Abs(configDir)
+	var configDirAbs string
+	configDirAbs, err = filepath.Abs(configDir)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	cfg := &zcnbridge.BridgeSDKConfig{
-		ConfigDir:        &configDir,
+		ConfigDir:        &configDirAbs,
 		ConfigBridgeFile: &configBridgeFileName,
 		ConfigChainFile:  &configChainFileName,
 		LogPath:          &logPath,
@@ -207,6 +209,7 @@ func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {
 
 func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {
 	payload, err := c.bridge.QueryZChainMintPayload(hash)
+	fmt.Println("HERE")
 	require.NoError(t, err)
 
 	_, err = c.bridge.MintZCN(context.Background(), payload)

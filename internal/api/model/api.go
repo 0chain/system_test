@@ -116,6 +116,32 @@ func NewDeleteStackPoolTransactionData(deleteStakePoolRequest DeleteStakePoolReq
 	}
 }
 
+func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "write_pool_lock",
+		Input: &createWritePoolRequest,
+	}
+}
+
+func NewDeleteWritePoolTransactionData(deleteWritePoolRequest DeleteWritePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "write_pool_unlock",
+		Input: &deleteWritePoolRequest,
+	}
+}
+
+func NewCreateReadPoolTransactionData() TransactionData {
+	return TransactionData{
+		Name: "read_pool_lock",
+	}
+}
+
+func NewDeleteReadPoolTransactionData() TransactionData {
+	return TransactionData{
+		Name: "read_pool_unlock",
+	}
+}
+
 func NewUpdateAllocationTransactionData(updateAllocationRequest *UpdateAllocationRequest) TransactionData {
 	return TransactionData{
 		Name:  "update_allocation_request",
@@ -127,6 +153,17 @@ func NewUpdateBlobberTransactionData(scRestGetBlobberResponse *SCRestGetBlobberR
 	return TransactionData{
 		Name:  "update_blobber_settings",
 		Input: scRestGetBlobberResponse,
+	}
+}
+
+func NewCancelAllocationTransactionData(allocationID string) TransactionData {
+	var input = map[string]interface{}{
+		"allocation_id": allocationID,
+	}
+
+	return TransactionData{
+		Name:  "cancel_allocation",
+		Input: input,
 	}
 }
 
@@ -356,6 +393,20 @@ type DeleteStakePoolRequest struct {
 	ProviderType int    `json:"provider_type,omitempty"`
 	ProviderID   string `json:"provider_id,omitempty"`
 	PoolID       string `json:"pool_id,omitempty"`
+}
+
+type CreateWritePoolRequest struct {
+	AllocationID string `json:"allocation_id"`
+}
+
+type DeleteWritePoolRequest struct {
+	AllocationID string `json:"allocation_id"`
+}
+
+type CreateReadPoolRequest struct {
+}
+
+type DeleteReadPoolRequest struct {
 }
 
 type SCRestGetAllocationResponse struct {
@@ -695,21 +746,15 @@ type GetAverageWritePriceResponse struct {
 
 type GetTotalMintedResponse int
 
-type GetTotalTotalChallengesResponse struct {
-	TotalTotalChallenges int `json:"total-total-challenges"`
-}
+type GetTotalTotalChallengesResponse int
 
 type GetTotalSuccessfulChallengesResponse struct {
 	TotalSuccessfulChallenges int `json:"total-successful-challenges"`
 }
 
-type GetTotalAllocatedStorage struct {
-	TotalAllocatedStorage int `json:"total-allocated-storage"`
-}
+type GetTotalAllocatedStorage int
 
-type GetTotalStakedResponse struct {
-	TotalStaked int `json:"total-staked"`
-}
+type GetTotalStakedResponse int
 
 type GetGraphBlobberInactiveRoundsRequest struct {
 	DataPoints    int
@@ -801,6 +846,13 @@ type GetGraphBlobberChallengesOpenedRequest struct {
 }
 
 type GetGraphBlobberChallengesOpenedResponse []int
+
+type GetGraphTotalLockedRequest struct {
+	DataPoints    int
+	BlobberID, To string
+}
+
+type GetGraphTotalLockedResponse []int
 
 type GetCurrentRoundResponse struct {
 	CurrentRound int `json:"current_round"`

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.11-0.20221204005243-d32563662652
+	github.com/0chain/gosdk v1.8.11-0.20221207100029-bfc80f6e8454
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/go-cmp v0.5.9
 	github.com/herumi/bls-go-binary v1.28.2
