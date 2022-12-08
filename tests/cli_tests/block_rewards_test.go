@@ -21,113 +21,167 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func confirmDebugBuild(t *test.SystemTest) {
-	globalCfg := getGlobalConfiguration(t, true)
-	value, found := globalCfg["server_chain.dbs.settings.debug"]
-	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
-	debug, err := strconv.ParseBool(value.(string))
-	require.NoError(t, err, "edb debug should be boolean")
-	if debug {
-		return
-	}
-	output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
-		"keys":   "server_chain.dbs.settings.debug",
-		"values": "true",
-	}, false)
-	require.NoError(t, err, "setting edb debug to true")
-	require.Len(t, output, 2, strings.Join(output, "\n"))
-	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
-}
-
 func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	confirmDebugBuild(t)
 
-	t.Run("Miner share on block fees and rewards", func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	//t.Run("Miner share on block fees and rewards", func(t *test.SystemTest) {
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
-		sharderUrl := getSharderUrl(t)
-		minersIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minersIds) > 0, "no miners found")
-		minerScConfig := getMinerScMap(t)
-		tokens := []float64{1, 0.5}
-		cleanupFunc := createStakePools(t, minersIds, tokens)
-		t.Cleanup(func() {
-			cleanupFunc()
-		})
+	sharderUrl := getSharderUrl(t)
+	minerIds := getSortedMinerIds(t, sharderUrl)
+	require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minersIds, sharderUrl)
+	tokens := []float64{1, 0.5}
+	cleanupFunc := createStakePools(t, minerIds, tokens)
+	t.Cleanup(func() {
+		cleanupFunc()
+	})
 
-		// -----------------------------------
-		time.Sleep(time.Second * 2)
-		// ----------------------------------=
+	beforeMiners := getNodes(t, minerIds, sharderUrl)
 
-		afterMiners := getNodes(t, minersIds, sharderUrl)
+	// -----------------------------------
+	time.Sleep(time.Second * 2)
+	// ----------------------------------=
 
-		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound := beforeMiners.Nodes[0].Round + 1
-		endRound := afterMiners.Nodes[0].Round + 1
-		for i := range beforeMiners.Nodes {
-			if startRound < beforeMiners.Nodes[i].Round {
-				startRound = beforeMiners.Nodes[i].Round
-			}
-			if endRound > afterMiners.Nodes[i].Round {
-				endRound = afterMiners.Nodes[i].Round
-			}
+	afterMiners := getNodes(t, minerIds, sharderUrl)
+
+	// we add rewards at the end of the round, and they don't appear until the next round
+	startRound := beforeMiners.Nodes[0].Round + 1
+	endRound := afterMiners.Nodes[0].Round + 1
+	for i := range beforeMiners.Nodes {
+		if startRound < beforeMiners.Nodes[i].Round {
+			startRound = beforeMiners.Nodes[i].Round
 		}
-
-		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl)
-
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-			"epoch changed during test, start %v finish %v",
-			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
-
-		// confirm payments to each provider consistent
-		for i, id := range minersIds {
-			var rewards int64
-			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
-				roundHistory := history.RoundHistory(t, round)
-				for _, pReward := range roundHistory.ProviderRewards {
-					if pReward.ProviderId != id {
-						continue
-					}
-					switch pReward.RewardType {
-					case climodel.BlockRewardMiner:
-						require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-							"block reward only paid to round lottery winner")
-						expectedServiceCharge := int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
-						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 1, "service charge round %d", round)
-						rewards += pReward.Amount
-					case climodel.FeeRewardMiner:
-						rewards += pReward.Amount
-					default:
-						require.Failf(t, "check ,miner reward type %s", pReward.RewardType.String())
-					}
-				}
-			}
-			rewardDelta := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
-			require.InDeltaf(testSetup, rewardDelta, rewards, 1, "rewards, expected %v got %v", rewardDelta, rewards)
+		if endRound > afterMiners.Nodes[i].Round {
+			endRound = afterMiners.Nodes[i].Round
 		}
+	}
 
-		// confirm each round miner block reward payment consistent
-		for round := history.From(); round <= history.To(); round++ {
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl)
+
+	minerScConfig := getMinerScMap(t)
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		"epoch changed during test, start %v finish %v",
+		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
+
+	minerBlockReward, _ := blockRewards(startRound, minerScConfig)
+
+	// confirm payments to each provider consistent
+	for i, id := range minerIds {
+		var rewards int64
+		for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
 			roundHistory := history.RoundHistory(t, round)
-			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
-				if pReward.RewardType == climodel.BlockRewardMiner {
-					require.False(testSetup, foundBlockRewardPayment, "only pay miner block rewards once")
-					foundBlockRewardPayment = true
+				if pReward.ProviderId != id {
+					continue
+				}
+				switch pReward.RewardType {
+				case climodel.BlockRewardMiner:
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 						"block reward only paid to round lottery winner")
+					expectedServiceCharge := int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
+					require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 1.0, "service charge round %d", round)
+					rewards += pReward.Amount
+				case climodel.FeeRewardMiner:
+					rewards += pReward.Amount
+				default:
+					require.Failf(t, "check ,miner reward type %s", pReward.RewardType.String())
 				}
 			}
-			require.True(testSetup, foundBlockRewardPayment, "must pay miner block rewards once")
 		}
-	})
+		actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
+		if actualReward != rewards {
+			require.InDeltaf(testSetup, actualReward, rewards, 1.0,
+				"rewards, expected %v got %v", actualReward, rewards)
+		}
+
+	}
+
+	// confirm each round miner block reward payment consistent
+	for round := history.From(); round <= history.To(); round++ {
+		roundHistory := history.RoundHistory(t, round)
+		foundBlockRewardPayment := false
+		for _, pReward := range roundHistory.ProviderRewards {
+			if pReward.RewardType == climodel.BlockRewardMiner {
+				require.False(testSetup, foundBlockRewardPayment, "only pay miner block rewards once")
+				foundBlockRewardPayment = true
+				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					"block reward only paid to round lottery winner")
+			}
+		}
+		require.True(testSetup, foundBlockRewardPayment, "must pay miner block rewards once")
+	}
+
+	numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
+	for i, id := range minerIds {
+		delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners.Nodes[i].Settings.ServiceCharge))
+		numPools := len(afterMiners.Nodes[i].StakePool.Pools)
+		rewards := make(map[string]int64, numPools)
+		for poolId := range afterMiners.Nodes[i].StakePool.Pools {
+			rewards[poolId] = 0
+		}
+		for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
+			poolsBlockRewarded := make(map[string]int64)
+			roundHistory := history.RoundHistory(t, round)
+			for _, dReward := range roundHistory.DelegateRewards {
+				if _, found := rewards[dReward.PoolID]; !found {
+					continue
+				}
+				switch dReward.RewardType {
+				case climodel.BlockRewardMiner:
+					_, found := poolsBlockRewarded[dReward.PoolID]
+					require.False(t, found, "pool only gets block reward once per round")
+					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
+					rewards[dReward.PoolID] += dReward.Amount
+				case climodel.FeeRewardMiner:
+					rewards[dReward.PoolID] += dReward.Amount
+				default:
+					require.Failf(t, "check ,miner reward type %s", dReward.RewardType.String())
+				}
+			}
+			if roundHistory.Block.MinerID != id {
+				require.Len(t, poolsBlockRewarded, 0,
+					"pools not block rewarded unless miner won lottery")
+			}
+			confirmPoolPayments(
+				t, delegateBlockReward, poolsBlockRewarded, afterMiners.Nodes[i].StakePool.Pools, numMinerDelegatesRewarded,
+			)
+		}
+		for poolId := range afterMiners.Nodes[i].StakePool.Pools {
+			actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
+			require.InDeltaf(testSetup, actualReward, rewards[poolId], 1.0,
+				"rewards, expected %v got %v", actualReward, rewards[poolId])
+		}
+	}
+	//	})
+}
+
+func confirmPoolPayments(
+	t *test.SystemTest,
+	blockReward int64,
+	poolsBlockRewarded map[string]int64,
+	pools map[string]*climodel.DelegatePool,
+	numRewards int,
+) {
+	if len(poolsBlockRewarded) == 0 {
+		return
+	}
+	if numRewards > len(pools) {
+		numRewards = len(pools)
+	}
+	require.Equal(t, len(poolsBlockRewarded), numRewards, "we block reward %d delegate pools", numRewards)
+	var total float64
+	for id := range poolsBlockRewarded {
+		total += float64(pools[id].Balance)
+	}
+	for id, reward := range poolsBlockRewarded {
+		expectedReward := (float64(pools[id].Balance) / total) * float64(blockReward)
+		require.InDeltaf(t, expectedReward, float64(reward), 1,
+			"delegates rewarded in proportion to their stake")
+	}
 }
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
@@ -145,6 +199,24 @@ func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	targetWallet, err := getWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 	return targetWallet.ClientID
+}
+
+func confirmDebugBuild(t *test.SystemTest) {
+	globalCfg := getGlobalConfiguration(t, true)
+	value, found := globalCfg["server_chain.dbs.settings.debug"]
+	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
+	debug, err := strconv.ParseBool(value.(string))
+	require.NoError(t, err, "edb debug should be boolean")
+	if debug {
+		return
+	}
+	output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		"keys":   "server_chain.dbs.settings.debug",
+		"values": "true",
+	}, false)
+	require.NoError(t, err, "setting edb debug to true")
+	require.Len(t, output, 2, strings.Join(output, "\n"))
+	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 }
 
 func keyValuePairStringToMap(input []string) (stringMap map[string]string, floatMap map[string]float64) {
