@@ -2,7 +2,6 @@ package cliutils
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -60,7 +59,6 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
 	url = addParms(url, params)
-	fmt.Println("url", url)
 	res, err := http.Get(url)
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
