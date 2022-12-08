@@ -95,7 +95,7 @@ func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string) {
 	ch.readBlocks(t, sharderBaseUrl)
 	ch.readDelegateRewards(t, sharderBaseUrl)
 	ch.readProviderRewards(t, sharderBaseUrl)
-	ch.organise(t)
+	ch.setup(t)
 }
 
 func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
@@ -124,7 +124,7 @@ func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl s
 	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to+1)
 }
 
-func (ch *ChainHistory) organise(t *test.SystemTest) { // nolint:
+func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from)
 
 	for _, bk := range ch.blocks {
@@ -181,27 +181,6 @@ func (ch *ChainHistory) DumpTransactions() {
 		for j := range ch.blocks[i].Transactions {
 			tx := &ch.blocks[i].Transactions[j]
 			_, _ = fmt.Println("tx", "round", tx.Round, "fees", tx.Fee, "data", tx.TransactionData, "miner id", ch.blocks[i].MinerID)
-		}
-	}
-}
-
-func (ch *ChainHistory) AccountingMiner(id string) {
-	_, _ = fmt.Println("-------------", "accounts for", id, "-------------")
-	for i := range ch.blocks {
-		if id == ch.blocks[i].MinerID {
-			ch.AccountingMinerBlock(id, &ch.blocks[i])
-		}
-	}
-}
-
-func (ch *ChainHistory) AccountingMinerBlock(id string, block *model.EventDBBlock) {
-	if id != block.MinerID {
-		return
-	}
-	for i := range block.Transactions {
-		tx := &block.Transactions[i]
-		if tx.Fee > 0 {
-			_, _ = fmt.Println("round", block.Round, "fee", tx.Fee, "data", tx.TransactionData)
 		}
 	}
 }

@@ -252,9 +252,10 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
-	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
-}
+// todo need for sharder rewards test
+//func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
+//	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
+//}
 
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
