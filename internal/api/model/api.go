@@ -732,25 +732,19 @@ type BlobberGetHashnodeResponse struct {
 	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
-type GetTotalStoredDataResponse struct {
-	TotalStoredData int `json:"total-stored-data"`
-}
+type GetTotalStoredDataResponse int
 
 type GetTotalBlobberCapacityResponse struct {
 	TotalBlobberCapacity int `json:"total-blobber-capacity"`
 }
 
-type GetAverageWritePriceResponse struct {
-	AverageWritePrice int `json:"average-write-price"`
-}
+type GetAverageWritePriceResponse int
 
 type GetTotalMintedResponse int
 
 type GetTotalTotalChallengesResponse int
 
-type GetTotalSuccessfulChallengesResponse struct {
-	TotalSuccessfulChallenges int `json:"total-successful-challenges"`
-}
+type GetTotalSuccessfulChallengesResponse int
 
 type GetTotalAllocatedStorage int
 

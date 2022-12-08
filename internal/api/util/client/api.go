@@ -56,13 +56,14 @@ const (
 	GetGraphBlobberInactiveRounds      = "/v2/graph-blobber-inactive-rounds"
 	GetGraphBlobberSavedData           = "/v2/graph-blobber-saved-data"
 	GetGraphBlobberReadData            = "/v2/graph-blobber-read-data"
+	GetTotalSuccessfulChallenges       = "/v2/total-successful-challenges"
 	GetTotalTotalChallenges            = "/v2/total-total-challenges"
 	GetTotalMinted                     = "/v2/total-minted"
-	GetAverageWritePrice               = "/v1/screst/:sc_address/average-write-price"
+	GetAverageWritePrice               = "/v2/average-write-price"
 	GetTotalBlobberCapacity            = "/v2/total-blobber-capacity"
 	GetTotalStaked                     = "/v2/total-staked"
-	GetTotalStoredData                 = "/v1/screst/:sc_address/total-stored-data"
-	GetTotalAllocatedStorage           = "/v2/total-allocation-storage"
+	GetTotalStoredData                 = "/v2/total-stored-data"
+	GetTotalAllocatedStorage           = "/v2/total-allocated-storage"
 	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
 	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
 	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
@@ -1516,19 +1517,24 @@ func (c *APIClient) V2ZBoxGetGraphTotalLocked(t *test.SystemTest, getGraphTotalL
 func (c *APIClient) V2ZBoxGetTotalStoredData(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStoredDataResponse, *resty.Response, error) { //nolint
 	var getTotalStoredDataResponse *model.GetTotalStoredDataResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalStoredData).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalStoredData).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getTotalStoredDataResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getTotalStoredDataResponse, resp, err
 }
@@ -1561,19 +1567,24 @@ func (c *APIClient) V2ZBoxGetTotalStaked(t *test.SystemTest, requiredStatusCode 
 func (c *APIClient) V2ZBoxGetAverageWritePrice(t *test.SystemTest, requiredStatusCode int) (*model.GetAverageWritePriceResponse, *resty.Response, error) { //nolint
 	var getAverageWritePriceResponse *model.GetAverageWritePriceResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetAverageWritePrice).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetAverageWritePrice).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getAverageWritePriceResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getAverageWritePriceResponse, resp, err
 }
@@ -1648,6 +1659,31 @@ func (c *APIClient) V2ZBoxGetTotalAllocatedStorage(t *test.SystemTest, requiredS
 	return getTotalAllocatedStorage, resp, err
 }
 
+func (c *APIClient) V2ZBoxGetTotalSuccessfulChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalSuccessfulChallengesResponse, *resty.Response, error) { //nolint
+	var getTotalSuccessfulChallengesResponse *model.GetTotalSuccessfulChallengesResponse
+
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
+
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalSuccessfulChallenges).
+		String()
+
+	resp, err := c.executeForServiceProvider(
+		t,
+		formattedURL,
+		model.ExecutionRequest{
+			Dst:                &getTotalSuccessfulChallengesResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod)
+
+	return getTotalSuccessfulChallengesResponse, resp, err
+}
+
 func (c *APIClient) V2ZBoxGetTotalTotalChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalTotalChallengesResponse, *resty.Response, error) { //nolint
 	var getTotalTotalChallengesResponse *model.GetTotalTotalChallengesResponse
 
@@ -1671,26 +1707,6 @@ func (c *APIClient) V2ZBoxGetTotalTotalChallenges(t *test.SystemTest, requiredSt
 		HttpGETMethod)
 
 	return getTotalTotalChallengesResponse, resp, err
-}
-
-func (c *APIClient) V2ZBoxGetTotalSuccessfulChallenges(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalSuccessfulChallengesResponse, *resty.Response, error) { //nolint
-	var getTotalSuccessfulChallengesResponse *model.GetTotalSuccessfulChallengesResponse
-
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalTotalChallenges).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
-
-	resp, err := c.executeForAllServiceProviders(
-		t,
-		urlBuilder,
-		model.ExecutionRequest{
-			Dst:                &getTotalSuccessfulChallengesResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpGETMethod,
-		SharderServiceProvider)
-
-	return getTotalSuccessfulChallengesResponse, resp, err
 }
 
 func (c *APIClient) V2ZBoxGetGraphBlobberInactiveRounds(t *test.SystemTest, getGraphBlobberInactiveRoundsRequest model.GetGraphBlobberInactiveRoundsRequest, requiredStatusCode int) (*model.GetGraphBlobberInactiveRoundsResponse, *resty.Response, error) { //nolint
