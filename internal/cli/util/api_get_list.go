@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -36,6 +37,8 @@ func ApiGetList[T any](t *test.SystemTest, url string, params map[string]string,
 	for {
 		var temp []T
 		raw := getNext(t, url, from, to, MaxQueryLimit, offset, params)
+		rs := string(raw)
+		rs = rs
 		err := json.Unmarshal(raw, &temp)
 		require.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
 		out = append(out, temp...)
@@ -58,6 +61,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
 	url = addParms(url, params)
+	fmt.Println("url", url)
 	res, err := http.Get(url)
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)

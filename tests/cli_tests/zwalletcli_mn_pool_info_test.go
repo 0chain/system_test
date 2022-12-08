@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -52,6 +53,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -78,6 +80,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
+		fmt.Println("piers  MMiner pool info after locking against sharder should work")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -105,6 +108,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
+		fmt.Println("piers  Miner/Sharder pool info for invalid node id should fail")
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

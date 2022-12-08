@@ -625,18 +625,23 @@ type EventDBTransaction struct {
 type Reward int
 
 const (
-	BlockReward Reward = iota
-	FeeReward
+	MinLockDemandReward Reward = iota
+	BlockRewardMiner
+	BlockRewardSharder
+	BlockRewardBlobber
+	FeeRewardMiner
+	FeeRewardSharder
 	ValidationReward
 	FileDownloadReward
 	ChallengePassReward
 	ChallengeSlashPenalty
 	CancellationChargeReward
-	MinLockDemandReward
 )
 
 var rewardString = []string{
-	"block_reward",
+	"block_reward_miner",
+	"block_reward_sharder",
+	"block_reward_blobber",
 	"fees",
 	"validation",
 	"file download",

@@ -4,12 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"net/http"
 	"reflect"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,109 +21,87 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func confirmDebugBuild(t *test.SystemTest) {
+	globalCfg := getGlobalConfiguration(t, true)
+	value, found := globalCfg["server_chain.dbs.settings.debug"]
+	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
+	debug, err := strconv.ParseBool(value.(string))
+	require.NoError(t, err, "server_chain.dbs.settings.debug id bool setting")
+	require.True(t, debug, "this test requires debug event database")
+}
+
 func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	//t.Skip("Till batch-update is merged...")
-	//t.RunSequentially("Miner share on block fees and rewards", func(t *test.SystemTest) {
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	confirmDebugBuild(t)
 
-	sharderUrl := getSharderUrl(t)
-	beforeMiners := getSortedMiners(t, sharderUrl)
-	require.True(t, len(beforeMiners.Nodes) > 0, "no miners found")
-	for _, m := range beforeMiners.Nodes {
-		createStakePool(t, m.ID, 0.1)
-	}
-
-	time.Sleep(time.Second * 1)
-
-	afterMiners := getSortedMiners(t, sharderUrl)
-	require.EqualValues(t, len(afterMiners.Nodes), len(beforeMiners.Nodes), "miner count changed during test")
-
-	// we add rewards at the end of the round, and they don't appear until the next round
-	startRound := beforeMiners.Nodes[0].Round + 1
-	endRound := afterMiners.Nodes[0].Round + 1
-	var minerTotalRewards = make(map[string]int64, len(beforeMiners.Nodes))
-	for i, m := range beforeMiners.Nodes {
-		require.EqualValues(t, m.ID, afterMiners.Nodes[i].ID, "miners changed during test")
-		require.EqualValues(t, startRound-1, m.Round)
-		require.EqualValues(t, endRound-1, afterMiners.Nodes[i].Round)
-		minerTotalRewards[m.ID] = 0
-	}
-
-	minerScConfig := getMinerScMap(t)
-	history := cliutil.NewHistory(startRound, endRound)
-	history.Read(t, sharderUrl)
-
-	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-		"epoch changed during test, start %v finish %v",
-		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-	minerBlockRewardPerRound, _ := blockRewards(startRound, minerScConfig)
-	//numMinerDelegatesRewarded := minerScConfig["NumMinerDelegatesRewarded"]
-	//numDelegatesPerMiner := 1
-
-	for round := history.From(); round <= history.To(); round++ {
-		roundHistory := history.RoundHistory(t, round)
-		for _, pReward := range roundHistory.ProviderRewards {
-			switch pReward.RewardType {
-			case climodel.BlockReward:
-				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					"block reward only paid to round lottery winner")
-				expectedServiceCharge := int64(float64(minerBlockRewardPerRound) * 0.1)
-				require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 2, "service charge round %d", round)
-			case climodel.FeeReward:
-			default:
-				require.Failf(t, "check reward type %s", pReward.RewardType.String())
-			}
-			minerTotalRewards[pReward.ProviderId] += pReward.Amount
-		}
-	}
-
-	//for i, beforeMiner := range beforeMiners.Nodes {
-	//	id := beforeMiner.ID
-	//	timesWon := history.TimesWonBestMiner(id)
-	//	expectedBlockRewards := timesWon * minerBlockRewardPerRound
-	//	recordedFees := history.TotalMinerFees(id)
-	//	expectedRewards := expectedBlockRewards + recordedFees
-	//	actualReward := afterMiners.Nodes[i].Reward - beforeMiner.Reward
-	//	require.EqualValues(t, expectedRewards, actualReward, "actual rewards don't match expected rewards")
-	//}
-	//})
-
-	t.RunSequentially("Sharder share on block fees and rewards", func(t *test.SystemTest) {
-		t.Skip("piers")
+	t.Run("Miner share on block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
-		beforeSharders := getSortedSharders(t, sharderUrl)
-		require.True(t, len(beforeSharders.Nodes) > 0, "no miners found")
+		minersIds := getSortedMinerIds(t, sharderUrl)
+		require.True(t, len(minersIds) > 0, "no miners found")
+		minerScConfig := getMinerScMap(t)
+		tokens := []float64{1, 0.5}
+		cleanupFunc := createStakePools(t, minersIds, tokens)
+		t.Cleanup(func() {
+			cleanupFunc()
+		})
 
-		time.Sleep(time.Second * 10)
+		beforeMiners := getNodes(t, minersIds, sharderUrl)
 
-		afterSharders := getSortedSharders(t, sharderUrl)
-		require.EqualValues(t, len(afterSharders.Nodes), len(beforeSharders.Nodes), "miner count changed during test")
+		// -----------------------------------
+		time.Sleep(time.Second * 2)
+		// ----------------------------------=
 
-		startRound := beforeSharders.Nodes[0].Round + 1
-		endRound := afterSharders.Nodes[0].Round + 1
-		for i, m := range beforeSharders.Nodes {
-			require.EqualValues(t, m.ID, afterSharders.Nodes[i].ID, "miners changed during test")
-			require.EqualValues(t, startRound-1, m.Round)
-			require.EqualValues(t, endRound-1, afterSharders.Nodes[i].Round)
+		afterMiners := getNodes(t, minersIds, sharderUrl)
+
+		// we add rewards at the end of the round, and they don't appear until the next round
+		startRound := beforeMiners.Nodes[0].Round + 1
+		endRound := afterMiners.Nodes[0].Round + 1
+		for i := range beforeMiners.Nodes {
+			if startRound < beforeMiners.Nodes[i].Round {
+				startRound = beforeMiners.Nodes[i].Round
+			}
+			if endRound > afterMiners.Nodes[i].Round {
+				endRound = afterMiners.Nodes[i].Round
+			}
 		}
 
-		minerScConfig := getMinerScMap(t)
+		history := cliutil.NewHistory(startRound, endRound)
+		history.Read(t, sharderUrl)
+
 		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
-		_, sharderBlockRewards := blockRewards(startRound, minerScConfig)
-		numberOfRounds := endRound - startRound
-		totalBlockRewardsPerSharder := numberOfRounds * sharderBlockRewards / int64(len(beforeSharders.Nodes))
-		for i, beforeSharder := range beforeSharders.Nodes {
-			expectedBlockRewards := totalBlockRewardsPerSharder
-			actualReward := afterSharders.Nodes[i].Reward - beforeSharder.Reward
-			require.EqualValues(t, expectedBlockRewards, actualReward)
+		minerBlockReward, sharderBlockReward := blockRewards(startRound, minerScConfig)
+
+		sharderBlockReward = sharderBlockReward
+		for i, id := range minersIds {
+			var rewards int64
+			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
+				roundHistory := history.RoundHistory(t, round)
+				for _, pReward := range roundHistory.ProviderRewards {
+					if pReward.ProviderId != id {
+						continue
+					}
+					switch pReward.RewardType {
+					case climodel.BlockRewardMiner:
+						require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+							"block reward only paid to round lottery winner")
+						expectedServiceCharge := int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
+						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 1, "service charge round %d", round)
+						rewards += pReward.Amount
+					case climodel.FeeRewardMiner:
+						rewards += pReward.Amount
+					default:
+						require.Failf(t, "check ,miner reward type %s", pReward.RewardType.String())
+					}
+				}
+			}
+			rewardDelta := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
+			require.InDeltaf(testSetup, rewardDelta, rewards, 1, "rewards, expected %v got %v", rewardDelta, rewards)
 		}
 	})
 }
@@ -273,56 +249,38 @@ func getNode(t *test.SystemTest, cliConfigFilename, nodeID string) ([]string, er
 	return cliutil.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
+	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-func apiGetMiners(sharderBaseURL string) (*http.Response, error) {
-	return http.Get(sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/getMinerList")
+func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
+	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
 }
 
-func apiGetSharders(sharderBaseURL string) (*http.Response, error) {
-	return http.Get(sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/getSharderList")
-}
-
-func getSortedMiners(t *test.SystemTest, sharderBaseURL string) climodel.NodeList {
-	res, err := apiGetMiners(sharderBaseURL)
-	require.NoError(t, err, "retrieving miners")
-	defer res.Body.Close()
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
-		"gailed API request to get miners, status code: %d", res.StatusCode)
-	require.NotNil(t, res.Body, "balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.NoError(t, err, "reading response body: %v", err)
-
-	var miners climodel.NodeList
-	err = json.Unmarshal(resBody, &miners)
-	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
-	sort.Slice(miners.Nodes, func(i, j int) bool {
-		return miners.Nodes[i].ID < miners.Nodes[j].ID
+func getSortedNodeIds(t *test.SystemTest, endpoint string, sharderBaseURL string) []string {
+	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
+	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
+	var nodeIds []string
+	for i, _ := range nodeList.Nodes {
+		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
+	}
+	sort.Slice(nodeIds, func(i, j int) bool {
+		return nodeIds[i] < nodeIds[j]
 	})
-	return miners
+	return nodeIds
 }
 
-func getSortedSharders(t *test.SystemTest, sharderBaseURL string) climodel.NodeList {
-	res, err := apiGetSharders(sharderBaseURL)
-	require.NoError(t, err, "retrieving miners")
-	defer res.Body.Close()
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
-		"gailed API request to get sharders, status code: %d", res.StatusCode)
-	require.NotNil(t, res.Body, "balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.NoError(t, err, "reading response body: %v", err)
-
-	var sharders climodel.NodeList
-	err = json.Unmarshal(resBody, &sharders)
-	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
-	sort.Slice(sharders.Nodes, func(i, j int) bool {
-		return sharders.Nodes[i].ID < sharders.Nodes[j].ID
-	})
-	return sharders
+func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.NodeList {
+	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/nodeStat"
+	params := map[string]string{
+		"include_delegates": "true",
+	}
+	var nodes climodel.NodeList
+	for _, id := range ids {
+		params["id"] = id
+		nodes.Nodes = append(nodes.Nodes, *cliutil.ApiGet[climodel.Node](t, url, params))
+	}
+	return nodes
 }
 
 func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
@@ -349,13 +307,35 @@ func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
 
-func createStakePool(t *test.SystemTest, id string, tokens float64) {
-	output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-		"id":     id,
-		"tokens": tokens,
-	}), true)
-	require.Nil(t, err,
-		"error staking tokens against node")
-	require.Len(t, output, 1)
-	require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
+func createStakePools(
+	t *test.SystemTest, providerIds []string, tokens []float64,
+) func() {
+	require.True(t, len(tokens) > 0, "create greater than zero pools")
+	for _, id := range providerIds {
+		for delegate := 0; delegate < len(tokens); delegate++ {
+			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
+			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
+				"id":     id,
+				"tokens": tokens[delegate],
+			}), wallet, true)
+			require.NoError(t, err, "lock tokens in %s's stake pool", id)
+			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
+		}
+	}
+	return func() {
+		for _, id := range providerIds {
+			for delegate := 0; delegate < len(tokens); delegate++ {
+				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
+					"id": id,
+				}), wallet, true)
+				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
+			}
+		}
+	}
+}
+
+func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
+	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

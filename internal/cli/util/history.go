@@ -39,9 +39,12 @@ func NewHistory(from, to int64) *ChainHistory {
 }
 
 func (ch *ChainHistory) RoundHistory(t *test.SystemTest, round int64) RoundHistory {
-	require.NotNil(t, ch.roundHistories, "requestingB round history")
-	require.Len(t, ch.roundHistories, int(round), "requested round in histories")
-	return ch.roundHistories[round]
+	require.NotNil(t, ch.roundHistories, "requesting round history")
+	rh, found := ch.roundHistories[round]
+	if !found {
+		require.True(t, found, "requested round in histories")
+	}
+	return rh
 }
 
 func (ch *ChainHistory) From() int64 {
@@ -100,25 +103,25 @@ func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	params := map[string]string{
 		"contents": "full",
 	}
-	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to)
+	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl string) {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + MinerScAddress + "/delegate-rewards")
 	params := map[string]string{
 		"start": strconv.FormatInt(ch.from, 10),
-		"end":   strconv.FormatInt(ch.to, 10),
+		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.delegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to)
+	ch.delegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl string) {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + MinerScAddress + "/provider-rewards")
 	params := map[string]string{
 		"start": strconv.FormatInt(ch.from, 10),
-		"end":   strconv.FormatInt(ch.to, 10),
+		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to)
+	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) organise(t *test.SystemTest) {
@@ -167,7 +170,10 @@ func (ch *ChainHistory) organise(t *test.SystemTest) {
 	if currentRound > 0 {
 		ch.roundHistories[currentRound] = currentHistory
 	}
-
+	if int(ch.to-ch.from)+1 != len(ch.roundHistories) {
+		fmt.Println("ch.to", ch.to, "ch.from", ch.from, "len histories", len(ch.roundHistories))
+		//require.Equal(t, int(ch.to-ch.from), len(ch.roundHistories), "history covers all blocks in range")
+	}
 }
 
 // debug dumps

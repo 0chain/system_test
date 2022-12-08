@@ -379,8 +379,7 @@ func TestDownload(testSetup *testing.T) {
 
 		// register viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		err = registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
-		require.Nil(t, err)
+		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
