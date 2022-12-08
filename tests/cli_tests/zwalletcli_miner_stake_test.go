@@ -247,7 +247,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.NotEqual(t, 0, newMiner.Settings.MaxNumDelegates)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": newMiner.ID,
-			"tokens":   9.0 / newMiner.Settings.MaxNumDelegates,
+			"tokens":   9.0,
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
