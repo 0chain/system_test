@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	confirmDebugBuild(t)
