@@ -87,7 +87,7 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 6.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
@@ -99,7 +99,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   1,
+			"tokens":   2,
 		}), true)
 		require.Nil(t, err,
 			"error staking tokens against node")
@@ -111,7 +111,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   1,
+			"tokens":   2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -126,7 +126,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, poolsInfo.Pools[miner.ID], 1)
 
-		require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
+		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
