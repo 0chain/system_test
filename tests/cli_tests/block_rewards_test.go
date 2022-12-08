@@ -252,10 +252,10 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-// todo need for sharder rewards test
-//func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
-//	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
-//}
+// todo needed later for sharder rewards test
+// func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
+// 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
+// }
 
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
@@ -284,10 +284,10 @@ func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.
 }
 
 func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	return getShardersForWallet(t, cliConfigFilename, escapedTestName(t))
+	return getShardersForWallet(cliConfigFilename, escapedTestName(t))
 }
 
-func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+func getShardersForWallet(cliConfigFilename, wallet string) ([]string, error) {
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
@@ -295,7 +295,7 @@ func getNodeBaseURL(host string, port int) string {
 	return fmt.Sprintf(`http://%s:%d`, host, port)
 }
 
-func getMinersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+func getMinersForWallet(cliConfigFilename, wallet string) ([]string, error) {
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
