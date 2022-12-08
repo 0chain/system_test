@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -771,6 +772,91 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 	}) //todo:slow
+
+	t.RunWithTimeout("transfer allocation accounting test", 6*time.Minute, func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": int64(1024000),
+		})
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, 204800)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+			"upload file - Unexpected output", strings.Join(output, "\n"))
+
+		newOwner := escapedTestName(t) + "_NEW_OWNER"
+
+		output, err = registerWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
+		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
+
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
+
+		initialAllocation := getAllocation(t, allocationID)
+
+		output, err = transferAllocationOwnership(t, map[string]interface{}{
+			"allocation":    allocationID,
+			"new_owner_key": newOwnerWallet.ClientPublicKey,
+			"new_owner":     newOwnerWallet.ClientID,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
+			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
+
+		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
+		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
+
+		// balance of old owner should be unchanged
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
+		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0],
+			"get balance - Unexpected output", strings.Join(output, "\n"))
+
+		// balance of new owner should be unchanged
+		output, err = getBalanceForWallet(t, configPath, newOwner)
+		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
+		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0],
+			"get balance - Unexpected output", strings.Join(output, "\n"))
+
+		// write lock pool of old owner should remain locked
+		cliutils.Wait(t, 2*time.Minute)
+
+		// Get expected upload cost
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, file)
+
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		// Expected cost is given in "per 720 hours", we need 1 hour
+		// Expected cost takes into account data+parity, so we divide by that
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+
+		finalAllocation := getAllocation(t, allocationID)
+		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+
+		// If a challenge has passed for upload, writepool balance should reduce, else, remain same
+		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
+	})
 }
 
 func transferAllocationOwnership(t *test.SystemTest, param map[string]interface{}, retry bool) ([]string, error) {
