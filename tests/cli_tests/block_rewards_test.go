@@ -77,6 +77,7 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 
 		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
 
+		// confirm payments to each provider consistent
 		for i, id := range minersIds {
 			var rewards int64
 			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
@@ -101,6 +102,21 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 			}
 			rewardDelta := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
 			require.InDeltaf(testSetup, rewardDelta, rewards, 1, "rewards, expected %v got %v", rewardDelta, rewards)
+		}
+
+		// confirm each round miner block reward payment consistent
+		for round := history.From(); round <= history.To(); round++ {
+			roundHistory := history.RoundHistory(t, round)
+			foundBlockRewardPayment := false
+			for _, pReward := range roundHistory.ProviderRewards {
+				if pReward.RewardType == climodel.BlockRewardMiner {
+					require.False(testSetup, foundBlockRewardPayment, "only pay miner block rewards once")
+					foundBlockRewardPayment = true
+					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+						"block reward only paid to round lottery winner")
+				}
+			}
+			require.True(testSetup, foundBlockRewardPayment, "must pay miner block rewards once")
 		}
 	})
 }
