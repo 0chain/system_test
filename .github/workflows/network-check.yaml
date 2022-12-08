@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        network: [ "beta.0chain.net" ]
+        network: [ ]
       fail-fast: false
     steps:
       - name: "Checkout System Tests"
