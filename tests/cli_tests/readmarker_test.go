@@ -99,13 +99,6 @@ func TestReadMarker(testSetup *testing.T) {
 		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
 
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotePath + filepath.Base(filename),
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
-		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
