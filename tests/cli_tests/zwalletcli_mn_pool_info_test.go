@@ -53,7 +53,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

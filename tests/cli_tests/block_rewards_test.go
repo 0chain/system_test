@@ -75,9 +75,8 @@ func TestBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preferen
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
-		minerBlockReward, sharderBlockReward := blockRewards(startRound, minerScConfig)
+		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
 
-		sharderBlockReward = sharderBlockReward
 		for i, id := range minersIds {
 			var rewards int64
 			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
@@ -253,15 +252,15 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
+func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
 }
 
-func getSortedNodeIds(t *test.SystemTest, endpoint string, sharderBaseURL string) []string {
+func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
 	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
 	var nodeIds []string
-	for i, _ := range nodeList.Nodes {
+	for i := range nodeList.Nodes {
 		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
 	}
 	sort.Slice(nodeIds, func(i, j int) bool {

@@ -37,8 +37,7 @@ func ApiGetList[T any](t *test.SystemTest, url string, params map[string]string,
 	for {
 		var temp []T
 		raw := getNext(t, url, from, to, MaxQueryLimit, offset, params)
-		rs := string(raw)
-		rs = rs
+
 		err := json.Unmarshal(raw, &temp)
 		require.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
 		out = append(out, temp...)

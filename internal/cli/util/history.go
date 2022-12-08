@@ -124,7 +124,7 @@ func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl s
 	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to+1)
 }
 
-func (ch *ChainHistory) organise(t *test.SystemTest) {
+func (ch *ChainHistory) organise(t *test.SystemTest) { // nolint:
 	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from)
 
 	for _, bk := range ch.blocks {
@@ -170,10 +170,8 @@ func (ch *ChainHistory) organise(t *test.SystemTest) {
 	if currentRound > 0 {
 		ch.roundHistories[currentRound] = currentHistory
 	}
-	if int(ch.to-ch.from)+1 != len(ch.roundHistories) {
-		fmt.Println("ch.to", ch.to, "ch.from", ch.from, "len histories", len(ch.roundHistories))
-		//require.Equal(t, int(ch.to-ch.from), len(ch.roundHistories), "history covers all blocks in range")
-	}
+	require.Equal(t, ch.to-ch.from+1, len(ch.roundHistories),
+		"mismatched round count recorded")
 }
 
 // debug dumps
