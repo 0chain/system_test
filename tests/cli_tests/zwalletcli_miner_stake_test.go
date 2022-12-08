@@ -275,13 +275,15 @@ func TestMinerStake(testSetup *testing.T) {
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.Greater(t, balance, max_stake)
 
+		tokens := intToZCN(max_stake) + 1
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   intToZCN(max_stake) + 1,
+			"tokens":   tokens,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "stake_pool_lock_failed: too large stake to lock", output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v \\u003e %v", (tokens*tokenUnit), max_stake), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
