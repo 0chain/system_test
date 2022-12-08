@@ -27,8 +27,8 @@ type ChainHistory struct {
 
 type RoundHistory struct {
 	Block           *model.EventDBBlock
-	DelegateRewards []*model.RewardDelegate
-	ProviderRewards []*model.RewardProvider
+	DelegateRewards []model.RewardDelegate
+	ProviderRewards []model.RewardProvider
 }
 
 func NewHistory(from, to int64) *ChainHistory {
@@ -146,7 +146,7 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 			require.True(t, ok, "should have block information for provider rewards")
 			currentRound = pr.BlockNumber
 		}
-		currentHistory.ProviderRewards = append(currentHistory.ProviderRewards, &pr)
+		currentHistory.ProviderRewards = append(currentHistory.ProviderRewards, pr)
 	}
 	if currentRound > 0 {
 		ch.roundHistories[currentRound] = currentHistory
@@ -165,7 +165,7 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 			require.True(t, ok, "should have block information for provider rewards")
 			currentRound = dr.BlockNumber
 		}
-		currentHistory.DelegateRewards = append(currentHistory.DelegateRewards, &dr)
+		currentHistory.DelegateRewards = append(currentHistory.DelegateRewards, dr)
 	}
 	if currentRound > 0 {
 		ch.roundHistories[currentRound] = currentHistory
