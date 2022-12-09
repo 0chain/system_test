@@ -109,7 +109,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
 					default:
-						require.Failf(t, "check ,miner reward type %s", pReward.RewardType.String())
+						require.Failf(t, "check miner reward type %s", pReward.RewardType.String())
 					}
 				}
 			}
