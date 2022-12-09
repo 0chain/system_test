@@ -380,11 +380,6 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-// todo needed later for sharder rewards test
-// func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string { // nolint:
-// 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
-// }
-
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
 	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
