@@ -115,7 +115,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
 			if actualReward != rewards {
-				require.InDeltaf(testSetup, actualReward, rewards, 1.0,
+				require.InDeltaf(t, actualReward, rewards, 1.0,
 					"rewards, expected %v got %v", actualReward, rewards)
 			}
 		}
@@ -127,13 +127,13 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.RewardType == climodel.BlockRewardMiner {
-					require.False(testSetup, foundBlockRewardPayment, "only pay miner block rewards once")
+					require.False(t, foundBlockRewardPayment, "only pay miner block rewards once")
 					foundBlockRewardPayment = true
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 						"block reward only paid to round lottery winner")
 				}
 			}
-			require.True(testSetup, foundBlockRewardPayment, "must pay miner block rewards once")
+			require.True(t, foundBlockRewardPayment, "must pay miner block rewards once")
 		}
 
 		// Each round confirm payments to delegates or the blocks winning miner.
@@ -183,7 +183,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
-				require.InDeltaf(testSetup, actualReward, rewards[poolId], 1.0,
+				require.InDeltaf(t, actualReward, rewards[poolId], 1.0,
 					"rewards, expected %v got %v", actualReward, rewards[poolId])
 			}
 		}
