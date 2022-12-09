@@ -58,7 +58,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
 	url = addParms(url, params)
-	res, err := http.Get(url)
+	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
 	defer res.Body.Close()
