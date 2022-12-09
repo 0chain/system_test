@@ -2,13 +2,13 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -34,15 +34,13 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
 
-		reg := regexp.MustCompile("0x[a-f0-9]{64}")
-		allHashes := reg.FindAllString(strings.Join(output, " "), -1)
-		ethTxHash := allHashes[len(allHashes)-1]
+		ethTxHash := getTransactionHash(output, true)
 
 		output, err = getWrappedZcnBurnTicket(t, ethTxHash, true)
 		require.Nil(t, err)
 
 		ethereumTxAddress := strings.TrimSpace(strings.Split(output[len(output)-2], ":")[1])
-		require.True(t, reg.MatchString(ethereumTxAddress))
+		require.True(t, isEthereumAddress(ethereumTxAddress))
 
 		amount := strings.TrimSpace(strings.Split(output[len(output)-3], ":")[1])
 		var amountInt int
@@ -54,11 +52,11 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var nonceInt int
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
-		require.Equal(t, 1, nonceInt)
+		require.GreaterOrEqual(t, nonceInt, 0)
 	})
 
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := burnZcn(t, "1", bridgeClientConfigFile, true)
+		output, err := burnZcn(t, "1", bridgeClientConfigFile, false)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
 	})
@@ -79,11 +77,10 @@ func TestBridgeBurn(testSetup *testing.T) {
 		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 
-		reg := regexp.MustCompile("[a-f0-9]{64}")
-		allHashes := reg.FindAllString(strings.Join(output, " "), -1)
-		zcnTxHash := allHashes[len(allHashes)-1]
-
+		zcnTxHash := getTransactionHash(output, false)
+		
 		output, err = getZcnBurnTicket(t, zcnTxHash, true)
 		require.Nil(t, err)
 
@@ -97,11 +94,26 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var nonceInt int
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
-		require.Equal(t, 1, nonceInt)
+		require.GreaterOrEqual(t, nonceInt, 0)
 	})
 }
 
-//nolint
+func getTransactionHash(src []string, prefix bool) string {
+	var reg *regexp.Regexp
+	if prefix {
+		reg = regexp.MustCompile("0x[a-f0-9]{64}")
+	} else {
+		reg = regexp.MustCompile("[a-f0-9]{64}")
+	}
+	allHashes := reg.FindAllString(strings.Join(src, " "), -1)
+	return allHashes[len(allHashes)-1]
+}
+
+func isEthereumAddress(src string) bool {
+	reg := regexp.MustCompile("0x[a-f0-9]{64}")
+	return reg.MatchString(src)
+}
+
 func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
@@ -120,7 +132,6 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 	}
 }
 
-//nolint
 func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
@@ -139,7 +150,6 @@ func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 	}
 }
 
-//nolint
 func getZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
 	t.Logf("Get ZCN burn ticket...")
 	cmd := fmt.Sprintf(
@@ -158,7 +168,6 @@ func getZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, er
 	}
 }
 
-//nolint
 func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
