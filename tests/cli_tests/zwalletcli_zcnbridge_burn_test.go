@@ -2,12 +2,13 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	"github.com/stretchr/testify/require"
 
@@ -80,7 +81,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 
 		zcnTxHash := getTransactionHash(output, false)
-		
+
 		output, err = getZcnBurnTicket(t, zcnTxHash, true)
 		require.Nil(t, err)
 
