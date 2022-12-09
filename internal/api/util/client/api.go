@@ -62,7 +62,7 @@ const (
 	GetAverageWritePrice               = "/v2/average-write-price"
 	GetTotalBlobberCapacity            = "/v2/total-blobber-capacity"
 	GetTotalStaked                     = "/v2/total-staked"
-	GetTotalStoredData                 = "/v2/total-stored-data"
+	GetTotalCloudSize                  = "/v2/total-cloud-size"
 	GetTotalAllocatedStorage           = "/v2/total-allocated-storage"
 	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
 	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
@@ -133,7 +133,7 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 		log.Fatalln(err)
 	}
 
-	reg := regexp.MustCompile("^.*:\\/\\/.([^/]+)")
+	reg := regexp.MustCompile("^.*://.([^/]+)")
 	apiClient.baseURL = reg.FindString(networkEntrypoint)
 
 	return apiClient
@@ -1514,8 +1514,8 @@ func (c *APIClient) V2ZBoxGetGraphTotalLocked(t *test.SystemTest, getGraphTotalL
 	return getGraphTotalLockedResponse, resp, err
 }
 
-func (c *APIClient) V2ZBoxGetTotalStoredData(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStoredDataResponse, *resty.Response, error) { //nolint
-	var getTotalStoredDataResponse *model.GetTotalStoredDataResponse
+func (c *APIClient) V2ZBoxGetTotalCloudSize(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalCloudSizeResponse, *resty.Response, error) { //nolint
+	var getTotalCloudSizeResponse *model.GetTotalCloudSizeResponse
 
 	urlBuilder := NewURLBuilder()
 	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
@@ -1524,19 +1524,19 @@ func (c *APIClient) V2ZBoxGetTotalStoredData(t *test.SystemTest, requiredStatusC
 
 	formattedURL := urlBuilder.
 		SetHostPrefix(ZBoxPrefix).
-		SetPath(GetTotalStoredData).
+		SetPath(GetTotalCloudSize).
 		String()
 
 	resp, err := c.executeForServiceProvider(
 		t,
 		formattedURL,
 		model.ExecutionRequest{
-			Dst:                &getTotalStoredDataResponse,
+			Dst:                &getTotalCloudSizeResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
 		HttpGETMethod)
 
-	return getTotalStoredDataResponse, resp, err
+	return getTotalCloudSizeResponse, resp, err
 }
 
 func (c *APIClient) V2ZBoxGetTotalStaked(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalStakedResponse, *resty.Response, error) { //nolint
@@ -1592,19 +1592,24 @@ func (c *APIClient) V2ZBoxGetAverageWritePrice(t *test.SystemTest, requiredStatu
 func (c *APIClient) V2ZBoxGetTotalBlobberCapacity(t *test.SystemTest, requiredStatusCode int) (*model.GetTotalBlobberCapacityResponse, *resty.Response, error) { //nolint
 	var getTotalBlobberCapacityResponse *model.GetTotalBlobberCapacityResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetTotalBlobberCapacity).
-		SetPathVariable("sc_address", StorageSmartContractAddress)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetTotalBlobberCapacity).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getTotalBlobberCapacityResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getTotalBlobberCapacityResponse, resp, err
 }

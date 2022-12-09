@@ -732,11 +732,9 @@ type BlobberGetHashnodeResponse struct {
 	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
-type GetTotalStoredDataResponse int
+type GetTotalCloudSizeResponse int
 
-type GetTotalBlobberCapacityResponse struct {
-	TotalBlobberCapacity int `json:"total-blobber-capacity"`
-}
+type GetTotalBlobberCapacityResponse int
 
 type GetAverageWritePriceResponse int
 

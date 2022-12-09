@@ -1,10 +1,11 @@
 package api_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -86,7 +87,6 @@ func TestAtlusChimney(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Check if amount of total minted tokens changed after minting zcn tokens, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip()
 		sdkClient.StartSession(func() {
 			getTotalMintedResponse, resp, err := apiClient.V2ZBoxGetTotalMinted(t, client.HttpOkStatus)
 			require.Nil(t, err)
@@ -599,7 +599,6 @@ func TestAtlusChimney(testSetup *testing.T) {
 
 			return *getTotalAllocatedStorageResponse > totalAllocatedStorageBefore
 		})
-
 	})
 
 	t.Run("Get total staked, should work", func(t *test.SystemTest) {
@@ -633,44 +632,11 @@ func TestAtlusChimney(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("Get total stored data, should work", func(t *test.SystemTest) {
-		getTotalStoredDataResponse, resp, err := apiClient.V2ZBoxGetTotalStoredData(t, client.HttpOkStatus)
+	t.Run("Get total cloud size, should work", func(t *test.SystemTest) {
+		getTotalStoredDataResponse, resp, err := apiClient.V2ZBoxGetTotalCloudSize(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.GreaterOrEqual(t, *getTotalStoredDataResponse, 0)
-	})
-
-	t.Run("Check if total stored data changed after file uploading, should work", func(t *test.SystemTest) {
-		t.Skip()
-		mnemonic := crypto.GenerateMnemonics(t)
-		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
-		getTotalStoredDataResponse, resp, err := apiClient.V2ZBoxGetTotalStoredData(t, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, *getTotalStoredDataResponse, 0)
-
-		totalStoredDataBefore := *getTotalStoredDataResponse
-
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		sdkClient.StartSession(func() {
-			sdkClient.SetWallet(t, wallet, mnemonic)
-			sdkClient.UploadFile(t, allocationID)
-		})
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalStoredDataResponse, resp, err = apiClient.V2ZBoxGetTotalStoredData(t, client.HttpOkStatus)
-			require.Nil(t, err)
-			require.NotNil(t, resp)
-			require.GreaterOrEqual(t, *getTotalStoredDataResponse, 0)
-
-			return *getTotalStoredDataResponse > totalStoredDataBefore
-		})
 	})
 
 	t.Run("Get average write price, should work", func(t *test.SystemTest) {
@@ -712,49 +678,37 @@ func TestAtlusChimney(testSetup *testing.T) {
 	})
 
 	t.Run("Get total blobber capacity, should work", func(t *test.SystemTest) {
-		t.Skip()
 		getTotalBlobberCapacityResponse, resp, err := apiClient.V2ZBoxGetTotalBlobberCapacity(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalBlobberCapacityResponse.TotalBlobberCapacity, 0)
+		require.GreaterOrEqual(t, *getTotalBlobberCapacityResponse, 0)
 	})
 
-	t.Run("Check if total blobber capacity changed after file uploading, should work", func(t *test.SystemTest) {
-		t.Skip()
-		mnemonic := crypto.GenerateMnemonics(t)
-		wallet := apiClient.RegisterWalletForMnemonic(t, mnemonic)
-
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
-		getTotalBlobberCapacityResponse, resp, err := apiClient.V2ZBoxGetTotalBlobberCapacity(t, client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
-		require.GreaterOrEqual(t, getTotalBlobberCapacityResponse.TotalBlobberCapacity, 0)
-
-		totalBlobberCapacityBefore := getTotalBlobberCapacityResponse.TotalBlobberCapacity
-
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
+	t.RunWithTimeout("Check if total blobber capacity changed after file uploading, should work", time.Minute*10, func(t *test.SystemTest) {
 		sdkClient.StartSession(func() {
-			sdkClient.SetWallet(t, wallet, mnemonic)
-			sdkClient.UploadFile(t, allocationID)
-		})
+			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		var totalBlobberCapacityAfter int
-
-		wait.PoolImmediately(t, time.Minute*2, func() bool {
-			getTotalBlobberCapacityResponse, resp, err = apiClient.V2ZBoxGetTotalBlobberCapacity(t, client.HttpOkStatus)
+			getTotalBlobberCapacityResponse, resp, err := apiClient.V2ZBoxGetTotalBlobberCapacity(t, client.HttpOkStatus)
 			require.Nil(t, err)
 			require.NotNil(t, resp)
+			require.GreaterOrEqual(t, *getTotalBlobberCapacityResponse, 0)
 
-			totalBlobberCapacityAfter = getTotalBlobberCapacityResponse.TotalBlobberCapacity
+			totalBlobberCapacityBefore := *getTotalBlobberCapacityResponse
 
-			return totalBlobberCapacityAfter < totalBlobberCapacityBefore
+			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			sdkClient.UploadFile(t, allocationID)
+
+			wait.PoolImmediately(t, time.Minute*2, func() bool {
+				getTotalBlobberCapacityResponse, resp, err = apiClient.V2ZBoxGetTotalBlobberCapacity(t, client.HttpOkStatus)
+				require.Nil(t, err)
+				require.NotNil(t, resp)
+
+				return *getTotalBlobberCapacityResponse < totalBlobberCapacityBefore
+			})
 		})
-
-		require.Less(t, totalBlobberCapacityAfter, totalBlobberCapacityBefore)
 	})
 
 	t.Run("Get graph of blobber service charge of certain blobber, should work", func(t *test.SystemTest) {
@@ -1620,7 +1574,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 
 	t.Run("Check if a graph of read data of a certain blobber changes after file upload, should work", func(t *test.SystemTest) {
 		t.Skip()
-		//t.Skip("Skip until fixed")
+		// t.Skip("Skip until fixed")
 		t.Parallel()
 
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)

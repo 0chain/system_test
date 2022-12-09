@@ -6,12 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"github.com/0chain/gosdk/core/zcncrypto"
-	"github.com/0chain/gosdk/zcnbridge"
-	"github.com/0chain/gosdk/zcncore"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,6 +13,12 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/0chain/gosdk/core/zcncrypto"
+	"github.com/0chain/gosdk/zcnbridge"
+	"github.com/0chain/gosdk/zcncore"
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/wait"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
@@ -209,7 +209,6 @@ func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {
 
 func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {
 	payload, err := c.bridge.QueryZChainMintPayload(hash)
-	fmt.Println("HERE")
 	require.NoError(t, err)
 
 	_, err = c.bridge.MintZCN(context.Background(), payload)
