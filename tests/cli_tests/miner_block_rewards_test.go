@@ -47,9 +47,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		tokens := []float64{1, 0.5}
 		cleanupFunc := createStakePools(t, minerIds, tokens)
-		t.Cleanup(func() {
-			cleanupFunc()
-		})
+		t.Cleanup(cleanupFunc)
 
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
@@ -238,16 +236,7 @@ func confirmDebugBuild(t *test.SystemTest) {
 	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
 	debug, err := strconv.ParseBool(value.(string))
 	require.NoError(t, err, "edb debug should be boolean")
-	if debug {
-		return
-	}
-	output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
-		"keys":   "server_chain.dbs.settings.debug",
-		"values": "true",
-	}, false)
-	require.NoError(t, err, "setting edb debug to true")
-	require.Len(t, output, 2, strings.Join(output, "\n"))
-	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
+	require.True(t, debug, "debug event database required for this test")
 }
 
 func keyValuePairStringToMap(input []string) (stringMap map[string]string, floatMap map[string]float64) {
