@@ -21,7 +21,7 @@ func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
-	const blobbersRequiredForDownload = 3 // download needs (data shards + 1) number of blobbers
+	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
 
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -35,6 +35,8 @@ func TestReadMarker(testSetup *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
+			"data":   3,
+			"parity": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationId, remotePath, filesize)
@@ -69,6 +71,8 @@ func TestReadMarker(testSetup *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
+			"data":   3,
+			"parity": 1,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -119,6 +123,8 @@ func TestReadMarker(testSetup *testing.T) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
+				"data":   3,
+				"parity": 1,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -184,6 +190,8 @@ func TestReadMarker(testSetup *testing.T) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
+				"data":   3,
+				"parity": 1,
 			})
 			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
 				"encrypt": "",
@@ -253,6 +261,8 @@ func TestReadMarker(testSetup *testing.T) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 1,
+				"data":   3,
+				"parity": 1,
 			})
 			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
 				"encrypt": "",
@@ -307,6 +317,8 @@ func TestReadMarker(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
+			"data":   3,
+			"parity": 1,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
