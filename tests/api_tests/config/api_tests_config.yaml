@@ -1,2 +1,2 @@
 block_worker: https://dev.0chain.net/dns
-default_test_case_timeout: 200000000s
+default_test_case_timeout: 20s
