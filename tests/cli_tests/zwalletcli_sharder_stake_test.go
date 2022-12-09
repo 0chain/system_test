@@ -180,13 +180,13 @@ func TestSharderStake(testSetup *testing.T) {
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.Greater(t, balance, int64(initialBalance))
-
 	})
 
 	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "error getting wallet")
 
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,

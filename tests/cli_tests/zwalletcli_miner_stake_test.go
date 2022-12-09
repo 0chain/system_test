@@ -87,7 +87,7 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 6.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
@@ -99,7 +99,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   1,
+			"tokens":   2,
 		}), true)
 		require.Nil(t, err,
 			"error staking tokens against node")
@@ -111,7 +111,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   1,
+			"tokens":   2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -126,7 +126,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, poolsInfo.Pools[miner.ID], 1)
 
-		require.Equal(t, float64(2), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
+		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
@@ -247,7 +247,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.NotEqual(t, 0, newMiner.Settings.MaxNumDelegates)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": newMiner.ID,
-			"tokens":   9.0 / newMiner.Settings.MaxNumDelegates,
+			"tokens":   9.0,
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -275,13 +275,15 @@ func TestMinerStake(testSetup *testing.T) {
 		balance := getBalanceFromSharders(t, wallet.ClientID)
 		require.Greater(t, balance, max_stake)
 
+		tokens := intToZCN(max_stake) + 1
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   intToZCN(max_stake) + 1,
+			"tokens":   tokens,
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "stake_pool_lock_failed: too large stake to lock", output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v \\u003e %v", 1010000000000, max_stake), output[0])
 	})
 
 	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
@@ -304,7 +306,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("delegate_pool_add: stake is less than min allowed: %d \\u003c %d", 10000000000, 20000000000), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
