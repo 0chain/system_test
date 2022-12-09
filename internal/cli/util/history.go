@@ -1,14 +1,11 @@
 package cliutils
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -64,43 +61,12 @@ func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
 	return fees
 }
 
-func apiGetBlocks(start, end, limit, offset int64, sharderBaseURL string) (*http.Response, error) {
-	baseUrl := sharderBaseURL + "/v1/screst/" + StorageScAddress + "/get_blocks"
-	query := fmt.Sprintf("?content=full&start=%d&end=%d", start, end)
-	if limit > 0 || offset > 0 {
-		query += fmt.Sprintf("&limit=%d&offset=%d", limit, offset)
-	}
-	return http.Get(baseUrl + query)
-}
-
 func (ch *ChainHistory) ReadBlocks(t *test.SystemTest, sharderBaseUrl string) {
-	var offset int64
-	for {
-		blocks := getBlocks(t, ch.from, ch.to, MaxQueryLimit, offset, sharderBaseUrl)
-		offset += int64(len(blocks))
-		ch.blocks = append(ch.blocks, blocks...)
-		if len(blocks) < MaxQueryLimit {
-			break
-		}
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/get_blocks")
+	params := map[string]string{
+		"contents": "full",
 	}
-}
-
-func getBlocks(t *test.SystemTest, from, to, limit, offset int64, sharderBaseUrl string) []model.EventDBBlock {
-	res, err := apiGetBlocks(from, to, limit, offset, sharderBaseUrl)
-	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
-	defer res.Body.Close()
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
-		"failed API request to get blocks %d to %d, status code: %d", from, to, res.StatusCode)
-	require.NotNil(t, res.Body, "balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.NoError(t, err, "reading response body: %v", err)
-
-	var blocks []model.EventDBBlock
-	err = json.Unmarshal(resBody, &blocks)
-	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
-
-	return blocks
+	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to)
 }
 
 // debug dumps
