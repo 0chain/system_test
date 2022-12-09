@@ -78,7 +78,7 @@ func TestSharderStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
@@ -90,7 +90,7 @@ func TestSharderStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-			"tokens":     1,
+			"tokens":     2,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -100,7 +100,7 @@ func TestSharderStake(testSetup *testing.T) {
 		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-			"tokens":     1,
+			"tokens":     2,
 		}), true)
 		require.NoError(t, err, "error staking tokens against node: %s", output)
 		require.Len(t, output, 1)
@@ -115,9 +115,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.NoError(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[sharder.ID], 1)
 
-		w, err := getWallet(t, configPath)
-		require.NoError(t, err)
-		require.Equal(t, poolsInfo.Pools[sharder.ID][0].ID, w.ClientID)
+		require.Equal(t, poolsInfo.Pools[sharder.ID][0].Balance, int64(4))
 	})
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
