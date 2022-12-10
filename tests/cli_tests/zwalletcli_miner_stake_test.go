@@ -56,7 +56,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   1,
+			"tokens":   2.0,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
@@ -64,7 +64,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		poolsInfo, err := pollForPoolInfo(t, miner.ID)
 		require.Nil(t, err)
-		require.Equal(t, float64(1), intToZCN(poolsInfo.Balance))
+		require.Equal(t, float64(2.0), intToZCN(poolsInfo.Balance))
 
 		// Unlock should work
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
