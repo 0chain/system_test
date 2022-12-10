@@ -47,6 +47,7 @@ const (
 	GetGraphBlobberAllocated           = "/v2/graph-blobber-allocated"
 	GetGraphBlobberCapacity            = "/v2/graph-blobber-capacity"
 	GetGraphBlobberWritePrice          = "/v2/graph-blobber-write-price"
+	GetGraphTokenSupply                = "/v2/graph-token-supply"
 	GetGraphBlobberServiceCharge       = "/v1/screst/:sc_address/graph-blobber-service-charge"
 	GetGraphBlobberUnstakeTotal        = "/v2/graph-blobber-unstake-total"
 	GetGraphBlobberTotalOffers         = "/v2/graph-blobber-offers-total"
@@ -1879,6 +1880,34 @@ func (c *APIClient) V2ZBoxGetGraphBlobberWritePrice(t *test.SystemTest, getGraph
 		HttpGETMethod)
 
 	return getGraphBlobberWritePriceResponse, resp, err
+}
+
+func (c *APIClient) V2ZBoxGetGraphTokenSupply(t *test.SystemTest, getGraphTokenSupplyRequest model.GetGraphTokenSupplyRequest, requiredStatusCode int) (*model.GetGraphTokenSupplyResponse, *resty.Response, error) {
+	var getGraphTokenSupplyResponse *model.GetGraphTokenSupplyResponse
+
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
+
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphTokenSupply).
+		AddParams("data-points", strconv.Itoa(getGraphTokenSupplyRequest.DataPoints)).
+		AddParams("from", "0").
+		AddParams("to", getGraphTokenSupplyRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
+		t,
+		formattedURL,
+		model.ExecutionRequest{
+			Dst:                &getGraphTokenSupplyResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod)
+
+	return getGraphTokenSupplyResponse, resp, err
 }
 
 func (c *APIClient) V2ZBoxGetGraphBlobberCapacity(t *test.SystemTest, getGraphBlobberCapacityRequest model.GetGraphBlobberCapacityRequest, requiredStatusCode int) (*model.GetGraphBlobberCapacityResponse, *resty.Response, error) {

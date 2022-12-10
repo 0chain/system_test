@@ -840,11 +840,18 @@ type GetGraphBlobberChallengesOpenedRequest struct {
 type GetGraphBlobberChallengesOpenedResponse []int
 
 type GetGraphTotalLockedRequest struct {
-	DataPoints    int
-	BlobberID, To string
+	DataPoints int
+	To         string
 }
 
 type GetGraphTotalLockedResponse []int
+
+type GetGraphTokenSupplyRequest struct {
+	DataPoints int
+	To         string
+}
+
+type GetGraphTokenSupplyResponse []int
 
 type GetCurrentRoundResponse struct {
 	CurrentRound int `json:"current_round"`

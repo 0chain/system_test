@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/0chain/gosdk/core/zcncrypto"
@@ -39,8 +38,6 @@ var (
 )
 
 type SDKClient struct {
-	mu sync.Mutex
-
 	blockWorker string
 	wallet      *model.SdkWallet
 
@@ -103,13 +100,6 @@ func NewSDKClient(blockWorker string) *SDKClient {
 	sdkClient.bridge = zcnbridge.SetupBridgeClientSDK(cfg)
 
 	return sdkClient
-}
-
-// StartSession executes all actions in one sdk client session
-func (c *SDKClient) StartSession(callback func()) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	callback()
 }
 
 func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonics string) {
@@ -205,6 +195,12 @@ func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {
 	transaction, err := c.bridge.BurnWZCN(context.Background(), amount)
 	require.NoError(t, err)
 	return transaction.Hash().String()
+}
+
+func (c *SDKClient) BurnZCN(t *test.SystemTest, amount uint64) string {
+	transaction, err := c.bridge.BurnZCN(context.Background(), amount)
+	require.NoError(t, err)
+	return transaction.Hash
 }
 
 func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {

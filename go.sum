@@ -42,6 +42,8 @@ github.com/0chain/gosdk v1.8.11-0.20221204005243-d32563662652 h1:66+Vy2yqmZWZfNC
 github.com/0chain/gosdk v1.8.11-0.20221204005243-d32563662652/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
 github.com/0chain/gosdk v1.8.11-0.20221207100029-bfc80f6e8454 h1:tp4JKU6HHG40XJq20AZvwMXQhutk/sSjgchCeQwfQPM=
 github.com/0chain/gosdk v1.8.11-0.20221207100029-bfc80f6e8454/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
+github.com/0chain/gosdk v1.8.11-0.20221207163554-54ce8d6dd61a h1:M7GVNB16mwxulYiB9HGAS88r8L4MrwWbq1JH1oXMGR4=
+github.com/0chain/gosdk v1.8.11-0.20221207163554-54ce8d6dd61a/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
