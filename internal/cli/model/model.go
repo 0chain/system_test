@@ -694,6 +694,25 @@ type EventDBBlock struct {
 	Transactions          []EventDBTransaction `json:"transactions"`
 }
 
+type ReadMarkersCount struct {
+	ReadMarkersCount int64 `json:"read_markers_count"`
+}
+
+type ReadMarker struct {
+	ClientID      string  `json:"client_id"`
+	BlobberID     string  `json:"blobber_id"`
+	AllocationID  string  `json:"allocation_id"`
+	TransactionID string  `json:"transaction_id"`
+	OwnerID       string  `json:"owner_id"`
+	Timestamp     int64   `json:"timestamp"`
+	ReadCounter   int64   `json:"read_counter"`
+	ReadSize      float64 `json:"read_size"`
+	Signature     string  `json:"signature"`
+	PayerID       string  `json:"payer_id"`
+	AuthTicket    string  `json:"auth_ticket"`
+	BlockNumber   int64   `json:"block_number"`
+}
+
 var StorageKeySettings = []string{
 	"owner_id",
 }
