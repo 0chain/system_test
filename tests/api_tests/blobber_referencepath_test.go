@@ -84,7 +84,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*5, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*2, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -113,7 +113,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*5, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*2, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)

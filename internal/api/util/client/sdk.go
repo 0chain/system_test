@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -56,7 +55,7 @@ func NewSDKClient(blockWorker string) *SDKClient {
 		ConfirmationChainLength: 3,
 	})
 
-	clientBytes, err := ioutil.ReadFile(filepath.Join(configDir, walletFileName))
+	clientBytes, err := os.ReadFile(filepath.Join(configDir, walletFileName))
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -49,7 +49,6 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, blobberObjectTreeResponse.Ref.Type, "f")
 
 		// TODO add more assertions once there blobber endpoints are documented
-
 	})
 
 	t.RunWithTimeout("Get file ref for empty allocation should work", time.Minute*5, func(t *test.SystemTest) {
@@ -83,7 +82,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*10, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
+	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*2, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -112,7 +111,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*2, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -138,7 +137,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunWithTimeout("Get file ref with invalid remotepath should fail", time.Minute*5, func(t *test.SystemTest) {
+	t.RunWithTimeout("Get file ref with invalid remotepath should fail", time.Minute*2, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)

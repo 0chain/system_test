@@ -47,12 +47,12 @@ const (
 	GetGraphBlobberAllocated           = "/v2/graph-blobber-allocated"
 	GetGraphBlobberCapacity            = "/v2/graph-blobber-capacity"
 	GetGraphBlobberWritePrice          = "/v2/graph-blobber-write-price"
-	GetGraphTokenSupply                = "/v2/graph-token-supply"
-	GetGraphBlobberServiceCharge       = "/v1/screst/:sc_address/graph-blobber-service-charge"
+	GetGraphTokenSupply                = "/v2/graph-token-supply" // nolint
+	GetGraphBlobberServiceCharge       = "/v2/graph-blobber-service-charge"
 	GetGraphBlobberUnstakeTotal        = "/v2/graph-blobber-unstake-total"
 	GetGraphBlobberTotalOffers         = "/v2/graph-blobber-offers-total"
 	GetGraphBlobberChallengesCompleted = "/v2/graph-blobber-challenges-completed"
-	GetGraphBlobberChallengesPassed    = "/v2/graph-blobber-challenges-passed"
+	GetGraphBlobberChallengesPassed    = "/v2/graph-blobber-challenges-passed" // nolint
 	GetGraphBlobberChallengesOpened    = "/v2/graph-blobber-challenges-open"
 	GetGraphBlobberInactiveRounds      = "/v2/graph-blobber-inactive-rounds"
 	GetGraphBlobberSavedData           = "/v2/graph-blobber-saved-data"
@@ -1834,21 +1834,28 @@ func (c *APIClient) V2ZBoxGetGraphBlobberChallengesOpened(t *test.SystemTest, ge
 func (c *APIClient) V2ZBoxGetGraphBlobberServiceCharge(t *test.SystemTest, getGraphBlobberServiceChargeRequest model.GetGraphBlobberServiceChargeRequest, requiredStatusCode int) (*model.GetGraphBlobberServiceChargeResponse, *resty.Response, error) { //nolint
 	var getGraphBlobberServiceChargeResponse *model.GetGraphBlobberServiceChargeResponse
 
-	urlBuilder := NewURLBuilder().
-		SetPath(GetGraphBlobberServiceCharge).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("data-points", strconv.Itoa(getGraphBlobberServiceChargeRequest.DataPoints)).
-		AddParams("id", getGraphBlobberServiceChargeRequest.BlobberID)
+	urlBuilder := NewURLBuilder()
+	if err := urlBuilder.MustShiftParse(c.baseURL); err != nil {
+		return nil, nil, err
+	}
 
-	resp, err := c.executeForAllServiceProviders(
+	formattedURL := urlBuilder.
+		SetHostPrefix(ZBoxPrefix).
+		SetPath(GetGraphBlobberServiceCharge).
+		AddParams("data-points", strconv.Itoa(getGraphBlobberServiceChargeRequest.DataPoints)).
+		AddParams("id", getGraphBlobberServiceChargeRequest.BlobberID).
+		AddParams("from", "0").
+		AddParams("to", getGraphBlobberServiceChargeRequest.To).
+		String()
+
+	resp, err := c.executeForServiceProvider(
 		t,
-		urlBuilder,
+		formattedURL,
 		model.ExecutionRequest{
 			Dst:                &getGraphBlobberServiceChargeResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpGETMethod,
-		SharderServiceProvider)
+		HttpGETMethod)
 
 	return getGraphBlobberServiceChargeResponse, resp, err
 }
