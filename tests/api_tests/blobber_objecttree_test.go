@@ -16,8 +16,6 @@ import (
 func TestObjectTree(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Parallel()
-
 	t.RunSequentiallyWithTimeout("Get object tree with allocation id, remote path should work", time.Minute*10, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

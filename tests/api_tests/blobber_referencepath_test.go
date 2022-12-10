@@ -16,8 +16,6 @@ import (
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Parallel()
-
 	t.RunSequentiallyWithTimeout("Get file ref with allocation id, remote path should work", time.Minute*5, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 

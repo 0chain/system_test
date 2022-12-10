@@ -166,6 +166,8 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
+	c.wallet
+
 	return filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name()))
 }
 
@@ -205,7 +207,6 @@ func (c *SDKClient) BurnZCN(t *test.SystemTest, amount uint64) string {
 func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {
 	payload, err := c.bridge.QueryZChainMintPayload(hash)
 	require.NoError(t, err)
-
 	_, err = c.bridge.MintZCN(context.Background(), payload)
 	require.NoError(t, err)
 }

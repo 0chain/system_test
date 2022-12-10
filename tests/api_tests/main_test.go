@@ -16,6 +16,7 @@ import (
 var (
 	apiClient          *client.APIClient
 	sdkClient          *client.SDKClient
+	ethClient          *client.ETHClient
 	sdkWallet          *model.Wallet
 	sdkWalletMnemonics string
 )
@@ -31,6 +32,7 @@ func TestMain(m *testing.M) {
 
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+	ethClient = client.NewETHClient(parsedConfig.EthereumNodeURL)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
