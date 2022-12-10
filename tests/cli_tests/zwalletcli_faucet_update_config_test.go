@@ -7,17 +7,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestFaucetUpdateConfig(t *testing.T) {
+func TestFaucetUpdateConfig(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	t.Run("should allow update of max_pour_amount", func(t *testing.T) {
+	t.RunSequentially("should allow update of max_pour_amount", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -70,7 +74,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.Run("update max_pour_amount to invalid value should fail", func(t *testing.T) {
+	t.RunSequentially("update max_pour_amount to invalid value should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -87,9 +91,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_settings: key max_pour_amount, unable to convert x to state.balance", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update by non-smartcontract owner should fail", func(t *testing.T) {
-		t.Parallel()
-
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "max_pour_amount"
 		newValue := "15"
 
@@ -106,7 +108,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_settings: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with bad config key should fail", func(t *testing.T) {
+	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -123,7 +125,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "update_settings: key unknown_key not recognised as setting", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing keys param should fail", func(t *testing.T) {
+	t.RunSequentially("update with missing keys param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -137,7 +139,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing values param should fail", func(t *testing.T) {
+	t.RunSequentially("update with missing values param should fail", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
@@ -152,7 +154,7 @@ func TestFaucetUpdateConfig(t *testing.T) {
 	})
 }
 
-func getFaucetSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]string, error) {
+func getFaucetSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	t.Logf("Retrieving faucet config...")
 
@@ -165,7 +167,7 @@ func getFaucetSCConfig(t *testing.T, cliConfigFilename string, retry bool) ([]st
 	}
 }
 
-func updateFaucetSCConfig(t *testing.T, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
+func updateFaucetSCConfig(t *test.SystemTest, walletName string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Updating faucet config...")
 	p := createParams(param)
 	cmd := fmt.Sprintf(

@@ -3,17 +3,19 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetSCStats(t *testing.T) {
+func TestGetSCStats(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 
-	t.Run("Get miner stats call should return successfully", func(t *testing.T) {
-		t.Parallel()
-
-		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(client.HttpOkStatus)
+	t.Run("Get miner stats call should return successfully", func(t *test.SystemTest) {
+		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, minerGetStatsResponse)
@@ -28,10 +30,8 @@ func TestGetSCStats(t *testing.T) {
 		require.NotNil(t, minerGetStatsResponse.NetworkTime)
 	})
 
-	t.Run("Get sharder stats call should return successfully", func(t *testing.T) {
-		t.Parallel()
-
-		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(client.HttpOkStatus)
+	t.Run("Get sharder stats call should return successfully", func(t *test.SystemTest) {
+		sharderGetStatsResponse, resp, err := apiClient.V1SharderGetStats(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, sharderGetStatsResponse)
