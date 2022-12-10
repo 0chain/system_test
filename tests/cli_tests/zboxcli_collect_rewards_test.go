@@ -29,7 +29,7 @@ func TestCollectRewards(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		blobbers := []climodel.BlobberInfo{}
@@ -46,7 +46,7 @@ func TestCollectRewards(testSetup *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     0.5,
+			"tokens":     1.0,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
