@@ -115,7 +115,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.NoError(t, err, "error unmarshalling Miner SC User Pool")
 		require.Len(t, poolsInfo.Pools[sharder.ID], 1)
 
-		require.Equal(t, poolsInfo.Pools[sharder.ID][0].Balance, int64(4))
+		require.Equal(t, poolsInfo.Pools[sharder.ID][0].Balance, int64(4e10))
 	})
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
