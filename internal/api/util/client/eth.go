@@ -2,11 +2,12 @@ package client
 
 import (
 	"context"
+	"log"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/stretchr/testify/require"
-	"log"
 )
 
 type ETHClient struct {
