@@ -38,18 +38,26 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of block fees and rewards", 180*time.Second, func(t *test.SystemTest) {
+	t.Run("Miner share of block fees and rewards", func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
-		tokens := []float64{1, 0.5}
-		cleanupFunc := createStakePools(t, minerIds, tokens)
-		t.Cleanup(cleanupFunc)
+		//tokens := []float64{1, 0.5}
+		//_ = createStakePools(t, minerIds, tokens)
+		//t.Cleanup(cleanupFunc)
 
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
+
+		minerScConfig := getMinerScMap(t)
+		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
+		for i := range beforeMiners.Nodes {
+			fmt.Println(len(beforeMiners.Nodes[i].Pools), "delegate pools for", beforeMiners.Nodes[i].ID)
+			//require.True(t, len(beforeMiners.Nodes[i].Pools) > numMinerDelegatesRewarded,
+			//	"test requires delegate pools to exceed %d", numMinerDelegatesRewarded)
+		}
 
 		// ------------------------------------
 		time.Sleep(time.Second * 2)
@@ -72,7 +80,6 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl)
 
-		minerScConfig := getMinerScMap(t)
 		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
@@ -83,7 +90,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		// The winning miner is stored in the block object.
 		// The reward payments retrieved from the provider reward table.
 		// The amount of the reward is a fraction of the block reward allocated to miners each
-		// round. The fraction is the miner's service charge.
+		// round. The fraction is the miner's service charge. If the miner has
+		// no stake pools then the reward becomes the full block reward.
 		//
 		// Firstly we confirm the self-consistency of the block and reward tables.
 		// We calculate the change in the miner rewards during and
@@ -101,7 +109,12 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					case climodel.BlockRewardMiner:
 						require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 							"block reward only paid to round lottery winner")
-						expectedServiceCharge := int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
+						var expectedServiceCharge int64
+						if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
+							expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
+						} else {
+							expectedServiceCharge = minerBlockReward
+						}
 						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 1.0, "service charge round %d", round)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
@@ -135,7 +148,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		}
 
 		// Each round confirm payments to delegates or the blocks winning miner.
-		// There should be `num_miner_delegates_rewarded` delegates rewarded each round,
+		// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
 		// or all delegates if less.
 		//
 		// Delegates should be rewarded in proportional to their locked tokens.
@@ -144,7 +157,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		//
 		// Next we compare the actual change in rewards to each miner delegate, with the
 		// change expected from the delegate reward table.
-		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
+
 		for i, id := range minerIds {
 			delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners.Nodes[i].Settings.ServiceCharge))
 			numPools := len(afterMiners.Nodes[i].StakePool.Pools)
