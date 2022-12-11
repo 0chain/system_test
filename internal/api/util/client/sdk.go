@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/0chain/gosdk/core/zcncrypto"
@@ -37,6 +38,8 @@ var (
 )
 
 type SDKClient struct {
+	mu sync.Mutex
+
 	blockWorker string
 	wallet      *model.SdkWallet
 
@@ -102,6 +105,9 @@ func NewSDKClient(blockWorker string) *SDKClient {
 }
 
 func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonics string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	c.wallet = &model.SdkWallet{
 		ClientID:  wallet.Id,
 		ClientKey: wallet.PublicKey,
@@ -128,6 +134,9 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 }
 
 func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		require.NoError(t, err)
@@ -166,12 +175,13 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
-	c.wallet
-
 	return filepath.Join(string(filepath.Separator), filepath.Base(tmpFile.Name()))
 }
 
 func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotePath string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	allocation, err := sdk.GetAllocation(allocationID)
 	require.Nil(t, err)
 
@@ -193,18 +203,27 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotePath st
 }
 
 func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	transaction, err := c.bridge.BurnWZCN(context.Background(), amount)
 	require.NoError(t, err)
 	return transaction.Hash().String()
 }
 
 func (c *SDKClient) BurnZCN(t *test.SystemTest, amount uint64) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	transaction, err := c.bridge.BurnZCN(context.Background(), amount)
 	require.NoError(t, err)
 	return transaction.Hash
 }
 
 func (c *SDKClient) MintZCN(t *test.SystemTest, hash string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	payload, err := c.bridge.QueryZChainMintPayload(hash)
 	require.NoError(t, err)
 	_, err = c.bridge.MintZCN(context.Background(), payload)
