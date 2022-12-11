@@ -38,8 +38,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		require.Empty(t, poolsInfo.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner01ID,
-			"tokens": 1,
+			"miner_id": miner01ID,
+			"tokens":   1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -58,7 +58,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": miner01ID,
+			"miner_id": miner01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -83,8 +83,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		require.Empty(t, poolsInfo.Pools)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharder01ID,
-			"tokens": 1,
+			"sharder_id": sharder01ID,
+			"tokens":     1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -105,7 +105,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
+			"sharder_id": sharder01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
@@ -127,8 +127,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner01ID,
-			"tokens": 1,
+			"miner_id": miner01ID,
+			"tokens":   1,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
 		require.Len(t, output, 1)
@@ -136,8 +136,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 
 		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharder01ID,
-			"tokens": 1,
+			"sharder_id": sharder01ID,
+			"tokens":     1,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
 		require.Len(t, output, 1)
@@ -166,14 +166,14 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": miner01ID,
+			"miner_id": miner01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
+			"sharder_id": sharder01ID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())

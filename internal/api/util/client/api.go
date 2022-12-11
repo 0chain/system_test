@@ -1128,7 +1128,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(0.5)},
+			Value: tokenomics.IntToZCN(1.0)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
