@@ -16,7 +16,7 @@ import (
 func TestObjectTree(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentiallyWithTimeout("Get object tree with allocation id, remote path should work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -49,7 +49,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunWithTimeout("Get file ref for empty allocation should work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -80,7 +80,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*2, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
+	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -91,6 +91,7 @@ func TestObjectTree(testSetup *testing.T) {
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -109,7 +110,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*2, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -120,6 +121,7 @@ func TestObjectTree(testSetup *testing.T) {
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -135,7 +137,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunWithTimeout("Get file ref with invalid remotepath should fail", time.Minute*2, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -158,7 +160,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// FIXME: error should be returned
 		require.Nil(t, err)
 		require.Empty(t, blobberObjectTreeResponse)
-		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
+		require.Equal(t, resp.StatusCode(), client.HttpNotFoundStatus)
 	})
 }
 
