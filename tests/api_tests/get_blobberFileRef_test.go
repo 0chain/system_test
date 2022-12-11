@@ -44,7 +44,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		blobberFileRefsResponse, resp, err := apiClient.V1BlobberGetFileRefs(t, &blobberFileRefRequest, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
-		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
+		require.Equal(t, client.HttpOkStatus, resp.StatusCode(), resp)
 		require.GreaterOrEqual(t, blobberFileRefsResponse.TotalPages, int(1))
 		require.Equal(t, blobberFileRefsResponse.OffsetPath, remoteFilePath)
 		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
