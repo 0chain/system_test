@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -16,7 +15,7 @@ import (
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentiallyWithTimeout("Get file ref with allocation id, remote path should work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -51,7 +50,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunWithTimeout("Get file ref for empty allocation should work", time.Minute*5, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -82,7 +81,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", time.Minute*2, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref with invalid allocation id should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -93,6 +92,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
@@ -111,7 +111,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", time.Minute*2, func(t *test.SystemTest) {
+	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -122,6 +122,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 
 		// TODO: replace with native "Upload API" call
 		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID)
