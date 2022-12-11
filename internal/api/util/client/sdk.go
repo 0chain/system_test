@@ -46,7 +46,7 @@ type SDKClient struct {
 	bridge *zcnbridge.BridgeClient
 }
 
-func NewSDKClient(blockWorker string) *SDKClient {
+func NewSDKClient(blockWorker, ethereumNodeURL string) *SDKClient {
 	sdkClient := &SDKClient{
 		blockWorker: blockWorker}
 
@@ -79,7 +79,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 		zcncore.WithChainID(""),
 		zcncore.WithMinConfirmation(50),
 		zcncore.WithMinSubmit(50),
-		zcncore.WithConfirmationChainLength(3))
+		zcncore.WithConfirmationChainLength(3),
+		zcncore.WithEthereumNode(ethereumNodeURL))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -200,6 +201,15 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotePath st
 		err = os.Remove(localPath)
 		return err == nil
 	})
+}
+
+func (c *SDKClient) IncreaseAllowance(t *test.SystemTest, amount uint64) {
+	transaction, err := c.bridge.IncreaseBurnerAllowance(context.Background(), zcnbridge.Wei(amount))
+	require.NoError(t, err)
+
+	hash := transaction.Hash().Hex()
+	_, err = zcnbridge.ConfirmEthereumTransaction(hash, 200, time.Second*2)
+	require.NoError(t, err)
 }
 
 func (c *SDKClient) BurnWZCN(t *test.SystemTest, amount uint64) string {

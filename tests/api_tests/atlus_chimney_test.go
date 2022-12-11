@@ -16,9 +16,6 @@ import (
 func TestAtlusChimney(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip()
-	t.Parallel()
-
 	t.Run("Get total minted tokens, should work", func(t *test.SystemTest) {
 		getTotalMintedResponse, resp, err := apiClient.V2ZBoxGetTotalMinted(t, client.HttpOkStatus)
 		require.Nil(t, err)
@@ -26,7 +23,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 		require.NotNil(t, getTotalMintedResponse)
 	})
 
-	t.RunSequentiallyWithTimeout("Check if amount of total minted tokens changed after minting zcn tokens, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Check if amount of total minted tokens changed after minting zcn tokens, should work", time.Minute*20, func(t *test.SystemTest) {
 		getTotalMintedResponse, resp, err := apiClient.V2ZBoxGetTotalMinted(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -34,8 +31,9 @@ func TestAtlusChimney(testSetup *testing.T) {
 
 		totalMintedBefore := getTotalMintedResponse
 
+		sdkClient.IncreaseAllowance(t, 1)
 		burnTicketHash := sdkClient.BurnWZCN(t, 1)
-		wait.PoolImmediately(t, time.Minute*3, func() bool {
+		wait.PoolImmediately(t, time.Minute*10, func() bool {
 			return !ethClient.IsTransactionPending(t, burnTicketHash)
 		})
 
@@ -50,6 +48,8 @@ func TestAtlusChimney(testSetup *testing.T) {
 			return *getTotalMintedResponse > *totalMintedBefore
 		})
 	})
+
+	t.Skip()
 
 	t.Run("Get a graph of token supply, should work", func(w *test.SystemTest) {
 		getCurrentRoundResponse, resp, err := apiClient.V1SharderGetCurrentRound(t, client.HttpOkStatus)
@@ -96,6 +96,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 
 		getGraphTokenSupplyBefore := *getGraphTokenSupply
 
+		sdkClient.IncreaseAllowance(t, 1)
 		burnTicketHash := sdkClient.BurnWZCN(t, 1)
 		wait.PoolImmediately(t, time.Minute*2, func() bool {
 			return !ethClient.IsTransactionPending(t, burnTicketHash)

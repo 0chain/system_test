@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 
 	parsedConfig := config.Parse(configPath)
 
-	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
+	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker, parsedConfig.EthereumNodeURL)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	ethClient = client.NewETHClient(parsedConfig.EthereumNodeURL)
 
