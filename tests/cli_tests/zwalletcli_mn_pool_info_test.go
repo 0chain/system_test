@@ -59,8 +59,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     miner.ID,
-			"tokens": 1,
+			"miner_id": miner.ID,
+			"tokens":   1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
@@ -85,8 +85,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"id":     sharder.ID,
-			"tokens": 5,
+			"sharder_id": sharder.ID,
+			"tokens":     5,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)
@@ -113,6 +113,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't get miner node: value not present"}`, output[0])
+		require.Equal(t, `resource_not_found: can't get miner node: value not present`, output[0])
 	})
 }
