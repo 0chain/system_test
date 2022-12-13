@@ -14,11 +14,14 @@ import (
 )
 
 var (
-	apiClient          *client.APIClient
-	sdkClient          *client.SDKClient
-	ethClient          *client.ETHClient
+	apiClient *client.APIClient
+	sdkClient *client.SDKClient
+	ethClient *client.ETHClient
+
 	sdkWallet          *model.Wallet
 	sdkWalletMnemonics string
+
+	delegatedWallet = new(model.Wallet)
 )
 
 func TestMain(m *testing.M) {
@@ -47,6 +50,14 @@ func TestMain(m *testing.M) {
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
+
+	var delegatedSdkWallet model.SdkWallet
+	delegatedSdkWallet.UnmarshalFile("config/blobber_owner_wallet.json")
+	keys := crypto.GenerateKeys(t, delegatedSdkWallet.Mnemonics)
+	delegatedWallet.FromSdkWallet(delegatedSdkWallet, keys)
+
+	walletBalance := apiClient.GetWalletBalance(t, delegatedWallet, client.HttpOkStatus)
+	delegatedWallet.Nonce = int(walletBalance.Nonce)
 
 	os.Exit(m.Run())
 }

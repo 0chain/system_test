@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -1217,7 +1218,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 		require.NotZero(t, *getGraphBlobberCapacityResponse)
 	})
 
-	t.RunWithTimeout("Check if a graph of capacity of a certain blobber changes adding a new blobber to the allocation, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunWithTimeout("Check if a graph of capacity of a certain blobber changes removing a blobber from the allocation, should work", time.Minute*10, func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
@@ -1281,6 +1282,64 @@ func TestAtlusChimney(testSetup *testing.T) {
 			require.Nil(t, err)
 			require.NotNil(t, resp)
 			require.NotZero(t, *getGraphBlobberCapacityResponse)
+
+			return !cmp.Equal(*getGraphBlobberCapacityResponse, getGraphBlobberCapacityResponseBefore)
+		})
+	})
+
+	t.RunWithTimeout("Check if a graph of capacity of a certain blobber changes updating settings of the blobber, should work", time.Minute*10, func(t *test.SystemTest) {
+
+		apiClient.ExecuteFaucet(t, delegatedWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(delegatedWallet.Id, delegatedWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, delegatedWallet, &blobberRequirements, client.HttpOkStatus)
+
+		allocationID := apiClient.CreateAllocation(t, delegatedWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+
+		getCurrentRoundResponse, resp, err := apiClient.V1SharderGetCurrentRound(t, client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, getCurrentRoundResponse)
+
+		currentRoundString := getCurrentRoundResponse.CurrentRoundTwiceToString()
+
+		var getGraphBlobberCapacityResponse *model.GetGraphBlobberCapacityResponse
+		getGraphBlobberCapacityResponse, resp, err = apiClient.V2ZBoxGetGraphBlobberCapacity(
+			t,
+			model.GetGraphBlobberCapacityRequest{
+				DataPoints: 17,
+				BlobberID:  blobberID,
+				To:         currentRoundString,
+			},
+			client.HttpOkStatus)
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotZero(t, *getGraphBlobberCapacityResponse)
+
+		getGraphBlobberCapacityResponseBefore := *getGraphBlobberCapacityResponse
+
+		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.Equal(t, delegatedWallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		blobber.Terms.ReadPrice += 1
+		apiClient.UpdateBlobber(t, delegatedWallet, blobber, client.TxSuccessfulStatus)
+
+		wait.PoolImmediately(t, time.Minute*5, func() bool {
+			getGraphBlobberCapacityResponse, resp, err = apiClient.V2ZBoxGetGraphBlobberCapacity(
+				t,
+				model.GetGraphBlobberCapacityRequest{
+					DataPoints: 17,
+					BlobberID:  blobberID,
+					To:         currentRoundString,
+				},
+				client.HttpOkStatus)
+			require.Nil(t, err)
+			require.NotNil(t, resp)
+			require.NotZero(t, *getGraphBlobberCapacityResponse)
+
+			fmt.Println(*getGraphBlobberCapacityResponse, getGraphBlobberCapacityResponseBefore)
 
 			return !cmp.Equal(*getGraphBlobberCapacityResponse, getGraphBlobberCapacityResponseBefore)
 		})

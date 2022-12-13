@@ -100,7 +100,7 @@ func NewSDKClient(blockWorker, ethereumNodeURL string) *SDKClient {
 		Development:      &development,
 	}
 
-	sdkClient.bridge = zcnbridge.SetupBridgeClientSDK(cfg)
+	sdkClient.bridge = zcnbridge.SetupBridgeClientSDK(cfg, walletFileName)
 
 	return sdkClient
 }

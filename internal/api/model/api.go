@@ -1,8 +1,11 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
+	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -31,12 +34,29 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string `json:"id"`
-	Version      string `json:"version"`
-	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
-	Nonce        int
+	Id           string   `json:"id"`
+	Version      string   `json:"version"`
+	CreationDate *int     `json:"creation_date"`
+	PublicKey    string   `json:"public_key"`
+	Nonce        int      `json:"nonce"`
 	Keys         *KeyPair `json:"-"`
+}
+
+func (w *Wallet) FromSdkWallet(sdkWallet SdkWallet, keys *KeyPair) {
+	w.Id = sdkWallet.ClientID
+	w.PublicKey = sdkWallet.ClientKey
+	w.Version = sdkWallet.Version
+
+	w.Keys = keys
+
+	w.Nonce = 3
+
+	var creationDate int
+	w.CreationDate = &creationDate
+}
+
+func (w *Wallet) IncNonce() {
+	w.Nonce++
 }
 
 type SdkWallet struct {
@@ -48,6 +68,21 @@ type SdkWallet struct {
 	DateCreated string        `json:"date_created"`
 }
 
+func (s *SdkWallet) UnmarshalFile(path string) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(file); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := json.Unmarshal(buf.Bytes(), s); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 type SdkKeyPair struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
@@ -56,10 +91,6 @@ type SdkKeyPair struct {
 type KeyPair struct {
 	PublicKey  bls.PublicKey
 	PrivateKey bls.SecretKey
-}
-
-func (w *Wallet) IncNonce() {
-	w.Nonce++
 }
 
 func (w *SdkWallet) String() (string, error) {
@@ -251,6 +282,7 @@ type ClientGetBalanceResponse struct {
 	Txn     string `json:"txn"`
 	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
+	Nonce   int64  `json:"nonce"`
 }
 
 type SCStateGetRequest struct {
