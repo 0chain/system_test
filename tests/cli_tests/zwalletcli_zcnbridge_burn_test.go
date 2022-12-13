@@ -60,6 +60,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, false)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
+		require.NotContains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
 	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
@@ -69,6 +70,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
 	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
