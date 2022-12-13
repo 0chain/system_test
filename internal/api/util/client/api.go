@@ -127,7 +127,7 @@ type APIClient struct {
 
 func NewAPIClient(networkEntrypoint string) *APIClient {
 	apiClient := &APIClient{
-		httpClient: resty.New(), //nolint
+		httpClient: resty.New().SetTimeout(time.Second * 5), //nolint
 	}
 
 	if err := apiClient.selectHealthyServiceProviders(networkEntrypoint); err != nil {

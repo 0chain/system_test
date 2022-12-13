@@ -1,4 +1,4 @@
-block_worker: https://dev-4.devnet-0chain.net/dns
+block_worker: https://dev.0chain.net/dns
 default_test_case_timeout: 20s
 ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
 ethereum_node_url: https://goerli.infura.io/v3/6141be73a15d47748af0dc14f53d57d7
