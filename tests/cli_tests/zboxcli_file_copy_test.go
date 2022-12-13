@@ -604,6 +604,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 60*time.Second, func(t *test.SystemTest) {
+		t.Skip("Test calculations are flaky in  CLI") //FIXME
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
