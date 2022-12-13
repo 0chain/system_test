@@ -45,19 +45,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
-		//tokens := []float64{1, 0.5}
-		//_ = createStakePools(t, minerIds, tokens)
-		//t.Cleanup(cleanupFunc)
-
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
-
-		minerScConfig := getMinerScMap(t)
-		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
-		for i := range beforeMiners.Nodes {
-			fmt.Println(len(beforeMiners.Nodes[i].Pools), "delegate pools for", beforeMiners.Nodes[i].ID)
-			//require.True(t, len(beforeMiners.Nodes[i].Pools) > numMinerDelegatesRewarded,
-			//	"test requires delegate pools to exceed %d", numMinerDelegatesRewarded)
-		}
 
 		// ------------------------------------
 		time.Sleep(time.Second * 2)
@@ -80,6 +68,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl)
 
+		minerScConfig := getMinerScMap(t)
+		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
 		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
@@ -431,36 +421,6 @@ func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
 func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
-
-func createStakePools(
-	t *test.SystemTest, providerIds []string, tokens []float64,
-) func() {
-	require.True(t, len(tokens) > 0, "create greater than zero pools")
-	for _, id := range providerIds {
-		for delegate := 0; delegate < len(tokens); delegate++ {
-			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
-			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
-			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
-				"id":     id,
-				"tokens": tokens[delegate],
-			}), wallet, true)
-			require.NoError(t, err, "lock tokens in %s's stake pool", id)
-			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
-		}
-	}
-	return func() {
-		for _, id := range providerIds {
-			for delegate := 0; delegate < len(tokens); delegate++ {
-				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
-				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
-					"id": id,
-				}), wallet, true)
-				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
-			}
-		}
-	}
-}
-
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
