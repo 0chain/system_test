@@ -43,7 +43,7 @@ func (ch *ChainHistory) RoundHistory(t *test.SystemTest, round int64) RoundHisto
 
 	rh, found := ch.roundHistories[round]
 	if !found {
-		require.True(t, found, "requested round in histories")
+		require.True(t, found, "requested round %d in histories from %d to %d", round, ch.from, ch.to)
 	}
 	return rh
 }
