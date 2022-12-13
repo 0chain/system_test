@@ -21,6 +21,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const delta = 1.0
+
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
@@ -105,7 +107,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 						} else {
 							expectedServiceCharge = minerBlockReward
 						}
-						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, 1.0, "service charge round %d", round)
+						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "service charge round %d", round)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
@@ -115,10 +117,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 				}
 			}
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
-			if actualReward != rewards {
-				require.InDeltaf(t, actualReward, rewards, 1.0,
-					"rewards, expected %v got %v", actualReward, rewards)
-			}
+			require.InDeltaf(t, actualReward, rewards, delta,
+				"rewards, expected %v got %v", actualReward, rewards)
 		}
 
 		// Each round there should be exactly one block reward payment
@@ -184,7 +184,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
-				require.InDeltaf(t, actualReward, rewards[poolId], 1.0,
+				require.InDeltaf(t, actualReward, rewards[poolId], delta,
 					"rewards, expected %v got %v", actualReward, rewards[poolId])
 			}
 		}
