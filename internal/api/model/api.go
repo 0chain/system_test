@@ -42,7 +42,7 @@ type Wallet struct {
 	Keys         *KeyPair `json:"-"`
 }
 
-func (w *Wallet) FromSdkWallet(sdkWallet SdkWallet, keys *KeyPair) {
+func (w *Wallet) FromSdkWallet(sdkWallet *SdkWallet, keys *KeyPair) {
 	w.Id = sdkWallet.ClientID
 	w.PublicKey = sdkWallet.ClientKey
 	w.Version = sdkWallet.Version

@@ -51,7 +51,7 @@ func TestMain(m *testing.M) {
 	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
-	var delegatedSdkWallet model.SdkWallet
+	delegatedSdkWallet := new(model.SdkWallet)
 	delegatedSdkWallet.UnmarshalFile(parsedConfig.DelegatedWalletLocation)
 	keys := crypto.GenerateKeys(t, delegatedSdkWallet.Mnemonics)
 	delegatedWallet.FromSdkWallet(delegatedSdkWallet, keys)

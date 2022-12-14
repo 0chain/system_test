@@ -1072,8 +1072,6 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	require.NotNil(t, resp)
 	require.NotNil(t, clientGetBalanceResponse)
 
-	fmt.Println("after")
-
 	return clientGetBalanceResponse
 }
 
