@@ -113,6 +113,6 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")
 		require.Len(t, output, 1)
-		require.Equal(t, `fatal:{"code":"resource_not_found","error":"resource_not_found: can't get miner node: value not present"}`, output[0])
+		require.Equal(t, `resource_not_found: can't get miner node: value not present`, output[0])
 	})
 }

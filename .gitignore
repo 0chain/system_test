@@ -20,7 +20,7 @@ vendor/
 
 # Temp test output
 tests/cli_tests/config/*.json
-tests/cli/config/*allocation.txt
+tests/cli_tests/config/*allocation.txt
 tests/cli/tmp/
 **/cmdlog.log
 **/bridge.log
@@ -34,4 +34,4 @@ tests/cli/tmp/
 tests/cli/__debug_bin
 tests/cli_tests/*.png
 
-tests/cli/logs/
+**/*.log
