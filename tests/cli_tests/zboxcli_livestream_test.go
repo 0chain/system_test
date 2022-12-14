@@ -106,7 +106,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 2*time.Minute, func(t *test.SystemTest) { // todo slow
+	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 2*time.Minute+30*time.Second, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -520,7 +520,6 @@ var feeds = []string{
 	"https://youtu.be/EBvFX1NP4WM",
 	"https://www.twitch.tv/videos/1628184971",
 	"https://www.twitch.tv/videos/1626720273",
-	"https://veoh.com/watch/v1422286563pBZAwaK",
 	"https://veoh.com/watch/v17432006xmkFQTa",
 	"https://odysee.com/@samuel_earp_artist:c/how-to-paint-a-landscape-in-gouache:8",
 	"https://odysee.com/@fireship:6/how-to-never-write-bug:4",
