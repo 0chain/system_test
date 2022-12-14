@@ -52,12 +52,21 @@ func TestMain(m *testing.M) {
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	var delegatedSdkWallet model.SdkWallet
-	delegatedSdkWallet.UnmarshalFile("config/blobber_owner_wallet.json")
+	delegatedSdkWallet.UnmarshalFile(parsedConfig.DelegatedWalletLocation)
 	keys := crypto.GenerateKeys(t, delegatedSdkWallet.Mnemonics)
 	delegatedWallet.FromSdkWallet(delegatedSdkWallet, keys)
 
-	walletBalance := apiClient.GetWalletBalance(t, delegatedWallet, client.HttpOkStatus)
-	delegatedWallet.Nonce = int(walletBalance.Nonce)
-
+	var clientGetBalanceResponse *model.ClientGetBalanceResponse
+	clientGetBalanceResponse, _, err = apiClient.V1ClientGetBalance(
+		t,
+		model.ClientGetBalanceRequest{
+			ClientID: delegatedWallet.Id,
+		},
+		client.HttpOkStatus)
+	if err != nil {
+		delegatedWallet = nil
+	} else {
+		delegatedWallet.Nonce = int(clientGetBalanceResponse.Nonce)
+	}
 	os.Exit(m.Run())
 }

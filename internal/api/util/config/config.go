@@ -14,9 +14,10 @@ const ConfigPathEnv = "CONFIG_PATH"
 const DefaultConfigPath = "./config/api_tests_config.yaml"
 
 type Config struct {
-	BlockWorker            string `yaml:"block_worker"`
-	EthereumNodeURL        string `yaml:"ethereum_node_url"`
-	DefaultTestCaseTimeout string `yaml:"default_test_case_timeout"`
+	BlockWorker             string `yaml:"block_worker"`
+	EthereumNodeURL         string `yaml:"ethereum_node_url"`
+	DefaultTestCaseTimeout  string `yaml:"default_test_case_timeout"`
+	DelegatedWalletLocation string `yaml:"delegated_wallet_location"`
 }
 
 func Parse(configPath string) *Config {

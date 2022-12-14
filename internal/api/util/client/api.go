@@ -708,6 +708,7 @@ func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requ
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
+			Value:           tokenomics.IntToZCN(100),
 			TransactionData: model.NewFaucetTransactionData()},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1070,6 +1071,8 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, clientGetBalanceResponse)
+
+	fmt.Println("after")
 
 	return clientGetBalanceResponse
 }
