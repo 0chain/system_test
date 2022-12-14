@@ -636,19 +636,22 @@ const (
 	ChallengePassReward
 	ChallengeSlashPenalty
 	CancellationChargeReward
+	NumOfRewards
 )
 
 var rewardString = []string{
+	"min lock demand",
 	"block_reward_miner",
 	"block_reward_sharder",
 	"block_reward_blobber",
-	"fees",
-	"validation",
-	"file download",
-	"challenge pass",
+	"fees miner",
+	"fees sharder",
+	"validation reward",
+	"file download reward",
+	"challenge pass reward",
 	"challenge slash",
 	"cancellation charge",
-	"min lock demand",
+	"invalid",
 }
 
 func (r Reward) String() string {
