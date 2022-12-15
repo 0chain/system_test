@@ -136,6 +136,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
+			"expiry": "2s"
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -151,14 +152,16 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
 		// expire the allocation
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
+		// 	"allocation": allocationID,
+		// 	"expiry":     "-1h",
+		// }), true)
+		// require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+		// require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
+		// assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
+
+		time.Sleep(5*time.Second)
 		alloc := getAllocation(t, allocationID)
 		require.False(t, alloc.Finalized)
 
