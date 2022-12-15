@@ -6,6 +6,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
+	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -18,6 +19,34 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("test case 1", 4*time.Minute, func(t *test.SystemTest) {
+		///////###### ----> just checking the files
+		t.Log("Files in config directory:")
+		files, err := ioutil.ReadDir("./config")
+		if err != nil {
+			t.Log(err)
+		}
+		for _, f := range files {
+			t.Log(f.Name())
+		}
+
+		t.Log("Files in the current directory:")
+		files, err = ioutil.ReadDir(".")
+		if err != nil {
+			t.Log(err)
+		}
+		for _, f := range files {
+			t.Log(f.Name())
+		}
+
+		t.Log("Files in the previous directory:")
+		files, err = ioutil.ReadDir("../")
+		if err != nil {
+			t.Log(err)
+		}
+		for _, f := range files {
+			t.Log(f.Name())
+		}
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Registering wallet failed", strings.Join(output, "\n"))
 
@@ -38,12 +67,13 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers)-1)]
 		t.Log(blobber.Id)
 
-		cleanupFunc := stakeAndUnstakePreExistingSP(t, "../ignore", blobber.Id, configPath)
+		/*
+			cleanupFunc := stakeAndUnstakePreExistingSP(t, "../ignore", blobber.Id, configPath)
 
-		t.Cleanup(func() {
-			cleanupFunc()
-		})
-
+			t.Cleanup(func() {
+				cleanupFunc()
+			})
+		*/
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"json":       "",
@@ -83,6 +113,7 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		//		require.Len(t, output, 1)
 		//		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
 		t.Log(output[0])
+
 		// Use sp-info to check the staked tokens in blobber's stake pool
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -90,11 +121,16 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		t.Log(output)
+		var spi = climodel.StakePoolInfo{}
+		_ = json.Unmarshal([]byte(output[0]), &spi)
+		t.Log(output[0])
+		for _, aa := range spi.Delegate {
+			fmt.Println(aa.DelegateID)
+		}
 
 		//	require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		//		require.Len(t, output, 1)
-		//		require.Regexp(t, regexp.MustCompile(`Balance: 2.800 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		//	require.Len(t, output, 1)
+		//	require.Regexp(t, regexp.MustCompile(`Balance: 2.800 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		name := cliutils.RandomAlphaNumericString(10)
 		options := map[string]interface{}{
@@ -150,14 +186,14 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		output, err = getBalance(t, configPath)
 		t.Logf("Balance: %v", output)
 
-		//unlock tokens for offered tokens should fail
+		//	unlock tokens for offered tokens should fail
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}))
 		t.Log(output[0])
 		require.NotNil(t, err, strings.Join(output, "\n"))
 
-		//cancel allocation
+		//	cancel allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Error cancelling allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -166,7 +202,7 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		output, err = getBalance(t, configPath)
 		t.Logf("Balance: %v", output)
 
-		//unlock tokens for offered tokens should fail
+		//	unlock tokens for offered tokens should fail
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 		}))
