@@ -6,7 +6,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -19,33 +19,42 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("test case 1", 4*time.Minute, func(t *test.SystemTest) {
-		///////###### ----> just checking the files
-		t.Log("Files in config directory:")
-		files, err := ioutil.ReadDir("./config")
+		fileWalletMap := make(map[string]string)
+
+		files, err := os.ReadDir("./config/")
 		if err != nil {
 			t.Log(err)
 		}
-		for _, f := range files {
-			t.Log(f.Name())
+		for _, file := range files {
+			var content map[string]interface{}
+
+			temp := strings.Split(file.Name(), ".")
+
+			if len(temp) > 1 && temp[1] == "json" {
+				data, err := os.ReadFile("./config/" + file.Name())
+				if err != nil {
+					t.Log(err)
+				}
+				err = json.Unmarshal([]byte(data), &content)
+				fileWalletMap[file.Name()] = content["client_id"].(string)
+			}
 		}
 
-		t.Log("Files in the current directory:")
-		files, err = ioutil.ReadDir(".")
-		if err != nil {
-			t.Log(err)
-		}
-		for _, f := range files {
-			t.Log(f.Name())
+		for k, v := range fileWalletMap {
+			fmt.Printf("%s -- %s\n", k, v)
 		}
 
-		t.Log("Files in the previous directory:")
-		files, err = ioutil.ReadDir("../")
+		data, err := os.ReadFile("ignore")
 		if err != nil {
-			t.Log(err)
+			fmt.Println(err)
 		}
-		for _, f := range files {
-			t.Log(f.Name())
+		fmt.Println(string(data))
+
+		data, err = os.ReadFile("./config/wallets/blobber_owner_wallet.json")
+		if err != nil {
+			fmt.Println(err)
 		}
+		fmt.Println(string(data))
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Registering wallet failed", strings.Join(output, "\n"))
@@ -74,6 +83,7 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 				cleanupFunc()
 			})
 		*/
+
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"json":       "",
