@@ -128,7 +128,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 	})
 
-	t.Run("Update Negative Expiry Should Work", func(t *test.SystemTest) {
+	t.Run("Update Negative Expiry Should Not Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(-30) // In minutes
 
@@ -138,8 +138,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error while updating allocation expiry "+
+			"by negative value", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
@@ -176,12 +176,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update All Negative Parameters Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(-30) // In minutes
+		// expDuration := int64(-30) // In minutes
 		size := int64(-512)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dm", expDuration),
+			// "expiry":     fmt.Sprintf("%dm", expDuration),
 			"size":       size,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
