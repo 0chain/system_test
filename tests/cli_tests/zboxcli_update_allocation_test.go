@@ -265,23 +265,24 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(-1) // In hours
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{ "expires": "2s" })
+		// expDuration := int64(-1) // In hours
 
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
-		})
+		// params := createParams(map[string]interface{}{
+		// 	"allocation": allocationID,
+		// 	"expiry":     fmt.Sprintf("\"%dh\"", expDuration),
+		// })
 
-		output, err := updateAllocation(t, configPath, params, true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// output, err := updateAllocation(t, configPath, params, true)
+		// require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+		// require.Len(t, output, 1)
+		// assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		time.Sleep(5*time.Second)
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+		// require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 		// Update the expired allocation's Expiration time
 
@@ -421,8 +422,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 }
 
-func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string) (string, climodel.Allocation) {
-	allocationID := setupAllocation(t, cliConfigFilename)
+func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
+	allocationID := setupAllocation(t, cliConfigFilename, extraParams)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
