@@ -69,23 +69,26 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(-1) // In hours
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
+			"expiry": "2s"
 		})
-		output, err := updateAllocation(t, configPath, params, true)
+		// expDuration := int64(-1) // In hours
 
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// params := createParams(map[string]interface{}{
+		// 	"allocation": allocationID,
+		// 	"expiry":     fmt.Sprintf("%dh", expDuration),
+		// })
+		// output, err := updateAllocation(t, configPath, params, true)
 
+		// require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+		// require.Len(t, output, 1)
+		// assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		time.Sleep(5*time.Second)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+		require.LessOrEqual(t, ac.ExpirationDate, time.Now())
 
 		// Cancel the expired allocation
 		output, err = cancelAllocation(t, configPath, allocationID, false)
