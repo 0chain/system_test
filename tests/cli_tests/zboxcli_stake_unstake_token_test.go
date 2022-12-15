@@ -21,7 +21,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", 2*time.Minute, func(t *test.SystemTest) {
+	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
