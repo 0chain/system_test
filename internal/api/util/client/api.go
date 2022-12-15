@@ -13,9 +13,10 @@ import (
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
+
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	resty "github.com/go-resty/resty/v2"
 )
@@ -990,7 +991,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(0.5)},
+			Value: tokenomics.IntToZCN(1.0)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
