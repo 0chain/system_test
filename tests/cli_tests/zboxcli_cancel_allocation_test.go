@@ -69,8 +69,8 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expiry": "2s"
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
+			"expiry": "2s",
 		})
 		// expDuration := int64(-1) // In hours
 
@@ -91,7 +91,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.LessOrEqual(t, ac.ExpirationDate, time.Now())
 
 		// Cancel the expired allocation
-		output, err = cancelAllocation(t, configPath, allocationID, false)
+		output, err := cancelAllocation(t, configPath, allocationID, false)
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 

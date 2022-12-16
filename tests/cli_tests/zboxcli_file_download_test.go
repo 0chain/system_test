@@ -1217,7 +1217,7 @@ func TestDownload(testSetup *testing.T) {
 		// output, err := updateAllocation(t, configPath, params, true)
 		// require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",

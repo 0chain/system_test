@@ -193,9 +193,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*60, ac.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: Before:", allocationBeforeUpdate.ExpirationDate, " After:", ac.ExpirationDate),
-		)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
 			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
 		)
@@ -265,7 +262,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{ "expires": "2s" })
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{ "expires": "2s" })
 		// expDuration := int64(-1) // In hours
 
 		// params := createParams(map[string]interface{}{
@@ -280,19 +277,19 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		time.Sleep(5*time.Second)
 
 		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
+		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		// require.LessOrEqual(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 
 		// Update the expired allocation's Expiration time
 
-		expDuration = int64(1) // In hours
+		expDuration := int64(1) // In hours
 
-		params = createParams(map[string]interface{}{
+		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err = updateAllocation(t, configPath, params, false)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -423,7 +420,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
-	allocationID := setupAllocation(t, cliConfigFilename, extraParams)
+	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]

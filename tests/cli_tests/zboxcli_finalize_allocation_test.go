@@ -21,8 +21,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
 
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expiry": "2s"
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
+			"expiry": "2s",
 		})
 
 		time.Sleep(5*time.Second)
@@ -35,7 +35,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 
 		cliutils.Wait(t, 4*time.Minute)
 
-		output, err = finalizeAllocation(t, configPath, allocationID, false)
+		output, err := finalizeAllocation(t, configPath, allocationID, false)
 
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))

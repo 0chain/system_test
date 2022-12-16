@@ -136,7 +136,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
-			"expiry": "2s"
+			"expiry": "2s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
