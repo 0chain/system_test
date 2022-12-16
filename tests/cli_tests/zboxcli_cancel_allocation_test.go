@@ -70,7 +70,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expiry": "2s",
+			"expire": "2s",
 		})
 		// expDuration := int64(-1) // In hours
 

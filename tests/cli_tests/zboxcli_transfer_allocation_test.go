@@ -136,7 +136,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
-			"expiry": "2s",
+			"expire": "2s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -229,6 +229,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.RunWithTimeout("transfer a finalized allocation", 5*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
+			"expire": "5s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -243,16 +244,18 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation first
-		expDuration := int64(-3) // In hours
+		time.Sleep(6*time.Second)
 
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// expire the allocation first
+		// expDuration := int64(-3) // In hours
+
+		// output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
+		// 	"allocation": allocationID,
+		// 	"expiry":     fmt.Sprintf("%dh", expDuration),
+		// }), true)
+		// require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+		// require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
+		// assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Wait for challenge completion time to expire
 		cliutils.Wait(t, 4*time.Minute)

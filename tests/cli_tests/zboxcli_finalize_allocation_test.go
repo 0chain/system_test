@@ -22,7 +22,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		//TODO: unacceptably slow
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expiry": "2s",
+			"expire": "2s",
 		})
 
 		time.Sleep(5*time.Second)

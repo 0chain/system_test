@@ -140,8 +140,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error while updating allocation expiry "+
 			"by negative value", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		// require.Len(t, output, 1)
+		// assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -262,7 +262,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{ "expires": "2s" })
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{ "expire": "2s" })
 		// expDuration := int64(-1) // In hours
 
 		// params := createParams(map[string]interface{}{
