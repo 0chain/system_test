@@ -1202,7 +1202,11 @@ func TestDownload(testSetup *testing.T) {
 			"expire": "3s",
 		})
 
+		t.Log("Time after creating the allocation ", time.Now())
+		
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		t.Log("Time after uploading the file ", time.Now())
 
 		time.Sleep(5*time.Second)
 
