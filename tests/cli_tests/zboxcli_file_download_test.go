@@ -1191,7 +1191,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"

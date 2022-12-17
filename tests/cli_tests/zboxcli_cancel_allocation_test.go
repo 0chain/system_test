@@ -88,7 +88,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.LessOrEqual(t, ac.ExpirationDate, time.Now())
+		require.LessOrEqual(t, ac.ExpirationDate, time.Now().Unix())
 
 		// Cancel the expired allocation
 		output, err := cancelAllocation(t, configPath, allocationID, false)
