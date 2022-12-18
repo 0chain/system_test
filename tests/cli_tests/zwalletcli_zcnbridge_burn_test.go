@@ -22,7 +22,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*4, func(t *test.SystemTest) {
+	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
