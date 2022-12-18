@@ -138,7 +138,7 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s",
+		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 200",
 		amount,
 		configDir,
 		bridgeClientConfigFile,
