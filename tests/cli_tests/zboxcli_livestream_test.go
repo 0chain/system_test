@@ -140,7 +140,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			"remotepath": remotepath,
 			"localpath":  localpath,
 			"feed":       feed,
-			"delay":      10,
+			"delay":      2,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
