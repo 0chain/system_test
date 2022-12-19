@@ -24,7 +24,6 @@ func PoolImmediately(t *test.SystemTest, duration time.Duration, callback func()
 				t.Log("Wait pool callback has succeed")
 				return
 			}
-			t.Log("Wait pool callback has failed, continue...")
 		}
 	}
 }
