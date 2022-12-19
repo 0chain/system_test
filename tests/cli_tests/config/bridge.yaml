@@ -1,9 +1,10 @@
 bridge:
-    Password: password
-    EthereumAddress: 0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947
-    BridgeAddress: 0xF26B52df8c6D9b9C20bfD7819Bed75a75258c7dB
-    WzcnAddress: 0x930E1BE76461587969Cb7eB9BFe61166b1E70244
-    EthereumNodeURL: https://ropsten.infura.io/v3/22cb2849f5f74b8599f3dc2a23085bd4
+    Password: "\"02289b9\""
+    EthereumAddress: 0xD8c9156e782C68EE671C09b6b92de76C97948432
+    AuthorizersAddress: 0xB132C20A02AD7C38d88805F0e3fFDdfb54224C58
+    BridgeAddress: 0x2405e40161ea6da91AE0e95061e7A8462b4D5eEa
+    WzcnAddress: 0x10140fbca3a468A1c35F132D75659eF0EB5d95DB
+    EthereumNodeURL: https://goerli.infura.io/v3/773bfe30452f40f998e5d0f2f8a29888
     GasLimit: 300000
     Value: 0
-    ConsensusThreshold: 0.7
+    ConsensusThreshold: 75

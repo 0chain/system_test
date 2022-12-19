@@ -106,7 +106,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 2*time.Minute+30*time.Second, func(t *test.SystemTest) { // todo slow
+	t.RunSequentiallyWithTimeout("Upload from feed with delay flag must work", 4*time.Minute, func(t *test.SystemTest) { // todo slow
 		feed, ok := getFeed()
 
 		if !ok {
@@ -140,7 +140,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			"remotepath": remotepath,
 			"localpath":  localpath,
 			"feed":       feed,
-			"delay":      10,
+			"delay":      2,
 		}))
 		require.Nil(t, err, fmt.Sprintf("startUploadFeed: %s", err))
 
