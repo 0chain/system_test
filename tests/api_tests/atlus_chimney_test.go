@@ -651,6 +651,14 @@ func TestAtlusChimney(testSetup *testing.T) {
 	t.RunWithTimeout("Check if amount of total staked changed after creating new allocation, should work", time.Minute*10, func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+
 		getTotalStakedResponse, resp, err := apiClient.V2ZBoxGetTotalStaked(t, client.HttpOkStatus)
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -658,9 +666,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 
 		getTotalStakedResponseBefore := *getTotalStakedResponse
 
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		wait.PoolImmediately(t, time.Minute*5, func() bool {
 			getTotalStakedResponse, resp, err = apiClient.V2ZBoxGetTotalStaked(t, client.HttpOkStatus)
