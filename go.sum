@@ -38,12 +38,6 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/0chain/errors v1.0.3 h1:QQZPFxTfnMcRdt32DXbzRQIfGWmBsKoEdszKQDb0rRM=
 github.com/0chain/errors v1.0.3/go.mod h1:xymD6nVgrbgttWwkpSCfLLEJbFO6iHGQwk/yeSuYkIc=
-github.com/0chain/gosdk v1.8.11-0.20221204005243-d32563662652 h1:66+Vy2yqmZWZfNCYK2QlD8Ll01z9bS1n6JIMSg812xA=
-github.com/0chain/gosdk v1.8.11-0.20221204005243-d32563662652/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
-github.com/0chain/gosdk v1.8.11-0.20221207100029-bfc80f6e8454 h1:tp4JKU6HHG40XJq20AZvwMXQhutk/sSjgchCeQwfQPM=
-github.com/0chain/gosdk v1.8.11-0.20221207100029-bfc80f6e8454/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
-github.com/0chain/gosdk v1.8.11-0.20221207163554-54ce8d6dd61a h1:M7GVNB16mwxulYiB9HGAS88r8L4MrwWbq1JH1oXMGR4=
-github.com/0chain/gosdk v1.8.11-0.20221207163554-54ce8d6dd61a/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
 github.com/0chain/gosdk v1.8.11-0.20221210013824-792e3106b610 h1:6x8hp7yDMNH25VR7vmiTrNgkmDsYg3EWaLPCXsDjXUM=
 github.com/0chain/gosdk v1.8.11-0.20221210013824-792e3106b610/go.mod h1:LpgbGOl7/r9H2pzNMY8bkxQ+jH8lAUNxgqQ5CbgnX8g=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
