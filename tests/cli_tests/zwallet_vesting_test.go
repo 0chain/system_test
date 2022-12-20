@@ -1791,7 +1791,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	t.Run("should allow update of max_destinations", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of max_destinations", func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -1835,7 +1835,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("update max_destinations to invalid value should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("update max_destinations to invalid value should fail", 60*time.Second, func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "x"
 
@@ -1849,7 +1849,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 			output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -1866,7 +1866,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("update with bad config key should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("update with bad config key should fail", 90*time.Second, func(t *test.SystemTest) {
 		configKey := "unknown_key"
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
@@ -1877,7 +1877,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_config: config setting unknown_key not found", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing keys param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing keys param should fail", func(t *test.SystemTest) {
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
 		}, false)
@@ -1886,7 +1886,7 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing values param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing values param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
