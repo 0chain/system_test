@@ -1262,7 +1262,7 @@ func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 			"amount in wallet after unlock should be greater or equal to transferred amount")
 	})
 
-	t.Run("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
+	t.RunWithTimeout("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", 90*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
