@@ -199,7 +199,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with expire smaller than limit (expire < 1s) Should Fail", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"expire": "0.5s", "lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"expire": "1s", "lock": "0.5", "size": 1024}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
