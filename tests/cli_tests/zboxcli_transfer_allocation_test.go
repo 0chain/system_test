@@ -694,7 +694,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
-
 }
 
 func transferAllocationOwnership(t *test.SystemTest, param map[string]interface{}, retry bool) ([]string, error) {
