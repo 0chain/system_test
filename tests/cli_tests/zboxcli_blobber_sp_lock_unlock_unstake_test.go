@@ -7,6 +7,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"testing"
@@ -56,6 +57,12 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		}
 		fmt.Println(string(data))
 
+		out, err := exec.Command("bash", "-c", "echo $HOME").Output()
+		if err != nil {
+			panic(err)
+		}
+		t.Logf("%s\n", out)
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Registering wallet failed", strings.Join(output, "\n"))
 
@@ -83,14 +90,6 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 				cleanupFunc()
 			})
 		*/
-
-		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"json":       "",
-		}))
-		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		t.Log(output)
 
 		// Wallet balance should decrease by locked amount
 		output, err = getBalance(t, configPath)
