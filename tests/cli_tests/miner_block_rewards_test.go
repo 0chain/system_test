@@ -17,6 +17,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,7 +52,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		time.Sleep(time.Second * 2)
+		cliutils.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
