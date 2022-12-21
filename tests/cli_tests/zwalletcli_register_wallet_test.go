@@ -116,7 +116,7 @@ func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilenam
 		"tokens": tokens / 2,
 	})
 	_, err := readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
-	require.NoErrorf(t, err, "lock read pool for %s", name)
+	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
 }
 
 func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {

@@ -355,7 +355,7 @@ func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {
 
 func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]climodel.Sharder {
 	// Get sharder list.
-	output, err := getShardersForWallet(configPath, wallet)
+	output, err := getShardersForWallet(t, configPath, wallet)
 	found := false
 	for index, line := range output {
 		if line == "MagicBlock Sharders" {
@@ -379,7 +379,7 @@ func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]clim
 
 func getMinersListForWallet(t *test.SystemTest, wallet string) climodel.NodeList {
 	// Get miner list.
-	output, err := getMinersForWallet(configPath, wallet)
+	output, err := getMinersForWallet(t, configPath, wallet)
 	require.Nil(t, err, "get miners failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
 

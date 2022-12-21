@@ -39,7 +39,8 @@ func NewHistory(from, to int64) *ChainHistory {
 }
 
 func (ch *ChainHistory) RoundHistory(t *test.SystemTest, round int64) RoundHistory {
-	require.NotNil(t, ch.roundHistories, "requesting round history")
+	require.NotNil(t, ch.roundHistories, "round histories' nil, expected to be not nil"+
+		" histories for round %v not found", round)
 
 	rh, found := ch.roundHistories[round]
 	if !found {
