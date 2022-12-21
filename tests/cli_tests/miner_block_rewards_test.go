@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"net/http"
 	"reflect"
@@ -18,6 +17,7 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,7 +52,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		time.Sleep(time.Second * 2)
+		cliutils.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
@@ -247,7 +247,7 @@ func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 func confirmDebugBuild(t *test.SystemTest) bool {
 	globalCfg := getGlobalConfiguration(t, true)
 	value, found := globalCfg["server_chain.dbs.settings.debug"]
-	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
+	require.True(t, found, "server_chain.dbs.settings.debug setting does not exists")
 	debug, err := strconv.ParseBool(value.(string))
 	require.NoErrorf(t, err, "edb debug should be boolean, actual value %v", value)
 	return debug
@@ -295,6 +295,7 @@ func newSettingMaps() *settingMaps {
 }
 
 func keyValueSettingsToMap(
+	t *test.SystemTest,
 	input []string,
 ) settingMaps {
 	const sdkPrefix = "0chain-core-sdk"
@@ -335,7 +336,7 @@ func keyValueSettingsToMap(
 			settings.Messages[key] = value
 			continue
 		}
-		log.Println("unexpect setting key", key, "value", value)
+		t.Log("unexpect setting key", key, "value", value)
 	}
 	return *settings
 }
@@ -359,6 +360,7 @@ func blockRewards(round int64, minerScConfig map[string]float64) (minerReward, s
 }
 
 func getSharderUrl(t *test.SystemTest) string {
+	t.Logf("getting sharder url...")
 	// Get sharder list.
 	output, err := getSharders(t, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
@@ -376,6 +378,7 @@ func getSharderUrl(t *test.SystemTest) string {
 }
 
 func getNode(t *test.SystemTest, cliConfigFilename, nodeID string) ([]string, error) {
+	t.Logf("getting a miner or sharder node...")
 	return cliutil.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
@@ -384,6 +387,7 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 }
 
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
+	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
 	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
 	var nodeIds []string
@@ -397,6 +401,7 @@ func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []str
 }
 
 func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.NodeList {
+	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/nodeStat"
 	params := map[string]string{
 		"include_delegates": "true",
@@ -410,10 +415,11 @@ func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.
 }
 
 func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	return getShardersForWallet(cliConfigFilename, escapedTestName(t))
+	return getShardersForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getShardersForWallet(cliConfigFilename, wallet string) ([]string, error) {
+func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	t.Logf("list sharder nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
@@ -421,7 +427,8 @@ func getNodeBaseURL(host string, port int) string {
 	return fmt.Sprintf(`http://%s:%d`, host, port)
 }
 
-func getMinersForWallet(cliConfigFilename, wallet string) ([]string, error) {
+func getMinersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	t.Logf("list miner nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
