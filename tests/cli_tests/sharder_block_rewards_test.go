@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"strconv"
 	"testing"
 	"time"
 
@@ -206,60 +205,4 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
-}
-
-// todo piers remove
-func sharderRewardSettings(
-	t *test.SystemTest,
-	sharderIds []string,
-	numShardersRewarded int,
-) (func(), int) {
-	require.True(t, len(sharderIds) > 1, "needs at least two sharders")
-	if len(sharderIds) > numShardersRewarded {
-		return func() {}, numShardersRewarded
-	}
-	newNumShardersRewarded := len(sharderIds) - 1
-	_, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-		"keys":   "num_sharders_rewarded",
-		"values": newNumShardersRewarded,
-	}, false)
-	require.NoError(t, err, "update minersc settings")
-
-	return func() {
-		_, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   "num_sharders_rewarded",
-			"values": numShardersRewarded,
-		}, false)
-		require.NoError(t, err, "update minersc settings")
-	}, newNumShardersRewarded
-}
-
-// todo piers remove
-func createStakePools(
-	t *test.SystemTest, providerIds []string, tokens []float64,
-) func() {
-	require.True(t, len(tokens) > 0, "create greater than zero pools")
-	for _, id := range providerIds {
-		for delegate := 0; delegate < len(tokens); delegate++ {
-			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
-			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
-			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
-				"sharder_id": id,
-				"tokens":     tokens[delegate],
-			}), wallet, true)
-			require.NoError(t, err, "lock tokens in %s's stake pool", id)
-			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
-		}
-	}
-	return func() {
-		for _, id := range providerIds {
-			for delegate := 0; delegate < len(tokens); delegate++ {
-				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
-				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
-					"id": id,
-				}), wallet, true)
-				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
-			}
-		}
-	}
 }
