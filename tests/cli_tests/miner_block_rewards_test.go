@@ -26,7 +26,9 @@ const delta = 1.0
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	confirmDebugBuild(t)
+	if !confirmDebugBuild(t) {
+		t.Skip("miner block rewards test skipped as it requires a debug event database")
+	}
 
 	// Take a snapshot of the chains miners, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -99,20 +101,22 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					}
 					switch pReward.RewardType {
 					case climodel.BlockRewardMiner:
-						require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-							"block reward only paid to round lottery winner")
+						require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+							"%s not round lottery winner %s but nevertheless paid with block reward.",
+							pReward.ProviderId, roundHistory.Block.MinerID)
 						var expectedServiceCharge int64
 						if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
 							expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
 						} else {
 							expectedServiceCharge = minerBlockReward
 						}
-						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "service charge round %d", round)
+						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "incorrect service charge %v for round %d"+
+							" service charge should be %v", pReward.Amount, round, expectedServiceCharge)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
 					default:
-						require.Failf(t, "check miner reward type %s", pReward.RewardType.String())
+						require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
 					}
 				}
 			}
@@ -128,13 +132,14 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.RewardType == climodel.BlockRewardMiner {
-					require.False(t, foundBlockRewardPayment, "only pay miner block rewards once")
+					require.False(t, foundBlockRewardPayment, "blocker reward already paid, only pay miner block rewards once")
 					foundBlockRewardPayment = true
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"block reward only paid to round lottery winner")
+						"block reward paid to %s, should only be paid to round lottery winner %s",
+						pReward.ProviderId, roundHistory.Block.MinerID)
 				}
 			}
-			require.True(t, foundBlockRewardPayment, "must pay miner block rewards once")
+			require.True(t, foundBlockRewardPayment, "miner block reward payment not recorded. block rewards should be paid every round.")
 		}
 
 		// Each round confirm payments to delegates or the blocks winning miner.
@@ -176,7 +181,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 				}
 				if roundHistory.Block.MinerID != id {
 					require.Len(t, poolsBlockRewarded, 0,
-						"pools not block rewarded unless miner won lottery")
+						"delegate pools should not get a block reward unless their parent miner won the round lottery")
 				}
 				confirmPoolPayments(
 					t, delegateBlockReward, poolsBlockRewarded, afterMiners.Nodes[i].StakePool.Pools, numMinerDelegatesRewarded,
@@ -204,7 +209,8 @@ func confirmPoolPayments(
 	if numRewards > len(pools) {
 		numRewards = len(pools)
 	}
-	require.Equal(t, len(poolsBlockRewarded), numRewards, "we block reward %d delegate pools", numRewards)
+	require.Equal(t, len(poolsBlockRewarded), numRewards,
+		"expected reward payments %d does not equal the actual number %d", numRewards, len(poolsBlockRewarded))
 	var total float64
 	for id := range poolsBlockRewarded {
 		total += float64(pools[id].Balance)
@@ -212,7 +218,8 @@ func confirmPoolPayments(
 	for id, reward := range poolsBlockRewarded {
 		expectedReward := (float64(pools[id].Balance) / total) * float64(blockReward)
 		require.InDeltaf(t, expectedReward, float64(reward), 1,
-			"delegates rewarded in proportion to their stake")
+			"delegate rewards. delegates should be rewarded in proportion to their stake."+
+				"total reward %d stake pools %v", blockReward, pools)
 	}
 }
 
@@ -233,13 +240,13 @@ func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	return targetWallet.ClientID
 }
 
-func confirmDebugBuild(t *test.SystemTest) {
+func confirmDebugBuild(t *test.SystemTest) bool {
 	globalCfg := getGlobalConfiguration(t, true)
 	value, found := globalCfg["server_chain.dbs.settings.debug"]
 	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
 	debug, err := strconv.ParseBool(value.(string))
-	require.NoError(t, err, "edb debug should be boolean")
-	require.True(t, debug, "debug event database required for this test")
+	require.NoErrorf(t, err, "edb debug should be boolean, actual value %v", value)
+	return debug
 }
 
 func keyValuePairStringToMap(input []string) (stringMap map[string]string, floatMap map[string]float64) {
