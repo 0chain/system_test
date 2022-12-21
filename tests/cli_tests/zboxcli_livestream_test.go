@@ -26,6 +26,7 @@ import (
 )
 
 func TestStreamUploadDownload(testSetup *testing.T) {
+	testSetup.Skip("Flaky")
 	t := test.NewSystemTest(testSetup)
 
 	KillFFMPEG()

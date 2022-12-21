@@ -1,9 +1,9 @@
 bridge:
     Password: "\"02289b9\""
     EthereumAddress: 0xD8c9156e782C68EE671C09b6b92de76C97948432
-    AuthorizersAddress: 0x8f528548189759761B40FF3b3d91A9544d52FaC5
-    BridgeAddress: 0xF6533C445f3A8173539b1D5e90661737ed90E294
-    WzcnAddress: 0x31E77dA0bC7bB60d27C224c12eb9ce8001b973e8
+    AuthorizersAddress: 0xB132C20A02AD7C38d88805F0e3fFDdfb54224C58
+    BridgeAddress: 0x2405e40161ea6da91AE0e95061e7A8462b4D5eEa
+    WzcnAddress: 0x10140fbca3a468A1c35F132D75659eF0EB5d95DB
     EthereumNodeURL: https://goerli.infura.io/v3/773bfe30452f40f998e5d0f2f8a29888
     GasLimit: 300000
     Value: 0
