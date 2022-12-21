@@ -1191,7 +1191,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 120*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1199,7 +1199,7 @@ func TestDownload(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"expire": "3s",
+			"expire": "30s",
 		})
 
 		t.Log("Time after creating the allocation ", time.Now())
@@ -1208,7 +1208,7 @@ func TestDownload(testSetup *testing.T) {
 
 		t.Log("Time after uploading the file ", time.Now())
 
-		time.Sleep(5*time.Second)
+		time.Sleep(10*time.Second)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
