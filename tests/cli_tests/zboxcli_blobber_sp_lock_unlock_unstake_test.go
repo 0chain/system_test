@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -62,6 +63,41 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 			panic(err)
 		}
 		t.Logf("%s\n", out)
+		myString := string(out[:(len(string(out)) - 1)])
+		files1, err := os.ReadDir(myString)
+
+		if err != nil {
+			panic(err)
+		}
+
+		for _, file := range files1 {
+			t.Log(file.Name())
+		}
+		myString = string(out[:(len(string(out)) - 1)])
+		myString = filepath.Clean(filepath.Join(myString, ".."))
+		t.Log(myString)
+		files, err = os.ReadDir(myString)
+
+		if err != nil {
+			panic(err)
+		}
+		for _, file := range files {
+			t.Log(file.Name())
+		}
+
+		out, err = exec.Command("bash", "-c", "pwd").Output()
+		if err != nil {
+			panic(err)
+		}
+		t.Logf("%s\n", out)
+		myString = string(out[:(len(string(out)) - 1)])
+		files, err = os.ReadDir(myString)
+		if err != nil {
+			panic(err)
+		}
+		for _, file := range files {
+			t.Log(file.Name())
+		}
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Registering wallet failed", strings.Join(output, "\n"))
