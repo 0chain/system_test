@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"net/http"
 	"reflect"
@@ -247,7 +246,7 @@ func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 func confirmDebugBuild(t *test.SystemTest) bool {
 	globalCfg := getGlobalConfiguration(t, true)
 	value, found := globalCfg["server_chain.dbs.settings.debug"]
-	require.True(t, found, "server_chain.dbs.settings.debug setting exists")
+	require.True(t, found, "server_chain.dbs.settings.debug setting does not exists")
 	debug, err := strconv.ParseBool(value.(string))
 	require.NoErrorf(t, err, "edb debug should be boolean, actual value %v", value)
 	return debug
@@ -295,6 +294,7 @@ func newSettingMaps() *settingMaps {
 }
 
 func keyValueSettingsToMap(
+	t *test.SystemTest,
 	input []string,
 ) settingMaps {
 	const sdkPrefix = "0chain-core-sdk"
@@ -335,7 +335,7 @@ func keyValueSettingsToMap(
 			settings.Messages[key] = value
 			continue
 		}
-		log.Println("unexpect setting key", key, "value", value)
+		t.Log("unexpect setting key", key, "value", value)
 	}
 	return *settings
 }
