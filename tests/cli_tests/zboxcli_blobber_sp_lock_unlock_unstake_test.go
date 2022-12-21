@@ -30,33 +30,47 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		for _, file := range files {
 			var content map[string]interface{}
 
-			temp := strings.Split(file.Name(), ".")
-
-			if len(temp) > 1 && temp[1] == "json" {
-				data, err := os.ReadFile("./config/" + file.Name())
-				if err != nil {
-					t.Log(err)
-				}
-				err = json.Unmarshal([]byte(data), &content)
+			data, err := os.ReadFile("./config/" + file.Name())
+			if err != nil {
+				t.Log(err)
+			}
+			_ = json.Unmarshal([]byte(data), &content)
+			if content["client_id"] != nil {
 				fileWalletMap[file.Name()] = content["client_id"].(string)
 			}
 		}
+		files, err = os.ReadDir("./config/wallets/")
+		if err != nil {
+			t.Log(err)
+		}
 
+		for _, file := range files {
+			var content map[string]interface{}
+
+			data, err := os.ReadFile("./config/wallets/" + file.Name())
+			if err != nil {
+				t.Log(err)
+			}
+			_ = json.Unmarshal([]byte(data), &content)
+			if content["client_id"] != nil {
+				fileWalletMap[file.Name()] = content["client_id"].(string)
+			}
+		}
 		for k, v := range fileWalletMap {
-			fmt.Printf("%s -- %s\n", k, v)
+			t.Logf("%s -- %s\n", k, v)
 		}
 
 		data, err := os.ReadFile("ignore")
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(string(data))
+		t.Log(string(data))
 
 		data, err = os.ReadFile("./config/wallets/blobber_owner_wallet.json")
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(string(data))
+		t.Log(string(data))
 
 		out, err := exec.Command("bash", "-c", "echo $HOME").Output()
 		if err != nil {
@@ -73,17 +87,6 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		for _, file := range files1 {
 			t.Log(file.Name())
 		}
-		myString = string(out[:(len(string(out)) - 1)])
-		myString = filepath.Clean(filepath.Join(myString, ".."))
-		t.Log(myString)
-		files, err = os.ReadDir(myString)
-
-		if err != nil {
-			panic(err)
-		}
-		for _, file := range files {
-			t.Log(file.Name())
-		}
 
 		out, err = exec.Command("bash", "-c", "pwd").Output()
 		if err != nil {
@@ -92,6 +95,18 @@ func TestBlobberStakePoolLockUnlock(testSetup *testing.T) { // nolint cyclomatic
 		t.Logf("%s\n", out)
 		myString = string(out[:(len(string(out)) - 1)])
 		files, err = os.ReadDir(myString)
+		if err != nil {
+			panic(err)
+		}
+		for _, file := range files {
+			t.Log(file.Name())
+		}
+
+		myString = string(out[:(len(string(out)) - 1)])
+		myString = filepath.Clean(filepath.Join(myString, ".."))
+		t.Log(myString)
+		files, err = os.ReadDir(myString)
+
 		if err != nil {
 			panic(err)
 		}
