@@ -102,7 +102,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					switch pReward.RewardType {
 					case climodel.BlockRewardMiner:
 						require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-							"%s not round lottery winner %s but nevertheless paid with block reward.",
+							"%s not round lottery winner %s but nevertheless paid with block reward."+
+								"only the round lottery winner shold get a miner block reward",
 							pReward.ProviderId, roundHistory.Block.MinerID)
 						var expectedServiceCharge int64
 						if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
@@ -111,7 +112,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 							expectedServiceCharge = minerBlockReward
 						}
 						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "incorrect service charge %v for round %d"+
-							" service charge should be %v", pReward.Amount, round, expectedServiceCharge)
+							" service charge should be block reward %v multiplied by service ratio %v",
+							pReward.Amount, round, expectedServiceCharge, minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
@@ -122,7 +124,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
 			require.InDeltaf(t, actualReward, rewards, delta,
-				"rewards, expected %v got %v", actualReward, rewards)
+				"rewards expected %v, change in miners reward during the test is %v", actualReward, rewards)
 		}
 
 		// Each round there should be exactly one block reward payment
@@ -139,7 +141,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 						pReward.ProviderId, roundHistory.Block.MinerID)
 				}
 			}
-			require.True(t, foundBlockRewardPayment, "miner block reward payment not recorded. block rewards should be paid every round.")
+			require.True(t, foundBlockRewardPayment,
+				"miner block reward payment not recorded. block rewards should be paid every round.")
 		}
 
 		// Each round confirm payments to delegates or the blocks winning miner.
@@ -170,13 +173,14 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					switch dReward.RewardType {
 					case climodel.BlockRewardMiner:
 						_, found := poolsBlockRewarded[dReward.PoolID]
-						require.False(t, found, "pool only gets block reward once per round")
+						require.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
+							dReward.PoolID, round)
 						poolsBlockRewarded[dReward.PoolID] = dReward.Amount
 						rewards[dReward.PoolID] += dReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards[dReward.PoolID] += dReward.Amount
 					default:
-						require.Failf(t, "check miner reward type %s", dReward.RewardType.String())
+						require.Failf(t, "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
 					}
 				}
 				if roundHistory.Block.MinerID != id {
@@ -190,7 +194,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
 				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"rewards, expected %v got %v", actualReward, rewards[poolId])
+					"rewards, expected %v change in pools reward during test %v", actualReward, rewards[poolId])
 			}
 		}
 	})
@@ -210,7 +214,7 @@ func confirmPoolPayments(
 		numRewards = len(pools)
 	}
 	require.Equal(t, len(poolsBlockRewarded), numRewards,
-		"expected reward payments %d does not equal the actual number %d", numRewards, len(poolsBlockRewarded))
+		"expected reward payments %d does not equal actual payment count %d", numRewards, len(poolsBlockRewarded))
 	var total float64
 	for id := range poolsBlockRewarded {
 		total += float64(pools[id].Balance)
