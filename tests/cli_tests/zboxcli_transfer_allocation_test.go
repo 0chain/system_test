@@ -440,7 +440,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
 		require.Contains(t, aggregatedOutput, "failed")
-
 	}) //todo:slow
 
 	t.RunWithTimeout("transfer allocation and update allocation", 6*time.Minute, func(t *test.SystemTest) {
