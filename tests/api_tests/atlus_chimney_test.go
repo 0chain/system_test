@@ -1754,8 +1754,6 @@ func TestAtlusChimney(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check if a graph of read data of a certain blobber changes after file upload, should work", time.Minute*5, func(t *test.SystemTest) {
-		t.Parallel()
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -1785,6 +1783,7 @@ func TestAtlusChimney(testSetup *testing.T) {
 		require.NotNil(t, *getGraphBlobberReadDataResponse)
 		getGraphBlobberReadDataResponseBefore := *getGraphBlobberReadDataResponse
 
+		fmt.Println(apiClient.CreateReadPool(t, sdkWallet, client.TxSuccessfulStatus))
 		fileName := sdkClient.UploadFile(t, allocationID)
 		sdkClient.DownloadFile(t, allocationID, fileName)
 
