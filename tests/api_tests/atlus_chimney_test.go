@@ -797,8 +797,6 @@ func TestAtlusChimney(testSetup *testing.T) {
 		})
 	})
 
-	t.Skip()
-
 	t.Run("Get graph of blobber service charge of certain blobber, should work", func(t *test.SystemTest) {
 		wallet := apiClient.RegisterWallet(t)
 
