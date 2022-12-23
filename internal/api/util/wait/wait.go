@@ -7,8 +7,9 @@ import (
 )
 
 // PoolImmediately pools passed function for a certain amount of time
-func PoolImmediately(t *test.SystemTest, duration time.Duration, callback func() bool) {
-	ticker := time.NewTicker(time.Millisecond * 500)
+func PoolImmediately(t *test.SystemTest, duration time.Duration, predicate func() bool) {
+	backoffPeriod := time.Second * 1
+	ticker := time.NewTicker(backoffPeriod)
 
 	defer ticker.Stop()
 
@@ -17,14 +18,13 @@ func PoolImmediately(t *test.SystemTest, duration time.Duration, callback func()
 	for range ticker.C {
 		select {
 		case <-after:
-			t.Fatal("Wait pool received a timeout")
+			t.Fatal("Timed out waiting for wait condition to pass")
 			return
 		default:
-			if callback() {
+			if predicate() {
 				t.Log("Wait pool callback has succeed")
 				return
 			}
-			t.Log("Wait pool callback has failed, continue...")
 		}
 	}
 }
