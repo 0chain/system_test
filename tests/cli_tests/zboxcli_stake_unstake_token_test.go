@@ -28,7 +28,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error getting wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		blobbers := []climodel.BlobberInfo{}
@@ -46,7 +46,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     0.5,
+			"tokens":     1.0,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -57,7 +57,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Use sp-info to check the staked tokens in blobber's stake pool
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -80,7 +80,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 			if delegate.ID == wallet.ClientID {
 				t.Log("Pool ID returned by sp-lock found in stake pool info...")
 				found = true
-				require.Equal(t, int64(5000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
+				require.Equal(t, int64(10000000000), delegate.Balance, "User Locked 5000000000 SAS but the pool balance is ", delegate.Balance)
 				require.Equal(t, wallet.ClientID, delegate.DelegateID, "Delegate ID of pool created by sp-lock is not equal to the wallet ID of User.",
 					"Delegate ID: ", delegate.DelegateID, "Wallet ID: ", wallet.ClientID)
 			}
@@ -231,7 +231,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: too small stake to lock", output[0])
+		require.Equal(t, fmt.Sprintf("Failed to lock tokens in stake pool: stake_pool_lock_failed:"+
+			" too small stake to lock: 0 < %v", blobber.Stake_pool_settings.Min_stake), output[0])
 
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
