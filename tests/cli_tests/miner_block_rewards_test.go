@@ -58,14 +58,14 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		afterMiners := getNodes(t, minerIds, sharderUrl)
 
 		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound := beforeMiners.Nodes[0].Round + 1
-		endRound := afterMiners.Nodes[0].Round + 1
+		startRound := beforeMiners.Nodes[0].RoundLastUpdated + 1
+		endRound := afterMiners.Nodes[0].RoundLastUpdated + 1
 		for i := range beforeMiners.Nodes {
-			if startRound < beforeMiners.Nodes[i].Round {
-				startRound = beforeMiners.Nodes[i].Round
+			if startRound < beforeMiners.Nodes[i].RoundLastUpdated {
+				startRound = beforeMiners.Nodes[i].RoundLastUpdated
 			}
-			if endRound > afterMiners.Nodes[i].Round {
-				endRound = afterMiners.Nodes[i].Round
+			if endRound > afterMiners.Nodes[i].RoundLastUpdated {
+				endRound = afterMiners.Nodes[i].RoundLastUpdated
 			}
 		}
 
@@ -93,7 +93,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		// read from the provider rewards table.
 		for i, id := range minerIds {
 			var rewards int64
-			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
+			for round := beforeMiners.Nodes[i].RoundLastUpdated + 1; round <= afterMiners.Nodes[i].RoundLastUpdated; round++ {
 				roundHistory := history.RoundHistory(t, round)
 				for _, pReward := range roundHistory.ProviderRewards {
 					if pReward.ProviderId != id {
@@ -163,7 +163,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				rewards[poolId] = 0
 			}
-			for round := beforeMiners.Nodes[i].Round + 1; round <= afterMiners.Nodes[i].Round; round++ {
+			for round := beforeMiners.Nodes[i].RoundLastUpdated + 1; round <= afterMiners.Nodes[i].RoundLastUpdated; round++ {
 				poolsBlockRewarded := make(map[string]int64)
 				roundHistory := history.RoundHistory(t, round)
 				for _, dReward := range roundHistory.DelegateRewards {
