@@ -25,8 +25,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 			"expire": "2s",
 		})
 
-		time.Sleep(5*time.Second)
-
+		time.Sleep(5 * time.Second)
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
