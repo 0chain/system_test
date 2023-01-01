@@ -79,7 +79,7 @@ func TestRepairReplaceBlobber(testSetup *testing.T) {
 
 		// pick a random blobber from an allocation to be removed from allocation
 		rand.Seed(time.Now().Unix())
-		removeBlobber := alloc.Blobbers[rand.Intn(len(alloc.Blobbers))]
+		removeBlobber := alloc.Blobbers[rand.Intn(len(alloc.Blobbers))] // nolint
 
 		// pick a new blobber that is not part of the current allocation
 		var newBlobber *sdk.Blobber
