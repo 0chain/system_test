@@ -18,6 +18,7 @@ var (
 	sdkClient          *client.SDKClient
 	sdkWallet          *model.Wallet
 	sdkWalletMnemonics string
+	parsedConfig       *config.Config
 )
 
 func TestMain(m *testing.M) {
@@ -27,10 +28,9 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	parsedConfig := config.Parse(configPath)
-
+	parsedConfig = config.Parse(configPath)
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
-	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+	apiClient = client.NewAPIClient(parsedConfig.BlockWorker, parsedConfig.ZboxUrl)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {

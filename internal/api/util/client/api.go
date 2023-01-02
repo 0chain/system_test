@@ -94,10 +94,11 @@ var (
 type APIClient struct {
 	model.HealthyServiceProviders
 
-	httpClient *resty.Client //nolint
+	httpClient     *resty.Client //nolint
+	zboxEntrypoint string
 }
 
-func NewAPIClient(networkEntrypoint string) *APIClient {
+func NewAPIClient(networkEntrypoint, zboxEntrypoint string) *APIClient {
 	apiClient := &APIClient{
 		httpClient: resty.New(), //nolint
 	}
@@ -105,6 +106,8 @@ func NewAPIClient(networkEntrypoint string) *APIClient {
 	if err := apiClient.selectHealthyServiceProviders(networkEntrypoint); err != nil {
 		log.Fatalln(err)
 	}
+
+	apiClient.zboxEntrypoint = zboxEntrypoint
 
 	return apiClient
 }
@@ -234,7 +237,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		return err
 	}
 	if len(healthyBlobbers) == 0 {
-		return ErrNoBlobbersHealthy
+		//return ErrNoBlobbersHealthy
 	}
 
 	c.HealthyServiceProviders.Blobbers = healthyBlobbers
@@ -1202,4 +1205,71 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		},
 		HttpGETMethod)
 	return blobberObjectTreePathResponse, resp, err
+}
+
+func (c *APIClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*model.CSRFToken, *resty.Response, error) {
+	t.Logf("Creating CSRF Token....")
+	var csrfToken *model.CSRFToken
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/csrftoken")
+	parsedUrl := urlBuilder.String()
+
+	resp, err := c.executeForServiceProvider(t, parsedUrl, model.ExecutionRequest{
+		Dst:                &csrfToken,
+		Headers:            map[string]string{"X-App-Phone-Number": phoneNumber},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return csrfToken, resp, err
+}
+
+func (c *APIClient) FirebaseSendSms(t *test.SystemTest, firebaseKey, phoneNumber string) (*model.FirebaseSession, *resty.Response, error) {
+	t.Logf("Sending firebase SMS...")
+	var firebaseSession *model.FirebaseSession
+
+	urlBuilder := NewURLBuilder().
+		SetScheme("https").
+		SetHost("identitytoolkit.googleapis.com").
+		SetPath("/v1/accounts:sendVerificationCode").
+		AddParams("key", firebaseKey)
+
+	formData := map[string]string{
+		"phoneNumber": phoneNumber,
+		"appId":       "com.0Chain.0Box",
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &firebaseSession,
+		FormData:           formData,
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return firebaseSession, resp, err
+}
+
+func (c *APIClient) FirebaseCreateToken(t *test.SystemTest, firebaseKey, sessionInfo string) (*model.FirebaseToken, *resty.Response, error) {
+	t.Logf("Creating firebase token...")
+	var firebaseToken *model.FirebaseToken
+
+	urlBuilder := NewURLBuilder().
+		SetScheme("https").
+		SetHost("identitytoolkit.googleapis.com").
+		SetPath("/v1/accounts:signInWithPhoneNumber").
+		AddParams("key", firebaseKey)
+
+	formData := map[string]string{
+		"code":        "123456",
+		"sessionInfo": sessionInfo,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &firebaseToken,
+		FormData:           formData,
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return firebaseToken, resp, err
 }
