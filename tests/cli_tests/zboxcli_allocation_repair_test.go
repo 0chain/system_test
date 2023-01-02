@@ -39,9 +39,10 @@ func TestRepairRename(t *testing.T) {
 
 func TestRepairReplaceBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
+	t.Run("repair with replace blobber Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"lock":   "0.5",
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 2,
 			"tokens": 1, // tokens to lock for read pool
