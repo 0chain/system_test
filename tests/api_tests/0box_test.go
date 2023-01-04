@@ -22,14 +22,14 @@ func Test0Box(testSetup *testing.T) {
 }
 
 func generateCsrfToken(t *test.SystemTest, phoneNumber string) *model.CSRFToken {
-	authenticateWithFirebox(t, phoneNumber)
+	authenticateWithFirebase(t, phoneNumber)
 	token, response, err := apiClient.CreateCSRFToken(t, phoneNumber)
 	require.NoError(t, err, "CSRF token creation failed with output: %v and error %v ", response, err)
 
 	return token
 }
 
-func authenticateWithFirebox(t *test.SystemTest, phoneNumber string) *model.FirebaseToken {
+func authenticateWithFirebase(t *test.SystemTest, phoneNumber string) *model.FirebaseToken {
 	session, response, err := apiClient.FirebaseSendSms(t, "AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY", phoneNumber)
 	require.NoError(t, err, "Firebase send SMS failed: ", response.RawResponse)
 	token, response, err := apiClient.FirebaseCreateToken(t, "AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY", session.SessionInfo)
@@ -37,7 +37,3 @@ func authenticateWithFirebox(t *test.SystemTest, phoneNumber string) *model.Fire
 
 	return token
 }
-
-//func createCsrfToken(number string) interface{} {
-//
-//}
