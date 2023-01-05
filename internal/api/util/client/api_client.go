@@ -21,21 +21,6 @@ import (
 	resty "github.com/go-resty/resty/v2"
 )
 
-// Statuses of http based responses
-const (
-	HttpOkStatus          = 200
-	HttpBadRequestStatus  = 400
-	HttpNotFoundStatus    = 404
-	HttpNotModifiedStatus = 304
-)
-
-// Contains all methods used for http based requests
-const (
-	HttpPOSTMethod = iota + 1
-	HttpGETMethod
-	HttpPUTMethod
-)
-
 // Contains all used url paths in the client
 const (
 	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
@@ -92,22 +77,17 @@ var (
 )
 
 type APIClient struct {
+	BaseHttpClient
 	model.HealthyServiceProviders
-
-	httpClient     *resty.Client //nolint
-	zboxEntrypoint string
 }
 
-func NewAPIClient(networkEntrypoint, zboxEntrypoint string) *APIClient {
-	apiClient := &APIClient{
-		httpClient: resty.New(), //nolint
-	}
+func NewAPIClient(networkEntrypoint string) *APIClient {
+	apiClient := &APIClient{}
+	apiClient.HttpClient = resty.New()
 
 	if err := apiClient.selectHealthyServiceProviders(networkEntrypoint); err != nil {
 		log.Fatalln(err)
 	}
-
-	apiClient.zboxEntrypoint = zboxEntrypoint
 
 	return apiClient
 }
@@ -120,7 +100,7 @@ func (c *APIClient) getHealthyNodes(nodes []string, serviceProviderType int) ([]
 			return nil, err
 		}
 
-		r := c.httpClient.R()
+		r := c.HttpClient.R()
 		var formattedURL string
 		switch serviceProviderType {
 		case MinerServiceProvider:
@@ -171,7 +151,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	}
 	formattedURL := urlBuilder.SetPath(GetNetworkDetails).String()
 
-	resp, err := c.httpClient.R().Get(formattedURL)
+	resp, err := c.HttpClient.R().Get(formattedURL)
 	if err != nil {
 		return errors.New(ErrNetworkHealthy.Error() + "error fetching network details from url: " + formattedURL)
 	}
@@ -213,7 +193,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		}
 		urlBuilder = urlBuilder.SetPath(GetBlobbers).SetPathVariable("sc_address", StorageSmartContractAddress)
 		formattedURL = urlBuilder.AddParams("offset", fmt.Sprint(offset)).AddParams("limit", fmt.Sprint(limit)).String()
-		resp, err = c.httpClient.R().Get(formattedURL)
+		resp, err = c.HttpClient.R().Get(formattedURL)
 		if err != nil {
 			return ErrNoBlobbersHealthy
 		}
@@ -243,36 +223,6 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	c.HealthyServiceProviders.Blobbers = healthyBlobbers
 
 	return nil
-}
-
-func (c *APIClient) executeForServiceProvider(t *test.SystemTest, url string, executionRequest model.ExecutionRequest, method int) (*resty.Response, error) { //nolint
-	var (
-		resp *resty.Response
-		err  error
-	)
-
-	switch method {
-	case HttpPUTMethod:
-		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Put(url)
-	case HttpPOSTMethod:
-		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Post(url)
-	case HttpGETMethod:
-		resp, err = c.httpClient.R().SetHeaders(executionRequest.Headers).SetQueryParams(executionRequest.QueryParams).Get(url)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", url, ErrGetFromResource)
-	}
-
-	t.Logf("%s returned %s with status %s", url, resp.String(), resp.Status())
-	if executionRequest.Dst != nil {
-		err = json.Unmarshal(resp.Body(), executionRequest.Dst)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return resp, nil
 }
 
 func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
@@ -1205,71 +1155,4 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		},
 		HttpGETMethod)
 	return blobberObjectTreePathResponse, resp, err
-}
-
-func (c *APIClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*model.CSRFToken, *resty.Response, error) {
-	t.Logf("Creating CSRF Token....")
-	var csrfToken *model.CSRFToken
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/csrftoken")
-	parsedUrl := urlBuilder.String()
-
-	resp, err := c.executeForServiceProvider(t, parsedUrl, model.ExecutionRequest{
-		Dst:                &csrfToken,
-		Headers:            map[string]string{"X-App-Phone-Number": phoneNumber},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return csrfToken, resp, err
-}
-
-func (c *APIClient) FirebaseSendSms(t *test.SystemTest, firebaseKey, phoneNumber string) (*model.FirebaseSession, *resty.Response, error) {
-	t.Logf("Sending firebase SMS...")
-	var firebaseSession *model.FirebaseSession
-
-	urlBuilder := NewURLBuilder().
-		SetScheme("https").
-		SetHost("identitytoolkit.googleapis.com").
-		SetPath("/v1/accounts:sendVerificationCode").
-		AddParams("key", firebaseKey)
-
-	formData := map[string]string{
-		"phoneNumber": phoneNumber,
-		"appId":       "com.0Chain.0Box",
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &firebaseSession,
-		FormData:           formData,
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return firebaseSession, resp, err
-}
-
-func (c *APIClient) FirebaseCreateToken(t *test.SystemTest, firebaseKey, sessionInfo string) (*model.FirebaseToken, *resty.Response, error) {
-	t.Logf("Creating firebase token...")
-	var firebaseToken *model.FirebaseToken
-
-	urlBuilder := NewURLBuilder().
-		SetScheme("https").
-		SetHost("identitytoolkit.googleapis.com").
-		SetPath("/v1/accounts:signInWithPhoneNumber").
-		AddParams("key", firebaseKey)
-
-	formData := map[string]string{
-		"code":        "123456",
-		"sessionInfo": sessionInfo,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &firebaseToken,
-		FormData:           formData,
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return firebaseToken, resp, err
 }

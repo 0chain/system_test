@@ -655,19 +655,3 @@ type StakePoolDelegatePoolInfo struct {
 	Status       string `json:"status"`
 	RoundCreated int64  `json:"round_created"`
 }
-
-type FirebaseSession struct {
-	SessionInfo string `json:"sessionInfo"`
-}
-type FirebaseToken struct {
-	IdToken      string `json:"idToken"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    string `json:"expiresIn"`
-	LocalId      string `json:"localId"`
-	IsNewUser    bool   `json:"isNewUser"`
-	PhoneNumber  string `json:"phoneNumber"`
-}
-
-type CSRFToken struct {
-	CSRFToken string `json:"csrf_token"`
-}
