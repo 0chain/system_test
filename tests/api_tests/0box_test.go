@@ -74,6 +74,8 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 1, len(wallets.Data), "Expected 1 wallet only to be present")
 	})
 
+	//FIXME: Missing field description does not match field name (Pascal case instead of snake case)
+	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
@@ -89,7 +91,7 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 			println(message, response, err)
 		}
 	} else {
-		t.Logf("No wallets found for [%v] teardown", len(wallets), phoneNumber)
+		t.Logf("No wallets found for [%v] teardown", phoneNumber)
 	}
 }
 
