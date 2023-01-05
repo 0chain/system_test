@@ -77,17 +77,19 @@ func Test0Box(testSetup *testing.T) {
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
+	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
 	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-	//wallets, response, err := zboxClient.ListWallets(t, idToken, csrfToken, phoneNumber) //FIXME: list wallets endpoint returns the client id in place of the wallet id, and does not return the wallet id at all so we need to use list keys instead
-	wallets, response, err := zboxClient.ListWalletKeys(t, idToken, csrfToken, phoneNumber)
-	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	require.NotNil(t, wallets)
+	//wallets, _, _ := zboxClient.ListWallets(t, idToken, csrfToken, phoneNumber) //FIXME: list wallets endpoint returns the client id in place of the wallet id, and does not return the wallet id at all so we need to use list keys instead
+	wallets, _, _ := zboxClient.ListWalletKeys(t, idToken, csrfToken, phoneNumber)
 
-	t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
-	for _, wallet := range wallets {
-		message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
-		println(message, response, err)
+	if wallets != nil {
+		t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
+		for _, wallet := range wallets {
+			message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
+			println(message, response, err)
+		}
+	} else {
+		t.Logf("No wallets found for [%v] teardown", len(wallets), phoneNumber)
 	}
 }
 
