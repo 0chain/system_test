@@ -199,7 +199,7 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
 			"X-APP-TYPE":         "chimney",
-		}, //FIXME: List endpoint does not require signature!
+		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 

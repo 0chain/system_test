@@ -16,7 +16,7 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type ZboxWalletAlt struct { //TODO THIS IS INCONSISTENT AND SHOULD BE FIXED
+type ZboxWalletAlt struct { //FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
 	WalletId    string   `json:"wallet_id"`
 	PhoneNumber string   `json:"phone_number"`
 	Name        string   `json:"name"`
@@ -27,12 +27,12 @@ type ZboxWalletAlt struct { //TODO THIS IS INCONSISTENT AND SHOULD BE FIXED
 	LastUpdate  string   `json:"last_update"`
 }
 
-type ZboxWallet struct { //todo: this model is correct given the 0box api
+type ZboxWallet struct {
 	ClientId          string   `json:"client_id"`
 	WalletId          int      `json:"wallet_id"`
 	WalletName        string   `json:"wallet_name"`
 	WalletDescription string   `json:"wallet_description"`
-	AppId             []string `json:"app_id"` //todo: this is called app_type everywhere else
+	AppId             []string `json:"app_id"`
 	PublicKey         string   `json:"public_key"`
 	LastUpdate        string   `json:"last_update"`
 }

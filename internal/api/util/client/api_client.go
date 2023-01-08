@@ -217,7 +217,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 		return err
 	}
 	if len(healthyBlobbers) == 0 {
-		//return ErrNoBlobbersHealthy
+		return ErrNoBlobbersHealthy
 	}
 
 	c.HealthyServiceProviders.Blobbers = healthyBlobbers

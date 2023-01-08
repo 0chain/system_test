@@ -33,7 +33,7 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		//require.Equal(t, description, zboxWallet.Description, "Description does not match expected") //FIXME: Description is not persisted
+		//require.Equal(t, description, zboxWallet.Description, "Description does not match expected") //FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 	})
 
 	t.RunSequentially("List wallet should work with zero wallets", func(t *test.SystemTest) {
@@ -81,8 +81,7 @@ func Test0Box(testSetup *testing.T) {
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
 	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-	//wallets, _, _ := zboxClient.ListWallets(t, idToken, csrfToken, phoneNumber) //FIXME: list wallets endpoint returns the client id in place of the wallet id, and does not return the wallet id at all so we need to use list keys instead
-	wallets, _, _ := zboxClient.ListWalletKeys(t, idToken, csrfToken, phoneNumber)
+	wallets, _, _ := zboxClient.ListWalletKeys(t, idToken, csrfToken, phoneNumber) //This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 	if wallets != nil {
 		t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
