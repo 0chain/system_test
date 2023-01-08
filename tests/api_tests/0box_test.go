@@ -21,7 +21,7 @@ func Test0Box(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
-			"613ed9fb5b9311f6f22080eb1db69b2e786c990706c160faf1f9bdd324fd909bc640ad6a3a44cb4248ddcd92cc1fabf66a69ac4eb38a102b984b98becb0674db7d69c5727579d5f756bb8c333010866d4d871dae1b7032d6140db897e4349f60f94f1eb14a3b7a14a489226a1f35952472c9b2b13e3698523a8be2dcba91c344f55da17c21c403543d82fe5a32cb0c8133759ab67c31f1405163a2a255ec270b1cca40d9f236e007a3ba8f6be4eaeaad10376c5f224bad45c597d85a3b8b984f46c597f6cf561405bd0b0007ac6833cfff408aeb51c0d2fX",
+			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
 			firebaseToken.IdToken,
@@ -54,7 +54,7 @@ func Test0Box(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		_, response, err := zboxClient.PostWallet(t,
-			"613ed9fb5b9311f6f22080eb1db69b2e786c990706c160faf1f9bdd324fd909bc640ad6a3a44cb4248ddcd92cc1fabf66a69ac4eb38a102b984b98becb0674db7d69c5727579d5f756bb8c333010866d4d871dae1b7032d6140db897e4349f60f94f1eb14a3b7a14a489226a1f35952472c9b2b13e3698523a8be2dcba91c344f55da17c21c403543d82fe5a32cb0c8133759ab67c31f1405163a2a255ec270b1cca40d9f236e007a3ba8f6be4eaeaad10376c5f224bad45c597d85a3b8b984f46c597f6cf561405bd0b0007ac6833cfff408aeb51c0d2fX",
+			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
 			firebaseToken.IdToken,
