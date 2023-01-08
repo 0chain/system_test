@@ -16,7 +16,7 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type ZboxWalletAlt struct { //FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
+type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
 	WalletId    string   `json:"wallet_id"`
 	PhoneNumber string   `json:"phone_number"`
 	Name        string   `json:"name"`

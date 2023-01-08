@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/go-resty/resty/v2"
@@ -14,7 +15,7 @@ type ZboxClient struct {
 	DefaultPhoneNumber string
 }
 
-func NewZboxClient(zboxEntrypoint string, defaultPhoneNumber string) *ZboxClient {
+func NewZboxClient(zboxEntrypoint, defaultPhoneNumber string) *ZboxClient {
 	zboxClient := &ZboxClient{
 		zboxEntrypoint:     zboxEntrypoint,
 		DefaultPhoneNumber: defaultPhoneNumber,

@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/0chain/system_test/internal/api/model"
