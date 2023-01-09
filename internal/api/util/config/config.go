@@ -15,6 +15,8 @@ const DefaultConfigPath = "./config/api_tests_config.yaml"
 
 type Config struct {
 	BlockWorker            string `yaml:"block_worker"`
+	ZboxUrl                string `yaml:"0box_url"`
+	ZboxPhoneNumber        string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout string `yaml:"default_test_case_timeout"`
 }
 
