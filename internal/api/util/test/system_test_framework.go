@@ -2,6 +2,7 @@ package test
 
 import (
 	"log"
+	"runtime/debug"
 	"sync"
 	"testing"
 	"time"
@@ -90,7 +91,7 @@ func executeTest(s *SystemTest, name string, testFunction func(w *SystemTest), t
 
 func handlePanic(s *SystemTest) {
 	if err := recover(); err != nil {
-		s.Errorf("Test case exited due to panic - [%v]", err)
+		s.Errorf("Test case exited due to panic - [%v], stack: [%v]", err, string(debug.Stack()))
 	}
 }
 
