@@ -75,7 +75,7 @@ func (c *ZboxClient) FirebaseCreateToken(t *test.SystemTest, firebaseKey, sessio
 	return firebaseToken, resp, err
 }
 
-func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (string, *resty.Response, error) {
+func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*model.CSRFToken, *resty.Response, error) {
 	t.Logf("Creating CSRF Token using 0box...")
 	var csrfToken *model.CSRFToken
 
@@ -91,7 +91,7 @@ func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (st
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return csrfToken.CSRFToken, resp, err
+	return csrfToken, resp, err
 }
 
 func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletList, *resty.Response, error) {
