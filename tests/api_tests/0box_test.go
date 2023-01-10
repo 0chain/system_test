@@ -96,10 +96,10 @@ func createCsrfToken(t *test.SystemTest, phoneNumber string) string {
 	csrfToken, response, err := zboxClient.CreateCSRFToken(t, phoneNumber)
 	require.NoError(t, err, "CSRF token creation failed with output: %v and error %v ", response, err)
 
-	require.NotNil(t, csrfToken, "CSRF token was nil!")
-	require.NotNil(t, csrfToken, "id token was nil!")
+	require.NotNil(t, csrfToken, "CSRF token container was nil!", response)
+	require.NotNil(t, csrfToken.CSRFToken, "CSRF token was nil!", response)
 
-	return csrfToken
+	return csrfToken.CSRFToken
 }
 
 func authenticateWithFirebase(t *test.SystemTest, phoneNumber string) *model.FirebaseToken {
