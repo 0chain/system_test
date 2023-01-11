@@ -48,65 +48,12 @@ on:
         default: ''
         required: false
 
-jobs:
-  golangci:
-    if: github.event_name == 'push'
-    name: "lint"
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.50
-          skip-build-cache: true
-          skip-pkg-cache: true
-          only-new-issues: true
-
-  ensure-master-is-green:
-    if: github.ref != 'refs/heads/master'
-    name: "Ensure master is green"
-    runs-on: self-hosted
-    steps:
-      - name: Check CI
-        id: check-ci
-        uses: 0chain/actions/get-build-state@blobber-storage-rewards
-        with:
-          github_token: ${{ github.token }}
-          repository: "0chain/system_test"
-          sha: master
-      - name: Success
-        if: ${{ env.BUILD_STATE == 'success' }}
-        run: echo "master is successful!"
-      - name: Not Successful
-        if: ${{ env.BUILD_STATE != 'success' }}
-        run: |
-          echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
-          exit 1
-        
-  system-tests:
-    name: "System Tests"
+jobs:      
+  blobber-storage-rewards-tests:
+    name: "Blobber Storage Rewards Tests"
     runs-on: [ tests-suite ]
     timeout-minutes: 120
     steps:
-      - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          github-token: ${{ github.token }}
-
-      - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@blobber-storage-rewards
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
-          state: "pending"
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
-
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
@@ -164,36 +111,3 @@ jobs:
           archive_results: true
           run_flaky_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-
-      - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@blobber-storage-rewards
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests with default config ${{ job.status }}"
-          state: ${{ job.status }}
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
-
-  set-build-conclusion:
-    name: "Set build conclusion"
-    if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
-    needs: [ golangci, system-tests ]
-    runs-on: self-hosted
-    steps:
-      - uses: technote-space/workflow-conclusion-action@v3
-      - name: "Parse status of ${{ env.WORKFLOW_CONCLUSION }}"
-        run: |
-          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
-            echo "WORKFLOW_CONCLUSION=failure" >> $GITHUB_ENV
-          fi
-      - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
-        uses: Sibz/github-status-action@v1
-        with:
-          authToken: ${{secrets.GITHUB_TOKEN}}
-          context: '0Chain System Tests CI'
-          description: "Build status: ${{ env.WORKFLOW_CONCLUSION }}"
-          state: ${{ env.WORKFLOW_CONCLUSION }}
-          sha: ${{github.event.pull_request.head.sha || github.sha}}
