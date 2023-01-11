@@ -49,7 +49,14 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	minerIds := getSortedMinerIds(t, sharderUrl)
 	require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minerIds, sharderUrl)
+	// todo piers remove
+	tokens := []float64{1, 0.5}
+	_ = createStakePools(t, minerIds, tokens)
+	//t.Cleanup(func() {
+	//	cleanupFunc()
+	//})
+
+	beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 	// ------------------------------------
 	cliutils.Wait(t, 3*time.Second)
