@@ -20,6 +20,8 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Finalize Expired Allocation Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
 
+		_ = setupWallet(t, configPath)
+
 		options := map[string]interface{}{
 			"expire": "1h",
 			"size":   "1024",
