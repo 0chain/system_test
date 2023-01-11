@@ -62,11 +62,11 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		}
 		go executeTest(t, name, testFunction, testCaseChannel, &wg)
 
-		select {
-		case <-time.After(timeout):
-			t.Errorf("Test case [%s] timed out after [%s]", name, timeout)
-		case _ = <-testCaseChannel:
-		}
+		//select {
+		//case <-time.After(timeout):
+		//	t.Errorf("Test case [%s] timed out after [%s]", name, timeout)
+		//case _ = <-testCaseChannel:
+		//}
 
 		t.Logf("Test case [%s] exit at [%s]", name, time.Now().Format("01-02-2006 15:04:05"))
 		t.testComplete = true

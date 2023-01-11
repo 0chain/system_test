@@ -293,12 +293,12 @@ type NodeList struct {
 }
 
 type DelegatePool struct {
-	Balance          int64  `json:"balance"`
-	Reward           int64  `json:"reward"`
-	Status           int    `json:"status"`
-	RoundCreated     int64  `json:"round_created"` // used for cool down
-	DelegateID       string `json:"delegate_id"`
-	RoundLastUpdated int64  `json:"roundLastUpdated"`
+	Balance              int64  `json:"balance"`
+	Reward               int64  `json:"reward"`
+	Status               int    `json:"status"`
+	RoundCreated         int64  `json:"round_created"` // used for cool down
+	DelegateID           string `json:"delegate_id"`
+	RoundPoolLastUpdated int64  `json:"round_pool_last_updated"`
 }
 
 type StakePool struct {
@@ -315,16 +315,16 @@ type Node struct {
 }
 
 type SimpleNode struct {
-	ID               string      `json:"id"`
-	N2NHost          string      `json:"n2n_host"`
-	Host             string      `json:"host"`
-	Port             int         `json:"port"`
-	PublicKey        string      `json:"public_key"`
-	ShortName        string      `json:"short_name"`
-	BuildTag         string      `json:"build_tag"`
-	TotalStake       int64       `json:"total_stake"`
-	Stat             interface{} `json:"stat"`
-	RoundLastUpdated int64       `json:"round_last_updated"`
+	ID                            string      `json:"id"`
+	N2NHost                       string      `json:"n2n_host"`
+	Host                          string      `json:"host"`
+	Port                          int         `json:"port"`
+	PublicKey                     string      `json:"public_key"`
+	ShortName                     string      `json:"short_name"`
+	BuildTag                      string      `json:"build_tag"`
+	TotalStake                    int64       `json:"total_stake"`
+	Stat                          interface{} `json:"stat"`
+	RoundServiceChargeLastUpdated int64       `json:"round_service_charge_last_updated"`
 }
 
 type Sharder struct {
