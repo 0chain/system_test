@@ -1,7 +1,5 @@
 name: "0Chain Blobber Storage Rewards Tests"
-run-name: "Blobber Storage Rewards tests"
-concurrency:
-  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:
