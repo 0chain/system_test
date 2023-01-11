@@ -50,8 +50,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	require.True(t, len(minerIds) > 0, "no miners found")
 
 	// todo piers remove
-	tokens := []float64{1, 0.5}
-	_ = createStakePools(t, minerIds, tokens)
+	//tokens := []float64{1, 0.5}
+	//_ = createStakePools(t, minerIds, tokens)
 	//t.Cleanup(func() {
 	//	cleanupFunc()
 	//})
@@ -69,10 +69,10 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
 	endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
 	for i := range beforeMiners.Nodes {
-		if startRound < beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
+		if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
 			startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
-		if endRound > afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
+		if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
 			endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
 	}
