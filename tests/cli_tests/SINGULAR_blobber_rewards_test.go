@@ -53,6 +53,8 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
+		cliutils.Wait(t, 2*time.Minute)
+
 		// 75% of 1 ZCN = 0.75 ZCN should return to the client
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
