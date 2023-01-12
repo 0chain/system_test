@@ -44,7 +44,7 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 10*time.Second)
+		cliutils.Wait(t, 4*time.Minute)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 
