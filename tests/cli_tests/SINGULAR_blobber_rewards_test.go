@@ -17,19 +17,27 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 
 	t.Parallel()
 
+	// Tests the rewards for blobbers from clients' end. In the first case:
+	// 1. Client creates an allocation, does not use it at all and finalizes it. In this, 25% of the locked amount should be
+	// moved to blobber's delegate wallet. 75% should be returned to the client.
+
 	t.RunWithTimeout("Finalize Expired Allocation Should Work", 5*time.Minute, func(t *test.SystemTest) {
-		//TODO: unacceptably slow
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		_ = setupWallet(t, configPath)
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
+		// lock 0.5 tokens from wallet
 		options := map[string]interface{}{
 			"expire": "1h",
 			"size":   "1024",
 			"parity": "1",
-			"lock":   "0.5",
+			"lock":   "1",
 			"data":   "1",
+			"duration": "5s",
 		}
-		output, err := createNewAllocation(t, configPath, createParams(options))
+		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
@@ -37,7 +45,7 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
-		cliutils.Wait(t, 4*time.Minute)
+		cliutils.Wait(t, 10*time.Second)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 
@@ -45,5 +53,10 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
+
+		output, err = getBalance(t, configPath)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 }
