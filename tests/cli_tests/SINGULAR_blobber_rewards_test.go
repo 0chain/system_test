@@ -30,12 +30,11 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 
 		// lock 0.5 tokens from wallet
 		options := map[string]interface{}{
-			"expire": "1h",
+			"expire": "5s",
 			"size":   "1024",
 			"parity": "1",
 			"lock":   "1",
 			"data":   "1",
-			"duration": "5s",
 		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -54,9 +53,10 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
+		// 75% of 1 ZCN = 0.75 ZCN should return to the client
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0]) // 75% of 1 ZCN
 	})
 }
