@@ -429,17 +429,20 @@ func getNodeBaseURL(host string, port int) string {
 }
 
 func getMinersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
-	t.Logf("list miner nodes...")
+	t.Log("list miner nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
-func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
+func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.Response, error) {
+	t.Logf("Getting balance for %s...", clientID)
 	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }
 
-func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
+func apiGetBlock(t *test.SystemTest, sharderBaseURL string, round int64) (*http.Response, error) {
+	t.Logf("Gert block for round %d...", round)
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
+	t.Log("Get miners...")
 	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

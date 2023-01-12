@@ -454,7 +454,7 @@ func getBalanceFromSharders(t *test.SystemTest, clientId string) int64 {
 
 	// Get base URL for API calls.
 	sharderBaseURLs := getAllSharderBaseURLs(sharders)
-	res, err := apiGetBalance(sharderBaseURLs[0], clientId)
+	res, err := apiGetBalance(t, sharderBaseURLs[0], clientId)
 	require.Nil(t, err, "error getting balance")
 
 	if res.StatusCode == 400 {
