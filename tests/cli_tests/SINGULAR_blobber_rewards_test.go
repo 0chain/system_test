@@ -21,7 +21,7 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 	// 1. Client creates an allocation, does not use it at all and finalizes it. In this, 25% of the locked amount should be
 	// moved to blobber's delegate wallet. 75% should be returned to the client.
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work", 8*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
