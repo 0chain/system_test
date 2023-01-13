@@ -10,7 +10,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlobberStorageRewards(testSetup *testing.T) {
@@ -29,13 +29,13 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 		}
 
 		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		assert.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		assert.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		blobberDelegateWallet, err := getWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "error getting target wallet")
+		assert.Nil(t, err, "error getting target wallet")
 
 		balanceBefore := getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
 
@@ -48,32 +48,32 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 			"data":   "1",
 		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+		assert.Nil(t, err, strings.Join(output, "\n"))
+		assert.True(t, len(output) > 0, "expected output length be at least 1")
+		assert.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
 
 		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+		assert.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 4*time.Minute)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 
-		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+		assert.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
+		assert.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
-		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
+		assert.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 
 		cliutils.Wait(t, 2*time.Minute)
 
 		// 75% of 1 ZCN = 0.75 ZCN should return to the client
 		output, err = getBalance(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		// require.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0]) // 75% of 1 ZCN
+		assert.Nil(t, err, strings.Join(output, "\n"))
+		assert.Len(t, output, 1)
+		// assert.Regexp(t, regexp.MustCompile(`Balance: 750.000 mZCN \(\d*\.?\d+ USD\)$`), output[0]) // 75% of 1 ZCN
 
 		// Check blobber delegate wallet
 		balanceAfter := getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
-		require.Equal(t, float64(balanceAfter), float64(balanceBefore)+(0.75*tokenUnit))
+		assert.Equal(t, float64(balanceAfter), float64(balanceBefore)+(0.75*tokenUnit))
 	})
 }
