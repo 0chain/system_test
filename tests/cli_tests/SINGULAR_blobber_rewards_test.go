@@ -28,16 +28,16 @@ func TestBlobberStorageRewards(testSetup *testing.T) {
 			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 		}
 
-		blobberDelegateWallet, err := getWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "error getting target wallet")
-
-		balanceBefore := getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
-
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		blobberDelegateWallet, err := getWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "error getting target wallet")
+
+		balanceBefore := getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
 
 		// lock 0.5 tokens from wallet
 		options := map[string]interface{}{
