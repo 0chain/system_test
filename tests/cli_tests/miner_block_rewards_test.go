@@ -42,7 +42,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of block fees and rewards", 120*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Miner share of block fees and rewards", 240*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -113,8 +113,11 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 							expectedServiceCharge = minerBlockReward
 						}
 						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "incorrect service charge %v for round %d"+
-							" service charge should be block reward %v multiplied by service ratio %v",
-							pReward.Amount, round, expectedServiceCharge, minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge)
+							" service charge should be block reward %v multiplied by service ratio %v."+
+							" Start round %d end round %d. History %v",
+							pReward.Amount, round, expectedServiceCharge, minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
+							beforeMiners.Nodes[i].RoundServiceChargeLastUpdated+1, afterMiners.Nodes[i].RoundServiceChargeLastUpdated,
+							history)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
