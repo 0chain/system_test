@@ -13,24 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getReadPoolUpdate(t *test.SystemTest, erp climodel.ReadPoolInfo, retry int) (climodel.ReadPoolInfo, error) {
-	if retry == 0 {
-		retry = 1
-	}
-	// Wait for read markers to be redeemed
-	for i := 0; i < retry; i++ {
-		readPool := getReadPoolInfo(t)
-		if readPool.Balance == erp.Balance {
-			continue
-		}
-
-		cliutils.Wait(t, time.Second*30)
-		return getReadPoolInfo(t), nil
-	}
-
-	return erp, fmt.Errorf("no update found in readpool")
-}
-
 func getReadPoolInfo(t *test.SystemTest) climodel.ReadPoolInfo {
 	output, err := readPoolInfo(t, configPath)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
@@ -41,10 +23,6 @@ func getReadPoolInfo(t *test.SystemTest) climodel.ReadPoolInfo {
 	require.Nil(t, err, "Error unmarshalling read pool %s", strings.Join(output, "\n"))
 	return readPool
 }
-
-
-
-
 
 func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Deleting file...")
