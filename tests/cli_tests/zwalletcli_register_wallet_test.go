@@ -126,19 +126,6 @@ func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilenam
 	return err
 }
 
-func lockReadTokensForWalletName(t *test.SystemTest, cliConfigFilename, wallet string, tokens float64) error {
-	_, err := executeFaucetWithTokensForWallet(t, wallet, cliConfigFilename, tokens)
-	if err != nil {
-		return err
-	}
-
-	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	_, err = readPoolLockWithWallet(t, wallet, cliConfigFilename, readPoolParams, true)
-	return err
-}
-
 func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))

@@ -42,20 +42,9 @@ func getReadPoolInfo(t *test.SystemTest) climodel.ReadPoolInfo {
 	return readPool
 }
 
-func getMetaData(t *test.SystemTest, params map[string]interface{}) *climodel.FileMetaResult {
-	return getMetaDataWithWallet(t, escapedTestName(t), params)
-}
 
-func getMetaDataWithWallet(t *test.SystemTest, walletName string, params map[string]interface{}) *climodel.FileMetaResult {
-	output, err := getFileMetaWithWallet(t, walletName, configPath, createParams(params), true)
-	require.Nil(t, err, "Error in getting file meta data", strings.Join(output, "\n"))
-	require.Len(t, output, 1, "Error in getting file meta data - Unexpected number of output lines", strings.Join(output, "\n"))
 
-	var meta climodel.FileMetaResult
-	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-	require.Nil(t, err, "Failed to unmarshal the json result into FileMetaResult", strings.Join(output, "\n"))
-	return &meta
-}
+
 
 func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Deleting file...")
