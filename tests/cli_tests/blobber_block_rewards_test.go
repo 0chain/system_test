@@ -3,8 +3,8 @@ package cli_tests
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -43,13 +43,23 @@ func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 		beforeBlobberStakePools := getBlobberStakepools(t, sharderUrl, blobberIds)
 
-		// ------------------------------------
-		cliutils.Wait(t, 3*time.Minute)
+		// Simulate some work to generate challenges ------------------------------------
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 8 * MB})
+		createAllocationTestTeardown(t, allocationID)
+
+		for i := 0; i < 10; i++ {
+			_ = uploadRandomlyGeneratedFile(t, allocationID, "/", 2*MB)
+		}
 		// ------------------------------------
 
 		afterBlobberStakePools := getBlobberStakepools(t, sharderUrl, blobberIds)
 
-		fmt.Print(beforeBlobberStakePools, afterBlobberStakePools)
+		rewardsAccumulated := compareStakePools(t, blobberIds, beforeBlobberStakePools, afterBlobberStakePools)
+		require.True(t, rewardsAccumulated, "no rewards accumulated for blobbers")
+
 		// we add rewards at the end of the round, and they don't appear until the next round
 		// 	startRound := beforeBlobbers.Nodes[0].Round + 1
 		// 	endRound := afterMiners.Nodes[0].Round + 1
@@ -223,4 +233,16 @@ func getBlobberStakepools(t *test.SystemTest, sharderBaseURL string, blobbers []
 		nodePoolStats[blobberId] = *nodePoolStat
 	}
 	return nodePoolStats
+}
+
+func compareStakePools(t *test.SystemTest, blobberIds []string, beforeBlobberStakePools, afterBlobberStakePools map[string]climodel.StakePoolStat) bool {
+	for _, blobberId := range blobberIds {
+		afterRewards, err := afterBlobberStakePools[blobberId].Rewards.Int64()
+		require.Nil(t, err)
+		beforeRewards, err := beforeBlobberStakePools[blobberId].Rewards.Int64()
+		if afterRewards > beforeRewards {
+			return true
+		}
+	}
+	return false
 }
