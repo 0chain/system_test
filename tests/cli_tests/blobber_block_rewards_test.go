@@ -2,12 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -16,9 +18,9 @@ import (
 func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	// if !confirmDebugBuild(t) {
-	// 	t.Skip("blobber block rewards test skipped as it requires a debug event database")
-	// }
+	//if !confirmDebugBuild(t) {
+	//	t.Skip("blobber block rewards test skipped as it requires a debug event database")
+	//}
 
 	// Take a snapshot of the chains blobbers, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -42,14 +44,32 @@ func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		require.True(t, len(blobberIds) > 0, "no blobbers found")
 
 		beforeBlobberStakePools := getBlobberStakepools(t, sharderUrl, blobberIds)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 4 * MB})
+		createAllocationTestTeardown(t, allocationID)
 
-		// ------------------------------------
-		cliutils.Wait(t, 3*time.Minute)
-		// ------------------------------------
+		t.Logf("Simulating work to generate rewards for blobbers")
+		upDownRandomFiles(t, allocationID, 128*KB, 3)
+		var rewardFoundBool bool
+		var afterBlobberStakePools map[string]climodel.StakePoolStat
+		for i := 0; i < 6; i++ {
+			afterBlobberStakePools = getBlobberStakepools(t, sharderUrl, blobberIds)
+			if checkRewardsIncreased(beforeBlobberStakePools, afterBlobberStakePools) {
+				rewardFoundBool = true
+				break
+			}
 
-		afterBlobberStakePools := getBlobberStakepools(t, sharderUrl, blobberIds)
+			cliutils.Wait(t, 10*time.Second)
+			//fmt.Printf("beforeBlobberStakePools %+v\n", beforeBlobberStakePools)
+			//fmt.Printf("afterBlobberStakePools %+v\n", afterBlobberStakePools)
+		}
+		if !rewardFoundBool {
+			t.Fatalf("Blobbers did not receive any rewards")
+		}
 
-		fmt.Print(beforeBlobberStakePools, afterBlobberStakePools)
+		//fmt.Printf("beforeBlobberStakePools %+v\n", beforeBlobberStakePools)
+		//fmt.Printf("afterBlobberStakePools %+v\n", afterBlobberStakePools)
+
+		//afterBlobberStakePools = getBlobberStakepools(t, sharderUrl, blobberIds)
 		// we add rewards at the end of the round, and they don't appear until the next round
 		// 	startRound := beforeBlobbers.Nodes[0].Round + 1
 		// 	endRound := afterMiners.Nodes[0].Round + 1
@@ -223,4 +243,39 @@ func getBlobberStakepools(t *test.SystemTest, sharderBaseURL string, blobbers []
 		nodePoolStats[blobberId] = *nodePoolStat
 	}
 	return nodePoolStats
+}
+
+func upDownRandomFiles(t *test.SystemTest, allocationID string, fileSize int64, count int) {
+	filenames := make([]string, 0)
+	for i := 0; i < count; i++ {
+		filename := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		filenames = append(filenames, filename)
+		err := os.Remove(filename)
+		require.Nil(t, err, "error")
+	}
+	_, err := readPoolLock(t, configPath, createParams(map[string]interface{}{
+		"tokens": 0.5,
+	}), true)
+	require.Nil(t, err, "error")
+
+	for _, filename := range filenames {
+		filebase := filepath.Base(filename)
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filebase,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		os.Remove(filename)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+	}
+}
+
+func checkRewardsIncreased(prev, post map[string]climodel.StakePoolStat) bool {
+	for k, v := range prev {
+		if post[k].Rewards > v.Rewards {
+			return true
+		}
+	}
+
+	return false
 }
