@@ -47,7 +47,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 8 * MB})
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 100 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
 		for i := 0; i < 10; i++ {
