@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -34,7 +35,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	//
 	// The remaining block reward (if any) is then distributed amongst all stakepools.
 
-	t.Run("Blobber share of block rewards should be distribute correctly", func(t *test.SystemTest) {
+	t.RunWithTimeout("Blobber share of block rewards should be distribute correctly", 20*time.Minute, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 		sharderUrl := getSharderUrl(t)
@@ -47,12 +48,14 @@ func TestBlobberBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 8 * MB})
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 100 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
 		for i := 0; i < 10; i++ {
 			_ = uploadRandomlyGeneratedFile(t, allocationID, "/", 2*MB)
 		}
+
+		cliutils.Wait(t, 5*time.Minute)
 		// ------------------------------------
 
 		afterBlobberStakePools := getBlobberStakepools(t, sharderUrl, blobberIds)
@@ -240,6 +243,7 @@ func compareStakePools(t *test.SystemTest, blobberIds []string, beforeBlobberSta
 		afterRewards, err := afterBlobberStakePools[blobberId].Rewards.Int64()
 		require.Nil(t, err)
 		beforeRewards, err := beforeBlobberStakePools[blobberId].Rewards.Int64()
+		require.Nil(t, err)
 		if afterRewards > beforeRewards {
 			return true
 		}
