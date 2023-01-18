@@ -27,6 +27,17 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
+type Allocation struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
+	WalletId     string   `json:"wallet_id"`
+	PhoneNumber  string   `json:"phone_number"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	AllocationId string   `json:"mnemonic"`
+	AppType      []string `json:"app_type"`
+	Allocation   string   `json:"allocation"`
+	LastUpdate   string   `json:"last_update"`
+}
+
 type ZboxWallet struct {
 	ClientId          string   `json:"client_id"`
 	WalletId          int      `json:"wallet_id"`
@@ -43,6 +54,11 @@ type MessageContainer struct {
 type ZboxWalletList struct {
 	MessageContainer
 	Data []ZboxWalletAlt `json:"data"`
+}
+
+type ZboxAllocationList struct {
+	MessageContainer
+	Data []Allocation `json:"data"`
 }
 
 type ZboxWalletKeys []struct {
