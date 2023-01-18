@@ -48,3 +48,7 @@ type ZboxWalletList struct {
 type ZboxWalletKeys []struct {
 	ZboxWallet
 }
+
+type ZboxSuccess struct {
+	Success string `json:"success"`
+}
