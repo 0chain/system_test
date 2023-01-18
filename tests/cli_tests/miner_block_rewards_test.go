@@ -16,7 +16,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutil "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -69,7 +68,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 		}
 
-		history := cliutil.NewHistory(startRound, endRound)
+		history := cliutils.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl)
 
 		minerScConfig := getMinerScMap(t)
@@ -379,7 +378,7 @@ func getSharderUrl(t *test.SystemTest) string {
 
 func getNode(t *test.SystemTest, cliConfigFilename, nodeID string) ([]string, error) {
 	t.Logf("getting a miner or sharder node...")
-	return cliutil.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	return cliutils.RunCommand(t, "./zwallet mn-info --silent --id "+nodeID+" --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
@@ -389,7 +388,7 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
-	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
+	nodeList := cliutils.ApiGet[climodel.NodeList](t, url, nil)
 	var nodeIds []string
 	for i := range nodeList.Nodes {
 		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
@@ -409,7 +408,7 @@ func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.
 	var nodes climodel.NodeList
 	for _, id := range ids {
 		params["id"] = id
-		nodes.Nodes = append(nodes.Nodes, *cliutil.ApiGet[climodel.Node](t, url, params))
+		nodes.Nodes = append(nodes.Nodes, *cliutils.ApiGet[climodel.Node](t, url, params))
 	}
 	return nodes
 }
@@ -420,7 +419,7 @@ func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error)
 
 func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	t.Logf("list sharder nodes...")
-	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
 func getNodeBaseURL(host string, port int) string {
@@ -429,7 +428,7 @@ func getNodeBaseURL(host string, port int) string {
 
 func getMinersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	t.Logf("list miner nodes...")
-	return cliutil.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
+	return cliutils.RunCommandWithRawOutput("./zwallet ls-miners --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
 func apiGetBalance(sharderBaseURL, clientID string) (*http.Response, error) {
@@ -440,5 +439,5 @@ func apiGetBlock(sharderBaseURL string, round int64) (*http.Response, error) {
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	return cliutil.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	return cliutils.RunCommand(t, "./zwallet ls-miners --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

@@ -162,7 +162,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 		// Compare the actual change in rewards to each miner delegate, with the
 		// change expected from the delegate reward table.
-		for i, _ := range sharderIds {
+		for i := range sharderIds {
 			delegateBlockReward := int64(float64(bwPerSharder) * (1 - beforeSharders.Nodes[i].Settings.ServiceCharge))
 			numPools := len(afterShardedrs.Nodes[i].StakePool.Pools)
 			rewards := make(map[string]int64, numPools)

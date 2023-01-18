@@ -11,7 +11,7 @@ import (
 )
 
 func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T {
-	url = addParms(url, params)
+	url = AddParams(url, params)
 
 	res, err := http.Get(url) //nolint:gosec
 
@@ -57,7 +57,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 	if offset > 0 {
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
-	url = addParms(url, params)
+	url = AddParams(url, params)
 	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
@@ -71,7 +71,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 	return resBody
 }
 
-func addParms(url string, params map[string]string) string {
+func AddParams(url string, params map[string]string) string {
 	first := true
 	for key, value := range params {
 		if first {

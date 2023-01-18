@@ -100,6 +100,32 @@ type Blobber struct {
 	Baseurl string `json:"url"`
 }
 
+type StakePoolStat struct {
+	ID           string             `json:"pool_id"` // pool ID
+	Balance      currency.Coin      `json:"balance"` // total balance
+	StakeTotal   currency.Coin      `json:"stake_total"`
+	UnstakeTotal currency.Coin      `json:"unstake_total"`
+	Delegate     []DelegatePoolStat `json:"delegate"` // delegate pools
+	Penalty      currency.Coin      `json:"penalty"`  // total for all
+	Rewards      currency.Coin      `json:"rewards"`  // rewards
+	Settings     Settings           `json:"settings"` // Settings of the stake pool
+}
+
+type DelegatePoolStat struct {
+	ID           string          `json:"id"`            // blobber ID
+	Balance      currency.Coin   `json:"balance"`       // current balance
+	DelegateID   string          `json:"delegate_id"`   // wallet
+	Rewards      currency.Coin   `json:"rewards"`       // total for all time
+	UnStake      bool            `json:"unstake"`       // want to unstake
+	ProviderId   string          `json:"provider_id"`   // id
+	ProviderType Provider `json:"provider_type"` // ype
+
+	TotalReward  currency.Coin `json:"total_reward"`
+	TotalPenalty currency.Coin `json:"total_penalty"`
+	Status       string        `json:"status"`
+	RoundCreated int64         `json:"round_created"`
+}
+
 type ReadPoolInfo struct {
 	Balance int64 `json:"balance"`
 }
