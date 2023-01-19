@@ -48,3 +48,9 @@ type ZboxWalletList struct {
 type ZboxWalletKeys []struct {
 	ZboxWallet
 }
+
+type DexState struct {
+	TxHash    string `form:"tx_hash" json:"tx_hash" binding:"-"`
+	Stage     string `form:"stage" json:"stage" binding:"required"`
+	Reference string `form:"reference" json:"reference" binding:"required"`
+}
