@@ -78,7 +78,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get empty user info should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -93,7 +93,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info Biography should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		success, response, err := zboxClient.PostUserInfoBiography(t, "bio", firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -105,7 +105,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info Avatar should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		avatarImagePath := escapedTestName(t) + "avatar.png"
@@ -119,7 +119,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info background image should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		backgroundImagePath := escapedTestName(t) + "background.png"
@@ -134,7 +134,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info username should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		username := cliutils.RandomAlphaNumericString(10)
@@ -148,7 +148,7 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get fully populated user info should work", func(t *test.SystemTest) {
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		username := cliutils.RandomAlphaNumericString(10)
