@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/base64"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"os"
 	"strings"
 	"testing"
@@ -75,8 +76,23 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 1, len(wallets.Data), "Expected 1 wallet only to be present")
 	})
 
+	t.RunSequentially("Get empty user info should work", func(t *test.SystemTest) {
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, userInfo)
+		require.Nil(t, userInfo.Username, "output not as expected", response.String())
+		require.Nil(t, userInfo.Biography, "output not as expected", response.String())
+		require.Nil(t, userInfo.Avatar, "output not as expected", response.String())
+		require.Nil(t, userInfo.CreatedAt, "output not as expected", response.String())
+		require.Nil(t, userInfo.BackgroundImage, "output not as expected", response.String())
+	})
+
 	t.RunSequentially("Create User Info Biography should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		success, response, err := zboxClient.PostUserInfoBiography(t, "bio", firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -88,13 +104,12 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info Avatar should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		thumbnailPath := escapedTestName(t) + "avatar.png"
-		generateImage(t, thumbnailPath)
-
-		success, response, err := zboxClient.PostUserInfoAvatar(t, thumbnailPath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		avatarImagePath := escapedTestName(t) + "avatar.png"
+		generateImage(t, avatarImagePath)
+		success, response, err := zboxClient.PostUserInfoAvatar(t, avatarImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -103,13 +118,13 @@ func Test0Box(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create User Info background image should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		thumbnailPath := escapedTestName(t) + "background.png"
-		generateImage(t, thumbnailPath)
+		backgroundImagePath := escapedTestName(t) + "background.png"
+		generateImage(t, backgroundImagePath)
 
-		success, response, err := zboxClient.PostUserInfoBackgroundImage(t, thumbnailPath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		success, response, err := zboxClient.PostUserInfoBackgroundImage(t, backgroundImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -117,14 +132,52 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, "background image saved", success.Success, "output not as expected", response.String())
 	})
 
-	//todo: are there no delete endpoints?
+	t.RunSequentially("Create User Info username should work", func(t *test.SystemTest) {
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-	//GET userinfo:
-	//no data
-	//only avatar
-	//only bg image
-	//only bio
-	//all elements
+		username := cliutils.RandomAlphaNumericString(10)
+
+		usernameResponse, response, err := zboxClient.PutUsername(t, username, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, username)
+		require.Equal(t, username, usernameResponse.Username, "output not as expected", response.String())
+	})
+
+	t.RunSequentially("Get fully populated user info should work", func(t *test.SystemTest) {
+		//teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber) // FIXME: there are no delete endpoints so we can't teardown
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		username := cliutils.RandomAlphaNumericString(10)
+		_, _, err := zboxClient.PutUsername(t, username, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+
+		bio := "bio"
+		_, _, err = zboxClient.PostUserInfoBiography(t, bio, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+
+		avatarImagePath := escapedTestName(t) + "avatar.png"
+		generateImage(t, avatarImagePath)
+		_, _, err = zboxClient.PostUserInfoAvatar(t, avatarImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+
+		thumbnailPath := escapedTestName(t) + "background.png"
+		generateImage(t, thumbnailPath)
+		_, _, err = zboxClient.PostUserInfoBackgroundImage(t, thumbnailPath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+
+		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, userInfo)
+		require.Equal(t, username, userInfo.Username, "output not as expected", response.String())
+		require.Equal(t, bio, userInfo.Biography, "output not as expected", response.String())
+		require.NotNil(t, userInfo.Avatar, "output not as expected", response.String())
+		require.NotNil(t, userInfo.CreatedAt, "output not as expected", response.String())
+		require.NotNil(t, userInfo.BackgroundImage, "output not as expected", response.String())
+	})
 
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
