@@ -15,7 +15,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
-	t.RunSequentially("Create a wallet with valid phone number should work-1", func(t *test.SystemTest) {
+	t.RunSequentially("Create an allocation with valid phone number should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -28,32 +28,21 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
-		fmt.Printf("%v\n", zboxWallet)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-	})
-
-	t.RunSequentially("Create a allocation with valid wallet should work", func(t *test.SystemTest) {
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		//description := "allocation created as part of " + t.Name()
+		
 		allocationName := "allocation_name"
-		allocationWallet, response, err := zboxClient.CreateAllocation(t,
+		allocationObj, response, err := zboxClient.CreateAllocation(t,
 			allocationName,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
-		fmt.Printf("%v\n----abc\n", allocationWallet)
-		fmt.Printf("%v\n----abc\n", response)
-		fmt.Printf("%v\n----abc\n", err)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, allocationWallet)
-		//require.Equal(t, allocationName, zboxWallet.Name, "Wallet name does not match expected")
-
+		require.NotNil(t, allocationObj 	)
 	})
 
 	t.RunSequentially("List allocation should work with zero allocations", func(t *test.SystemTest) {
