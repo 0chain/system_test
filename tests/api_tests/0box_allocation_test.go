@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -32,7 +31,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		
+
 		allocationName := "allocation_name"
 		allocationObj, response, err := zboxClient.CreateAllocation(t,
 			allocationName,
@@ -42,7 +41,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, allocationObj 	)
+		require.NotNil(t, allocationObj)
 	})
 
 	t.RunSequentially("List allocation should work with zero allocations", func(t *test.SystemTest) {
