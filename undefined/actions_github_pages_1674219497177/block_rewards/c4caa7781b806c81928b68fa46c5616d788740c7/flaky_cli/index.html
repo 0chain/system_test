@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [block_rewards/c4caa778] ran against [dev-3.devnet-0chain.net] at [2023-01-20_12.36.09]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [block_rewards/c4caa778] ran against [dev-3.devnet-0chain.net] at [2023-01-20_12.36.09]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>11</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>6</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>3</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>2</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">January 20, 2023 13:58:13</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  skipped" id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  skipped" id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup  skipped" id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___broken_scenarios_test.go:31: \n","--- SKIP: Test___FlakyBrokenScenarios (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":28,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileCopy (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":424,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:427: Test case [File copy - Users should not be charged for moving a file ] scheduled at [01-20-2023 13:53:14] \n","","","    system_test_framework.go:85: Test case [File copy - Users should not be charged for moving a file ] start at [01-20-2023 13:53:14] \n","    flaky___flaky_test.go:428: Test calculations are flaky in  CLI\n","    flaky___flaky_test.go:427: Test case [File copy - Users should not be charged for moving a file ] exit at [01-20-2023 13:53:14]\n","    --- SKIP: Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_ (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileDelete (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":257,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":326.71,"Output":["","    flaky___flaky_test.go:260: Test case [Delete file concurrently in existing directory, should work] scheduled at [01-20-2023 13:47:47] \n","","","    system_test_framework.go:85: Test case [Delete file concurrently in existing directory, should work] start at [01-20-2023 13:47:47] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 256    0.00% 256 / 256  100.00% 256 / 256  100.00% 4m0s -\u003cNEWLINE\u003e- Error in file operation: consensus_not_met: Upload commit failed. Required consensus atleast 3, got 1 -\u003cNEWLINE\u003e- Upload failed. consensus_not_met: Upload commit failed. Required consensus atleast 3, got 1]\n","    utils.go:63: \u001b[32mCommand passed on retry [2/3]. Output: [0 / 256    0.00% 256 / 256  100.00% 0s -\u003cNEWLINE\u003e- Status completed callback. Type = application/octet-stream. Name = ksMrayYSOt_test.txt]\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:632: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --allocation 55a07ef5a961c8d63954f9f3ec91149f5c5ff66846880c9af11056244d7e867a --remotepath /JXWDL-fHKl_test.txt --json --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:52:58.841855 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:52:58.841900 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:52:58.934698 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:52:59.014880 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\",\"https://dev-3.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:52:59.099322 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:52:59.106854 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:52:59.127576 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:52:59.134510 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:632: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --json  --allocation 55a07ef5a961c8d63954f9f3ec91149f5c5ff66846880c9af11056244d7e867a --remotepath /ksMrayYSOt_test.txt --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:53:14.113142 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:53:14.113182 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:53:14.207109 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:53:14.287179 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:53:14.372567 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:53:14.372636 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:53:14.401011 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:53:14.401963 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    flaky___flaky_test.go:260: Test case [Delete file concurrently in existing directory, should work] exit at [01-20-2023 13:53:14]\n","--- PASS: Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work (326.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":320,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":298.82,"Output":["","    flaky___flaky_test.go:325: Test case [Rename and delete file concurrently, should work] scheduled at [01-20-2023 13:53:14] \n","","","    system_test_framework.go:85: Test case [Rename and delete file concurrently, should work] start at [01-20-2023 13:53:14] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [consensus_not_met: Required consensus 3 got 2. Error: commit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}\tcommit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 0]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [consensus_not_met: Required consensus 3 got 1. Error: commit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}\tcommit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}\tcommit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 2]\n","    utils.go:63: \u001b[32mCommand passed on retry [2/3]. Output: [/9tEPWVtlUi_test.txt deleted]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [rename failed: lock_consensus_not_met: Required consensus 3 got 2]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 2]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [consensus_not_met: Required consensus 3 got 2. Error: commit_error: {\"error\":\"write_marker_verification_failed: Verification of write marker failed: invalid_write_marker: Invalid write marker. Prev Allocation root does not match the allocation root on record\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox rename --allocation e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1 --remotepath /ohc51hXsns_test.txt --destname y-FyhwIdmY_test.txt --silent --wallet Test___FlakyFileRename-Rename_and_delete_file_concurrently,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [consensus_not_met: Rename failed. Required consensus 3 got 2]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox rename --allocation e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1 --remotepath /MwN8onBsLL_test.txt --destname QNnou5h6xJ_test.txt --silent --wallet Test___FlakyFileRename-Rename_and_delete_file_concurrently,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [rename failed: lock_consensus_not_met: Required consensus 3 got 2]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:63: \u001b[32mCommand passed on retry [3/3]. Output: [/Yd7l3TGLeO_test.txt deleted]\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:58:12.758604 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:12.758650 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:58:12.854852 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:58:12.935048 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.023084 common.go:37: Object tree response : 404\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.023116 renameworker.go:161: ref not found: /ohc51hXsns_test.txt\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.025650 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"2bac90b8f63f3fdcbbb79cf9e288d2ab2cfe0744c06da62b6777fa13b192f3d5\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"chunk_size\":65536,\"commit_meta_txns\":null,\"content_hash\":\"f31469739d0e603e9bc89f3c5aa510dd5fa77b45f8f2d5550500db7c1e706dd1\",\"created_at\":1674219209,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"8c55da666d2a841c24c30863284562c252e75f58bd917d62dae9d5f2b718282e\",\"lookup_hash\":\"8c84489e0ec0ddc31789c0c7e50133887f454542e25c1679e86366c3529be8c6\",\"merkle_root\":\"1fdb0e0f26b3d970882d52f5eb765d079fc2eb15d6d0636d44e2736929a0beeb\",\"mimetype\":\"application/octet-stream\",\"name\":\"ohc51hXsns_test.txt\",\"num_of_blocks\":1,\"path\":\"/ohc51hXsns_test.txt\",\"path_hash\":\"8c84489e0ec0ddc31789c0c7e50133887f454542e25c1679e86366c3529be8c6\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,","\"type\":\"f\",\"updated_at\":1674219209},\"Ref\":{\"ID\":414,\"Type\":\"f\",\"AllocationID\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"LookupHash\":\"8c84489e0ec0ddc31789c0c7e50133887f454542e25c1679e86366c3529be8c6\",\"Name\":\"ohc51hXsns_test.txt\",\"Path\":\"/ohc51hXsns_test.txt\",\"Hash\":\"8c55da666d2a841c24c30863284562c252e75f58bd917d62dae9d5f2b718282e\",\"NumBlocks\":1,\"PathHash\":\"8c84489e0ec0ddc31789c0c7e50133887f454542e25c1679e86366c3529be8c6\",\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ContentHash\":\"f31469739d0e603e9bc89f3c5aa510dd5fa77b45f8f2d5550500db7c1e706dd1\",\"Size\":128,\"MerkleRoot\":\"1fdb0e0f26b3d970882d52f5eb765d079fc2eb15d6d0636d44e2736929a0beeb\",\"ActualFileSize\":256,\"ActualFileHash\":\"2bac90b8f63f3fdcbbb79cf9e288d2ab2cfe0744c06da62b6777fa13b192f3d5\",\"MimeType\":\"application/octet-stream\",\"WriteMarker\":\"c1d7b0e5bd45e6190ccb67923bb48482218a9f52bd3556bd8f3b84b1596cdce9\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CommitMeta","Txns\":null,\"CreatedAt\":1674219209,\"UpdatedAt\":1674219209,\"DeletedAt\":null,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marker\":{\"allocation_root\":\"a408084d5cfe56ab599914050139d05aedb95f8bbf115f7c1c27fb4e90f714c1\",\"prev_allocation_root\":\"32fda6a1c9e7649cfe51da981c640428f66e6996cbec3c2a864ac27f12db1767\",\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"size\":-128,\"blobber_id\":\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"timestamp\":1674219472,\"client_id\":\"2bcc4a6fd8f024f902ff3f4522cca6741a290240607814a71b30df45fabd4797\",\"signature\":\"58999c2380a570e7d6bd96373690ff3502a6d33fb4ec21e38661c029ed8b7008\",\"lookup_hash\":\"\",\"name\":\"\",\"content_hash\":\"\"}}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.054397 common.go:37: Object tree response : 404\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.054434 renameworker.go:161: ref not found: /ohc51hXsns_test.txt\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.057439 common.go:37: Object tree response : 404\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.057471 renameworker.go:161: ref not found: /ohc51hXsns_test.txt\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.083825 renameworker.go:110: https://dev-3.devnet-0chain.net/blobber05 /ohc51hXsns_test.txt renamed.\n","    utils.go:77: \u001b[31mconsensus_not_met: Rename failed. Required consensus 3 got 2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:58:12.765853 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:12.765885 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:58:12.858737 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:58:12.938897 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.066020 common.go:37: Object tree response : 404\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.066045 renameworker.go:161: ref not found: /MwN8onBsLL_test.txt\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.066824 common.go:37: Object tree response : 404\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:58:13.066853 renameworker.go:161: ref not found: /MwN8onBsLL_test.txt\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.096937 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"203e2a211e07bbb574e3b715920f8b423afa8b112ec62cf49122c9265c4404a5\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"chunk_size\":65536,\"commit_meta_txns\":null,\"content_hash\":\"40aad468ab33936fecb40f11913067d039d6013206d94e23ed8409529d520019\",\"created_at\":1674219208,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"328093504b5e43e731e4b5c6fba658868626d6d05801482ce93007c860cdf323\",\"lookup_hash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"merkle_root\":\"5435e3954dd6ec2fa1f90c8852578c638ab8bdecadaa00a271ce33e2a3b787d4\",\"mimetype\":\"application/octet-stream\",\"name\":\"MwN8onBsLL_test.txt\",\"num_of_blocks\":1,\"path\":\"/MwN8onBsLL_test.txt\",\"path_hash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,","\"type\":\"f\",\"updated_at\":1674219208},\"Ref\":{\"ID\":398,\"Type\":\"f\",\"AllocationID\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"LookupHash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"Name\":\"MwN8onBsLL_test.txt\",\"Path\":\"/MwN8onBsLL_test.txt\",\"Hash\":\"328093504b5e43e731e4b5c6fba658868626d6d05801482ce93007c860cdf323\",\"NumBlocks\":1,\"PathHash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ContentHash\":\"40aad468ab33936fecb40f11913067d039d6013206d94e23ed8409529d520019\",\"Size\":128,\"MerkleRoot\":\"5435e3954dd6ec2fa1f90c8852578c638ab8bdecadaa00a271ce33e2a3b787d4\",\"ActualFileSize\":256,\"ActualFileHash\":\"203e2a211e07bbb574e3b715920f8b423afa8b112ec62cf49122c9265c4404a5\",\"MimeType\":\"application/octet-stream\",\"WriteMarker\":\"e8c7bcf2638cf2ed9f93bf9bc0bd2b2531c81cda2bd6062c7e622ae3a5944e61\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CommitMeta","Txns\":null,\"CreatedAt\":1674219208,\"UpdatedAt\":1674219208,\"DeletedAt\":null,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marker\":{\"allocation_root\":\"caeafe54a508fed462f19c366d2e8563f1f52d664708f4f6a15911e94b42391b\",\"prev_allocation_root\":\"ad0938cde4d20b6059097c2d32c8d8d22b45e05d0e8fc85521ae7e2a3a3a0642\",\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"size\":-128,\"blobber_id\":\"1bd4b1d96bffd9b19309f5db49861e8835bfcbf6a596c72f2a27c46070cd65f9\",\"timestamp\":1674219472,\"client_id\":\"2bcc4a6fd8f024f902ff3f4522cca6741a290240607814a71b30df45fabd4797\",\"signature\":\"37aae2a8965d00a5e65e483397f17076b5c8fc53d9e9f5d8aa4604e22346bb8c\",\"lookup_hash\":\"\",\"name\":\"\",\"content_hash\":\"\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.103840 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"203e2a211e07bbb574e3b715920f8b423afa8b112ec62cf49122c9265c4404a5\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"chunk_size\":65536,\"commit_meta_txns\":null,\"content_hash\":\"4be37ce51f792c05fa9dae7a5721d9519156dbf2ea389f9fd069c09deaa83a19\",\"created_at\":1674219208,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"hash\":\"0e1ed1c8fdc9c456a2a8a823a67e6c44796ba40cfe01095f74f4356bfa5b8def\",\"lookup_hash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"merkle_root\":\"b5abdd14977cfa16b5db1b25adcd5146b5bdb4c0eb24ca914af644849a4e1b8b\",\"mimetype\":\"application/octet-stream\",\"name\":\"MwN8onBsLL_test.txt\",\"num_of_blocks\":1,\"path\":\"/MwN8onBsLL_test.txt\",\"path_hash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,","\"type\":\"f\",\"updated_at\":1674219208},\"Ref\":{\"ID\":412,\"Type\":\"f\",\"AllocationID\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"LookupHash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"Name\":\"MwN8onBsLL_test.txt\",\"Path\":\"/MwN8onBsLL_test.txt\",\"Hash\":\"0e1ed1c8fdc9c456a2a8a823a67e6c44796ba40cfe01095f74f4356bfa5b8def\",\"NumBlocks\":1,\"PathHash\":\"3eb4402d9791ce727de07789dd02c9a0ea385d0b2993cc7c1f400f49b080e051\",\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ContentHash\":\"4be37ce51f792c05fa9dae7a5721d9519156dbf2ea389f9fd069c09deaa83a19\",\"Size\":128,\"MerkleRoot\":\"b5abdd14977cfa16b5db1b25adcd5146b5bdb4c0eb24ca914af644849a4e1b8b\",\"ActualFileSize\":256,\"ActualFileHash\":\"203e2a211e07bbb574e3b715920f8b423afa8b112ec62cf49122c9265c4404a5\",\"MimeType\":\"application/octet-stream\",\"WriteMarker\":\"9075d4e42aa799162d7ddbab183d39254838dad30417e21a3b21e53b82e45825\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CommitMeta","Txns\":null,\"CreatedAt\":1674219208,\"UpdatedAt\":1674219208,\"DeletedAt\":null,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marker\":{\"allocation_root\":\"a408084d5cfe56ab599914050139d05aedb95f8bbf115f7c1c27fb4e90f714c1\",\"prev_allocation_root\":\"32fda6a1c9e7649cfe51da981c640428f66e6996cbec3c2a864ac27f12db1767\",\"allocation_id\":\"e40e45ad59cb4ddbe4e4c732fda0bb3495c40ed284d092b6e7f50e9d2bf2fae1\",\"size\":-128,\"blobber_id\":\"8534eabcc384a0e822573ee657e665ce0c3d599b4e45f7331af080c8e6b49b09\",\"timestamp\":1674219472,\"client_id\":\"2bcc4a6fd8f024f902ff3f4522cca6741a290240607814a71b30df45fabd4797\",\"signature\":\"58999c2380a570e7d6bd96373690ff3502a6d33fb4ec21e38661c029ed8b7008\",\"lookup_hash\":\"\",\"name\":\"\",\"content_hash\":\"\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.131819 renameworker.go:110: https://dev-3.devnet-0chain.net/blobber01 /MwN8onBsLL_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.133453 renameworker.go:110: https://dev-3.devnet-0chain.net/blobber05 /MwN8onBsLL_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.160878 writemarker_mutex.go:265: https://dev-3.devnet-0chain.net/blobber05XEULAr7ikwhbdZQguh2huh locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.161557 writemarker_mutex.go:265: https://dev-3.devnet-0chain.net/blobber01XEULAr7ikwhbdZQguh2huh locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.189776 writemarker_mutex.go:121: https://dev-3.devnet-0chain.net/blobber05XEULAr7ikwhbdZQguh2huh unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.190730 writemarker_mutex.go:121: https://dev-3.devnet-0chain.net/blobber01XEULAr7ikwhbdZQguh2huh unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.218153 writemarker_mutex.go:121: https://dev-3.devnet-0chain.net/blobber05XEULAr7ikwhbdZQguh2huh unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:58:13.218406 writemarker_mutex.go:121: https://dev-3.devnet-0chain.net/blobber01XEULAr7ikwhbdZQguh2huh unlocked\n","    utils.go:77: \u001b[31mrename failed: lock_consensus_not_met: Required consensus 3 got 2\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:396\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00009a1b0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work\n","        \tMessages:   \trename failed: lock_consensus_not_met: Required consensus 3 got 2\n","    flaky___flaky_test.go:325: Test case [Rename and delete file concurrently, should work] exit at [01-20-2023 13:58:13]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:25: \n","--- SKIP: Test___FlakyScenariosCommonUserFunctions (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyTransferAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":90,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":268.53,"Output":["","    flaky___flaky_test.go:93: Test case [transfer allocation accounting test] scheduled at [01-20-2023 13:43:19] \n","","","","    system_test_framework.go:85: Test case [transfer allocation accounting test] start at [01-20-2023 13:43:19] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:704: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:721: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation baf0b1f302498d3e33378fd66cb4f2b844d28666a18d903e5dbcd7136196c041 --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:43:58.644495 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:43:58.644536 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:43:58.739054 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:58.824497 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:59.077643 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:59.077776 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:59.107032 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:59.107888 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:43:59.107902 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:43:59.107912 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation baf0b1f302498d3e33378fd66cb4f2b844d28666a18d903e5dbcd7136196c041 --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:19.322419 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:44:19.322456 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:19.417336 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.496705 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.611611 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.611944 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.639017 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.640941 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:44:19.640960 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:19.640969 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation baf0b1f302498d3e33378fd66cb4f2b844d28666a18d903e5dbcd7136196c041 --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:39.628094 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:44:39.628131 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:39.721694 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.800331 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.885233 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.885400 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.912537 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.912910 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:44:39.912937 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:39.912950 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:138: Waiting 5s...\n","","    utils.go:138: Waiting 2m0s...\n","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    flaky___flaky_test.go:93: Test case [transfer allocation accounting test] exit at [01-20-2023 13:47:47]\n","--- PASS: Test___FlakyTransferAllocation/transfer_allocation_accounting_test (268.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_and_upload_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":142.49,"Output":["","    flaky___flaky_test.go:179: Test case [transfer allocation and upload file] scheduled at [01-20-2023 13:43:19] \n","","","","    system_test_framework.go:85: Test case [transfer allocation and upload file] start at [01-20-2023 13:43:19] \n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","","    zboxcli_create_allocation_test.go:258: Creating new allocation...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zboxcli_add_remove_curator_test.go:363: Adding curator...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:585: Executing faucet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zboxcli_transfer_allocation_test.go:704: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:721: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation dd38b4e92301714693bcb61fc2b95fe3457c50810d8084a7539cf3e5d6977734 --wallet Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:03.880267 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:44:03.880304 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:03.974126 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.055683 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.152750 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.154032 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.179954 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.182950 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:44:04.182978 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:04.182989 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation dd38b4e92301714693bcb61fc2b95fe3457c50810d8084a7539cf3e5d6977734 --wallet Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:24.152519 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:44:24.152560 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:24.246502 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.327887 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.428724 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.429433 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.455698 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.456513 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:44:24.456539 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:24.456549 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation dd38b4e92301714693bcb61fc2b95fe3457c50810d8084a7539cf3e5d6977734 --wallet Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:44.480921 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:44:44.480958 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:44:44.574526 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.654694 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.750884 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.755793 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.784934 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.786943 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:44:44.786973 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:44:44.786989 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation dd38b4e92301714693bcb61fc2b95fe3457c50810d8084a7539cf3e5d6977734 --wallet Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:45:04.792941 wallet_base.go:268: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/01/20 13:45:04.792984 sdk.go:73: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/01/20 13:45:04.887030 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:04.966635 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:05.054091 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:05.057979 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:05.081474 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:05.086341 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/01/20 13:45:05.086371 sync.go:82: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/01/20 13:45:05.086381 sync.go:89: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:330: Listing all...\n","    zboxcli_wp_lock_unlock_test.go:367: Locking write tokens...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","","    flaky___flaky_test.go:179: Test case [transfer allocation and upload file] exit at [01-20-2023 13:45:41]\n","--- PASS: Test___FlakyTransferAllocation/transfer_allocation_and_upload_file (142.49s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
