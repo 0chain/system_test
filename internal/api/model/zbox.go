@@ -28,14 +28,14 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 }
 
 type Allocation struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
-	WalletId     string   `json:"wallet_id"`
-	PhoneNumber  string   `json:"phone_number"`
-	Name         string   `json:"name"`
-	Description  string   `json:"description"`
-	AllocationId string   `json:"mnemonic"`
-	AppType      []string `json:"app_type"`
-	Allocation   string   `json:"allocation"`
-	LastUpdate   string   `json:"last_update"`
+	Id             string   `json:"id"`
+	WalletId       string   `json:"wallet_id"`
+	Name           string   `json:"name"`
+	Description    string   `json:"random_description"`
+	AllocationType string   `json:"allocation_type"`
+	AppType        []string `json:"app_type"`
+	NftState       string   `json:"nft_state"`
+	LastUpdate     string   `json:"last_update"`
 }
 
 type ZboxWallet struct {

@@ -182,7 +182,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 }
 
 func (c *ZboxClient) CreateAllocation(t *test.SystemTest, allocationName, idToken, csrfToken, phoneNumber string) (*model.Allocation, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
+	t.Logf("Posting Allocation using 0box...")
 	var allocWallet *model.Allocation
 
 	urlBuilder := NewURLBuilder()
@@ -192,7 +192,7 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, allocationName, idToke
 
 	formData := map[string]string{
 		"name": allocationName,
-		"id":   "123",
+		"id":   "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -209,7 +209,7 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, allocationName, idToke
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
-
+	fmt.Printf("%+v\n", allocWallet)
 	return allocWallet, resp, err
 }
 
