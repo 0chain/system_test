@@ -30,10 +30,14 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Update Name Should Work", func(t *test.SystemTest) {
-		_ = setupWallet(t, configPath)
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		options := map[string]interface{}{"lock": "0.5"}
-		output, err := createNewAllocation(t, configPath, createParams(options))
+		output, err = executeFaucetWithTokens(t, configPath, 2)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		options := map[string]interface{}{"lock": "1.5"}
+		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
