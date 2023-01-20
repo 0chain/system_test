@@ -49,7 +49,7 @@ type ZboxWalletKeys []struct {
 	ZboxWallet
 }
 
-type NftStateInfo struct {
+type NftState struct {
 	Stage        string `form:"stage" json:"stage"`
 	Reference    string `form:"reference" json:"reference"`
 	CollectionId string `form:"collection_id" json:"collection_id"`

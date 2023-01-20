@@ -209,9 +209,9 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 	return *zboxWallets, resp, err
 }
 
-func (c *ZboxClient) PostNftStateInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.NftStateInfo, *resty.Response, error) {
+func (c *ZboxClient) PostNftState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.NftState, *resty.Response, error) {
 	t.Log("Posting NFT state info using 0box...")
-	var NftStateInfo *model.NftStateInfo
+	var NftState *model.NftState
 
 	urBuilder := NewURLBuilder()
 	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -229,7 +229,7 @@ func (c *ZboxClient) PostNftStateInfo(t *test.SystemTest, idToken, csrfToken, ph
 	}
 
 	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
-		Dst:      &NftStateInfo,
+		Dst:      &NftState,
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
@@ -244,5 +244,5 @@ func (c *ZboxClient) PostNftStateInfo(t *test.SystemTest, idToken, csrfToken, ph
 		RequiredStatusCode: 201,
 	}, HttpPUTMethod)
 
-	return NftStateInfo, resp, err
+	return NftState, resp, err
 }
