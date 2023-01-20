@@ -49,6 +49,13 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
+		// todo piers remove
+		tokens := []float64{1, 0.5}
+		_ = createStakePools(t, minerIds, tokens)
+		//t.Cleanup(func() {
+		//	cleanupFunc()
+		//})
+
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
@@ -230,6 +237,34 @@ func confirmPoolPayments(
 				"total reward %d stake pools %v", blockReward, pools)
 	}
 }
+func createStakePools(
+	t *test.SystemTest, providerIds []string, tokens []float64,
+) func() {
+	require.True(t, len(tokens) > 0, "create greater than zero pools")
+	for _, id := range providerIds {
+		for delegate := 0; delegate < len(tokens); delegate++ {
+			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
+			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
+				"miner_id": id,
+				"tokens":   tokens[delegate],
+			}), wallet, true)
+			require.NoError(t, err, "lock tokens in %s's stake pool", id)
+			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
+		}
+	}
+	return func() {
+		for _, id := range providerIds {
+			for delegate := 0; delegate < len(tokens); delegate++ {
+				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
+					"id": id,
+				}), wallet, true)
+				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
+			}
+		}
+	}
+}
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	output, err := registerWallet(t, configPath)
@@ -406,7 +441,7 @@ func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []str
 
 func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.NodeList {
 	t.Logf("getting miner or sharder nodes...")
-	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/nodeStat"
+	url := sharderBaseURL + "/test/screst/nodeStat"
 	params := map[string]string{
 		"include_delegates": "true",
 	}
