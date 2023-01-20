@@ -84,7 +84,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 90*time.Second, func(t *test.SystemTest) {
-		//output, err := registerWallet(t, configPath)
+		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 6.0)
@@ -144,7 +144,6 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Len(t, poolsInfo2.Pools[miner.ID], 1)
 
 		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
-
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
@@ -398,7 +397,6 @@ func TestMinerStake(testSetup *testing.T) {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 	})
-
 }
 
 func pollForPoolInfo(t *test.SystemTest, minerID string) (climodel.DelegatePool, error) {
