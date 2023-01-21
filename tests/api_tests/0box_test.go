@@ -96,7 +96,7 @@ func Test0Box(testSetup *testing.T) {
 		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		success, response, err := zboxClient.PostUserInfoBiography(t, "bio", firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		success, response, err := zboxClient.PostUserInfoBiography(t, "bio from "+escapedTestName(t), firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -155,7 +155,7 @@ func Test0Box(testSetup *testing.T) {
 		_, _, err := zboxClient.PutUsername(t, username, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 
-		bio := "bio"
+		bio := "bio from " + escapedTestName(t)
 		_, _, err = zboxClient.PostUserInfoBiography(t, bio, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 
