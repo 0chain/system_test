@@ -14,24 +14,8 @@ func TestDexState(testSetup *testing.T) {
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
-	t.RunSequentially("Create a wallet with valid phone number should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		dexState, response, err := zboxClient.PostDexState(t,
 			firebaseToken.IdToken,
