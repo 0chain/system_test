@@ -27,7 +27,7 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
-type Allocationobj struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
+type Allocationobj struct {
 	Id             string `json:"id"`
 	WalletId       string `json:"wallet_id"`
 	Name           string `json:"name"`

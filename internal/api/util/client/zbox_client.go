@@ -120,7 +120,7 @@ func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNu
 }
 
 func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber string) ([]model.Allocationobj, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
+	t.Logf("Listing all allocations for [%v] using 0box...", phoneNumber)
 	var allocWalletList []model.Allocationobj
 
 	urlBuilder := NewURLBuilder()

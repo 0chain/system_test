@@ -74,7 +74,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, allocationList)
-		require.Equal(t, 1, len(allocationList), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Id)
+		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
 	})
 }
