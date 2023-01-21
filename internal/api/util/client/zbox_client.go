@@ -127,12 +127,12 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, idToken, csrfToken, phoneN
 	urBuilder.SetPath("/v2/dex/state")
 
 	formData := map[string]string{
-		"stage": "burn",
+		"stage":     "burn",
 		"reference": "{\"test_1\":\"test2\", \"test3\":\"tes4\"}",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
-		Dst: &dexState,
+		Dst:      &dexState,
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
