@@ -77,5 +77,4 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, allocationList)
 		require.Equal(t, 1, len(allocationList), "Response status code does not match expected. Output: [%v]", response.String())
 	})
-
 }

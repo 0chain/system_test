@@ -27,7 +27,7 @@ func Test0Box(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-		) //github.com/0chain/system_test.git
+		) // github.com/0chain/system_test.git
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
