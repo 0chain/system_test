@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/stretchr/testify/require"
 )
@@ -310,4 +311,20 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
+}
+
+func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
+	t.Logf("Deleting file...")
+	cmd := fmt.Sprintf(
+		"./zbox delete %s --silent --wallet %s "+
+			"--configDir ./config --config %s",
+		params,
+		walletName+"_wallet.json",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
