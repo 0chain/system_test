@@ -39,7 +39,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Len(t, allocationList[0].Allocs, 0)
 	})
 
-	t.RunSequentially("Create an allocation with valid phone number should work", func(t *test.SystemTest) {
+	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		time.Sleep(1 * time.Second)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -76,6 +76,81 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Allocs[0].Id)
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		time.Sleep(1 * time.Second)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		allocationName := "allocation created as part of " + t.Name()
+		requiredMessage := model.MessageContainer(model.MessageContainer{Message: "creating allocation succesful"})
+		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
+			zboxClient.DefaultAllocationId,
+			allocationName,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, &requiredMessage, allocationObjCreatedResponse)
+
+	})
+
+	t.RunSequentially("Create an allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		time.Sleep(1 * time.Second)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		allocationName := "allocation created as part of " + t.Name()
+		//requiredMessage := model.MessageContainer(model.MessageContainer{Message: "400: error updating allocation"})
+		_, response, err = zboxClient.PostAllocation(t,
+			zboxClient.DefaultAllocationId,
+			allocationName,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		_, response, err = zboxClient.PostAllocation(t,
+			zboxClient.DefaultAllocationId,
+			allocationName,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		//require.Equal(t, &requiredMessage, allocationObjCreatedResponse)
+
 	})
 
 	t.RunSequentially("Get an allocation with allocation present should work", func(t *test.SystemTest) {
