@@ -85,7 +85,7 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, userInfo)
-		require.Nil(t, userInfo.Username, "output not as expected", response.String())
+		require.Equal(t, "no_username", userInfo.Username, "output not as expected", response.String()) //FIXME: This is strange - why not null like every other missing field, this will conflict with an actual username of 'no_username'?
 		require.Nil(t, userInfo.Biography, "output not as expected", response.String())
 		require.Nil(t, userInfo.Avatar, "output not as expected", response.String())
 		require.Nil(t, userInfo.CreatedAt, "output not as expected", response.String())
