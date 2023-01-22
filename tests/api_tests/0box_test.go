@@ -167,7 +167,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
@@ -205,7 +205,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		_, _, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
 		require.Error(t, err)
@@ -240,7 +240,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
 	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
@@ -310,7 +310,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
 		require.NoError(t, err)
