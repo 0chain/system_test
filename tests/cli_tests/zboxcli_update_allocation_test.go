@@ -250,7 +250,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't get existing allocation: value not present", output[3])
+		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[3])
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
