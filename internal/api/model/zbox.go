@@ -27,7 +27,7 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
-type Allocationobj struct {
+type ZboxAllocation struct {
 	Id             string   `json:"id"`
 	WalletId       int      `json:"wallet_id"`
 	Name           string   `json:"name"`
@@ -69,8 +69,8 @@ type ZboxWalletList struct {
 }
 
 type ZboxAllocationList struct {
-	WalletName string          `json:"wallet_name"`
-	Allocs     []Allocationobj `json:"allocs"`
+	WalletName string           `json:"wallet_name"`
+	Allocs     []ZboxAllocation `json:"allocs"`
 }
 
 type ZboxWalletKeys []struct {

@@ -121,9 +121,9 @@ func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNu
 	return zboxWallets, resp, err
 }
 
-func (c *ZboxClient) GetAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber string, allocationId string, allocationName string) (model.Allocationobj, *resty.Response, error) {
+func (c *ZboxClient) GetAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber, allocationId, allocationName string) (model.ZboxAllocation, *resty.Response, error) {
 	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocationId)
-	var allocation model.Allocationobj
+	var allocation model.ZboxAllocation
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
