@@ -214,7 +214,7 @@ func getAllocation(t *test.SystemTest, allocationID string) (allocation climodel
 func getAllocationWithRetry(t *test.SystemTest, cliConfigFilename, allocationID string, retry int) ([]string, error) {
 	t.Logf("Get Allocation...")
 	output, err := cliutils.RunCommand(t, fmt.Sprintf(
-		"./zbox get --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
+		"./zbox getallocation --allocation %s --json --silent --wallet %s --configDir ./config --config %s",
 		allocationID,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename), retry, time.Second*5)
