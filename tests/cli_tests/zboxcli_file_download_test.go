@@ -785,7 +785,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
+	t.Run("Download File With Only endblock Should Work", func(t *test.SystemTest) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -810,10 +810,10 @@ func TestDownload(testSetup *testing.T) {
 			"endblock":   endBlock,
 		}), false)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "Status completed callback.")
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
@@ -872,7 +872,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should work", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -899,10 +899,11 @@ func TestDownload(testSetup *testing.T) {
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
-		require.NotNil(t, err)
-		require.Len(t, output, 3)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "Status completed callback.")
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should work", func(t *test.SystemTest) {
@@ -1000,7 +1001,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "start block or end block or both cannot be negative.")
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
@@ -1033,7 +1034,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "start block should be less than end block")
+		require.Contains(t, aggregatedOutput, "start block or end block or both cannot be negative.")
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
