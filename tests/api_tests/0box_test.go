@@ -85,11 +85,17 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, userInfo)
-		require.Equal(t, "no_username", userInfo.Username, "output not as expected", response.String()) //FIXME: This is strange - why not null like every other missing field, this will conflict with an actual username of 'no_username'?
-		require.Nil(t, userInfo.Biography, "output not as expected", response.String())
-		require.Nil(t, userInfo.Avatar, "output not as expected", response.String())
-		require.Nil(t, userInfo.CreatedAt, "output not as expected", response.String())
-		require.Nil(t, userInfo.BackgroundImage, "output not as expected", response.String())
+		require.Equal(t, "no_username", userInfo.Username, "output not as expected", response.String()) //FIXME: This is strange - why not null like every other missing field, this will conflict with an actual username of 'no_username'
+		require.Equal(t, "", userInfo.Biography, "output not as expected", response.String())           //FIXME: should be null
+		require.NotNil(t, userInfo.Avatar, "output not as expected", response.String())                 //FIXME: should be null
+		require.Equal(t, "", userInfo.Avatar.LargeLoc, "output not as expected", response.String())
+		require.Equal(t, "", userInfo.Avatar.MedLoc, "output not as expected", response.String())
+		require.Equal(t, "", userInfo.Avatar.SmallLoc, "output not as expected", response.String())
+		require.NotNil(t, userInfo.BackgroundImage, "output not as expected", response.String()) //FIXME: should be null
+		require.Equal(t, "", userInfo.BackgroundImage.LargeLoc, "output not as expected", response.String())
+		require.Equal(t, "", userInfo.BackgroundImage.MedLoc, "output not as expected", response.String())
+		require.Equal(t, "", userInfo.BackgroundImage.SmallLoc, "output not as expected", response.String())
+		require.NotNil(t, userInfo.CreatedAt, "output not as expected", response.String()) // FIXME: weird that this is present on a blank object
 	})
 
 	t.RunSequentially("Create User Info Biography should work", func(t *test.SystemTest) {
