@@ -20,7 +20,7 @@ const (
 type ChainHistory struct {
 	from, to        int64
 	blocks          []model.EventDBBlock
-	delegateRewards []model.RewardDelegate
+	DelegateRewards []model.RewardDelegate
 	providerRewards []model.RewardProvider
 	roundHistories  map[int64]RoundHistory
 }
@@ -114,7 +114,7 @@ func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl s
 		"start": strconv.FormatInt(ch.from, 10),
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.delegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to+1)
+	ch.DelegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl string) {
@@ -156,7 +156,7 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 
 	currentRound = 0
 	currentHistory = RoundHistory{}
-	for _, dr := range ch.delegateRewards {
+	for _, dr := range ch.DelegateRewards {
 		require.GreaterOrEqual(t, dr.BlockNumber, currentRound, "delegate rewards out of order")
 		if currentRound < dr.BlockNumber {
 			if currentRound > 0 {
