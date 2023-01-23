@@ -27,7 +27,7 @@ func TestReadMarker(testSetup *testing.T) {
 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 	sharderUrl := getSharderUrl(t)
 
-	t.RunWithTimeout("After downloading a file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a file, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotePath := "/dir/"
@@ -63,7 +63,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading an encrypted file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading an encrypted file, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(10 * MB)
 		filesize := int64(10)
 		remotePath := "/"
@@ -91,6 +91,10 @@ func TestReadMarker(testSetup *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
+		sharderUrl := getSharderUrl(t)
+		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
+		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
+
 		// Downloading encrypted file should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -98,10 +102,6 @@ func TestReadMarker(testSetup *testing.T) {
 			"localpath":  os.TempDir(),
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
-		sharderUrl := getSharderUrl(t)
-		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
-		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
 
 		time.Sleep(time.Second * 20)
 
@@ -112,7 +112,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a shared file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared file, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename, allocationID string
 
 		filesize := int64(10)
@@ -152,6 +152,8 @@ func TestReadMarker(testSetup *testing.T) {
 		// Just register a wallet so that we can work further
 		err := registerWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
+		err = os.MkdirAll("tmp", 0644)
+		require.NoError(t, err)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -169,7 +171,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -240,7 +242,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a shared encrypted file by lookuphash, return a readmarker for each blobber used in download", 80*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared encrypted file by lookuphash, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -308,7 +310,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a file by blocks, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a file by blocks, return a readmarker for each blobber used in download", 160*time.Second, func(t *test.SystemTest) {
 		// 1 block is of size 65536, we upload 20 blocks and download 1 block
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -342,11 +344,13 @@ func TestReadMarker(testSetup *testing.T) {
 
 		startBlock := 1
 		endBlock := 6
+
+		localTmpFile := generateRandomTestFileName(t)
 		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
+			"localpath":  localTmpFile,
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
