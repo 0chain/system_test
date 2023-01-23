@@ -89,9 +89,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		// no stake pools then the reward becomes the full block reward.
 		//
 		// Firstly we confirm the self-consistency of the block and reward tables.
-		// We calculate the change in the miner rewards during and
-		// confirm that this equals the total of the reward payments
-		// read from the provider rewards table.
+		// We calculate the change in the miner rewards during and confirm that this
+		// equals the total of the reward payments read from the provider rewards table.
 		for i, id := range minerIds {
 			var rewards int64
 			for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
