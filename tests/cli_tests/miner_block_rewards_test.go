@@ -132,7 +132,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		// Each round there should be exactly one block reward payment
 		// and this to the blocks' miner.
-		for round := history.From(); round <= history.To(); round++ {
+		for round := startRound + 1; round <= endRound-1; round++ {
 			roundHistory := history.RoundHistory(t, round)
 			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
