@@ -27,6 +27,10 @@ type ExecutionRequest struct {
 	Dst interface{}
 
 	RequiredStatusCode int
+
+	FileName string
+
+	FilePath string
 }
 
 type Wallet struct {

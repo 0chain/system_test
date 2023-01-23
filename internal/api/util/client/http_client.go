@@ -24,6 +24,7 @@ const (
 	HttpGETMethod
 	HttpPUTMethod
 	HttpDELETEMethod
+	HttpFileUploadMethod
 )
 
 type BaseHttpClient struct {
@@ -41,6 +42,8 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Put(url)
 	case HttpPOSTMethod:
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Post(url)
+	case HttpFileUploadMethod:
+		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetFile(executionRequest.FileName, executionRequest.FilePath).Post(url)
 	case HttpGETMethod:
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetQueryParams(executionRequest.QueryParams).Get(url)
 	case HttpDELETEMethod:

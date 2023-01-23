@@ -225,7 +225,7 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	return nil
 }
 
-func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
+func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest *model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
 	var (
 		resp       *resty.Response
 		respErrors []error
@@ -250,7 +250,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 		}
 		formattedURL := urlBuilder.String()
 
-		newResp, err := c.executeForServiceProvider(t, formattedURL, executionRequest, method)
+		newResp, err := c.executeForServiceProvider(t, formattedURL, *executionRequest, method)
 		if err != nil {
 			respErrors = append(respErrors, err)
 			continue
@@ -294,7 +294,7 @@ func (c *APIClient) V1ClientPut(t *test.SystemTest, clientPutRequest model.Walle
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Body:               clientPutRequest,
 			Dst:                &clientPutResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -350,7 +350,7 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Body:               transactionPutRequest,
 			Dst:                &transactionPutResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -373,7 +373,7 @@ func (c *APIClient) V1TransactionGetConfirmation(t *test.SystemTest, transaction
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &transactionGetConfirmationResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -391,7 +391,7 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &clientGetBalanceResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -412,7 +412,7 @@ func (c *APIClient) V1SCRestGetBlobber(t *test.SystemTest, scRestGetBlobberReque
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &scRestGetBlobberResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -457,7 +457,7 @@ func (c *APIClient) V1SCRestGetAllocation(t *test.SystemTest, scRestGetAllocatio
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &scRestGetAllocationResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -485,7 +485,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &blobbers,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -509,7 +509,7 @@ func (c *APIClient) V1SCRestOpenChallenge(t *test.SystemTest, scRestOpenChalleng
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &scRestOpenChallengeResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -528,7 +528,7 @@ func (c *APIClient) V1MinerGetStats(t *test.SystemTest, requiredStatusCode int) 
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &getMinerStatsResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -547,7 +547,7 @@ func (c *APIClient) V1SharderGetStats(t *test.SystemTest, requiredStatusCode int
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &getSharderStatusResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -566,7 +566,7 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			FormData: map[string]string{
 				"sc_address": scStateGetRequest.SCAddress,
 				"key":        scStateGetRequest.Key,
@@ -991,7 +991,7 @@ func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakeP
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			Dst:                &scRestGetStakePoolStatResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
@@ -1126,7 +1126,7 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
-		model.ExecutionRequest{
+		&model.ExecutionRequest{
 			RequiredStatusCode: requiredStatusCode,
 		},
 		HttpPOSTMethod,
