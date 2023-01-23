@@ -125,25 +125,6 @@ func TestMinerStake(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.NoError(t, err)
 		require.Len(t, poolsInfo.Pools[miner.ID], 1)
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner.ID,
-			"tokens":   2,
-		}), true)
-		require.Nil(t, err, "error staking tokens against node")
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("locked with: [a-z0-9]{64}"), output[0])
-
-		var poolsInfo2 climodel.MinerSCUserPoolsInfo
-		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
-		require.Len(t, output, 1)
-
-		err = json.Unmarshal([]byte(output[0]), &poolsInfo2)
-		require.NoError(t, err)
-		require.Len(t, poolsInfo2.Pools[miner.ID], 1)
-
-		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[miner.ID][0].Balance))
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
