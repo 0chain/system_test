@@ -285,7 +285,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v > %v", 1010000000000, max_stake), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v \\u003e %v", 1010000000000, max_stake), output[0])
 	})
 
 	t.RunWithTimeout("Staking tokens less than min_stake of miner node should fail", 120*time.Second, func(t *test.SystemTest) {
@@ -308,7 +308,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d < %d", 10000000000, 20000000000), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
