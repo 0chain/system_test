@@ -888,9 +888,9 @@ func TestDownload(testSetup *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		startBlock := 0
+		startBlock := 1
 		endBlock := 5
-		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 1 would lead to startblock being 0).
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
