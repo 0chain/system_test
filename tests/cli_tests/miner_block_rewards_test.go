@@ -140,8 +140,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					require.False(t, foundBlockRewardPayment, "blocker reward already paid, only pay miner block rewards once")
 					foundBlockRewardPayment = true
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"block reward paid to %s, should only be paid to round lottery winner %s",
-						pReward.ProviderId, roundHistory.Block.MinerID)
+						"block reward paid to %s, should only be paid to round lottery winner %s, \nhistory %v",
+						pReward.ProviderId, roundHistory.Block.MinerID, history.DelegateRewards)
 				}
 			}
 			require.True(t, foundBlockRewardPayment,
@@ -197,7 +197,10 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
 				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"rewards, expected %v change in pools reward during test %v", actualReward, rewards[poolId])
+					"rewards, expected %v change in pools reward during test %v"+"\nbefore %v, \nafter %v, \nhistory %v",
+					actualReward, rewards[poolId],
+					beforeMiners, afterMiners, history.DelegateRewards,
+				)
 			}
 		}
 	})
