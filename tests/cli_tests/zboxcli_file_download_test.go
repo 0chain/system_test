@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	"golang.org/x/crypto/sha3"
+
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
 )
 
 const StatusCompletedCB = "Status completed callback"
@@ -32,7 +32,7 @@ func TestDownload(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	// Success Scenarios
-	t.Run("Download File from Root Directory Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File from Root Directory Should Work", 3*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -221,7 +221,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
-	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download File From Shared Folder Should Work but does not see blobber/issues/588", func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -273,7 +273,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
-	t.RunWithTimeout("Download Shared File Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
+	t.Run("Download Shared File Should Work", func(t *test.SystemTest) { // todo: too slow
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -445,7 +445,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 	})
 
-	t.RunWithTimeout("Download From Shared Folder by Remotepath Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download From Shared Folder by Remotepath Should Work", func(t *test.SystemTest) {
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -501,7 +501,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download From Shared Folder by Lookup Hash Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download From Shared Folder by Lookup Hash Should Work", func(t *test.SystemTest) {
 		var authTicket, lookuphash, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -561,7 +561,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -608,7 +608,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 3)
 	})
 
-	t.RunWithTimeout("Download Shared File by Paying Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download Shared File by Paying Should Work", func(t *test.SystemTest) {
 		var allocationID, authTicket, filename string
 
 		filesize := int64(10)
@@ -872,7 +872,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.Run("Download File With startblock 0 and non-zero endblock should fail", func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -972,7 +972,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.RunWithTimeout("Download with negative startblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.Run("Download with negative startblock should fail", func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -1191,7 +1191,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"

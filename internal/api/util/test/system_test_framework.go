@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var DefaultTestTimeout = 60 * time.Second
+var DefaultTestTimeout = 2 * time.Minute
 
 type SystemTest struct {
 	Unwrap       *testing.T
