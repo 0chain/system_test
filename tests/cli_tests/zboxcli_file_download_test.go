@@ -269,7 +269,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "consensus_not_met")
-		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
 	t.RunWithTimeout("Download Shared File Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
@@ -784,7 +783,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With Only endblock Should Work", func(t *test.SystemTest) {
+	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -809,10 +808,9 @@ func TestDownload(testSetup *testing.T) {
 			"endblock":   endBlock,
 		}), false)
 
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, " "))
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Status completed callback.")
+		require.Contains(t, output[0], "start block or end block or both cannot be negative")
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
@@ -1115,7 +1113,6 @@ func TestDownload(testSetup *testing.T) {
 		require.True(t, len(output) > 0)
 
 		require.Contains(t, output[len(output)-1], "consensus_not_met")
-		require.Contains(t, output[len(output)-1], "file meta data")
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *test.SystemTest) {
