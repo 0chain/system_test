@@ -217,7 +217,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Error(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
@@ -811,7 +810,7 @@ func TestDownload(testSetup *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 1, strings.Join(output, " "))
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Status completed callback.")
 	})
@@ -999,9 +998,8 @@ func TestDownload(testSetup *testing.T) {
 		}), true)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "start block or end block or both cannot be negative.")
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "start block or end block or both cannot be negative.")
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
@@ -1137,7 +1135,6 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
@@ -1224,7 +1221,6 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {

@@ -452,9 +452,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"authticket": authTicket,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
-		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
-		require.Contains(t, aggregatedOutput, "failed")
+		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "consensus_not_met")
 
 		/* Authticket is redundant for owner and collaborator
 		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{

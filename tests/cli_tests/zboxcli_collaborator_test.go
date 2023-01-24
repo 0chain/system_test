@@ -302,7 +302,6 @@ func TestCollaborator(testSetup *testing.T) {
 		require.NotNil(t, err, "The command must fail since the wallet is not collaborator anymore", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "Unexpected number of output lines", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Add Collaborator to a file owned by somebody else must fail", func(t *test.SystemTest) {
