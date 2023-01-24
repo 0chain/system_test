@@ -22,10 +22,10 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
 	// of the block reward payments
 	//
-	// Each round a random miner is chosen to receive the block reward.
-	// The miner's service charge is used to determine the fraction received by the miner's wallet.
+	// Each round we choose num_sharders_rewarded random sharders to receive the block reward.
+	// The sharder's service charge is used to determine the fraction received by the miner's wallet.
 	//
-	// The remaining block reward is then distributed amongst the miner's delegates.
+	// The remaining block reward is then distributed amongst the sharder's delegates.
 	//
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
