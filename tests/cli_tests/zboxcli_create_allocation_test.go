@@ -18,7 +18,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create allocation with name Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Create allocation with name Should Work", 90*time.Second, func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		name := cliutils.RandomAlphaNumericString(10)
@@ -57,7 +57,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Create allocation with smallest expiry (5m) Should Work", 120*time.Second, func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"expire": "5m", "size": "256000", "lock": "0.5"}

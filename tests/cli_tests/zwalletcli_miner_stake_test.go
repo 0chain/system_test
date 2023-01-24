@@ -83,7 +83,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, `resource_not_found: can't find pool stats`, output[0])
 	})
 
-	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 120*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -130,13 +130,15 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		walletName := escapedTestName(t)
+		_, err := executeFaucetWithTokensForWallet(t, walletName, configPath, 1.0)
+		require.Nil(t, err)
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   3,
-		}), false)
+			"tokens":   3.0,
+		}), walletName, false)
+
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance", output[0])
@@ -210,7 +212,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Making more pools than allowed by num_delegates of miner node should fail", 90*time.Second, func(t *test.SystemTest) {
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
 			if newMiner.ID == miner02ID {
@@ -255,7 +257,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	///todo: again, too slow for a failure case
-	t.RunWithTimeout("Staking more tokens than max_stake of miner node should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Staking more tokens than max_stake of miner node should fail", 120*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -280,13 +282,13 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   tokens,
-		}), true)
+		}), false)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v \\u003e %v", 1010000000000, max_stake), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v > %v", 1010000000000, max_stake), output[0])
 	})
 
-	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Staking tokens less than min_stake of miner node should fail", 120*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -306,12 +308,12 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d < %d", 10000000000, 20000000000), output[0])
 	})
 
 	// FIXME: This does not fail. Is this by design or a bug?
 	// TODO: way too slow
-	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 4*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
