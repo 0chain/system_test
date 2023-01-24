@@ -52,7 +52,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		cliutils.Wait(t, 12*time.Second)
+		cliutils.Wait(t, 15*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
@@ -140,8 +140,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					require.False(t, foundBlockRewardPayment, "blocker reward already paid, only pay miner block rewards once")
 					foundBlockRewardPayment = true
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"block reward paid to %s, should only be paid to round lottery winner %s, \nhistory %v",
-						pReward.ProviderId, roundHistory.Block.MinerID, history.DelegateRewards)
+						"round %d, start round %d, finish round %d, block reward paid to %s, should only be paid to round lottery winner %s, \nhistory %v",
+						round, startRound, endRound, pReward.ProviderId, roundHistory.Block.MinerID, history.DelegateRewards)
 				}
 			}
 			require.True(t, foundBlockRewardPayment,
@@ -197,9 +197,9 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
 				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"rewards, expected %v change in pools reward during test %v"+"\nbefore %v, \nafter %v, \nhistory %v",
-					actualReward, rewards[poolId],
-					beforeMiners, afterMiners, history.DelegateRewards,
+					"poolID %s, rewards expected %v change in pools reward during test %v"+"\nstart rond %v, \nend round%v, \nhistory %v",
+					poolId, rewards[poolId],
+					startRound, endRound, history.DelegateRewards,
 				)
 			}
 		}
