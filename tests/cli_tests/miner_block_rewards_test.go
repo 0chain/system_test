@@ -113,10 +113,9 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 						}
 						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "incorrect service charge %v for round %d"+
 							" service charge should be block reward %v multiplied by service ratio %v."+
-							" Start round %d end round %d. History %v",
+							" Start round %d end round %d",
 							pReward.Amount, round, expectedServiceCharge, minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
-							beforeMiners.Nodes[i].RoundServiceChargeLastUpdated+1, afterMiners.Nodes[i].RoundServiceChargeLastUpdated,
-							history)
+							beforeMiners.Nodes[i].RoundServiceChargeLastUpdated+1, afterMiners.Nodes[i].RoundServiceChargeLastUpdated)
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
@@ -140,8 +139,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					require.False(t, foundBlockRewardPayment, "blocker reward already paid, only pay miner block rewards once")
 					foundBlockRewardPayment = true
 					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"round %d, start round %d, finish round %d, block reward paid to %s, should only be paid to round lottery winner %s, \nhistory %v",
-						round, startRound, endRound, pReward.ProviderId, roundHistory.Block.MinerID, history.DelegateRewards)
+						"round %d, start round %d, finish round %d, block reward paid to %s, should only be paid to round lottery winner %s",
+						round, startRound, endRound, pReward.ProviderId, roundHistory.Block.MinerID)
 				}
 			}
 			require.True(t, foundBlockRewardPayment,
@@ -197,9 +196,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
 				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"poolID %s, rewards expected %v change in pools reward during test %v"+"\nstart rond %v, \nend round%v, \nhistory %v",
-					poolId, rewards[poolId],
-					startRound, endRound, history.DelegateRewards,
+					"poolID %s, rewards expected %v change in pools reward during test %v", poolId, rewards[poolId], startRound,
 				)
 			}
 		}
