@@ -34,7 +34,7 @@ func TestDexState(testSetup *testing.T) {
 			csrfToken,
 			"123456789",
 		)
-		require.Error(t, err)
+		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode())
 		require.Nil(t, dexState)
 	})
@@ -45,7 +45,7 @@ func TestDexState(testSetup *testing.T) {
 			"abcd",
 			zboxClient.DefaultPhoneNumber,
 		)
-		require.Error(t, err)
+		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode())
 		require.Nil(t, dexState)
 	})
