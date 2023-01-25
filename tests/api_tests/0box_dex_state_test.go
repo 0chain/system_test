@@ -36,7 +36,7 @@ func TestDexState(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode())
-		require.Nil(t, dexState)
+		require.Empty(t, dexState)
 	})
 
 	t.RunSequentially("Create a DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
@@ -47,6 +47,6 @@ func TestDexState(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode())
-		require.Nil(t, dexState)
+		require.Empty(t, dexState)
 	})
 }
