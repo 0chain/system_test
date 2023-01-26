@@ -21,7 +21,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const delta = 1.0
+const (
+	delta          = 1.0
+	restApiRetries = 3
+)
 
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
@@ -127,6 +130,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			require.InDeltaf(t, actualReward, rewards, delta,
 				"rewards expected %v, change in miners reward during the test is %v", actualReward, rewards)
 		}
+		t.Log("finished testing miners")
 
 		// Each round there should be exactly one block reward payment
 		// and this to the blocks' miner.
@@ -145,6 +149,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			require.True(t, foundBlockRewardPayment,
 				"miner block reward payment not recorded. block rewards should be paid every round.")
 		}
+		t.Log("about to test delegate pools")
 
 		// Each round confirm payments to delegates or the blocks winning miner.
 		// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
@@ -391,7 +396,7 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
 	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
-	nodeList := cliutil.ApiGet[climodel.NodeList](t, url, nil)
+	nodeList := cliutil.ApiGetRetries[climodel.NodeList](t, url, nil, restApiRetries)
 	var nodeIds []string
 	for i := range nodeList.Nodes {
 		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
@@ -411,7 +416,7 @@ func getNodes(t *test.SystemTest, ids []string, sharderBaseURL string) climodel.
 	var nodes climodel.NodeList
 	for _, id := range ids {
 		params["id"] = id
-		nodes.Nodes = append(nodes.Nodes, *cliutil.ApiGet[climodel.Node](t, url, params))
+		nodes.Nodes = append(nodes.Nodes, *cliutil.ApiGetRetries[climodel.Node](t, url, params, restApiRetries))
 	}
 	return nodes
 }

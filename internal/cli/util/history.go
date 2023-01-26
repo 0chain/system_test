@@ -15,6 +15,7 @@ const (
 	MaxQueryLimit    = 20
 	StorageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	MinerScAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+	restApiRetries   = 3
 )
 
 type ChainHistory struct {
@@ -105,7 +106,7 @@ func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	params := map[string]string{
 		"contents": "full",
 	}
-	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to+1)
+	ch.blocks = ApiGetListRetries[model.EventDBBlock](t, url, params, ch.from, ch.to+1, restApiRetries)
 }
 
 func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl string) {
@@ -114,7 +115,7 @@ func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl s
 		"start": strconv.FormatInt(ch.from, 10),
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.DelegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to+1)
+	ch.DelegateRewards = ApiGetListRetries[model.RewardDelegate](t, url, params, ch.from, ch.to+1, restApiRetries)
 }
 
 func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl string) {
@@ -123,7 +124,7 @@ func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl s
 		"start": strconv.FormatInt(ch.from, 10),
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to+1)
+	ch.providerRewards = ApiGetListRetries[model.RewardProvider](t, url, params, ch.from, ch.to+1, restApiRetries)
 }
 
 func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
