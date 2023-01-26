@@ -133,7 +133,7 @@ func getNextError(t *test.SystemTest, url string, from, to, limit, offset int64,
 	url = addParms(url, params)
 	res, err := http.Get(url) //nolint:gosec
 	if err != nil {
-		return nil, fmt.Errorf("reponse %s; retrieving blocks %d to %d", url, from, to)
+		return nil, fmt.Errorf("response %s; retrieving blocks %d to %d", url, from, to)
 	}
 	defer res.Body.Close()
 	if res.StatusCode < 200 && res.StatusCode >= 300 {
