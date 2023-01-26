@@ -141,15 +141,15 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.RewardType == climodel.BlockRewardMiner {
-					assert.False(t, foundBlockRewardPayment, "blocker reward already paid, only pay miner block rewards once")
+					assert.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 					foundBlockRewardPayment = true
 					assert.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 						"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
 						round, pReward.ProviderId, roundHistory.Block.MinerID)
 				}
 			}
-			assert.True(t, foundBlockRewardPayment,
-				"miner block reward payment not recorded. block rewards should be paid every round.")
+			assert.Truef(t, foundBlockRewardPayment,
+				"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
 		}
 		t.Log("about to test delegate pools")
 
