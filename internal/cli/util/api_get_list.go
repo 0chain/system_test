@@ -3,6 +3,7 @@ package cliutils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strconv"
@@ -22,7 +23,7 @@ func ApiGetRetries[T any](t *test.SystemTest, url string, params map[string]stri
 			break
 		}
 	}
-	require.NoError(t, err, "%s failed after %d retries", url, retries)
+	assert.NoError(t, err, "%s failed after %d retries", url, retries)
 
 	return res
 }
@@ -83,7 +84,7 @@ func ApiGetList[T any](t *test.SystemTest, url string, params map[string]string,
 		raw := getNext(t, url, from, to, MaxQueryLimit, offset, params)
 
 		err := json.Unmarshal(raw, &temp)
-		require.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
+		assert.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
 		out = append(out, temp...)
 		if len(temp) < MaxQueryLimit {
 			return out
@@ -108,10 +109,10 @@ func ApiGetListRetries[T any](t *test.SystemTest, url string, params map[string]
 				break
 			}
 		}
-		require.NoError(t, err, "%s failed after %d retries", url, retries)
+		assert.NoError(t, err, "%s failed after %d retries", url, retries)
 
 		err = json.Unmarshal(raw, &temp)
-		require.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
+		assert.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
 		out = append(out, temp...)
 		if len(temp) < MaxQueryLimit {
 			return out
