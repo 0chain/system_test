@@ -13,14 +13,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -52,7 +51,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
-		assert.True(t, len(minerIds) > 0, "no miners found")
+		require.True(t, len(minerIds) > 0, "no miners found")
 
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
@@ -81,7 +80,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		minerScConfig := getMinerScMap(t)
 		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
-		assert.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
@@ -107,7 +106,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					}
 					switch pReward.RewardType {
 					case climodel.BlockRewardMiner:
-						assert.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+						require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
 							"%s not round lottery winner %s but nevertheless paid with block reward."+
 								"only the round lottery winner shold get a miner block reward",
 							pReward.ProviderId, roundHistory.Block.MinerID)
@@ -117,7 +116,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 						} else {
 							expectedServiceCharge = minerBlockReward
 						}
-						assert.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
+						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
 							"incorrect service charge %v for round %d"+
 								" service charge should be block reward %v multiplied by service ratio %v."+
 								"length stake pools %d",
@@ -128,12 +127,12 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
 					default:
-						assert.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+						require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
 					}
 				}
 			}
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
-			assert.InDeltaf(t, actualReward, rewards, delta,
+			require.InDeltaf(t, actualReward, rewards, delta,
 				"rewards expected %v, change in miners reward during the test is %v", actualReward, rewards)
 		}
 		t.Log("finished testing miners")
@@ -145,14 +144,14 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.RewardType == climodel.BlockRewardMiner {
-					assert.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
+					require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 					foundBlockRewardPayment = true
-					assert.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 						"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
 						round, pReward.ProviderId, roundHistory.Block.MinerID)
 				}
 			}
-			assert.Truef(t, foundBlockRewardPayment,
+			require.Truef(t, foundBlockRewardPayment,
 				"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
 		}
 		t.Log("about to test delegate pools")
@@ -185,18 +184,18 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					switch dReward.RewardType {
 					case climodel.BlockRewardMiner:
 						_, found := poolsBlockRewarded[dReward.PoolID]
-						assert.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
+						require.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
 							dReward.PoolID, round)
 						poolsBlockRewarded[dReward.PoolID] = dReward.Amount
 						rewards[dReward.PoolID] += dReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards[dReward.PoolID] += dReward.Amount
 					default:
-						assert.Failf(t, "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
+						require.Failf(t, "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
 					}
 				}
 				if roundHistory.Block.MinerID != id {
-					assert.Len(t, poolsBlockRewarded, 0,
+					require.Len(t, poolsBlockRewarded, 0,
 						"delegate pools should not get a block reward unless their parent miner won the round lottery")
 				}
 				confirmPoolPayments(
@@ -205,7 +204,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
 				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
-				assert.InDeltaf(t, actualReward, rewards[poolId], delta,
+				require.InDeltaf(t, actualReward, rewards[poolId], delta,
 					"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
 				)
 			}
@@ -226,7 +225,7 @@ func confirmPoolPayments(
 	if numRewards > len(pools) {
 		numRewards = len(pools)
 	}
-	assert.Equal(t, len(poolsBlockRewarded), numRewards,
+	require.Equal(t, len(poolsBlockRewarded), numRewards,
 		"expected reward payments %d does not equal actual payment count %d", numRewards, len(poolsBlockRewarded))
 	var total float64
 	for id := range poolsBlockRewarded {
@@ -234,7 +233,7 @@ func confirmPoolPayments(
 	}
 	for id, reward := range poolsBlockRewarded {
 		expectedReward := (float64(pools[id].Balance) / total) * float64(blockReward)
-		assert.InDeltaf(t, expectedReward, float64(reward), 1,
+		require.InDeltaf(t, expectedReward, float64(reward), 1,
 			"delegate rewards. delegates should be rewarded in proportion to their stake."+
 				"total reward %d stake pools %v", blockReward, pools)
 	}
