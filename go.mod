@@ -27,6 +27,7 @@ require (
 )
 
 require (
+	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
