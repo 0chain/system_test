@@ -117,12 +117,13 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 						} else {
 							expectedServiceCharge = minerBlockReward
 						}
-						assert.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "incorrect service charge %v for round %d"+
-							" service charge should be block reward %v multiplied by service ratio %d."+
-							"length stake pools %d, stake pools %v",
+						assert.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
+							"incorrect service charge %v for round %d"+
+								" service charge should be block reward %v multiplied by service ratio %v."+
+								"length stake pools %d",
 							pReward.Amount, round,
 							minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
-							len(beforeMiners.Nodes[i].StakePool.Pools), beforeMiners.Nodes[i].StakePool.Pools)
+							len(beforeMiners.Nodes[i].StakePool.Pools))
 						rewards += pReward.Amount
 					case climodel.FeeRewardMiner:
 						rewards += pReward.Amount
