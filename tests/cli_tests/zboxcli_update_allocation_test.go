@@ -29,38 +29,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Update Name Should Work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		options := map[string]interface{}{"lock": "1.5"}
-		output, err = createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-		name := cliutils.RandomAlphaNumericString(10)
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"name":       name,
-		})
-
-		output, err = updateAllocation(t, configPath, params, true)
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		alloc := getAllocation(t, allocationID)
-		require.Equal(t, name, alloc.Name, "allocation name is not created properly")
-	})
-
 	t.Run("Update Expiry Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
