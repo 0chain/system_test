@@ -86,8 +86,8 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, userInfo)
 		require.Equal(t, "", userInfo.Username, "output not as expected", response.String())
-		require.Equal(t, "", userInfo.Biography, "output not as expected", response.String())           //FIXME: should be null
-		require.NotNil(t, userInfo.Avatar, "output not as expected", response.String())                 //FIXME: should be null
+		require.Equal(t, "", userInfo.Biography, "output not as expected", response.String()) //FIXME: should be null
+		require.NotNil(t, userInfo.Avatar, "output not as expected", response.String())       //FIXME: should be null
 		require.Equal(t, "", userInfo.Avatar.LargeLoc, "output not as expected", response.String())
 		require.Equal(t, "", userInfo.Avatar.MedLoc, "output not as expected", response.String())
 		require.Equal(t, "", userInfo.Avatar.SmallLoc, "output not as expected", response.String())
