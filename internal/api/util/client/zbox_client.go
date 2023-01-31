@@ -392,3 +392,42 @@ func (c *ZboxClient) PostNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 
 	return PostNftInfo, resp, err
 }
+
+func (c *ZboxClient) PutNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.PutNftInfo, *resty.Response, error) {
+	t.Log("Putting NFT info using 0box...")
+	var PutNftInfo *model.PutNftInfo
+
+	urBuilder := NewURLBuilder()
+	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urBuilder.SetPath("/v2/nft/info")
+
+	formData := map[string]string{
+		"allocation_id":    "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
+		"created_by":       "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+		"contract_address": "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+		"token_id":         "new_token",
+		"token_standard":   "eth",
+	}
+
+	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
+		Dst:      &PutNftInfo,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-Key":       "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
+			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "chimney",
+		},
+		QueryParams: map[string]string{
+			"id": "1",
+		},
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	return PutNftInfo, resp, err
+}

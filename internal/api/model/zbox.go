@@ -78,3 +78,11 @@ type PostNftInfo struct {
 	TokenID         string `form:"token_id" json:"token_id"`
 	TokenStandard   string `form:"token_standard" json:"token_standard"`
 }
+
+type PutNftInfo struct {
+	AllocationId    string `form:"allocation_id" json:"allocation_id"`
+	CreatedBy       string `form:"created_by" json:"created_by"`
+	ContractAddress string `form:"contract_address" json:"contract_address"`
+	TokenID         string `form:"token_id" json:"token_id"`
+	TokenStandard   string `form:"token_standard" json:"token_standard"`
+}

@@ -25,4 +25,17 @@ func TestNftInfo(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode())
 		require.NotNil(t, PostNftInfo)
 	})
+
+	t.RunSequentially("Putting NFT Info with valid form-data should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		PutNftInfo, response, err := zboxClient.PutNftInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode())
+		require.NotNil(t, PutNftInfo)
+	})
 }
