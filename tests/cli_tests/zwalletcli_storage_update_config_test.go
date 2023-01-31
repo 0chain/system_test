@@ -252,7 +252,7 @@ func getStorageConfigMap(t *test.SystemTest) settingMaps {
 	require.NoError(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	return keyValueSettingsToMap(output)
+	return keyValueSettingsToMap(t, output)
 }
 
 func getStorageSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
