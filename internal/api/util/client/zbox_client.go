@@ -385,7 +385,7 @@ func (c *ZboxClient) PostNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "nft",
+			"X-APP-TYPE":             "chimney",
 		},
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
