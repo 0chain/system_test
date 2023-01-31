@@ -30,7 +30,7 @@ func TestNftInfo(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
-		// require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		PostNftInfo, response, err := zboxClient.PostNftInfo(t,
 			firebaseToken.IdToken,
