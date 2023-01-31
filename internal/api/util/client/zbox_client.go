@@ -209,27 +209,25 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 	return *zboxWallets, resp, err
 }
 
-func (c *ZboxClient) PostNftState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.NftState, *resty.Response, error) {
-	t.Log("Posting NFT state info using 0box...")
-	var NftState *model.NftState
+func (c *ZboxClient) PostNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.PostNftInfo, *resty.Response, error) {
+	t.Log("Posting NFT info using 0box...")
+	var PostNftInfo *model.PostNftInfo
 
 	urBuilder := NewURLBuilder()
 	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urBuilder.SetPath("/v2/nft/state")
+	urBuilder.SetPath("/v2/nft/info")
 
 	formData := map[string]string{
-		"stage":         "upload_nft",
-		"reference":     "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
-		"collection_id": "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b8ced2f0",
-		"owned_by":      "new_owner_1",
-		"nft_activity":  "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
-		"meta_data":     "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
-		"allocation_id": "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
+		"allocation_id":    "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
+		"created_by":       "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+		"contract_address": "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+		"token_id":         "nft_token",
+		"token_standard":   "eth",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
-		Dst:      &NftState,
+		Dst:      &PostNftInfo,
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
@@ -242,7 +240,7 @@ func (c *ZboxClient) PostNftState(t *test.SystemTest, idToken, csrfToken, phoneN
 			"X-APP-TYPE":             "chimney",
 		},
 		RequiredStatusCode: 201,
-	}, HttpPUTMethod)
+	}, HttpPOSTMethod)
 
-	return NftState, resp, err
+	return PostNftInfo, resp, err
 }

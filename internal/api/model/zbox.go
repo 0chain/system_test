@@ -49,12 +49,10 @@ type ZboxWalletKeys []struct {
 	ZboxWallet
 }
 
-type NftState struct {
-	Stage        string `form:"stage" json:"stage"`
-	Reference    string `form:"reference" json:"reference"`
-	CollectionId string `form:"collection_id" json:"collection_id"`
-	OwnedBy      string `form:"owned_by" json:"owned_by"`
-	NftActivity  string `form:"nft_activity" json:"nft_activity"`
-	MetaData     string `form:"meta_data" json:"meta_data"`
-	AllocationId string `form:"allocation_id" json:"allocation_id"`
+type PostNftInfo struct {
+	AllocationId    string `form:"allocation_id" json:"allocation_id"`
+	CreatedBy       string `form:"created_by" json:"created_by"`
+	ContractAddress string `form:"contract_address" json:"contract_address"`
+	TokenID         string `form:"token_id" json:"token_id"`
+	TokenStandard   string `form:"token_standard" json:"token_standard"`
 }
