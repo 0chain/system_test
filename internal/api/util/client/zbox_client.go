@@ -367,7 +367,7 @@ func (c *ZboxClient) PostNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 	urBuilder.SetPath("/v2/nft/info")
 
 	formData := map[string]string{
-		"allocation_id":    "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d42",
+		"allocation_id":    "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
 		"created_by":       "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
 		"contract_address": "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
 		"token_id":         "nft_token",
