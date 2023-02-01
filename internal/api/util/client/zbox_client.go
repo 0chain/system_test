@@ -431,3 +431,69 @@ func (c *ZboxClient) PutNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNum
 
 	return PutNftInfo, resp, err
 }
+
+func (c *ZboxClient) PutNftState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.PutNftState, *resty.Response, error) {
+	t.Log("Putting NFT state using 0box...")
+	var PutNftState *model.PutNftState
+
+	urBuilder := NewURLBuilder()
+	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urBuilder.SetPath("/v2/nft/state")
+
+	formData := map[string]string{
+		"stage":         "upload_nft",
+		"reference":     "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
+		"collection_id": "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b8ced2f0",
+		"owned_by":      "new_owner_1",
+		"nft_activity":  "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
+		"meta_data":     "{\"test_2\":\"test3\", \"test4\":\"test5\"}",
+		"allocation_id": "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
+	}
+
+	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
+		Dst:      &PutNftState,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-Key":       "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
+			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "chimney",
+		},
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	return PutNftState, resp, err
+}
+
+func (c *ZboxClient) GetNftState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (resty.Response, error) {
+	t.Log("Getting NFT state using 0box...")
+
+	urBuilder := NewURLBuilder()
+	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urBuilder.SetPath("/v2/nft/state")
+
+	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
+		Headers: map[string]string{
+			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-Key":       "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
+			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "chimney",
+		},
+		QueryParams: map[string]string{
+			"filter": "owned_by-new_owner_1",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return *resp, err
+}
