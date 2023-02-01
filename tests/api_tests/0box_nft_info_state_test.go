@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -24,7 +23,6 @@ func TestNftInfoState(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode())
 		require.NotNil(t, PostNftInfo)
-		fmt.Println("Post Nft Info", string(response.Body()))
 	})
 
 	t.RunSequentially("Putting NFT Info with valid form-data should work", func(t *test.SystemTest) {
@@ -38,7 +36,6 @@ func TestNftInfoState(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode())
 		require.NotNil(t, PutNftInfo)
-		fmt.Println("Put Nft Info", string(response.Body()))
 	})
 
 	t.RunSequentially("Putting NFT State with valid form-data should work", func(t *test.SystemTest) {
@@ -52,7 +49,6 @@ func TestNftInfoState(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode())
 		require.NotNil(t, PutNftState)
-		fmt.Println("Put Nft State", string(response.Body()))
 	})
 
 	t.RunSequentially("Getting NFT State with valid form-data should work", func(t *test.SystemTest) {
@@ -65,6 +61,5 @@ func TestNftInfoState(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
-		fmt.Println("Get Nft State", string(response.Body()))
 	})
 }
