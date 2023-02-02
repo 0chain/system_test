@@ -211,7 +211,7 @@ func Test0Box(testSetup *testing.T) {
 		_, _, err = zboxClient.PostUserInfoBackgroundImage(t, thumbnailPath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 
-		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, username)
+		userInfo, response, err := zboxClient.GetUserInfoFromUserName(t, firebaseToken.IdToken, csrfToken, username)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, userInfo)
