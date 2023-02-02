@@ -79,9 +79,7 @@ func Test0Box(testSetup *testing.T) {
 func Test0BoxAllocation(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-	//t.SetTimeout(1 * time.Second)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
-	//FIXME some one broke list allocation previously it was working fine in pipeline
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -215,9 +213,10 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
+		_, _, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
 		require.Error(t, err)
-		//require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// I guess this a bug. Will discuss it and fix it
 	})
 
 	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
@@ -457,7 +456,6 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 	})
-
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
