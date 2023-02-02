@@ -79,6 +79,7 @@ func Test0Box(testSetup *testing.T) {
 func Test0BoxAllocation(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+	//t.SetTimeout(1 * time.Second)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	//FIXME some one broke list allocation previously it was working fine in pipeline
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
@@ -102,7 +103,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, allocationList[0].Allocs, 0)
+		require.Len(t, allocationList, 0)
 	})
 
 	t.RunSequentially("Post allocation with invalid phonenumber should not work", func(t *test.SystemTest) {
@@ -177,7 +178,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Allocs[0].Id)
+		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Id)
 	})
 
 	t.RunSequentially("List allocation with invalid phone number should not work", func(t *test.SystemTest) {
@@ -411,7 +412,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
 		require.NoError(t, err)
@@ -454,7 +455,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation succesful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
 }
