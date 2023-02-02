@@ -300,7 +300,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 }
 
 func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxUserInfo, *resty.Response, error) {
-	t.Logf("Getting user info background using 0box...")
+	t.Logf("Getting user info using 0box...")
 	var userInfo *model.ZboxUserInfo
 
 	urlBuilder := NewURLBuilder()
@@ -308,14 +308,40 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/userinfo")
 
+	formData := map[string]string{
+		"phone_number": phoneNumber,
+	}
+
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &userInfo,
+		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":    "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":   "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "chimney",
+		}, // TODO: this endpoint doesnt check signature!
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return userInfo, resp, err
+}
+
+func (c *ZboxClient) GetUserInfoFromUserName(t *test.SystemTest, idToken, csrfToken, userName string) (*model.ZboxUserInfo, *resty.Response, error) {
+	t.Logf("Getting user info using 0box...")
+	var userInfo *model.ZboxUserInfo
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/userinfo")
+
+	formData := map[string]string{
+		"username": userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &userInfo,
+		FormData: formData,
+		Headers: map[string]string{
 			"X-CSRF-TOKEN":       csrfToken,
 			"X-APP-TYPE":         "chimney",
 		}, // TODO: this endpoint doesnt check signature!
