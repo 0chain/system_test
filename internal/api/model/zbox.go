@@ -76,3 +76,25 @@ type ZboxAllocationList struct {
 type ZboxWalletKeys []struct {
 	ZboxWallet
 }
+
+type ZboxSuccess struct {
+	Success string `json:"success"`
+}
+
+type ZboxUsername struct {
+	Username string `json:"username"`
+}
+
+type ZboxImage struct {
+	SmallLoc string `json:"small_loc"`
+	MedLoc   string `json:"medium_loc"`
+	LargeLoc string `json:"large_loc"`
+}
+
+type ZboxUserInfo struct {
+	Username        string    `json:"user_name"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
+	Biography       string    `json:"biography"`
+	CreatedAt       string    `json:"created_at"`
+	Avatar          ZboxImage `json:"avatar"`
+	BackgroundImage ZboxImage `json:"bg_img"`
+}

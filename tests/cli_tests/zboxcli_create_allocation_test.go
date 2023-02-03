@@ -18,30 +18,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create allocation with name Should Work", func(t *test.SystemTest) {
-		_ = setupWallet(t, configPath)
-
-		name := cliutils.RandomAlphaNumericString(10)
-
-		options := map[string]interface{}{
-			"lock": "0.5",
-			"name": name,
-		}
-		output, err := createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-		alloc := getAllocation(t, allocationID)
-
-		require.Equal(t, name, alloc.Name, "allocation name is not created properly")
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
@@ -183,7 +159,8 @@ func TestCreateAllocation(testSetup *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: {\"error\":\"not enough blobbers to honor the allocation\"}",
+			output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {

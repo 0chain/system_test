@@ -114,6 +114,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
 		}, false)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
