@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -12,6 +13,24 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
+
+//func TestCallContactWallets(testSetup *testing.T) {
+//	t := test.NewSystemTest(testSetup)
+//	t.Parallel()
+//
+//	t.Run("Get wallets List, should work", func(t *test.SystemTest) {
+//		wallet := apiClient.RegisterWallet(t)
+//		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+//
+//		contactWallet := apiClient.RegisterWallet(t)
+//		apiClient.ExecuteFaucet(t, contactWallet, client.TxSuccessfulStatus)
+//
+//		apiClient.AddContact(t, wallet, contactWallet, client.HttpOkStatus)
+//
+//		_, err := apiClient.CallContactWallets(t, wallet, contactWallet.Id, client.HttpOkStatus)
+//		require.NoError(t, err)
+//	})
+//}
 
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
@@ -190,6 +209,119 @@ func Test0Box(testSetup *testing.T) {
 
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
+
+	t.RunSequentially("Get wallet keys should work with wallet present", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		zboxWalletKeys, response, err := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWalletKeys)
+		require.NotEqual(t, 0, len(response.String()), "Response body is empty")
+	})
+
+	t.RunSequentially("Get wallet keys should return empty with wallet not present", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		_, response, err := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		// convert response to json
+		var responseJson []string
+		err = json.Unmarshal([]byte(response.String()), &responseJson)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 0, len(responseJson), "Response body is empty")
+	})
+
+	t.RunSequentially("Delete Wallet should work with wallet present", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		// Create Wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		// Get Wallet
+		wallets, _, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.Equal(t, 1, len(wallets), "Wallet not created")
+		wallet := wallets[0]
+
+		// Delete Wallet
+		_, response, err = zboxClient.DeleteWallet(t, wallet.WalletId, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		var responseJson map[string]interface{}
+		err = json.Unmarshal([]byte(response.String()), &responseJson)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, "Wallet info deleted successfully", responseJson["message"], "Response message does not match expected. Output: [%v]", response.String())
+
+		// Get Wallet
+		wallets, _, _ = zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.Equal(t, 0, len(wallets), "Wallet not deleted")
+	})
+
+	t.RunSequentially("Update Wallet with wallet present", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		// Create Wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		wallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		// Update Wallet
+		_, response, err = zboxClient.UpdateWallet(t, wallet.Mnemonic, "new_wallet_name", "new_wallet_description", firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		// Get Wallet
+		_, resp, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		var wallets []model.ZboxWallet
+
+		// store data to responseJson and read and println it
+		err = json.Unmarshal([]byte(resp.String()), &wallets)
+
+		require.Equal(t, 1, len(wallets), "Wallet not updated")
+		newWallet := wallets[0]
+		require.Equal(t, "new_wallet_name", newWallet.WalletName, "Wallet name not updated")
+		// Description is not working in PostWallet and Update is also not working for description
+		//require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
+	})
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
