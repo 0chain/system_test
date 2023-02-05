@@ -132,7 +132,7 @@ func getNextError(t *test.SystemTest, url string, from, to, limit, offset int64,
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
 	url = addParms(url, params)
-	res, err := http.Get(url) // nolint:gosec
+	res, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		return nil, fmt.Errorf("response %s; retrieving blocks %d to %d", url, from, to)
 	}
