@@ -126,13 +126,6 @@ func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string
 	require.NoErrorf(t, err, "get tokens for wallet %s", name)
 }
 
-func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
-	_, err := registerWalletForName(t, cliConfigFilename, name)
-	require.NoErrorf(t, err, "register wallet %s", name)
-	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
-	require.NoErrorf(t, err, "get tokens for wallet %s", name)
-}
-
 func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	cliutils.Wait(t, 5*time.Second)
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
