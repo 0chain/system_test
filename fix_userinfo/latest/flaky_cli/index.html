@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [fix_userinfo/3c1b476e] ran against [dev-1.devnet-0chain.net] at [2023-02-06_20.45.35]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [fix_userinfo/3c1b476e] ran against [dev-1.devnet-0chain.net] at [2023-02-06_20.45.35]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>11</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>4</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>3</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>4</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">February 6, 2023 21:58:54</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  skipped" id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  skipped" id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup  skipped" id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+                <div class="testResultGroup failed " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___broken_scenarios_test.go:31: \n","--- SKIP: Test___FlakyBrokenScenarios (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":28,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileCopy (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":424,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:427: Test case [File copy - Users should not be charged for moving a file ] scheduled at [02-06-2023 21:53:45] \n","","","    system_test_framework.go:85: Test case [File copy - Users should not be charged for moving a file ] start at [02-06-2023 21:53:45] \n","    flaky___flaky_test.go:428: Test calculations are flaky in  CLI\n","    flaky___flaky_test.go:427: Test case [File copy - Users should not be charged for moving a file ] exit at [02-06-2023 21:53:45]\n","    --- SKIP: Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_ (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileDelete (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":257,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":86.9,"Output":["","    flaky___flaky_test.go:260: Test case [Delete file concurrently in existing directory, should work] scheduled at [02-06-2023 21:52:18] \n","","","    system_test_framework.go:85: Test case [Delete file concurrently in existing directory, should work] start at [02-06-2023 21:52:18] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","    zboxcli_create_allocation_test.go:235: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 256    0.00% 0 / 256    0.00% 0s -\u003cNEWLINE\u003e- Error in file operation: consensus_not_met: Upload failed. Required consensus atleast 3, got 1 -\u003cNEWLINE\u003e- Upload failed. consensus_not_met: Upload failed. Required consensus atleast 3, got 1]\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:63: \u001b[32mCommand passed on retry [2/3]. Output: [0 / 256    0.00% 256 / 256  100.00% 256 / 256  100.00% 0s -\u003cNEWLINE\u003e- Status completed callback. Type = application/octet-stream. Name = dvx2jNzKRd_test.txt]\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:632: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --allocation 506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6 --remotepath /dvx2jNzKRd_test.txt --json --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:53:29.655304 wallet_base.go:294: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/02/06 21:53:29.655343 sdk.go:74: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:53:29.753386 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:29.833645 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-1.devnet-0chain.net/miner02\",\"https://dev-1.devnet-0chain.net/miner01\",\"https://dev-1.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-1.devnet-0chain.net/sharder02\",\"https://dev-1.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:53:29.915343 transaction_query_base.go:265: https://dev-1.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6 200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:53:29.915368 transaction_query_base.go:266: {\"id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"tx\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"data_shards\":2,\"parity_shards\":2,\"size\":2048,\"expiration_date\":1675720347,\"owner_id\":\"1d213429c85b991e2f5138f9d8ed9293191f5419b730ac3b590e4669c1f80c97\",\"owner_public_key\":\"d4e46c2686e0a3735fdb843c621c091a792c75f54f0e7fd58245df2216614223a0e1568a2f83d11430f3844db3273bee7db275a7ccfb504fc363f0dda93d4d02\",\"stats\":{\"used_size\":0,\"num_of_writes\":0,\"num_of_reads\":0,\"total_challenges\":0,\"num_open_challenges\":0,\"num_success_challenges\":0,\"num_failed_challenges\":0,\"latest_closed_challenge\":\"\"},\"diverse_blobbers\":false,\"preferred_blobbers\":null,\"blobber_details\":[{\"blobber_id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1393046189,\"allocation_root\":\"\",\"write_marke","r\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"45ed7558c46c2c056bb6e065e93fb32ba819233e9865d344c6f853b7c912542b\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":2586621019,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1436799955,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_pr","ice\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"9a9a9acb32752c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1548370627,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0}],\"is_immutable\":false,\"third_party_extendable\":false,\"file_options\":0,\"write_pool\":5000000000,\"read_price_range\":{\"min\":0,\"max\":184467440737095516},\"write_price_range\":{\"min\":0,\"max\":184467440737095516},\"start_time\":1675716747,\"time_unit\":2592000000000000,\"curators\":[],\"blobbers\":[{\"id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432","db220b99a9ffb2\",\"url\":\"https://dev-1.devnet-0chain.net/blobber02\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475637395456,\"allocated\":1393046189,\"last_health_check\":1675716798,\"saved_data\":88485554,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"45ed7558c46c2c056bb6e065e93fb32ba819233e9865d344c6f853b7c912542b\",\"url\":\"https://dev-1.devnet-0chain.net/blobber03\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475461230592,\"allocated\":2586621019,\"last_health_check\":1675716789,\"saved_data\":631462260,\"","data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"url\":\"https://dev-1.devnet-0chain.net/blobber05\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475473932288,\"allocated\":1436799955,\"last_health_check\":1675716785,\"saved_data\":631975706,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"9a9a9acb327","52c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"url\":\"https://dev-1.devnet-0chain.net/blobber06\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475436331008,\"allocated\":1548370627,\"last_health_check\":1675716799,\"saved_data\":96420219,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}}]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:29.943334 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:29.971169 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:29.997451 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:29.998239 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:632: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --allocation 506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6 --remotepath /RE0zZJjieN_test.txt --json --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:53:45.118905 wallet_base.go:294: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/02/06 21:53:45.118944 sdk.go:74: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:53:45.212807 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:45.292183 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-1.devnet-0chain.net/miner02\",\"https://dev-1.devnet-0chain.net/miner01\",\"https://dev-1.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-1.devnet-0chain.net/sharder02\",\"https://dev-1.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:53:45.374215 transaction_query_base.go:265: https://dev-1.devnet-0chain.net/sharder02/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6 200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:53:45.374240 transaction_query_base.go:266: {\"id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"tx\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"data_shards\":2,\"parity_shards\":2,\"size\":2048,\"expiration_date\":1675720347,\"owner_id\":\"1d213429c85b991e2f5138f9d8ed9293191f5419b730ac3b590e4669c1f80c97\",\"owner_public_key\":\"d4e46c2686e0a3735fdb843c621c091a792c75f54f0e7fd58245df2216614223a0e1568a2f83d11430f3844db3273bee7db275a7ccfb504fc363f0dda93d4d02\",\"stats\":{\"used_size\":0,\"num_of_writes\":0,\"num_of_reads\":0,\"total_challenges\":1,\"num_open_challenges\":1,\"num_success_challenges\":0,\"num_failed_challenges\":0,\"latest_closed_challenge\":\"\"},\"diverse_blobbers\":false,\"preferred_blobbers\":null,\"blobber_details\":[{\"blobber_id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1393046189,\"allocation_root\":\"\",\"write_marke","r\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"45ed7558c46c2c056bb6e065e93fb32ba819233e9865d344c6f853b7c912542b\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":2586621019,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1436799955,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_pr","ice\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"9a9a9acb32752c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"allocation_id\":\"506578b7ce35bb7fa80098b4bedef460874dba691e6d77fd918c7b444f9446e6\",\"size\":1548370627,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0}],\"is_immutable\":false,\"third_party_extendable\":false,\"file_options\":0,\"write_pool\":5000000000,\"read_price_range\":{\"min\":0,\"max\":184467440737095516},\"write_price_range\":{\"min\":0,\"max\":184467440737095516},\"start_time\":1675716747,\"time_unit\":2592000000000000,\"curators\":[],\"blobbers\":[{\"id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432","db220b99a9ffb2\",\"url\":\"https://dev-1.devnet-0chain.net/blobber02\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475637395456,\"allocated\":1393046189,\"last_health_check\":1675716798,\"saved_data\":88485554,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"45ed7558c46c2c056bb6e065e93fb32ba819233e9865d344c6f853b7c912542b\",\"url\":\"https://dev-1.devnet-0chain.net/blobber03\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475461230592,\"allocated\":2586621019,\"last_health_check\":1675716789,\"saved_data\":631462260,\"","data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"url\":\"https://dev-1.devnet-0chain.net/blobber05\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475473932288,\"allocated\":1436799955,\"last_health_check\":1675716785,\"saved_data\":631975706,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"9a9a9acb327","52c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"url\":\"https://dev-1.devnet-0chain.net/blobber06\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475436331008,\"allocated\":1548370627,\"last_health_check\":1675716799,\"saved_data\":96420219,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}}]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:45.402512 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:45.432138 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:45.455393 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:53:45.456292 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    flaky___flaky_test.go:260: Test case [Delete file concurrently in existing directory, should work] exit at [02-06-2023 21:53:45]\n","--- PASS: Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work (86.90s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":320,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":308.97,"Output":["","    flaky___flaky_test.go:325: Test case [Rename and delete file concurrently, should work] scheduled at [02-06-2023 21:53:45] \n","","","    system_test_framework.go:85: Test case [Rename and delete file concurrently, should work] start at [02-06-2023 21:53:45] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","    zboxcli_create_allocation_test.go:235: Creating new allocation...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_common_user_functions_test.go:167: Renaming file...\n","    zboxcli_collaborator_test.go:794: Deleting file...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 1]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 0]\n","    utils.go:63: \u001b[32mCommand passed on retry [2/3]. Output: [/skvCvoRLnD_test.txt deleted]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 2]\n","    utils.go:63: \u001b[32mCommand passed on retry [3/3]. Output: [/8WvtwEWyuD_test.txt deleted]\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:632: Listing individual file in allocation...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:418\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tAn error is expected but got nil.\n","        \tTest:       \tTest___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work\n","    flaky___flaky_test.go:325: Test case [Rename and delete file concurrently, should work] exit at [02-06-2023 21:58:54]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:25: \n","--- SKIP: Test___FlakyScenariosCommonUserFunctions (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":90,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":212.73,"Output":["","    flaky___flaky_test.go:93: Test case [transfer allocation accounting test] scheduled at [02-06-2023 21:48:45] \n","","","","    system_test_framework.go:85: Test case [transfer allocation accounting test] start at [02-06-2023 21:48:45] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","","    zboxcli_create_allocation_test.go:235: Creating new allocation...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:704: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:721: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:328: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation 2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf --wallet Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:49:25.592985 wallet_base.go:294: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/02/06 21:49:25.593022 sdk.go:74: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:49:25.686985 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.767539 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-1.devnet-0chain.net/miner02\",\"https://dev-1.devnet-0chain.net/miner01\",\"https://dev-1.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-1.devnet-0chain.net/sharder01\",\"https://dev-1.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:49:25.849717 transaction_query_base.go:265: https://dev-1.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf 200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:49:25.849743 transaction_query_base.go:266: {\"id\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"tx\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"data_shards\":2,\"parity_shards\":2,\"size\":1024000,\"expiration_date\":1675720134,\"owner_id\":\"fb1761e91e82766eec3710a6f88ece535dcf0899b7c685555dc505c469da7245\",\"owner_public_key\":\"bf4cc94b22a5db7a36fed73f4a768d33e9219b6d5456398bb677550141f4a0099117685e950c150dabb987fe99653fcc6b115c39f5fe6577be37ac878b54cb8a\",\"stats\":{\"used_size\":409600,\"num_of_writes\":4,\"num_of_reads\":0,\"total_challenges\":0,\"num_open_challenges\":0,\"num_success_challenges\":0,\"num_failed_challenges\":0,\"latest_closed_challenge\":\"\"},\"diverse_blobbers\":false,\"preferred_blobbers\":null,\"blobber_details\":[{\"blobber_id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"allocation_id\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"size\":1393045165,\"allocation_root\":\"\",\"wri","te_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":33,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"9a9a9acb32752c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"allocation_id\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"size\":1548369603,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":33,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"9cc0d682d2aa97b4d19f907473aefcf27a04456a53ada707f86db9cd8f830cae\",\"allocation_id\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"size\":1310365272,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000",",\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":33,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"de2b9c70a0de31a716645e53eb899399b2de7cbeb916bf8986f80a7281c26ea4\",\"allocation_id\":\"2fe2a4d2e6bf58d695bf4e641117400a2066c9cf3978db2995d67116bb3342cf\",\"size\":2305424650,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":33,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0}],\"is_immutable\":false,\"third_party_extendable\":false,\"file_options\":0,\"write_pool\":4999999472,\"read_price_range\":{\"min\":0,\"max\":184467440737095516},\"write_price_range\":{\"min\":0,\"max\":184467440737095516},\"start_time\":1675716535,\"moved_to_challenge\":528,\"time_unit\":2592000000000000,\"curators\":[],\"blobbers\":[{\"id\":\"19bbafd3da04b","e5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"url\":\"https://dev-1.devnet-0chain.net/blobber02\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475637395456,\"allocated\":1393045165,\"last_health_check\":1675716558,\"saved_data\":88485426,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"9a9a9acb32752c03e4b1ee35ccb56f3eb94bb39f53775c19f3df717a6a8b5bcc\",\"url\":\"https://dev-1.devnet-0chain.net/blobber06\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475436331008,\"allocated\":1548369603,\"last_health_check","\":1675716559,\"saved_data\":96420219,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"9cc0d682d2aa97b4d19f907473aefcf27a04456a53ada707f86db9cd8f830cae\",\"url\":\"https://dev-1.devnet-0chain.net/blobber04\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475533582336,\"allocated\":1310365272,\"last_health_check\":1675716529,\"saved_data\":554350422,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":","0,\"timestamp\":0}},{\"id\":\"de2b9c70a0de31a716645e53eb899399b2de7cbeb916bf8986f80a7281c26ea4\",\"url\":\"https://dev-1.devnet-0chain.net/blobber01\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475547889664,\"allocated\":2305424650,\"last_health_check\":1675716525,\"saved_data\":545606807,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}}]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.877515 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.904266 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.932724 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.936203 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/02/06 21:49:25.936226 sync.go:87: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:25.936236 sync.go:94: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:328: Listing all...\n","","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:328: Listing all...\n","","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:328: Listing all...\n","","    utils.go:138: Waiting 5s...\n","","    utils.go:138: Waiting 2m0s...\n","","    zboxcli_upload_token_test.go:86: Getting upload cost...\n","    zboxcli_common_user_functions_test.go:215: Get Allocation...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:175\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tShould be true\n","        \tTest:       \tTest___FlakyTransferAllocation/transfer_allocation_accounting_test\n","    flaky___flaky_test.go:93: Test case [transfer allocation accounting test] exit at [02-06-2023 21:52:18]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_and_upload_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":97.22,"Output":["","    flaky___flaky_test.go:179: Test case [transfer allocation and upload file] scheduled at [02-06-2023 21:48:45] \n","","","","    system_test_framework.go:85: Test case [transfer allocation and upload file] start at [02-06-2023 21:48:45] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","","    zboxcli_create_allocation_test.go:235: Creating new allocation...\n","","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","","    zboxcli_add_remove_curator_test.go:363: Adding curator...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","","    zboxcli_update_allocation_test.go:553: Executing faucet...\n","    zwalletcli_register_wallet_test.go:166: Getting wallet...\n","    zboxcli_transfer_allocation_test.go:704: Transferring allocation ownership...\n","","    zboxcli_transfer_allocation_test.go:721: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:328: Listing all...\n","","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list-all --silent --allocation 33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7 --wallet Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:49:30.631653 wallet_base.go:294: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/02/06 21:49:30.631696 sdk.go:74: ******* Storage SDK Version: v1.8.9-57-g7fbdcff *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/02/06 21:49:30.724531 transaction_base.go:136: ******* Wallet SDK Version:v1.8.9-57-g7fbdcff ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.804102 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-1.devnet-0chain.net/miner01\",\"https://dev-1.devnet-0chain.net/miner03\",\"https://dev-1.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-1.devnet-0chain.net/sharder02\",\"https://dev-1.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:49:30.886055 transaction_query_base.go:265: https://dev-1.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7 200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/02/06 21:49:30.886082 transaction_query_base.go:266: {\"id\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"tx\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"data_shards\":2,\"parity_shards\":2,\"size\":20480,\"expiration_date\":1675720134,\"owner_id\":\"e78113dd088dac5e87a465c85bf1112137de625515347cdc63aa032088d595f2\",\"owner_public_key\":\"ca808ccf1c997797b5600248fbc31befe59fc6f6e981a8c7cdb0ee924e564600db694d1fb302331337dd1677c8fe567f19851a3a3bfc75643bbf8d7609776c0c\",\"stats\":{\"used_size\":384,\"num_of_writes\":3,\"num_of_reads\":0,\"total_challenges\":1,\"num_open_challenges\":1,\"num_success_challenges\":0,\"num_failed_challenges\":0,\"latest_closed_challenge\":\"\"},\"diverse_blobbers\":false,\"preferred_blobbers\":null,\"blobber_details\":[{\"blobber_id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"allocation_id\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"size\":1393045165,\"allocation_root\":\"\",\"write_ma","rker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"allocation_id\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"size\":1436798931,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"9cc0d682d2aa97b4d19f907473aefcf27a04456a53ada707f86db9cd8f830cae\",\"allocation_id\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"size\":1310365272,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write","_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0},{\"blobber_id\":\"de2b9c70a0de31a716645e53eb899399b2de7cbeb916bf8986f80a7281c26ea4\",\"allocation_id\":\"33dc5485944b17adff8a2a6e17d8d51558510bef3dbe06914b1551d3094f8ce7\",\"size\":2305424650,\"allocation_root\":\"\",\"write_marker\":null,\"stats\":null,\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"min_lock_demand\":0,\"spent\":0,\"penalty\":0,\"read_reward\":0,\"returned\":0,\"challenge_reward\":0,\"challenge_pool_integral_value\":0}],\"is_immutable\":false,\"third_party_extendable\":false,\"file_options\":0,\"write_pool\":5000000000,\"read_price_range\":{\"min\":0,\"max\":184467440737095516},\"write_price_range\":{\"min\":0,\"max\":184467440737095516},\"start_time\":1675716534,\"time_unit\":2592000000000000,\"curators\":[\"2363b7df8d378bcf152445bb85c7658ac7e12b0aa5ad37f1324477fdde75312f\"],","\"blobbers\":[{\"id\":\"19bbafd3da04be5474e49cea50d6805e4750dd117b80a5f432db220b99a9ffb2\",\"url\":\"https://dev-1.devnet-0chain.net/blobber02\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475637395456,\"allocated\":1393045165,\"last_health_check\":1675716558,\"saved_data\":88485426,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"7801743df796f484921aecc39efa338c852e2b966de96b6fc536b6219617deb1\",\"url\":\"https://dev-1.devnet-0chain.net/blobber05\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475473932288,\"allocate","d\":1436798931,\"last_health_check\":1675716545,\"saved_data\":631975706,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"9cc0d682d2aa97b4d19f907473aefcf27a04456a53ada707f86db9cd8f830cae\",\"url\":\"https://dev-1.devnet-0chain.net/blobber04\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475533582336,\"allocated\":1310365272,\"last_health_check\":1675716529,\"saved_data\":554350422,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.","1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}},{\"id\":\"de2b9c70a0de31a716645e53eb899399b2de7cbeb916bf8986f80a7281c26ea4\",\"url\":\"https://dev-1.devnet-0chain.net/blobber01\",\"geolocation\":{\"latitude\":0,\"longitude\":0},\"terms\":{\"read_price\":100000000,\"write_price\":1000000000,\"min_lock_demand\":0.1,\"max_offer_duration\":2678400000000000},\"capacity\":475547889664,\"allocated\":2305424650,\"last_health_check\":1675716525,\"saved_data\":545606807,\"data_read_last_reward_round\":0,\"last_reward_data_read_round\":0,\"stake_pool_settings\":{\"delegate_wallet\":\"591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8\",\"min_stake\":10000000000,\"max_stake\":1000000000000,\"num_delegates\":50,\"service_charge\":0.1},\"reward_round\":{\"start_round\":0,\"timestamp\":0}}]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.914155 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.944784 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.968663 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.969831 listworker.go:111: List result:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m0box-sdk        \u001b[31m[ERROR]  2023/02/06 21:49:30.969852 sync.go:87: error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:77: \u001b[31m\u001b[0m\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/02/06 21:49:30.969861 sync.go:94: Remote List: map[]\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Auth ticket is required\"}\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:328: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:328: Listing all...\n","    utils.go:138: Waiting 10s...\n","","    utils.go:138: Waiting 5s...\n","","    zboxcli_create_dir_test.go:328: Listing all...\n","    zboxcli_wp_lock_unlock_test.go:367: Locking write tokens...\n","","    zboxcli_file_upload_test.go:728: Uploading file...\n","    flaky___flaky_test.go:179: Test case [transfer allocation and upload file] exit at [02-06-2023 21:50:23]\n","--- PASS: Test___FlakyTransferAllocation/transfer_allocation_and_upload_file (97.22s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
