@@ -124,3 +124,10 @@ type PutNftState struct {
 	Metadata     string `form:"meta_data" json:"meta_data"`
 	AllocationId string `form:"allocation_id" json:"allocation_id"`
 }
+
+type CreateAllocation struct {
+	AllocationName string `form:"name" json:"name"`
+	AllocationId   string `form:"id" json:"id"`
+	Description    string `form:"description" json:"description"`
+	AllocationType string `form:"allocation_type" json:"allocation_type"`
+}

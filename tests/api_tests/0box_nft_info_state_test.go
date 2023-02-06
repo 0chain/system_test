@@ -12,6 +12,19 @@ func TestNftInfoState(testSetup *testing.T) {
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
+	t.RunSequentially("Posting Allocation with valid form-data should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		CreateAllocation, response, err := zboxClient.CreateAllocation(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode())
+		require.NotNil(t, CreateAllocation)
+	})
+
 	t.RunSequentially("Posting NFT Info with valid form-data should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
