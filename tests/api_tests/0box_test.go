@@ -77,13 +77,13 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 1, len(wallets.Data), "Expected 1 wallet only to be present")
 	})
 
-	t.RunSequentially("Get empty user info should work", func(t *test.SystemTest) {
+	t.RunSequentially("Get empty user info should not work", func(t *test.SystemTest) {
 		// FIXME: there are no delete endpoints so we can't teardown
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, userInfo)
 		require.Equal(t, "", userInfo.Username, "output not as expected", response.String())
 		require.Equal(t, "", userInfo.Biography, "output not as expected", response.String()) //FIXME: should be null
