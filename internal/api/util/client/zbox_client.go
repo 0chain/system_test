@@ -113,7 +113,7 @@ func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -145,7 +145,7 @@ func (c *ZboxClient) GetAllocation(t *test.SystemTest, idToken, csrfToken, phone
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
 		},
 		RequiredStatusCode: 200,
@@ -175,7 +175,7 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
 		},
 		RequiredStatusCode: 200,
@@ -210,7 +210,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -244,7 +244,7 @@ func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocation
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -277,7 +277,7 @@ func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, allocationId, allocati
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
@@ -308,7 +308,7 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpDELETEMethod)
@@ -333,7 +333,7 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -365,7 +365,7 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -394,7 +394,7 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
@@ -423,7 +423,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
@@ -449,7 +449,7 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 		FormData: formData,
 		Headers: map[string]string{
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		}, // TODO: this endpoint doesnt check signature!
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -475,7 +475,7 @@ func (c *ZboxClient) GetUserInfoFromUserName(t *test.SystemTest, idToken, csrfTo
 		FormData: formData,
 		Headers: map[string]string{
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		}, // TODO: this endpoint doesnt check signature!
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -507,7 +507,7 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
