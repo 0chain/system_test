@@ -525,7 +525,7 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, idToken, csrfToken, ph
 			"X-CSRF-TOKEN":       csrfToken,
 			"X-APP-TYPE":         "blimp",
 		},
-		RequiredStatusCode: 201,
+		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
 
 	return CreateAllocation, resp, err
