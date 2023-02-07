@@ -445,11 +445,11 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &userInfo,
+		Dst:      &userInfo,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-CSRF-TOKEN": csrfToken,
+			"X-APP-TYPE":   "blimp",
 		}, // TODO: this endpoint doesnt check signature!
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -471,11 +471,11 @@ func (c *ZboxClient) GetUserInfoFromUserName(t *test.SystemTest, idToken, csrfTo
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &userInfo,
+		Dst:      &userInfo,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-CSRF-TOKEN": csrfToken,
+			"X-APP-TYPE":   "blimp",
 		}, // TODO: this endpoint doesnt check signature!
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
