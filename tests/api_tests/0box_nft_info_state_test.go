@@ -18,7 +18,7 @@ func TestNftInfoState(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxblimpWallet, response, err := zboxClient.PostBlimpWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -28,8 +28,8 @@ func TestNftInfoState(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		require.NotNil(t, zboxblimpWallet)
+		require.Equal(t, walletName, zboxblimpWallet.Name, "Wallet name does not match expected")
 
 		CreateAllocation, response, err := zboxClient.CreateAllocation(t,
 			firebaseToken.IdToken,

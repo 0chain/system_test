@@ -218,6 +218,40 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 	return zboxWallet, resp, err
 }
 
+func (c *ZboxClient) PostBlimpWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+	t.Logf("Posting wallet using 0box...")
+	var zboxWallet *model.ZboxWalletAlt
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet")
+
+	formData := map[string]string{
+		"mnemonic":    mnemonic,
+		"name":        walletName,
+		"description": walletDescription,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxWallet,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-Key":       "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
+			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxWallet, resp, err
+}
+
 func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
 	t.Logf("Posting Allocation using 0box...")
 	var message *model.MessageContainer
