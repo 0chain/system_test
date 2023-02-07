@@ -503,6 +503,14 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, idToken, csrfToken, ph
 		"id":              "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
 		"description":     "randon_description",
 		"allocation_type": "cloud_migration",
+		"size":            "100",
+		"expiration":      "10 hours",
+		"finalized":       "false",
+		"cancelled":       "false",
+		"data_shards":     "2",
+		"parity_shards":   "2",
+		"read_price":      "1.00",
+		"write_price":     "2.00",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
