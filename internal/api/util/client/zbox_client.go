@@ -515,7 +515,7 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, idToken, csrfToken, ph
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		},
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
