@@ -319,8 +319,57 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 1, len(wallets), "Wallet not updated")
 		newWallet := wallets[0]
 		require.Equal(t, "new_wallet_name", newWallet.WalletName, "Wallet name not updated")
-		// Description is not working in PostWallet and Update is also not working for description
+		//FIXME: Description is not working in PostWallet and Update is also not working for description
 		//require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
+	})
+
+	t.RunSequentially("Contact Wallet", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		// Create Wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		// test for 2 users
+		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"},{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}]"
+
+		// Contact Wallet
+		response, err = zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		type contactResponse struct {
+			Message string              `json:"message"`
+			Data    []map[string]string `json:"data"`
+		}
+
+		var cr contactResponse
+		json.Unmarshal([]byte(response.String()), &cr)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 2, len(cr.Data), "Response data does not match expected. Output: [%v]", response.String())
+
+		// test for 1 user
+		reqBody = "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"}]"
+
+		// Contact Wallet
+		response, err = zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		json.Unmarshal([]byte(response.String()), &cr)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 1, len(cr.Data), "Response data does not match expected. Output: [%v]", response.String())
 	})
 }
 

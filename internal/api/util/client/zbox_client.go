@@ -418,3 +418,35 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 
 	return zboxUsername, resp, err
 }
+
+func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfToken, phoneNumber string) (*resty.Response, error) {
+	t.Logf("Contacting wallets for [%v] using 0box...", phoneNumber)
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/contact/wallets")
+
+	//formData := "[{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}\", \"{\"user_name\":\"artem3\",\"phone_number\":\"+917696229925\"}]"
+
+	formData := map[string]string{
+		"contacts": reqBody,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &model.MessageContainer{},
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":    "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-Key":   "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
+			"X-App-Timestamp":    "1618213324",
+			"X-App-ID-TOKEN":     idToken,
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "chimney",
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return resp, err
+}
