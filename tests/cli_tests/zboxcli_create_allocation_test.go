@@ -137,9 +137,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "expire": "1h"}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		t.Log("output", output)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: allocation_creation_failed: Too many blobbers selected, max available \\d*"), output[0], strings.Join(output, "\n"))
+		require.Regexp(t, regexp.MustCompile("Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: allocation_creation_failed: Too many blobbers selected, max available \\d*"),
+			output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
