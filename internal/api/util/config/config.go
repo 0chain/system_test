@@ -18,6 +18,8 @@ type Config struct {
 	EthereumNodeURL         string `yaml:"ethereum_node_url"`
 	DefaultTestCaseTimeout  string `yaml:"default_test_case_timeout"`
 	DelegatedWalletLocation string `yaml:"delegated_wallet_location"`
+	ZboxUrl                string `yaml:"0box_url"`
+	ZboxPhoneNumber        string `yaml:"0box_phone_number"`
 }
 
 func Parse(configPath string) *Config {

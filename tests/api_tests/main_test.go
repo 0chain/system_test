@@ -16,8 +16,9 @@ import (
 var (
 	apiClient *client.APIClient
 	sdkClient *client.SDKClient
+	zboxClient *client.ZboxClient
 	ethClient *client.ETHClient
-
+	parsedConfig       *config.Config
 	sdkWallet          *model.Wallet
 	sdkWalletMnemonics string
 
@@ -31,11 +32,11 @@ func TestMain(m *testing.M) {
 		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
-	parsedConfig := config.Parse(configPath)
-
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker, parsedConfig.EthereumNodeURL)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	ethClient = client.NewETHClient(parsedConfig.EthereumNodeURL)
+	parsedConfig = config.Parse(configPath)
+	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
