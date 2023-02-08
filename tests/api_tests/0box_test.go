@@ -336,7 +336,7 @@ func Test0Box(testSetup *testing.T) {
 
 		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"}]"
 
-		response, err := zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		response, err := zboxClient.GetContactWallets(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		_ = json.Unmarshal([]byte(response.String()), &cr)
 
@@ -351,7 +351,7 @@ func Test0Box(testSetup *testing.T) {
 
 		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"},{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}]"
 
-		response, err := zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		response, err := zboxClient.GetContactWallets(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		type contactResponse struct {
 			Message string              `json:"message"`

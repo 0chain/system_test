@@ -450,7 +450,7 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 	return zboxUsername, resp, err
 }
 
-func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfToken, phoneNumber string) (*resty.Response, error) {
+func (c *ZboxClient) GetContactWallets(t *test.SystemTest, reqBody, idToken, csrfToken, phoneNumber string) (*resty.Response, error) {
 	t.Logf("Contacting wallets for [%v] using 0box...", phoneNumber)
 
 	urlBuilder := NewURLBuilder()
