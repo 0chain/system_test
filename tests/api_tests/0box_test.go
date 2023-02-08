@@ -3,6 +3,7 @@ package api_tests
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -13,24 +14,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
-
-//func TestCallContactWallets(testSetup *testing.T) {
-//	t := test.NewSystemTest(testSetup)
-//	t.Parallel()
-//
-//	t.Run("Get wallets List, should work", func(t *test.SystemTest) {
-//		wallet := apiClient.RegisterWallet(t)
-//		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-//
-//		contactWallet := apiClient.RegisterWallet(t)
-//		apiClient.ExecuteFaucet(t, contactWallet, client.TxSuccessfulStatus)
-//
-//		apiClient.AddContact(t, wallet, contactWallet, client.HttpOkStatus)
-//
-//		_, err := apiClient.CallContactWallets(t, wallet, contactWallet.Id, client.HttpOkStatus)
-//		require.NoError(t, err)
-//	})
-//}
 
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
@@ -327,6 +310,20 @@ func Test0Box(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
+		// create wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		type contactResponse struct {
 			Message string              `json:"message"`
 			Data    []map[string]string `json:"data"`
@@ -336,7 +333,7 @@ func Test0Box(testSetup *testing.T) {
 
 		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"}]"
 
-		response, err := zboxClient.GetContactWallets(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		response, err = zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		_ = json.Unmarshal([]byte(response.String()), &cr)
 
@@ -349,9 +346,23 @@ func Test0Box(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
+		// create wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"},{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}]"
 
-		response, err := zboxClient.GetContactWallets(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		response, err = zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		type contactResponse struct {
 			Message string              `json:"message"`
@@ -375,6 +386,7 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	if wallets != nil {
 		t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
 		for _, wallet := range wallets {
+			fmt.Println(wallet.WalletId)
 			message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
 			println(message, response, err)
 		}
