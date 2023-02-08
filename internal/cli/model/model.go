@@ -295,11 +295,12 @@ type NodeList struct {
 }
 
 type DelegatePool struct {
-	Balance      int64  `json:"balance"`
-	Reward       int64  `json:"reward"`
-	Status       int    `json:"status"`
-	RoundCreated int64  `json:"round_created"` // used for cool down
-	DelegateID   string `json:"delegate_id"`
+	Balance              int64  `json:"balance"`
+	Reward               int64  `json:"reward"`
+	Status               int    `json:"status"`
+	RoundCreated         int64  `json:"round_created"` // used for cool down
+	DelegateID           string `json:"delegate_id"`
+	RoundPoolLastUpdated int64  `json:"round_pool_last_updated"`
 }
 
 type StakePool struct {
@@ -312,20 +313,20 @@ type StakePool struct {
 type Node struct {
 	SimpleNode  `json:"simple_miner"`
 	StakePool   `json:"stake_pool"`
-	Round       int64 `json:"round"`
 	TotalReward int64 `json:"total_reward"`
 }
 
 type SimpleNode struct {
-	ID         string      `json:"id"`
-	N2NHost    string      `json:"n2n_host"`
-	Host       string      `json:"host"`
-	Port       int         `json:"port"`
-	PublicKey  string      `json:"public_key"`
-	ShortName  string      `json:"short_name"`
-	BuildTag   string      `json:"build_tag"`
-	TotalStake int64       `json:"total_stake"`
-	Stat       interface{} `json:"stat"`
+	ID                            string      `json:"id"`
+	N2NHost                       string      `json:"n2n_host"`
+	Host                          string      `json:"host"`
+	Port                          int         `json:"port"`
+	PublicKey                     string      `json:"public_key"`
+	ShortName                     string      `json:"short_name"`
+	BuildTag                      string      `json:"build_tag"`
+	TotalStake                    int64       `json:"total_stake"`
+	Stat                          interface{} `json:"stat"`
+	RoundServiceChargeLastUpdated int64       `json:"round_service_charge_last_updated"`
 }
 
 type Sharder struct {
@@ -624,6 +625,60 @@ type EventDBTransaction struct {
 	Status            int    `json:"status"`
 }
 
+type Reward int
+
+const (
+	MinLockDemandReward Reward = iota
+	BlockRewardMiner
+	BlockRewardSharder
+	BlockRewardBlobber
+	FeeRewardMiner
+	FeeRewardSharder
+	ValidationReward
+	FileDownloadReward
+	ChallengePassReward
+	ChallengeSlashPenalty
+	CancellationChargeReward
+	NumOfRewards
+)
+
+var rewardString = []string{
+	"min lock demand",
+	"block_reward_miner",
+	"block_reward_sharder",
+	"block_reward_blobber",
+	"fees miner",
+	"fees sharder",
+	"validation reward",
+	"file download reward",
+	"challenge pass reward",
+	"challenge slash",
+	"cancellation charge",
+	"invalid",
+}
+
+func (r Reward) String() string {
+	return rewardString[r]
+}
+
+func (r Reward) Int() int {
+	return int(r)
+}
+
+type RewardProvider struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
+	ProviderId  string `json:"provider_id" gorm:"index:idx_provider,priority:2"`
+	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+}
+
+type RewardDelegate struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
+	PoolID      string `json:"pool_id" gorm:"index:idx_pool,priority:2"`
+	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+}
+
 type EventDBBlock struct {
 	Hash                  string               `json:"hash"`
 	Version               string               `json:"version"`
@@ -643,6 +698,25 @@ type EventDBBlock struct {
 	RoundTimeoutCount     int                  `json:"round_timeout_count"`
 	CreatedAt             time.Time            `json:"created_at"`
 	Transactions          []EventDBTransaction `json:"transactions"`
+}
+
+type ReadMarkersCount struct {
+	ReadMarkersCount int64 `json:"read_markers_count"`
+}
+
+type ReadMarker struct {
+	ClientID      string  `json:"client_id"`
+	BlobberID     string  `json:"blobber_id"`
+	AllocationID  string  `json:"allocation_id"`
+	TransactionID string  `json:"transaction_id"`
+	OwnerID       string  `json:"owner_id"`
+	Timestamp     int64   `json:"timestamp"`
+	ReadCounter   int64   `json:"read_counter"`
+	ReadSize      float64 `json:"read_size"`
+	Signature     string  `json:"signature"`
+	PayerID       string  `json:"payer_id"`
+	AuthTicket    string  `json:"auth_ticket"`
+	BlockNumber   int64   `json:"block_number"`
 }
 
 var StorageKeySettings = []string{

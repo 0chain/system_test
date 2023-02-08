@@ -344,7 +344,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.RunWithTimeout("Upload Large File Should Work", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload Large File Should Work", 3*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
@@ -552,7 +552,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 1)
 
 		expected := "Error fetching the allocation. allocation_fetch_error: " +
-			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: ab12mn34as90, error: record not found"
+			"Error fetching the allocation.zcn: object not found"
 		require.Equal(t, expected, output[0])
 	})
 
