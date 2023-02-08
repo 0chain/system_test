@@ -322,6 +322,49 @@ func Test0Box(testSetup *testing.T) {
 		// Description is not working in PostWallet and Update is also not working for description
 		//require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
 	})
+
+	t.RunSequentially("Contact Wallet should work with for single user", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		type contactResponse struct {
+			Message string              `json:"message"`
+			Data    []map[string]string `json:"data"`
+		}
+
+		var cr contactResponse
+
+		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"}]"
+
+		response, err := zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		_ = json.Unmarshal([]byte(response.String()), &cr)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 1, len(cr.Data), "Response data does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Contact Wallet should work with for multiple users", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"},{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}]"
+
+		response, err := zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		type contactResponse struct {
+			Message string              `json:"message"`
+			Data    []map[string]string `json:"data"`
+		}
+
+		var cr contactResponse
+		_ = json.Unmarshal([]byte(response.String()), &cr)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 2, len(cr.Data), "Response data does not match expected. Output: [%v]", response.String())
+	})
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
