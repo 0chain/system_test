@@ -269,10 +269,11 @@ type StakePoolDelegatePoolInfo struct {
 	Rewards    int64  `json:"rewards"`     // current
 	UnStake    bool   `json:"unstake"`     // want to unstake
 
-	TotalReward  int64  `json:"total_reward"`
-	TotalPenalty int64  `json:"total_penalty"`
-	Status       string `json:"status"`
-	RoundCreated int64  `json:"round_created"`
+	TotalReward  int64            `json:"total_reward"`
+	TotalPenalty int64            `json:"total_penalty"`
+	Status       string           `json:"status"`
+	RoundCreated int64            `json:"round_created"`
+	StakedAt     common.Timestamp `json:"staked_at"`
 }
 
 type StakePoolSettings struct {
@@ -293,11 +294,12 @@ type NodeList struct {
 }
 
 type DelegatePool struct {
-	Balance      int64  `json:"balance"`
-	Reward       int64  `json:"reward"`
-	Status       int    `json:"status"`
-	RoundCreated int64  `json:"round_created"` // used for cool down
-	DelegateID   string `json:"delegate_id"`
+	Balance      int64            `json:"balance"`
+	Reward       int64            `json:"reward"`
+	Status       int              `json:"status"`
+	RoundCreated int64            `json:"round_created"` // used for cool down
+	DelegateID   string           `json:"delegate_id"`
+	StakedAt     common.Timestamp `json:"staked_at"`
 }
 
 type StakePool struct {
