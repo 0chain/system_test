@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/0chain/gosdk/core/common"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"
 )
@@ -655,9 +654,8 @@ type StakePoolDelegatePoolInfo struct {
 	Rewards    int64  `json:"rewards"`
 	UnStake    bool   `json:"unstake"`
 
-	TotalReward  int64            `json:"total_reward"`
-	TotalPenalty int64            `json:"total_penalty"`
-	Status       string           `json:"status"`
-	RoundCreated int64            `json:"round_created"`
-	StakedAt     common.Timestamp `json:"staked_at"`
+	TotalReward  int64  `json:"total_reward"`
+	TotalPenalty int64  `json:"total_penalty"`
+	Status       string `json:"status"`
+	RoundCreated int64  `json:"round_created"`
 }
