@@ -188,6 +188,43 @@ func Test0Box(testSetup *testing.T) {
 
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
+
+	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		dexState, response, err := zboxClient.PostDexState(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode())
+		require.NotNil(t, dexState)
+	})
+
+	t.RunSequentially("Create a DEX state with invalid phone number should fail", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		dexState, response, err := zboxClient.PostDexState(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			"123456789",
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Empty(t, dexState)
+	})
+
+	t.RunSequentially("Create a DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
+		dexState, response, err := zboxClient.PostDexState(t,
+			firebaseToken.IdToken,
+			"abcd",
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Empty(t, dexState)
+	})
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
