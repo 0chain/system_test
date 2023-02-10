@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -188,6 +187,13 @@ func Test0Box(testSetup *testing.T) {
 	})
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
+}
+
+func TestDexState(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+	t.Parallel()
+
+	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
