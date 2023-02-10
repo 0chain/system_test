@@ -144,6 +144,7 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, idToken, csrfToken, phoneN
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
 			"X-APP-TYPE":             "chimney",
 		},
