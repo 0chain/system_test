@@ -221,11 +221,11 @@ func Test0Box(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		_, response, err := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		_, response, _ := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		// convert response to json
 		var responseJson []string
-		err = json.Unmarshal([]byte(response.String()), &responseJson)
+		err := json.Unmarshal([]byte(response.String()), &responseJson)
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -256,7 +256,7 @@ func Test0Box(testSetup *testing.T) {
 		wallet := wallets[0]
 
 		// Delete Wallet
-		_, response, err = zboxClient.DeleteWallet(t, wallet.WalletId, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		_, response, _ = zboxClient.DeleteWallet(t, wallet.WalletId, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		var responseJson map[string]interface{}
 		err = json.Unmarshal([]byte(response.String()), &responseJson)
 		require.NoError(t, err)
@@ -297,13 +297,13 @@ func Test0Box(testSetup *testing.T) {
 		var wallets []model.ZboxWallet
 
 		// store data to responseJson and read and println it
-		err = json.Unmarshal([]byte(resp.String()), &wallets)
+		_ = json.Unmarshal([]byte(resp.String()), &wallets)
 
 		require.Equal(t, 1, len(wallets), "Wallet not updated")
 		newWallet := wallets[0]
 		require.Equal(t, "new_wallet_name", newWallet.WalletName, "Wallet name not updated")
 		// Description is not working in PostWallet and Update is also not working for description
-		//require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
+		// require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
 	})
 
 	t.RunSequentially("Contact Wallet should work with for single user", func(t *test.SystemTest) {
