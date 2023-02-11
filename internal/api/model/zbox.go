@@ -27,6 +27,28 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
+type ZboxAllocation struct {
+	Id             string   `json:"id"`
+	WalletId       int      `json:"wallet_id"`
+	Name           string   `json:"name"`
+	Description    string   `json:"random_description"`
+	AllocationType string   `json:"allocation_type"`
+	AppType        string   `json:"app_type"`
+	NftState       NftState `json:"nft_state"`
+	LastUpdate     string   `json:"last_update"`
+}
+
+type NftState struct {
+	AllocationId string `json:"allocation_id"`
+	CollectionId string `json:"collection_id"`
+	OwnedBy      string `json:"owned_by"`
+	Stage        string `json:"stage"`
+	Reference    string `json:"reference"`
+	NftActivity  string `json:"nft_activity"`
+	Metadata     string `json:"meta_data"`
+	NftImage     string `json:"nft_image"`
+}
+
 type ZboxWallet struct {
 	ClientId          string   `json:"client_id"`
 	WalletId          int      `json:"wallet_id"`
@@ -38,6 +60,7 @@ type ZboxWallet struct {
 }
 
 type MessageContainer struct {
+	Message string `json:"message"`
 }
 
 type ZboxWalletList struct {
@@ -45,6 +68,33 @@ type ZboxWalletList struct {
 	Data []ZboxWalletAlt `json:"data"`
 }
 
+type ZboxAllocationList struct {
+	WalletName string           `json:"wallet_name"`
+	Allocs     []ZboxAllocation `json:"allocs"`
+}
+
 type ZboxWalletKeys []struct {
 	ZboxWallet
+}
+
+type ZboxSuccess struct {
+	Success string `json:"success"`
+}
+
+type ZboxUsername struct {
+	Username string `json:"username"`
+}
+
+type ZboxImage struct {
+	SmallLoc string `json:"small_loc"`
+	MedLoc   string `json:"medium_loc"`
+	LargeLoc string `json:"large_loc"`
+}
+
+type ZboxUserInfo struct {
+	Username        string    `json:"user_name"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
+	Biography       string    `json:"biography"`
+	CreatedAt       string    `json:"created_at"`
+	Avatar          ZboxImage `json:"avatar"`
+	BackgroundImage ZboxImage `json:"bg_img"`
 }

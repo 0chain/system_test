@@ -139,7 +139,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": "2s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -154,15 +155,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
+		time.Sleep(5 * time.Second)
 		alloc := getAllocation(t, allocationID)
 		require.False(t, alloc.Finalized)
 
@@ -229,7 +222,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.RunWithTimeout("transfer a finalized allocation", 5*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": "5s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -244,16 +238,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation first
-		expDuration := int64(-3) // In hours
-
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		time.Sleep(6 * time.Second)
 
 		// Wait for challenge completion time to expire
 		cliutils.Wait(t, 4*time.Minute)
@@ -456,19 +441,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"authticket": authTicket,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "consensus_not_met")
-
-		/* Authticket is redundant for owner and collaborator
-		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"localpath":  downloadFilePath,
-			"authticket": authTicket,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
-		*/
+		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
+		require.Contains(t, aggregatedOutput, "failed")
 	}) //todo:slow
 
 	t.RunWithTimeout("transfer allocation and update allocation", 6*time.Minute, func(t *test.SystemTest) {

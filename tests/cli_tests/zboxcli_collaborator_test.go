@@ -97,8 +97,7 @@ func TestCollaborator(testSetup *testing.T) {
 	t.RunWithTimeout("Add Collaborator _ collaborator must be able to read the file", 2*time.Minute, func(t *test.SystemTest) { // todo: too slow
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
-		require.Nil(t, err)
+		registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
@@ -638,8 +637,7 @@ func TestCollaborator(testSetup *testing.T) {
 	t.RunWithTimeout("Add Collaborator _ collaborator should NOT be able to download encrypted file", 2*time.Minute, func(t *test.SystemTest) { // todo: too slow
 		collaboratorWalletName := escapedTestName(t) + "_collaborator"
 
-		err := registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
-		require.Nil(t, err)
+		registerWalletForNameAndLockReadTokens(t, configPath, collaboratorWalletName)
 
 		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
