@@ -309,6 +309,7 @@ type UpdateAllocationRequest struct {
 	AddBlobberId         string `json:"add_blobber_id"`
 	RemoveBlobberId      string `json:"remove_blobber_id"`
 	ThirdPartyExtendable bool   `json:"third_party_extendable"`
+	FileOptionsChanged   bool   `json:"file_options_changed"`
 	FileOptions          uint16 `json:"file_options"`
 }
 
