@@ -29,3 +29,14 @@ func TestListBuckets(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 	})
 }
+
+func TestPutObject(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	t.Parallel()
+	t.Run("run ListBuckets test", func(t *test.SystemTest) {
+		resp, err := zs3Client.PutObject(t)
+		require.Nil(t, err)
+		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
+	})
+}
