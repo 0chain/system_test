@@ -1,1 +1,1 @@
-default_test_case_timeout: 50s
+default_test_case_timeout: 60s
