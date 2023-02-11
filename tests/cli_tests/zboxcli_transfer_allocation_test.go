@@ -18,6 +18,7 @@ import (
 func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	// This test is skipped for now and will be covered by next PRs after
 	// allocation transfer issue with signature verification is sorted out.
+	// issue: https://github.com/0chain/gosdk/issues/765
 	testSetup.Skip()
 	// todo: some allocation transfer operations are very slow
 	t := test.NewSystemTest(testSetup)
