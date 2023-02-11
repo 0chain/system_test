@@ -101,3 +101,23 @@ func (c *ZS3Client) PutObject(t *test.SystemTest) (*resty.Response, error) {
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
 }
+
+func (c *ZS3Client) RemoveObject(t *test.SystemTest) (*resty.Response, error) {
+	queryParams := map[string]string{
+		"accessKey":       AccessKey,
+		"secretAccessKey": SecretAccessKey,
+		"action":          "removeObject",
+		"bucketName":      "root",
+		"objectName":      "main-struture.png",
+	}
+
+	formData := map[string]string{
+		"file": "https://github.com/0chain/zs3server/blob/task/logapi/assets/main-struture.png",
+	}
+	resp, err := c.BaseHttpClient.HttpClient.R().SetFiles(formData).SetQueryParams(queryParams).Get(c.zs3ServerUrl)
+	if err != nil {
+		fmt.Println(err)
+	}
+	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
+	return resp, nil
+}
