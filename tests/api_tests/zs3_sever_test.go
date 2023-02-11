@@ -38,5 +38,9 @@ func TestPutObject(testSetup *testing.T) {
 		resp, err := zs3Client.PutObject(t)
 		require.Nil(t, err)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
+
+		resp, err = zs3Client.RemoveObject(t)
+		require.Nil(t, err)
+		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 	})
 }
