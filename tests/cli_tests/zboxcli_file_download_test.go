@@ -869,7 +869,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should work", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("Download File With startblock 1 and non-zero endblock should work", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
