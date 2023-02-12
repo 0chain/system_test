@@ -21,7 +21,7 @@ func TestListObjects(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
-	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
+	t.Run("listObjects should return 500 when trying to list objects from un existing bucket", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
