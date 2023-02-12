@@ -33,9 +33,9 @@ func (c *ZS3Client) CreateBucket(t *test.SystemTest) (*resty.Response, error) {
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
-	fmt.Print(resp.String())
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
 }
@@ -48,7 +48,8 @@ func (c *ZS3Client) ListBucket(t *test.SystemTest) (*resty.Response, error) {
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
@@ -62,7 +63,8 @@ func (c *ZS3Client) ListBucketsObjects(t *test.SystemTest) (*resty.Response, err
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
@@ -77,7 +79,8 @@ func (c *ZS3Client) ListObjects(t *test.SystemTest) (*resty.Response, error) {
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
@@ -96,7 +99,8 @@ func (c *ZS3Client) PutObject(t *test.SystemTest) (*resty.Response, error) {
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetFiles(formData).SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
@@ -116,7 +120,8 @@ func (c *ZS3Client) RemoveObject(t *test.SystemTest) (*resty.Response, error) {
 	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetFiles(formData).SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
+		return nil, err
 	}
 	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
 	return resp, nil
