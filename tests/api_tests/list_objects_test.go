@@ -25,7 +25,8 @@ func TestListObjects(testSetup *testing.T) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
+			"action":          "listObjects",
+			"bucketName":      "random-bucket",
 		}
 		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
 		require.Nil(t, err)
