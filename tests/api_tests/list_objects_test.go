@@ -21,4 +21,14 @@ func TestListObjects(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
+	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "createBucket",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
 }

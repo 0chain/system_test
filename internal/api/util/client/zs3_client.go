@@ -22,7 +22,7 @@ func NewZS3Client(zs3ServerUrl string) *ZS3Client {
 	return zs3Client
 }
 
-func (c *ZS3Client) BucketOperation(t *test.SystemTest, queryParams map[string]string, formData map[string]string) (*resty.Response, error) {
+func (c *ZS3Client) BucketOperation(t *test.SystemTest, queryParams, formData map[string]string) (*resty.Response, error) {
 	resp, err := c.BaseHttpClient.HttpClient.R().SetFiles(formData).SetQueryParams(queryParams).Post(c.zs3ServerUrl)
 	if err != nil {
 		t.Log(err)
