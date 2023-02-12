@@ -20,7 +20,239 @@ func Test0Box_share_info(testSetup *testing.T) {
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
+	t.RunSequentially("Post ShareInfo with Incorrect AuthTicket should not work properly", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		shareMessage := "Massege created as a part of " + t.Name()
+		fromInfo := "FromInfo created as a part of " + t.Name()
+		shareInfoSuccessMssg, response, err := zboxClient.PostShareInfo(t,
+			zboxClient.DefaultAuthTicket,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultRecieverId,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoSuccessMssg)
+		require.Equal(t, "share_info_insert_fail: error getting lookupHash from auth_ticke", shareInfoSuccessMssg.Message)
+
+	})
+
+	t.RunSequentially("Post ShareInfo with correct parameter should not work properly", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		shareMessage := "Massege created as a part of " + t.Name()
+		fromInfo := "FromInfo created as a part of " + t.Name()
+		shareInfoSuccessMssg, response, err := zboxClient.PostShareInfo(t,
+			zboxClient.DefaultAuthTicket,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultRecieverId,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoSuccessMssg)
+		require.Equal(t, "Share info added successfully", shareInfoSuccessMssg.Message)
+
+		shareInfoData, response, err := zboxClient.GetShareInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultAuthTicket,
+			zboxClient.DefaultRecieverId,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoData)
+		require.Equal(t, shareInfoData.Message, "Data is present for the given details")
+		require.Len(t, shareInfoData.Data, 1)
+		require.Equal(t, shareInfoData.Data[0].Message, shareMessage)
+		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
+		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
+
+	})
+
+	t.RunSequentially("Delete ShareInfo without AUthTicket should not work properly", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		shareMessage := "Massege created as a part of " + t.Name()
+		fromInfo := "FromInfo created as a part of " + t.Name()
+		shareInfoSuccessMssg, response, err := zboxClient.PostShareInfo(t,
+			zboxClient.DefaultAuthTicket,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultRecieverId,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoSuccessMssg)
+		require.Equal(t, "Share info added successfully", shareInfoSuccessMssg.Message)
+
+		shareInfoData, response, err := zboxClient.GetShareInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultAuthTicket,
+			zboxClient.DefaultRecieverId,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoData)
+		require.Equal(t, shareInfoData.Message, "Data is present for the given details")
+		require.Len(t, shareInfoData.Data, 1)
+		require.Equal(t, shareInfoData.Data[0].Message, shareMessage)
+		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
+		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
+
+		_, response, err = zboxClient.DeleteShareInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"",
+		)
+
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, err)
+		require.Equal(t, "invalid_body: Invalid body parameter. [{AuthTicket  required }]", err)
+
+	})
+
 	t.RunSequentially("Delete ShareInfo with correct parameter should work properly", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+
+		shareMessage := "Massege created as a part of " + t.Name()
+		fromInfo := "FromInfo created as a part of " + t.Name()
+		shareInfoSuccessMssg, response, err := zboxClient.PostShareInfo(t,
+			zboxClient.DefaultAuthTicket,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultRecieverId,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoSuccessMssg)
+		require.Equal(t, "Share info added successfully", shareInfoSuccessMssg.Message)
+
+		shareInfoData, response, err := zboxClient.GetShareInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			shareMessage,
+			fromInfo,
+			zboxClient.DefaultAuthTicket,
+			zboxClient.DefaultRecieverId,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, shareInfoData)
+		require.Equal(t, shareInfoData.Message, "Data is present for the given details")
+		require.Len(t, shareInfoData.Data, 1)
+		require.Equal(t, shareInfoData.Data[0].Message, shareMessage)
+		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
+		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
+
+		_, response, err = zboxClient.DeleteShareInfo(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAuthTicket,
+		)
+
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Nil(t, err)
+		require.NotNil()
+		require.Equal(t, "invalid_body: Invalid body parameter. [{AuthTicket  required }]", err)
+
+	})
+
+	t.RunSequentially("Get ShareInfo with Incorrect clientRecieverId should not work properly", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -73,7 +305,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 
 	})
 
-	t.RunSequentially("Get ShareInfo with Incorrect clientRecieverId should not work properly", func(t *test.SystemTest) {
+	t.RunSequentially("Get ShareInfo with Incorrect AuthTicket should not work properly", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
