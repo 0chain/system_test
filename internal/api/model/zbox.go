@@ -98,3 +98,20 @@ type ZboxUserInfo struct {
 	Avatar          ZboxImage `json:"avatar"`
 	BackgroundImage ZboxImage `json:"bg_img"`
 }
+
+type ZboxShareInfo struct {
+	AuthTicket string `json:"auth_ticket"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
+	Message    string `json:"message"`
+	FromInfo   string `json:"from_info"`
+	ClientID   string `json:"client_id"`
+	Receiver   string `json:"Receiver"`
+	LookUpHash string `json:"lookup_hash"`
+	CreatedAt  string `json:"CreatedAt"`
+	UpdatedAt  string `json:"UpdatedAt"`
+	AppType    string `json:"app_type"`
+}
+
+type ZboxShareInfoList struct {
+	MessageContainer
+	Data []ZboxShareInfo `json:"data"`
+}
