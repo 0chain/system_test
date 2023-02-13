@@ -252,7 +252,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "NO", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -296,7 +296,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -335,7 +335,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 		filename := strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
