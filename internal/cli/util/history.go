@@ -23,6 +23,7 @@ type ChainHistory struct {
 	blocks          []model.EventDBBlock
 	DelegateRewards []model.RewardDelegate
 	providerRewards []model.RewardProvider
+	transactions    []model.EventDBTransaction
 	roundHistories  map[int64]RoundHistory
 }
 
@@ -30,6 +31,7 @@ type RoundHistory struct {
 	Block           *model.EventDBBlock
 	DelegateRewards []model.RewardDelegate
 	ProviderRewards []model.RewardProvider
+	Transactions    []model.EventDBTransaction
 }
 
 func NewHistory(from, to int64) *ChainHistory {
@@ -68,36 +70,23 @@ func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 	return won
 }
 
-func (ch *ChainHistory) TotalFees() int64 {
-	var fees int64
-	for i := range ch.blocks {
-		fees += ch.TotalBlockFees(&ch.blocks[i])
+func (ch *ChainHistory) FeesForRound(t *test.SystemTest, round int64) int64 {
+	roundHistory, ok := ch.roundHistories[round]
+	require.Truef(t, ok, "cannot find history for round %d", round)
+	var fee int64
+	for i := 0; i < len(roundHistory.Transactions); i++ {
+		fee += roundHistory.Transactions[i].Fee
 	}
-	return fees
+	return fee
 }
 
-func (ch *ChainHistory) TotalMinerFees(minerId string) int64 {
-	var fees int64
-	for i := range ch.blocks {
-		if ch.blocks[i].MinerID == minerId {
-			fees += ch.TotalBlockFees(&ch.blocks[i])
-		}
-	}
-	return fees
-}
-
-func (ch *ChainHistory) TotalBlockFees(block *model.EventDBBlock) int64 {
-	var fees int64
-	for i := range block.Transactions {
-		fees += block.Transactions[i].Fee
-	}
-	return fees
-}
-
-func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string) {
+func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string, includeTransactions bool) {
 	ch.readBlocks(t, sharderBaseUrl)
 	ch.readDelegateRewards(t, sharderBaseUrl)
 	ch.readProviderRewards(t, sharderBaseUrl)
+	if includeTransactions {
+		ch.readTransaction(t, sharderBaseUrl)
+	}
 	ch.setup(t)
 }
 
@@ -125,6 +114,12 @@ func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl s
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
 	ch.providerRewards = ApiGetListRetries[model.RewardProvider](t, url, params, ch.from, ch.to+1, restApiRetries)
+}
+
+func (ch *ChainHistory) readTransaction(t *test.SystemTest, sharderBaseUrl string) {
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/transactions")
+	params := map[string]string{}
+	ch.transactions = ApiGetList[model.EventDBTransaction](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
@@ -170,11 +165,32 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 		}
 		currentHistory.DelegateRewards = append(currentHistory.DelegateRewards, dr)
 	}
+	ch.setupTransactions(t)
+
 	if currentRound > 0 {
 		ch.roundHistories[currentRound] = currentHistory
 	}
 	require.Equalf(t, int(ch.to-ch.from+1), len(ch.roundHistories),
 		"mismatched round count recorded, from %d, to %d", ch.to, ch.from)
+}
+
+func (ch *ChainHistory) setupTransactions(t *test.SystemTest) {
+	var currentRound int64 = 0
+	var currentHistory RoundHistory
+	for _, tr := range ch.transactions {
+		require.GreaterOrEqual(t, tr.Round, currentRound, "delegate rewards out of order")
+		if currentRound < tr.Round {
+			if currentRound > 0 {
+				ch.roundHistories[currentRound] = currentHistory
+			}
+			var ok bool
+			currentHistory, ok = ch.roundHistories[tr.Round]
+			require.True(t, ok, "should have block information for every round")
+			currentRound = tr.Round
+		}
+		currentHistory.Transactions = append(currentHistory.Transactions, tr)
+		//ch.blocks[currentRound-ch.from].Transactions = append(ch.blocks[currentRound-ch.from].Transactions, tr)
+	}
 }
 
 // debug dumps
