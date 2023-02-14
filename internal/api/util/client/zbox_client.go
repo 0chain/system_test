@@ -1,7 +1,7 @@
 package client
 
 import (
-	"fmt"
+	"fmt" //nolint:goimports
 	"github.com/go-resty/resty/v2"
 
 	"github.com/0chain/system_test/internal/api/model"

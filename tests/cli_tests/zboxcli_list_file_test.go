@@ -1,10 +1,10 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -596,7 +596,7 @@ func extractAuthToken(str string) (string, error) {
 
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
-	rand.Read(buffer) //nolint:gosec,revive
+	_, _ = rand.Read(buffer) //nolint:gosec
 	return os.WriteFile(name, buffer, os.ModePerm)
 }
 
