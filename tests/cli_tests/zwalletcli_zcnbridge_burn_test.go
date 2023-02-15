@@ -23,6 +23,11 @@ func TestBridgeBurn(testSetup *testing.T) {
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	require.Nil(t, err)
 
+	t.Cleanup(func() {
+		err = tenderlyClient.Revert(snapshotHash)
+		require.Nil(t, err)
+	})
+
 	t.Parallel()
 
 	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
@@ -30,7 +35,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
-		fmt.Println(output)
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
@@ -60,12 +64,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.GreaterOrEqual(t, nonceInt, 0)
 	})
 
-	t.Cleanup(func() {
-		err = tenderlyClient.Revert(snapshotHash)
-		require.Nil(t, err)
-	})
-
-	t.Skip()
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, false)
 		require.NotNil(t, err)
@@ -148,7 +146,7 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 300",
+		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 200",
 		amount,
 		configDir,
 		bridgeClientConfigFile,
