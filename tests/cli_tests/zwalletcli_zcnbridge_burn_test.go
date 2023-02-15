@@ -34,7 +34,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip()
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
