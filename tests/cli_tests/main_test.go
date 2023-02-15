@@ -2,13 +2,14 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/tenderly"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/tenderly"
 
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/test"
