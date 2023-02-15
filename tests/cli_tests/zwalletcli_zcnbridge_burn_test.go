@@ -35,7 +35,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
-		fmt.Println(output)
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
@@ -147,7 +146,7 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 300",
+		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 200",
 		amount,
 		configDir,
 		bridgeClientConfigFile,
