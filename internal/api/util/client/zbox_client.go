@@ -232,6 +232,14 @@ func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocation
 		"id":              allocationId,
 		"description":     allocationDescription,
 		"allocation_type": allocationType,
+		"size":            "100",
+		"expiration":      "10 hours",
+		"finalized":       "false",
+		"cancelled":       "false",
+		"data_shards":     "2",
+		"parity_shards":   "2",
+		"read_price":      "1.00",
+		"write_price":     "2.00",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -515,48 +523,6 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 	return zboxUsername, resp, err
 }
 
-func (c *ZboxClient) CreateAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.CreateAllocation, *resty.Response, error) {
-	t.Log("Posting Allocation info using 0box...")
-	var CreateAllocation *model.CreateAllocation
-
-	urBuilder := NewURLBuilder()
-	err := urBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urBuilder.SetPath("/v2/allocation")
-
-	formData := map[string]string{
-		"name":            "alloc_name",
-		"id":              "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
-		"description":     "randon_description",
-		"allocation_type": "cloud_migration",
-		"size":            "100",
-		"expiration":      "10 hours",
-		"finalized":       "false",
-		"cancelled":       "false",
-		"data_shards":     "2",
-		"parity_shards":   "2",
-		"read_price":      "1.00",
-		"write_price":     "2.00",
-	}
-
-	resp, err := c.executeForServiceProvider(t, urBuilder.String(), model.ExecutionRequest{
-		Dst:      &CreateAllocation,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":    "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":   "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96",
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return CreateAllocation, resp, err
-}
-
 func (c *ZboxClient) PostNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.PostNftInfo, *resty.Response, error) {
 	t.Log("Posting NFT info using 0box...")
 	var PostNftInfo *model.PostNftInfo
@@ -621,7 +587,7 @@ func (c *ZboxClient) PutNftInfo(t *test.SystemTest, idToken, csrfToken, phoneNum
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		QueryParams: map[string]string{
 			"id": "1",
@@ -662,7 +628,7 @@ func (c *ZboxClient) PutNftState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 201,
 	}, HttpPUTMethod)
@@ -687,7 +653,7 @@ func (c *ZboxClient) GetNftState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		QueryParams: map[string]string{
 			"filter": "owned_by-new_owner_1",

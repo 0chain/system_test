@@ -124,17 +124,3 @@ type PutNftState struct {
 	Metadata     string `form:"meta_data" json:"meta_data"`
 	AllocationId string `form:"allocation_id" json:"allocation_id"`
 }
-
-type CreateAllocation struct {
-	AllocationName string `form:"name" json:"name"`
-	AllocationId   string `form:"id" json:"id"`
-	Description    string `form:"description" json:"description"`
-	AllocationType string `form:"allocation_type" json:"allocation_type"`
-	Size           string `form:"size" json:"size"`
-	Finalized      string `form:"finalized" json:"finalized"`
-	Cancelled      string `form:"cancelled" json:"cancelled"`
-	DataShards     string `form:"data_shards" json:"data_shards"`
-	ParityShards   string `form:"parity_shards" json:"parity_shards"`
-	ReadPrice      string `form:"read_price" json:"read_price"`
-	WritePrice     string `form:"write_price" json:"write_price"`
-}
