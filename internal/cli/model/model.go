@@ -665,16 +665,17 @@ func (r Reward) Int() int {
 
 type RewardProvider struct {
 	Amount      int64  `json:"amount"`
-	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
-	ProviderId  string `json:"provider_id" gorm:"index:idx_provider,priority:2"`
-	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+	BlockNumber int64  `json:"block_number"`
+	ProviderId  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
 }
 
 type RewardDelegate struct {
 	Amount      int64  `json:"amount"`
-	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
-	PoolID      string `json:"pool_id" gorm:"index:idx_pool,priority:2"`
-	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+	BlockNumber int64  `json:"block_number"`
+	PoolID      string `json:"pool_id"`
+	ProviderID  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
 }
 
 type EventDBBlock struct {
