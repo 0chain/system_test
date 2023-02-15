@@ -51,6 +51,15 @@ func setupConfig() {
 		test.DefaultTestTimeout = defaultTestTimeout
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}
+
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(path)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
+	}
+
+	ethereumNodeURL = viper.GetString("ethereum_node_url")
 }
 
 const (
@@ -70,6 +79,8 @@ var (
 	miner03ID   string
 	sharder01ID string
 	sharder02ID string
+
+	ethereumNodeURL string
 )
 
 var (
@@ -139,7 +150,7 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
-	tenderlyClient = tenderly.NewClient("https://rpc.tenderly.co/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17")
+	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
 	exitRun := m.Run()
 	os.Exit(exitRun)

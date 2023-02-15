@@ -40,3 +40,5 @@ func (c *Client) Revert(snapshotHash string) error {
 	fmt.Println(resp)
 	return nil
 }
+
+//curl "https://api.tenderly.co/api/v1/account/YarikRevich/project/jgkdfjgkdf/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17" -H "X-Access-Key: Sc8gOOcwiVV6EoDZPFpK11V20bz-8UKJ" -H "Content-Type: application/json"

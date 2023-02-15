@@ -1,6 +1,6 @@
 block_worker: https://demo.zus.network/dns
 ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
-ethereum_node_url: https://goerli.infura.io/v3/6141be73a15d47748af0dc14f53d57d7
+ethereum_node_url: https://rpc.tenderly.co/fork/f4d2dc0c-77bc-4e61-a95f-de5202b63b57
 confirmation_chain_length: 3
 min_confirmation: 50
 min_submit: 50
