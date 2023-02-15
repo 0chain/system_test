@@ -150,11 +150,7 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
-<<<<<<< HEAD
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
-=======
-	tenderlyClient = tenderly.NewClient("https://rpc.tenderly.co/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17")
->>>>>>> 6c6282de (feature: added basic tenderly client)
 
 	exitRun := m.Run()
 	os.Exit(exitRun)

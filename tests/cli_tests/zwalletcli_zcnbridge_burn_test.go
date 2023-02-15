@@ -23,17 +23,13 @@ func TestBridgeBurn(testSetup *testing.T) {
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	require.Nil(t, err)
 
+	t.Cleanup(func() {
+		err = tenderlyClient.Revert(snapshotHash)
+		require.Nil(t, err)
+	})
+
 	t.Parallel()
 
-	snapshotHash, err := tenderlyClient.CreateSnapshot()
-	require.Nil(t, err)
-	err = tenderlyClient.Revert(snapshotHash)
-	require.Nil(t, err)
-	//t.RunWithTimeout("", time.Minute*10, func(t *test.SystemTest) {
-	//
-	//})
-
-	t.Skip()
 	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err)
@@ -69,12 +65,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.GreaterOrEqual(t, nonceInt, 0)
 	})
 
-	t.Cleanup(func() {
-		err = tenderlyClient.Revert(snapshotHash)
-		require.Nil(t, err)
-	})
-
-	t.Skip()
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", bridgeClientConfigFile, false)
 		require.NotNil(t, err)

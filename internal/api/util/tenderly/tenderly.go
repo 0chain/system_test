@@ -3,10 +3,6 @@ package tenderly
 import (
 	"context"
 	"fmt"
-<<<<<<< HEAD
-
-=======
->>>>>>> 6c6282de (feature: added basic tenderly client)
 	"github.com/ybbus/jsonrpc/v3"
 )
 
@@ -44,8 +40,5 @@ func (c *Client) Revert(snapshotHash string) error {
 	fmt.Println(resp)
 	return nil
 }
-<<<<<<< HEAD
 
 //curl "https://api.tenderly.co/api/v1/account/YarikRevich/project/jgkdfjgkdf/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17" -H "X-Access-Key: Sc8gOOcwiVV6EoDZPFpK11V20bz-8UKJ" -H "Content-Type: application/json"
-=======
->>>>>>> 6c6282de (feature: added basic tenderly client)
