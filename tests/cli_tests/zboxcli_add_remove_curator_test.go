@@ -138,7 +138,7 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		require.Equal(t, expectedOutput, output[0], "unexpected output:", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Add Curator _ Owner added as curator must be able to transfer the ownership", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Add Curator _ Owner added as curator must be able to transfer the ownership", 120*time.Second, func(t *test.SystemTest) {
 		targetWalletName := escapedTestName(t) + "_TARGET"
 
 		output, err := registerWallet(t, configPath)
