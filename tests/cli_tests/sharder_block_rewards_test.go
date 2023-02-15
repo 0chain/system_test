@@ -165,7 +165,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 		// Compare the actual change in rewards to each miner delegate, with the
 		// change expected from the delegate reward table.
-		for i := range sharderIds {
+		for i, id := range sharderIds {
 			delegateBlockReward := int64(float64(bwPerSharder) * (1 - beforeSharders.Nodes[i].Settings.ServiceCharge))
 			numPools := len(afterShardedrs.Nodes[i].StakePool.Pools)
 			rewards := make(map[string]int64, numPools)
@@ -176,9 +176,11 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 				poolsBlockRewards := make(map[string]int64)
 				roundHistory := history.RoundHistory(t, round)
 				for _, dReward := range roundHistory.DelegateRewards {
-					if _, found := rewards[dReward.PoolID]; !found {
+					if dReward.ProviderID != id {
 						continue
 					}
+					_, isSharderPool := rewards[dReward.PoolID]
+					require.Truef(testSetup, isSharderPool, "round %d, invalid pool id, reward %v", round, dReward)
 					switch dReward.RewardType {
 					case climodel.BlockRewardSharder:
 						_, found := poolsBlockRewards[dReward.PoolID]
