@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -187,4 +189,15 @@ func readPoolUnlock(t *test.SystemTest, cliConfigFilename, params string, retry 
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+func getReadPoolInfo(t *test.SystemTest) climodel.ReadPoolInfo {
+	output, err := readPoolInfo(t, configPath)
+	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	var readPool climodel.ReadPoolInfo
+	err = json.Unmarshal([]byte(output[0]), &readPool)
+	require.Nil(t, err, "Error unmarshalling read pool %s", strings.Join(output, "\n"))
+	return readPool
 }
