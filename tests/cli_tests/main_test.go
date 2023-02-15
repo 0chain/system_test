@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/tenderly"
 	"log"
 	"os"
 	"path/filepath"
@@ -78,6 +79,8 @@ var (
 	bridgeOwnerConfigFile  string
 )
 
+var tenderlyClient *tenderly.Client
+
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
@@ -135,6 +138,8 @@ func TestMain(m *testing.M) {
 	}
 
 	setupConfig()
+
+	tenderlyClient = tenderly.NewClient("https://rpc.tenderly.co/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17")
 
 	exitRun := m.Run()
 	os.Exit(exitRun)
