@@ -58,7 +58,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		}
 
 		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl)
+		history.Read(t, sharderUrl, false)
 
 		minerScConfig := getMinerScMap(t)
 		numSharderDelegatesRewarded := int(minerScConfig["num_sharder_delegates_rewarded"])
