@@ -2,7 +2,7 @@ package tenderly
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/ybbus/jsonrpc/v3"
 )
@@ -21,10 +21,15 @@ func NewClient(tenderlyNodeURL string) *Client {
 	}
 }
 
+// Creates network snapshot with a help of Ethereum JSON-RPC method call.
+// Returns snapshot hash, which is available to be used to revert a state of the network
 func (c *Client) CreateSnapshot() (string, error) {
 	resp, err := c.client.Call(context.Background(), "evm_snapshot")
 	if err != nil {
 		return "", err
+	}
+	if resp.Error != nil {
+		return "", errors.New(resp.Error.Error())
 	}
 	result, ok := resp.Result.(string)
 	if !ok {
@@ -33,13 +38,14 @@ func (c *Client) CreateSnapshot() (string, error) {
 	return result, nil
 }
 
+// Reverts a state of Ethereum network using snapshot hash with a help of Ethereum JSON-RPC method call.
 func (c *Client) Revert(snapshotHash string) error {
 	resp, err := c.client.Call(context.Background(), "evm_revert", snapshotHash)
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp)
+	if resp.Error != nil {
+		return errors.New(resp.Error.Error())
+	}
 	return nil
 }
-
-//curl "https://api.tenderly.co/api/v1/account/YarikRevich/project/jgkdfjgkdf/fork/ca3894fd-9ecc-4f86-a10d-af7b91659a17" -H "X-Access-Key: Sc8gOOcwiVV6EoDZPFpK11V20bz-8UKJ" -H "Content-Type: application/json"
