@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ybbus/jsonrpc/v3"
+	jsonrpc "github.com/ybbus/jsonrpc/v3"
 )
 
 // Client represents Ethereum client, which
