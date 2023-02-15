@@ -4,18 +4,18 @@ import (
 	"context"
 	"errors"
 
-	jsonrpc "github.com/ybbus/jsonrpc/v3"
+	jsonrpc "github.com/ybbus/jsonrpc/v3" // nolint
 )
 
 // Client represents Ethereum client, which
 // uses Tenderly fork node to perform snapshots
 // and revert changes using requests to EVM
 type Client struct {
-	client jsonrpc.RPCClient
+	client jsonrpc.RPCClient // nolint
 }
 
 func NewClient(tenderlyNodeURL string) *Client {
-	client := jsonrpc.NewClient(tenderlyNodeURL)
+	client := jsonrpc.NewClient(tenderlyNodeURL) // nolint
 	return &Client{
 		client: client,
 	}

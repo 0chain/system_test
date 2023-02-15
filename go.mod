@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tyler-smith/go-bip39 v1.1.0
-	github.com/ybbus/jsonrpc/v3 v3.1.1
+	github.com/ybbus/jsonrpc/v3 v3.1.1 // nolint
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v3 v3.0.1
