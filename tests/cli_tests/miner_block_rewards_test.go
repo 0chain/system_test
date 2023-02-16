@@ -178,9 +178,11 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 				poolsBlockRewarded := make(map[string]int64)
 				roundHistory := history.RoundHistory(t, round)
 				for _, dReward := range roundHistory.DelegateRewards {
-					if _, found := rewards[dReward.PoolID]; !found {
+					if dReward.ProviderID != id {
 						continue
 					}
+					_, isMinerPool := rewards[dReward.PoolID]
+					require.Truef(testSetup, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
 					switch dReward.RewardType {
 					case climodel.BlockRewardMiner:
 						_, found := poolsBlockRewarded[dReward.PoolID]
@@ -191,7 +193,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 					case climodel.FeeRewardMiner:
 						rewards[dReward.PoolID] += dReward.Amount
 					default:
-						require.Failf(t, "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
+						require.Failf(t, "mismatched reward", "round %d, %s not available for miner", round, dReward.RewardType)
 					}
 				}
 				if roundHistory.Block.MinerID != id {
