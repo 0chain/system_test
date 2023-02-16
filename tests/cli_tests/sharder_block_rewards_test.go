@@ -43,17 +43,17 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		time.Sleep(time.Second * 2)
 		// ----------------------------------=
 
-		afterShardedrs := getNodes(t, sharderIds, sharderUrl)
+		afterSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// we add rewards at the end of the round, and they don't appear until the next round
 		startRound := beforeSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterShardedrs.Nodes[0].RoundServiceChargeLastUpdated + 1
+		endRound := afterSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
 		for i := range beforeSharders.Nodes {
 			if startRound < beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				startRound = beforeSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
-			if endRound > afterShardedrs.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterShardedrs.Nodes[i].RoundServiceChargeLastUpdated
+			if endRound > afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
+				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
 		}
 
@@ -88,7 +88,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		bwPerSharder := int64(float64(sharderBlockReward) / float64(numShardersRewarded))
 		for i, id := range sharderIds {
 			var rewards int64
-			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterShardedrs.Nodes[i].RoundServiceChargeLastUpdated; round++ {
+			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders.Nodes[i].RoundServiceChargeLastUpdated; round++ {
 				roundHistory := history.RoundHistory(t, round)
 				for _, pReward := range roundHistory.ProviderRewards {
 					if pReward.ProviderId != id {
@@ -112,7 +112,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 					}
 				}
 			}
-			actualReward := afterShardedrs.Nodes[i].Reward - beforeSharders.Nodes[i].Reward
+			actualReward := afterSharders.Nodes[i].Reward - beforeSharders.Nodes[i].Reward
 			if actualReward != rewards {
 				require.InDeltaf(t, actualReward, rewards, delta,
 					"rewards expected %v change in sharders reward during test %v", actualReward, rewards)
@@ -167,12 +167,12 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		// change expected from the delegate reward table.
 		for i, id := range sharderIds {
 			delegateBlockReward := int64(float64(bwPerSharder) * (1 - beforeSharders.Nodes[i].Settings.ServiceCharge))
-			numPools := len(afterShardedrs.Nodes[i].StakePool.Pools)
+			numPools := len(afterSharders.Nodes[i].StakePool.Pools)
 			rewards := make(map[string]int64, numPools)
-			for poolId := range afterShardedrs.Nodes[i].StakePool.Pools {
+			for poolId := range afterSharders.Nodes[i].StakePool.Pools {
 				rewards[poolId] = 0
 			}
-			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterShardedrs.Nodes[i].RoundServiceChargeLastUpdated; round++ {
+			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders.Nodes[i].RoundServiceChargeLastUpdated; round++ {
 				poolsBlockRewards := make(map[string]int64)
 				roundHistory := history.RoundHistory(t, round)
 				for _, dReward := range roundHistory.DelegateRewards {
@@ -196,11 +196,11 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 					}
 				}
 				confirmPoolPayments(
-					t, delegateBlockReward, poolsBlockRewards, afterShardedrs.Nodes[i].StakePool.Pools, numSharderDelegatesRewarded,
+					t, delegateBlockReward, poolsBlockRewards, afterSharders.Nodes[i].StakePool.Pools, numSharderDelegatesRewarded,
 				)
 			}
-			for poolId := range afterShardedrs.Nodes[i].StakePool.Pools {
-				actualReward := afterShardedrs.Nodes[i].StakePool.Pools[poolId].Reward - beforeSharders.Nodes[i].StakePool.Pools[poolId].Reward
+			for poolId := range afterSharders.Nodes[i].StakePool.Pools {
+				actualReward := afterSharders.Nodes[i].StakePool.Pools[poolId].Reward - beforeSharders.Nodes[i].StakePool.Pools[poolId].Reward
 				require.InDeltaf(t, actualReward, rewards[poolId], delta,
 					"rewards expected %v, change in rewards during test %v", actualReward, rewards[poolId])
 			}

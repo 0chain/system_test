@@ -216,7 +216,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 func confirmPoolPayments(
 	t *test.SystemTest,
-	blockReward int64,
+	totalReward int64,
 	poolsBlockRewarded map[string]int64,
 	pools map[string]*climodel.DelegatePool,
 	numRewards int,
@@ -234,10 +234,10 @@ func confirmPoolPayments(
 		total += float64(pools[id].Balance)
 	}
 	for id, reward := range poolsBlockRewarded {
-		expectedReward := (float64(pools[id].Balance) / total) * float64(blockReward)
+		expectedReward := (float64(pools[id].Balance) / total) * float64(totalReward)
 		require.InDeltaf(t, expectedReward, float64(reward), 1,
 			"delegate rewards. delegates should be rewarded in proportion to their stake."+
-				"total reward %d stake pools %v", blockReward, pools)
+				"total reward %d stake pools %v", totalReward, pools)
 	}
 }
 

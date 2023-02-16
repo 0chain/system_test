@@ -67,6 +67,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
 				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
 			}
+			t.Logf("miner %s delegates pools %d", beforeMiners.Nodes[i].ID, len(beforeMiners.Nodes[i].Pools))
 		}
 		t.Logf("start round %d, end round %d", startRound, endRound)
 
@@ -89,6 +90,10 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		for i, id := range minerIds {
 			var blockRewards, feeRewards int64
 			for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
+				var fees = history.FeesForRound(t, round)
+				if fees == 0 {
+					continue
+				}
 				roundHistory := history.RoundHistory(t, round)
 				for _, pReward := range roundHistory.ProviderRewards {
 					if pReward.ProviderId != id {
@@ -100,7 +105,6 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 							"%s not round lottery winner %s but nevertheless paid with block reward."+
 								"only the round lottery winner shold get a miner block reward",
 							pReward.ProviderId, roundHistory.Block.MinerID)
-						var fees = history.FeesForRound(t, round)
 						if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
 							fees = int64(float64(fees) * beforeMiners.Nodes[i].Settings.ServiceCharge * minerShare)
 						} else {
