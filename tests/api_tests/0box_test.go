@@ -187,8 +187,6 @@ func Test0Box(testSetup *testing.T) {
 		require.NotNil(t, userInfo.CreatedAt, "output not as expected", response.String())
 		require.NotNil(t, userInfo.BackgroundImage, "output not as expected", response.String())
 	})
-	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
-	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
 
 	t.RunSequentially("Get wallet keys should work with wallet present", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -212,6 +210,14 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWalletKeys)
 		require.NotEqual(t, 0, len(response.String()), "Response body is empty")
+	})
+
+	t.RunSequentially("Get wallet keys should not work with wrong phone number ", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		_, _, err := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, "+910123456789")
+
+		require.Error(t, err)
 	})
 
 	t.RunSequentially("Get wallet keys should return empty with wallet not present", func(t *test.SystemTest) {
@@ -444,6 +450,43 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, 1, len(cr.Data), "Response data does not match expected. Output: [%v]", response.String())
 	})
+
+	t.RunSequentially("Contact Wallet should not work with wrong phone number", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		// create wallet
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		type contactResponse struct {
+			Message string              `json:"message"`
+			Data    []map[string]string `json:"data"`
+		}
+
+		var cr contactResponse
+
+		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696232325\"}]"
+
+		response, err = zboxClient.ContactWallet(t, reqBody, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+
+		_ = json.Unmarshal([]byte(response.String()), &cr)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, cr.Message, "No data present for the given details", "Response data does not match expected. Output: [%v]", response.String())
+	})
+
 }
 
 func Test0BoxAllocation(testSetup *testing.T) {
