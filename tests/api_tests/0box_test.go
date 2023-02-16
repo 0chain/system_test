@@ -16,7 +16,6 @@ import (
 func Test0Box_share_info(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
@@ -238,7 +237,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
 		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
 
-		_, response, err = zboxClient.DeleteShareInfo(t,
+		shareInfoDeletionMssg, response, err := zboxClient.DeleteShareInfo(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -247,8 +246,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Nil(t, err)
-		require.NotNil()
-		require.Equal(t, "invalid_body: Invalid body parameter. [{AuthTicket  required }]", err)
+		require.NotNil(t, shareInfoDeletionMssg)
 
 	})
 
