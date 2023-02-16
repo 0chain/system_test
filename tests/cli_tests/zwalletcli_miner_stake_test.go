@@ -342,7 +342,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.NotEqual(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
