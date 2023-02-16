@@ -20,14 +20,6 @@ import (
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	snapshotHash, err := tenderlyClient.CreateSnapshot()
-	require.Nil(t, err)
-
-	t.Cleanup(func() {
-		err = tenderlyClient.Revert(snapshotHash)
-		require.Nil(t, err)
-	})
-
 	t.Parallel()
 
 	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
@@ -154,6 +146,7 @@ func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
+	fmt.Println(cmd)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
