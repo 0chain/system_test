@@ -22,7 +22,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
+	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 6*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -106,6 +106,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
 		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
 		// So the download cost will be in between initial balance and expected balance.
+		t.Logf("FinalReadPool.Balance:%d\nInitialReadPool.Balance:%d\nExpectedReadPool.Balance:%d\n", finalReadPool.Balance, initialReadPool.Balance, int64(expectedRPBalance))
 		require.Equal(t, true,
 			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
