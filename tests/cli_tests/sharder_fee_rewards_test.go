@@ -106,70 +106,14 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			history,
 		)
 
-		// Each round confirm payments to delegates or the blocks winning miner.
-		// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
-		// or all delegates if less.
-		//
-		// Delegates should be rewarded in proportional to their locked tokens.
-		// We check the self-consistency of the reward payments each round using
-		// the delegate reward table.
-		//
-		// Next we compare the actual change in rewards to each miner delegate, with the
-		// change expected from the delegate reward table.
-
-		for i, id := range sharderIds {
-			numPools := len(afterSharders.Nodes[i].StakePool.Pools)
-			rewards := make(map[string]int64, numPools)
-			for poolId := range afterSharders.Nodes[i].StakePool.Pools {
-				rewards[poolId] = 0
-			}
-			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders.Nodes[i].RoundServiceChargeLastUpdated; round++ {
-				fees := history.FeesForRound(t, round)
-				poolsBlockRewarded := make(map[string]int64)
-				roundHistory := history.RoundHistory(t, round)
-				for _, dReward := range roundHistory.DelegateRewards {
-					if dReward.ProviderID != id {
-						continue
-					}
-					_, isSharderPool := rewards[dReward.PoolID]
-					require.Truef(testSetup, isSharderPool, "round %d, invalid pool id, reward %v", round, dReward)
-					switch dReward.RewardType {
-					case climodel.FeeRewardSharder:
-						require.Greater(testSetup, fees, int64(0), "fee reward with no fees")
-						_, found := poolsBlockRewarded[dReward.PoolID]
-						require.False(t, found, "delegate pool %s paid a fee reward more than once on round %d",
-							dReward.PoolID, round)
-						poolsBlockRewarded[dReward.PoolID] = dReward.Amount
-						rewards[dReward.PoolID] += dReward.Amount
-					case climodel.BlockRewardSharder:
-						rewards[dReward.PoolID] += dReward.Amount
-					default:
-						require.Failf(t, "mismatched reward type",
-							"reward type %s not paid to miner delegate pools", dReward.RewardType)
-					}
-				}
-				if fees > 0 {
-					confirmPoolPayments(
-						t,
-						delegateSharderFeesRewards(
-							numShardersRewarded,
-							fees,
-							beforeSharders.Nodes[i].Settings.ServiceCharge,
-							1-minerShare,
-						),
-						poolsBlockRewarded,
-						afterSharders.Nodes[i].StakePool.Pools,
-						numSharderDelegatesRewarded,
-					)
-				}
-			}
-			for poolId := range afterSharders.Nodes[i].StakePool.Pools {
-				actualReward := afterSharders.Nodes[i].StakePool.Pools[poolId].Reward - beforeSharders.Nodes[i].StakePool.Pools[poolId].Reward
-				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
-				)
-			}
-		}
+		checkSharderDelegatePoolFeeAmounts(
+			t,
+			sharderIds,
+			minerShare,
+			numShardersRewarded, numSharderDelegatesRewarded,
+			beforeSharders.Nodes, afterSharders.Nodes,
+			history,
+		)
 	})
 }
 
@@ -302,6 +246,81 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 			require.Len(t, poolsPaid, numShouldPay,
 				"should pay %d pools for shader %s on round %d; %d pools actually paid",
 				numShouldPay, id, round, len(poolsPaid))
+		}
+	}
+}
+
+// checkSharderDelegatePoolFeeAmounts
+// Each round confirm payments to delegates or the blocks winning miner.
+// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
+// or all delegates if less.
+//
+// Delegates should be rewarded in proportional to their locked tokens.
+// We check the self-consistency of the reward payments each round using
+// the delegate reward table.
+//
+// Next we compare the actual change in rewards to each miner delegate, with the
+// change expected from the delegate reward table.
+func checkSharderDelegatePoolFeeAmounts(
+	t *test.SystemTest,
+	sharderIds []string,
+	minerShare float64,
+	numShardersRewarded, numSharderDelegatesRewarded int,
+	beforeSharders, afterSharders []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	t.Log("checking sharder delegate pools fee rewards")
+	for i, id := range sharderIds {
+		numPools := len(afterSharders[i].StakePool.Pools)
+		rewards := make(map[string]int64, numPools)
+		for poolId := range afterSharders[i].StakePool.Pools {
+			rewards[poolId] = 0
+		}
+		for round := beforeSharders[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders[i].RoundServiceChargeLastUpdated; round++ {
+			fees := history.FeesForRound(t, round)
+			poolsBlockRewarded := make(map[string]int64)
+			roundHistory := history.RoundHistory(t, round)
+			for _, dReward := range roundHistory.DelegateRewards {
+				if dReward.ProviderID != id {
+					continue
+				}
+				_, isSharderPool := rewards[dReward.PoolID]
+				require.Truef(t, isSharderPool, "round %d, invalid pool id, reward %v", round, dReward)
+				switch dReward.RewardType {
+				case climodel.FeeRewardSharder:
+					require.Greater(t, fees, int64(0), "fee reward with no fees")
+					_, found := poolsBlockRewarded[dReward.PoolID]
+					require.False(t, found, "delegate pool %s paid a fee reward more than once on round %d",
+						dReward.PoolID, round)
+					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
+					rewards[dReward.PoolID] += dReward.Amount
+				case climodel.BlockRewardSharder:
+					rewards[dReward.PoolID] += dReward.Amount
+				default:
+					require.Failf(t, "mismatched reward type",
+						"reward type %s not paid to miner delegate pools", dReward.RewardType)
+				}
+			}
+			if fees > 0 {
+				confirmPoolPayments(
+					t,
+					delegateSharderFeesRewards(
+						numShardersRewarded,
+						fees,
+						beforeSharders[i].Settings.ServiceCharge,
+						1-minerShare,
+					),
+					poolsBlockRewarded,
+					afterSharders[i].StakePool.Pools,
+					numSharderDelegatesRewarded,
+				)
+			}
+		}
+		for poolId := range afterSharders[i].StakePool.Pools {
+			actualReward := afterSharders[i].StakePool.Pools[poolId].Reward - beforeSharders[i].StakePool.Pools[poolId].Reward
+			require.InDeltaf(t, actualReward, rewards[poolId], delta,
+				"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
+			)
 		}
 	}
 }
