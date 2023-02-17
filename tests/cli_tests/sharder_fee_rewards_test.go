@@ -42,18 +42,10 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		sharderIds := getSortedSharderIds(t, sharderUrl)
 		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
 
-		// todo piers remove
-		//tokens := []float64{1, 0.5}
-		//_ = createSharderStakePools(t, sharderIds, tokens)
-		//t.Cleanup(func() {
-		//	cleanupFunc()
-		//})
-
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// ------------------------------------
-		//cliutils.Wait(t, 2*time.Second)
-		const numPaidTransactions = 1
+		const numPaidTransactions = 3
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
 			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
@@ -89,111 +81,30 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			numShardersRewarded = len(sharderIds)
 		}
 		minerShare := minerScConfig["share_ratio"]
-		// Each round one miner is chosen to receive a block reward.
-		// The winning miner is stored in the block object.
-		// The reward payments retrieved from the provider reward table.
-		// The amount of the reward is a fraction of the block reward allocated to miners each
-		// round. The fraction is the miner's service charge. If the miner has
-		// no stake pools then the reward becomes the full block reward.
-		//
-		// Firstly we confirm the self-consistency of the block and reward tables.
-		// We calculate the change in the miner rewards during and confirm that this
-		// equals the total of the reward payments read from the provider rewards table.
-		for i, id := range sharderIds {
-			var blockRewards, feeRewards int64
-			for round := beforeSharders.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders.Nodes[i].RoundServiceChargeLastUpdated; round++ {
-				feesPerSharder := int64(float64(history.FeesForRound(t, round)) / float64(numShardersRewarded))
-				roundHistory := history.RoundHistory(t, round)
-				for _, pReward := range roundHistory.ProviderRewards {
-					if pReward.ProviderId != id {
-						continue
-					}
-					switch pReward.RewardType {
-					case climodel.FeeRewardSharder:
-						require.Greater(testSetup, feesPerSharder, int64(0), "fee reward with no fees")
-						var fees int64
-						if len(beforeSharders.Nodes[i].StakePool.Pools) > 0 {
-							fees = int64(float64(feesPerSharder) * beforeSharders.Nodes[i].Settings.ServiceCharge * (1 - minerShare))
-						} else {
-							fees = int64(float64(feesPerSharder) * (1 - minerShare))
-						}
-						if fees != pReward.Amount {
-							fmt.Println("fees", fees, "reward", pReward.Amount)
-						}
-						require.InDeltaf(t, fees, pReward.Amount, delta,
-							"incorrect service charge %v for round %d"+
-								" service charge should be fees %d multiplied by service ratio %v."+
-								"length stake pools %d",
-							pReward.Amount, round, fees, beforeSharders.Nodes[i].Settings.ServiceCharge,
-							len(beforeSharders.Nodes[i].StakePool.Pools))
-						feeRewards += pReward.Amount
-					case climodel.BlockRewardSharder:
-						blockRewards += pReward.Amount
-					default:
-						require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
-					}
-				}
-			}
-			actualReward := afterSharders.Nodes[i].Reward - beforeSharders.Nodes[i].Reward
-			if actualReward != blockRewards+feeRewards {
-				fmt.Println("piers actual rewards", actualReward, "block rewards", blockRewards, "fee rewards", feeRewards)
-			}
 
-			require.InDeltaf(t, actualReward, blockRewards+feeRewards, delta,
-				"rewards expected %v, change in sharder reward during the test is %v", actualReward, blockRewards+feeRewards)
-		}
+		checkSharderFeeAmounts(
+			t,
+			sharderIds,
+			minerShare,
+			numShardersRewarded,
+			beforeSharders.Nodes, afterSharders.Nodes,
+			history,
+		)
 		t.Log("finished testing sharders")
 
-		// Each round there is a fee, there should be exactly num_sharders_rewarded sharder fee reward payment.
-		for round := startRound + 1; round <= endRound-1; round++ {
-			if history.FeesForRound(t, round) == 0 {
-				continue
-			}
-			roundHistory := history.RoundHistory(t, round)
-			shardersPaid := make(map[string]bool)
-			for _, pReward := range roundHistory.ProviderRewards {
-				if pReward.RewardType == climodel.FeeRewardSharder {
-					_, found := shardersPaid[pReward.ProviderId]
-					require.Falsef(t, found, "sharder %s receives more than one block reward on round %d", pReward.ProviderId, round)
-					shardersPaid[pReward.ProviderId] = true
-				}
-			}
-			require.Equal(t, numShardersRewarded, len(shardersPaid),
-				"mismatch between expected count of sharders rewarded and actual number on round %d", round)
+		checkSharderFeeRewardFrequency(
+			t, startRound+1, endRound-1, numShardersRewarded, history,
+		)
 
-		}
 		t.Log("about to test delegate pools")
 
-		// Each round there is a fee each sharder rewarded should have num_sharder_delegates_rewarded of
-		// their delegates rewarded, or all delegates if less.
-		for round := history.From(); round <= history.To(); round++ {
-			if history.FeesForRound(t, round) == 0 {
-				continue
-			}
-			roundHistory := history.RoundHistory(t, round)
-			for i, id := range sharderIds {
-				poolsPaid := make(map[string]bool)
-				for poolId := range beforeSharders.Nodes[i].Pools {
-					for _, dReward := range roundHistory.DelegateRewards {
-						if dReward.RewardType != climodel.FeeRewardSharder || dReward.PoolID != poolId {
-							continue
-						}
-						_, found := poolsPaid[poolId]
-						if found {
-							require.Falsef(t, found, "pool %s should have only received block reward once, round %d", poolId, round)
-						}
-						poolsPaid[poolId] = true
-					}
-				}
-				numShouldPay := numSharderDelegatesRewarded
-				if numShouldPay > len(beforeSharders.Nodes[i].Pools) {
-					numShouldPay = len(beforeSharders.Nodes[i].Pools)
-				}
-				require.Len(t, poolsPaid, numShouldPay,
-					"should pay %d pools for shader %s on round %d; %d pools actually paid",
-					numShouldPay, id, round, len(poolsPaid))
-			}
-		}
+		checkSharderDelegatePoolFeeRewardFrequency(
+			t,
+			numSharderDelegatesRewarded,
+			sharderIds,
+			beforeSharders.Nodes,
+			history,
+		)
 
 		// Each round confirm payments to delegates or the blocks winning miner.
 		// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
@@ -260,6 +171,139 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			}
 		}
 	})
+}
+
+// checkSharderFeeAmounts
+// Each round one miner is chosen to receive a block reward.
+// The winning miner is stored in the block object.
+// The reward payments retrieved from the provider reward table.
+// The amount of the reward is a fraction of the block reward allocated to miners each
+// round. The fraction is the miner's service charge. If the miner has
+// no stake pools then the reward becomes the full block reward.
+//
+// Firstly we confirm the self-consistency of the block and reward tables.
+// We calculate the change in the miner rewards during and confirm that this
+// equals the total of the reward payments read from the provider rewards table.
+func checkSharderFeeAmounts(
+	t *test.SystemTest,
+	sharderIds []string,
+	minerShare float64,
+	numShardersRewarded int,
+	beforeSharders, afterSharders []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	t.Log("checking sharder fee payment amounts...")
+	for i, id := range sharderIds {
+		var blockRewards, feeRewards int64
+		for round := beforeSharders[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders[i].RoundServiceChargeLastUpdated; round++ {
+			feesPerSharder := int64(float64(history.FeesForRound(t, round)) / float64(numShardersRewarded))
+			roundHistory := history.RoundHistory(t, round)
+			for _, pReward := range roundHistory.ProviderRewards {
+				if pReward.ProviderId != id {
+					continue
+				}
+				switch pReward.RewardType {
+				case climodel.FeeRewardSharder:
+					require.Greater(t, feesPerSharder, int64(0), "fee reward with no fees")
+					var fees int64
+					if len(beforeSharders[i].StakePool.Pools) > 0 {
+						fees = int64(float64(feesPerSharder) * beforeSharders[i].Settings.ServiceCharge * (1 - minerShare))
+					} else {
+						fees = int64(float64(feesPerSharder) * (1 - minerShare))
+					}
+					if fees != pReward.Amount {
+						fmt.Println("fees", fees, "reward", pReward.Amount)
+					}
+					require.InDeltaf(t, fees, pReward.Amount, delta,
+						"incorrect service charge %v for round %d"+
+							" service charge should be fees %d multiplied by service ratio %v."+
+							"length stake pools %d",
+						pReward.Amount, round, fees, beforeSharders[i].Settings.ServiceCharge,
+						len(beforeSharders[i].StakePool.Pools))
+					feeRewards += pReward.Amount
+				case climodel.BlockRewardSharder:
+					blockRewards += pReward.Amount
+				default:
+					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+				}
+			}
+		}
+		actualReward := afterSharders[i].Reward - beforeSharders[i].Reward
+		if actualReward != blockRewards+feeRewards {
+			fmt.Println("piers actual rewards", actualReward, "block rewards", blockRewards, "fee rewards", feeRewards)
+		}
+
+		require.InDeltaf(t, actualReward, blockRewards+feeRewards, delta,
+			"rewards expected %v, change in sharder reward during the test is %v", actualReward, blockRewards+feeRewards)
+	}
+}
+
+// Each round there is a fee, there should be exactly num_sharders_rewarded sharder fee reward payment.
+func checkSharderFeeRewardFrequency(
+	t *test.SystemTest,
+	start, end int64,
+	numShardersRewarded int,
+	history *cliutil.ChainHistory,
+) {
+	t.Log("checking number of fee payments...")
+	for round := start; round <= end; round++ {
+		if history.FeesForRound(t, round) == 0 {
+			continue
+		}
+		roundHistory := history.RoundHistory(t, round)
+		shardersPaid := make(map[string]bool)
+		for _, pReward := range roundHistory.ProviderRewards {
+			if pReward.RewardType == climodel.FeeRewardSharder {
+				_, found := shardersPaid[pReward.ProviderId]
+				require.Falsef(t, found, "sharder %s receives more than one block reward on round %d", pReward.ProviderId, round)
+				shardersPaid[pReward.ProviderId] = true
+			}
+		}
+		require.Equal(t, numShardersRewarded, len(shardersPaid),
+			"mismatch between expected count of sharders rewarded and actual number on round %d", round)
+
+	}
+}
+
+// checkSharderDelegatePoolFeeRewardFrequency
+// Each round there is a fee each sharder rewarded should have num_sharder_delegates_rewarded of
+// their delegates rewarded, or all delegates if less.
+func checkSharderDelegatePoolFeeRewardFrequency(
+	t *test.SystemTest,
+	numSharderDelegatesRewarded int,
+	sharderIds []string,
+	sharders []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	t.Log("checking delegate pool reward frequencies...")
+	for round := history.From(); round <= history.To(); round++ {
+		if history.FeesForRound(t, round) == 0 {
+			continue
+		}
+		roundHistory := history.RoundHistory(t, round)
+		for i, id := range sharderIds {
+			poolsPaid := make(map[string]bool)
+			for poolId := range sharders[i].Pools {
+				for _, dReward := range roundHistory.DelegateRewards {
+					if dReward.RewardType != climodel.FeeRewardSharder || dReward.PoolID != poolId {
+						continue
+					}
+					_, found := poolsPaid[poolId]
+					if found {
+						require.Falsef(t, found, "pool %s should have only received block reward once, round %d", poolId, round)
+					}
+					poolsPaid[poolId] = true
+				}
+			}
+			numShouldPay := numSharderDelegatesRewarded
+			if numShouldPay > len(sharders[i].Pools) {
+				numShouldPay = len(sharders[i].Pools)
+			}
+			require.Len(t, poolsPaid, numShouldPay,
+				"should pay %d pools for shader %s on round %d; %d pools actually paid",
+				numShouldPay, id, round, len(poolsPaid))
+		}
+	}
 }
 
 func delegateSharderFeesRewards(numberSharders int, fee int64, serviceCharge, sharderShare float64) int64 {

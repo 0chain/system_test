@@ -40,7 +40,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// ----------------------------------- w
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 3)
 		// ----------------------------------=
 
 		afterSharders := getNodes(t, sharderIds, sharderUrl)

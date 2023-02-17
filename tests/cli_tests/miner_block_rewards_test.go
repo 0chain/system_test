@@ -56,7 +56,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		cliutils.Wait(t, 2*time.Second)
+		cliutils.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
@@ -97,7 +97,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		// We calculate the change in the miner rewards during and confirm that this
 		// equals the total of the reward payments read from the provider rewards table.
 		for i, id := range minerIds {
-			var rewards int64
+			var feeRewards, blockRewards int64
 			for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
 				roundHistory := history.RoundHistory(t, round)
 				for _, pReward := range roundHistory.ProviderRewards {
@@ -123,17 +123,17 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 							pReward.Amount, round,
 							minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
 							len(beforeMiners.Nodes[i].StakePool.Pools))
-						rewards += pReward.Amount
+						blockRewards += pReward.Amount
 					case climodel.FeeRewardMiner:
-						rewards += pReward.Amount
+						feeRewards += pReward.Amount
 					default:
 						require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
 					}
 				}
 			}
 			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
-			require.InDeltaf(t, actualReward, rewards, delta,
-				"rewards expected %v, change in miners reward during the test is %v", actualReward, rewards)
+			require.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
+				"rewards expected %v, change in miners reward during the test is %v", actualReward, feeRewards+blockRewards)
 		}
 		t.Log("finished testing miners")
 
