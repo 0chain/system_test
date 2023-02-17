@@ -80,6 +80,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		} else {
 			numShardersRewarded = len(sharderIds)
 		}
+
 		minerShare := minerScConfig["share_ratio"]
 
 		checkSharderFeeAmounts(
@@ -90,14 +91,9 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			beforeSharders.Nodes, afterSharders.Nodes,
 			history,
 		)
-		t.Log("finished testing sharders")
-
 		checkSharderFeeRewardFrequency(
 			t, startRound+1, endRound-1, numShardersRewarded, history,
 		)
-
-		t.Log("about to test delegate pools")
-
 		checkSharderDelegatePoolFeeRewardFrequency(
 			t,
 			numSharderDelegatesRewarded,
@@ -105,7 +101,6 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			beforeSharders.Nodes,
 			history,
 		)
-
 		checkSharderDelegatePoolFeeAmounts(
 			t,
 			sharderIds,

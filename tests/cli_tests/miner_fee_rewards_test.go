@@ -74,28 +74,20 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		history.Read(t, sharderUrl, true)
 
 		minerScConfig := getMinerScMap(t)
-		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
-		minerShare := minerScConfig["share_ratio"]
-
 		checkMinerFeeAmounts(
 			t,
 			minerIds,
-			minerShare,
+			minerScConfig["share_ratio"],
 			beforeMiners.Nodes, afterMiners.Nodes,
 			history,
 		)
-		t.Log("finished testing miners")
-
 		checkMinerFeeRewardFrequency(
 			t, startRound+1, endRound-1, history,
 		)
-
-		t.Log("about to test delegate pools")
-
 		checkMinerDelegatePoolFeeAmounts(
 			t,
 			minerIds,
-			numMinerDelegatesRewarded,
+			int(minerScConfig["num_miner_delegates_rewarded"]),
 			beforeMiners.Nodes, afterMiners.Nodes,
 			history,
 		)
