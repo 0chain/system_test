@@ -646,7 +646,7 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
-	pourZCN := tokenomics.IntToZCN(3)
+	pourZCN := tokenomics.IntToZCN(5)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1047,7 +1047,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) int64 {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1086,6 +1086,7 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 	})
 
 	wallet.IncNonce()
+	return collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
 }
 
 func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
