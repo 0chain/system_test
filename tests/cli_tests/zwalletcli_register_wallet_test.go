@@ -172,7 +172,7 @@ func getWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*clim
 }
 
 func verifyTransaction(t *test.SystemTest, cliConfigFilename, txn string) ([]string, error) {
-	t.Logf("Verifying transaction...")
+	t.Logf("Verifying transaction %s", txn)
 	return cliutils.RunCommand(t, "./zwallet verify --silent --wallet "+escapedTestName(t)+""+
 		"_wallet.json"+" --hash "+txn+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

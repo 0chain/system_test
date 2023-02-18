@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/0chain/system_test/internal/api/util/crypto"
 
@@ -58,8 +59,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	output, err = registerWalletForName(t, configPath, assigner)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	// Open the wallet file themselves to get private key for signing data
-	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
 	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
@@ -82,16 +81,15 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
-	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
-	err = sendTxn(miners, freeAllocAssignerTxn)
-	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
-
-	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
-	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-	require.Len(t, output, 3)
-	require.Equal(t, "Transaction verification success", output[0])
-	require.Equal(t, "TransactionStatus: 1", output[1])
-	require.Greater(t, len(output[2]), 0, output[2])
+	input := map[string]interface{}{
+		"name":  assignerWallet.ClientID,
+		"key":   assignerWallet.ClientKey,
+		"limit": freeTokensIndividualLimit,
+		"max":   freeTokensTotalLimit,
+	}
+	output, err = createFreeStorageAllocation(t, configPath, scOwnerWallet, createParams(input))
+	require.NoError(t, err)
+	t.Log(output)
 
 	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
@@ -395,4 +393,13 @@ func freeAllocationAssignerTxn(t *test.SystemTest, from, assigner *climodel.Wall
 		SerializeToHexStr()
 
 	return txn
+}
+
+func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params string) ([]string, error) {
+	t.Logf("Creating new free storage allocation...")
+	return cliutils.RunCommand(t, fmt.Sprintf(
+		"./zbox add --silent %s --wallet %s --configDir ./config --config %s",
+		params,
+		from+"_wallet.json",
+		configFile), 3, time.Second*5)
 }
