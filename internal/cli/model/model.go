@@ -86,6 +86,8 @@ type Allocation struct {
 	MovedBack         int64    `json:"moved_back,omitempty"`
 	MovedToValidators int64    `json:"moved_to_validators,omitempty"`
 	Curators          []string `json:"curators"`
+	FileOptions		  uint16   `json:"file_options"`
+	ThirdPartyExtendable bool `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {
