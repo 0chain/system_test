@@ -5,7 +5,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -555,7 +555,7 @@ func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneN
 }
 
 func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage, fromInfo, recieverClientId, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
-	t.Logf("Posting Allocation using 0box...")
+	t.Logf("Posting ShareInfo using 0box...")
 	var message *model.MessageContainer
 
 	urlBuilder := NewURLBuilder()
