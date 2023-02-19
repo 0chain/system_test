@@ -102,8 +102,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, successfulBalanceOutputRegex, output[0])
 
-		output, err = getBalanceForWallet(t, configPath, targetWallet)
-		ensureZeroBalance(t, output, err)
+		_, err = getBalanceForWallet(t, configPath, targetWallet)
+		require.NoError(t, err)
 
 		// Transfer ZCN from sender to target wallet
 		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), true)
@@ -113,8 +113,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 
 		// After send balance checks
-		output, err = getBalance(t, configPath)
-		ensureZeroBalance(t, output, err)
+		_, err = getBalance(t, configPath)
+		require.NoError(t, err)
 
 		output, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
