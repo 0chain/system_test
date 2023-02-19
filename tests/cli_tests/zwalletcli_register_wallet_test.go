@@ -16,7 +16,10 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-const defaultInitFaucetTokens = 2.0
+const (
+	defaultInitFaucetTokens         = 5.0
+	defaultBlobberOwnerFaucetTokens = 5.0
+)
 
 func TestRegisterWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)

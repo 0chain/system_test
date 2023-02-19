@@ -75,6 +75,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
+	// init enough tokens to blobber owner wallet to issue txns
+	for i := 0; i < 3; i++ {
+		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
+		require.NoError(t, err)
+	}
+
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// register wallet for normal user
 		output, err := registerWallet(t, configPath)
@@ -250,7 +256,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		output, err = updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 25)
+		require.Len(t, output, 26)
 		require.Equal(t, "Error: required flag(s) \"blobber_id\" not set", output[0])
 	})
 
