@@ -2,14 +2,15 @@ package api_tests
 
 import (
 	"encoding/base64"
+	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -153,38 +154,64 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, username, usernameResponse.Username, "output not as expected", response.String())
 	})
 
-	t.RunSequentially("Get fully populated user info from username should work", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
-		// FIXME: there are no delete endpoints so we can't teardown
+	t.RunSequentially("Phone exists should work with existing phone number", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		username := cliutils.RandomAlphaNumericString(10)
-		_, _, err := zboxClient.PutUsername(t, username, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-
-		bio := "bio from " + escapedTestName(t)
-		_, _, err = zboxClient.PostUserInfoBiography(t, bio, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-
-		avatarImagePath := escapedTestName(t) + "avatar.png"
-		generateImage(t, avatarImagePath)
-		_, _, err = zboxClient.PostUserInfoAvatar(t, avatarImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-
-		thumbnailPath := escapedTestName(t) + "background.png"
-		generateImage(t, thumbnailPath)
-		_, _, err = zboxClient.PostUserInfoBackgroundImage(t, thumbnailPath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-
-		userInfo, response, err := zboxClient.GetUserInfo(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		data, response, err := zboxClient.CheckPhoneExists(t, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, userInfo)
-		require.Equal(t, username, userInfo.Username, "output not as expected", response.String())
-		require.Equal(t, bio, userInfo.Biography, "output not as expected", response.String())
-		require.NotNil(t, userInfo.Avatar, "output not as expected", response.String())
-		require.NotNil(t, userInfo.CreatedAt, "output not as expected", response.String())
-		require.NotNil(t, userInfo.BackgroundImage, "output not as expected", response.String())
+		require.NotNil(t, data.Exist)
+		require.Equal(t, true, *data.Exist, "Expected phone number to exist")
+	})
+
+	t.RunSequentially("Phone exists check should return error with non-existing phone number", func(t *test.SystemTest) {
+		phoneNumber := fmt.Sprintf("%s%d", zboxClient.DefaultPhoneNumber, 0)
+		teardown(t, firebaseToken.IdToken, phoneNumber)
+		csrfToken := createCsrfToken(t, phoneNumber)
+
+		data, response, err := zboxClient.CheckPhoneExists(t, csrfToken, phoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusBadRequest, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, data.Error)
+		require.Equal(t, "404: User not found", *data.Error, "Expected error message to match")
+	})
+
+	t.RunSequentially("Wallet exists should work with zero wallet", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		walletName := "wallet_name"
+
+		data, response, err := zboxClient.CheckWalletExists(t, walletName, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, data.Exist)
+		require.Equal(t, false, *data.Exist, "Expected wallet to not exist")
+	})
+
+	t.RunSequentially("Wallet exists should work with wallet present", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		walletName := "wallet_name"
+
+		description := "wallet created as part of " + t.Name()
+		_, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		t.Logf("Should return true when wallet exists")
+		data, response, err := zboxClient.CheckWalletExists(t, walletName, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, data.Exist)
+		require.Equal(t, true, *data.Exist, "Expected wallet to exist")
 	})
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]

@@ -27,6 +27,11 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
+type ZboxResourceExist struct {
+	Exist *bool   `json:"exist"`
+	Error *string `json:"error"`
+}
+
 type ZboxAllocation struct {
 	Id             string   `json:"id"`
 	WalletId       int      `json:"wallet_id"`

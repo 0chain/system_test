@@ -514,3 +514,52 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 
 	return zboxUsername, resp, err
 }
+
+func (c *ZboxClient) CheckPhoneExists(t *test.SystemTest, csrfToken, phoneNumber string) (model.ZboxResourceExist, *resty.Response, error) {
+	t.Logf("Checking if phone number [%v] exists using 0box...", phoneNumber)
+	var zboxWalletExists model.ZboxResourceExist
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/phone/exist")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &zboxWalletExists,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxWalletExists, resp, err
+}
+
+func (c *ZboxClient) CheckWalletExists(t *test.SystemTest, walletName, csrfToken, phoneNumber string) (model.ZboxResourceExist, *resty.Response, error) {
+	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	var zboxWalletExists model.ZboxResourceExist
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet/exist")
+	formData := map[string]string{
+		"wallet_name": walletName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxWalletExists,
+		FormData: formData,
+		Headers: map[string]string{
+			//"X-App-ID-TOKEN":     idToken,
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxWalletExists, resp, err
+}
