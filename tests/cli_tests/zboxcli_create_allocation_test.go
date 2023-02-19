@@ -228,12 +228,12 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		// get allocation
 		var alloc *climodel.Allocation
-		
+
 		output, err = getAllocationWithRetry(t, configPath, allocationID, 10)
 		require.Nil(t, err, "error fetching allocation")
 		require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
 		err = json.Unmarshal([]byte(output[0]), &alloc)
-		require.Nil(t, err, "error unmarshalling allocation json")	
+		require.Nil(t, err, "error unmarshalling allocation json")
 		require.Equal(t, uint16(63), alloc.FileOptions)
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -268,7 +268,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(61), alloc.FileOptions) // 63 - 2 = 62 (delete mask = 2)
-		
+
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid update
@@ -282,7 +282,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(59), alloc.FileOptions) // 63 - 4 = 59 (update mask = 4)
-		
+
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid move
@@ -296,7 +296,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(55), alloc.FileOptions) // 63 - 8 = 55 (move mask = 8)
-		
+
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid copy
@@ -310,7 +310,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(47), alloc.FileOptions) // 63 - 16 = 47 (copy mask = 8)
-		
+
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid rename
@@ -343,12 +343,12 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		// get allocation
 		var alloc *climodel.Allocation
-		
+
 		output, err = getAllocationWithRetry(t, configPath, allocationID, 10)
 		require.Nil(t, err, "error fetching allocation")
 		require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
 		err = json.Unmarshal([]byte(output[0]), &alloc)
-		require.Nil(t, err, "error unmarshalling allocation json")	
+		require.Nil(t, err, "error unmarshalling allocation json")
 		require.Equal(t, false, alloc.ThirdPartyExtendable) // 63 - (2 + 4 + 32) = 25 (update mask = 2, rename = 32, delete = 4)
 		createAllocationTestTeardown(t, allocationID)
 

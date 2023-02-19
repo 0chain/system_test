@@ -617,7 +617,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		destpath := "/target/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size":        allocSize,
 			"forbid_copy": nil,
 		})
 

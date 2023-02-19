@@ -79,15 +79,15 @@ type Allocation struct {
 
 	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
 
-	StartTime         int64    `json:"start_time"`
-	Finalized         bool     `json:"finalized,omitempty"`
-	Canceled          bool     `json:"canceled,omitempty"`
-	MovedToChallenge  int64    `json:"moved_to_challenge,omitempty"`
-	MovedBack         int64    `json:"moved_back,omitempty"`
-	MovedToValidators int64    `json:"moved_to_validators,omitempty"`
-	Curators          []string `json:"curators"`
-	FileOptions		  uint16   `json:"file_options"`
-	ThirdPartyExtendable bool `json:"third_party_extendable"`
+	StartTime            int64    `json:"start_time"`
+	Finalized            bool     `json:"finalized,omitempty"`
+	Canceled             bool     `json:"canceled,omitempty"`
+	MovedToChallenge     int64    `json:"moved_to_challenge,omitempty"`
+	MovedBack            int64    `json:"moved_back,omitempty"`
+	MovedToValidators    int64    `json:"moved_to_validators,omitempty"`
+	Curators             []string `json:"curators"`
+	FileOptions          uint16   `json:"file_options"`
+	ThirdPartyExtendable bool     `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {

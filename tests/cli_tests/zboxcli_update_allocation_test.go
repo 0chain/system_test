@@ -361,13 +361,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, expected, output[0])
 	})
 
-
-	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 2 * time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 2*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// Forbid upload
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_upload": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -382,7 +381,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid delete
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_delete": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -397,7 +396,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid update
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_update": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -412,7 +411,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid move
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":  allocationID,
 			"forbid_move": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -427,7 +426,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid copy
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":  allocationID,
 			"forbid_copy": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -442,7 +441,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid rename
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_rename": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -455,10 +454,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions) // 32 - 32 = 0 = 00000000
 
-		
 		// Allow upload
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_upload": false,
 		})
 
@@ -474,7 +472,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Allow delete
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_delete": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -489,7 +487,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Allow update
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_update": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -504,7 +502,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Allow move
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":  allocationID,
 			"forbid_move": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -519,7 +517,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Allow copy
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":  allocationID,
 			"forbid_copy": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -531,10 +529,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// get allocation
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(31), alloc.FileOptions) // 15 + 16 = 31 = 00011111
-		
+
 		// Allow rename
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_rename": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -553,10 +551,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid upload
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_upload": nil,
 			"forbid_delete": nil,
-			"forbid_move": nil,
+			"forbid_move":   nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -566,10 +564,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Forbid upload
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":    allocationID,
 			"forbid_upload": nil,
 			"forbid_delete": nil,
-			"forbid_move": nil,
+			"forbid_move":   nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 
@@ -583,7 +581,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// set third party extendable
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -602,7 +600,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// set third party extendable
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -617,7 +615,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// set third party extendable
 		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -630,8 +628,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"size":         1,
+			"allocation": allocationID,
+			"size":       1,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -648,7 +646,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-
 		// expand allocation
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -664,7 +661,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -681,13 +678,14 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+		require.Nil(t, err)
 
 		// expand allocation
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       2,
-			"expiry": "24h",
+			"expiry":     "24h",
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
 
@@ -695,18 +693,18 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// get allocation
 		allocUpdated := getAllocation(t, allocationID)
-		require.Equal(t, int64(alloc.Size + 2), allocUpdated.Size)
+		require.Equal(t, int64(alloc.Size+2), allocUpdated.Size)
 
 		expandedDuration, err := time.ParseDuration("24h")
 		require.Nil(t, err)
-		require.Equal(t, alloc.ExpirationDate + int64(expandedDuration.Seconds()), allocUpdated.ExpirationDate)
+		require.Equal(t, alloc.ExpirationDate+int64(expandedDuration.Seconds()), allocUpdated.ExpirationDate)
 	})
 
 	t.Run("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
+			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -723,7 +721,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+		require.Nil(t, err)
 
 		// reduce allocation should fail
 		params = createParams(map[string]interface{}{
@@ -736,13 +735,13 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// set file_options or third_party_extendable should fail
 		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"forbid_upload": nil,
-			"forbid_update": nil,
-			"forbid_delete": nil,
-			"forbid_rename": nil,
-			"forbid_move": nil,
-			"forbid_copy": nil,
+			"allocation":                 allocationID,
+			"forbid_upload":              nil,
+			"forbid_update":              nil,
+			"forbid_delete":              nil,
+			"forbid_rename":              nil,
+			"forbid_move":                nil,
+			"forbid_copy":                nil,
 			"set_third_party_extendable": nil,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
@@ -751,32 +750,32 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// add blobber should fail
 		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"add_blobber": "new_blobber_id",
+			"allocation":     allocationID,
+			"add_blobber":    "new_blobber_id",
 			"remove_blobber": "blobber_id",
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-		
+
 		// set update_term should fail
 		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
+			"allocation":   allocationID,
 			"update_terms": false,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-	
+
 		// set lock should fail
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"lock": 100,
+			"lock":       100,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-	
+
 		// get allocation
 		updatedAlloc := getAllocation(t, allocationID)
 		require.Equal(t, alloc, updatedAlloc)
