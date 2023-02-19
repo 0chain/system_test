@@ -776,6 +776,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+	
+		// get allocation
+		updatedAlloc := getAllocation(t, allocationID)
+		require.Equal(t, alloc, updatedAlloc)
 	})
 
 	t.Run("Update allocation reduce expiry shouldn't work", func(t *test.SystemTest) {
