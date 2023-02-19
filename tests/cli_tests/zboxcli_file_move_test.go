@@ -696,8 +696,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": allocationID,
 			"remotepath": destpath,
 		}), false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.NotContains(t, strings.Join(output, "\n"), filename)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 }
 
