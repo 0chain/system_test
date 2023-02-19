@@ -240,9 +240,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Run("Create allocation with some forbidden file options flags should pass and show in allocation", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
+		_, err := executeFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err)
 
 		// Forbid upload
-		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_upload": nil}
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_upload": nil}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -256,7 +258,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid delete
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_delete": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_delete": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -270,7 +272,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid update
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_update": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_update": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -284,7 +286,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid move
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_move": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_move": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -298,7 +300,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid copy
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_copy": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_copy": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -312,7 +314,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid rename
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "data": 1, "parity": 1, "forbid_rename": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_rename": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
