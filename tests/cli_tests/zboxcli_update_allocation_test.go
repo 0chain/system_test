@@ -548,6 +548,36 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, uint16(63), alloc.FileOptions) // 31 + 32 = 63 = 00111111
 	})
 
+	t.Run("Updating same file options twice should fail", func(w *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		// Forbid upload
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_upload": nil,
+			"forbid_delete": nil,
+			"forbid_move": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Forbid upload
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_upload": nil,
+			"forbid_delete": nil,
+			"forbid_move": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "changes nothing")
+	})
+
 	t.Run("Update allocation set_third_party_extendable flag should work", func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath)
 
@@ -565,6 +595,200 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// get allocation
 		alloc := getAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
+	})
+
+	t.Run("Update allocation set_third_party_extendable flag should fail if third_party_extendable is already true", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		// set third party extendable
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.True(t, alloc.ThirdPartyExtendable)
+
+		// set third party extendable
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "changes nothing")
+	})
+
+	t.Run("Update allocation expand by third party if third_party_extendable = false should fail", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"size":         1,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.False(t, alloc.ThirdPartyExtendable)
+
+		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
+
+		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+
+		// expand allocation
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       2,
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+	})
+
+	t.Run("Update allocation expand by third party if third_party_extendable = true should succeed", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.True(t, alloc.ThirdPartyExtendable)
+
+		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
+
+		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+
+		// expand allocation
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       2,
+			"expiry": "24h",
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+
+		// get allocation
+		allocUpdated := getAllocation(t, allocationID)
+		require.Equal(t, int64(alloc.Size + 2), allocUpdated.Size)
+
+		expandedDuration, err := time.ParseDuration("24h")
+		require.Nil(t, err)
+		require.Equal(t, alloc.ExpirationDate + int64(expandedDuration.Seconds()), allocUpdated.ExpirationDate)
+	})
+
+	t.Run("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.True(t, alloc.ThirdPartyExtendable)
+
+		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
+
+		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+
+		// reduce allocation should fail
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       -100,
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+
+		// set file_options or third_party_extendable should fail
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"forbid_upload": nil,
+			"forbid_update": nil,
+			"forbid_delete": nil,
+			"forbid_rename": nil,
+			"forbid_move": nil,
+			"forbid_copy": nil,
+			"set_third_party_extendable": nil,
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+
+		// add blobber should fail
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"add_blobber": "new_blobber_id",
+			"remove_blobber": "blobber_id",
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+		
+		// set update_term should fail
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"update_terms": false,
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+	
+		// set lock should fail
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"lock": 100,
+		})
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+	})
+
+	t.Run("Update allocation reduce expiry shouldn't work", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		// reduce allocation should fail
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"expiry": "-24h",
+		})
+		output, err := updateAllocation(t, configPath, params, false)
+		require.NotNil(t, err, "no error updating allocation", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "duration of an allocation cannot be reduced")
 	})
 }
 
