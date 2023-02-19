@@ -108,7 +108,8 @@ type ZboxShareInfo struct {
 	LookUpHash string `json:"lookup_hash"`
 	CreatedAt  string `json:"CreatedAt"`
 	UpdatedAt  string `json:"UpdatedAt"`
-	AppType    string `json:"app_type"`
+	AppType    int    `json:"app_type"`
+	// [FIXME] need string for app type. Sanchit is working o this.
 }
 
 type ZboxShareInfoList struct {

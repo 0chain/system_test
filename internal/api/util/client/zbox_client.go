@@ -532,7 +532,7 @@ func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneN
 		"auth_tickets":       authTickets,
 		"message":            shareMessage,
 		"from_info":          fromInfo,
-		"reciever_client_id": recieverClientId,
+		"receiver_client_id": recieverClientId,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -567,7 +567,7 @@ func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage,
 		"auth_ticket":        authTicket,
 		"message":            shareMessage,
 		"from_info":          fromInfo,
-		"reciever_client_id": recieverClientId,
+		"receiver_client_id": recieverClientId,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -595,7 +595,7 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/share/shareInfo")
+	urlBuilder.SetPath("/v2/share/shareinfo")
 
 	formData := map[string]string{
 		"auth_ticket": authTicket,
