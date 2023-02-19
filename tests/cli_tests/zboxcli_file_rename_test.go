@@ -738,8 +738,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"remotepath": "/",
 		}), false)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.NotContains(t, output[0], destPath)
+		require.NotContains(t, strings.Join(output, "\n"), destPath)
 	})
 }
 

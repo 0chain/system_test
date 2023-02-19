@@ -328,7 +328,6 @@ func TestFileDelete(testSetup *testing.T) {
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
-			"force":      "",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -337,11 +336,9 @@ func TestFileDelete(testSetup *testing.T) {
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
-			"json":       "",
 		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), remoteFilePath, strings.Join(output, "\n"))
 	})
 }
 
