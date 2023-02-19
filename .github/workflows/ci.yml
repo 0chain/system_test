@@ -52,11 +52,11 @@ jobs:
   golangci:
     if: github.event_name == 'push'
     name: "lint"
-    runs-on: self-hosted
+    runs-on: [ tests-suite ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           version: v1.50
           skip-build-cache: true
