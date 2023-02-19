@@ -707,7 +707,7 @@ func TestUpload(testSetup *testing.T) {
 		fileSize := int64(512 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
+			"size":          allocSize,
 			"forbid_upload": nil,
 		})
 
@@ -725,7 +725,7 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
-		
+
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
