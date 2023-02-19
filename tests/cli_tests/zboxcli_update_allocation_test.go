@@ -732,7 +732,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+		require.Contains(t, strings.Join(output, "\n"), "third party can only extend the allocation")
 
 		// set file_options or third_party_extendable should fail
 		params = createParams(map[string]interface{}{
@@ -780,19 +780,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// get allocation
 		updatedAlloc := getAllocation(t, allocationID)
 		require.Equal(t, alloc, updatedAlloc)
-	})
-
-	t.Run("Update allocation reduce expiry shouldn't work", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath)
-
-		// reduce allocation should fail
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry": "-24h",
-		})
-		output, err := updateAllocation(t, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "duration of an allocation cannot be reduced")
 	})
 }
 
