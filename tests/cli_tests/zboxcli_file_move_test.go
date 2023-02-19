@@ -647,6 +647,57 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.Run("move file with allocation move file option forbidden should fail", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		existingFileInDest := generateRandomTestFileName(t)
+		err = createFileWithSize(existingFileInDest, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/" + filename
+		destpath := "/target/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"forbid_move": nil,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
+		
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[0], filename)
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": destpath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotContains(t, output[0], filename)
+	})
 }
 
 func moveFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {

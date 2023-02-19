@@ -697,6 +697,50 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
 		createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.Run("rename file with allocation rename file option forbidden should fail", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/" + filename
+		destName := "new_" + filename
+		destPath := "/" + destName
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"forbid_rename": nil,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		output, err = renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destname":   destName,
+		}, true)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "this options for this file is not permitted for this allocation", output[0])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.NotContains(t, output[0], destPath)
+	})
 }
 
 func renameFileWithWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {
