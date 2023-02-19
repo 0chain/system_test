@@ -362,7 +362,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 
-	t.Run("Update Allocation flags for forbid and allow file_options should succeed", func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 2 * time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 
 		// Forbid upload
@@ -732,7 +732,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "third party can only extend the allocation")
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
 		// set file_options or third_party_extendable should fail
 		params = createParams(map[string]interface{}{
