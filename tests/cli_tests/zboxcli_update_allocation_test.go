@@ -360,6 +360,212 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 	})
+
+
+	t.Run("Update Allocation flags for forbid and allow file_options should succeed", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath)
+
+		// Forbid upload
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_upload": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.Equal(t, uint16(62), alloc.FileOptions) // 63 - 1 = 62 = 00111110
+
+		// Forbid delete
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_delete": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(60), alloc.FileOptions) // 63 - 3 = 60 = 00011100
+
+		// Forbid update
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_update": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(56), alloc.FileOptions) // 63 - 7 = 56 = 00111000
+
+		// Forbid move
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_move": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(48), alloc.FileOptions) // 63 - 15 = 48 = 00110000
+
+		// Forbid copy
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_copy": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(32), alloc.FileOptions) // 63 - 31 = 32 = 00100000
+
+		// Forbid rename
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_rename": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(0), alloc.FileOptions) // 32 - 32 = 0 = 00000000
+
+		
+		// Allow upload
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_upload": false,
+		})
+
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(1), alloc.FileOptions) // 0 + 1 = 1 = 00000001
+
+		// Allow delete
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_delete": false,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(3), alloc.FileOptions) // 1 + 2 = 3 = 00000011
+
+		// Allow update
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_update": false,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(7), alloc.FileOptions) // 3 + 4 = 7 = 00000111
+
+		// Allow move
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_move": false,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(15), alloc.FileOptions) // 7 + 8 = 15 = 00001111
+
+		// Allow copy
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_copy": false,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(31), alloc.FileOptions) // 15 + 16 = 31 = 00011111
+		
+		// Allow rename
+		params = createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"forbid_rename": false,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(63), alloc.FileOptions) // 31 + 32 = 63 = 00111111
+	})
+
+	t.Run("Update allocation set_third_party_extendable flag should work", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+
+		// set third party extendable
+		params := createParams(map[string]interface{}{
+			"allocation":   allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// get allocation
+		alloc := getAllocation(t, allocationID)
+		require.True(t, alloc.ThirdPartyExtendable)
+	})
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
@@ -397,7 +603,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 1.0
 	// Then create new allocation
-	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
+	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5", "data": 1, "parity": 1}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
