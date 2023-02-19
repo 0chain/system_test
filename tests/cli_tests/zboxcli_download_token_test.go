@@ -108,7 +108,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		// So the download cost will be in between initial balance and expected balance.
 		t.Logf("FinalReadPool.Balance:%d\nInitialReadPool.Balance:%d\nExpectedReadPool.Balance:%d\n", finalReadPool.Balance, initialReadPool.Balance, int64(expectedRPBalance))
 		require.Equal(t, true,
-			finalReadPool.Balance <= initialReadPool.Balance &&
+			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 }

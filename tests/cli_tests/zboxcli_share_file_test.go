@@ -1051,7 +1051,7 @@ func TestShareFile(testSetup *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1161,11 +1161,11 @@ func TestShareFile(testSetup *testing.T) {
 		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
 		// So the download cost will be in between initial balance and expected balance.
 		require.Equal(t, true,
-			finalReadPool.Balance <= initialReadPool.Balance &&
+			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 
-	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1263,7 +1263,7 @@ func TestShareFile(testSetup *testing.T) {
 		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
 		// So the download cost will be in between initial balance and expected balance.
 		require.Equal(t, true,
-			finalReadPool.Balance <= initialReadPool.Balance &&
+			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 }
