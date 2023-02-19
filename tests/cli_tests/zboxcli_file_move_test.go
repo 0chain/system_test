@@ -665,7 +665,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		destpath := "/target/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size":        allocSize,
 			"forbid_move": nil,
 		})
 
@@ -675,7 +675,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		
+
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -684,7 +684,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		// FIXME: zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
-		
+
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",

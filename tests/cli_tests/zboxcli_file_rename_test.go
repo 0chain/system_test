@@ -712,7 +712,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		destPath := "/" + destName
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size":          allocSize,
 			"forbid_rename": nil,
 		})
 

@@ -314,8 +314,8 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Run("delete existing file with allocation delete file options forbidden should fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"data": 1,
-			"parity": 1,
+			"data":          1,
+			"parity":        1,
 			"forbid_delete": nil,
 		})
 
