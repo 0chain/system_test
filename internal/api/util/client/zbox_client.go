@@ -553,7 +553,6 @@ func (c *ZboxClient) CheckWalletExists(t *test.SystemTest, walletName, csrfToken
 		Dst:      &zboxWalletExists,
 		FormData: formData,
 		Headers: map[string]string{
-			//"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
 			"X-APP-TYPE":         "blimp",
