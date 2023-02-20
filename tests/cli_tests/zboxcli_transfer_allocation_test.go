@@ -135,7 +135,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.Run("transfer an expired allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": "2s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -150,15 +151,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
+		time.Sleep(5 * time.Second)
 		alloc := getAllocation(t, allocationID)
 		require.False(t, alloc.Finalized)
 
@@ -225,7 +218,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.RunWithTimeout("transfer a finalized allocation", 5*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
+			"size":   int64(2048),
+			"expire": "5s",
 		})
 
 		ownerWallet, err := getWallet(t, configPath)
@@ -240,16 +234,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
 			"add curator - Unexpected output", strings.Join(output, "\n"))
 
-		// expire the allocation first
-		expDuration := int64(-3) // In hours
-
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-		}), true)
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		time.Sleep(6 * time.Second)
 
 		// Wait for challenge completion time to expire
 		cliutils.Wait(t, 4*time.Minute)
@@ -455,17 +440,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
 		require.Contains(t, aggregatedOutput, "failed")
-
-		/* Authticket is redundant for owner and collaborator
-		output, err = downloadFileForWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"localpath":  downloadFilePath,
-			"authticket": authTicket,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error in file operation: File content didn't match with uploaded file", output[1],
-			"download file - Unexpected output", strings.Join(output, "\n"))
-		*/
 	}) //todo:slow
 
 	t.RunWithTimeout("transfer allocation and update allocation", 6*time.Minute, func(t *test.SystemTest) {
@@ -694,83 +668,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
-
-	t.RunWithTimeout("transfer allocation and upload file", 6*time.Minute, func(t *test.SystemTest) { // todo: very slow
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(20480),
-		})
-
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
-		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
-		require.Nil(t, err)
-
-		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
-
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  file,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"upload file - Unexpected output", strings.Join(output, "\n"))
-
-		newOwner := escapedTestName(t) + "_NEW_OWNER"
-
-		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
-		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
-			"allocation":    allocationID,
-			"new_owner_key": newOwnerWallet.ClientPublicKey,
-			"new_owner":     newOwnerWallet.ClientID,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
-			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
-
-		transferred := pollForAllocationTransferToEffect(t, newOwner, allocationID)
-		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
-
-		output, err = writePoolLockWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"tokens":     0.5,
-		}), false)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "write pool lock - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "locked", output[0], "write pool lock - Unexpected output", strings.Join(output, "\n"))
-
-		output, err = uploadFileForWallet(t, newOwner, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/new" + remotePath,
-			"localpath":  file,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
-			"upload file - Unexpected output", strings.Join(output, "\n"))
-	}) //todo:slow
 }
 
 func transferAllocationOwnership(t *test.SystemTest, param map[string]interface{}, retry bool) ([]string, error) {

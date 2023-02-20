@@ -109,34 +109,21 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) (
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) error {
-	_, err := registerWalletForName(t, cliConfigFilename, name)
-	if err != nil {
-		return err
-	}
-	var tokens float64 = 2
-	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
-	if err != nil {
-		return err
-	}
+func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
+	var tokens = 2.0
+	registerWalletWithTokens(t, cliConfigFilename, name, tokens)
 	readPoolParams := createParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
-	_, err = readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
-	return err
+	_, err := readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
+	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
 }
 
-func lockReadTokensForWalletName(t *test.SystemTest, cliConfigFilename, wallet string, tokens float64) error {
-	_, err := executeFaucetWithTokensForWallet(t, wallet, cliConfigFilename, tokens)
-	if err != nil {
-		return err
-	}
-
-	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	_, err = readPoolLockWithWallet(t, wallet, cliConfigFilename, readPoolParams, true)
-	return err
+func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
+	_, err := registerWalletForName(t, cliConfigFilename, name)
+	require.NoErrorf(t, err, "register wallet %s", name)
+	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
+	require.NoErrorf(t, err, "get tokens for wallet %s", name)
 }
 
 func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {

@@ -698,7 +698,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		output, err = syncFolderWithWallet(t, notOwnerWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  localpath,
-		}, true)
+		}, false) // Do not retry when expecting failure
 
 		require.NotNil(t, err)
 		require.Len(t, output, 2)

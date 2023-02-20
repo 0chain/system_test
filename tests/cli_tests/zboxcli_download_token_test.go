@@ -43,8 +43,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
 
 		// locking 1 read tokens to readPool via wallet
-		err = registerWalletForNameAndLockReadTokens(t, configPath, walletOwner)
-		require.Nil(t, err)
+		registerWalletForNameAndLockReadTokens(t, configPath, walletOwner)
 
 		output, err = readPoolInfoWithWallet(t, walletOwner, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))

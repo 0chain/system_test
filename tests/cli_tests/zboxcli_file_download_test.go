@@ -379,8 +379,7 @@ func TestDownload(testSetup *testing.T) {
 
 		// register viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		err = registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
-		require.Nil(t, err)
+		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
@@ -1191,7 +1190,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 120*time.Second, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1199,23 +1198,22 @@ func TestDownload(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"expire": "1h",
+			"expire": "30s",
 		})
 
+		t.Log("Time after creating the allocation ", time.Now())
+
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		t.Log("Time after uploading the file ", time.Now())
+
+		time.Sleep(10 * time.Second)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     "-1h",
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",

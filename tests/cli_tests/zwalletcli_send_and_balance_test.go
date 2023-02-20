@@ -335,7 +335,7 @@ func getRoundBlockFromASharder(t *test.SystemTest, round int64) climodel.Block {
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
 
 	// Get round details
-	res, err := apiGetBlock(sharderBaseUrl, round)
+	res, err := apiGetBlock(t, sharderBaseUrl, round)
 	require.Nil(t, err, "Error retrieving block %d", round)
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
 	require.NotNil(t, res.Body, "Balance API response must not be nil")
