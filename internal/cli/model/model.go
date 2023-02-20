@@ -293,11 +293,12 @@ type NodeList struct {
 }
 
 type DelegatePool struct {
-	Balance      int64  `json:"balance"`
-	Reward       int64  `json:"reward"`
-	Status       int    `json:"status"`
-	RoundCreated int64  `json:"round_created"` // used for cool down
-	DelegateID   string `json:"delegate_id"`
+	Balance              int64  `json:"balance"`
+	Reward               int64  `json:"reward"`
+	Status               int    `json:"status"`
+	RoundCreated         int64  `json:"round_created"` // used for cool down
+	DelegateID           string `json:"delegate_id"`
+	RoundPoolLastUpdated int64  `json:"round_pool_last_updated"`
 }
 
 type StakePool struct {
@@ -310,20 +311,20 @@ type StakePool struct {
 type Node struct {
 	SimpleNode  `json:"simple_miner"`
 	StakePool   `json:"stake_pool"`
-	Round       int64 `json:"round"`
 	TotalReward int64 `json:"total_reward"`
 }
 
 type SimpleNode struct {
-	ID         string      `json:"id"`
-	N2NHost    string      `json:"n2n_host"`
-	Host       string      `json:"host"`
-	Port       int         `json:"port"`
-	PublicKey  string      `json:"public_key"`
-	ShortName  string      `json:"short_name"`
-	BuildTag   string      `json:"build_tag"`
-	TotalStake int64       `json:"total_stake"`
-	Stat       interface{} `json:"stat"`
+	ID                            string      `json:"id"`
+	N2NHost                       string      `json:"n2n_host"`
+	Host                          string      `json:"host"`
+	Port                          int         `json:"port"`
+	PublicKey                     string      `json:"public_key"`
+	ShortName                     string      `json:"short_name"`
+	BuildTag                      string      `json:"build_tag"`
+	TotalStake                    int64       `json:"total_stake"`
+	Stat                          interface{} `json:"stat"`
+	RoundServiceChargeLastUpdated int64       `json:"round_service_charge_last_updated"`
 }
 
 type Sharder struct {
@@ -620,6 +621,61 @@ type EventDBTransaction struct {
 	TransactionOutput string `json:"transaction_output"`
 	OutputHash        string `json:"output_hash"`
 	Status            int    `json:"status"`
+}
+
+type Reward int
+
+const (
+	MinLockDemandReward Reward = iota
+	BlockRewardMiner
+	BlockRewardSharder
+	BlockRewardBlobber
+	FeeRewardMiner
+	FeeRewardSharder
+	ValidationReward
+	FileDownloadReward
+	ChallengePassReward
+	ChallengeSlashPenalty
+	CancellationChargeReward
+	NumOfRewards
+)
+
+var rewardString = []string{
+	"min lock demand",
+	"block_reward_miner",
+	"block_reward_sharder",
+	"block_reward_blobber",
+	"fees miner",
+	"fees sharder",
+	"validation reward",
+	"file download reward",
+	"challenge pass reward",
+	"challenge slash",
+	"cancellation charge",
+	"invalid",
+}
+
+func (r Reward) String() string {
+	return rewardString[r]
+}
+
+func (r Reward) Int() int {
+	return int(r)
+}
+
+type RewardProvider struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number"`
+	ProviderId  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
+}
+
+type RewardDelegate struct {
+	Amount      int64  `json:"amount"`
+	BlockNumber int64  `json:"block_number"`
+	PoolID      string `json:"pool_id"`
+	ProviderID  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
 }
 
 type EventDBBlock struct {

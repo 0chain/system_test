@@ -23,7 +23,7 @@ const maxDuration = "max_duration"
 const minDuration = "min_duration"
 const minLock = "min_lock"
 
-func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
+func TestVestingPoolAdd(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -605,7 +605,7 @@ func Test___FlakyVestingPoolAdd(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolDelete(testSetup *testing.T) {
+func TestVestingPoolDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	// get current valid vesting configs
@@ -736,7 +736,7 @@ func vestingPoolDelete(t *test.SystemTest, cliConfigFilename, params string, ret
 	}
 }
 
-func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
+func TestVestingPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	// get current valid vesting configs
@@ -942,7 +942,7 @@ func Test___FlakyVestingPoolInfo(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolStop(testSetup *testing.T) {
+func TestVestingPoolStop(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	// get current valid vesting configs
@@ -1184,7 +1184,7 @@ func Test___FlakyVestingPoolStop(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
+func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
@@ -1262,7 +1262,7 @@ func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 			"amount in wallet after unlock should be greater or equal to transferred amount")
 	})
 
-	t.Run("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
+	t.RunWithTimeout("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", 90*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -1380,7 +1380,7 @@ func Test___FlakyVestingPoolTokenAccounting(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
+func TestVestingPoolTrigger(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	// get current valid vesting configs
@@ -1570,7 +1570,7 @@ func Test___FlakyVestingPoolTrigger(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
+func TestVestingPoolUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	// get current valid vesting configs
@@ -1781,7 +1781,7 @@ func Test___FlakyVestingPoolUnlock(testSetup *testing.T) {
 	})
 }
 
-func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
+func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
@@ -1791,7 +1791,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-	t.Run("should allow update of max_destinations", func(t *test.SystemTest) {
+	t.RunSequentially("should allow update of max_destinations", func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -1835,7 +1835,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("update max_destinations to invalid value should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("update max_destinations to invalid value should fail", 60*time.Second, func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "x"
 
@@ -1849,7 +1849,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 			output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "max_destinations"
 		newValue := "4"
 
@@ -1866,7 +1866,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_config: unauthorized access - only the owner can access", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("update with bad config key should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("update with bad config key should fail", 90*time.Second, func(t *test.SystemTest) {
 		configKey := "unknown_key"
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
@@ -1877,7 +1877,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "update_config: config setting unknown_key not found", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing keys param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing keys param should fail", func(t *test.SystemTest) {
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
 		}, false)
@@ -1886,7 +1886,7 @@ func Test___FlakyVestingPoolUpdateConfig(testSetup *testing.T) {
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("update with missing values param should fail", func(t *test.SystemTest) {
+	t.RunSequentially("update with missing values param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
