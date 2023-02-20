@@ -19,15 +19,13 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		t.Skip("miner block rewards test skipped as it requires a debug event database")
 	}
 
-	// Take a snapshot of the chains miners, then wait a few seconds, take another snapshot.
+	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
-	// of the block reward payments
+	// of the reward payments
 	//
-	// Each round a random miner is chosen to receive the block reward.
-	// The miner's service charge is used to determine the fraction received by the miner's wallet.
-	//
-	// The remaining block reward is then distributed amongst the miner's delegates.
-	//
+	// Each round a random sharder is chosen to receive the block reward.
+	// The sharder's service charge is used to determine the fraction received by the miner's wallet.
+	// The remaining reward is then distributed amongst the sharder's delegates.
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
@@ -113,16 +111,17 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 }
 
 // checkSharderFeeAmounts
-// Each round one miner is chosen to receive a block reward.
-// The winning miner is stored in the block object.
+// Each round we select a subset of sharders to receive that round's rewards.
+//
 // The reward payments retrieved from the provider reward table.
-// The amount of the reward is a fraction of the block reward allocated to miners each
-// round. The fraction is the miner's service charge. If the miner has
+// The reward is evenly spread between the sharders receiving rewards each
+// round. Each round each sharder receiving a reward gets a fraction
+// determined by that sharder's service charge. If the sharder has
 // no stake pools then the reward becomes the full block reward.
 //
-// Firstly we confirm the self-consistency of the block and reward tables.
-// We calculate the change in the miner rewards during and confirm that this
-// equals the total of the reward payments read from the provider rewards table.
+// Firstly we confirm the self-consistency of the reward tables.
+// We calculate the change in each sharder's rewards during and confirm that this
+// equals the total of the reward payments as read from the provider rewards table.
 func checkSharderFeeAmounts(
 	t *test.SystemTest,
 	sharderIds []string,
@@ -246,7 +245,7 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 }
 
 // checkSharderDelegatePoolFeeAmounts
-// Each round confirm payments to delegates or the blocks winning miner.
+// Each round confirm payments to delegates of the selected sharders.
 // There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
 // or all delegates if less.
 //
@@ -254,8 +253,8 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 // We check the self-consistency of the reward payments each round using
 // the delegate reward table.
 //
-// Next we compare the actual change in rewards to each miner delegate, with the
-// change expected from the delegate reward table.
+// Next we compare the actual change in rewards to each sharder's delegates, with the
+// change as read from the delegate reward table.
 func checkSharderDelegatePoolFeeAmounts(
 	t *test.SystemTest,
 	sharderIds []string,

@@ -19,15 +19,14 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		t.Skip("miner block rewards test skipped as it requires a debug event database")
 	}
 
-	// Take a snapshot of the chains miners, then wait a few seconds, take another snapshot.
+	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
+	// take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
 	// of the block reward payments
 	//
-	// Each round a random miner is chosen to receive the block reward.
+	// Each round a random miner is chosen to receive the rewards for transactions.
 	// The miner's service charge is used to determine the fraction received by the miner's wallet.
-	//
-	// The remaining block reward is then distributed amongst the miner's delegates.
-	//
+	// The remaining block reward is then distributed amongst the miner's delegates as follows.
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
@@ -95,16 +94,16 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 }
 
 // checkMinerRewards
-// Each round one miner is chosen to receive a block reward.
+// Each round one miner is chosen to receive a that rounds rewards.
 // The winning miner is stored in the block object.
 // The reward payments retrieved from the provider reward table.
-// The amount of the reward is a fraction of the block reward allocated to miners each
+// The amount of the reward is a fraction of the rewards allocated to miners each
 // round. The fraction is the miner's service charge. If the miner has
 // no stake pools then the reward becomes the full block reward.
 //
-// Firstly we confirm the self-consistency of the block and reward tables.
-// We calculate the change in the miner rewards during and confirm that this
-// equals the total of the reward payments read from the provider rewards table.
+// Firstly we confirm the self-consistency of the block and reward payments.
+// We calculate the change in each miner's rewards during and confirm that this
+// equals the total of the reward payments read from the rewards table.
 func checkMinerFeeAmounts(
 	t *test.SystemTest,
 	minerIds []string,
@@ -161,8 +160,8 @@ func checkMinerFeeAmounts(
 }
 
 // checkCountOfFeePayments
-// Each round there should be zero or one fee reward payment depending on where there was at least one
-// transaction with a fee. This should be paid to the blocks' miner.
+// Each round there should be zero or one fee reward payment depending on the count of
+// transaction with a fee. This should be paid to the blocks' miner and its delegates.
 func checkMinerFeeRewardFrequency(
 	t *test.SystemTest,
 	start, end int64,
