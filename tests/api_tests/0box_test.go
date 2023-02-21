@@ -623,7 +623,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 	})
 
-	t.Run("test /v2/graph-write-price behavior", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-write-price behavior", 2 * time.Minute, func(t *test.SystemTest) {
 		// Should increase when increasing write price of one of the blobbers
 		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
 		require.NoError(t, err)
@@ -644,7 +644,39 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		}, client.TxSuccessfulStatus)
 
 		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-			data, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
+			require.NoError(t, err)
+			latestRound := minerStats.LastFinalizedRound
+			data, resp, err = zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 10, len([]int64(*data)))
+			wpAfter = (*data)[9]
+			return wpAfter > wpBefore
+		})
+
+		wpBefore = wpAfter
+
+		// Should decrease when decreasing write price of one of the blobbers
+		targetBlobber.Terms.WritePrice /= 2
+		apiClient.UpdateBlobber(t, blobberOwnerWallet, &model.SCRestGetBlobberResponse{
+			ID: targetBlobber.ID,
+			Terms: targetBlobber.Terms,
+		}, client.TxSuccessfulStatus)
+
+		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+			minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
+			require.NoError(t, err)
+			latestRound := minerStats.LastFinalizedRound
+			data, resp, err = zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 10, len([]int64(*data)))
+			wpAfter = (*data)[9]
+			return wpAfter > wpBefore
+		})
+
+	})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
