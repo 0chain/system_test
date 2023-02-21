@@ -18,6 +18,7 @@ type Config struct {
 	ZboxUrl                string `yaml:"0box_url"`
 	ZboxPhoneNumber        string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout string `yaml:"default_test_case_timeout"`
+	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 }
 
 func Parse(configPath string) *Config {
