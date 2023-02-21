@@ -45,7 +45,7 @@ on:
         required: false
       ethereum_node_url: 
         required: false
-        default: "https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}"
+        default: ''
         description: 'Ethereum node URL used for 0Box CLI internal logic and Authorizers registration'
 
 jobs:
@@ -133,8 +133,13 @@ jobs:
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
-          echo "ETHEREUM_NODE_URL=$(echo $'${{github.event.inputs.ethereum_node_url}}')" >> $GITHUB_ENV
-
+ 
+          if [[ ${{github.event.inputs.ethereum_node_url}} == '' ]]; then
+            echo "ETHEREUM_NODE_URL='https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}'" >> $GITHUB_ENV 
+          else
+            echo "ETHEREUM_NODE_URL=$(echo '${{github.event.inputs.ethereum_node_url}}')" >> $GITHUB_ENV
+          fi;
+          
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
 
