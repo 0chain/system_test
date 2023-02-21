@@ -98,11 +98,3 @@ type ZboxUserInfo struct {
 	Avatar          ZboxImage `json:"avatar"`
 	BackgroundImage ZboxImage `json:"bg_img"`
 }
-
-type ZboxGraphRequest struct {
-	From string `json:"from"`
-	To   string `json:"to"`
-	DataPoints string `json:"data_points"`
-}
-
-type ZboxGraphInt64Response []int64

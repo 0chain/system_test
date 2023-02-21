@@ -58,7 +58,7 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 	if executionRequest.Dst != nil {
 		err = json.Unmarshal(resp.Body(), executionRequest.Dst)
 		if err != nil {
-			return resp, err
+			return nil, err
 		}
 	}
 

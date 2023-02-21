@@ -19,8 +19,6 @@ var (
 	zboxClient         *client.ZboxClient
 	sdkWallet          *model.Wallet
 	sdkWalletMnemonics string
-	blobberOwnerWallet *model.Wallet
-	blobberOwnerWalletMnemonics string
 	parsedConfig       *config.Config
 )
 
@@ -49,9 +47,6 @@ func TestMain(m *testing.M) {
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
-
-	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
-	blobberOwnerWallet = apiClient.RegisterWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
 	os.Exit(m.Run())
 }

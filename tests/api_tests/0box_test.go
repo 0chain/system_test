@@ -3,17 +3,13 @@ package api_tests
 import (
 	"encoding/base64"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
@@ -573,102 +569,6 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
-	})
-
-	t.Run("Test /v2/graph-write-price parameters", func(t *test.SystemTest) {
-		// should fail for invalid parameters
-		_, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: "AX", To: "20", DataPoints: "5" })
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid from param")
-
-		_, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: "10", To: "AX", DataPoints: "5" })
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid to param")
-
-		_, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: "10", To: "20", DataPoints: "AX" })
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid data-points query param")
-
-		// should fail for invalid parameters (end - start < points + 1)
-		_, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: "10000", To: "10010", DataPoints: "10" })
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "there must be at least one interval")
-
-		// should fail for invalid parameters (end < start)
-		_, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: "10000", To: "1000", DataPoints: "10" })
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "to 1000 less than from 10000")
-
-		// should succeed in case of 1 point
-		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		require.Greater(t, (*data)[0], int64(0))
-
-		// should succeed in case of multiple points
-		minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
-		require.NoError(t, err)
-		latestRound := minerStats.LastFinalizedRound
-		data, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 10, len([]int64(*data)))
-
-
-	})
-
-	t.Run("test /v2/graph-write-price behavior", func(t *test.SystemTest) {
-		// Should increase when increasing write price of one of the blobbers
-		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		wpBefore, wpAfter := (*data)[0], int64(0)
-
-		// apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-		targetBlobber, resp, err := apiClient.V1SCRestGetRandomBlobber(t, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotNil(t, targetBlobber)
-
-		targetBlobber.Terms.WritePrice *= 2
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, &model.SCRestGetBlobberResponse{
-			ID: targetBlobber.ID,
-			Terms: targetBlobber.Terms,
-		}, client.TxSuccessfulStatus)
-
-		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-			data, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			wpAfter = (*data)[0]
-			return wpAfter > wpBefore
-		})
-
-		wpBefore = wpAfter
-
-		// Should decrease when decreasing write price of one of the blobbers
-		targetBlobber.Terms.WritePrice /= 2
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, &model.SCRestGetBlobberResponse{
-			ID: targetBlobber.ID,
-			Terms: targetBlobber.Terms,
-		}, client.TxSuccessfulStatus)
-
-		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-			data, resp, err = zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			wpAfter = (*data)[0]
-			return wpAfter < wpBefore
-		})
 	})
 }
 

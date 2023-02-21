@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -400,28 +399,6 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 		SharderServiceProvider)
 
 	return clientGetBalanceResponse, resp, err
-}
-
-func (c *APIClient) V1SCRestGetRandomBlobber(t *test.SystemTest, requiredStatusCode int) (*model.SCRestGetBlobberResponse, *resty.Response, error) {
-	var scRestGetBlobbersResponse *model.SCRestGetBlobbersResponse
-
-	urlBuilder := NewURLBuilder().
-		SetPath(GetBlobbers).
-		SetPathVariable("sc_address", StorageSmartContractAddress).
-		AddParams("active", "true").
-		AddParams("limit", "10")
-
-	resp, err := c.executeForAllServiceProviders(
-		t,
-		urlBuilder,
-		&model.ExecutionRequest{
-			Dst:                &scRestGetBlobbersResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpGETMethod,
-		SharderServiceProvider)
-	randIdx := rand.Intn(len(scRestGetBlobbersResponse.Nodes))
-	return scRestGetBlobbersResponse.Nodes[randIdx], resp, err
 }
 
 func (c *APIClient) V1SCRestGetBlobber(t *test.SystemTest, scRestGetBlobberRequest model.SCRestGetBlobberRequest, requiredStatusCode int) (*model.SCRestGetBlobberResponse, *resty.Response, error) {
