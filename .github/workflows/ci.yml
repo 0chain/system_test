@@ -19,7 +19,7 @@ on:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
-      0chain_image:
+      zchain_image:
         description: 'sharder and miner DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
@@ -126,7 +126,7 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "0CHAIN_TAG=$(echo $(([ -z '${{github.event.inputs.0chain_image}}' ] && echo 'staging') || echo '${{github.event.inputs.0chain_image}}'))" >> $GITHUB_ENV
+          echo "ZCHAIN_TAG=$(echo $(([ -z '${{github.event.inputs.zchain_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zchain_image}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
@@ -149,7 +149,7 @@ jobs:
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
-          0chain_image: ${{ env.0CHAIN_TAG }}
+          zchain_image: ${{ env.ZCHAIN_TAG }}
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
