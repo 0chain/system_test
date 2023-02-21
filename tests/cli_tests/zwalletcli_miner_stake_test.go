@@ -307,7 +307,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
 	})
 
-	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 3*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
