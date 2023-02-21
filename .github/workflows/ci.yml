@@ -19,12 +19,8 @@ on:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
-      miner_image:
-        description: 'miner DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
-      sharder_image:
-        description: 'sharder DOCKER IMAGE to deploy'
+      0chain_image:
+        description: 'sharder and miner DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
@@ -130,8 +126,7 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
-          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
+          echo "0CHAIN_TAG=$(echo $(([ -z '${{github.event.inputs.0chain_image}}' ] && echo 'staging') || echo '${{github.event.inputs.0chain_image}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
@@ -149,8 +144,7 @@ jobs:
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
+          0chain_image: ${{ env.0CHAIN_TAG }}
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
