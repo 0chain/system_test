@@ -514,3 +514,24 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 
 	return zboxUsername, resp, err
 }
+
+func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph write price using 0box...")
+	var graphWritePrice model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/graph-write-price")
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &graphWritePrice,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &graphWritePrice, resp, err
+}
