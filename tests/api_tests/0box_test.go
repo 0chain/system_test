@@ -494,7 +494,6 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, cr.Message, "No data present for the given details", "Response data does not match expected. Output: [%v]", response.String())
 	})
-
 }
 
 func Test0BoxAllocation(testSetup *testing.T) {
