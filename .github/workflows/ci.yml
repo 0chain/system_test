@@ -47,6 +47,10 @@ on:
         description: 'Comma separated list of test files to run (eg. zwalletcli_register_wallet_test.go, zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
         required: false
+      ethereum_node_url: 
+        required: false
+        default: "https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}"
+        description: 'Ethereum node URL used for 0Box CLI internal logic and Authorizers registration'
 
 jobs:
   golangci:
@@ -134,6 +138,7 @@ jobs:
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
+          echo "ETHEREUM_NODE_URL=$(echo $'${{github.event.inputs.ethereum_node_url}}')" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
@@ -155,6 +160,7 @@ jobs:
           zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+          ethereum_node_url: ${{ env.ETHEREUM_NODE_URL }}
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
