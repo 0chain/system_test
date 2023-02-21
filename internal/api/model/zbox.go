@@ -32,6 +32,11 @@ type ZboxResourceExist struct {
 	Error *string `json:"error"`
 }
 
+type ZboxFCMResponse struct {
+	FCMToken   string `json:"fcm_token"`
+	DeviceType string `json:"device_type"`
+}
+
 type ZboxAllocation struct {
 	Id             string   `json:"id"`
 	WalletId       int      `json:"wallet_id"`
