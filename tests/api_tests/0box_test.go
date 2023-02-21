@@ -189,6 +189,12 @@ func Test0Box(testSetup *testing.T) {
 	})
 	// FIXME: Missing field description does not match field name (Pascal case instead of snake case)
 	// [{ClientID  required } {PublicKey  required } {Timestamp  required } {TokenInput  required } {AppType  required } {PhoneNumber  required }]
+}
+
+func Test0BoxWallet(testSetup *testing.T) {
+	// todo: These tests are sequential and start with teardown as they all share a common phone number
+	t := test.NewSystemTest(testSetup)
+	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Get wallet keys should work with wallet present", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
