@@ -61,6 +61,7 @@ func setupConfig() {
 	}
 
 	ethereumNodeURL = viper.GetString("ethereum_node_url")
+	ethereumAddress = viper.GetString("ethereum_address")
 }
 
 const (
@@ -82,6 +83,7 @@ var (
 	sharder02ID string
 
 	ethereumNodeURL string
+	ethereumAddress string
 )
 
 var (
@@ -153,6 +155,21 @@ func TestMain(m *testing.M) {
 
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
+	snapshotHash, err := tenderlyClient.CreateSnapshot()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = tenderlyClient.InitBalance(ethereumAddress)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	exitRun := m.Run()
+
+	err = tenderlyClient.Revert(snapshotHash)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	os.Exit(exitRun)
 }

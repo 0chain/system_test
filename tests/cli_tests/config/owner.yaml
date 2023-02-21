@@ -4,7 +4,7 @@ bridge:
     BridgeAddress: 0xF6533C445f3A8173539b1D5e90661737ed90E294
     WzcnAddress: 0x31E77dA0bC7bB60d27C224c12eb9ce8001b973e8
     AuthorizersAddress: 0x8f528548189759761B40FF3b3d91A9544d52FaC5
-    EthereumNodeURL: https://rpc.tenderly.co/fork/f4d2dc0c-77bc-4e61-a95f-de5202b63b57
+    EthereumNodeURL: https://rpc.tenderly.co/fork/48ebd03a-d36e-4e74-a240-b7de1e3b210b
     GasLimit: 300000
     Value: 0
     ConsensusThreshold: 75
