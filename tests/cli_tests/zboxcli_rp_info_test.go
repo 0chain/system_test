@@ -2,14 +2,15 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadPoolInfo(testSetup *testing.T) {
@@ -51,8 +52,6 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &rpInfo)
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, rpInfo)
-
-		t.Log(output)
 	})
 
 	t.RunWithTimeout("Read pool info testing without json parameter", 90*time.Second, func(t *test.SystemTest) {
