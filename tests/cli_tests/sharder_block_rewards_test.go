@@ -23,7 +23,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// of the block reward payments
 	//
 	// Each round we choose num_sharders_rewarded random sharders to receive the block reward.
-	// The sharder's service charge is used to determine the fraction received by the miner's wallet.
+	// The sharder's service charge is used to determine the fraction received by the sharder's wallet.
 	//
 	// The remaining block reward is then distributed amongst num_sharder_delegates_rewarded of the sharder's delegates.
 	//
@@ -163,7 +163,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 			}
 		}
 
-		// Compare the actual change in rewards to each miner delegate, with the
+		// Compare the actual change in rewards to each sharder delegate, with the
 		// change expected from the delegate reward table.
 		for i, id := range sharderIds {
 			delegateBlockReward := int64(float64(bwPerSharder) * (1 - beforeSharders.Nodes[i].Settings.ServiceCharge))

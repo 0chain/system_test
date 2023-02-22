@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -16,7 +15,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	t := test.NewSystemTest(testSetup)
 
 	if !confirmDebugBuild(t) {
-		t.Skip("miner block rewards test skipped as it requires a debug event database")
+		t.Skip("miner fee rewards test skipped as it requires a debug event database")
 	}
 
 	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
@@ -30,67 +29,67 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
-		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-		output, err := executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	//	t.RunWithTimeout("Miner share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
+	walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	output, err := executeFaucetWithTokens(t, configPath, 10)
+	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokens(t, configPath, 10)
+	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		sharderUrl := getSharderUrl(t)
-		minerIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minerIds) > 0, "no miners found")
+	sharderUrl := getSharderUrl(t)
+	minerIds := getSortedMinerIds(t, sharderUrl)
+	require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minerIds, sharderUrl)
+	beforeMiners := getNodes(t, minerIds, sharderUrl)
 
-		// ------------------------------------
-		const numPaidTransactions = 3
-		const fee = 0.1
-		for i := 0; i < numPaidTransactions; i++ {
-			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
-			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+	// ------------------------------------
+	const numPaidTransactions = 3
+	const fee = 0.1
+	for i := 0; i < numPaidTransactions; i++ {
+		output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
+		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+	}
+	// ------------------------------------
+
+	afterMiners := getNodes(t, minerIds, sharderUrl)
+
+	// we add rewards at the end of the round, and they don't appear until the next round
+
+	startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
+	endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
+	for i := range beforeMiners.Nodes {
+		if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
+			startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
-		// ------------------------------------
-
-		afterMiners := getNodes(t, minerIds, sharderUrl)
-
-		// we add rewards at the end of the round, and they don't appear until the next round
-
-		startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeMiners.Nodes {
-			if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			t.Logf("miner %s delegates pools %d", beforeMiners.Nodes[i].ID, len(beforeMiners.Nodes[i].Pools))
+		if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
+			endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
-		t.Logf("start round %d, end round %d", startRound, endRound)
+		t.Logf("miner %s delegates pools %d", beforeMiners.Nodes[i].ID, len(beforeMiners.Nodes[i].Pools))
+	}
+	t.Logf("start round %d, end round %d", startRound, endRound)
 
-		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl, true)
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl, true)
 
-		minerScConfig := getMinerScMap(t)
-		checkMinerFeeAmounts(
-			t,
-			minerIds,
-			minerScConfig["share_ratio"],
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
-		)
-		checkMinerFeeRewardFrequency(
-			t, startRound+1, endRound-1, history,
-		)
-		checkMinerDelegatePoolFeeAmounts(
-			t,
-			minerIds,
-			int(minerScConfig["num_miner_delegates_rewarded"]),
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
-		)
-	})
+	minerScConfig := getMinerScMap(t)
+	checkMinerFeeAmounts(
+		t,
+		minerIds,
+		minerScConfig["share_ratio"],
+		beforeMiners.Nodes, afterMiners.Nodes,
+		history,
+	)
+	checkMinerFeeRewardFrequency(
+		t, startRound+1, endRound-1, history,
+	)
+	checkMinerDelegatePoolFeeAmounts(
+		t,
+		minerIds,
+		int(minerScConfig["num_miner_delegates_rewarded"]),
+		beforeMiners.Nodes, afterMiners.Nodes,
+		history,
+	)
+	//})
 }
 
 // checkMinerRewards

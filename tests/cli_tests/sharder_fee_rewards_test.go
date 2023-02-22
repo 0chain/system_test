@@ -16,7 +16,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	t := test.NewSystemTest(testSetup)
 
 	if !confirmDebugBuild(t) {
-		t.Skip("miner block rewards test skipped as it requires a debug event database")
+		t.Skip("sharder fee rewards test skipped as it requires a debug event database")
 	}
 
 	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
@@ -24,7 +24,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// of the reward payments
 	//
 	// Each round a random sharder is chosen to receive the block reward.
-	// The sharder's service charge is used to determine the fraction received by the miner's wallet.
+	// The sharder's service charge is used to determine the fraction received by the sharder's wallet.
 	// The remaining reward is then distributed amongst the sharder's delegates.
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
@@ -63,7 +63,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			if endRound > afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
-			t.Logf("miner %s delegates pools %d", beforeSharders.Nodes[i].ID, len(beforeSharders.Nodes[i].Pools))
+			t.Logf("sharder %s delegates pools %d", beforeSharders.Nodes[i].ID, len(beforeSharders.Nodes[i].Pools))
 		}
 		t.Logf("start round %d, end round %d", startRound, endRound)
 
@@ -162,7 +162,7 @@ func checkSharderFeeAmounts(
 				case climodel.BlockRewardSharder:
 					blockRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+					require.Failf(t, "reward type %s is not available for sharders", pReward.RewardType.String())
 				}
 			}
 		}
@@ -246,7 +246,7 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 
 // checkSharderDelegatePoolFeeAmounts
 // Each round confirm payments to delegates of the selected sharders.
-// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
+// There should be exactly `num_sharder_delegates_rewarded` delegates rewarded each round,
 // or all delegates if less.
 //
 // Delegates should be rewarded in proportional to their locked tokens.
@@ -292,7 +292,7 @@ func checkSharderDelegatePoolFeeAmounts(
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
 					require.Failf(t, "mismatched reward type",
-						"reward type %s not paid to miner delegate pools", dReward.RewardType)
+						"reward type %s not paid to sharder delegate pools", dReward.RewardType)
 				}
 			}
 			if fees > 0 {

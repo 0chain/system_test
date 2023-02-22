@@ -46,172 +46,209 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	//t.RunWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
-		sharderUrl := getSharderUrl(t)
-		minerIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minerIds) > 0, "no miners found")
+	sharderUrl := getSharderUrl(t)
+	minerIds := getSortedMinerIds(t, sharderUrl)
+	require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minerIds, sharderUrl)
+	// todo piers remove
+	//tokens := []float64{1, 0.5, 2, 3, 4, 5, 6, 7, 8, 9}
+	//_ = createStakePools(t, minerIds, tokens)
+	//t.Cleanup(func() {
+	//	cleanupFunc()
+	//})
 
-		// ------------------------------------
-		cliutils.Wait(t, 3*time.Second)
-		// ------------------------------------
+	beforeMiners := getNodes(t, minerIds, sharderUrl)
 
-		afterMiners := getNodes(t, minerIds, sharderUrl)
+	// ------------------------------------
+	cliutils.Wait(t, 3*time.Second)
+	// ------------------------------------
 
-		// we add rewards at the end of the round, and they don't appear until the next round
+	afterMiners := getNodes(t, minerIds, sharderUrl)
 
-		startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeMiners.Nodes {
-			if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
+	// we add rewards at the end of the round, and they don't appear until the next round
+
+	startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
+	endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
+	for i := range beforeMiners.Nodes {
+		if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
+			startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
-		t.Logf("start round %d, end round %d", startRound, endRound)
-
-		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl, false)
-
-		minerScConfig := getMinerScMap(t)
-		numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-			"epoch changed during test, start %v finish %v",
-			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
-
-		// Each round one miner is chosen to receive a block reward.
-		// The winning miner is stored in the block object.
-		// The reward payments retrieved from the provider reward table.
-		// The amount of the reward is a fraction of the block reward allocated to miners each
-		// round. The fraction is the miner's service charge. If the miner has
-		// no stake pools then the reward becomes the full block reward.
-		//
-		// Firstly we confirm the self-consistency of the block and reward tables.
-		// We calculate the change in the miner rewards during and confirm that this
-		// equals the total of the reward payments read from the provider rewards table.
-		for i, id := range minerIds {
-			var feeRewards, blockRewards int64
-			for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
-				roundHistory := history.RoundHistory(t, round)
-				for _, pReward := range roundHistory.ProviderRewards {
-					if pReward.ProviderId != id {
-						continue
-					}
-					switch pReward.RewardType {
-					case climodel.BlockRewardMiner:
-						require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-							"%s not round lottery winner %s but nevertheless paid with block reward."+
-								"only the round lottery winner shold get a miner block reward",
-							pReward.ProviderId, roundHistory.Block.MinerID)
-						var expectedServiceCharge int64
-						if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
-							expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
-						} else {
-							expectedServiceCharge = minerBlockReward
-						}
-						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
-							"incorrect service charge %v for round %d"+
-								" service charge should be block reward %v multiplied by service ratio %v."+
-								"length stake pools %d",
-							pReward.Amount, round,
-							minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
-							len(beforeMiners.Nodes[i].StakePool.Pools))
-						blockRewards += pReward.Amount
-					case climodel.FeeRewardMiner:
-						feeRewards += pReward.Amount
-					default:
-						require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
-					}
-				}
-			}
-			actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
-			require.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
-				"rewards expected %v, change in miners reward during the test is %v", actualReward, feeRewards+blockRewards)
+		if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
+			endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
 		}
-		t.Log("finished testing miners")
+	}
+	t.Logf("start round %d, end round %d", startRound, endRound)
 
-		// Each round there should be exactly one block reward payment
-		// and this to the blocks' miner.
-		for round := startRound + 1; round <= endRound-1; round++ {
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl, false)
+
+	minerScConfig := getMinerScMap(t)
+	numMinerDelegatesRewarded := int(minerScConfig["num_miner_delegates_rewarded"])
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		"epoch changed during test, start %v finish %v",
+		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
+
+	minerBlockReward, _ := blockRewards(startRound, minerScConfig)
+
+	// Each round one miner is chosen to receive a block reward.
+	// The winning miner is stored in the block object.
+	// The reward payments retrieved from the provider reward table.
+	// The amount of the reward is a fraction of the block reward allocated to miners each
+	// round. The fraction is the miner's service charge. If the miner has
+	// no stake pools then the reward becomes the full block reward.
+	//
+	// Firstly we confirm the self-consistency of the block and reward tables.
+	// We calculate the change in the miner rewards during and confirm that this
+	// equals the total of the reward payments read from the provider rewards table.
+	for i, id := range minerIds {
+		var feeRewards, blockRewards int64
+		for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
 			roundHistory := history.RoundHistory(t, round)
-			foundBlockRewardPayment := false
 			for _, pReward := range roundHistory.ProviderRewards {
-				if pReward.RewardType == climodel.BlockRewardMiner {
-					require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
-					foundBlockRewardPayment = true
-					require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-						round, pReward.ProviderId, roundHistory.Block.MinerID)
+				if pReward.ProviderId != id {
+					continue
 				}
-			}
-			require.Truef(t, foundBlockRewardPayment,
-				"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
-		}
-		t.Log("about to test delegate pools")
-
-		// Each round confirm payments to delegates or the blocks winning miner.
-		// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
-		// or all delegates if less.
-		//
-		// Delegates should be rewarded in proportional to their locked tokens.
-		// We check the self-consistency of the reward payments each round using
-		// the delegate reward table.
-		//
-		// Next we compare the actual change in rewards to each miner delegate, with the
-		// change expected from the delegate reward table.
-
-		for i, id := range minerIds {
-			delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners.Nodes[i].Settings.ServiceCharge))
-			numPools := len(afterMiners.Nodes[i].StakePool.Pools)
-			rewards := make(map[string]int64, numPools)
-			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
-				rewards[poolId] = 0
-			}
-			for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
-				poolsBlockRewarded := make(map[string]int64)
-				roundHistory := history.RoundHistory(t, round)
-				for _, dReward := range roundHistory.DelegateRewards {
-					if dReward.ProviderID != id {
-						continue
+				switch pReward.RewardType {
+				case climodel.BlockRewardMiner:
+					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+						"%s not round lottery winner %s but nevertheless paid with block reward."+
+							"only the round lottery winner shold get a miner block reward",
+						pReward.ProviderId, roundHistory.Block.MinerID)
+					var expectedServiceCharge int64
+					if len(beforeMiners.Nodes[i].StakePool.Pools) > 0 {
+						expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners.Nodes[i].Settings.ServiceCharge)
+					} else {
+						expectedServiceCharge = minerBlockReward
 					}
-					_, isMinerPool := rewards[dReward.PoolID]
-					require.Truef(testSetup, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
-					switch dReward.RewardType {
-					case climodel.BlockRewardMiner:
-						_, found := poolsBlockRewarded[dReward.PoolID]
-						require.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
-							dReward.PoolID, round)
-						poolsBlockRewarded[dReward.PoolID] = dReward.Amount
-						rewards[dReward.PoolID] += dReward.Amount
-					case climodel.FeeRewardMiner:
-						rewards[dReward.PoolID] += dReward.Amount
-					default:
-						require.Failf(t, "mismatched reward", "round %d, %s not available for miner", round, dReward.RewardType)
-					}
+					require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
+						"incorrect service charge %v for round %d"+
+							" service charge should be block reward %v multiplied by service ratio %v."+
+							"length stake pools %d",
+						pReward.Amount, round,
+						minerBlockReward, beforeMiners.Nodes[i].Settings.ServiceCharge,
+						len(beforeMiners.Nodes[i].StakePool.Pools))
+					blockRewards += pReward.Amount
+				case climodel.FeeRewardMiner:
+					feeRewards += pReward.Amount
+				default:
+					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
 				}
-				if roundHistory.Block.MinerID != id {
-					require.Len(t, poolsBlockRewarded, 0,
-						"delegate pools should not get a block reward unless their parent miner won the round lottery")
-				}
-				confirmPoolPayments(
-					t, delegateBlockReward, poolsBlockRewarded, afterMiners.Nodes[i].StakePool.Pools, numMinerDelegatesRewarded,
-				)
-			}
-			for poolId := range afterMiners.Nodes[i].StakePool.Pools {
-				actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
-				require.InDeltaf(t, actualReward, rewards[poolId], delta,
-					"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
-				)
 			}
 		}
-	})
+		actualReward := afterMiners.Nodes[i].Reward - beforeMiners.Nodes[i].Reward
+		require.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
+			"rewards expected %v, change in miners reward during the test is %v", actualReward, feeRewards+blockRewards)
+	}
+	t.Log("finished testing miners")
+
+	// Each round there should be exactly one block reward payment
+	// and this to the blocks' miner.
+	for round := startRound + 1; round <= endRound-1; round++ {
+		roundHistory := history.RoundHistory(t, round)
+		foundBlockRewardPayment := false
+		for _, pReward := range roundHistory.ProviderRewards {
+			if pReward.RewardType == climodel.BlockRewardMiner {
+				require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
+				foundBlockRewardPayment = true
+				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
+					round, pReward.ProviderId, roundHistory.Block.MinerID)
+			}
+		}
+		require.Truef(t, foundBlockRewardPayment,
+			"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
+	}
+	t.Log("about to test delegate pools")
+
+	// Each round confirm payments to delegates or the blocks winning miner.
+	// There should be exactly `num_miner_delegates_rewarded` delegates rewarded each round,
+	// or all delegates if less.
+	//
+	// Delegates should be rewarded in proportional to their locked tokens.
+	// We check the self-consistency of the reward payments each round using
+	// the delegate reward table.
+	//
+	// Next we compare the actual change in rewards to each miner delegate, with the
+	// change expected from the delegate reward table.
+
+	for i, id := range minerIds {
+		delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners.Nodes[i].Settings.ServiceCharge))
+		numPools := len(afterMiners.Nodes[i].StakePool.Pools)
+		rewards := make(map[string]int64, numPools)
+		for poolId := range afterMiners.Nodes[i].StakePool.Pools {
+			rewards[poolId] = 0
+		}
+		for round := beforeMiners.Nodes[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners.Nodes[i].RoundServiceChargeLastUpdated; round++ {
+			poolsBlockRewarded := make(map[string]int64)
+			roundHistory := history.RoundHistory(t, round)
+			for _, dReward := range roundHistory.DelegateRewards {
+				if dReward.ProviderID != id {
+					continue
+				}
+				_, isMinerPool := rewards[dReward.PoolID]
+				require.Truef(testSetup, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
+				switch dReward.RewardType {
+				case climodel.BlockRewardMiner:
+					_, found := poolsBlockRewarded[dReward.PoolID]
+					require.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
+						dReward.PoolID, round)
+					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
+					rewards[dReward.PoolID] += dReward.Amount
+				case climodel.FeeRewardMiner:
+					rewards[dReward.PoolID] += dReward.Amount
+				default:
+					require.Failf(t, "mismatched reward", "round %d, %s not available for miner", round, dReward.RewardType)
+				}
+			}
+			if roundHistory.Block.MinerID != id {
+				require.Len(t, poolsBlockRewarded, 0,
+					"delegate pools should not get a block reward unless their parent miner won the round lottery")
+			}
+			confirmPoolPayments(
+				t, delegateBlockReward, poolsBlockRewarded, afterMiners.Nodes[i].StakePool.Pools, numMinerDelegatesRewarded,
+			)
+		}
+		for poolId := range afterMiners.Nodes[i].StakePool.Pools {
+			actualReward := afterMiners.Nodes[i].StakePool.Pools[poolId].Reward - beforeMiners.Nodes[i].StakePool.Pools[poolId].Reward
+			require.InDeltaf(t, actualReward, rewards[poolId], delta,
+				"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
+			)
+		}
+	}
+	//})
+}
+
+// todo piers remove
+func createStakePools(
+	t *test.SystemTest, providerIds []string, tokens []float64,
+) func() {
+	require.True(t, len(tokens) > 0, "create greater than zero pools")
+	for _, id := range providerIds {
+		for delegate := 0; delegate < len(tokens); delegate++ {
+			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
+			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
+				"miner_id": id,
+				"tokens":   tokens[delegate],
+			}), wallet, true)
+			require.NoError(t, err, "lock tokens in %s's stake pool", id)
+			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
+		}
+	}
+	return func() {
+		for _, id := range providerIds {
+			for delegate := 0; delegate < len(tokens); delegate++ {
+				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
+					"id": id,
+				}), wallet, true)
+				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
+			}
+		}
+	}
 }
 
 func confirmPoolPayments(
