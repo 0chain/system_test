@@ -177,19 +177,18 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 func (ch *ChainHistory) setupTransactions(t *test.SystemTest) {
 	var currentRound int64 = 0
 	var currentHistory RoundHistory
-	for _, tr := range ch.transactions {
-		require.GreaterOrEqual(t, tr.Round, currentRound, "delegate rewards out of order")
-		if currentRound < tr.Round {
+	for i := 0; i < len(ch.transactions); i++ {
+		require.GreaterOrEqual(t, ch.transactions[i].Round, currentRound, "delegate rewards out of order")
+		if currentRound < ch.transactions[i].Round {
 			if currentRound > 0 {
 				ch.roundHistories[currentRound] = currentHistory
 			}
 			var ok bool
-			currentHistory, ok = ch.roundHistories[tr.Round]
+			currentHistory, ok = ch.roundHistories[ch.transactions[i].Round]
 			require.True(t, ok, "should have block information for every round")
-			currentRound = tr.Round
+			currentRound = ch.transactions[i].Round
 		}
-		currentHistory.Transactions = append(currentHistory.Transactions, tr)
-		//ch.blocks[currentRound-ch.from].Transactions = append(ch.blocks[currentRound-ch.from].Transactions, tr)
+		currentHistory.Transactions = append(currentHistory.Transactions, ch.transactions[i])
 	}
 }
 

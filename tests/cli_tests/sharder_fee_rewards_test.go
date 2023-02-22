@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -149,9 +148,6 @@ func checkSharderFeeAmounts(
 					} else {
 						fees = int64(float64(feesPerSharder) * (1 - minerShare))
 					}
-					if fees != pReward.Amount {
-						fmt.Println("fees", fees, "reward", pReward.Amount)
-					}
 					require.InDeltaf(t, fees, pReward.Amount, delta,
 						"incorrect service charge %v for round %d"+
 							" service charge should be fees %d multiplied by service ratio %v."+
@@ -167,10 +163,6 @@ func checkSharderFeeAmounts(
 			}
 		}
 		actualReward := afterSharders[i].Reward - beforeSharders[i].Reward
-		if actualReward != blockRewards+feeRewards {
-			fmt.Println("piers actual rewards", actualReward, "block rewards", blockRewards, "fee rewards", feeRewards)
-		}
-
 		require.InDeltaf(t, actualReward, blockRewards+feeRewards, delta,
 			"rewards expected %v, change in sharder reward during the test is %v", actualReward, blockRewards+feeRewards)
 	}
@@ -199,7 +191,6 @@ func checkSharderFeeRewardFrequency(
 		}
 		require.Equal(t, numShardersRewarded, len(shardersPaid),
 			"mismatch between expected count of sharders rewarded and actual number on round %d", round)
-
 	}
 }
 
@@ -320,8 +311,5 @@ func checkSharderDelegatePoolFeeAmounts(
 }
 
 func delegateSharderFeesRewards(numberSharders int, fee int64, serviceCharge, sharderShare float64) int64 {
-	fmt.Println("num sharders", numberSharders, "fee", fee,
-		"service charge", serviceCharge, "share", sharderShare, "result",
-		int64(float64(fee)*(1-serviceCharge)*sharderShare/float64(numberSharders)))
 	return int64(float64(fee) * (1 - serviceCharge) * sharderShare / float64(numberSharders))
 }
