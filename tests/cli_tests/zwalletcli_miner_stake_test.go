@@ -337,7 +337,7 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   intToZCN(max_stake)/2 + 1,
-		}), true)
+		}), false)
 
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
