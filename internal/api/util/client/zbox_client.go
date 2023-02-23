@@ -534,7 +534,7 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -569,7 +569,7 @@ func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, wall
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
