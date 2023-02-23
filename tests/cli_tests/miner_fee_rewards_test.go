@@ -175,7 +175,7 @@ func checkMinerFeeRewardFrequency(
 			}
 		}
 		require.EqualValues(t, foundFeeRewardPayment, isAFeePayment,
-			"rond %d, incorrect miner fee reward payments.", round)
+			"rond %d, incorrect number of miner fee reward payments", round)
 	}
 }
 
