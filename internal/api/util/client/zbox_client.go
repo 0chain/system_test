@@ -210,7 +210,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
+			"X-App-Type":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
