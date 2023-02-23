@@ -2,7 +2,9 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -172,6 +174,31 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Len(t, files, 2, "Expecting directories created. Possibly `createdir` failed to create on blobbers (error suppressed) or unable to `list-all` from 3/4 blobbers")
 		require.Contains(t, files, climodel.AllocationFile{Name: "existingdir", Path: "/existingdir", Type: "d"})
 		require.Contains(t, files, climodel.AllocationFile{Name: "existingDir", Path: "/existingDir", Type: "d"})
+	})
+
+	t.Run("create directories concurrently", func(t *test.SystemTest) {
+		allocID := setupAllocation(t, configPath)
+		var wg sync.WaitGroup
+		numDirectories := 100
+		outputList := make([][]string, numDirectories)
+		errorList := make([]error, numDirectories)
+		for i := 0; i < numDirectories; i++ {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				dirname := "/" + strconv.Itoa(i)
+				output, err := createDir(t, configPath, allocID, dirname, true)
+				outputList[i] = output
+				errorList[i] = err
+			}(i)
+		}
+		wg.Wait()
+		for i := 0; i < numDirectories; i++ {
+			require.Nil(t, errorList[i], "Unexpected create dir failure %s", strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList[i], 1)
+			dirname := "/" + strconv.Itoa(i)
+			require.Equal(t, dirname+" directory created", outputList[i][0])
+		}
 	})
 
 	t.Run("create with non-existent parent dir", func(t *test.SystemTest) {
