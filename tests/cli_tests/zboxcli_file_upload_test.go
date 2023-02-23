@@ -701,6 +701,38 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "filename is longer than 100 characters")
 	})
+
+	t.Run("Upload File should fail if upload file option is forbidden", func(t *test.SystemTest) {
+		allocSize := int64(1 * MB)
+		fileSize := int64(512 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":          allocSize,
+			"forbid_upload": nil,
+		})
+
+		dirPath := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		randomFilename := cliutils.RandomAlphaNumericString(101)
+		filename := fmt.Sprintf("%s%s%s_test.txt", dirPath, string(os.PathSeparator), randomFilename)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err)
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+		}), false)
+		require.Nil(t, err)
+		require.NotContains(t, output[0], filename)
+	})
 }
 
 func uploadWithParam(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) {

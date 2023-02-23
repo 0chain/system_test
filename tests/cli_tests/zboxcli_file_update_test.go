@@ -412,6 +412,31 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.Run("update with allocation update file option forbidden should fail", func(t *test.SystemTest) {
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB, "forbid_update": nil})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		newFileSize := 2 * MB
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(newFileSize))
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+		}, false)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "this options for this file is not permitted for this allocation"), strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
 }
 
 func generateThumbnail(t *test.SystemTest, localpath string) int {
