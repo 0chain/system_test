@@ -906,8 +906,6 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 func TestDexState(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
-
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
