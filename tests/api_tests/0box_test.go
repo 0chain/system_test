@@ -422,7 +422,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, `{"error":{"code":"invalid_header","msg":"Invalid signature."}}`, response.String())
 	})
-
 }
 
 func Test0Box(testSetup *testing.T) {
