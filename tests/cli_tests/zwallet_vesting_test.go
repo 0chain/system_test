@@ -25,7 +25,7 @@ const minLock = "min_lock"
 
 func TestVestingPoolAdd(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
+	t.Skip("turn on post mainnet")
 	t.Parallel()
 
 	// get current valid vesting configs
@@ -607,7 +607,7 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 
 func TestVestingPoolDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
+	t.Skip("turn on post mainnet")
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
@@ -738,6 +738,7 @@ func vestingPoolDelete(t *test.SystemTest, cliConfigFilename, params string, ret
 
 func TestVestingPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -944,6 +945,7 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 
 func TestVestingPoolStop(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1186,6 +1188,7 @@ func TestVestingPoolStop(testSetup *testing.T) {
 
 func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
@@ -1382,6 +1385,7 @@ func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 
 func TestVestingPoolTrigger(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1572,6 +1576,7 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 
 func TestVestingPoolUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
 	output, err := registerWallet(t, configPath)
@@ -1783,6 +1788,7 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 
 func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("turn on post mainnet")
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
