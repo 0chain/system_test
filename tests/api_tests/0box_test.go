@@ -20,7 +20,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Post ShareInfo with correct AuthTicket should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -86,11 +85,9 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, shareInfoData.Data[0].Message, shareMessage)
 		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
 		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
-
 	})
 
 	t.RunSequentially("Post ShareInfo with Incorrect AuthTicket should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -295,7 +292,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, shareInfoDeletionMssg)
 		require.Equal(t, shareInfoDeletionMssg.Message, "Share info deleted successfully", "Error deleting ShareInfo")
-
 	})
 
 	t.RunSequentially("Get ShareInfo with Incorrect clientRecieverId should not work properly", func(t *test.SystemTest) {
@@ -361,7 +357,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, errorString, response.String())
-
 	})
 
 	t.RunSequentially("Get ShareInfo with Incorrect AuthTicket should not work properly", func(t *test.SystemTest) {
@@ -426,7 +421,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, `{"error":{"code":"invalid_header","msg":"Invalid signature."}}`, response.String())
-
 	})
 
 }
