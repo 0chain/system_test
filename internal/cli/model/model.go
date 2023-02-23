@@ -103,7 +103,9 @@ type Blobber struct {
 }
 
 type ReadPoolInfo struct {
-	Balance int64 `json:"balance"`
+	Balance int64   `json:"fmt"`
+	Zcn     float64 `json:"zcn"`
+	Usd     float64 `json:"usd"`
 }
 
 type RecentlyAddedRefResult struct {
