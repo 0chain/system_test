@@ -307,9 +307,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
 	})
 
-	// FIXME: This does not fail. Is this by design or a bug?
-	// TODO: way too slow
-	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 3*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -339,12 +337,11 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   intToZCN(max_stake)/2 + 1,
-		}), true)
+		}), false)
 
-		// FIXME: Change to NotNil and Equal post-fix
-		require.Nil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
+		require.NotNil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.NotEqual(t, fmt.Sprintf("delegate_pool_add: stake is greater than max allowed: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %d \\u003e %d", max_stake+1e10, max_stake), output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
