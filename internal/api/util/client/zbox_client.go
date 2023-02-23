@@ -599,7 +599,7 @@ func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfTok
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "chimney",
+			"X-APP-TYPE":         "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
