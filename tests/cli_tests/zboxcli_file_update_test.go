@@ -252,7 +252,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "NO", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -270,7 +270,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted = strings.Split(output[2], "|")[6]
+		isEncrypted = strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 
 		createAllocationTestTeardown(t, allocationID)
@@ -296,7 +296,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -313,7 +313,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		yes := strings.Split(output[2], "|")[6]
+		yes := strings.Split(output[2], "|")[7]
 		require.Equal(t, "NO", strings.TrimSpace(yes))
 
 		createAllocationTestTeardown(t, allocationID)
@@ -335,7 +335,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[6]
+		isEncrypted := strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 		filename := strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
@@ -359,7 +359,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		yes := strings.Split(output[2], "|")[6]
+		yes := strings.Split(output[2], "|")[7]
 		require.Equal(t, "YES", strings.Trim(yes, " "))
 		filename = strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
@@ -409,6 +409,31 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("update with allocation update file option forbidden should fail", func(t *test.SystemTest) {
+		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB, "forbid_update": nil})
+
+		filesize := int64(0.5 * MB)
+		remotepath := "/"
+		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
+
+		newFileSize := 2 * MB
+		localfile := generateRandomTestFileName(t)
+		err := createFileWithSize(localfile, int64(newFileSize))
+		require.Nil(t, err)
+
+		output, err := updateFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/" + filepath.Base(localFilePath),
+			"localpath":  localfile,
+		}, false)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "this options for this file is not permitted for this allocation"), strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
 	})
