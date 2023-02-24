@@ -310,6 +310,28 @@ func getBlockContainingTransaction(
 	return block
 }
 
+func getBlockContainingTransactions(
+	t *test.SystemTest,
+	startBlock, endBlock *climodel.LatestFinalizedBlock,
+	wallet *climodel.Wallet,
+	txnData string,
+) (block []climodel.Block) {
+	var blocks []climodel.Block
+	for round := startBlock.Round + 1; round <= endBlock.Round; round++ {
+		block := getRoundBlockFromASharder(t, round)
+
+		for i := range block.Block.Transactions {
+			txn := block.Block.Transactions[i]
+			// Find the generator miner of the block on which this transaction was recorded
+			if strings.Contains(txn.TransactionData, txnData) {
+				fmt.Println("Transaction Data", txn.TransactionData)
+				fmt.Println("Transaction Output", txn.TransactionOutput)
+			}
+		}
+	}
+	return blocks
+}
+
 func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
 }
