@@ -41,12 +41,12 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		blobberOwnerWalletBalanceFloat, _ := strconv.ParseFloat(blobberOwnerWalletBalance, 64)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * MB,
+			"size":   20 * MB,
 			"tokens": 1,
 		})
 
 		remotepath := "/dir/"
-		filesize := 0.5 * MB
+		filesize := 10 * MB
 		filename := generateRandomTestFileName(t)
 
 		err = createFileWithSize(filename, int64(filesize))
@@ -60,8 +60,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		//sleep for 30 seconds to allow the challenges to be created
-		time.Sleep(30 * time.Second)
+		//sleep for 60 seconds to allow the challenges to be created
+		time.Sleep(60 * time.Second)
 
 		// end block
 		endBlock := getLatestFinalizedBlock(t)
@@ -70,37 +70,27 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		blobberWallet, _ := getWalletForName(t, configPath, blobberOwnerWallet)
 
-		blocks := getBlockContainingTransactions(t, startBlock, endBlock, blobberWallet, "")
+		blocks := getBlockContainingTransactions(t, startBlock, endBlock, blobberWallet, "challenge_response")
 
 		fmt.Println(len(blocks))
-
-		for _, block := range blocks {
-			for _, tx := range block.Block.Transactions {
-				fmt.Println("Transaction Value : ", tx.TransactionValue)
-				fmt.Println("Transaction Type : ", tx.TransactionType)
-				fmt.Println("Transaction Data : ", tx.TransactionData)
-				fmt.Println("Transaction Nonce : ", tx.TransactionNonce)
-				fmt.Println("Transaction Output : ", tx.TransactionOutput)
-				fmt.Println("Transaction Fee : ", tx.TransactionFee)
-				fmt.Println("Transaction Status : ", tx.TransactionStatus)
-
-				fmt.Println("--------------------------------------------------")
-			}
-		}
-
-		// list blobbers before
-		fmt.Println("List blobbers before : ")
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		fmt.Println(output)
-		fmt.Println("--------------------------------------------------")
+		//
+		//for _, block := range blocks {
+		//	for _, tx := range block.Block.Transactions {
+		//		fmt.Println("Transaction Value : ", tx.TransactionValue)
+		//		fmt.Println("Transaction Type : ", tx.TransactionType)
+		//		fmt.Println("Transaction Data : ", tx.TransactionData)
+		//		fmt.Println("Transaction Nonce : ", tx.TransactionNonce)
+		//		fmt.Println("Transaction Output : ", tx.TransactionOutput)
+		//		fmt.Println("Transaction Fee : ", tx.TransactionFee)
+		//		fmt.Println("Transaction Status : ", tx.TransactionStatus)
+		//
+		//		fmt.Println("--------------------------------------------------")
+		//	}
+		//}
 
 		// list validators before
-		fmt.Println("List validators before : ")
 		output, err = listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
-		fmt.Println(output)
-		fmt.Println("--------------------------------------------------")
 
 		// collect reward for each blobber
 		for _, blobber := range blobberList {
@@ -109,25 +99,20 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 				"provider_id":   blobber.Id,
 			}), blobberOwnerWallet, true)
 
-			fmt.Println(getBalanceForWallet(t, configPath, blobberOwnerWallet))
+			blobberWalletBalance, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
+
+			fmt.Println(blobber.Id, " > ", blobberWalletBalance)
 		}
 
-		// list blobbers after
-		fmt.Println("List blobbers after : ")
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		fmt.Println(output)
 		fmt.Println("--------------------------------------------------")
 
-		// list validators after
-		fmt.Println("List validators after : ")
 		output, err = listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
-		fmt.Println(output)
-		fmt.Println("--------------------------------------------------")
 
 		var validatorList []climodel.Validator
 		json.Unmarshal([]byte(output[0]), &validatorList)
+
+		fmt.Println(getBalanceForWallet(t, configPath, validatorOwnerWallet))
 
 		// collect reward for each validator
 		for _, validator := range validatorList {
@@ -136,8 +121,12 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 				"provider_id":   validator.ID,
 			}), validatorOwnerWallet, true)
 
-			fmt.Println(getBalanceForWallet(t, configPath, validatorOwnerWallet))
+			validatorWalletBalance, _ := getBalanceForWallet(t, configPath, validatorOwnerWallet)
+
+			fmt.Println(validator.ID, " > ", validatorWalletBalance)
 		}
+
+		fmt.Println("--------------------------------------------------")
 
 		blobberOwnerWalletBalancesAfter, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
 		fmt.Println("blobberOwnerWalletBalanceAfter : ", blobberOwnerWalletBalancesAfter)

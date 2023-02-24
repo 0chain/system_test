@@ -56,6 +56,7 @@ const (
 	zcnscOwner                      = "wallets/zcnsc_owner"
 	scOwnerWallet                   = "wallets/sc_owner"
 	blobberOwnerWallet              = "wallets/blobber_owner"
+	validatorOwnerWallet            = "wallets/validator_owner"
 	miner01NodeDelegateWalletName   = "wallets/miner01_node_delegate"
 	miner02NodeDelegateWalletName   = "wallets/miner02_node_delegate"
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
