@@ -19,8 +19,12 @@ on:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
-      zchain_image:
-        description: 'sharder and miner DOCKER IMAGE to deploy'
+      miner_image:
+        description: 'miner DOCKER IMAGE to deploy'
+        default: 'staging'
+        required: false
+      sharder_image:
+        description: 'sharder DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
@@ -43,10 +47,6 @@ on:
         description: 'Comma separated list of test files to run (eg. zwalletcli_register_wallet_test.go, zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
         required: false
-      ethereum_node_url: 
-        required: false
-        default: ''
-        description: 'Ethereum node URL used for 0Box CLI internal logic and Authorizers registration'
 
 jobs:
   golangci:
@@ -73,7 +73,7 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: 0chain/actions/get-build-state@ethereum_node_url_input
+        uses: 0chain/actions/get-build-state@master
         with:
           github_token: ${{ github.token }}
           repository: "0chain/system_test"
@@ -99,7 +99,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@ethereum_node_url_input
+        uses: 0chain/actions/set-pr-status@master
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
@@ -126,25 +126,26 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "ZCHAIN_TAG=$(echo $(([ -z '${{github.event.inputs.zchain_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zchain_image}}'))" >> $GITHUB_ENV
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
           echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
-          echo "ETHEREUM_NODE_URL=$(echo $(([ -z '${{github.event.inputs.ethereum_node_url}}' ] && echo 'https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}') || echo '${{github.event.inputs.ethereum_node_url}}'))" >> $GITHUB_ENV
-          
+
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@ethereum_node_url_input
+        uses: 0chain/actions/deploy-0chain@master
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
-          zchain_image: ${{ env.ZCHAIN_TAG }}
+          miner_image: ${{ env.MINER_TAG }}
+          sharder_image: ${{ env.SHARDER_TAG }}
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
@@ -154,10 +155,9 @@ jobs:
           zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          ethereum_node_url: ${{ env.ETHEREUM_NODE_URL }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@ethereum_node_url_input
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -170,7 +170,7 @@ jobs:
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@ethereum_node_url_input
+        uses: 0chain/actions/set-pr-status@master
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"
