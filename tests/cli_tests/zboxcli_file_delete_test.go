@@ -311,6 +311,35 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
+
+	t.Run("delete existing file with allocation delete file options forbidden should fail", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"data":          1,
+			"parity":        1,
+			"forbid_delete": nil,
+		})
+
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), remoteFilePath, strings.Join(output, "\n"))
+	})
 }
 
 func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {

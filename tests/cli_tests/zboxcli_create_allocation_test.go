@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -159,8 +161,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: {\"error\":\"not enough blobbers to honor the allocation\"}",
-			output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
@@ -211,6 +212,164 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "invalid argument \"1hour\" for \"--expire\" flag: time: unknown unit \"hour\" in duration \"1hour\"", output[len(output)-1])
+	})
+
+	t.Run("Create allocation should have all file options permitted by default", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h"}
+		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err)
+
+		// get allocation
+		var alloc *climodel.Allocation
+
+		output, err = getAllocationWithRetry(t, configPath, allocationID, 10)
+		require.Nil(t, err, "error fetching allocation")
+		require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+		err = json.Unmarshal([]byte(output[0]), &alloc)
+		require.Nil(t, err, "error unmarshalling allocation json")
+		require.Equal(t, uint16(63), alloc.FileOptions)
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create allocation with some forbidden file options flags should pass and show in allocation", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+		_, err := executeFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err)
+
+		// Forbid upload
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_upload": nil}
+		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc := getAllocation(t, allocationID)
+		require.Equal(t, uint16(62), alloc.FileOptions) // 63 - 1 = 62 (upload mask = 1)
+
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid delete
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_delete": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(61), alloc.FileOptions) // 63 - 2 = 62 (delete mask = 2)
+
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid update
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_update": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(59), alloc.FileOptions) // 63 - 4 = 59 (update mask = 4)
+
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid move
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_move": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(55), alloc.FileOptions) // 63 - 8 = 55 (move mask = 8)
+
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid copy
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_copy": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(47), alloc.FileOptions) // 63 - 16 = 47 (copy mask = 8)
+
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid rename
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_rename": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+		alloc = getAllocation(t, allocationID)
+		require.Equal(t, uint16(31), alloc.FileOptions) // 63 - 32 = 31 (rename mask = 32)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create allocation third_party_extendable should be false by default and change with flags", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		// Forbid update, rename and delete
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h"}
+		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err)
+
+		// get allocation
+		var alloc *climodel.Allocation
+
+		output, err = getAllocationWithRetry(t, configPath, allocationID, 10)
+		require.Nil(t, err, "error fetching allocation")
+		require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+		err = json.Unmarshal([]byte(output[0]), &alloc)
+		require.Nil(t, err, "error unmarshalling allocation json")
+		require.Equal(t, false, alloc.ThirdPartyExtendable) // 63 - (2 + 4 + 32) = 25 (update mask = 2, rename = 32, delete = 4)
+		createAllocationTestTeardown(t, allocationID)
+
+		// Forbid upload, move and copy
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "third_party_extendable": nil}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Allocation created", strings.Join(output, "\n"))
+
+		allocationID, err = getAllocationID(output[0])
+		require.Nil(t, err)
+
+		// get allocation
+		output, err = getAllocationWithRetry(t, configPath, allocationID, 10)
+		require.Nil(t, err, "error fetching allocation")
+		require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+		err = json.Unmarshal([]byte(output[0]), &alloc)
+		require.Nil(t, err, "error unmarshalling allocation json")
+		require.Equal(t, true, alloc.ThirdPartyExtendable) // 63 - (1 + 8 + 16) = 38 (upload mask = 1, move = 8, copy = 16)
+		createAllocationTestTeardown(t, allocationID)
 	})
 }
 
