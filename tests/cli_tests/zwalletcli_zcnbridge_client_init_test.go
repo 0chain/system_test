@@ -191,6 +191,10 @@ func bridgeClientInit(
 ) ([]string, error) {
 	t.Logf("Init bridge client config (bridge.yaml) in HOME (~/.zcn) folder")
 
+	// To avoid noise in output of subsequent operations
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	cmd := "./zwallet bridge-client-init" +
 		" --password " + password +
 		" --ethereumaddress " + ethereumaddress +
