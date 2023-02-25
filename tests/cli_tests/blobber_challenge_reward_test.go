@@ -28,7 +28,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
-	t.RunSequentiallyWithTimeout("Test Blobber Challenge Rewards", (50*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Test Blobber Challenge Rewards", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// wallet balance before
 		blobberOwnerWalletBalances, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
 		fmt.Println("blobberOwnerWalletBalance : ", blobberOwnerWalletBalances)
@@ -41,7 +41,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		blobberOwnerWalletBalanceFloat, _ := strconv.ParseFloat(blobberOwnerWalletBalance, 64)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   20 * MB,
+			"size":   100 * MB,
 			"tokens": 1,
 		})
 
@@ -61,7 +61,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		//sleep for 60 seconds to allow the challenges to be created
-		time.Sleep(60 * time.Second)
+		time.Sleep(100 * time.Second)
 
 		// end block
 		endBlock := getLatestFinalizedBlock(t)

@@ -431,7 +431,7 @@ func getSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error)
 }
 
 func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
-	t.Logf("list sharder nodes...")
+	//t.Logf("list sharder nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
 
@@ -450,7 +450,7 @@ func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.R
 }
 
 func apiGetBlock(t *test.SystemTest, sharderBaseURL string, round int64) (*http.Response, error) {
-	t.Logf("Gert block for round %d...", round)
+	//t.Logf("Gert block for round %d...", round)
 	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
 }
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
