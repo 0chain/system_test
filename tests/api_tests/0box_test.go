@@ -908,6 +908,7 @@ func TestDexState(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
+	// POST DEX STATE
 	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
@@ -935,6 +936,44 @@ func TestDexState(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create a DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
+		dexState, response, err := zboxClient.PostDexState(t,
+			firebaseToken.IdToken,
+			"abcd",
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Empty(t, dexState)
+	})
+
+	// GET DEX STATE
+	t.RunSequentially("Get DEX state with valid phone number should work", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		dexState, response, err := zboxClient.GetDexState(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, zboxClient.DefaultRecieverId, dexState)
+	})
+
+	t.RunSequentially("Get DEX state with invalid phone number should fail", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		dexState, response, err := zboxClient.PostDexState(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			"123456789",
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Empty(t, dexState)
+	})
+
+	t.RunSequentially("Get a DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
 		dexState, response, err := zboxClient.PostDexState(t,
 			firebaseToken.IdToken,
 			"abcd",
