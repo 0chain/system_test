@@ -161,7 +161,9 @@ func TestBridgeOwnerInit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Run("Init bridge owner config to default path and file", func(t *test.SystemTest) {
-		output, err := bridgeOwnerInit(
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = bridgeOwnerInit(
 			t,
 			"password",
 			"0x860FA46F170a87dF44D7bB867AA4a5D2813127c1",
