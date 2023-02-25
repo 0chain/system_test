@@ -155,7 +155,6 @@ jobs:
           zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-        secrets: 
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
 
       - name: "Run System tests"
@@ -169,7 +168,6 @@ jobs:
           archive_results: true
           run_flaky_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-        secrets: 
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
 
       - name: "Set PR status as ${{ job.status }}"
