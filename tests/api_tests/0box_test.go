@@ -12,6 +12,73 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func Test0BoxNFT(testSetup *testing.T) {
+	// todo: These tests are sequential and start with teardown as they all share a common phone number
+	t := test.NewSystemTest(testSetup)
+	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	defaultBatchSize := 1
+	defaultMaxMint := 1
+	defaultCurrMint := 1
+	defaultPricePerPack := 1
+
+	t.RunSequentially("Post NFT with valid arguments should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
+
+		allocationName := "allocation created as part of " + t.Name()
+		allocationDescription := "allocation description created as part of " + t.Name()
+		allocationType := "allocation type created as part of " + t.Name()
+		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
+			zboxClient.DefaultAllocationId,
+			allocationName,
+			allocationDescription,
+			allocationType,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+
+		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"",
+			"collectionn_name",
+			"collection_id",
+			"total_nfts",
+			"collection_type",
+			zboxClient.DefaultAllocationId,
+			"base_url",
+			"symbol",
+			defaultPricePerPack,
+			defaultMaxMint,
+			defaultCurrMint,
+			defaultBatchSize,
+		)
+
+	})
+
+}
+
 func Test0Box_share_info(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
