@@ -73,7 +73,7 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: 0chain/actions/get-build-state@manual_system_tests
+        uses: 0chain/actions/get-build-state@master
         with:
           github_token: ${{ github.token }}
           repository: "0chain/system_test"
