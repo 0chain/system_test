@@ -78,6 +78,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
 			"max_stake":     intToZCN(old_max_stake),
 			"min_stake":     intToZCN(old_min_stake),
+			"sharder":       "",
 		}), true)
 		require.Nil(t, err, "error reverting sharder settings after test")
 		require.Len(t, output, 2)
@@ -101,6 +102,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": 1,
+			"sharder":   "",
 		}), true)
 
 		require.Nil(t, err, "error reverting sharder node settings after test")
@@ -138,6 +140,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 5,
+			"sharder":       "",
 		}), true)
 		require.Nil(t, err, "error updating num_delegated in sharder node")
 		require.Len(t, output, 2)
@@ -172,6 +175,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": 99,
+			"sharder":   "",
 		}), true)
 		require.Nil(t, err, "error updating max_stake in sharder node")
 		require.Len(t, output, 2)
@@ -210,6 +214,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			"num_delegates": 8,
 			"min_stake":     2,
 			"max_stake":     98,
+			"sharder":       "",
 		}), true)
 		require.Nil(t, err, "error updating multiple settings in sharder node")
 		require.Len(t, output, 2)
@@ -250,6 +255,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
+			"sharder":   "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -273,6 +279,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
+			"sharder":       "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -296,6 +303,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
+			"sharder":   "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -320,6 +328,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			"id":        sharder01ID,
 			"max_stake": 48,
 			"min_stake": 51,
+			"sharder":   "",
 		}), false)
 		require.NotNil(t, err, "expected error when trying to update min_stake greater than max stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -343,6 +352,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": -1,
+			"sharder":   "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -366,6 +376,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": -1,
+			"sharder":   "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -389,6 +400,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": -1,
+			"sharder":       "",
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -409,7 +421,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, "", false)
+		output, err := sharderUpdateSettings(t, configPath, "--sharder", false)
 		require.NotNil(t, err, "expected error trying to update sharder node without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
@@ -429,7 +441,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
+			"id":      sharder01ID,
+			"sharder": "",
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
 		require.Nil(t, err)
@@ -457,6 +470,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 5,
+			"sharder":       "",
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -465,6 +479,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": 99,
+			"sharder":   "",
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -473,6 +488,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": 1,
+			"sharder":   "",
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -487,7 +503,7 @@ func sharderUpdateSettings(t *test.SystemTest, cliConfigFilename, params string,
 func sharderUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Logf("Updating Sharder node info...")
 	if retry {
-		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-node-settings --sharder %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
+		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-node-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
 	} else {
 		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-node-settings --sharder %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
