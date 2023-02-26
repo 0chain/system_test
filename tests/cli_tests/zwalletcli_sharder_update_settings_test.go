@@ -102,6 +102,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			"id":        sharder01ID,
 			"min_stake": 1,
 		}), true)
+
 		require.Nil(t, err, "error reverting sharder node settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])

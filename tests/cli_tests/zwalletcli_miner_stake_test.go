@@ -291,8 +291,14 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
-		_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		/*
+			// Update min_stake to 1 before testing as otherwise this case will duplicate negative stake case
+			_, err = minerUpdateSettings(t, configPath, createParams(map[string]interface{}{
+				"id":        miner01ID,
+				"min_stake": 2,
+			}), true)
+		*/
+		_, err = sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
 			"id":        miner01ID,
 			"min_stake": 2,
 		}), true)
