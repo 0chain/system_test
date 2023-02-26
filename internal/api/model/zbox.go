@@ -116,3 +116,60 @@ type ZboxShareInfoList struct {
 	MessageContainer
 	Data []ZboxShareInfo `json:"data"`
 }
+
+type ZboxNftCollection struct {
+	AllocationId           string `json:"allocation_id"`
+	CollectionId           string `json:"collection_id"`
+	CreatedBy              string `json:"created_by"`
+	CollectionName         string `json:"collection_name"`
+	TotalNfts              string `json:"total_nfts"`
+	CollectionType         string `json:"collection_type"`
+	Symbol                 string `json:"symbol"`
+	BaseUrl                string `json:"base_url"`
+	LastUpdate             string `json:"last_update"`
+	CreatedAtDate          string `json:"created_at_date"`
+	CollectionImage        string `json:"collection_image"`
+	ColleectionBannerImage string `json:"collection_banner_image"`
+	CreatorName            string `json:"creator_name"`
+	PricePerPack           string `json:"price_per_back"`
+	MaxMints               string `json:"max_mints"`
+	CurrMints              string `json:"curr_mints"`
+	BatchSize              string `json:"batch_size"`
+}
+
+type ZboxNft struct {
+	Id              string `json:"id"`
+	AllocationId    string `json:"allocation_id"`
+	ClientId        string `json:"client_id"`
+	CollectionId    string `json:"collection_id"`
+	OwnedBy         string `json:"owned_by"`
+	Stage           string `json:"stage"`
+	Reference       string `json:"reference"`
+	NftActivity     string `json:"nft_activity"`
+	MetaData        string `json:"meta_data"`
+	NftImage        string `json:"nft_image"`
+	IsMinted        string `json:"is_minted"`
+	AuthTicket      string `json:"auth_ticket"`
+	RemotePath      string `json:"remote_path"`
+	CreatedBy       string `json:"created_by"`
+	CreatorName     string `json:"creator_name"`
+	ContractAddress string `json:"contract_address"`
+	TokenId         string `json:"token_id"`
+	TokenStandard   string `json:"token_standard"`
+	CreatedAtDate   string `json:"created_at_date"`
+	LastUpdate      string `json:"last_update"`
+}
+
+type ZboxNftList struct {
+	NftList  []ZboxNft `json:"all_nfts"`
+	NftCount int       `json:"total"`
+}
+
+type ZboxNftListByWalletID struct {
+	NftList  []ZboxNft `json:"nfts_by_client_id"`
+	NftCount int       `json:"total"`
+}
+
+type ZboxNftListByCollectionId struct {
+	NftList []ZboxNft `json:"collections"`
+}
