@@ -15,6 +15,7 @@ import (
 
 var (
 	apiClient          *client.APIClient
+	zs3Client          *client.ZS3Client
 	sdkClient          *client.SDKClient
 	zboxClient         *client.ZboxClient
 	sdkWallet          *model.Wallet
@@ -32,6 +33,7 @@ func TestMain(m *testing.M) {
 	parsedConfig = config.Parse(configPath)
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
