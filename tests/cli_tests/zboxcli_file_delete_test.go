@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/stretchr/testify/require"
 )
@@ -115,48 +116,6 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
-	})
-
-	t.RunWithTimeout("delete shared file by owner should work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
-		collaboratorWalletName := escapedTestName(t) + "_collaborator"
-
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		createAllocationTestTeardown(t, allocationID)
-
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"collabid":   collaboratorWallet.ClientID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
-		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
-
-		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
-
-		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"json":       "",
-		}), true)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
 	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
@@ -353,47 +312,48 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete shared file by collaborator should fail", 60*time.Second, func(t *test.SystemTest) {
-		collaboratorWalletName := escapedTestName(t) + "_collaborator"
+	t.Run("delete existing file with allocation delete file options forbidden should fail", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"data":          1,
+			"parity":        1,
+			"forbid_delete": nil,
+		})
 
-		output, err := registerWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		remotepath := "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
 
-		collaboratorWallet, err := getWalletForName(t, configPath, collaboratorWalletName)
-		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
-		createAllocationTestTeardown(t, allocationID)
-
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", 128*KB)
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = addCollaborator(t, createParams(map[string]interface{}{
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"collabid":   collaboratorWallet.ClientID,
-			"remotepath": remotepath,
-		}), true)
-		require.Nil(t, err, "error in adding collaborator", strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		expectedOutput := fmt.Sprintf("Collaborator %s added successfully for the file %s", collaboratorWallet.ClientID, remotepath)
-		require.Equal(t, expectedOutput, output[0], strings.Join(output, "\n"))
-
-		output, err = deleteFile(t, collaboratorWalletName, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
+			"remotepath": remoteFilePath,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/",
-			"json":       "",
+			"remotepath": remotepath,
 		}), true)
-
-		require.Nil(t, err, "List files after delete failed", err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], remotepath, strings.Join(output, "\n"))
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), remoteFilePath, strings.Join(output, "\n"))
 	})
+}
+
+func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
+	t.Logf("Deleting file...")
+	cmd := fmt.Sprintf(
+		"./zbox delete %s --silent --wallet %s "+
+			"--configDir ./config --config %s",
+		params,
+		walletName+"_wallet.json",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }

@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 block_worker:  https://dev-2.devnet-0chain.net/dns
 0box_url: https://0box.dev-2.devnet-0chain.net
+=======
+block_worker:  https://dev-1.devnet-0chain.net/dns
+0box_url: https://0box.dev-1.devnet-0chain.net
+>>>>>>> 38be4876ad1614f52e2e74a25f7108bde672fd85
 0box_phone_number: +917696229925
 default_test_case_timeout: 20s
