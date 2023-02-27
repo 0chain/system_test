@@ -18,6 +18,7 @@ type Config struct {
 	ZboxUrl                string `yaml:"0box_url"`
 	ZboxPhoneNumber        string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout string `yaml:"default_test_case_timeout"`
+	ZS3ServerUrl           string `yaml:"zs3_server_url"`
 }
 
 func Parse(configPath string) *Config {
