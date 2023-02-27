@@ -26,6 +26,9 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
+	output, err = registerWalletForName(t, configPath, miner01NodeDelegateWalletName)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	mnConfig := getMinerSCConfiguration(t)
 	output, err = listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
