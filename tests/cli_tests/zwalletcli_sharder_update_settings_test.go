@@ -505,6 +505,6 @@ func sharderUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, param
 	if retry {
 		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-node-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
 	} else {
-		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-node-settings --sharder %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-node-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
 }
