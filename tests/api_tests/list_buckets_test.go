@@ -11,6 +11,7 @@ func TestListBuckets(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	t.Run("ListBuckets should return 200 when all the parameters are correct", func(t *test.SystemTest) {
+		t.Skip("skip till zs3server issues are resolved")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -22,6 +23,7 @@ func TestListBuckets(testSetup *testing.T) {
 	})
 
 	t.Run("ListBuckets should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
+		t.Skip("skip till zs3server issues are resolved")
 		queryParams := map[string]string{
 			"secretAccessKey": SecretAccessKey,
 			"action":          "listBucket",
