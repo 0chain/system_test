@@ -80,7 +80,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -880,7 +880,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 

@@ -569,7 +569,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_delete": nil,
 			"forbid_move":   nil,
 		})
-		output, err = updateAllocation(t, configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
