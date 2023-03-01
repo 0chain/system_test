@@ -503,6 +503,16 @@ func minerUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, params,
 	}
 }
 
+func getNonceForWallet(t *test.SystemTest, cliConfigFilename, wallet string, retry bool) ([]string, error) {
+	t.Log("Updating miner settings...")
+	cmd := fmt.Sprintf("./zwallet getnonce --silent --wallet %s_wallet.json --configDir ./config --config %s", wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
 func minerInfo(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("Fetching miner node info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
