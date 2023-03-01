@@ -257,7 +257,7 @@ func TestFileDelete(testSetup *testing.T) {
 		output, err := getBalance(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 6.500 ZCN \(\d*\.?\d+ USD\)$`), output[0]) // 5+2 Faucet, 0.5 locked to allocation
 
 		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -279,7 +279,7 @@ func TestFileDelete(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 6.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
