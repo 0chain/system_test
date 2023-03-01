@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
@@ -86,6 +87,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 			t,
 			minerIds,
 			int(minerScConfig["num_miner_delegates_rewarded"]),
+			minerScConfig["share_ratio"],
 			beforeMiners.Nodes, afterMiners.Nodes,
 			history,
 		)
@@ -194,6 +196,7 @@ func checkMinerDelegatePoolFeeAmounts(
 	t *test.SystemTest,
 	minerIds []string,
 	numMinerDelegatesRewarded int,
+	minerShare float64,
 	beforeMiners, afterMiners []climodel.Node,
 	history *cliutil.ChainHistory,
 ) {
@@ -230,9 +233,23 @@ func checkMinerDelegatePoolFeeAmounts(
 				require.Len(t, poolsBlockRewarded, 0,
 					"delegate pools should not get a block reward unless their parent miner won the round lottery")
 			}
-			confirmPoolPayments(
-				t, history.FeesForRound(t, round), poolsBlockRewarded, afterMiners[i].StakePool.Pools, numMinerDelegatesRewarded,
-			)
+			fees := history.FeesForRound(t, round)
+			if fees == 0 {
+				require.Equal(t, len(poolsBlockRewarded), 0)
+			} else {
+				confirmPoolPayments(
+					t,
+					delegateFeeRewards(
+						fees,
+						minerShare,
+						beforeMiners[i].Settings.ServiceCharge,
+						1,
+					),
+					poolsBlockRewarded,
+					afterMiners[i].StakePool.Pools,
+					numMinerDelegatesRewarded,
+				)
+			}
 		}
 		for poolId := range afterMiners[i].StakePool.Pools {
 			actualReward := afterMiners[i].StakePool.Pools[poolId].Reward - beforeMiners[i].StakePool.Pools[poolId].Reward
@@ -241,4 +258,8 @@ func checkMinerDelegatePoolFeeAmounts(
 			)
 		}
 	}
+}
+
+func delegateFeeRewards(total int64, share, serviceCharge float64, numProvidersPaid int) int64 {
+	return int64(float64(total) * share * (1 - serviceCharge) / float64(numProvidersPaid))
 }

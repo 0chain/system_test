@@ -141,7 +141,7 @@ func checkSharderFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardSharder:
-					require.Greater(t, feesPerSharder, int64(0), "fee reward with no fees")
+					require.Greaterf(t, feesPerSharder, int64(0), "fee reward with no fees, reward %v", pReward)
 					var fees int64
 					if len(beforeSharders[i].StakePool.Pools) > 0 {
 						fees = int64(float64(feesPerSharder) * beforeSharders[i].Settings.ServiceCharge * (1 - minerShare))
@@ -289,11 +289,11 @@ func checkSharderDelegatePoolFeeAmounts(
 			if fees > 0 {
 				confirmPoolPayments(
 					t,
-					delegateSharderFeesRewards(
-						numShardersRewarded,
+					delegateFeeRewards(
 						fees,
-						beforeSharders[i].Settings.ServiceCharge,
 						1-minerShare,
+						beforeSharders[i].Settings.ServiceCharge,
+						numShardersRewarded,
 					),
 					poolsBlockRewarded,
 					afterSharders[i].StakePool.Pools,
@@ -308,8 +308,4 @@ func checkSharderDelegatePoolFeeAmounts(
 			)
 		}
 	}
-}
-
-func delegateSharderFeesRewards(numberSharders int, fee int64, serviceCharge, sharderShare float64) int64 {
-	return int64(float64(fee) * (1 - serviceCharge) * sharderShare / float64(numberSharders))
 }
