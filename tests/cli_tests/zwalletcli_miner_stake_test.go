@@ -291,7 +291,7 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		_, err = sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		_, err = minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner01ID,
 			"min_stake": 2,
 		}), true)

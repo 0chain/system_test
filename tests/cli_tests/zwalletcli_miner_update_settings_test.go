@@ -48,7 +48,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	// Revert miner settings after test is complete
 	t.Cleanup(func() {
 		t.Log("start revert")
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": miner.Settings.MaxNumDelegates,
 			"min_stake":     miner.Settings.MinStake / 1e10,
@@ -78,7 +78,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 				currRound = getCurrentRound(t)
 			}
 		}
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
 		}), true)
@@ -116,7 +116,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 				currRound = getCurrentRound(t)
 			}
 		}
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
 		}), true)
@@ -151,7 +151,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 				currRound = getCurrentRound(t)
 			}
 		}
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), true)
@@ -189,7 +189,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 				currRound = getCurrentRound(t)
 			}
 		}
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
 			"max_stake":     99,
@@ -236,7 +236,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10, // Balance package makes this 18446744073709551615
 		}), false)
@@ -259,7 +259,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 		}), false)
@@ -284,7 +284,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 		}), false)
@@ -309,7 +309,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 51,
 			"max_stake": 48,
@@ -334,7 +334,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": -1,
 		}), false)
@@ -360,7 +360,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": -1,
 		}), false)
@@ -384,7 +384,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": -1,
 		}), false)
@@ -409,7 +409,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, "", false)
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, "", false)
 		require.NotNil(t, err, "expected error trying to update miner node settings without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
@@ -430,7 +430,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id": miner.ID,
 		}), false)
 		lastRoundOfSettingUpdate = getCurrentRound(t)
@@ -447,7 +447,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
 		}), escapedTestName(t), false)
@@ -456,7 +456,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
-		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"min_stake": 1,
 		}), escapedTestName(t), false)
@@ -465,7 +465,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
 
-		output, err = sharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":        miner.ID,
 			"max_stake": 99,
 		}), escapedTestName(t), false)
