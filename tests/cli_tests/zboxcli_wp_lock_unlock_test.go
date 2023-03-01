@@ -18,12 +18,9 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -38,11 +35,11 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 1.5 ZCN
+		// Wallet balance before lock should be 4.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in Write pool amongst all blobbers
 		params := createParams(map[string]interface{}{
@@ -54,13 +51,13 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		// Wallet balance should decrement from 1.5 to 0.5 ZCN
+		// Wallet balance should decrement from 4.5 to 3.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 3.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		// Write pool balance should increment to 1
+		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
 
@@ -77,19 +74,16 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		// Wallet balance should increment from 0.5 to 2.0 ZCN
+		// Wallet balance should increment from 3.5 to 5.0 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -104,11 +98,11 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 1.5 ZCN
+		// Wallet balance before lock should be 4.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in Write pool amongst all blobbers
 		params := createParams(map[string]interface{}{
@@ -120,13 +114,13 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		// Wallet balance should decrement from 1.5 to 0.5 ZCN
+		// Wallet balance should decrement from 4.5 to 3.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 3.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		// Write pool balance should increment to 1
+		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
 
@@ -146,19 +140,16 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		// Wallet balance should increment from 0.5 to 2.0 ZCN
+		// Wallet balance should increment from 3.5 to 5.0 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 2.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	}) //todo: this test takes on average 9 mins 20 seconds.. i'm not joking!!!
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -173,16 +164,16 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 0.5 ZCN
+		// Wallet balance before lock should be 4.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
-		// Lock 1 token in write pool distributed amongst all blobbers
+		// Lock 10 token in write pool should fail
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"tokens":     1,
+			"tokens":     10,
 		})
 		output, err = writePoolLock(t, configPath, params, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
@@ -193,15 +184,12 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -216,11 +204,11 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 0.5 ZCN
+		// Wallet balance before lock should be 4.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking -1 token in write pool should not succeed
 		params := createParams(map[string]interface{}{
@@ -236,15 +224,12 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.RunWithTimeout("Should not be able to lock zero write tokens", 60*time.Second, func(t *test.SystemTest) { //todo: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -259,11 +244,11 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 0.5 ZCN
+		// Wallet balance before lock should be 4.5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Locking 0 token in write pool should not succeed
 		params := createParams(map[string]interface{}{
@@ -279,15 +264,12 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -315,9 +297,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 	t.Run("Should not be able to unlock unexpired write tokens", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
