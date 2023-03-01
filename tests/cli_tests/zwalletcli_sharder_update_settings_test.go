@@ -73,7 +73,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.Nil(t, err)
 		old_min_stake, err := oldSharderInfo.Settings.MinStake.Int64()
 		require.Nil(t, err)
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
 			"max_stake":     intToZCN(old_max_stake),
@@ -99,7 +99,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": 1,
 			"sharder":   "",
@@ -137,7 +137,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 5,
 			"sharder":       "",
@@ -172,7 +172,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": 99,
 			"sharder":   "",
@@ -209,7 +209,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 8,
 			"min_stake":     2,
@@ -252,7 +252,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": mnConfig["min_stake"] - 1e-10,
 			"sharder":   "",
@@ -276,7 +276,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 			"sharder":       "",
@@ -300,7 +300,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": mnConfig["max_stake"] + 1e-10,
 			"sharder":   "",
@@ -324,7 +324,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": 48,
 			"min_stake": 51,
@@ -349,7 +349,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"min_stake": -1,
 			"sharder":   "",
@@ -373,7 +373,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        sharder01ID,
 			"max_stake": -1,
 			"sharder":   "",
@@ -397,7 +397,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": -1,
 			"sharder":       "",
@@ -421,7 +421,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, "--sharder", false)
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, "--sharder", false)
 		require.NotNil(t, err, "expected error trying to update sharder node without id, but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing id flag", output[0])
@@ -440,7 +440,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := sharderUpdateSettings(t, configPath, createParams(map[string]interface{}{
+		output, err := sharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":      sharder01ID,
 			"sharder": "",
 		}), false)
@@ -496,8 +496,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 	})
 }
 
-func sharderUpdateSettings(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, sharder01NodeDelegateWalletName, retry)
+func sharderUpdateSettings(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
+	return sharderUpdateSettingsForWallet(t, cliConfigFilename, params, wallet, retry)
 }
 
 func sharderUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
