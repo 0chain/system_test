@@ -23,6 +23,12 @@ func TestSharderStake(testSetup *testing.T) {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 	}
 
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+	output, err = registerWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
 	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
