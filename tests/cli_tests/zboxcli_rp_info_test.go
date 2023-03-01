@@ -22,14 +22,11 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.5)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Wallet balance before lock should be 1.5 ZCN
+		// Wallet balance before lock should be 5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
@@ -58,14 +55,11 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.5)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Wallet balance before lock should be 1.5 ZCN
+		// Wallet balance before lock should be 5 ZCN
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
