@@ -122,7 +122,7 @@ type ZboxNftCollection struct {
 	CollectionId           string `json:"collection_id"`
 	CreatedBy              string `json:"created_by"`
 	CollectionName         string `json:"collection_name"`
-	TotalNfts              string `json:"total_nfts"`
+	TotalNfts              int    `json:"total_nfts"`
 	CollectionType         string `json:"collection_type"`
 	Symbol                 string `json:"symbol"`
 	BaseUrl                string `json:"base_url"`
@@ -131,10 +131,10 @@ type ZboxNftCollection struct {
 	CollectionImage        string `json:"collection_image"`
 	ColleectionBannerImage string `json:"collection_banner_image"`
 	CreatorName            string `json:"creator_name"`
-	PricePerPack           string `json:"price_per_back"`
-	MaxMints               string `json:"max_mints"`
-	CurrMints              string `json:"curr_mints"`
-	BatchSize              string `json:"batch_size"`
+	PricePerPack           int    `json:"price_per_back"`
+	MaxMints               int    `json:"max_mints"`
+	CurrMints              int    `json:"curr_mints"`
+	BatchSize              int    `json:"batch_size"`
 }
 
 type ZboxNft struct {
@@ -167,6 +167,11 @@ type ZboxNftList struct {
 
 type ZboxNftListByWalletID struct {
 	NftList  []ZboxNft `json:"nfts_by_client_id"`
+	NftCount int       `json:"total"`
+}
+
+type ZboxNftListByCollection struct {
+	NftList  []ZboxNft `json:"nfts_by_collection_id"`
 	NftCount int       `json:"total"`
 }
 
