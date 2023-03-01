@@ -130,7 +130,7 @@ func TestSharderStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-			"tokens":     2,
+			"tokens":     6,
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
