@@ -238,12 +238,12 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		output, err := sharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":        miner.ID,
-			"min_stake": mnConfig["min_stake"] - 1e-10, // Currency package makes this 0
+			"min_stake": mnConfig["min_stake"] - 1e-10, // Balance package makes this 18446744073709551615
 		}), false)
 
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -1 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
+		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 18446744073709551615 \\u003e 990000000000", output[0])
 	})
 
 	t.RunSequentiallyWithTimeout("Miner update num_delegates greater than global max_delegates should fail", 60*time.Second, func(t *test.SystemTest) {
@@ -343,7 +343,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		require.NotNil(t, err, "expected error on negative min stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin", output[0])
+		require.Equal(t, "update_miner_settings: invalid node request results in min_stake greater than max_stake: 18446744063709551616 \\u003e 990000000000", output[0])
 		t.Log("end test")
 	})
 
@@ -368,7 +368,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		require.NotNil(t, err, "expected error negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin", output[0])
+		require.Equal(t, "update_miner_settings: max_stake is greater than allowed by SC: 18446744063709551616 \\u003e 1000000000000", output[0])
 	})
 
 	t.RunSequentiallyWithTimeout("Miner update num_delegate negative value should fail", 60*time.Second, func(t *test.SystemTest) {

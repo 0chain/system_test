@@ -259,7 +259,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
-		const expected = "update_sharder_settings: decoding request: json: cannot unmarshal number -1 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin"
+		const expected = "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 18446744073709551615 \\u003e 980000000000"
 		require.Equal(t, expected, output[0], strings.Join(output, "\n"))
 	})
 
@@ -356,7 +356,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.min_stake of type currency.Coin"
+		const expected = "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 18446744063709551616 \\u003e 980000000000"
 		require.Equal(t, expected, output[0])
 	})
 
@@ -380,7 +380,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: decoding request: json: cannot unmarshal number -10000000000 into Go struct field Settings.stake_pool.settings.max_stake of type currency.Coin"
+		const expected = "update_sharder_settings: max_stake is greater than allowed by SC: 18446744063709551616 \\u003e 1000000000000"
 		require.Equal(t, expected, output[0])
 	})
 
