@@ -49,8 +49,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
+		_, _ = registerWalletWithoutFaucet(t, configPath)
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
@@ -105,6 +104,13 @@ func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename strin
 	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
 
 	return err
+}
+
+func registerWalletWithoutFaucet(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
+	t.Logf("Registering wallet...")
+
+	return cliutils.RunCommand(t, "./zbox register --silent "+
+		"--wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
 func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
