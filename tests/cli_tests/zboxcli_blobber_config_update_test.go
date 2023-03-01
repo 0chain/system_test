@@ -25,6 +25,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+	output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
