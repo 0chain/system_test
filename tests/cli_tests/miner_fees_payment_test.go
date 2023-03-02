@@ -337,6 +337,9 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 }
 
 func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)

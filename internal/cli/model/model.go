@@ -79,13 +79,15 @@ type Allocation struct {
 
 	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
 
-	StartTime         int64    `json:"start_time"`
-	Finalized         bool     `json:"finalized,omitempty"`
-	Canceled          bool     `json:"canceled,omitempty"`
-	MovedToChallenge  int64    `json:"moved_to_challenge,omitempty"`
-	MovedBack         int64    `json:"moved_back,omitempty"`
-	MovedToValidators int64    `json:"moved_to_validators,omitempty"`
-	Curators          []string `json:"curators"`
+	StartTime            int64    `json:"start_time"`
+	Finalized            bool     `json:"finalized,omitempty"`
+	Canceled             bool     `json:"canceled,omitempty"`
+	MovedToChallenge     int64    `json:"moved_to_challenge,omitempty"`
+	MovedBack            int64    `json:"moved_back,omitempty"`
+	MovedToValidators    int64    `json:"moved_to_validators,omitempty"`
+	Curators             []string `json:"curators"`
+	FileOptions          uint16   `json:"file_options"`
+	ThirdPartyExtendable bool     `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {
@@ -101,7 +103,9 @@ type Blobber struct {
 }
 
 type ReadPoolInfo struct {
-	Balance int64 `json:"balance"`
+	Balance int64   `json:"fmt"`
+	Zcn     float64 `json:"zcn"`
+	Usd     float64 `json:"usd"`
 }
 
 type RecentlyAddedRefResult struct {
@@ -665,16 +669,17 @@ func (r Reward) Int() int {
 
 type RewardProvider struct {
 	Amount      int64  `json:"amount"`
-	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
-	ProviderId  string `json:"provider_id" gorm:"index:idx_provider,priority:2"`
-	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+	BlockNumber int64  `json:"block_number"`
+	ProviderId  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
 }
 
 type RewardDelegate struct {
 	Amount      int64  `json:"amount"`
-	BlockNumber int64  `json:"block_number" gorm:"index:idx_block,priority:1"`
-	PoolID      string `json:"pool_id" gorm:"index:idx_pool,priority:2"`
-	RewardType  Reward `json:"reward_type" gorm:"index:idx_reward_type,priority:3"`
+	BlockNumber int64  `json:"block_number"`
+	PoolID      string `json:"pool_id"`
+	ProviderID  string `json:"provider_id"`
+	RewardType  Reward `json:"reward_type"`
 }
 
 type EventDBBlock struct {

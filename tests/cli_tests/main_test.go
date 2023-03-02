@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/util/tenderly"
+
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -50,6 +52,16 @@ func setupConfig() {
 		test.DefaultTestTimeout = defaultTestTimeout
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}
+
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(path)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
+	}
+
+	ethereumNodeURL = viper.GetString("ethereum_node_url")
+	ethereumAddress = viper.GetString("ethereum_address")
 }
 
 const (
@@ -70,6 +82,9 @@ var (
 	miner03ID   string
 	sharder01ID string
 	sharder02ID string
+
+	ethereumNodeURL string
+	ethereumAddress string
 )
 
 var (
@@ -78,6 +93,8 @@ var (
 	bridgeClientConfigFile string
 	bridgeOwnerConfigFile  string
 )
+
+var tenderlyClient *tenderly.Client
 
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
@@ -137,6 +154,23 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
+	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
+
+	snapshotHash, err := tenderlyClient.CreateSnapshot()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = tenderlyClient.InitBalance(ethereumAddress)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	exitRun := m.Run()
+
+	err = tenderlyClient.Revert(snapshotHash)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	os.Exit(exitRun)
 }
