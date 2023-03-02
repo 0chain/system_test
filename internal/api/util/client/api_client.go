@@ -617,6 +617,11 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
+	c.ExecuteFaucetWithTokens(t, wallet, 1.0, requiredTransactionStatus)
+}
+
+// ExecuteFaucet provides basic assertions
+func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -624,7 +629,8 @@ func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requ
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData()},
+			TransactionData: model.NewFaucetTransactionData(),
+			Value:           tokenomics.IntToZCN(tokens)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
