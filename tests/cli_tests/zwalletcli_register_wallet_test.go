@@ -18,7 +18,6 @@ import (
 
 const (
 	defaultInitFaucetTokens         = 5.0
-	defaultBlobberOwnerFaucetTokens = 5.0
 )
 
 func TestRegisterWallet(testSetup *testing.T) {
@@ -166,15 +165,6 @@ func getBalanceZCN(t *test.SystemTest, cliConfigFilename string) (float64, error
 	}
 
 	return strconv.ParseFloat(balance.ZCN, 64)
-}
-
-func ensureZeroBalance(t *test.SystemTest, output []string, err error) {
-	if err != nil {
-		require.Len(t, output, 1)
-		require.Equal(t, "Failed to get balance:", output[0])
-		return
-	}
-	require.Equal(t, "Balance: 0 SAS (0.00 USD)", output[0])
 }
 
 func getBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {

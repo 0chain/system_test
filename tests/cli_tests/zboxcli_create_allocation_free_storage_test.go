@@ -1,18 +1,14 @@
 package cli_tests
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -313,87 +309,6 @@ func readWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 	require.Nil(t, err, "error marshaling wallet content")
 
 	return wallet
-}
-
-func sendTxn(miners climodel.NodeList, txn *climodel.Transaction) error {
-	var (
-		err error
-		wg  sync.WaitGroup
-	)
-
-	for i := range miners.Nodes {
-		wg.Add(1)
-		go func(node climodel.Node) {
-			defer wg.Done()
-			_, apiErr := apiPutTransaction(getNodeBaseURL(node.Host, node.Port), txn)
-			if apiErr != nil {
-				err = apiErr
-			}
-		}(miners.Nodes[i])
-	}
-	wg.Wait()
-
-	return err
-}
-
-func apiPutTransaction(minerBaseURL string, txn *climodel.Transaction) (*http.Response, error) {
-	txnData, err := json.Marshal(txn)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
-}
-
-func freeAllocationAssignerTxn(t *test.SystemTest, from, assigner *climodel.WalletFile) *climodel.Transaction {
-	txn := &climodel.Transaction{}
-	txn.Version = "1.0"
-	txn.ClientId = from.ClientID
-	txn.CreationDate = time.Now().Unix()
-	txn.ChainId = chainID
-	txn.PublicKey = from.ClientKey
-	txn.TransactionType = txnTypeSmartContract
-	txn.ToClientId = storageSmartContractAddress
-	txn.TransactionValue = 0
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
-	txn.TransactionNonce = int(nonce) + 1
-
-	input := map[string]interface{}{
-		"name":             assigner.ClientID,
-		"public_key":       assigner.ClientKey,
-		"individual_limit": freeTokensIndividualLimit,
-		"total_limit":      freeTokensTotalLimit,
-	}
-
-	sn := climodel.TransactionData{Name: "add_free_storage_assigner", Input: input}
-	snBytes, err := json.Marshal(sn)
-	require.Nil(t, err, "error marshaling smart contract data")
-
-	txn.TransactionData = string(snBytes)
-
-	txn.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		txn.CreationDate,
-		txn.TransactionNonce,
-		txn.ClientId,
-		txn.ToClientId,
-		txn.TransactionValue,
-		crypto.Sha3256([]byte(txn.TransactionData)))))
-
-	hashToSign, err := hex.DecodeString(txn.Hash)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-
-	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
-		SerializeToHexStr()
-
-	return txn
 }
 
 func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params string) ([]string, error) {

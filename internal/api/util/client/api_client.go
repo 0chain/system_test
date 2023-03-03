@@ -384,6 +384,7 @@ func estimateTxnFee(t *test.SystemTest, c *APIClient, transactionPutRequest *mod
 	var fee = struct {
 		Fee int64 `josn:"fee"`
 	}{}
+	require.Nil(t, err)
 
 	err = json.Unmarshal(resp.Body(), &fee)
 	require.NoError(t, err)
