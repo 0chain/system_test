@@ -741,6 +741,7 @@ var StorageFloatSettings = []string{
 	"block_reward.zeta.i",
 	"block_reward.zeta.k",
 	"block_reward.zeta.mu",
+	"stakepool.kill_slash",
 }
 
 var StorageCurrencySettigs = []string{
@@ -762,7 +763,6 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
-
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -806,6 +806,10 @@ var StorageIntSettings = []string{
 	"cost.stake_pool_pay_interests",
 	"cost.commit_settings_changes",
 	"cost.collect_reward",
+	"cost.kill_blobber",
+	"cost.kill_validator",
+	"cost.shutdown_blobber",
+	"cost.shutdown_validator",
 }
 var StorageBoolSettings = []string{
 	"challenge_enabled",
@@ -817,6 +821,7 @@ var StorageDurationSettings = []string{
 	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
 	"free_allocation_settings.duration",
+	"health_check_period",
 }
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
