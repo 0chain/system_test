@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultInitFaucetTokens         = 5.0
+	defaultInitFaucetTokens = 5.0
 )
 
 func TestRegisterWallet(testSetup *testing.T) {
