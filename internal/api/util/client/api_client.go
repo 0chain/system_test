@@ -644,6 +644,11 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
+	c.ExecuteFaucetWithTokens(t, wallet, 1.0, requiredTransactionStatus)
+}
+
+// ExecuteFaucet provides basic assertions
+func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
 	pourZCN := tokenomics.IntToZCN(5)
