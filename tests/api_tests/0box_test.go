@@ -20,89 +20,92 @@ func Test0BoxNFT(testSetup *testing.T) {
 	defaultMaxMint := 1
 	defaultCurrMint := 1
 	defaultPricePerPack := 1
-
-	t.RunSequentially("Post NFT with valid arguments should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "unique_id"
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-			"abcd",
-			"collectionn_name31",
-			"collection_id41",
-			"0",
-			"collection_type",
-			zboxClient.DefaultAllocationId,
-			"base_url",
-			"symbol",
-			defaultPricePerPack,
-			defaultMaxMint,
-			defaultCurrMint,
-			defaultBatchSize,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxNftCollectionId)
-
-		zboxNft, response, err := zboxClient.PostNftCollection(t,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-			"stage_nft_upload",
-			"nft_reference",
-			zboxNftCollectionId.CollectionId,
-			"owned_by",
-			"nft_activity",
-			"meta_data",
-			allocationId,
-			"created_by",
-			"contract_Address",
-			"token_id",
-			"token_standard",
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxNft)
-
-	})
 	/*
-		t.RunSequentially("Get NFT collection with zero arguments should work", func(t *test.SystemTest) {
+			t.RunSequentially("Post NFT with valid arguments should work", func(t *test.SystemTest) {
+				teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+				csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+				description := "wallet created as part of " + t.Name()
+				walletName := "wallet_name"
+				zboxWallet, response, err := zboxClient.PostWallet(t,
+					zboxClient.DefaultMnemonic,
+					walletName,
+					description,
+					firebaseToken.IdToken,
+					csrfToken,
+					zboxClient.DefaultPhoneNumber,
+				)
+
+				require.NoError(t, err)
+				require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+				require.NotNil(t, zboxWallet)
+				require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+				// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
+
+				allocationName := "allocation created as part of " + t.Name()
+				allocationDescription := "allocation description created as part of " + t.Name()
+				allocationType := "allocation type created as part of " + t.Name()
+				allocationId := "unique_id"
+				allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
+					allocationId,
+					allocationName,
+					allocationDescription,
+					allocationType,
+					firebaseToken.IdToken,
+					csrfToken,
+					zboxClient.DefaultPhoneNumber,
+				)
+				require.NoError(t, err)
+				require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+				require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+
+				collection_name := "collection as a part of" + t.Name()
+				collection_id := "collectionId as a part of" + t.Name()
+				zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
+					firebaseToken.IdToken,
+					csrfToken,
+					zboxClient.DefaultPhoneNumber,
+					"abcd",
+					collection_name,
+					collection_id,
+					"0",
+					"collection_type",
+					zboxClient.DefaultAllocationId,
+					"base_url",
+					"symbol",
+					defaultPricePerPack,
+					defaultMaxMint,
+					defaultCurrMint,
+					defaultBatchSize,
+				)
+
+				require.NoError(t, err)
+				require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+				require.NotNil(t, zboxNftCollectionId)
+
+				zboxNft, response, err := zboxClient.PostNftCollection(t,
+					firebaseToken.IdToken,
+					csrfToken,
+					zboxClient.DefaultPhoneNumber,
+					"stage_nft_upload",
+					"nft_reference",
+					zboxNftCollectionId.CollectionId,
+					"owned_by",
+					"nft_activity",
+					"meta_data",
+					allocationId,
+					"created_by",
+					"contract_Address",
+					"token_id",
+					"token_standard",
+				)
+				require.NoError(t, err)
+				require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+				require.NotNil(t, zboxNft)
+
+			})
+
+
+		t.RunSequentially("Get NFT collection with correct arguments should work", func(t *test.SystemTest) {
 			teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 			csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 			description := "wallet created as part of " + t.Name()
@@ -122,9 +125,10 @@ func Test0BoxNFT(testSetup *testing.T) {
 			require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 			// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
-			allocationName := "allocation created as part of " + t.Name()
-			allocationDescription := "allocation description created as part of " + t.Name()
-			allocationType := "allocation type created as part of " + t.Name()
+			allocationName := "allocation created as part of 111" + t.Name()
+			allocationDescription := "allocation description created as part of 11" + t.Name()
+			allocationType := "allocation type created as part of111" + t.Name()
+			allocationId := "unique_id for" + t.Name()
 			allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 				zboxClient.DefaultAllocationId,
 				allocationName,
@@ -138,13 +142,16 @@ func Test0BoxNFT(testSetup *testing.T) {
 			require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 			require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
+			collection_id := "This collection id is created as part of 111 " + t.Name()
+			collection_name := "This collection name is created as part of  111" + t.Name()
+
 			zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 				firebaseToken.IdToken,
 				csrfToken,
 				zboxClient.DefaultPhoneNumber,
 				"abcd",
-				"collectionn_name3",
-				"collection_id4",
+				collection_name,
+				collection_id,
 				"0",
 				"collection_type",
 				zboxClient.DefaultAllocationId,
@@ -160,8 +167,111 @@ func Test0BoxNFT(testSetup *testing.T) {
 			require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 			require.NotNil(t, zboxNftCollectionId)
 
-		})
+			zboxNft, response, err := zboxClient.PostNftCollection(t,
+				firebaseToken.IdToken,
+				csrfToken,
+				zboxClient.DefaultPhoneNumber,
+				"stage_nft_upload",
+				"nft_reference",
+				zboxNftCollectionId.CollectionId,
+				"owned_by",
+				"nft_activity",
+				"meta_data",
+				allocationId,
+				"created_by",
+				"contract_Address",
+				"token_id",
+				"token_standard",
+			)
+			require.NoError(t, err)
+			require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+			require.NotNil(t, zboxNft)
 
+			zboxNftList, response, err := zboxClient.GetAllNft(t,
+				firebaseToken.IdToken,
+				csrfToken,
+				zboxWallet.PhoneNumber,
+			)
+			require.NoError(t, err)
+			require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+			require.NotNil(t, zboxNftList)
+
+		})
+	*/
+	t.RunSequentially("Get NFT collection with zero nft should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
+
+		allocationName := "allocation created as part of 111" + t.Name()
+		allocationDescription := "allocation description created as part of 11" + t.Name()
+		allocationType := "allocation type created as part of111" + t.Name()
+		allocationId := "unique_id for" + t.Name()
+		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
+			allocationId,
+			allocationName,
+			allocationDescription,
+			allocationType,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+
+		collection_id := "This collection id is created as part of 111 " + t.Name()
+		collection_name := "This collection name is created as part of  111" + t.Name()
+
+		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"abcd",
+			collection_name,
+			collection_id,
+			"0",
+			"collection_type",
+			allocationId,
+			"base_url",
+			"symbol",
+			defaultPricePerPack,
+			defaultMaxMint,
+			defaultCurrMint,
+			defaultBatchSize,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxNftCollectionId)
+
+		zboxNftList, response, err := zboxClient.GetAllNft(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxWallet.PhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxNftList)
+
+	})
+
+	/*
 		t.RunSequentially("Get NFT collection with valid arguments should work", func(t *test.SystemTest) {
 			teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 			csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)

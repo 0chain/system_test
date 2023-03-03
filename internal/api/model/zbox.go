@@ -162,7 +162,7 @@ type ZboxNft struct {
 
 type ZboxNftList struct {
 	NftList  []ZboxNft `json:"all_nfts"`
-	NftCount int       `json:"total"`
+	NftCount string    `json:"total"`
 }
 
 type ZboxNftListByWalletID struct {
@@ -173,8 +173,4 @@ type ZboxNftListByWalletID struct {
 type ZboxNftListByCollection struct {
 	NftList  []ZboxNft `json:"nfts_by_collection_id"`
 	NftCount int       `json:"total"`
-}
-
-type ZboxNftListByCollectionId struct {
-	NftList []ZboxNft `json:"collections"`
 }
