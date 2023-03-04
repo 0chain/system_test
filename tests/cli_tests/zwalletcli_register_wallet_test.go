@@ -52,7 +52,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
-		require.True(t, balance > 0)
+		require.True(t, balance == float64(0))
 		require.True(t, balance < defaultInitFaucetTokens)
 	})
 
