@@ -63,9 +63,6 @@ func TestRegisterWallet(testSetup *testing.T) {
 		balanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
 		require.Len(t, output, 1)
 		matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")

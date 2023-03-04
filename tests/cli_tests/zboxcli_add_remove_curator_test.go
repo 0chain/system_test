@@ -22,9 +22,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving wallet")
 
@@ -39,9 +36,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	t.Run("Add Curator _ attempt to add curator by anyone except allocation owner must fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -68,9 +62,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 	t.Run("Add Curator _ must fail when 'curator' parameter is missing", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -105,9 +96,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -146,9 +134,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
@@ -189,9 +174,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
-
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -225,9 +207,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -272,9 +251,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -323,9 +299,6 @@ func TestAddRemoveCurator(testSetup *testing.T) {
 
 		curatorWallet, err := getWalletForName(t, configPath, curatorWalletName)
 		require.Nil(t, err, "Error occurred when retrieving curator wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5", "size": 1 * MB}))
 		require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
