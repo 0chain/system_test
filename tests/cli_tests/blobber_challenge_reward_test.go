@@ -29,6 +29,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
 	t.RunSequentiallyWithTimeout("Test Blobber Challenge Rewards", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
 		// wallet balance before
 		blobberOwnerWalletBalances, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
 		fmt.Println("blobberOwnerWalletBalance : ", blobberOwnerWalletBalances)
@@ -39,10 +42,14 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// convert blobberOwnerWalletBalance to float
 		blobberOwnerWalletBalanceFloat, _ := strconv.ParseFloat(blobberOwnerWalletBalance, 64)
+		fmt.Println("blobberOwnerWalletBalanceFloat : ", blobberOwnerWalletBalanceFloat)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
 			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
 		})
 
 		remotepath := "/dir/"
@@ -52,7 +59,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		err = createFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			// fetch the latest block in the chain
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -60,8 +67,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		//sleep for 60 seconds to allow the challenges to be created
-		time.Sleep(100 * time.Second)
+		//sleep for 30 seconds to allow the challenges to be created
+		time.Sleep(30 * time.Second)
 
 		// end block
 		endBlock := getLatestFinalizedBlock(t)
@@ -70,29 +77,18 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		blobberWallet, _ := getWalletForName(t, configPath, blobberOwnerWallet)
 
-		blocks := getBlockContainingTransactions(t, startBlock, endBlock, blobberWallet, "challenge_response")
+		fmt.Println(blobberWallet)
 
-		fmt.Println(len(blocks))
-		//
-		//for _, block := range blocks {
-		//	for _, tx := range block.Block.Transactions {
-		//		fmt.Println("Transaction Value : ", tx.TransactionValue)
-		//		fmt.Println("Transaction Type : ", tx.TransactionType)
-		//		fmt.Println("Transaction Data : ", tx.TransactionData)
-		//		fmt.Println("Transaction Nonce : ", tx.TransactionNonce)
-		//		fmt.Println("Transaction Output : ", tx.TransactionOutput)
-		//		fmt.Println("Transaction Fee : ", tx.TransactionFee)
-		//		fmt.Println("Transaction Status : ", tx.TransactionStatus)
-		//
-		//		fmt.Println("--------------------------------------------------")
-		//	}
-		//}
+		//getBlockContainingTransactions(t, startBlock, endBlock, blobberWallet, "")
+
+		fmt.Println("Client Wallet Balance : ")
+		fmt.Println(getBalance(t, configPath))
 
 		// list validators before
 		output, err = listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
 
-		// collect reward for each blobber
+		//collect reward for each blobber
 		for _, blobber := range blobberList {
 			output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
 				"provider_type": "blobber",
