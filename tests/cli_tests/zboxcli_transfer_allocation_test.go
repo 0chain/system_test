@@ -21,42 +21,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.Parallel()
 
-	t.Run("transfer allocation by curator should work", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": int64(2048),
-		})
-
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
-		newOwner := escapedTestName(t) + "_NEW_OWNER"
-
-		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
-
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
-			"allocation":    allocationID,
-			"new_owner_key": newOwnerWallet.ClientPublicKey,
-			"new_owner":     newOwnerWallet.ClientID,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0],
-			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
-	})
-
 	t.Run("transfer allocation by owner should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
@@ -80,7 +44,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		require.Equal(t, fmt.Sprintf("transferred ownership of allocation %s to %s", allocationID, newOwnerWallet.ClientID), output[0])
 	})
 
-	t.Run("transfer allocation by non-owner and non-curator should fail", func(t *test.SystemTest) {
+	t.Run("transfer allocation by non-owner", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": int64(2048),
 		})
@@ -100,7 +64,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		reg := regexp.MustCompile("Error transferring allocation:curator_transfer_allocation_failed: only curators or the owner can transfer allocations; [a-z0-9]{64} is neither")
+		reg := regexp.MustCompile("Error transferring allocation:transfer_allocation_failed: only the owner can transfer allocations; [a-z0-9]{64} is neither")
 		require.Regexp(t, reg, output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
@@ -113,16 +77,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		ownerWallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving owner wallet")
 
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
-		output, err = transferAllocationOwnership(t, map[string]interface{}{
+		output, err := transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,
 			"new_owner_key": ownerWallet.ClientPublicKey,
 			"new_owner":     ownerWallet.ClientID,
@@ -139,25 +94,13 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"expire": "2s",
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		time.Sleep(5 * time.Second)
 		alloc := getAllocation(t, allocationID)
 		require.False(t, alloc.Finalized)
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -179,19 +122,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
-		output, err = cancelAllocation(t, configPath, allocationID, false)
+		output, err := cancelAllocation(t, configPath, allocationID, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "cancel allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Regexp(t, "Allocation canceled with txId : [0-9a-f]+", output[0],
@@ -222,24 +153,12 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"expire": "5s",
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		time.Sleep(6 * time.Second)
 
 		// Wait for challenge completion time to expire
 		cliutils.Wait(t, 4*time.Minute)
 
-		output, err = finalizeAllocation(t, configPath, allocationID, false)
+		output, err := finalizeAllocation(t, configPath, allocationID, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "finalize allocation - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Allocation finalized with txId : ",
@@ -270,26 +189,14 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -349,26 +256,14 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -447,26 +342,14 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(4096),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -591,7 +474,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error transferring allocation:curator_transfer_allocation_failed: value not present", output[0],
+		require.Equal(t, "Error transferring allocation:transfer_allocation_failed: value not present", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
@@ -601,21 +484,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
@@ -638,21 +509,9 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"size": int64(2048),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
+		output, err := registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
