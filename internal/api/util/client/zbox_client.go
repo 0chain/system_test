@@ -337,14 +337,14 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWallets,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Timestamp":        "1618213324",
 			"X-App-Client-Signature": "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a",
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
 		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -803,6 +803,7 @@ func (c *ZboxClient) UpdateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/fcmtoken")
+	//todo: figure out which field can be updated
 	formData := map[string]string{
 		"fcm_token":   idToken,
 		"device_type": "bolt",
@@ -822,6 +823,31 @@ func (c *ZboxClient) UpdateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
+
+	return &dest, resp, err
+}
+
+func (c *ZboxClient) DeleteFCMToken(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxFCMResponse, *resty.Response, error) {
+	t.Logf("Deleting fcm token for [%v] using 0box...", phoneNumber)
+	var dest model.ZboxFCMResponse
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/fcmtoken")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &dest,
+		Headers: map[string]string{
+			"X-App-Client-ID":    X_APP_CLIENT_ID,
+			"X-App-Client-Key":   X_APP_CLIENT_KEY,
+			"X-App-ID-TOKEN":     idToken,
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "blimp",
+			"X-App-Timestamp":    "1618213426",
+		},
+		RequiredStatusCode: 200,
+	}, HttpDELETEMethod)
 
 	return &dest, resp, err
 }

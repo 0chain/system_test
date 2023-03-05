@@ -659,8 +659,13 @@ func Test0Box(testSetup *testing.T) {
 		require.NotNil(t, data.Exist)
 		require.Equal(t, true, *data.Exist, "Expected wallet to exist")
 	})
+}
 
-	t.RunSequentially("Create FCM Token should work", func(t *test.SystemTest) {
+func Test0BoxFCM(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+
+	t.RunSequentially("Creating FCM Token with valid credentials should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		response, err := zboxClient.CreateFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -668,9 +673,18 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Update FCM Token should work", func(t *test.SystemTest) {
+	t.RunSequentially("Updating FCM Token should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		data, response, err := zboxClient.UpdateFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, data, "response object should not be nil")
+		require.Equal(t, "bolt", data.DeviceType, "response object should match input")
+	})
+
+	t.RunSequentially("Deleting FCM Token should work", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		data, response, err := zboxClient.DeleteFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, data, "response object should not be nil")
