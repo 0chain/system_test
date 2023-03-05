@@ -17,7 +17,7 @@ type CSRFToken struct {
 }
 
 type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
-	WalletId    string   `json:"wallet_id"`
+	WalletId    int      `json:"wallet_id"`
 	PhoneNumber string   `json:"phone_number"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -107,4 +107,22 @@ type ZboxUserInfo struct {
 	CreatedAt       string    `json:"created_at"`
 	Avatar          ZboxImage `json:"avatar"`
 	BackgroundImage ZboxImage `json:"bg_img"`
+}
+
+type ZboxShareInfo struct {
+	AuthTicket string `json:"auth_ticket"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
+	Message    string `json:"message"`
+	FromInfo   string `json:"from_info"`
+	ClientID   string `json:"client_id"`
+	Receiver   string `json:"Receiver"`
+	LookUpHash string `json:"lookup_hash"`
+	CreatedAt  string `json:"CreatedAt"`
+	UpdatedAt  string `json:"UpdatedAt"`
+	AppType    int    `json:"app_type"`
+	// [FIXME] need string for app type. Sanchit is working o this.
+}
+
+type ZboxShareInfoList struct {
+	MessageContainer
+	Data []ZboxShareInfo `json:"data"`
 }
