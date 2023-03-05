@@ -41,8 +41,8 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 		allocParams := createParams(map[string]interface{}{
 			"lock":   "0.5",
 			"size":   10 * MB,
-			"data":   2,
-			"parity": 2,
+			"data":   1,
+			"parity": 1,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
