@@ -503,8 +503,8 @@ func minerSharderUpdateSettings(t *test.SystemTest, cliConfigFilename, wallet, p
 func minerSharderUpdateSettingsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Logf("Updating Miner/Sharder node info...")
 	if retry {
-		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-node-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
+		return cliutils.RunCommand(t, fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
 	} else {
-		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-node-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+		return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-update-settings %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
 	}
 }
