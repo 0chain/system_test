@@ -3,9 +3,13 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
+	"io"
+	"net/http"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -14,186 +18,638 @@ import (
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	//output, err := registerWallet(t, configPath)
-	//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-	//
-	var blobberList []climodel.BlobberInfo
-	output, err := listBlobbers(t, configPath, "--json")
-	//require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	//require.Len(t, output, 1)
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-	err = json.Unmarshal([]byte(output[3]), &blobberList)
+	var blobberList []climodel.BlobberInfo
+	output, err = listBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
-	t.RunSequentiallyWithTimeout("Test Blobber Challenge Rewards", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		count := 0
+	var validatorList []climodel.Validator
+	output, err = listValidators(t, configPath, "--json")
+	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
 
-		//collect reward for each blobber
-		for _, blobber := range blobberList {
-			var blobberWallet string
+	err = json.Unmarshal([]byte(output[0]), &validatorList)
+	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
+	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-			if count > 0 {
-				blobberWallet = blobber2Wallet
-			} else {
-				blobberWallet = blobber1Wallet
-			}
-			count++
-
-			output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-				"provider_type": "blobber",
-				"provider_id":   blobber.Id,
-			}), blobberWallet, true)
-
-			blobberWalletBalance, _ := getBalanceForWallet(t, configPath, blobberWallet)
-
-			fmt.Println(blobber.Id, " > ", blobberWalletBalance)
-		}
+	t.RunWithTimeout("Case 1 : Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 		//
-		//output, err := listValidators(t, configPath, "--json")
-		//require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
 		//
-		//return
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 		//
-		//var validatorList []climodel.Validator
-		//json.Unmarshal([]byte(output[3]), &validatorList)
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
 		//
-		//fmt.Println("Validator List: ", output[3])
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 		//
-		//fmt.Println(getBalanceForWallet(t, configPath, validatorOwnerWallet))
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
 		//
-		//// collect reward for each validator
-		//for _, validator := range validatorList {
-		//	output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//		"provider_type": "validator",
-		//		"provider_id":   validator.ID,
-		//	}), validatorOwnerWallet, true)
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 		//
-		//	validatorWalletBalance, _ := getBalanceForWallet(t, configPath, validatorOwnerWallet)
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
 		//
-		//	fmt.Println(validator.ID, " > ", validatorWalletBalance)
-		//}
-		//
-		//return
-		//
-		//output, err := registerWallet(t, configPath)
+		//output, err = registerWallet(t, configPath)
 		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		//allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-		//	"size":   1000 * MB,
-		//	"tokens": 1,
-		//	"data":   1,
-		//	"parity": 1,
-		//	"expire": "5m",
-		//})
-		//
-		//allocationID := "90a8400e8b544b9afe1a41d61480dd3c1e554477f2b0ade4712d7ecc4d054008"
-		//
-		//fmt.Println("Allocation ID : ", allocationID)
-		//
-		//cancelAllocation(t, configPath, allocationID, true)
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
 
-		return
-		//
-		//// wallet balance before
-		//blobberOwnerWalletBalances, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
-		//fmt.Println("blobberOwnerWalletBalance : ", blobberOwnerWalletBalances)
-		//blobberOwnerWalletBalance := blobberOwnerWalletBalances[0][9:14]
-		//
-		//// start block
-		//startBlock := getLatestFinalizedBlock(t)
-		//
-		//// convert blobberOwnerWalletBalance to float
-		//blobberOwnerWalletBalanceFloat, _ := strconv.ParseFloat(blobberOwnerWalletBalance, 64)
-		//fmt.Println("blobberOwnerWalletBalanceFloat : ", blobberOwnerWalletBalanceFloat)
-		//
-		//allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-		//	"size":   100 * MB,
-		//	"tokens": 1,
-		//	"data":   1,
-		//	"parity": 1,
-		//	"expire": "5m",
-		//})
-		//
-		//remotepath := "/dir/"
-		//filesize := 30 * MB
-		//filename := generateRandomTestFileName(t)
-		//
-		//err = createFileWithSize(filename, int64(filesize))
-		//require.Nil(t, err)
-		//
-		//output, err = uploadFile(t, configPath, map[string]interface{}{
-		//	// fetch the latest block in the chain
-		//	"allocation": allocationId,
-		//	"remotepath": remotepath + filepath.Base(filename),
-		//	"localpath":  filename,
-		//}, true)
-		//require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-		//
-		////sleep for 60 seconds to allow the challenges to be created
-		//time.Sleep(30 * time.Second)
-		//
-		//// end block
-		//endBlock := getLatestFinalizedBlock(t)
-		//
-		//fmt.Println(startBlock, endBlock)
-		//
-		//blobberWallet, _ := getWalletForName(t, configPath, blobberOwnerWallet)
-		//
-		//fmt.Println(blobberWallet)
-		//
-		////getBlockContainingTransactions(t, startBlock, endBlock, blobberWallet, "")
-		//
-		//fmt.Println("Client Wallet Balance : ")
-		//fmt.Println(getBalance(t, configPath))
-		//
-		//// list validators before
-		//output, err = listValidators(t, configPath, "--json")
-		//require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
-		//
-		////collect reward for each blobber
-		//for _, blobber := range blobberList {
-		//	//output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//	//	"provider_type": "blobber",
-		//	//	"provider_id":   blobber.Id,
-		//	//}), blobberOwnerWallet, true)
-		//
-		//	blobberWalletBalance, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
-		//
-		//	fmt.Println(blobber.Id, " > ", blobberWalletBalance)
-		//}
-		//
-		//fmt.Println("--------------------------------------------------")
-		//
-		//output, err = listValidators(t, configPath, "--json")
-		//require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
-		//
-		//var validatorList []climodel.Validator
-		//json.Unmarshal([]byte(output[0]), &validatorList)
-		//
-		//fmt.Println(getBalanceForWallet(t, configPath, validatorOwnerWallet))
-		//
-		//// collect reward for each validator
-		//for _, validator := range validatorList {
-		//	//output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//	//	"provider_type": "validator",
-		//	//	"provider_id":   validator.ID,
-		//	//}), validatorOwnerWallet, true)
-		//
-		//	validatorWalletBalance, _ := getBalanceForWallet(t, configPath, validatorOwnerWallet)
-		//
-		//	fmt.Println(validator.ID, " > ", validatorWalletBalance)
-		//}
-		//
-		//fmt.Println("--------------------------------------------------")
-		//
-		//blobberOwnerWalletBalancesAfter, _ := getBalanceForWallet(t, configPath, blobberOwnerWallet)
-		//fmt.Println("blobberOwnerWalletBalanceAfter : ", blobberOwnerWalletBalancesAfter)
-		//blobberOwnerWalletBalanceAfter := blobberOwnerWalletBalancesAfter[0][9:14]
-		//
-		//// convert blobberOwnerWalletBalanceAfter to float
-		//blobberOwnerWalletBalanceAfterFloat, _ := strconv.ParseFloat(blobberOwnerWalletBalanceAfter, 64)
-		//
-		//require.Greater(t, blobberOwnerWalletBalanceAfterFloat, blobberOwnerWalletBalanceFloat, "blobber wallet balance should be greater than before")
+		remotepath := "/dir/"
+		filesize := 50 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 5000000000 / (365 * 25 * 12 * 10)
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
 	})
+
+	t.RunWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
+
+		remotepath := "/dir/"
+		filesize := 300 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 1000000000 / (365 * 25 * 12 * 10)
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
+	})
+
+	t.RunWithTimeout("Case 3 : Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
+
+		remotepath := "/dir/"
+		filesize := 100 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 1000000000 / (365 * 25 * 12 * 10)
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
+	})
+
+	t.RunWithTimeout("Case 4 : Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
+
+		remotepath := "/dir/"
+		filesize := 100 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 1000000000 / (365 * 25 * 12 * 10)
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
+	})
+
+	t.RunWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
+
+		remotepath := "/dir/"
+		filesize := 100 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 1000000000 / (365 * 25 * 12 * 10)
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
+	})
+
+	t.RunWithTimeout("Case 6 : Client Uploads 10% of Allocation and 1 delegate each (equal stake) with Uploading in starting and in the middle", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[0].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"blobber_id": blobberList[1].Id,
+		//	"tokens":     1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[0].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		//
+		//stakeTokens(t, configPath, createParams(map[string]interface{}{
+		//	"validator_id": validatorList[1].ID,
+		//	"tokens":       1,
+		//}), true)
+		//
+		//output, err = registerWallet(t, configPath)
+		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "5m",
+		})
+
+		remotepath := "/dir/"
+		filesize := 100 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
+
+		remotepath = "/dir/"
+		filesize = 100 * MB
+		filename = generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		challenges, _ := getAllChallenges(t, configPath)
+
+		totalPossibleReward := 2 * (1000000000 / (365 * 25 * 12 * 10))
+		totalReward := 0
+
+		challengeUrl := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?challenge_id="
+		for _, challenge := range challenges {
+
+			res, _ := http.Get(challengeUrl + challenge.ChallengeID)
+
+			var response map[string]interface{}
+			body, _ := io.ReadAll(res.Body)
+			err := json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			challengeReward := int(response["sum"].(float64))
+
+			totalReward += challengeReward
+
+			if challengeReward != 0 {
+				fmt.Println("Challenge ID : ", challenge.ChallengeID)
+				fmt.Println("Challenge Reward : ", challengeReward)
+			}
+		}
+
+		fmt.Println("Total possible reward : ", totalPossibleReward)
+		fmt.Println("Total reward : ", totalReward)
+	})
+
+}
+
+func getAllChallenges(t *test.SystemTest, configPath string) ([]Challenge, error) {
+
+	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/all-challenges"
+
+	var result []Challenge
+
+	res, _ := http.Get(url)
+
+	fmt.Println(res.Body)
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(res.Body)
+
+	body, _ := io.ReadAll(res.Body)
+
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type Challenge struct {
+	ChallengeID    string           `json:"challenge_id"`
+	CreatedAt      common.Timestamp `json:"created_at"`
+	AllocationID   string           `json:"allocation_id"`
+	BlobberID      string           `json:"blobber_id"`
+	ValidatorsID   string           `json:"validators_id"`
+	Seed           int64            `json:"seed"`
+	AllocationRoot string           `json:"allocation_root"`
+	Responded      bool             `json:"responded"`
+	Passed         bool             `json:"passed"`
+	RoundResponded int64            `json:"round_responded"`
+	ExpiredN       int              `json:"expired_n"`
 }
