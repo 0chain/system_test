@@ -8,14 +8,11 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	if !confirmDebugBuild(t) {
-		t.Skip("sharder block rewards test skipped as it requires a debug event database")
-	}
 
 	// Take a snapshot of the chains sharders, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -31,10 +28,13 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+		if !confirmDebugBuild(t) {
+			t.Skip("sharder block rewards test skipped as it asserts a debug event database")
+		}
 
 		sharderUrl := getSharderUrl(t)
 		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
+		assert.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
 
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
@@ -68,7 +68,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		if numShardersRewarded == 0 {
 			return
 		}
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		assert.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 			"epoch changed during test, start %v finish %v",
 			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
@@ -102,18 +102,18 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 						} else {
 							expectedServiceCharge = int64(float64(bwPerSharder) * beforeSharders.Nodes[i].Settings.ServiceCharge)
 						}
-						require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "sharder service charge incorrect value on round %d", round)
+						assert.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta, "sharder service charge incorrect value on round %d", round)
 						rewards += pReward.Amount
 					case climodel.FeeRewardSharder:
 						rewards += pReward.Amount
 					default:
-						require.Failf(t, "reward type %s not available to sharders", pReward.RewardType.String())
+						assert.Failf(t, "reward type %s not available to sharders", pReward.RewardType.String())
 					}
 				}
 			}
 			actualReward := afterSharders.Nodes[i].Reward - beforeSharders.Nodes[i].Reward
 			if actualReward != rewards {
-				require.InDeltaf(t, actualReward, rewards, delta,
+				assert.InDeltaf(t, actualReward, rewards, delta,
 					"rewards expected %v change in sharders reward during test %v", actualReward, rewards)
 			}
 		}
@@ -126,11 +126,11 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.RewardType == climodel.BlockRewardSharder {
 					_, found := shardersPaid[pReward.ProviderId]
-					require.Falsef(t, found, "sharder %s receives more than one block reward on round %d", pReward.ProviderId, round)
+					assert.Falsef(t, found, "sharder %s receives more than one block reward on round %d", pReward.ProviderId, round)
 					shardersPaid[pReward.ProviderId] = true
 				}
 			}
-			require.Equal(t, numShardersRewarded, len(shardersPaid),
+			assert.Equal(t, numShardersRewarded, len(shardersPaid),
 				"mismatch between expected count of sharders rewarded and actual number on round %d", round)
 		}
 
@@ -147,7 +147,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 						}
 						_, found := poolsPaid[poolId]
 						if found {
-							require.Falsef(t, found, "pool %s should have only received block reward once, round %d", poolId, round)
+							assert.Falsef(t, found, "pool %s should have only received block reward once, round %d", poolId, round)
 						}
 						poolsPaid[poolId] = true
 					}
@@ -156,7 +156,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 				if numShouldPay > len(beforeSharders.Nodes[i].Pools) {
 					numShouldPay = len(beforeSharders.Nodes[i].Pools)
 				}
-				require.Len(t, poolsPaid, numShouldPay,
+				assert.Len(t, poolsPaid, numShouldPay,
 					"should pay %d pools for shader %s on round %d; %d pools actually paid",
 					numShouldPay, id, round, len(poolsPaid))
 			}
@@ -179,18 +179,18 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 						continue
 					}
 					_, isSharderPool := rewards[dReward.PoolID]
-					require.Truef(testSetup, isSharderPool, "round %d, invalid pool id, reward %v", round, dReward)
+					assert.Truef(testSetup, isSharderPool, "round %d, invalid pool id, reward %v", round, dReward)
 					switch dReward.RewardType {
 					case climodel.BlockRewardSharder:
 						_, found := poolsBlockRewards[dReward.PoolID]
-						require.False(t, found, "pool %s gets more than one block reward on round %d",
+						assert.False(t, found, "pool %s gets more than one block reward on round %d",
 							dReward.PoolID, round)
 						poolsBlockRewards[dReward.PoolID] = dReward.Amount
 						rewards[dReward.PoolID] += dReward.Amount
 					case climodel.FeeRewardSharder:
 						rewards[dReward.PoolID] += dReward.Amount
 					default:
-						require.Failf(t, "reward type %s not available to sharders stake pools;"+
+						assert.Failf(t, "reward type %s not available to sharders stake pools;"+
 							" received by sharder %s on round %d", dReward.RewardType.String(), &dReward.PoolID, round)
 					}
 				}
@@ -200,7 +200,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 			}
 			for poolId := range afterSharders.Nodes[i].StakePool.Pools {
 				actualReward := afterSharders.Nodes[i].StakePool.Pools[poolId].Reward - beforeSharders.Nodes[i].StakePool.Pools[poolId].Reward
-				require.InDeltaf(t, actualReward, rewards[poolId], delta,
+				assert.InDeltaf(t, actualReward, rewards[poolId], delta,
 					"rewards expected %v, change in rewards during test %v", actualReward, rewards[poolId])
 			}
 		}

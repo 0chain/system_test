@@ -14,10 +14,6 @@ import (
 func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	if !confirmDebugBuild(t) {
-		t.Skip("sharder fee rewards test skipped as it requires a debug event database")
-	}
-
 	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
 	// of the reward payments
@@ -32,6 +28,11 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		if !confirmDebugBuild(t) {
+			t.Skip("sharder fee rewards test skipped as it requires a debug event database")
+		}
+
 		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
