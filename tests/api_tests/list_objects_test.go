@@ -11,7 +11,6 @@ func TestListObjects(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	t.Run("ListObjects should return 200 when all the parameters are correct", func(t *test.SystemTest) {
-		t.Skip("skip till zs3server issues are resolved")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -23,7 +22,6 @@ func TestListObjects(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 	t.Run("listObjects should return 500 when trying to list objects from un existing bucket", func(t *test.SystemTest) {
-		t.Skip("skip till zs3server issues are resolved")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
