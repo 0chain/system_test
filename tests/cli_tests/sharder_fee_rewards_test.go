@@ -43,7 +43,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// ------------------------------------
-		const numPaidTransactions = 2
+		const numPaidTransactions = 3
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
 			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
