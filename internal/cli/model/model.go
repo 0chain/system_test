@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	currency "github.com/0chain/system_test/internal/currency"
 )
 
@@ -138,19 +139,9 @@ type SimilarField struct {
 }
 
 type ListFileResult struct {
-	Name            string    `json:"name"`
-	Path            string    `json:"path"`
-	Type            string    `json:"type"`
-	Size            int64     `json:"size"`
-	Hash            string    `json:"hash"`
-	Mimetype        string    `json:"mimetype"`
-	NumBlocks       int       `json:"num_blocks"`
-	LookupHash      string    `json:"lookup_hash"`
-	EncryptionKey   string    `json:"encryption_key"`
-	ActualSize      int64     `json:"actual_size"`
-	ActualNumBlocks int       `json:"actual_num_blocks"`
-	CreatedAt       Timestamp `json:"created_at"`
-	UpdatedAt       Timestamp `json:"updated_at"`
+	sdk.FileInfo
+	Name string `json:"name"`
+	Path string `json:"path"`
 }
 
 type Terms struct {
