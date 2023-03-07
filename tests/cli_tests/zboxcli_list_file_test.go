@@ -475,7 +475,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Len(t, output, 1)
 
 		var listResults []climodel.ListFileResult
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&listResults)
+		err = json.Unmarshal([]byte(output[0]), &listResults)
 		require.Nil(t, err, "Decoding list results failed\n", strings.Join(output, "\n"))
 
 		totalFiles := 4
