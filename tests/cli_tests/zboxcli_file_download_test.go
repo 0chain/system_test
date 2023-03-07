@@ -782,7 +782,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
+	t.Run("Download File With Only endblock Should Work", func(t *test.SystemTest) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -807,9 +807,10 @@ func TestDownload(testSetup *testing.T) {
 			"endblock":   endBlock,
 		}), false)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, " "))
-		require.Contains(t, output[0], "start block or end block or both cannot be negative")
+		require.NoError(t, err)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, StatusCompletedCB)
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
@@ -897,7 +898,6 @@ func TestDownload(testSetup *testing.T) {
 		}), true)
 
 		require.Error(t, err)
-		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Error: start block should not be less than 1")
 	})
@@ -995,8 +995,8 @@ func TestDownload(testSetup *testing.T) {
 		}), true)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], "start block or end block or both cannot be negative.")
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "start block should not be less than 1")
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
