@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -27,68 +28,50 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
+			"expire": "50m",
 		})
 
 		remotepath := "/dir/"
 		filesize := 50 * MB
 		filename := generateRandomTestFileName(t)
 
-		err = createFileWithSize(filename, int64(filesize))
+		err := createFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		// sleep for 2 minutes
-		time.Sleep(2 * time.Minute)
+		err = os.Remove(filename)
+		require.Nil(t, err)
 
-		file, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		fmt.Println("Sleeping for 30 seconds")
+		time.Sleep(30 * time.Second)
+
+		downloadCost, _ := getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
 		}), true)
-		if err != nil {
-			fmt.Println("Error downloading file", err)
-			return
-		}
 
-		fmt.Println(file)
+		fmt.Println(downloadCost)
 
-		time.Sleep(2 * time.Minute)
+		totalDownloadRewards := getAllRewardsByRewardType(7)
 
-		//
-		//
-		//
-		//
-		//// 2. Wait for 6 minutes.
-		//time.Sleep(6 * time.Minute)
-		//
-		//// 3. Cancel the allocation.
-		//cancelAllocation(t, configPath, allocationID, true)
-		//
-		//// 4. Collect rewards for the delegate wallets.
-		//collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//	"provider_type": "delegate",
-		//	"provider_id":   delegate1ID,
-		//}), delegate1Wallet, true)
-		//
-		//collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//	"provider_type": "delegate",
-		//	"provider_id":   delegate2ID,
-		//}), delegate2Wallet, true)
-		//
-		//// 5. Get the balances of the delegate wallets.
-		//delegate1WalletBalance, _ := getBalanceForWallet(t, configPath, delegate1Wallet)
-		//delegate2WalletBalance, _ := getBalanceForWallet(t, configPath, delegate2Wallet)
-		//
-		//// 6. Check if the balances are equal.
-		//require.Equal(t, delegate1WalletBalance, delegate2WalletBalance)
+		fmt.Println(totalDownloadRewards)
+
+		require.Equal(t, downloadCost, totalDownloadRewards, "Download cost and total download rewards are not equal")
 	})
 }
 
@@ -102,9 +85,11 @@ func getAllRewardsByRewardType(rewardType int) int {
 		return 0
 	}
 
+	fmt.Println(resp.Body)
+
 	var response map[string]interface{}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 		return 0
@@ -112,8 +97,41 @@ func getAllRewardsByRewardType(rewardType int) int {
 
 	err = json.Unmarshal(body, &response)
 
+	fmt.Println(response)
+
 	sum := response["sum"].(float64)
 
 	return int(sum)
 
 }
+
+//
+//func sizeInGB(size int64) float64 {
+//	return float64(size) / GB
+//}
+//
+//func calculateDownloadCost(alloc *sdk.Allocation, fileSize int64, blocksPerMarker int) common.Balance {
+//	chunkSize := fileref.CHUNK_SIZE
+//	dataShards := alloc.DataShards
+//
+//	// singleShardSize collection of data-shards
+//	singleShardSize := fileref.CHUNK_SIZE * dataShards
+//	totalShards := int(math.Ceil(float64(fileSize) / float64(singleShardSize)))
+//
+//	// Currently if for example, blocksPerMarker is 10, and there are say 11 shards. First 10 shards will be covered
+//	// by first readmarker. Second readmarker is signed with blocksPerMarker number of blocks i.e. 10
+//	// so user ends up paying for 20 shards
+//	totRMsForEachBlobber := int(math.Ceil(float64(totalShards) / float64(blocksPerMarker)))
+//
+//	var cost float64
+//
+//	for _, _ = range alloc.BlobberDetails {
+//		readPrice := 0.1
+//		for i := 0; i < totRMsForEachBlobber; i++ {
+//			cost += sizeInGB(int64(chunkSize)*int64(blocksPerMarker)) * float64(readPrice)
+//		}
+//	}
+//
+//	balance := common.ToBalance(cost)
+//	return balance
+//}
