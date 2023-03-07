@@ -57,12 +57,12 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 		// staked a total of 1.4*1e10 tokens in readpool
 		require.Equal(t, 1.4*1e10, float64(initialReadPool.Balance))
-
 		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteOwnerPath,
 		}), true)
+
 		require.Nil(t, err, "Could not get download cost", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
