@@ -868,7 +868,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.RunWithTimeout("Download File With startblock 1 and non-zero endblock should work", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -885,7 +885,7 @@ func TestDownload(testSetup *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		startBlock := 1
+		startBlock := 0
 		endBlock := 5
 		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 1 would lead to startblock being 0).
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -896,10 +896,10 @@ func TestDownload(testSetup *testing.T) {
 			"endblock":   endBlock,
 		}), true)
 
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Error(t, err)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Status completed callback.")
+		require.Contains(t, aggregatedOutput, "Error: start block should not be less than 1")
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should work", func(t *test.SystemTest) {
