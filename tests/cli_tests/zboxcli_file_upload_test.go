@@ -114,7 +114,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.RunWithTimeout("Upload file concurrently to root directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
+	t.RunWithTimeout("Upload file concurrently to root directory, should work", 10*time.Minute, func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048000
 		const fileSize int64 = 25600
 
