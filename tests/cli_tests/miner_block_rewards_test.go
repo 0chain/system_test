@@ -55,7 +55,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		cliutils.Wait(t, 500*time.Second)
+		cliutils.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
