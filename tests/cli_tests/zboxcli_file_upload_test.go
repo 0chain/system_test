@@ -115,8 +115,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload file concurrently to root directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 2048000
+		const fileSize int64 = 25600
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -130,7 +130,7 @@ func TestUpload(testSetup *testing.T) {
 		var errorList [2]error
 		var wg sync.WaitGroup
 
-		for i := 0; i < 2; i++ {
+		for i := 0; i < 10; i++ {
 			wg.Add(1)
 			go func(currentIndex int) {
 				defer wg.Done()
