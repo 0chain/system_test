@@ -74,7 +74,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Equal(t, remotepath+fname, result.Path)
 		require.Equal(t, filesize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
-		require.Equal(t, "", result.EncryptionKey)
+		require.Equal(t, "", result.FileInfo.EncryptedKey)
 	})
 
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
@@ -124,7 +124,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Equal(t, remotepath+fname, result.Path)
 		require.Equal(t, filesize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
-		require.NotEqual(t, "", result.EncryptionKey)
+		require.NotEqual(t, "", result.FileInfo.EncryptedKey)
 	})
 
 	t.Run("List Files and Check Lookup Hash Should Work", func(t *test.SystemTest) {
