@@ -233,7 +233,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, "/dir/"+filepath.Base(filename), result.Path)
 		require.Equal(t, fileSize, result.ActualSize)
 		require.Equal(t, "f", result.Type)
-		require.Equal(t, "", result.FileInfo.EncryptedKey)
+		require.Equal(t, "", result.EncryptedKey)
 	})
 
 	t.Run("Upload File to Nested Directory Should Work", func(t *test.SystemTest) {
