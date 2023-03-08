@@ -138,19 +138,19 @@ type SimilarField struct {
 }
 
 type ListFileResult struct {
-	Name            string           `json:"name"`
-	Path            string           `json:"path"`
-	Type            string           `json:"type"`
-	Size            int64            `json:"size"`
-	Hash            string           `json:"hash"`
-	Mimetype        string           `json:"mimetype"`
-	NumBlocks       int              `json:"num_blocks"`
-	LookupHash      string           `json:"lookup_hash"`
-	EncryptionKey   string           `json:"encryption_key"`
-	ActualSize      int64            `json:"actual_size"`
-	ActualNumBlocks int              `json:"actual_num_blocks"`
-	CreatedAt       common.Timestamp `json:"created_at"`
-	UpdatedAt       common.Timestamp `json:"updated_at"`
+	Name            string `json:"name"`
+	Path            string `json:"path"`
+	Type            string `json:"type"`
+	Size            int64  `json:"size"`
+	Hash            string `json:"hash"`
+	Mimetype        string `json:"mimetype"`
+	NumBlocks       int    `json:"num_blocks"`
+	LookupHash      string `json:"lookup_hash"`
+	EncryptionKey   string `json:"encryption_key"`
+	ActualSize      int64  `json:"actual_size"`
+	ActualNumBlocks int    `json:"actual_num_blocks"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 type Terms struct {
