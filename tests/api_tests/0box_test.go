@@ -1018,7 +1018,6 @@ func TestDexState(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
-		//require.Equal(t, zboxClient.DefaultRecieverId, dexState)
 		require.NotNil(t, dexState)
 		require.Equal(t, postData["stage"], dexState.Stage)
 		require.Equal(t, postData["reference"], dexState.Reference)
@@ -1034,7 +1033,7 @@ func TestDexState(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get a DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
-		csrfToken := "rg483biecoq23dce2bou"
+		csrfToken := "rg483biecoq23dce2bou" //nolint:gosec
 
 		dexState, response, err := zboxClient.GetDexState(t, firebaseToken.IdToken, csrfToken, "123456789")
 		require.NoError(t, err)
@@ -1053,8 +1052,6 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 
-		fmt.Println("Printing 1 dexState", dexState)
-
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
 		require.Equal(t, postData["reference"], dexState.Reference)
@@ -1070,16 +1067,12 @@ func TestDexState(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, dexState)
 
-		fmt.Println("Printing 2 dexState", dexState)
-
 		// get dex state
 		dexState, response, err = zboxClient.GetDexState(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
-
-		fmt.Println("Printing 3 dexState", dexState)
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
@@ -1104,7 +1097,7 @@ func TestDexState(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update DEX state with invalid csrf token should fail", func(t *test.SystemTest) {
-		csrfToken := "fhkjfhno2"
+		csrfToken := "fhkjfhno2" //nolint:gosec
 
 		dexState, response, err := zboxClient.PutDexState(t,
 			updateData,
