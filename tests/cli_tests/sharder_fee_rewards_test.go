@@ -67,7 +67,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		}
 		t.Logf("start round %d, end round %d", startRound, endRound)
 
-		history := cliutil.NewHistory(startRound, endRound)
+		history := cliutil.NewHistory(startRound, endRound+1)
 		history.Read(t, sharderUrl, true)
 
 		minerScConfig := getMinerScMap(t)
