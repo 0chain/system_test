@@ -599,6 +599,53 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
+
+	t.Run("copy file with allocation copy file options forbidden should fail", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		existingFileInDest := generateRandomTestFileName(t)
+		err = createFileWithSize(existingFileInDest, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/" + filename
+		destpath := "/target/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":        allocSize,
+			"forbid_copy": nil,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		output, err = copyFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, false)
+		// FIXME: zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": destpath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+	})
 }
 
 func copyFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {

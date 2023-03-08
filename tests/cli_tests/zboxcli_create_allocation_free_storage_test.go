@@ -144,6 +144,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, ConvertToValue(wantWritePoolToken), allocation.WritePool, "Expected write pool amount not met", strings.Join(output, "\n"))
+		require.Equal(t, uint16(63), allocation.FileOptions, "Expected file_options to be 63 (all allowed) by default", strings.Join(output, "\n"))
 
 		readPool := getReadPoolInfo(t)
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
