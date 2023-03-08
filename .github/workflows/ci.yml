@@ -52,7 +52,7 @@ jobs:
   golangci:
     if: github.event_name == 'push'
     name: "lint"
-    runs-on: [ tests-suite ]
+    runs-on: [ arc-runner ]
     steps:
       - uses: actions/setup-go@v3
         with:
@@ -155,6 +155,8 @@ jobs:
           zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
@@ -167,6 +169,7 @@ jobs:
           archive_results: true
           run_flaky_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
