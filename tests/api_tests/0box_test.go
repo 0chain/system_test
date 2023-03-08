@@ -3,7 +3,6 @@ package api_tests
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
