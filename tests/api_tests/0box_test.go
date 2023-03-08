@@ -993,6 +993,20 @@ func TestDexState(testSetup *testing.T) {
 		require.Empty(t, dexState)
 	})
 
+	t.RunSequentially("Create a DEX state 2 times with same phone number should fail", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+
+		dexState, response, err := zboxClient.PostDexState(t,
+			postData,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Empty(t, dexState)
+	})
+
 	// GET DEX STATE
 	t.RunSequentially("Get DEX state with valid phone number should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
