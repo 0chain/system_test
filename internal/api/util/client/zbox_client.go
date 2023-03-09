@@ -731,7 +731,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 		"symbol":          symbol,
 		"price_per_pack":  strconv.Itoa(pricePerPack),
 		"max_mints":       strconv.Itoa(maxMints),
-		"curr_mints":      strconv.Itoa(CurrMints),
+		"curr_mints":      strconv.Itoa(currMints),
 		"batch_size":      strconv.Itoa(batchSize),
 	}
 
