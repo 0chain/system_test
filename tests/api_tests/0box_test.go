@@ -24,7 +24,7 @@ func Test0boxNft(testSetup *testing.T) {
 	defaultCollectionId := "default collection id"
 	var nft_id string
 
-	t.RunSequentially("Get NFT by  collection with zero nft collection should work", func(t *test.SystemTest) {
+	t.RunSequentially("Get NFT collection with zero nft collection should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -500,6 +500,51 @@ func Test0boxNft(testSetup *testing.T) {
 			"stage_nft_upload",
 			"nft_reference",
 			defaultCollectionId,
+			"owned_by",
+			"nft_activity",
+			"meta_data",
+			zboxClient.DefaultAllocationId,
+			"created_by",
+			"contract_Address",
+			"token_id",
+			"token_standard",
+			"is_minted",
+			"remote_path",
+			"auth_ticket",
+			nft_id,
+		)
+		require.NotNil(t, zboxNftCollectionId)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+	})
+
+	t.RunSequentially("Update NFT collection with Invalid argument should not work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
+
+		zboxNftCollectionId, response, err := zboxClient.UpdateNftCollection(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"stage_nft_upload",
+			"nft_reference",
+			"invalid_collection_id",
 			"owned_by",
 			"nft_activity",
 			"meta_data",
