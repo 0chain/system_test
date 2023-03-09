@@ -53,7 +53,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		time.Sleep(2*time.Minute + 30*time.Second)
 
 		// 3. Kill the blobber
-		killProvider(t, blobberList[0].Id)
+		killProvider(blobberList[0].Id)
 
 		// 4. Wait for 2 minutes 30 seconds
 		time.Sleep(2*time.Minute + 30*time.Second)
@@ -93,7 +93,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		time.Sleep(2*time.Minute + 30*time.Second)
 
 		// 3. Kill the blobber
-		killProvider(t, blobberList[0].Id)
+		killProvider(blobberList[0].Id)
 
 		// 4. Wait for 2 minutes 30 seconds
 		time.Sleep(2*time.Minute + 30*time.Second)
@@ -106,7 +106,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	})
 }
 
-func killProvider(t *test.SystemTest, providerID string) {
+func killProvider(providerID string) {
 	res, err := http.Get("https://test2.zus.network/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/kill_blobber?provider_id=" + providerID)
 
 	fmt.Println(res, err)

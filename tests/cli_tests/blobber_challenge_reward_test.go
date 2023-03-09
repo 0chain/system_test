@@ -18,11 +18,10 @@ import (
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	setupWalletWithCustomTokens(t, configPath, 9.0)
 
 	var blobberList []climodel.BlobberInfo
-	output, err = listBlobbers(t, configPath, "--json")
+	output, err := listBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -45,12 +44,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -115,11 +109,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -182,11 +172,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Case 3 : Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -249,11 +235,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Case 4 : Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -316,11 +298,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -382,11 +360,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Case 6 : Client Uploads 10% of Allocation and 1 delegate each (equal stake) with Uploading in starting and in the middle", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
+		setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -468,21 +442,8 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	count := 1
 
 	for _, blobber := range blobbers {
-		_, err := registerWallet(t, configPath)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		setupWalletWithCustomTokens(t, configPath, 9)
+		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"tokens":     count,
 		}), true)
@@ -497,21 +458,9 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	}
 
 	for _, validator := range validators {
-		_, err := registerWallet(t, configPath)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		setupWalletWithCustomTokens(t, configPath, 9)
 
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"validator_id": validator.ID,
 			"tokens":       count,
 		}), true)

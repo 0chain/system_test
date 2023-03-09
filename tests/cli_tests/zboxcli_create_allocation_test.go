@@ -386,6 +386,19 @@ func setupWallet(t *test.SystemTest, configPath string) []string {
 	return output
 }
 
+func setupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens float64) []string {
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = executeFaucetWithTokens(t, configPath, tokens)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = getBalance(t, configPath)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	return output
+}
+
 func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return createNewAllocationForWallet(t, escapedTestName(t), cliConfigFilename, params)
 }
@@ -407,6 +420,17 @@ func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, para
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 		escapedTestName(t)+"_allocation.txt"))
+}
+
+func createNewAllocationWithPreferredBlobbers(t *test.SystemTest, wallet, cliConfigFilename, params string, blobbers []string) ([]string, error) {
+	t.Logf("Creating new allocation...")
+	return cliutils.RunCommand(t, fmt.Sprintf(
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --preferred_blobbers %s",
+		params,
+		wallet+"_wallet.json",
+		cliConfigFilename,
+		wallet+"_allocation.txt",
+		strings.Join(blobbers, ",")), 3, time.Second*5)
 }
 
 func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {

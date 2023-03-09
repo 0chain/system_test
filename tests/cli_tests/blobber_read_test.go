@@ -18,10 +18,11 @@ import (
 func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	setupWalletWithCustomTokens(t, configPath, 9)
 
 	t.RunSequentiallyWithTimeout("Case 1 : 1 delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		setupWalletWithCustomTokens(t, configPath, 9)
+
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -67,7 +68,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 		fmt.Println(downloadCost)
 
-		totalDownloadRewards := getAllRewardsByRewardType(7)
+		totalDownloadRewards := getTotalRewardsByRewardType(7)
 
 		fmt.Println(totalDownloadRewards)
 
@@ -75,7 +76,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	})
 }
 
-func getAllRewardsByRewardType(rewardType int) int {
+func getTotalRewardsByRewardType(rewardType int) int {
 	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward_type=" + strconv.Itoa(rewardType)
 
 	resp, err := http.Get(url)
