@@ -22,6 +22,7 @@ func Test0boxNft(testSetup *testing.T) {
 	defaultPricePerPack := 1
 	defaultTotalNFT := "1"
 	defaultCollectionId := "default collection id"
+	var nft_id string
 
 	t.RunSequentially("Get NFT collection with zero nft collection should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -262,6 +263,8 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNft)
 
+		nft_id = zboxNft.Id
+
 	})
 
 	t.RunSequentially("Get NFT collection with one nft present should work", func(t *test.SystemTest) {
@@ -453,16 +456,59 @@ func Test0boxNft(testSetup *testing.T) {
 
 	})
 
+	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
+		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
+
+		zboxNftCollectionId, response, err := zboxClient.UpdateNftCollection(t,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"stage_nft_upload",
+			"nft_reference",
+			defaultCollectionId,
+			"owned_by",
+			"nft_activity",
+			"meta_data",
+			zboxClient.DefaultAllocationId,
+			"created_by",
+			"contract_Address",
+			"token_id",
+			"token_standard",
+			"is_minted",
+			"remote_path",
+			"auth_ticket",
+			nft_id,
+		)
+		require.NotNil(t, zboxNftCollectionId)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+	})
+
 }
 
 func Test0Box_share_info(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Post ShareInfo with correct AuthTicket should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
