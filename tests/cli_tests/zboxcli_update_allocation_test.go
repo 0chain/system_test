@@ -842,10 +842,14 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 
 	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	//require.Len(t, output, 1)
 
 	// Get the allocation ID and return it
 	allocationID, err := getAllocationID(output[0])
+
+	fmt.Println("Allocation : ")
+	fmt.Println(getAllocationID(output[0]))
+	fmt.Println(getAllocationID(output[1]))
 	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID

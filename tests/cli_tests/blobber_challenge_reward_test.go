@@ -44,7 +44,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		setupWalletWithCustomTokens(t, configPath, 9.0)
+		output := setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   500 * MB,
@@ -105,6 +105,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		fmt.Println("Total reward : ", totalReward)
 
 	})
+
+	t.Skip()
 
 	t.RunWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)

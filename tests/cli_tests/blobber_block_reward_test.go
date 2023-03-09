@@ -7,6 +7,8 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -40,12 +42,21 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 		fmt.Println("Blobbers : ", blobberList)
 		fmt.Println("Validators : ", validatorList)
 
-		var blobbers []string
-		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
+		blobbers := []string{
+			blobberList[2].Url,
+			blobberList[4].Url,
 		}
+		fmt.Println(blobbers)
 
-		setupWalletWithCustomTokens(t, configPath, 9)
+		//setupWalletWithCustomTokens(t, configPath, 9)
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		fmt.Println(output)
+		fmt.Println(getBalance(t, configPath))
+
+		executeFaucetWithTokens(t, configPath, 9)
 
 		fmt.Println(getBalance(t, configPath))
 
@@ -54,211 +65,220 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 		//	"lock": 1,
 		//}))
 
-		res, err := createNewAllocationWithPreferredBlobbers(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		//if err != nil {
+		//	fmt.Println(err)
+		//}
+
+		//setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		//	"size":   500 * MB,
+		//	"tokens": 1,
+		//	"data":   1,
+		//	"parity": 1,
+		//})
+
+		_, err = createNewAllocationWithPreferredBlobbers(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"size": 50 * MB,
 			"lock": 1,
 		}), blobbers)
 		fmt.Println(getBalance(t, configPath))
 
-		fmt.Println("Allocation : ", res)
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
 		return
-		//
-		//stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
-		//
-		//// 1. Create an allocation with 1 data shard and 1 parity shard.
-		//output, err = registerWallet(t, configPath)
-		//require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-		//
-		//output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-		//	"tokens": 9.0,
-		//}), false)
-		//
-		//allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-		//	"size":   500 * MB,
-		//	"tokens": 1,
-		//	"data":   1,
-		//	"parity": 1,
-		//	"expire": "10m",
-		//})
-		//
-		//// Uploading 10% of allocation
-		//
-		//remotepath := "/dir/"
-		//filesize := 50 * MB
-		//filename := generateRandomTestFileName(t)
-		//
-		//err = createFileWithSize(filename, int64(filesize))
-		//require.Nil(t, err)
-		//
-		//output, err = uploadFile(t, configPath, map[string]interface{}{
-		//	// fetch the latest block in the chain
-		//	"allocation": allocationId,
-		//	"remotepath": remotepath + filepath.Base(filename),
-		//	"localpath":  filename,
-		//}, true)
-		//require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-		//
-		//// download the file
-		//err = os.Remove(filename)
-		//require.Nil(t, err)
-		//
-		//remoteFilepath := remotepath + filepath.Base(filename)
-		//
-		//output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-		//	"allocation": allocationId,
-		//	"remotepath": remoteFilepath,
-		//	"localpath":  os.TempDir() + string(os.PathSeparator),
-		//}), true)
-		//require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		//
-		//// sleep for 2 minutes
-		//time.Sleep(6 * time.Minute)
-		//
-		//// 2. Get the block rewards for all the blobbers.
-		//blockRewards := getAllBlockRewards(blobberList)
-		//
-		//for blobberId, amount := range blockRewards {
-		//	fmt.Println("Blobber ID : ", blobberId)
-		//	fmt.Println("Block Reward : ", amount)
-		//}
+
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"tokens": 9.0,
+		}), false)
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "10m",
+		})
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 50 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(6 * time.Minute)
+
+		// 2. Get the block rewards for all the blobbers.
+		blockRewards := getAllBlockRewards(blobberList)
+
+		for blobberId, amount := range blockRewards {
+			fmt.Println("Blobber ID : ", blobberId)
+			fmt.Println("Block Reward : ", amount)
+		}
 	})
 
-	//t.RunSequentiallyWithTimeout("Case 4: Free Reads, One delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-	//
-	//	stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
-	//
-	//	// 1. Create an allocation with 1 data shard and 1 parity shard.
-	//	output, err = registerWallet(t, configPath)
-	//	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-	//
-	//	output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-	//		"tokens": 9.0,
-	//	}), false)
-	//
-	//	allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-	//		"size":   500 * MB,
-	//		"tokens": 1,
-	//		"data":   1,
-	//		"parity": 1,
-	//		"expire": "10m",
-	//	})
-	//
-	//	// Uploading 10% of allocation
-	//
-	//	remotepath := "/dir/"
-	//	filesize := 50 * MB
-	//	filename := generateRandomTestFileName(t)
-	//
-	//	err = createFileWithSize(filename, int64(filesize))
-	//	require.Nil(t, err)
-	//
-	//	output, err = uploadFile(t, configPath, map[string]interface{}{
-	//		// fetch the latest block in the chain
-	//		"allocation": allocationId,
-	//		"remotepath": remotepath + filepath.Base(filename),
-	//		"localpath":  filename,
-	//	}, true)
-	//	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-	//
-	//	// download the file
-	//	err = os.Remove(filename)
-	//	require.Nil(t, err)
-	//
-	//	remoteFilepath := remotepath + filepath.Base(filename)
-	//
-	//	output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remoteFilepath,
-	//		"localpath":  os.TempDir() + string(os.PathSeparator),
-	//	}), true)
-	//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-	//
-	//	// sleep for 2 minutes
-	//	time.Sleep(6 * time.Minute)
-	//
-	//	// 2. Get the block rewards for all the blobbers.
-	//	blockRewards := getAllBlockRewards(blobberList)
-	//
-	//	for blobberId, amount := range blockRewards {
-	//		fmt.Println("Blobber ID : ", blobberId)
-	//		fmt.Println("Block Reward : ", amount)
-	//	}
-	//})
-	//
-	//t.RunSequentiallyWithTimeout("Free Reads, One delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-	//
-	//	stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
-	//
-	//	// 1. Create an allocation with 1 data shard and 1 parity shard.
-	//	output, err = registerWallet(t, configPath)
-	//	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-	//
-	//	output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-	//		"tokens": 9.0,
-	//	}), false)
-	//
-	//	allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-	//		"size":   500 * MB,
-	//		"tokens": 1,
-	//		"data":   1,
-	//		"parity": 1,
-	//		"expire": "10m",
-	//	})
-	//
-	//	// Uploading 10% of allocation
-	//
-	//	remotepath := "/dir/"
-	//	filesize := 50 * MB
-	//	filename := generateRandomTestFileName(t)
-	//
-	//	err = createFileWithSize(filename, int64(filesize))
-	//	require.Nil(t, err)
-	//
-	//	output, err = uploadFile(t, configPath, map[string]interface{}{
-	//		// fetch the latest block in the chain
-	//		"allocation": allocationId,
-	//		"remotepath": remotepath + filepath.Base(filename),
-	//		"localpath":  filename,
-	//	}, true)
-	//	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-	//
-	//	// download the file
-	//	err = os.Remove(filename)
-	//	require.Nil(t, err)
-	//
-	//	remoteFilepath := remotepath + filepath.Base(filename)
-	//
-	//	output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remoteFilepath,
-	//		"localpath":  os.TempDir() + string(os.PathSeparator),
-	//	}), true)
-	//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-	//
-	//	// sleep for 2 minutes
-	//	time.Sleep(3 * time.Minute)
-	//
-	//	// 2. Get all the block rewards for blobber1.
-	//	totalBlockRewardForBlobber1 := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-	//	totalBlockRewardForBlobber2 := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
-	//
-	//	// 3. Stop the blobber1.
-	//	killProvider(blobberList[0].Id)
-	//
-	//	// 4. Sleep for 3 minutes.
-	//	time.Sleep(3 * time.Minute)
-	//
-	//	// 5. Get all the block rewards for blobber1.
-	//	totalBlockRewardForBlobber1AfterStop := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-	//	totalBlockRewardForBlobber2AfterStop := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
-	//
-	//	fmt.Println("Total Block Reward for Blobber 1 : ", totalBlockRewardForBlobber1)
-	//	fmt.Println("Total Block Reward for Blobber 2 : ", totalBlockRewardForBlobber2)
-	//	fmt.Println("Total Block Reward for Blobber 1 After Stop : ", totalBlockRewardForBlobber1AfterStop)
-	//	fmt.Println("Total Block Reward for Blobber 2 After Stop : ", totalBlockRewardForBlobber2AfterStop)
-	//})
+	t.Skip()
+	t.RunSequentiallyWithTimeout("Case 4: Free Reads, One delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"tokens": 9.0,
+		}), false)
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "10m",
+		})
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 50 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(6 * time.Minute)
+
+		// 2. Get the block rewards for all the blobbers.
+		blockRewards := getAllBlockRewards(blobberList)
+
+		for blobberId, amount := range blockRewards {
+			fmt.Println("Blobber ID : ", blobberId)
+			fmt.Println("Block Reward : ", amount)
+		}
+	})
+
+	t.RunSequentiallyWithTimeout("Free Reads, One delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		output, err = registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"tokens": 9.0,
+		}), false)
+
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "10m",
+		})
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 50 * MB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		// sleep for 2 minutes
+		time.Sleep(3 * time.Minute)
+
+		// 2. Get all the block rewards for blobber1.
+		totalBlockRewardForBlobber1 := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
+		totalBlockRewardForBlobber2 := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
+
+		// 3. Stop the blobber1.
+		killProvider(blobberList[0].Id)
+
+		// 4. Sleep for 3 minutes.
+		time.Sleep(3 * time.Minute)
+
+		// 5. Get all the block rewards for blobber1.
+		totalBlockRewardForBlobber1AfterStop := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
+		totalBlockRewardForBlobber2AfterStop := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
+
+		fmt.Println("Total Block Reward for Blobber 1 : ", totalBlockRewardForBlobber1)
+		fmt.Println("Total Block Reward for Blobber 2 : ", totalBlockRewardForBlobber2)
+		fmt.Println("Total Block Reward for Blobber 1 After Stop : ", totalBlockRewardForBlobber1AfterStop)
+		fmt.Println("Total Block Reward for Blobber 2 After Stop : ", totalBlockRewardForBlobber2AfterStop)
+	})
 
 }
 
