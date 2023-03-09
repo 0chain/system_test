@@ -35,6 +35,7 @@ type ZboxResourceExist struct {
 type ZboxFCMResponse struct {
 	FCMToken   string `json:"fcm_token"`
 	DeviceType string `json:"device_type"`
+	Message    string `json:"message"`
 }
 
 type ZboxAllocation struct {

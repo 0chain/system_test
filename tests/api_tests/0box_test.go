@@ -705,7 +705,7 @@ func Test0BoxFCM(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, data, "response object should not be nil")
-		require.Equal(t, "bolt", data.DeviceType, "response object should match input")
+		require.Equal(t, "Firebase token register deleted successfully", data.Message, "response object should match input")
 	})
 }
 
