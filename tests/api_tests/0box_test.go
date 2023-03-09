@@ -665,6 +665,8 @@ func Test0BoxFCM(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
+	teardownFCM(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+
 	t.RunSequentially("Creating FCM Token with valid credentials should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -673,13 +675,28 @@ func Test0BoxFCM(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
+	t.RunSequentially("Creating FCM Token with existing credentials should fail", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		response, err := zboxClient.CreateFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
 	t.RunSequentially("Updating FCM Token should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		data, response, err := zboxClient.UpdateFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, data, "response object should not be nil")
-		require.Equal(t, "bolt", data.DeviceType, "response object should match input")
+		require.Equal(t, "zorro", data.DeviceType, "response object should match input")
+	})
+
+	t.RunSequentially("Updating Someone else's FCM Token should fail", func(t *test.SystemTest) {
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		_, response, err := zboxClient.UpdateFCMToken(t, firebaseToken.IdToken, csrfToken, "+917696229926")
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Deleting FCM Token should work", func(t *test.SystemTest) {
@@ -1393,6 +1410,14 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	} else {
 		t.Logf("No wallets found for [%v] teardown", phoneNumber)
 	}
+}
+
+func teardownFCM(t *test.SystemTest, idToken, phoneNumber string) {
+	t.Logf("Tearing down existing fcm test data for [%v]", phoneNumber)
+	csrfToken := createCsrfToken(t, phoneNumber)
+
+	_, _, err := zboxClient.DeleteFCMToken(t, idToken, csrfToken, phoneNumber)
+	require.NoError(t, err, "Cleanup failed for 0box FCM Token")
 }
 
 func createCsrfToken(t *test.SystemTest, phoneNumber string) string {

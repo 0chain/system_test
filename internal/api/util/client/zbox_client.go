@@ -806,7 +806,7 @@ func (c *ZboxClient) UpdateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	//todo: figure out which field can be updated
 	formData := map[string]string{
 		"fcm_token":   idToken,
-		"device_type": "bolt",
+		"device_type": "zorro",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
