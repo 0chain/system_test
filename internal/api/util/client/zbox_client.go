@@ -904,7 +904,7 @@ func (c *ZboxClient) GetAllNftByCollectionId(t *test.SystemTest, idToken, csrfTo
 	return ZboxNftList, resp, err
 }
 
-func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftListByWalletID, *resty.Response, error) {
+func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken, phoneNumber, wallet_id string) (*model.ZboxNftListByWalletID, *resty.Response, error) {
 	t.Logf("Getting All nft using collection Id for 0box...")
 	var ZboxNftList *model.ZboxNftListByWalletID
 
@@ -914,7 +914,7 @@ func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken,
 	urlBuilder.SetPath("/v2/nft/bycollection")
 
 	queryParams := map[string]string{
-		"collection_id": collection_id,
+		"wallet_id": wallet_id,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{

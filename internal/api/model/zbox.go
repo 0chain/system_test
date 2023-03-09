@@ -17,7 +17,7 @@ type CSRFToken struct {
 }
 
 type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
-	WalletId    string   `json:"wallet_id"`
+	WalletId    int      `json:"wallet_id"`
 	PhoneNumber string   `json:"phone_number"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -122,7 +122,7 @@ type ZboxNftCollection struct {
 	CollectionId           string `json:"collection_id"`
 	CreatedBy              string `json:"created_by"`
 	CollectionName         string `json:"collection_name"`
-	TotalNfts              int    `json:"total_nfts"`
+	TotalNfts              string `json:"total_nfts"`
 	CollectionType         string `json:"collection_type"`
 	Symbol                 string `json:"symbol"`
 	BaseUrl                string `json:"base_url"`
@@ -132,9 +132,9 @@ type ZboxNftCollection struct {
 	ColleectionBannerImage string `json:"collection_banner_image"`
 	CreatorName            string `json:"creator_name"`
 	PricePerPack           int    `json:"price_per_back"`
-	MaxMints               int    `json:"max_mints"`
-	CurrMints              int    `json:"curr_mints"`
-	BatchSize              int    `json:"batch_size"`
+	MaxMints               string `json:"max_mints"`
+	CurrMints              string `json:"curr_mints"`
+	BatchSize              string `json:"batch_size"`
 }
 
 type ZboxNft struct {
