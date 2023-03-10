@@ -375,7 +375,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		errMssg := `{error":"400: collectionID not valid}`
+		errMssg := `{"error":"400: collectionID not valid"}`
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, errMssg, response.String())
