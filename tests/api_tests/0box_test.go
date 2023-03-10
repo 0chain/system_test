@@ -358,7 +358,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		//collection_id := "collectionId as a part of " + t.Name()
+		// collection_id := "collectionId as a part of " + t.Name()
 		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -534,7 +534,7 @@ func Test0boxNft(testSetup *testing.T) {
 			nft_id,
 		)
 		errorMssg := `code":"400","msg":"please pass a valid ID`
-		//require.Error(t, err) Fixme error is not send in error instead it is send
+		// require.Error(t, err) Fixme error is not send in error instead it is send
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftCollectionId, errorMssg)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
