@@ -1082,13 +1082,13 @@ func (c *ZboxClient) GetAllNftByCollectionId(t *test.SystemTest, idToken, csrfTo
 }
 
 func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken, phoneNumber, wallet_id string) (*model.ZboxNftListByWalletID, *resty.Response, error) {
-	t.Logf("Getting All nft using collection Id for 0box...")
+	t.Logf("Getting All nft using wallet Id for 0box...")
 	var ZboxNftList *model.ZboxNftListByWalletID
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/nft")
+	urlBuilder.SetPath("/v2/nft/wallet")
 
 	queryParams := map[string]string{
 		"wallet_id": wallet_id,
