@@ -194,7 +194,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Nil(t, zboxNftByCollectionId)
-
 	})
 
 	t.RunSequentially("Post NFT collection with valid arguments should work", func(t *test.SystemTest) {
@@ -548,6 +547,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"auth_ticket",
 			nft_id,
 		)
+		require.Error(t, err)
 		require.NotNil(t, zboxNftCollectionId)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
@@ -961,13 +961,11 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, `{"error":{"code":"invalid_header","msg":"Invalid signature."}}`, response.String())
 	})
-
 }
 
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
