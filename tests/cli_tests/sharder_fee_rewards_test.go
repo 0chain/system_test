@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -156,9 +155,6 @@ func checkSharderFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardSharder:
-					if feesForSharder <= 0 {
-						fmt.Println("round", round, "fees", feesForSharder)
-					}
 					require.Greaterf(t, feesForSharder, int64(0), "fee reward with no fees, reward %v", pReward)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount
@@ -170,10 +166,6 @@ func checkSharderFeeAmounts(
 			}
 			// If sharder is one of the chosen sharders, check fee payment is correct
 			if recordedRoundRewards > 0 {
-				if feesForSharder-recordedRoundRewards < -1 || feesForSharder-recordedRoundRewards > 1 {
-					fmt.Println("round", round, "delta", fees-recordedRoundRewards)
-				}
-
 				require.InDeltaf(t, feesForSharder, recordedRoundRewards, delta,
 					"incorrect service charge %v for round %d"+
 						" service charge should be fees %d multiplied by service ratio %v."+

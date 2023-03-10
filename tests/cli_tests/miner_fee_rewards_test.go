@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -146,9 +145,6 @@ func checkMinerFeeAmounts(
 			}
 			// if this miner is the round miner check fees add up
 			if id == roundHistory.Block.MinerID {
-				if fees != recordedRoundRewards {
-					fmt.Println("round", round, "delta", fees-recordedRoundRewards)
-				}
 				require.InDeltaf(t, fees, recordedRoundRewards, delta,
 					"incorrect service charge %v for round %d"+
 						" service charge should be fees %d multiplied by service ratio %v."+
