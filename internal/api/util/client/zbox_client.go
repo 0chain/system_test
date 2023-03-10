@@ -1088,7 +1088,7 @@ func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken,
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/nft/bycollection")
+	urlBuilder.SetPath("/v2/nft")
 
 	queryParams := map[string]string{
 		"wallet_id": wallet_id,
