@@ -2,12 +2,9 @@ package api_tests
 
 import (
 	"encoding/base64"
-<<<<<<< HEAD
-=======
 	"encoding/json"
 	"fmt"
 	"net/http"
->>>>>>> master
 	"os"
 	"strconv"
 	"strings"
