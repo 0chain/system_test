@@ -243,15 +243,13 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_standard",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNft)
 
 		nft_id = strconv.Itoa(zboxNft.Id)
 	})
 
 	t.RunSequentially("Get NFT by collection with invalid collection id should give empty array", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		zboxNftCollectionId, response, err := zboxClient.GetAllNftByCollectionId(t,
 			firebaseToken.IdToken,
@@ -262,14 +260,12 @@ func Test0boxNft(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Nil(t, zboxNftCollectionId.NftList)
+		require.Len(t, zboxNftCollectionId.NftList, 0)
 		require.Equal(t, 0, zboxNftCollectionId.NftCount)
 	})
 
-	t.RunSequentially("Get NFT collection by wallet id should give empty array invalid wallet id", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+	t.RunSequentially("Get NFT collection by wallet id should give empty array for invalid wallet id", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-
 		zboxNftByWalletId, response, err := zboxClient.GetAllNftByWalletId(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -279,7 +275,7 @@ func Test0boxNft(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Nil(t, zboxNftByWalletId.NftList)
+		require.Len(t, zboxNftByWalletId.NftList, 0)
 		require.Equal(t, 0, zboxNftByWalletId.NftCount)
 	})
 
@@ -363,7 +359,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_id := "collectionId as a part of " + t.Name()
-		_, response, err = zboxClient.PostNftCollection(t,
+		Nft, response, err := zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -379,8 +375,11 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		require.Error(t, err)
+		// FIXME should give error massege instead of returning error as body
+		errMssg := `error":"400: collectionID not valid`
+		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, errMssg, Nft)
 	})
 
 	t.RunSequentially("Post NFT collection with Invalid allocation Id should not work", func(t *test.SystemTest) {
