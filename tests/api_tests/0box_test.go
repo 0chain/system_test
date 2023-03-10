@@ -359,7 +359,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		//collection_id := "collectionId as a part of " + t.Name()
-		Nft, response, err := zboxClient.PostNftCollection(t,
+		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -375,11 +375,10 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		// FIXME should give error massege instead of returning error as body
 		errMssg := `error":"400: collectionID not valid`
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, errMssg, Nft)
+		require.Equal(t, errMssg, response.String())
 	})
 
 	t.RunSequentially("Post NFT collection with Invalid allocation Id should not work", func(t *test.SystemTest) {
@@ -444,7 +443,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NotNil(t, zboxNftCollectionId)
 
 		allocationId = "allocationId is being changed here"
-		nft, response, err := zboxClient.PostNftCollection(t,
+		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -463,7 +462,7 @@ func Test0boxNft(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, `"error":"400: allocationID not valid"`, nft)
+		require.Equal(t, `"error":"400: allocationID not valid"`, response.String())
 	})
 
 	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
