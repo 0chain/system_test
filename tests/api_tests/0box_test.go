@@ -56,7 +56,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNftCollectionId)
-
 	})
 
 	t.RunSequentially("Get NFT by collection with invalid collection id should not work", func(t *test.SystemTest) {
@@ -73,7 +72,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Nil(t, zboxNftCollectionId)
-
 	})
 
 	t.RunSequentially("Get NFT collection by collection id with zero nft collection should work", func(t *test.SystemTest) {
@@ -239,7 +237,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of" + t.Name()
-		//collection_id := "collectionId as a part of" + t.Name()
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -284,11 +281,9 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NotNil(t, zboxNft)
 
 		nft_id = zboxNft.Id
-
 	})
 
 	t.RunSequentially("Get NFT collection with one nft present should work", func(t *test.SystemTest) {
-
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		zboxNFTList, response, err := zboxClient.GetAllNft(t,
 			firebaseToken.IdToken,
@@ -299,7 +294,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response)
 		require.NotNil(t, zboxNFTList)
-
 	})
 
 	t.RunSequentially("Get NFT collection by wallet id with one nft present should work", func(t *test.SystemTest) {
@@ -315,7 +309,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response)
 		require.NotNil(t, zboxNFTList)
-
 	})
 
 	t.RunSequentially("Get NFT collection by collection id with one nft present should work", func(t *test.SystemTest) {
@@ -330,7 +323,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response)
 		require.NotNil(t, zboxNFTList)
-
 	})
 
 	t.RunSequentially("Post NFT collection with Invalid collectionId should not work", func(t *test.SystemTest) {
@@ -389,7 +381,6 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
 	})
 
 	t.RunSequentially("Post NFT collection with Invalid allocation Id should not work", func(t *test.SystemTest) {
@@ -473,7 +464,6 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
 	})
 
 	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
@@ -518,7 +508,6 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NotNil(t, zboxNftCollectionId)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
 	})
 
 	t.RunSequentially("Update NFT collection with Invalid argument should not work", func(t *test.SystemTest) {
@@ -563,7 +552,6 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NotNil(t, zboxNftCollectionId)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
 	})
 
 }
@@ -639,11 +627,9 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, shareInfoData.Data[0].Message, shareMessage)
 		require.Equal(t, shareInfoData.Data[0].FromInfo, fromInfo)
 		require.Equal(t, shareInfoData.Data[0].Receiver, zboxClient.DefaultRecieverId)
-
 	})
 
 	t.RunSequentially("Post ShareInfo with Incorrect AuthTicket should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -848,7 +834,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, shareInfoDeletionMssg)
 		require.Equal(t, shareInfoDeletionMssg.Message, "Share info deleted successfully", "Error deleting ShareInfo")
-
 	})
 
 	t.RunSequentially("Get ShareInfo with Incorrect clientRecieverId should not work properly", func(t *test.SystemTest) {
@@ -914,7 +899,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, errorString, response.String())
-
 	})
 
 	t.RunSequentially("Get ShareInfo with Incorrect AuthTicket should not work properly", func(t *test.SystemTest) {
@@ -979,7 +963,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, shareInfoData)
 		require.Equal(t, `{"error":{"code":"invalid_header","msg":"Invalid signature."}}`, response.String())
-
 	})
 
 }
