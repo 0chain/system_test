@@ -146,7 +146,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNftByCollectionId)
-
 	})
 
 	t.RunSequentially("Get NFT collection by wallet id with zero nft collection should work", func(t *test.SystemTest) {
@@ -179,7 +178,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNftByCollectionId)
-
 	})
 
 	t.RunSequentially("Get NFT collection by wallet id should not work with invalid wallet id", func(t *test.SystemTest) {
@@ -379,7 +377,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-
+		require.Error(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
@@ -421,7 +419,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of" + t.Name()
-		//collection_id := "collectionId as a part of" + t.Name()
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -462,7 +459,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-
+		require.Error(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
@@ -506,6 +503,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"auth_ticket",
 			nft_id,
 		)
+		require.Error(t, err)
 		require.NotNil(t, zboxNftCollectionId)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
@@ -553,7 +551,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NotNil(t, zboxNftCollectionId)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
-
 }
 
 func Test0Box_share_info(testSetup *testing.T) {
