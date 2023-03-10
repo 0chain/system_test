@@ -303,7 +303,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response)
+		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
 	})
 
@@ -317,7 +317,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response)
+		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
 	})
 
@@ -365,7 +365,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"stage_nft_upload",
 			"nft_reference",
-			collection_id,
+			"invalid_collection_id",
 			"owned_by",
 			"nft_activity",
 			"meta_data",
