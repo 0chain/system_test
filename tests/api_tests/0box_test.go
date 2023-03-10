@@ -277,7 +277,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNft)
 
-		nft_id = zboxNft.Id
+		nft_id = strconv.Itoa(zboxNft.Id)
 	})
 
 	t.RunSequentially("Get NFT collection with one nft present should work", func(t *test.SystemTest) {
@@ -289,7 +289,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response)
+		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
 	})
 

@@ -155,7 +155,7 @@ type ZboxNftCollection struct {
 }
 
 type ZboxNft struct {
-	Id              string `json:"id"`
+	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`
 	ClientId        string `json:"client_id"`
 	CollectionId    string `json:"collection_id"`
