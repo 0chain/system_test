@@ -160,12 +160,12 @@ type ZboxNft struct {
 	ClientId        string `json:"client_id"`
 	CollectionId    string `json:"collection_id"`
 	OwnedBy         string `json:"owned_by"`
-	Stage           string `json:"stage"`
+	Stage           int    `json:"stage"`
 	Reference       string `json:"reference"`
 	NftActivity     string `json:"nft_activity"`
 	MetaData        string `json:"meta_data"`
 	NftImage        string `json:"nft_image"`
-	IsMinted        string `json:"is_minted"`
+	IsMinted        bool   `json:"is_minted"`
 	AuthTicket      string `json:"auth_ticket"`
 	RemotePath      string `json:"remote_path"`
 	CreatedBy       string `json:"created_by"`
