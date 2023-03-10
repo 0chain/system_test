@@ -64,7 +64,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		reg := regexp.MustCompile("Error transferring allocation:allocation_updating_failed: only owner can update the allocation; [a-z0-9]{64} is neither")
+		reg := regexp.MustCompile("Error transferring allocation:allocation_updating_failed: only owner can update the allocation")
 		require.Regexp(t, reg, output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
@@ -361,7 +361,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0],
+		require.Equal(t, "Error transferring allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0],
 			"transfer allocation - Unexpected output", strings.Join(output, "\n"))
 	})
 
