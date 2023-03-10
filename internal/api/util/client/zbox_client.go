@@ -977,7 +977,7 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/nft")
-	urlBuilder.AddParams("id", nft_id)
+	//urlBuilder.AddParams("id", nft_id)
 
 	formData := map[string]string{
 		"stage":            stage_nft_upload,
