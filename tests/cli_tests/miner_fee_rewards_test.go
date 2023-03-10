@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -34,7 +35,6 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		if !confirmDebugBuild(t) {
 			t.Skip("miner fee rewards test skipped as it requires a debug event database")
 		}
-
 		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -117,8 +117,15 @@ func checkMinerFeeAmounts(
 	for i, id := range minerIds {
 		var blockRewards, feeRewards int64
 		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners[i].RoundServiceChargeLastUpdated; round++ {
+			var recordedRoundRewards int64
 			var roundFees = history.FeesForRound(t, round)
 			roundHistory := history.RoundHistory(t, round)
+			var fees int64
+			if len(beforeMiners[i].StakePool.Pools) > 0 {
+				fees = int64(float64(roundFees) * beforeMiners[i].Settings.ServiceCharge * minerShare)
+			} else {
+				fees = int64(float64(roundFees) * minerShare)
+			}
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.ProviderId != id {
 					continue
@@ -126,27 +133,28 @@ func checkMinerFeeAmounts(
 				switch pReward.RewardType {
 				case climodel.FeeRewardMiner:
 					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"%s not round lottery winner %s but nevertheless paid with block reward."+
+						"%s not round lottery winner %s but nevertheless paid with fee reward."+
 							"only the round lottery winner shold get a miner block reward",
 						pReward.ProviderId, roundHistory.Block.MinerID)
-					var fees int64
-					if len(beforeMiners[i].StakePool.Pools) > 0 {
-						fees = int64(float64(roundFees) * beforeMiners[i].Settings.ServiceCharge * minerShare)
-					} else {
-						fees = int64(float64(roundFees) * minerShare)
-					}
-					require.InDeltaf(t, fees, pReward.Amount, delta,
-						"incorrect service charge %v for round %d"+
-							" service charge should be fees %d multiplied by service ratio %v."+
-							"length stake pools %d",
-						pReward.Amount, round, fees, beforeMiners[i].Settings.ServiceCharge,
-						len(beforeMiners[i].StakePool.Pools))
 					feeRewards += pReward.Amount
+					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardMiner:
 					blockRewards += pReward.Amount
 				default:
 					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
 				}
+			}
+			// if this miner is the round miner check fees add up
+			if id == roundHistory.Block.MinerID {
+				if fees != recordedRoundRewards {
+					fmt.Println("round", round, "delta", fees-recordedRoundRewards)
+				}
+				require.InDeltaf(t, fees, recordedRoundRewards, delta,
+					"incorrect service charge %v for round %d"+
+						" service charge should be fees %d multiplied by service ratio %v."+
+						"length stake pools %d",
+					recordedRoundRewards, round, fees, beforeMiners[i].Settings.ServiceCharge,
+					len(beforeMiners[i].StakePool.Pools))
 			}
 		}
 		actualReward := afterMiners[i].Reward - beforeMiners[i].Reward

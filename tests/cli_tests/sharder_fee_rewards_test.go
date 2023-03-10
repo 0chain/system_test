@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -57,17 +58,17 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		startRound := beforeSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
 		endRound := afterSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
 		for i := range beforeSharders.Nodes {
-			if startRound < beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
+			if startRound > beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				startRound = beforeSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
-			if endRound > afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
+			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
 			t.Logf("sharder %s delegates pools %d", beforeSharders.Nodes[i].ID, len(beforeSharders.Nodes[i].Pools))
 		}
 		t.Logf("start round %d, end round %d", startRound, endRound)
 
-		history := cliutil.NewHistory(startRound, endRound+1)
+		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, true)
 
 		minerScConfig := getMinerScMap(t)
@@ -133,34 +134,52 @@ func checkSharderFeeAmounts(
 	t.Log("checking sharder fee payment amounts...")
 	for i, id := range sharderIds {
 		var blockRewards, feeRewards int64
-		for round := beforeSharders[i].RoundServiceChargeLastUpdated + 1; round <= afterSharders[i].RoundServiceChargeLastUpdated; round++ {
-			feesPerSharder := int64(float64(history.FeesForRound(t, round)) / float64(numShardersRewarded))
+		var startRound int64
+		if beforeSharders[i].RoundServiceChargeLastUpdated+1 < history.From() {
+			startRound = history.From()
+		} else {
+			startRound = beforeSharders[i].RoundServiceChargeLastUpdated + 1
+		}
+		for round := startRound; round <= afterSharders[i].RoundServiceChargeLastUpdated; round++ {
+			var recordedRoundRewards int64
+			fees := int64(float64(history.FeesForRound(t, round)) / float64(numShardersRewarded))
 			roundHistory := history.RoundHistory(t, round)
+			var feesForSharder int64
+			if len(beforeSharders[i].StakePool.Pools) > 0 {
+				feesForSharder = int64(float64(fees) * beforeSharders[i].Settings.ServiceCharge * (1 - minerShare))
+			} else {
+				feesForSharder = int64(float64(fees) * (1 - minerShare))
+			}
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.ProviderId != id {
 					continue
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardSharder:
-					require.Greaterf(t, feesPerSharder, int64(0), "fee reward with no fees, reward %v", pReward)
-					var fees int64
-					if len(beforeSharders[i].StakePool.Pools) > 0 {
-						fees = int64(float64(feesPerSharder) * beforeSharders[i].Settings.ServiceCharge * (1 - minerShare))
-					} else {
-						fees = int64(float64(feesPerSharder) * (1 - minerShare))
+					if feesForSharder <= 0 {
+						fmt.Println("round", round, "fees", feesForSharder)
 					}
-					require.InDeltaf(t, fees, pReward.Amount, delta,
-						"incorrect service charge %v for round %d"+
-							" service charge should be fees %d multiplied by service ratio %v."+
-							"length stake pools %d",
-						pReward.Amount, round, fees, beforeSharders[i].Settings.ServiceCharge,
-						len(beforeSharders[i].StakePool.Pools))
+					require.Greaterf(t, feesForSharder, int64(0), "fee reward with no fees, reward %v", pReward)
 					feeRewards += pReward.Amount
+					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardSharder:
 					blockRewards += pReward.Amount
 				default:
 					require.Failf(t, "reward type %s is not available for sharders", pReward.RewardType.String())
 				}
+			}
+			// If sharder is one of the chosen sharders, check fee payment is correct
+			if recordedRoundRewards > 0 {
+				if feesForSharder-recordedRoundRewards < -1 || feesForSharder-recordedRoundRewards > 1 {
+					fmt.Println("round", round, "delta", fees-recordedRoundRewards)
+				}
+
+				require.InDeltaf(t, feesForSharder, recordedRoundRewards, delta,
+					"incorrect service charge %v for round %d"+
+						" service charge should be fees %d multiplied by service ratio %v."+
+						"length stake pools %d",
+					recordedRoundRewards, round, fees, beforeSharders[i].Settings.ServiceCharge,
+					len(beforeSharders[i].StakePool.Pools))
 			}
 		}
 		actualReward := afterSharders[i].Reward - beforeSharders[i].Reward

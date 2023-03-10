@@ -48,10 +48,10 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		startRound := beforeSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
 		endRound := afterSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
 		for i := range beforeSharders.Nodes {
-			if startRound < beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
+			if startRound > beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				startRound = beforeSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
-			if endRound > afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
+			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
 				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
 			}
 		}
