@@ -444,7 +444,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NotNil(t, zboxNftCollectionId)
 
 		allocationId = "allocationId is being changed here"
-		_, response, err = zboxClient.PostNftCollection(t,
+		nft, response, err := zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -460,8 +460,10 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		require.Error(t, err)
+
+		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, `"error":"400: allocationID not valid"`, nft)
 	})
 
 	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
