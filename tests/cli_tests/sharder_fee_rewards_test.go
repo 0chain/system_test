@@ -67,6 +67,8 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		}
 		t.Logf("start round %d, end round %d", startRound, endRound)
 
+		time.Sleep(time.Second) // give time for last round to be saved
+
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, true)
 

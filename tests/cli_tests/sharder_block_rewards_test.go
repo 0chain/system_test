@@ -56,6 +56,8 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 			}
 		}
 
+		time.Sleep(time.Second) // give time for last round to be saved
+
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, false)
 
