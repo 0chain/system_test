@@ -927,9 +927,9 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNft, *resty.Response, error) {
+func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNftAlt, *resty.Response, error) {
 	t.Logf("Posting nft using 0box...")
-	var ZboxNft *model.ZboxNft
+	var ZboxNft *model.ZboxNftAlt
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -977,7 +977,7 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/nft")
-	urlBuilder.AddParams("id", nft_id)
+	//urlBuilder.AddParams("id", nft_id)
 
 	formData := map[string]string{
 		"stage":            stage_nft_upload,
@@ -991,6 +991,7 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 		"contract_address": contract_address,
 		"token_id":         token_id,
 		"token_standard":   token_standard,
+		"creator_name":     "creator_name",
 		"is_minted":        isMinted,
 		"remote_path":      remotePath,
 		"auth_ticket":      authTicket,
@@ -1082,13 +1083,13 @@ func (c *ZboxClient) GetAllNftByCollectionId(t *test.SystemTest, idToken, csrfTo
 }
 
 func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken, phoneNumber, wallet_id string) (*model.ZboxNftListByWalletID, *resty.Response, error) {
-	t.Logf("Getting All nft using collection Id for 0box...")
+	t.Logf("Getting All nft using wallet Id for 0box...")
 	var ZboxNftList *model.ZboxNftListByWalletID
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/nft/bycollection")
+	urlBuilder.SetPath("/v2/nft/wallet")
 
 	queryParams := map[string]string{
 		"wallet_id": wallet_id,

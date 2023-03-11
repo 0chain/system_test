@@ -303,7 +303,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response)
+		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
 	})
 
@@ -317,7 +317,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response)
+		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
 	})
 
@@ -358,14 +358,14 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_id := "collectionId as a part of " + t.Name()
-		Nft, response, err := zboxClient.PostNftCollection(t,
+		// collection_id := "collectionId as a part of " + t.Name()
+		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"stage_nft_upload",
 			"nft_reference",
-			collection_id,
+			"invalid_collection_id",
 			"owned_by",
 			"nft_activity",
 			"meta_data",
@@ -375,11 +375,10 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		// FIXME should give error massege instead of returning error as body
-		errMssg := `error":"400: collectionID not valid`
+		errMssg := `{"error":"400: collectionID not valid"}`
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, errMssg, Nft)
+		require.Equal(t, errMssg, response.String())
 	})
 
 	t.RunSequentially("Post NFT collection with Invalid allocation Id should not work", func(t *test.SystemTest) {
@@ -420,14 +419,14 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of" + t.Name()
-
+		collection_id := "collection id as a part of" + t.Name()
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"created_by",
 			collection_name,
-			defaultCollectionId,
+			collection_id,
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
@@ -460,29 +459,14 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_id",
 			"token_standard",
 		)
-		require.Error(t, err)
+
+		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, `{"error":"400: allocationID not valid"}`, response.String())
 	})
 
 	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -611,7 +595,7 @@ func Test0boxNft(testSetup *testing.T) {
 			nft_id,
 		)
 		errorMssg := `code":"400","msg":"please pass a valid ID`
-		//require.Error(t, err) Fixme error is not send in error instead it is send
+		// require.Error(t, err) Fixme error is not send in error instead it is send
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftCollectionId, errorMssg)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
