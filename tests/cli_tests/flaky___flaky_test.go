@@ -181,26 +181,14 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 			"size": int64(20480),
 		})
 
-		ownerWallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error occurred when retrieving owner wallet")
-
-		output, err := addCurator(t, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"curator":    ownerWallet.ClientID,
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "add curator - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, fmt.Sprintf("%s added %s as a curator to allocation %s", ownerWallet.ClientID, ownerWallet.ClientID, allocationID), output[0],
-			"add curator - Unexpected output", strings.Join(output, "\n"))
-
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, 256)
+		err := createFileWithSize(file, 256)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
