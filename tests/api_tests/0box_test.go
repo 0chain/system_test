@@ -502,7 +502,8 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of" + t.Name()
+		collection_name := "collection as a part of " + t.Name()
+		collection_id := "collectionId as a part of " + t.Name()
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -510,7 +511,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"created_by",
 			collection_name,
-			defaultCollectionId,
+			collection_id,
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
