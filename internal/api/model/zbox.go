@@ -27,6 +27,17 @@ type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SE
 	LastUpdate  string   `json:"last_update"`
 }
 
+type ZboxResourceExist struct {
+	Exist *bool   `json:"exist"`
+	Error *string `json:"error"`
+}
+
+type ZboxFCMResponse struct {
+	FCMToken   string `json:"fcm_token"`
+	DeviceType string `json:"device_type"`
+	Message    string `json:"message"`
+}
+
 type ZboxAllocation struct {
 	Id             string   `json:"id"`
 	WalletId       int      `json:"wallet_id"`
@@ -75,6 +86,12 @@ type ZboxAllocationList struct {
 
 type ZboxWalletKeys []struct {
 	ZboxWallet
+}
+
+type DexState struct {
+	TxHash    string `form:"tx_hash" json:"tx_hash" binding:"-"`
+	Stage     string `form:"stage" json:"stage" binding:"required"`
+	Reference string `form:"reference" json:"reference" binding:"required"`
 }
 
 type ZboxSuccess struct {
