@@ -529,7 +529,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNft)
 
-		zboxNft, response, err = zboxClient.UpdateNftCollection(t,
+		zboxNftUpdated, response, err := zboxClient.UpdateNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -550,7 +550,7 @@ func Test0boxNft(testSetup *testing.T) {
 			nft_id,
 		)
 		require.NoError(t, err)
-		require.NotNil(t, zboxNft)
+		require.NotNil(t, zboxNftUpdated)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
