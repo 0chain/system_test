@@ -969,7 +969,7 @@ func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, p
 	return ZboxNft, resp, err
 }
 
-func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard, isMinted, remotePath, authTicket, nft_id string) (*model.ZboxNft, *resty.Response, error) {
+func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, totalNfts, collectionType, allocationId, baseUrl, symbol string, nftId, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Updating nft using 0box...")
 	var ZboxNft *model.ZboxNft
 
@@ -977,28 +977,24 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/nft/collection")
-	//urlBuilder.AddParams("id", nft_id)
 
 	formData := map[string]string{
-		"stage":            stage_nft_upload,
-		"reference":        nft_reference,
-		"collection_id":    collectionId,
-		"owned_by":         owned_by,
-		"nft_activity":     nft_activity,
-		"meta_data":        meta_data,
-		"allocation_id":    allocationId,
-		"created_by":       created_by,
-		"contract_address": contract_address,
-		"token_id":         token_id,
-		"token_standard":   token_standard,
-		"creator_name":     "creator_name",
-		"is_minted":        isMinted,
-		"remote_path":      remotePath,
-		"auth_ticket":      authTicket,
+		"created_by":      createdBy,
+		"collection_name": collectionName,
+		"collection_id":   collectionId,
+		"total_nfts":      totalNfts,
+		"collection_type": collectionType,
+		"allocation_id":   allocationId,
+		"base_url":        baseUrl,
+		"symbol":          symbol,
+		"price_per_pack":  strconv.Itoa(pricePerPack),
+		"max_mints":       strconv.Itoa(maxMints),
+		"curr_mints":      strconv.Itoa(currMints),
+		"batch_size":      strconv.Itoa(batchSize),
 	}
 
 	queryParams := map[string]string{
-		"id": nft_id,
+		"id": strconv.Itoa(nftId),
 	}
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:         &ZboxNft,

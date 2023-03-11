@@ -19,7 +19,6 @@ import (
 func Test0boxNft(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
-	var nft_id string
 
 	defaultBatchSize := 1
 	defaultMaxMint := 1
@@ -245,8 +244,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNft)
-
-		nft_id = strconv.Itoa(zboxNft.Id)
 	})
 
 	t.RunSequentially("Get NFT by collection with invalid collection id should give empty array", func(t *test.SystemTest) {
@@ -551,21 +548,19 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			"stage_nft_upload",
-			"nft_reference",
-			zboxNftCollectionId.CollectionId,
-			"owned_by",
-			"nft_activity",
-			"meta_data",
-			allocationId,
 			"created_by",
-			"contract_Address",
-			"token_id",
-			"token_standard",
-			"is_minted",
-			"remote_path",
-			"auth_ticket",
-			nft_id,
+			collection_name,
+			collection_id,
+			defaultTotalNFT,
+			"collection_type",
+			allocationId,
+			"base_url",
+			"symbol",
+			zboxNft.Id,
+			defaultPricePerPack,
+			defaultMaxMint,
+			defaultCurrMint,
+			defaultBatchSize,
 		)
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftUpdated)
@@ -596,21 +591,19 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			"stage_nft_upload",
-			"nft_reference",
-			"invalid_collection_id",
-			"owned_by",
-			"nft_activity",
-			"meta_data",
-			zboxClient.DefaultAllocationId,
 			"created_by",
-			"contract_Address",
-			"token_id",
-			"token_standard",
-			"is_minted",
-			"remote_path",
-			"auth_ticket",
-			nft_id,
+			"invalid_name",
+			"invalid_collection_id",
+			defaultTotalNFT,
+			"collection_type",
+			"invalid_alloc",
+			"base_url",
+			"symbol",
+			390,
+			defaultPricePerPack,
+			defaultMaxMint,
+			defaultCurrMint,
+			defaultBatchSize,
 		)
 		errorMssg := `code":"400","msg":"please pass a valid ID`
 		// require.Error(t, err) Fixme error is not send in error instead it is send
