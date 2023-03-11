@@ -355,7 +355,6 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		// collection_id := "collectionId as a part of " + t.Name()
 		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -606,7 +605,7 @@ func Test0boxNft(testSetup *testing.T) {
 			defaultCurrMint,
 			defaultBatchSize,
 		)
-		// FIXME: there should be validation on this update 
+		// FIXME: there should be validation on this update
 		// require.Error(t, err) Fixme error is not send in error instead it is send
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftCollectionId)
@@ -617,6 +616,7 @@ func Test0boxNft(testSetup *testing.T) {
 func Test0Box_share_info(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Post ShareInfo with correct AuthTicket should work properly", func(t *test.SystemTest) {
@@ -1027,7 +1027,6 @@ func Test0Box_share_info(testSetup *testing.T) {
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Create a wallet with valid phone number should work", func(t *test.SystemTest) {
