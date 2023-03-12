@@ -218,7 +218,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := "invalid token amount: negative"
+		wantFailureMsg := "invalid tokens amount: negative"
 
 		output, err = sendZCN(t, configPath, target.ClientID, "-1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
