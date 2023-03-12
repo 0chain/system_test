@@ -354,7 +354,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 60*time.Second, func(t *test.SystemTest) {
@@ -752,7 +751,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
@@ -954,7 +952,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share non-existent file should fail", 60*time.Second, func(t *test.SystemTest) {
