@@ -6,6 +6,7 @@ import (
 	"io"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -84,17 +85,16 @@ func TestSendAndBalance(testSetup *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		successfulBalanceOutputRegex := regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`)
-
 		// Before send balance checks
-		output, err = getBalance(t, configPath)
+		srcBalanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, successfulBalanceOutputRegex, output[0])
+		require.Equal(t, float64(5), srcBalanceBefore)
 
 		_, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.NoError(t, err)
+
+		targetBalanceBefore, err := getBalanceZCN(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected balance check failure for target wallet", escapedTestName(t), strings.Join(output, "\n"))
 
 		// Transfer ZCN from sender to target wallet
 		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), true)
@@ -104,14 +104,13 @@ func TestSendAndBalance(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Send tokens success:  [a-f0-9]{64}"), output[0]) //nolint
 
 		// After send balance checks
-		_, err = getBalance(t, configPath)
+		srcBalanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
+		require.Equal(t, srcBalanceBefore-1.01, srcBalanceAfter)
 
-		output, err = getBalanceForWallet(t, configPath, targetWallet)
+		targetBalanceAfter, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, successfulBalanceOutputRegex, output[0])
+		require.Equal(t, targetBalanceBefore+1, targetBalanceAfter)
 	})
 
 	t.Run("Send without description should fail", func(t *test.SystemTest) {
@@ -132,7 +131,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
+		output, err := registerWallet(t, configPath, withNoReadPool())
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, targetWallet)
@@ -141,7 +140,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := "Insufficient balance for this transaction."
+		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
 
 		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
@@ -191,15 +190,19 @@ func TestSendAndBalance(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		output, err = registerWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := "Insufficient balance for this transaction."
+		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
+		tokens := strconv.Itoa(int(balance) + 1)
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1.5", "", createParams(map[string]interface{}{}), false)
+		output, err = sendZCN(t, configPath, target.ClientID, tokens, "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

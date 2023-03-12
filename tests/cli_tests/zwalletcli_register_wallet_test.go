@@ -109,12 +109,34 @@ func registerWalletWithoutFaucet(t *test.SystemTest, cliConfigFilename string) (
 		"--wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
+func registerWallet(t *test.SystemTest, cliConfigFilename string, opt ...registerWalletOptionFunc) ([]string, error) {
+	return registerWalletForName(t, cliConfigFilename, escapedTestName(t), opt...)
 }
 
-func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
+type registerWalletOption struct {
+	doNotCreateReadPool bool
+}
+
+type registerWalletOptionFunc func(*registerWalletOption)
+
+func withNoReadPool() registerWalletOptionFunc {
+	return func(o *registerWalletOption) {
+		o.doNotCreateReadPool = true
+	}
+}
+
+func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, opts ...registerWalletOptionFunc) ([]string, error) {
 	t.Logf("Registering wallet...")
+	regOpt := &registerWalletOption{}
+	for _, opt := range opts {
+		opt(regOpt)
+	}
+
+	if regOpt.doNotCreateReadPool {
+		return cliutils.RunCommand(t, "./zwallet register --silent "+
+			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	}
+
 	_, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
 	if err != nil {
 		return nil, err
@@ -146,11 +168,22 @@ func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) 
 	return getBalanceForWallet(t, cliConfigFilename, escapedTestName(t))
 }
 
-func getBalanceZCN(t *test.SystemTest, cliConfigFilename string) (float64, error) {
+func getBalanceZCN(t *test.SystemTest, cliConfigFilename string, walletName ...string) (float64, error) {
 	cliutils.Wait(t, 5*time.Second)
-	output, err := getBalanceForWalletJSON(t, cliConfigFilename, escapedTestName(t))
-	if err != nil {
-		return 0, err
+	var (
+		output []string
+		err    error
+	)
+	if len(walletName) > 0 && walletName[0] != "" {
+		output, err = getBalanceForWalletJSON(t, cliConfigFilename, walletName[0])
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		output, err = getBalanceForWalletJSON(t, cliConfigFilename, escapedTestName(t))
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	var balance = struct {
