@@ -39,7 +39,7 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 
 	switch method {
 	case HttpPUTMethod:
-		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Put(url)
+		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetQueryParams(executionRequest.QueryParams).SetBody(executionRequest.Body).Put(url)
 	case HttpPOSTMethod:
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Post(url)
 	case HttpFileUploadMethod:
