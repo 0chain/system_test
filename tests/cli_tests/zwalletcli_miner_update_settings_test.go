@@ -477,7 +477,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 }
 
 func listMiners(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet ls-miners %s --active --silent --wallet %s_wallet.json --configDir ./config --config %s", params, miner01NodeDelegateWalletName, cliConfigFilename), 3, time.Second*2)
 }
 
 func getNonceForWallet(t *test.SystemTest, cliConfigFilename, wallet string, retry bool) ([]string, error) {
