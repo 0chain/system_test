@@ -755,13 +755,12 @@ var StorageCurrencySettigs = []string{
 	"free_allocation_settings.write_price_range.max",
 	"max_read_price",
 	"max_write_price",
-	"max_write_price",
+	"min_write_price",
 	"block_reward.block_reward",
 	"block_reward.qualifying_stake",
 }
 
 var StorageIntSettings = []string{
-
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
