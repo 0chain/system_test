@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.13-0.20230228020307-a70fa6765dcc
+	github.com/0chain/gosdk v1.8.13-0.20230303034900-33f16e391723
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.28.2
 	github.com/shopspring/decimal v1.3.1
@@ -28,7 +28,7 @@ require (
 )
 
 require (
-	github.com/0chain/common v0.0.5 // indirect
+	github.com/0chain/common v0.0.6-0.20221123040931-4a3feacdb97c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
