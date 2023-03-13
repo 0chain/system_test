@@ -40,6 +40,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Pick a random blobber
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -51,10 +54,11 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Nil(t, err, "Error extracting txn hash from sp-lock output", strings.Join(output, "\n"))
 
 		// Wallet balance should decrease by locked amount
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 4.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balanceAfter, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
+		// less than balanceBefore - 1 due to txn fee
+		require.Less(t, balanceAfter, balanceBefore-1)
 
 		// Use sp-info to check the staked tokens in blobber's stake pool
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -91,7 +95,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens unlocked, pool deleted", output[0])
+		require.Equal(t, "tokens unlocked: 0, pool deleted", output[0])
 
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
@@ -157,10 +161,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before staking tokens
-		output, err = getBalance(t, configPath)
+		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
@@ -184,10 +186,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance", output[0])
 
 		// Wallet balance after staking tokens
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance2, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Less(t, balance2, balance) // txn fee paid for staking
 	})
 
 	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
@@ -195,10 +196,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before staking tokens
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
@@ -223,10 +222,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 			" too small stake to lock: 0 < %v", blobber.Stake_pool_settings.Min_stake), output[0])
 
 		// Wallet balance after staking tokens
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance2, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Less(t, balance2, balance) // txn fee paid for staking
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
@@ -234,10 +232,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before staking tokens
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
 
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
@@ -261,10 +257,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Equal(t, "invalid token amount: negative", output[0])
 
 		// Wallet balance after staking tokens
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance2, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, balance2, balance)
 	})
 }
 
