@@ -131,7 +131,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath, withNoReadPool())
+		output, err := registerWallet(t, configPath, withNoFaucetPour())
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
 		output, err = registerWalletForName(t, configPath, targetWallet)

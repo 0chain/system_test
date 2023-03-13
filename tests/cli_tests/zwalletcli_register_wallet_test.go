@@ -29,10 +29,8 @@ func TestRegisterWallet(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 3, len(output))
-		require.Equal(t, "Creating related read pool for storage smart-contract...", output[0])
-		require.Equal(t, "Read pool created successfully", output[1])
-		require.Equal(t, "Wallet registered", output[2])
+		require.Len(t, output, 1, len(output))
+		require.Equal(t, "Wallet registered", output[0])
 	})
 
 	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
@@ -48,12 +46,11 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *test.SystemTest) {
-		_, _ = registerWalletWithoutFaucet(t, configPath)
+		_, _ = registerWallet(t, configPath, withNoFaucetPour())
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
-		require.True(t, balance > 0)
-		require.True(t, balance < defaultInitFaucetTokens)
+		require.Equal(t, float64(0), balance)
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *test.SystemTest) {
@@ -63,6 +60,8 @@ func TestRegisterWallet(testSetup *testing.T) {
 		balanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
 
+		output, err = executeFaucetWithTokens(t, configPath, 1)
+		require.NoError(t, err)
 		require.Len(t, output, 1)
 		matcher := regexp.MustCompile("Execute faucet smart contract success with txn : {2}([a-f0-9]{64})$")
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
@@ -114,14 +113,14 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string, opt ...registe
 }
 
 type registerWalletOption struct {
-	doNotCreateReadPool bool
+	noPourAndReadPool bool
 }
 
 type registerWalletOptionFunc func(*registerWalletOption)
 
-func withNoReadPool() registerWalletOptionFunc {
+func withNoFaucetPour() registerWalletOptionFunc {
 	return func(o *registerWalletOption) {
-		o.doNotCreateReadPool = true
+		o.noPourAndReadPool = true
 	}
 }
 
@@ -132,7 +131,7 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, o
 		opt(regOpt)
 	}
 
-	if regOpt.doNotCreateReadPool {
+	if regOpt.noPourAndReadPool {
 		return cliutils.RunCommand(t, "./zwallet register --silent "+
 			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
