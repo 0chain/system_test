@@ -106,7 +106,6 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 			beforeMiners.Nodes, afterMiners.Nodes,
 			history,
 		)
-
 	})
 }
 
@@ -214,7 +213,6 @@ func checkMinerDelegatePoolBlockRewards(
 	beforeMiners, afterMiners []climodel.Node,
 	history *cliutil.ChainHistory,
 ) {
-
 	for i, id := range minerIds {
 		delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners[i].Settings.ServiceCharge))
 		numPools := len(afterMiners[i].StakePool.Pools)
