@@ -86,7 +86,8 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
 
-		checkMinerBlockRewards(t,
+		checkMinerBlockRewards(
+			t,
 			minerIds,
 			minerBlockReward,
 			beforeMiners.Nodes, afterMiners.Nodes,
