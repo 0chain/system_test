@@ -56,44 +56,47 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 
 		// we add rewards at the end of the round, and they don't appear until the next round
 
-		startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeMiners.Nodes {
-			if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			t.Logf("miner %s delegates pools %d", beforeMiners.Nodes[i].ID, len(beforeMiners.Nodes[i].Pools))
-		}
-		t.Logf("start round %d, end round %d", startRound, endRound)
+		startRound, endRound := getStartAndEndRounds(
+			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
+		)
 
 		time.Sleep(time.Second) // give time for last round to be saved
 
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, true)
 
-		minerScConfig := getMinerScMap(t)
-		checkMinerFeeAmounts(
-			t,
-			minerIds,
-			minerScConfig["share_ratio"],
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
-		)
-		checkMinerFeeRewardFrequency(
-			t, startRound+1, endRound-1, history,
-		)
-		checkMinerDelegatePoolFeeAmounts(
-			t,
-			minerIds,
-			int(minerScConfig["num_miner_delegates_rewarded"]),
-			minerScConfig["share_ratio"],
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
+		balanceMinerIncome(
+			t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
 		)
 	})
+}
+
+func balanceMinerIncome(
+	t *test.SystemTest,
+	startRound, endRound int64,
+	minerIds []string,
+	beforeMiners, afterMiners []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	minerScConfig := getMinerScMap(t)
+	checkMinerFeeAmounts(
+		t,
+		minerIds,
+		minerScConfig["share_ratio"],
+		beforeMiners, afterMiners,
+		history,
+	)
+	checkMinerFeeRewardFrequency(
+		t, startRound+1, endRound-1, history,
+	)
+	checkMinerDelegatePoolFeeAmounts(
+		t,
+		minerIds,
+		int(minerScConfig["num_miner_delegates_rewarded"]),
+		minerScConfig["share_ratio"],
+		beforeMiners, afterMiners,
+		history,
+	)
 }
 
 // checkMinerRewards

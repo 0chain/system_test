@@ -45,59 +45,64 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		afterSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound := beforeSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeSharders.Nodes {
-			if startRound > beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeSharders.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
-			}
-		}
+		startRound, endRound := getStartAndEndRounds(
+			t, nil, nil, beforeSharders.Nodes, afterSharders.Nodes,
+		)
 
 		time.Sleep(time.Second) // give time for last round to be saved
 
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, false)
 
-		minerScConfig := getMinerScMap(t)
-		numSharderDelegatesRewarded := int(minerScConfig["num_sharder_delegates_rewarded"])
-		numShardersRewarded := int(minerScConfig["num_sharders_rewarded"])
-		if numShardersRewarded > len(sharderIds) {
-			numShardersRewarded = len(sharderIds)
-		}
-		if numShardersRewarded == 0 {
-			return
-		}
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-			"epoch changed during test, start %v finish %v",
-			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-		_, sharderBlockReward := blockRewards(startRound, minerScConfig)
-		bwPerSharder := int64(float64(sharderBlockReward) / float64(numShardersRewarded))
-
-		checkSharderBlockRewards(
-			t,
-			sharderIds,
-			bwPerSharder,
-			numSharderDelegatesRewarded,
-			beforeSharders.Nodes, afterSharders.Nodes,
-			history,
-		)
-
-		countSharderBlockRewards(
-			t, startRound+1, endRound-1, numShardersRewarded, history,
-		)
-
-		countDelegatesRewarded(
-			t, sharderIds, numSharderDelegatesRewarded, beforeSharders.Nodes, history,
-		)
-
-		balanceSharderDelegatePoolBlockRewards(
-			t, sharderIds, numSharderDelegatesRewarded, bwPerSharder, beforeSharders.Nodes, afterSharders.Nodes, history,
+		balanceSharderRewards(
+			t, startRound, endRound, sharderIds, beforeSharders.Nodes, afterSharders.Nodes, history,
 		)
 	})
+}
+
+func balanceSharderRewards(
+	t *test.SystemTest,
+	startRound, endRound int64,
+	sharderIds []string,
+	beforeSharders, afterSharders []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	minerScConfig := getMinerScMap(t)
+	numSharderDelegatesRewarded := int(minerScConfig["num_sharder_delegates_rewarded"])
+	numShardersRewarded := int(minerScConfig["num_sharders_rewarded"])
+	if numShardersRewarded > len(sharderIds) {
+		numShardersRewarded = len(sharderIds)
+	}
+	if numShardersRewarded == 0 {
+		return
+	}
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		"epoch changed during test, start %v finish %v",
+		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
+
+	_, sharderBlockReward := blockRewards(startRound, minerScConfig)
+	bwPerSharder := int64(float64(sharderBlockReward) / float64(numShardersRewarded))
+
+	checkSharderBlockRewards(
+		t,
+		sharderIds,
+		bwPerSharder,
+		numSharderDelegatesRewarded,
+		beforeSharders, afterSharders,
+		history,
+	)
+
+	countSharderBlockRewards(
+		t, startRound+1, endRound-1, numShardersRewarded, history,
+	)
+
+	countDelegatesRewarded(
+		t, sharderIds, numSharderDelegatesRewarded, beforeSharders, history,
+	)
+
+	balanceSharderDelegatePoolBlockRewards(
+		t, sharderIds, numSharderDelegatesRewarded, bwPerSharder, beforeSharders, afterSharders, history,
+	)
 }
 
 // checkSharderBlockRewards

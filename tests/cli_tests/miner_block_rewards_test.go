@@ -62,51 +62,54 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		// we add rewards at the end of the round, and they don't appear until the next round
 
-		startRound := beforeMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterMiners.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeMiners.Nodes {
-			if startRound > beforeMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
-			}
-		}
-		t.Logf("start round %d, end round %d", startRound, endRound)
+		startRound, endRound := getStartAndEndRounds(
+			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
+		)
 
 		time.Sleep(time.Second) // give time for last round to be saved
-
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, false)
 
-		minerScConfig := getMinerScMap(t)
-		require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
-			"epoch changed during test, start %v finish %v",
-			startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
-
-		minerBlockReward, _ := blockRewards(startRound, minerScConfig)
-
-		checkMinerBlockRewards(
-			t,
-			minerIds,
-			minerBlockReward,
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
-		)
-
-		countMinerBlockRewards(
-			t, startRound+1, endRound-1, history,
-		)
-
-		checkMinerDelegatePoolBlockRewards(
-			t,
-			minerIds,
-			int(minerScConfig["num_miner_delegates_rewarded"]),
-			minerBlockReward,
-			beforeMiners.Nodes, afterMiners.Nodes,
-			history,
+		balanceMinerRewards(
+			t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
 		)
 	})
+}
+
+func balanceMinerRewards(
+	t *test.SystemTest,
+	startRound, endRound int64,
+	minerIds []string,
+	beforeMiners, afterMiners []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	minerScConfig := getMinerScMap(t)
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+		"epoch changed during test, start %v finish %v",
+		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
+
+	minerBlockReward, _ := blockRewards(startRound, minerScConfig)
+
+	checkMinerBlockRewards(
+		t,
+		minerIds,
+		minerBlockReward,
+		beforeMiners, afterMiners,
+		history,
+	)
+
+	countMinerBlockRewards(
+		t, startRound+1, endRound-1, history,
+	)
+
+	checkMinerDelegatePoolBlockRewards(
+		t,
+		minerIds,
+		int(minerScConfig["num_miner_delegates_rewarded"]),
+		minerBlockReward,
+		beforeMiners, afterMiners,
+		history,
+	)
 }
 
 // checkMinerBlockRewards
@@ -503,4 +506,33 @@ func apiGetBlock(t *test.SystemTest, sharderBaseURL string, round int64) (*http.
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	t.Log("Get miners...")
 	return cliutil.RunCommand(t, "./zwallet ls-miners --active --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
+// getStartAndEndRounds
+// we want to the range of rounds between the miners and sharders showed changes
+func getStartAndEndRounds(
+	t *test.SystemTest, beforeMiners, afterMiners, beforeSharders, afterSharders []climodel.Node,
+) (int64, int64) {
+	require.Equal(t, len(beforeMiners), len(afterMiners), "miner count mismatch")
+	require.Equal(t, len(beforeSharders), len(afterSharders), "sharder count mismatch")
+	startRound := beforeMiners[0].RoundServiceChargeLastUpdated - 1
+	endRound := afterMiners[0].RoundServiceChargeLastUpdated + 1
+	for i := range beforeMiners {
+		if startRound > beforeMiners[i].RoundServiceChargeLastUpdated {
+			startRound = beforeMiners[i].RoundServiceChargeLastUpdated
+		}
+		if endRound < afterMiners[i].RoundServiceChargeLastUpdated {
+			endRound = afterMiners[i].RoundServiceChargeLastUpdated
+		}
+	}
+	for i := range beforeSharders {
+		if startRound > beforeSharders[i].RoundServiceChargeLastUpdated {
+			startRound = beforeSharders[i].RoundServiceChargeLastUpdated
+		}
+		if endRound < afterSharders[i].RoundServiceChargeLastUpdated {
+			endRound = afterSharders[i].RoundServiceChargeLastUpdated
+		}
+	}
+	t.Logf("start round %d, end round %d", startRound, endRound)
+	return startRound, endRound
 }

@@ -54,62 +54,65 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		afterSharders := getNodes(t, sharderIds, sharderUrl)
 
 		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound := beforeSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
-		endRound := afterSharders.Nodes[0].RoundServiceChargeLastUpdated + 1
-		for i := range beforeSharders.Nodes {
-			if startRound > beforeSharders.Nodes[i].RoundServiceChargeLastUpdated {
-				startRound = beforeSharders.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
-				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
-			}
-			t.Logf("sharder %s delegates pools %d", beforeSharders.Nodes[i].ID, len(beforeSharders.Nodes[i].Pools))
-		}
-		t.Logf("start round %d, end round %d", startRound, endRound)
+		startRound, endRound := getStartAndEndRounds(
+			t, nil, nil, beforeSharders.Nodes, afterSharders.Nodes,
+		)
 
 		time.Sleep(time.Second) // give time for last round to be saved
 
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, true)
 
-		minerScConfig := getMinerScMap(t)
-		numSharderDelegatesRewarded := int(minerScConfig["num_sharder_delegates_rewarded"])
-		var numShardersRewarded int
-		if len(sharderIds) > int(minerScConfig["num_sharders_rewarded"]) {
-			numShardersRewarded = int(minerScConfig["num_sharders_rewarded"])
-		} else {
-			numShardersRewarded = len(sharderIds)
-		}
-
-		minerShare := minerScConfig["share_ratio"]
-
-		checkSharderFeeAmounts(
-			t,
-			sharderIds,
-			minerShare,
-			numShardersRewarded,
-			beforeSharders.Nodes, afterSharders.Nodes,
-			history,
-		)
-		checkSharderFeeRewardFrequency(
-			t, startRound+1, endRound-1, numShardersRewarded, history,
-		)
-		checkSharderDelegatePoolFeeRewardFrequency(
-			t,
-			numSharderDelegatesRewarded,
-			sharderIds,
-			beforeSharders.Nodes,
-			history,
-		)
-		checkSharderDelegatePoolFeeAmounts(
-			t,
-			sharderIds,
-			minerShare,
-			numShardersRewarded, numSharderDelegatesRewarded,
-			beforeSharders.Nodes, afterSharders.Nodes,
-			history,
+		balanceSharderIncome(
+			t, startRound, endRound, sharderIds, beforeSharders.Nodes, afterSharders.Nodes, history,
 		)
 	})
+}
+
+func balanceSharderIncome(
+	t *test.SystemTest,
+	startRound, endRound int64,
+	sharderIds []string,
+	beforeSharders, afterSharders []climodel.Node,
+	history *cliutil.ChainHistory,
+) {
+	minerScConfig := getMinerScMap(t)
+	numSharderDelegatesRewarded := int(minerScConfig["num_sharder_delegates_rewarded"])
+	var numShardersRewarded int
+	if len(sharderIds) > int(minerScConfig["num_sharders_rewarded"]) {
+		numShardersRewarded = int(minerScConfig["num_sharders_rewarded"])
+	} else {
+		numShardersRewarded = len(sharderIds)
+	}
+
+	minerShare := minerScConfig["share_ratio"]
+
+	checkSharderFeeAmounts(
+		t,
+		sharderIds,
+		minerShare,
+		numShardersRewarded,
+		beforeSharders, afterSharders,
+		history,
+	)
+	checkSharderFeeRewardFrequency(
+		t, startRound+1, endRound-1, numShardersRewarded, history,
+	)
+	checkSharderDelegatePoolFeeRewardFrequency(
+		t,
+		numSharderDelegatesRewarded,
+		sharderIds,
+		beforeSharders,
+		history,
+	)
+	checkSharderDelegatePoolFeeAmounts(
+		t,
+		sharderIds,
+		minerShare,
+		numShardersRewarded, numSharderDelegatesRewarded,
+		beforeSharders, afterSharders,
+		history,
+	)
 }
 
 // checkSharderFeeAmounts
