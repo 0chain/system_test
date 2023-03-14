@@ -79,15 +79,14 @@ type Allocation struct {
 
 	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
 
-	StartTime            int64    `json:"start_time"`
-	Finalized            bool     `json:"finalized,omitempty"`
-	Canceled             bool     `json:"canceled,omitempty"`
-	MovedToChallenge     int64    `json:"moved_to_challenge,omitempty"`
-	MovedBack            int64    `json:"moved_back,omitempty"`
-	MovedToValidators    int64    `json:"moved_to_validators,omitempty"`
-	Curators             []string `json:"curators"`
-	FileOptions          uint16   `json:"file_options"`
-	ThirdPartyExtendable bool     `json:"third_party_extendable"`
+	StartTime            int64  `json:"start_time"`
+	Finalized            bool   `json:"finalized,omitempty"`
+	Canceled             bool   `json:"canceled,omitempty"`
+	MovedToChallenge     int64  `json:"moved_to_challenge,omitempty"`
+	MovedBack            int64  `json:"moved_back,omitempty"`
+	MovedToValidators    int64  `json:"moved_to_validators,omitempty"`
+	FileOptions          uint16 `json:"file_options"`
+	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {
@@ -756,13 +755,12 @@ var StorageCurrencySettigs = []string{
 	"free_allocation_settings.write_price_range.max",
 	"max_read_price",
 	"max_write_price",
-	"max_write_price",
+	"min_write_price",
 	"block_reward.block_reward",
 	"block_reward.qualifying_stake",
 }
 
 var StorageIntSettings = []string{
-
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -784,12 +782,9 @@ var StorageIntSettings = []string{
 	"cost.add_free_storage_assigner",
 	"cost.free_allocation_request",
 	"cost.free_update_allocation",
-	"cost.add_curator",
-	"cost.remove_curator",
 	"cost.blobber_health_check",
 	"cost.update_blobber_settings",
 	"cost.pay_blobber_block_rewards",
-	"cost.curator_transfer_allocation",
 	"cost.challenge_request",
 	"cost.challenge_response",
 	"cost.generate_challenges",
