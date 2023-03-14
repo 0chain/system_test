@@ -95,7 +95,7 @@ func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	params := map[string]string{
 		"contents": "full",
 	}
-	ch.blocks = ApiGetListRetries[model.EventDBBlock](t, url, params, ch.from, ch.to+1, restApiRetries)
+	ch.blocks = ApiGetList[model.EventDBBlock](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl string) {
@@ -104,7 +104,7 @@ func (ch *ChainHistory) readDelegateRewards(t *test.SystemTest, sharderBaseUrl s
 		"start": strconv.FormatInt(ch.from, 10),
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.DelegateRewards = ApiGetListRetries[model.RewardDelegate](t, url, params, ch.from, ch.to+1, restApiRetries)
+	ch.DelegateRewards = ApiGetList[model.RewardDelegate](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl string) {
@@ -113,7 +113,7 @@ func (ch *ChainHistory) readProviderRewards(t *test.SystemTest, sharderBaseUrl s
 		"start": strconv.FormatInt(ch.from, 10),
 		"end":   strconv.FormatInt(ch.to+1, 10),
 	}
-	ch.providerRewards = ApiGetListRetries[model.RewardProvider](t, url, params, ch.from, ch.to+1, restApiRetries)
+	ch.providerRewards = ApiGetList[model.RewardProvider](t, url, params, ch.from, ch.to+1)
 }
 
 func (ch *ChainHistory) readTransaction(t *test.SystemTest, sharderBaseUrl string) {
