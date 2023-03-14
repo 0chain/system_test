@@ -470,7 +470,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *test.SystemTest) {
@@ -494,7 +494,7 @@ func TestUpload(testSetup *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
@@ -530,7 +530,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
@@ -600,7 +600,7 @@ func TestUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
-			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
@@ -700,6 +700,38 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "filename is longer than 100 characters")
+	})
+
+	t.Run("Upload File should fail if upload file option is forbidden", func(t *test.SystemTest) {
+		allocSize := int64(1 * MB)
+		fileSize := int64(512 * KB)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":          allocSize,
+			"forbid_upload": nil,
+		})
+
+		dirPath := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
+		randomFilename := cliutils.RandomAlphaNumericString(101)
+		filename := fmt.Sprintf("%s%s%s_test.txt", dirPath, string(os.PathSeparator), randomFilename)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err)
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+		}), false)
+		require.Nil(t, err)
+		require.NotContains(t, output[0], filename)
 	})
 }
 

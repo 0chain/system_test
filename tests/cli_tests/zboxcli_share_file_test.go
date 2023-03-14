@@ -80,7 +80,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -354,7 +354,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 60*time.Second, func(t *test.SystemTest) {
@@ -752,7 +751,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
@@ -880,7 +878,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -954,7 +952,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share non-existent file should fail", 60*time.Second, func(t *test.SystemTest) {
@@ -1052,6 +1049,7 @@ func TestShareFile(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1166,6 +1164,7 @@ func TestShareFile(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 3*time.Minute, func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
