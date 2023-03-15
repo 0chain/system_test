@@ -87,10 +87,6 @@ func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename strin
 		return err
 	}
 	var tokens float64 = 2
-	_, err = executeFaucetWithTokens(t, cliConfigFilename, tokens)
-	if err != nil {
-		return err
-	}
 
 	// Lock half the tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
@@ -147,7 +143,7 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, o
 
 func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
 	var tokens = 2.0
-	registerWalletWithTokens(t, cliConfigFilename, name, tokens)
+	registerWalletWithTokens(t, cliConfigFilename, name)
 	readPoolParams := createParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
@@ -155,11 +151,9 @@ func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilenam
 	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
 }
 
-func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
+func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string) {
 	_, err := registerWalletForName(t, cliConfigFilename, name)
 	require.NoErrorf(t, err, "register wallet %s", name)
-	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
-	require.NoErrorf(t, err, "get tokens for wallet %s", name)
 }
 
 func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {

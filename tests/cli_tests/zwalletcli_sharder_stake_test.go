@@ -49,9 +49,6 @@ func TestSharderStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     1,
@@ -83,9 +80,6 @@ func TestSharderStake(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Multiple stakes against a sharder should not create multiple pools", 80*time.Second, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
 		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
@@ -141,9 +135,6 @@ func TestSharderStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     -1,
@@ -159,10 +150,6 @@ func TestSharderStake(testSetup *testing.T) {
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
-
-		initialBalance := 1.0
-		output, err = executeFaucetWithTokens(t, configPath, initialBalance)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
@@ -183,7 +170,7 @@ func TestSharderStake(testSetup *testing.T) {
 		}
 
 		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, int64(initialBalance))
+		require.Greater(t, balance, int64(defaultInitFaucetTokens))
 	})
 
 	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {

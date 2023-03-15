@@ -27,9 +27,6 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
-
 		allocParam := createParams(map[string]interface{}{
 			"lock":   balance,
 			"size":   10485760,
@@ -60,9 +57,6 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 	t.Run("Total balance in blobber pool equals locked tokens", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
 			"lock":   balance,

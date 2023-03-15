@@ -102,9 +102,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
-		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
-
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
@@ -181,9 +178,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
-		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
-
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
@@ -254,9 +248,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 		output, err = registerWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
-		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")

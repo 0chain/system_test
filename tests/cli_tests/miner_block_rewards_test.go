@@ -47,7 +47,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunWithTimeout("Miner share of block fees and rewards", 240*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET")
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
@@ -241,14 +241,9 @@ func confirmPoolPayments(
 	}
 }
 
-func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
+func initialiseTest(t *test.SystemTest, wallet string) string {
 	output, err := registerWallet(t, configPath)
 	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-	if funds {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-	}
 
 	output, err = registerWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))

@@ -377,9 +377,6 @@ func setupWallet(t *test.SystemTest, configPath string) []string {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, configPath, 1)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
 	output, err = getBalance(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 

@@ -31,7 +31,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.Run("Sharder share of block fees and rewards", func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET")
 
 		sharderUrl := getSharderUrl(t)
 		sharderIds := getSortedSharderIds(t, sharderUrl)

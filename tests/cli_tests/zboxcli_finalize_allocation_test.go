@@ -39,7 +39,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
-		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
+		require.Regexp(t, matcher, output[0], "finalize execution output did not match expected")
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {

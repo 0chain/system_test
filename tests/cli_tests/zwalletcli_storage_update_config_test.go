@@ -26,7 +26,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("should allow update setting updates", 3*time.Minute, func(t *test.SystemTest) { // todo: too slow
-		_ = initialiseTest(t, scOwnerWallet, false)
+		_ = initialiseTest(t, scOwnerWallet)
 
 		// ATM the owner is the only string setting and that is handled elsewhere
 		settings := getStorageConfigMap(t)

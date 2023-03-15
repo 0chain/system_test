@@ -1285,7 +1285,6 @@ func shareFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 }
 
 func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
-	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	// Output:
 	// 		[0]:"ZCN wallet created"
@@ -1297,9 +1296,6 @@ func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) 
 	require.Len(t, output, 3, strings.Join(output, "\n"))
 	require.Equal(t, "Read pool created successfully", output[1], strings.Join(output, "\n"))
 	require.Equal(t, "Wallet registered", output[2], strings.Join(output, "\n"))
-
-	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   0.5,

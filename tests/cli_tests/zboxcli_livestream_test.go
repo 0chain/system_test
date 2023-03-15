@@ -43,9 +43,6 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))
@@ -117,9 +114,6 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))
@@ -190,10 +184,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
+		
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))
@@ -262,10 +253,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
+		
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))
@@ -330,10 +318,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
+		
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))
@@ -399,10 +384,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
+		
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 1,
 		}))

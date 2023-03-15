@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -678,8 +677,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
-		require.Nil(t, err)
 
 		// expand allocation
 		params = createParams(map[string]interface{}{
@@ -721,8 +718,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
-		require.Nil(t, err)
 
 		// reduce allocation should fail
 		params = createParams(map[string]interface{}{
@@ -815,20 +810,12 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 2.0
 	// Then create new allocation
 	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
 	for _, params := range extraParams {
-		// Extract parameters unrelated to upload
-		if tokenStr, ok := params["tokens"]; ok {
-			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tokenStr), 64)
-			require.Nil(t, err)
-			faucetTokens = token
-			delete(params, "tokens")
-		}
 		for k, v := range params {
 			options[k] = v
 		}
@@ -836,9 +823,6 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	// First create a wallet and run faucet command
 	output, err := registerWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	output, err = createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))

@@ -40,7 +40,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 		walletOwner := escapedTestName(t) + "_wallet"
 
-		_ = initialiseTest(t, walletOwner, true)
+		_ = initialiseTest(t, walletOwner)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 0.5,
@@ -187,7 +187,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
-		_ = initialiseTest(t, walletOwner, true)
+		_ = initialiseTest(t, walletOwner)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 0.5,
@@ -340,7 +340,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 		walletOwner := escapedTestName(t) + "_wallet"
 
-		_ = initialiseTest(t, walletOwner, true)
+		_ = initialiseTest(t, walletOwner)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"lock": 0.5,
