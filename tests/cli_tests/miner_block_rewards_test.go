@@ -514,8 +514,15 @@ func getStartAndEndRounds(
 ) (startRound, endRound int64) {
 	require.Equal(t, len(beforeMiners), len(afterMiners), "miner count mismatch")
 	require.Equal(t, len(beforeSharders), len(afterSharders), "sharder count mismatch")
-	startRound = beforeMiners[0].RoundServiceChargeLastUpdated - 1
-	endRound = afterMiners[0].RoundServiceChargeLastUpdated + 1
+	if len(beforeMiners) > 0 {
+		startRound = beforeMiners[0].RoundServiceChargeLastUpdated - 1
+		endRound = afterMiners[0].RoundServiceChargeLastUpdated + 1
+	} else {
+		require.True(t, len(beforeSharders) > 0, "no miners or sharders found")
+		startRound = beforeSharders[0].RoundServiceChargeLastUpdated - 1
+		endRound = afterSharders[0].RoundServiceChargeLastUpdated + 1
+	}
+
 	for i := range beforeMiners {
 		if startRound > beforeMiners[i].RoundServiceChargeLastUpdated {
 			startRound = beforeMiners[i].RoundServiceChargeLastUpdated
