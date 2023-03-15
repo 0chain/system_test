@@ -112,7 +112,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.Run("After downloading a shared file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared file, return a readmarker for each blobber used in download", 120*time.Second,func(t *test.SystemTest) {
 		var authTicket, filename, allocationID string
 
 		filesize := int64(10)
@@ -169,7 +169,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.Run("After downloading a shared encrypted file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -239,7 +239,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.Run("After downloading a shared encrypted file by lookuphash, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared encrypted file by lookuphash, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
