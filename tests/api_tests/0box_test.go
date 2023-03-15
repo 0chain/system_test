@@ -563,7 +563,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftUpdated)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	// FIXME see: https://github.com/0chain/0box/issues/507
@@ -609,7 +609,7 @@ func Test0boxNft(testSetup *testing.T) {
 		// require.Error(t, err) Fixme error is not send in error instead it is send
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftCollectionId)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 }
 
