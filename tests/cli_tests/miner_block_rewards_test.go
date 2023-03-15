@@ -508,15 +508,14 @@ func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	return cliutil.RunCommand(t, "./zwallet ls-miners --active --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
-// getStartAndEndRounds
-// we want to the range of rounds between the miners and sharders showed changes
 func getStartAndEndRounds(
-	t *test.SystemTest, beforeMiners, afterMiners, beforeSharders, afterSharders []climodel.Node,
-) (int64, int64) {
+	t *test.SystemTest,
+	beforeMiners, afterMiners, beforeSharders, afterSharders []climodel.Node,
+) (startRound, endRound int64) {
 	require.Equal(t, len(beforeMiners), len(afterMiners), "miner count mismatch")
 	require.Equal(t, len(beforeSharders), len(afterSharders), "sharder count mismatch")
-	startRound := beforeMiners[0].RoundServiceChargeLastUpdated - 1
-	endRound := afterMiners[0].RoundServiceChargeLastUpdated + 1
+	startRound = beforeMiners[0].RoundServiceChargeLastUpdated - 1
+	endRound = afterMiners[0].RoundServiceChargeLastUpdated + 1
 	for i := range beforeMiners {
 		if startRound > beforeMiners[i].RoundServiceChargeLastUpdated {
 			startRound = beforeMiners[i].RoundServiceChargeLastUpdated
