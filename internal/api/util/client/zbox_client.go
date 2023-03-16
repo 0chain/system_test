@@ -316,7 +316,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 	return zboxWallet, resp, err
 }
 
-func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.MessageContainer, *resty.Response, error) {
 	t.Logf("Posting Allocation using 0box...")
 	var message *model.MessageContainer
 
@@ -342,7 +342,7 @@ func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocation
 			"X-App-ID-TOKEN":     idToken,
 			"X-App-Phone-Number": phoneNumber,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-APP-TYPE":         appType,
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
