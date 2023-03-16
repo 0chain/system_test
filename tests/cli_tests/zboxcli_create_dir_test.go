@@ -134,7 +134,6 @@ func TestCreateDir(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "directory_exists")
-
 	})
 
 	t.Run("create dir with no leading slash should not work", func(t *test.SystemTest) {
