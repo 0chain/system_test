@@ -413,7 +413,7 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 
 	return message, resp, err
 }
-func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletKeys, *resty.Response, error) {
+func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletKeys, *resty.Response, error) {
 	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
 	var zboxWallets *model.ZboxWalletKeys
 
@@ -432,7 +432,7 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
+			"X-APP-TYPE":             appType,
 		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
