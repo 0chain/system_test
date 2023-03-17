@@ -381,3 +381,5 @@ func GetReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) []c
 	}
 	return cliutils.ApiGetList[climodel.ReadMarker](t, url, params, 0, 100)
 }
+
+//

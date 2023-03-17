@@ -58,7 +58,7 @@ func ApiGetError[T any](url string, params map[string]string) (*T, error) {
 
 func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T {
 	url = addParms(url, params)
-
+	t.Logf("api query %s ...", url)
 	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "with request", url)
@@ -71,6 +71,26 @@ func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T 
 	require.NoError(t, err, "reading response body: %v", err)
 
 	var result = new(T)
+	err = json.Unmarshal(resBody, &result)
+	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
+	return result
+}
+
+func ApiGetSlice[T any](t *test.SystemTest, url string, params map[string]string) []T {
+	url = addParms(url, params)
+	t.Logf("api query %s ...", url)
+	res, err := http.Get(url) //nolint:gosec
+
+	require.NoError(t, err, "with request", url)
+	defer res.Body.Close()
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
+		"failed API request %s, status code: %d", url, res.StatusCode)
+	require.NotNil(t, res.Body, "API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.NoError(t, err, "reading response body: %v", err)
+
+	var result []T
 	err = json.Unmarshal(resBody, &result)
 	require.NoError(t, err, "deserializing JSON string `%s`: %v", string(resBody), err)
 	return result
@@ -104,6 +124,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 		params["offset"] = strconv.FormatInt(offset, 10)
 	}
 	url = addParms(url, params)
+	t.Logf("api list query %s ...", url)
 	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
