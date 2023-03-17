@@ -26,11 +26,11 @@ func TestRegisterWallet(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Register wallet outputs expected", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := registerWallet(t, configPath, withNoFaucetPour())
 
 		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1, len(output))
-		require.Equal(t, "Wallet registered", output[0])
+		require.Len(t, output, 3, len(output))
+		require.Equal(t, "Wallet registered", output[2])
 	})
 
 	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
