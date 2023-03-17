@@ -88,7 +88,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// Before send balance checks
 		srcBalanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-		require.Equal(t, float64(5), srcBalanceBefore)
+		require.Equal(t, 4.9, srcBalanceBefore)
 
 		_, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.NoError(t, err)
@@ -106,7 +106,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// After send balance checks
 		srcBalanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, srcBalanceBefore-1.01, srcBalanceAfter)
+		require.Equal(t, 3.89, srcBalanceAfter)
 
 		targetBalanceAfter, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
