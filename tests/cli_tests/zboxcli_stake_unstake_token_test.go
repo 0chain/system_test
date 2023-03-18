@@ -188,8 +188,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Wallet balance after staking tokens
 		balance2, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		// stake failed so no txn fee paid
-		require.Equal(t, balance2, balance)
+		require.Less(t, balance2, balance) // pay txn fee
 	})
 
 	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
@@ -225,8 +224,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Wallet balance after staking tokens
 		balance2, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		// stakeing failed so no txn fee paid
-		require.Equal(t, balance2, balance)
+		require.Less(t, balance2, balance) // pay txn fee
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
