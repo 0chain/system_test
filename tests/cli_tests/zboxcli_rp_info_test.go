@@ -27,7 +27,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 5.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 4.9.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
