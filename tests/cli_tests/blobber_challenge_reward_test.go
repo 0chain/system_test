@@ -368,7 +368,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		}
 
 		require.Equal(t, totalExpectedReward, totalReward, "Total reward is not equal to expected reward")
-		require.Equal(t, blobberChallengeRewards[blobberListString[0]], blobberChallengeRewards[blobberListString[1]], "Blobber 1 and Blobber 2 rewards are not equal")
+		require.Equal(t, float64(blobberChallengeRewards[blobberListString[0]])*3.3, float64(blobberChallengeRewards[blobberListString[1]])*6.7, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.Equal(t, validatorChallengeRewards[validatorListString[0]], validatorChallengeRewards[validatorListString[1]], "Validator 1 and Validator 2 rewards are not equal")
 	})
 
@@ -586,7 +586,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		}
 
 		require.Equal(t, totalExpectedReward, totalReward, "Total reward is not equal to expected reward")
-		require.Equal(t, blobberChallengeRewards[blobberListString[0]], blobberChallengeRewards[blobberListString[1]], "Blobber 1 and Blobber 2 rewards are not equal")
+		require.Equal(t, float64(blobberChallengeRewards[blobberListString[0]])*3.3, float64(blobberChallengeRewards[blobberListString[1]])*6.7, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.Equal(t, validatorChallengeRewards[validatorListString[0]], validatorChallengeRewards[validatorListString[1]], "Validator 1 and Validator 2 rewards are not equal")
 	})
 
