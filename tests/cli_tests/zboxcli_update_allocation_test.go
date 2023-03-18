@@ -849,7 +849,6 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 
 	fmt.Println("Allocation : ")
 	fmt.Println(getAllocationID(output[0]))
-	fmt.Println(getAllocationID(output[1]))
 	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID

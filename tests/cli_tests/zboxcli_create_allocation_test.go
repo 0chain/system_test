@@ -390,10 +390,7 @@ func setupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens f
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
-	output, err = executeFaucetWithTokens(t, configPath, tokens)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	output, err = getBalance(t, configPath)
+	executeFaucetWithTokens(t, configPath, tokens)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	return output
