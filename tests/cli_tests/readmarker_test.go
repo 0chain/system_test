@@ -27,6 +27,9 @@ func TestReadMarker(testSetup *testing.T) {
 	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 	sharderUrl := getSharderUrl(t)
 
+	err = os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
 	t.Run("After downloading a file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
@@ -112,7 +115,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a shared file, return a readmarker for each blobber used in download", 120*time.Second,func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared file, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
 		var authTicket, filename, allocationID string
 
 		filesize := int64(10)
