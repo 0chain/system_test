@@ -89,6 +89,50 @@ func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string, includeT
 	ch.setup(t)
 }
 
+// TotalRecordedRewards
+// Sums the total rewards of all types recorded during given round period
+func (ch *ChainHistory) TotalRecordedRewards(t *test.SystemTest, from, to int64) int64 {
+	require.True(t, from >= ch.from, "from value out of range")
+	require.True(t, to <= ch.to, "to value out of range")
+	var total int64
+	for round := from; round <= to; round++ {
+		roundHistory := ch.RoundHistory(t, round)
+		for _, dReward := range roundHistory.DelegateRewards {
+			total += dReward.Amount
+		}
+		for _, dReward := range roundHistory.ProviderRewards {
+			total += dReward.Amount
+		}
+	}
+	return total
+}
+
+func (ch ChainHistory) TotalRecordedProviderRewards(t *test.SystemTest, from, to int64) int64 {
+	require.True(t, from >= ch.from, "from value out of range")
+	require.True(t, to <= ch.to, "to value out of range")
+	var total int64
+	for round := from; round <= to; round++ {
+		roundHistory := ch.RoundHistory(t, round)
+		for _, dReward := range roundHistory.ProviderRewards {
+			total += dReward.Amount
+		}
+	}
+	return total
+}
+
+func (ch ChainHistory) TotalRecordedDelegateRewards(t *test.SystemTest, from, to int64) int64 {
+	require.True(t, from >= ch.from, "from value out of range")
+	require.True(t, to <= ch.to, "to value out of range")
+	var total int64
+	for round := from; round <= to; round++ {
+		roundHistory := ch.RoundHistory(t, round)
+		for _, dReward := range roundHistory.DelegateRewards {
+			total += dReward.Amount
+		}
+	}
+	return total
+}
+
 func (ch *ChainHistory) readBlocks(t *test.SystemTest, sharderBaseUrl string) {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/get_blocks")
 	params := map[string]string{
