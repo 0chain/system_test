@@ -121,7 +121,7 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Len(t, files, 0)
 	})
 
-	t.Run("create dir with existing dirname should fail", func(t *test.SystemTest) {
+	t.Run("create dir with existing dirname should work", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		dirname := "/existingdir"
@@ -131,9 +131,9 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Equal(t, dirname+" directory created", output[0])
 
 		output, err = createDir(t, configPath, allocID, dirname, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "directory_exists")
+		require.Equal(t, dirname+" directory created", output[0])
 	})
 
 	t.Run("create dir with no leading slash should not work", func(t *test.SystemTest) {
