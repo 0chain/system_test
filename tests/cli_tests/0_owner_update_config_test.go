@@ -13,7 +13,6 @@ import (
 
 func TestOwnerUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")

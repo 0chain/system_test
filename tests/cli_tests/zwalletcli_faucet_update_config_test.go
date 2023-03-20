@@ -16,7 +16,6 @@ import (
 
 func TestFaucetUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	// register SC owner wallet
 	output, err := registerWalletForName(t, configPath, scOwnerWallet)

@@ -16,7 +16,6 @@ import (
 
 func TestMinerUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"

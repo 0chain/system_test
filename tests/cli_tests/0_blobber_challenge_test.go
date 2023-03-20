@@ -22,7 +22,6 @@ import (
 func TestBlobberChallenge(testSetup *testing.T) {
 	// todo: all of these tests poll for up to 2mins30s - is this reasonable?
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

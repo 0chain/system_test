@@ -35,7 +35,6 @@ const (
 
 func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")

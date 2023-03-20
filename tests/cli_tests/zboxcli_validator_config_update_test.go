@@ -17,7 +17,6 @@ import (
 
 func TestValidatorConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("DEBUG txn fee")
 
 	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
