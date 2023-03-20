@@ -284,7 +284,7 @@ func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry boo
 
 func getZboxCliVersion(t *test.SystemTest) ([]string, error) {
 	t.Log("Get zboxcli version...")
-	cmd := fmt.Sprintf("./zbox version %s --silent")
+	cmd := "./zbox version %s --silent"
 	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
