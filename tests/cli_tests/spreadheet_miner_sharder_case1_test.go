@@ -81,6 +81,58 @@ func TestSpreadsheetMinerSharderCase1(testSetup *testing.T) { // nolint:gocyclo 
 	//  })
 }
 
+func SSMSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
+	// 11 miners, 3 sharders
+	require.Len(t, minerIds, sSMSNumberMiners)
+	require.Len(t, sharderIds, sSMSNumberSharders)
+
+	// 1 delegate each, equal stake
+	t.Log("locking tokens in new miner delegate pools")
+	_ = createStakePools(t, minerIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderMiner)
+	t.Log("locking tokens in new sharder delegate pools")
+	_ = createStakePools(t, sharderIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderSharder)
+	miners := getNodes(t, minerIds, sharderUrl)
+	sharders := getNodes(t, sharderIds, sharderUrl)
+	for i := range miners.Nodes {
+		require.Len(t, miners.Nodes[i].StakePool.Pools, 1,
+			"there should be exactly one stake pool per miner")
+		for _, pool := range miners.Nodes[i].StakePool.Pools {
+			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
+				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
+		}
+	}
+	for i := range sharders.Nodes {
+		require.Len(t, sharders.Nodes[i].StakePool.Pools, 1,
+			"there should be exactly one stake pool per sharder")
+		for _, pool := range sharders.Nodes[i].StakePool.Pools {
+			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
+				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
+		}
+	}
+
+	// Service charge set to 20%
+	for i := range miners.Nodes {
+		require.Equalf(t, miners.Nodes[i].Settings.ServiceCharge, sSMSServiceCharge, "")
+	}
+	for i := range sharders.Nodes {
+		require.Equalf(t, sharders.Nodes[i].Settings.ServiceCharge, sSMSServiceCharge, "")
+	}
+
+	// Turn challenge off
+	storageSettings := getStorageConfigMap(t)
+	challengesEnabled, ok := storageSettings.Boolean["challenge_enabled"]
+	require.True(t, ok, "missing challenge enabled setting")
+	require.Falsef(t, challengesEnabled, "challenge enabled setting should be false")
+
+	// costs all set to zero
+	checkCostValues(t, storageSettings.Numeric, 0)
+	checkCostValues(t, getMinerScMap(t), 0)
+
+	//  No blobbers
+	blobbers := getBlobbers(t)
+	require.Len(t, blobbers, 0)
+}
+
 func displayMetricsMinerSharders(
 	t *test.SystemTest,
 	endRound int64,
@@ -142,6 +194,7 @@ func displayMetricsMinerSharders(
 	_, _ = fmt.Println("\ttotal mined", endSnapshot[0].MinedTotal)
 	_, _ = fmt.Println("\ttotal rewards", endSnapshot[0].TotalRewards)
 	_, _ = fmt.Println("\ttransaction count", endSnapshot[0].TransactionsCount)
+	_, _ = fmt.Println("\ttotal transaction fee", history.TotalTransactionFees(t, 0, endRound))
 	_, _ = fmt.Println("from rewards providers table")
 	_, _ = fmt.Println("\ttotal rewards table", rewardedRecorded)
 	_, _ = fmt.Println("\tproviders", rewardedProviderRewards)
@@ -206,58 +259,6 @@ func estimateReward(
 		}
 	}
 	return currentReward, totalReward, delegateRewards
-}
-
-func SSMSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
-	// 11 miners, 3 sharders
-	require.Len(t, minerIds, sSMSNumberMiners)
-	require.Len(t, sharderIds, sSMSNumberSharders)
-
-	// 1 delegate each, equal stake
-	t.Log("locking tokens in new miner delegate pools")
-	_ = createStakePools(t, minerIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderMiner)
-	t.Log("locking tokens in new sharder delegate pools")
-	_ = createStakePools(t, sharderIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderSharder)
-	miners := getNodes(t, minerIds, sharderUrl)
-	sharders := getNodes(t, sharderIds, sharderUrl)
-	for i := range miners.Nodes {
-		//require.Len(t, miners.Nodes[i].StakePool.Pools, 1,
-		//	"there should be exactly one stake pool per miner")
-		for _, pool := range miners.Nodes[i].StakePool.Pools {
-			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
-				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
-		}
-	}
-	for i := range sharders.Nodes {
-		//require.Len(t, sharders.Nodes[i].StakePool.Pools, 1,
-		//	"there should be exactly one stake pool per sharder")
-		for _, pool := range sharders.Nodes[i].StakePool.Pools {
-			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
-				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
-		}
-	}
-
-	// Service charge set to 20%
-	for i := range miners.Nodes {
-		require.Equalf(t, miners.Nodes[i].Settings.ServiceCharge, sSMSServiceCharge, "")
-	}
-	for i := range sharders.Nodes {
-		require.Equalf(t, sharders.Nodes[i].Settings.ServiceCharge, sSMSServiceCharge, "")
-	}
-
-	// Turn challenge off
-	storageSettings := getStorageConfigMap(t)
-	challengesEnabled, ok := storageSettings.Boolean["challenge_enabled"]
-	require.True(t, ok, "missing challenge enabled setting")
-	require.Falsef(t, challengesEnabled, "challenge enabled setting should be false")
-
-	// costs all set to zero
-	checkCostValues(t, storageSettings.Numeric, 0)
-	checkCostValues(t, getMinerScMap(t), 0)
-
-	//  No blobbers
-	blobbers := getBlobbers(t)
-	require.Len(t, blobbers, 0)
 }
 
 func checkCostValues(t *test.SystemTest, settings map[string]float64, requiredCost int64) {

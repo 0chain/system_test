@@ -59,6 +59,18 @@ func (ch *ChainHistory) To() int64 {
 	return ch.to
 }
 
+func (ch *ChainHistory) TotalTransactionFees(t *test.SystemTest, from, to int64) int64 {
+	require.True(t, ch.from <= from)
+	require.True(t, ch.to >= to)
+	var total int64
+	for i := range ch.transactions {
+		if ch.transactions[i].Round >= from && ch.transactions[i].Round <= to {
+			total += ch.transactions[i].Fee
+		}
+	}
+	return total
+}
+
 func (ch *ChainHistory) TimesWonBestMiner(minerId string) int64 {
 	var won int64
 	for i := range ch.blocks {
