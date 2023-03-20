@@ -1116,7 +1116,7 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "biography saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating bio successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info Avatar should work", func(t *test.SystemTest) {
@@ -1130,7 +1130,7 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "avatar saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating avatar successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info background image should work", func(t *test.SystemTest) {
@@ -1145,7 +1145,7 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "background image saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating bgimage successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info username should work", func(t *test.SystemTest) {
