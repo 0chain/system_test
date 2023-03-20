@@ -1992,25 +1992,27 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
+		allocation_id := "allocation ID created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocation_id,
 			allocationName,
 			allocationDescription,
 			allocationType,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			"blimp",
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		_, _, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
-		require.Error(t, err)
-		// require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
+
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		// I guess this a bug. Will discuss it and fix it
 	})
 
@@ -2346,7 +2348,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		_, _, err = zboxClient.PostAllocation(t,
+		_, response, err = zboxClient.PostAllocation(t,
 			zboxClient.DefaultAllocationId,
 			allocationName,
 			allocationDescription,
@@ -2356,8 +2358,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"abc",
 		)
-		require.Error(t, err)
-		require.Equal(t, `{"error":{"code":"invalid_header","msg":"invalid application type."}}`, err.Error())
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, `{"error":{"code":"invalid_header","msg":"invalid application type."}}`, response.String())
 	})
 
 	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
