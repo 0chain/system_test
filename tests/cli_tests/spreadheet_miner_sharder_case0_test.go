@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestSpreadsheetMinerSharderCase1
+// TestSpreadsheetMinerSharderCase0
 // 11 miners, 3 sharders to represent a scaled version of 111 miners and 30 sharders for mainnet
-// 1 delegate each, equal stake
+// no delegate each,
 // Loadtest is off
 // Txn fee set to zero, Service charge set to 20%. Turn challenge off. No blobbers
 // Miners and sharders should get equal rewards. May need to find the right share ratio

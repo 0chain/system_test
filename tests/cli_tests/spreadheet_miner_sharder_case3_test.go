@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -12,9 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestSpreadsheetMinerSharderCase2
+// TestSpreadsheetMinerSharderCase3
 // 11 miners, 3 sharders to represent a scaled version of 111 miners and 30 sharders for mainnet
-// 2 delegate each, equal stake, one delegate collects rewards
+// 2 delegate each, one twice the other's stake, one delegate collects rewards
 // Loadtest is off
 // Txn fee set to zero, Service charge set to 20%. Turn challenge off. No blobbers
 // Miners and sharders should get equal rewards. May need to find the right share ratio
@@ -22,7 +21,7 @@ import (
 // Each miner/sharder delegate income should be equal and is based on rewards minus the service charge.
 // The delegate should also receive the service fee portion.
 // Total Rewards = Rewards from all miners and sharders
-func TestSpreadsheetMinerSharderCase2(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestSpreadsheetMinerSharderCase3(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	//  t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
@@ -36,7 +35,7 @@ func TestSpreadsheetMinerSharderCase2(testSetup *testing.T) { // nolint:gocyclo 
 	minerIds := getSortedMinerIds(t, sharderUrl)
 	sharderIds := getSortedSharderIds(t, sharderUrl)
 
-	walletsMiners, walletsSharders := SSMSCase2Setup(t, minerIds, sharderIds, sharderUrl)
+	walletsMiners, walletsSharders := SSMSCase3Setup(t, minerIds, sharderIds, sharderUrl)
 
 	// ----------------------------------- w
 	time.Sleep(time.Second * 1)
@@ -91,16 +90,16 @@ func TestSpreadsheetMinerSharderCase2(testSetup *testing.T) { // nolint:gocyclo 
 	//  })
 }
 
-func SSMSCase2Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) (minerWallets, sharderWallets [][]string) {
+func SSMSCase3Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) (minerWallets, sharderWallets [][]string) {
 	// 11 miners, 3 sharders
 	require.Len(t, minerIds, sSMSNumberMiners)
 	require.Len(t, sharderIds, sSMSNumberSharders)
 
 	// 2 delegate each, equal stake
 	t.Log("locking tokens in new miner delegate pools")
-	minerWallets = createStakePools(t, minerIds, []float64{sSMSMinerSharderStakePoolSize, sSMSMinerSharderStakePoolSize}, climodel.ProviderMiner)
+	minerWallets = createStakePools(t, minerIds, []float64{sSMSMinerSharderStakePoolSize, 2 * sSMSMinerSharderStakePoolSize}, climodel.ProviderMiner)
 	t.Log("locking tokens in new sharder delegate pools")
-	sharderWallets = createStakePools(t, sharderIds, []float64{sSMSMinerSharderStakePoolSize, sSMSMinerSharderStakePoolSize}, climodel.ProviderSharder)
+	sharderWallets = createStakePools(t, sharderIds, []float64{sSMSMinerSharderStakePoolSize, 2 * sSMSMinerSharderStakePoolSize}, climodel.ProviderSharder)
 
 	time.Sleep(time.Second)
 
@@ -109,18 +108,10 @@ func SSMSCase2Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 	for i := range miners.Nodes {
 		require.Len(t, miners.Nodes[i].StakePool.Pools, 2,
 			"there should be exactly one stake pool per miner")
-		for _, pool := range miners.Nodes[i].StakePool.Pools {
-			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
-				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
-		}
 	}
 	for i := range sharders.Nodes {
 		require.Len(t, sharders.Nodes[i].StakePool.Pools, 2,
 			"there should be exactly one stake pool per sharder")
-		for _, pool := range sharders.Nodes[i].StakePool.Pools {
-			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
-				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
-		}
 	}
 
 	// Service charge set to 20%
@@ -146,15 +137,4 @@ func SSMSCase2Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 	blobbers := getBlobbers(t)
 	require.Len(t, blobbers, 0)
 	return minerWallets, sharderWallets
-}
-
-func collectRewardsMinerSharder(t *test.SystemTest, cliConfigFilename, params string, retry bool, wallet string) ([]string, error) {
-	t.Log("collecting rewards...")
-	cmd := fmt.Sprintf("./zwallet collect-reward %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
-		params, wallet, cliConfigFilename)
-	if retry {
-		return cliutil.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutil.RunCommandWithoutRetry(cmd)
-	}
 }
