@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain API System test suite [spreadheet_miner_sharder/0cbf73ae] ran against [dev-3.devnet-0chain.net] at [2023-03-20_16.34.04]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain API System test suite [spreadheet_miner_sharder/0cbf73ae] ran against [dev-3.devnet-0chain.net] at [2023-03-20_16.34.04]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>148</strong>Duration: <strong>4ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>148</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">March 20, 2023 16:34:21</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+                <div class="testResultGroup  " id="33"></div>
+            
+                <div class="testResultGroup  " id="34"></div>
+            
+                <div class="testResultGroup  " id="35"></div>
+            
+                <div class="testResultGroup  " id="36"></div>
+            
+                <div class="testResultGroup  " id="37"></div>
+            
+                <div class="testResultGroup  " id="38"></div>
+            
+                <div class="testResultGroup  " id="39"></div>
+            
+                <div class="testResultGroup  " id="40"></div>
+            
+                <div class="testResultGroup  " id="41"></div>
+            
+                <div class="testResultGroup  " id="42"></div>
+            
+                <div class="testResultGroup  " id="43"></div>
+            
+                <div class="testResultGroup  " id="44"></div>
+            
+                <div class="testResultGroup  " id="45"></div>
+            
+                <div class="testResultGroup  " id="46"></div>
+            
+                <div class="testResultGroup  " id="47"></div>
+            
+                <div class="testResultGroup  " id="48"></div>
+            
+                <div class="testResultGroup  " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup  " id="52"></div>
+            
+                <div class="testResultGroup  " id="53"></div>
+            
+                <div class="testResultGroup  " id="54"></div>
+            
+                <div class="testResultGroup  " id="55"></div>
+            
+                <div class="testResultGroup  " id="56"></div>
+            
+                <div class="testResultGroup  " id="57"></div>
+            
+                <div class="testResultGroup  " id="58"></div>
+            
+                <div class="testResultGroup  " id="59"></div>
+            
+                <div class="testResultGroup  " id="60"></div>
+            
+                <div class="testResultGroup  " id="61"></div>
+            
+                <div class="testResultGroup  " id="62"></div>
+            
+                <div class="testResultGroup  " id="63"></div>
+            
+                <div class="testResultGroup  " id="64"></div>
+            
+                <div class="testResultGroup  " id="65"></div>
+            
+                <div class="testResultGroup  " id="66"></div>
+            
+                <div class="testResultGroup  " id="67"></div>
+            
+                <div class="testResultGroup  " id="68"></div>
+            
+                <div class="testResultGroup  " id="69"></div>
+            
+                <div class="testResultGroup  " id="70"></div>
+            
+                <div class="testResultGroup  " id="71"></div>
+            
+                <div class="testResultGroup  " id="72"></div>
+            
+                <div class="testResultGroup  " id="73"></div>
+            
+                <div class="testResultGroup  " id="74"></div>
+            
+                <div class="testResultGroup  " id="75"></div>
+            
+                <div class="testResultGroup  " id="76"></div>
+            
+                <div class="testResultGroup  " id="77"></div>
+            
+                <div class="testResultGroup  " id="78"></div>
+            
+                <div class="testResultGroup  " id="79"></div>
+            
+                <div class="testResultGroup  " id="80"></div>
+            
+                <div class="testResultGroup  " id="81"></div>
+            
+                <div class="testResultGroup  " id="82"></div>
+            
+                <div class="testResultGroup  " id="83"></div>
+            
+                <div class="testResultGroup  " id="84"></div>
+            
+                <div class="testResultGroup  " id="85"></div>
+            
+                <div class="testResultGroup  " id="86"></div>
+            
+                <div class="testResultGroup  " id="87"></div>
+            
+                <div class="testResultGroup  " id="88"></div>
+            
+                <div class="testResultGroup  " id="89"></div>
+            
+                <div class="testResultGroup  " id="90"></div>
+            
+                <div class="testResultGroup  " id="91"></div>
+            
+                <div class="testResultGroup  " id="92"></div>
+            
+                <div class="testResultGroup  " id="93"></div>
+            
+                <div class="testResultGroup  " id="94"></div>
+            
+                <div class="testResultGroup  " id="95"></div>
+            
+                <div class="testResultGroup  " id="96"></div>
+            
+                <div class="testResultGroup  " id="97"></div>
+            
+                <div class="testResultGroup  " id="98"></div>
+            
+                <div class="testResultGroup  " id="99"></div>
+            
+                <div class="testResultGroup  " id="100"></div>
+            
+                <div class="testResultGroup  " id="101"></div>
+            
+                <div class="testResultGroup  " id="102"></div>
+            
+                <div class="testResultGroup  " id="103"></div>
+            
+                <div class="testResultGroup  " id="104"></div>
+            
+                <div class="testResultGroup  " id="105"></div>
+            
+                <div class="testResultGroup  " id="106"></div>
+            
+                <div class="testResultGroup  " id="107"></div>
+            
+                <div class="testResultGroup  " id="108"></div>
+            
+                <div class="testResultGroup  " id="109"></div>
+            
+                <div class="testResultGroup  " id="110"></div>
+            
+                <div class="testResultGroup  " id="111"></div>
+            
+                <div class="testResultGroup  " id="112"></div>
+            
+                <div class="testResultGroup  " id="113"></div>
+            
+                <div class="testResultGroup  " id="114"></div>
+            
+                <div class="testResultGroup  " id="115"></div>
+            
+                <div class="testResultGroup  " id="116"></div>
+            
+                <div class="testResultGroup  " id="117"></div>
+            
+                <div class="testResultGroup  " id="118"></div>
+            
+                <div class="testResultGroup  " id="119"></div>
+            
+                <div class="testResultGroup  " id="120"></div>
+            
+                <div class="testResultGroup  " id="121"></div>
+            
+                <div class="testResultGroup  " id="122"></div>
+            
+                <div class="testResultGroup  " id="123"></div>
+            
+                <div class="testResultGroup  " id="124"></div>
+            
+                <div class="testResultGroup  " id="125"></div>
+            
+                <div class="testResultGroup  " id="126"></div>
+            
+                <div class="testResultGroup  " id="127"></div>
+            
+                <div class="testResultGroup  " id="128"></div>
+            
+                <div class="testResultGroup  " id="129"></div>
+            
+                <div class="testResultGroup  " id="130"></div>
+            
+                <div class="testResultGroup  " id="131"></div>
+            
+                <div class="testResultGroup  " id="132"></div>
+            
+                <div class="testResultGroup  " id="133"></div>
+            
+                <div class="testResultGroup  " id="134"></div>
+            
+                <div class="testResultGroup  " id="135"></div>
+            
+                <div class="testResultGroup  " id="136"></div>
+            
+                <div class="testResultGroup  " id="137"></div>
+            
+                <div class="testResultGroup  " id="138"></div>
+            
+                <div class="testResultGroup  " id="139"></div>
+            
+                <div class="testResultGroup  " id="140"></div>
+            
+                <div class="testResultGroup  " id="141"></div>
+            
+                <div class="testResultGroup  " id="142"></div>
+            
+                <div class="testResultGroup  " id="143"></div>
+            
+                <div class="testResultGroup  " id="144"></div>
+            
+                <div class="testResultGroup  " id="145"></div>
+            
+                <div class="testResultGroup  " id="146"></div>
+            
+                <div class="testResultGroup  " id="147"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.52,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHDZ4DD1OlltwDQOr8KWWdh4PLggTwBv8N-_3tPHcz9UjfmnU81I-tpmiStH7kMRojdVh8MEWn12gBEhMM_q2cuJp-LI5kdxqIr0wHQ797JpIll9KWlAN6F5TNxXaSVXWemRkfrCuSDydS_wr0RQk7ydy2PbUg\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDUyLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NTIsImV4cCI6MTY3OTMzMDA1MiwicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.qGqDdL4uXI1zijn8d8cBDLZkitf_eErAIuXcjFLxdC3xFEoJVlvzXwZ912sH_kreTCnNXZoVsBD_Fo2g8ZFTCZ8dyjtjQpbkBuEfmknRUONzQY22mGpbn8DYuMKvsb0o8XjaKInfDyXDqpZY3_e_X8OyWVyruPKBSTOjg_14IYNZGdIxjZIzWKHGK80nTMQSP47dc11lr44WUikhLLteHLbgTwGgYVicMNEzXQQZgNUHkY1SdEaoHGsET7meewnpWc6aTbgVny1eCVQrcWRnPovVLdt_xgnV4noYIFbFt9e70JXyR8G1iysEHEyIIiMCYOO68sMO7JTq000Nm2SiKw\",\n","          \"refreshToken\": \"APJWN8eLll4rapJ1TTpFHHsdgVYlshK16gEk7AI4krVk7tK8Sra0BTjwAv5-jiFOArvSTNMbWNMdB5GXGPjfh7nUD-2BcYOakr1whfQ9-FMlsUJM9MzRwaIJhax8kvq72w9aL6euoMH7_sPvaqB8iRVLaefAu18gcKpL2YlBLtwcvwJfzSUPdrPmtBpm-eJFXlGf9RRvr9px\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","--- PASS: Test0Box (0.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":1027,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Create_User_Info_Avatar_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1122: Test case [Create User Info Avatar should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1122: Test case [Create User Info Avatar should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Create_User_Info_Avatar_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Create_User_Info_Biography_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1110: Test case [Create User Info Biography should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1110: Test case [Create User Info Biography should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Create_User_Info_Biography_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Create_User_Info_background_image_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1136: Test case [Create User Info background image should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1136: Test case [Create User Info background image should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Create_User_Info_background_image_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Create_User_Info_username_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1151: Test case [Create User Info username should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1151: Test case [Create User Info username should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Create_User_Info_username_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Create_a_wallet_with_valid_phone_number_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1032: Test case [Create a wallet with valid phone number should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1032: Test case [Create a wallet with valid phone number should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Create_a_wallet_with_valid_phone_number_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Get_empty_user_info_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1089: Test case [Get empty user info should not work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1089: Test case [Get empty user info should not work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Get_empty_user_info_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Get_fully_populated_user_info_from_username_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1165: Test case [Get fully populated user info from username should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1165: Test case [Get fully populated user info from username should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Get_fully_populated_user_info_from_username_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/List_wallet_should_work_with_wallet_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1065: Test case [List wallet should work with wallet present] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1065: Test case [List wallet should work with wallet present] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/List_wallet_should_work_with_wallet_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/List_wallet_should_work_with_zero_wallets","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1053: Test case [List wallet should work with zero wallets] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1053: Test case [List wallet should work with zero wallets] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/List_wallet_should_work_with_zero_wallets (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Phone_exists_check_should_return_error_with_non-existing_phone_number","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1212: Test case [Phone exists check should return error with non-existing phone number] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1212: Test case [Phone exists check should return error with non-existing phone number] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Phone_exists_check_should_return_error_with_non-existing_phone_number (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Phone_exists_should_work_with_existing_phone_number","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1201: Test case [Phone exists should work with existing phone number] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1201: Test case [Phone exists should work with existing phone number] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Phone_exists_should_work_with_existing_phone_number (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Wallet_exists_should_work_with_wallet_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1236: Test case [Wallet exists should work with wallet present] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1236: Test case [Wallet exists should work with wallet present] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Wallet_exists_should_work_with_wallet_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0Box/Wallet_exists_should_work_with_zero_wallet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1224: Test case [Wallet exists should work with zero wallet] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:1224: Test case [Wallet exists should work with zero wallet] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0Box/Wallet_exists_should_work_with_zero_wallet (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.49,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHAAbw0rLF_NuSqPNC9QBPZ-BCkva3iitXHMDl7yYYjdbsD03bYgtiB3F6ZRFbXnepktPA7n2Vsx5baKpAqR-Sfk7TjVufRQpbD0KLECFFWSMFxEA2DZI4GGFscdAoxk17sodO13IQ4Ze83RYrXjtufI-GW9dQ\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDYxLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NjEsImV4cCI6MTY3OTMzMDA2MSwicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.Te_E8SG7x3jhxgwHCMQM-46d6qBztldWmS7UN4sXxr-UgwkbmCNyaqYZJJbwBsrchlWkBxaa-78ZAPXnF9_ffPlNr5qC3qGOTIlu9E7a3Q8WwhLS3d63hggwHXRbGEJgL7FWFxBJ17P-gtUV2UnxAaOIDKKcy5a8at404_jJG8SsYOXl914Usn60I9A-FPcGHkWKtAWipn3sOvY8HcZLYgESnwSlQyqp1Z7gR0nLmpupTDaDCdmFwmXRm7W7clFcSnS097R_o1zOMqowbkt2FshUh9TF4Jv7-CxlA1Fi7HJ1uhVjR5fi3yefQjmKjYyNCUy9IoasejxqOR6Rbn8tBQ\",\n","          \"refreshToken\": \"APJWN8fgqeDx6vdaEewGS-RL9ojFTqR6E1b3bkzs7DXI1v6DrhOzysMeqUNI7mAaWoiqMA44fuO5DH65nt3233IFIJz4JFGUGElSf7lUNywMiXH_iMWsj9foxZRYYnVPSp2Wrc8aut-mqGAf56JbZV93eKESzaugrsawp3ejTU87gaVN1jbgTlHXT7938_c-s75Y6-zACH4J\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","--- PASS: Test0BoxAllocation (0.49s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":1837,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Get_an_allocation_with_allocation_not_present_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:2102: Test case [Get an allocation with allocation not present should not work] scheduled at [03-20-2023 16:34:21] \n","    system_test_framework.go:85: Test case [Get an allocation with allocation not present should not work] start at [03-20-2023 16:34:21] \n","    0box_test.go:2220: Tearing down existing test data for [+917696229925]\n","    zbox_client.go:94: Creating CSRF Token using 0box...\n","    0box_test.go:2102: Test case [Get an allocation with allocation not present should not work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Get_an_allocation_with_allocation_not_present_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Get_an_allocation_with_allocation_present_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:2062: Test case [Get an allocation with allocation present should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:2062: Test case [Get an allocation with allocation present should work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Get_an_allocation_with_allocation_present_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/List_allocation_with_existing_allocation_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1899: Test case [List allocation with existing allocation should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1899: Test case [List allocation with existing allocation should work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/List_allocation_with_existing_allocation_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/List_allocation_with_invalid_phone_number_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1940: Test case [List allocation with invalid phone number should not work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1940: Test case [List allocation with invalid phone number should not work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/List_allocation_with_invalid_phone_number_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/List_allocation_with_zero_allocation_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1841: Test case [List allocation with zero allocation should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1841: Test case [List allocation with zero allocation should work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/List_allocation_with_zero_allocation_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Post_allocation_with_already_existing_allocation_Id_should_not__work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:2015: Test case [Post allocation with already existing allocation Id should not  work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:2015: Test case [Post allocation with already existing allocation Id should not  work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Post_allocation_with_already_existing_allocation_Id_should_not__work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Post_allocation_with_correct_argument_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1980: Test case [Post allocation with correct argument should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1980: Test case [Post allocation with correct argument should work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Post_allocation_with_correct_argument_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Post_allocation_with_invalid_phonenumber_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1865: Test case [Post allocation with invalid phonenumber should not work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1865: Test case [Post allocation with invalid phonenumber should not work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Post_allocation_with_invalid_phonenumber_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Update_an_allocation_with_allocation_not_present_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:2181: Test case [Update an allocation with allocation not present should not work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:2181: Test case [Update an allocation with allocation not present should not work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Update_an_allocation_with_allocation_not_present_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxAllocation/Update_an_allocation_with_allocation_present_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:2126: Test case [Update an allocation with allocation present should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:2126: Test case [Update an allocation with allocation present should work] exit at [03-20-2023 16:34:21]\n","--- PASS: Test0BoxAllocation/Update_an_allocation_with_allocation_present_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":7.64,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHB_JgI938of-z08cEMoMbk6GRV7vq4jKLHD951XCarqxm0fUtKKmiZ0xa5yKQVwjERGS8PDD5qcH4AhrqbeBIyf8BIYkluuQB9sFoaoldCx6f5ARdkdUj_4D3io-FVppCb3pghKinuOvGrvxZ7DQG0YTn_SOQ\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDUzLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NTMsImV4cCI6MTY3OTMzMDA1MywicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.Kbv9OL6vzDXA6Bp7WwB4sytJD0-c-UwmtQEIFppcKowkhYxNN6TWFrLVwHSU3LFksoZRb_2HMJF4yKVsVtyMFH1q6fFNctPm0n0dmlGCXWWtxjKHTA1qaMaY1W-aLXuwy4tqhjV6nZunaLqCTjj-AdyRiptsI0xlAp5s5Uw9x2tmuA-qgavp0S4haORuyWwbb-Z7JH4826AcrGBSoznEqd-vhQqspBE-9SwwViwAMSgMNHGPuNMsfssCxyDwYN9AhT-NOYOFc696-FcUjdqw2TV1U9o-hBOe2lx8u-1i6hrQqEFUqgJtz4ncV5-w5zu_ZZ1TBsZf4Guz6dfY5ctGHQ\",\n","          \"refreshToken\": \"APJWN8eiX3QhBS2fifaZoKaCQWV7DcSXwTJtLaqGHYhsp58BV4PNffTqfNbYGq9sDcxNw3j-A7f5qFU86kF-2f-fevQJSa8mBV2sjhxkFHtbe-c7dQvn4Flw3uMW4Y9EYo7fjOiXFpADUfni5M1YnRKWGuuSD0sNi-DjoBrEKHr1w0VX28Ja6D6_HEPgA3OSqGwMQidBgiRN\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","    0box_test.go:2236: Tearing down existing fcm test data for [+917696229925]\n","    zbox_client.go:94: Creating CSRF Token using 0box...\n","    http_client.go:57: https://0box.dev-3.devnet-0chain.net/v2/csrftoken returned {\"csrf_token\":\"eyJOb25jZSI6IjBLT2dGYncrUG9NNWZud3E4SCtFRHZvYkl0NlJRSko5QVg2ekxmYURzOEhxNHFRRXVUeCtUWmNoeWxzelYwZUxHUkJOc1Rud0FVYUs2aWcwS3JiNDBBPT0iLCJFeHBpcmVzQXQiOiIyMDIzLTAzLTIwVDE1OjM0OjQ1LjgyMDk2MzQ4OFoifQ.71Ev6UiwKochG-CwiW15pSo5U_qYtiWpqnmYyU_Sc-8\"} with status 200 OK\n","    zbox_client.go:1145: Deleting fcm token for [+917696229925] using 0box...\n","    http_client.go:57: https://0box.dev-3.devnet-0chain.net/v2/fcmtoken returned {\"message\":\"Firebase token register deleted successfully\"} with status 200 OK\n","--- PASS: Test0BoxFCM (7.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":1262,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM/Creating_FCM_Token_with_existing_credentials_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1276: Test case [Creating FCM Token with existing credentials should fail] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1276: Test case [Creating FCM Token with existing credentials should fail] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxFCM/Creating_FCM_Token_with_existing_credentials_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM/Creating_FCM_Token_with_valid_credentials_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1268: Test case [Creating FCM Token with valid credentials should work] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1268: Test case [Creating FCM Token with valid credentials should work] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxFCM/Creating_FCM_Token_with_valid_credentials_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM/Deleting_FCM_Token_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1300: Test case [Deleting FCM Token should work] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1300: Test case [Deleting FCM Token should work] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxFCM/Deleting_FCM_Token_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM/Updating_FCM_Token_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1284: Test case [Updating FCM Token should work] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1284: Test case [Updating FCM Token should work] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxFCM/Updating_FCM_Token_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxFCM/Updating_Someone_else's_FCM_Token_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1293: Test case [Updating Someone else's FCM Token should fail] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1293: Test case [Updating Someone else's FCM Token should fail] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxFCM/Updating_Someone_else's_FCM_Token_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.49,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHDpOLR_2UyhgWBnl38KlwocSGQ9MelpOZ3yXdkC5L0OEpTbsudiZ0tqMpnjEunsok0chExiWH-i0G7j4GtyaS2Oe_KVq5vG-mNWavSCeuXanw8eQrqKcVgsRySxZzjA0kcZM2EfhJyOsqRXnLvpE7mH36cShQ\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDYwLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NjAsImV4cCI6MTY3OTMzMDA2MCwicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.nk6qPNMfj7f8AQsBCk33pPU-tT6i8qtgFAFBJ-EJAv7lilfRf7uZ_3MhumNHXl1wer2NXQ-8VE1Qwh1M7KAvm2BxxtH-TkVsGuK4qLHHq5Hy9lNqb8lI4U9Q-pjbzIoEG3RF0x81FcZsq0hVstrpFZbD7GZW_3OGyINK5Rmfp3VXZ0k1t9UNq2G8r2k2GaIaN7rxL0j1dfhEIF2aGA3i-uP0boAnR7oMoyweQDNKy1qYZwMhvAgXdzdPB6dM5uxMmryNvqdSWUa-LTqOSqh6ki_NsHQHTVGi_4Zg-fb0zyc77En6VViSQyZgtTr7kLR5QPXwvx_irdEQN-UH5kDQdg\",\n","          \"refreshToken\": \"APJWN8fVu-hXUdb3aeJPELaHIWbjDU-j3Myr5-7tzLP3f89ILeKZxh6A7u5pl3Efg812V-c_Fzm0zmqBjbw6x7Sn6E2reX9I2RC03aLNms6jrXwzfcY5-9rCdUaY2OaenhNvtFyYGZOSgEYIQpYWTHTEVY-YuB_-jPwxR23Xd-CqRgxy9FYXfNByC2VsjJgXDZTjiwZbBClq\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","--- PASS: Test0BoxWallet (0.49s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":1310,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Contact_Wallet_should_not_work_with_wrong_phone_number","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1578: Test case [Contact Wallet should not work with wrong phone number] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1578: Test case [Contact Wallet should not work with wrong phone number] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Contact_Wallet_should_not_work_with_wrong_phone_number (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Contact_Wallet_should_not_work_without_phone","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1507: Test case [Contact Wallet should not work without phone] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1507: Test case [Contact Wallet should not work without phone] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Contact_Wallet_should_not_work_without_phone (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Contact_Wallet_should_work_with_for_multiple_users","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1472: Test case [Contact Wallet should work with for multiple users] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1472: Test case [Contact Wallet should work with for multiple users] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Contact_Wallet_should_work_with_for_multiple_users (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Contact_Wallet_should_work_with_for_single_user","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1436: Test case [Contact Wallet should work with for single user] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1436: Test case [Contact Wallet should work with for single user] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Contact_Wallet_should_work_with_for_single_user (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Contact_Wallet_should_work_without_user_name","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1542: Test case [Contact Wallet should work without user_name] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1542: Test case [Contact Wallet should work without user_name] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Contact_Wallet_should_work_without_user_name (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Delete_Wallet_should_work_with_wallet_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1362: Test case [Delete Wallet should work with wallet present] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1362: Test case [Delete Wallet should work with wallet present] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Delete_Wallet_should_work_with_wallet_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Get_wallet_keys_should_not_work_with_wrong_phone_number_","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1339: Test case [Get wallet keys should not work with wrong phone number ] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1339: Test case [Get wallet keys should not work with wrong phone number ] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Get_wallet_keys_should_not_work_with_wrong_phone_number_ (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Get_wallet_keys_should_return_empty_with_wallet_not_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1347: Test case [Get wallet keys should return empty with wallet not present] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1347: Test case [Get wallet keys should return empty with wallet not present] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Get_wallet_keys_should_return_empty_with_wallet_not_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Get_wallet_keys_should_work_with_wallet_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1315: Test case [Get wallet keys should work with wallet present] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1315: Test case [Get wallet keys should work with wallet present] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Get_wallet_keys_should_work_with_wallet_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0BoxWallet/Update_Wallet_with_wallet_present","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1398: Test case [Update Wallet with wallet present] scheduled at [03-20-2023 16:34:20] \n","    0box_test.go:1398: Test case [Update Wallet with wallet present] exit at [03-20-2023 16:34:20]\n","--- PASS: Test0BoxWallet/Update_Wallet_with_wallet_present (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.51,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHDlDTLr8v3gyeC2RbfGv0fhpTfKgc48dZ9K9LN1F1nGuNxlO_9Jt1PT0MtS8qJhytDmWw8BNOTyeR2ve_qcT50dZei8i16JgtW2BTzRF2n0wcYXlBMPcDhgaOm1Xbb2blDfxBZWltrkKXHPo5RE9GBhU6_e0g\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDUyLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NTIsImV4cCI6MTY3OTMzMDA1MiwicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.qGqDdL4uXI1zijn8d8cBDLZkitf_eErAIuXcjFLxdC3xFEoJVlvzXwZ912sH_kreTCnNXZoVsBD_Fo2g8ZFTCZ8dyjtjQpbkBuEfmknRUONzQY22mGpbn8DYuMKvsb0o8XjaKInfDyXDqpZY3_e_X8OyWVyruPKBSTOjg_14IYNZGdIxjZIzWKHGK80nTMQSP47dc11lr44WUikhLLteHLbgTwGgYVicMNEzXQQZgNUHkY1SdEaoHGsET7meewnpWc6aTbgVny1eCVQrcWRnPovVLdt_xgnV4noYIFbFt9e70JXyR8G1iysEHEyIIiMCYOO68sMO7JTq000Nm2SiKw\",\n","          \"refreshToken\": \"APJWN8eWzVmJtX0bhtQEDqHS3zWFV-zcKy0ktrvXET_7uNNVUtRTFXHcrMrkqcExKT9IGZB3j9SRWYQYycBq_8k7H8tYArogGvQ6gOEzahNDU8wowVh1YugRF66Ec81ubAOOA0-f5dRSwuBDDSagwrHHZ04pVK5_SShcoQgm1XWXsmxIDPADwRnZQUoRVjKQV4xQsjqFV43Y\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","--- PASS: Test0boxNft (0.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_by_collection_with_invalid_collection_id_should_give_empty_array","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:249: Test case [Get NFT by collection with invalid collection id should give empty array] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:249: Test case [Get NFT by collection with invalid collection id should give empty array] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_by_collection_with_invalid_collection_id_should_give_empty_array (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_by_collection_id_with_one_nft_present_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:307: Test case [Get NFT collection by collection id with one nft present should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:307: Test case [Get NFT collection by collection id with one nft present should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_by_collection_id_with_one_nft_present_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_by_collection_id_with_zero_nft_collection_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:61: Test case [Get NFT collection by collection id with zero nft collection should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:61: Test case [Get NFT collection by collection id with zero nft collection should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_by_collection_id_with_zero_nft_collection_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_by_wallet_id_should_give_empty_array_for_invalid_wallet_id","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:264: Test case [Get NFT collection by wallet id should give empty array for invalid wallet id] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:264: Test case [Get NFT collection by wallet id should give empty array for invalid wallet id] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_by_wallet_id_should_give_empty_array_for_invalid_wallet_id (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_by_wallet_id_with_one_nft_present_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:292: Test case [Get NFT collection by wallet id with one nft present should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:292: Test case [Get NFT collection by wallet id with one nft present should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_by_wallet_id_with_one_nft_present_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_by_wallet_id_with_zero_nft_collection_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:135: Test case [Get NFT collection by wallet id with zero nft collection should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:135: Test case [Get NFT collection by wallet id with zero nft collection should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_by_wallet_id_with_zero_nft_collection_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_with_one_nft_present_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:279: Test case [Get NFT collection with one nft present should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:279: Test case [Get NFT collection with one nft present should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_with_one_nft_present_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Get_NFT_collection_with_zero_nft_collection_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:30: Test case [Get NFT collection with zero nft collection should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:30: Test case [Get NFT collection with zero nft collection should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Get_NFT_collection_with_zero_nft_collection_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Post_NFT_collection_with_Invalid_allocation_Id_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:380: Test case [Post NFT collection with Invalid allocation Id should not work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:380: Test case [Post NFT collection with Invalid allocation Id should not work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Post_NFT_collection_with_Invalid_allocation_Id_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Post_NFT_collection_with_Invalid_collectionId_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:321: Test case [Post NFT collection with Invalid collectionId should not work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:321: Test case [Post NFT collection with Invalid collectionId should not work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Post_NFT_collection_with_Invalid_collectionId_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Post_NFT_collection_with_valid_arguments_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:167: Test case [Post NFT collection with valid arguments should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:167: Test case [Post NFT collection with valid arguments should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Post_NFT_collection_with_valid_arguments_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Update_NFT_collection_with_missing_params_should_not_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:570: Test case [Update NFT collection with missing params should not work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:570: Test case [Update NFT collection with missing params should not work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Update_NFT_collection_with_missing_params_should_not_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0boxNft/Update_NFT_collection_with_valid_argument_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:464: Test case [Update NFT collection with valid argument should work] scheduled at [03-20-2023 16:34:12] \n","    0box_test.go:464: Test case [Update NFT collection with valid argument should work] exit at [03-20-2023 16:34:12]\n","--- PASS: Test0boxNft/Update_NFT_collection_with_valid_argument_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAddBlobber","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestAddBlobber (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"add_blobber_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAddBlobber/Add_blobber_which_already_exists_in_allocation,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    add_blobber_test.go:99: Test case [Add blobber which already exists in allocation, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","    add_blobber_test.go:99: Test case [Add blobber which already exists in allocation, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestAddBlobber/Add_blobber_which_already_exists_in_allocation,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAddBlobber/Add_new_blobber_to_allocation,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    add_blobber_test.go:21: Test case [Add new blobber to allocation, should work] scheduled at [03-20-2023 16:34:21] \n","","","    add_blobber_test.go:21: Test case [Add new blobber to allocation, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestAddBlobber/Add_new_blobber_to_allocation,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAddBlobber/Add_new_blobber_with_incorrect_ID_to_allocation,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    add_blobber_test.go:72: Test case [Add new blobber with incorrect ID to allocation, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","    add_blobber_test.go:72: Test case [Add new blobber with incorrect ID to allocation, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestAddBlobber/Add_new_blobber_with_incorrect_ID_to_allocation,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAddBlobber/Add_new_blobber_without_provided_blobber_ID_to_allocation,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    add_blobber_test.go:48: Test case [Add new blobber without provided blobber ID to allocation, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","    add_blobber_test.go:48: Test case [Add new blobber without provided blobber ID to allocation, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestAddBlobber/Add_new_blobber_without_provided_blobber_ID_to_allocation,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","--- PASS: TestBlobberFileRefs (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_blobberFileRef_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_allocation_id,_remote_path_with_reftype_as_regular_or_updated_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:19: Test case [Get file ref with allocation id, remote path with reftype as regular or updated should work] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:19: Test case [Get file ref with allocation id, remote path with reftype as regular or updated should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_allocation_id,_remote_path_with_reftype_as_regular_or_updated_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_incorrect_allocation_id_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:80: Test case [Get file ref with incorrect allocation id should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:80: Test case [Get file ref with incorrect allocation id should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_incorrect_allocation_id_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_invalid_client_id_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:283: Test case [Get file ref with invalid client id should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:283: Test case [Get file ref with invalid client id should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_invalid_client_id_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_invalid_client_key_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:315: Test case [Get file ref with invalid client key should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:315: Test case [Get file ref with invalid client key should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_invalid_client_key_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_invalid_client_signature_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:257: Test case [Get file ref with invalid client signature should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:257: Test case [Get file ref with invalid client signature should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_invalid_client_signature_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_invalid_refType_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:137: Test case [Get file ref with invalid refType should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:137: Test case [Get file ref with invalid refType should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_invalid_refType_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_invalid_remote_file_path_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:107: Test case [Get file ref with invalid remote file path should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:107: Test case [Get file ref with invalid remote file path should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_invalid_remote_file_path_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_no_path_and_no_refType_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:227: Test case [Get file ref with no path and no refType should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:227: Test case [Get file ref with no path and no refType should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_no_path_and_no_refType_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_no_path_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:167: Test case [Get file ref with no path should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:167: Test case [Get file ref with no path should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_no_path_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberFileRefs/Get_file_ref_with_no_refType_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobberFileRef_test.go:197: Test case [Get file ref with no refType should fail] scheduled at [03-20-2023 16:34:21] \n","    get_blobberFileRef_test.go:197: Test case [Get file ref with no refType should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberFileRefs/Get_file_ref_with_no_refType_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberRewards","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","--- PASS: TestBlobberRewards (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_blobber_rewards_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberRewards/Check_if_a_new_added_blobber_as_additional_parity_shard_to_allocation_can_receive_rewards,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobber_rewards_test.go:105: Test case [Check if a new added blobber as additional parity shard to allocation can receive rewards, should work] scheduled at [03-20-2023 16:34:21] \n","    get_blobber_rewards_test.go:105: Test case [Check if a new added blobber as additional parity shard to allocation can receive rewards, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberRewards/Check_if_a_new_added_blobber_as_additional_parity_shard_to_allocation_can_receive_rewards,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberRewards/Check_if_blobber,_which_already_exists_in_allocation_as_additional_parity_shard_can_receive_rewards,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobber_rewards_test.go:18: Test case [Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work] scheduled at [03-20-2023 16:34:21] \n","    get_blobber_rewards_test.go:18: Test case [Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberRewards/Check_if_blobber,_which_already_exists_in_allocation_as_additional_parity_shard_can_receive_rewards,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberRewards/Check_if_the_balance_of_the_wallet_has_been_changed_without_rewards_being_claimed,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    get_blobber_rewards_test.go:63: Test case [Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","    get_blobber_rewards_test.go:63: Test case [Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestBlobberRewards/Check_if_the_balance_of_the_wallet_has_been_changed_without_rewards_being_claimed,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestCreateAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"create_allocation_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    create_allocation_test.go:18: Test case [Create allocation API call should be successful given a valid request] scheduled at [03-20-2023 16:34:21] \n","","","","    create_allocation_test.go:18: Test case [Create allocation API call should be successful given a valid request] exit at [03-20-2023 16:34:21]\n","--- PASS: TestCreateAllocation/Create_allocation_API_call_should_be_successful_given_a_valid_request (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateBucket","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestCreateBucket (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"create_bucket_test.go","TestFunctionDetail":{"Line":10,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateBucket/CreateBucket_should_return_200_when_all_the_parameters_are_correct","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    create_bucket_test.go:13: Test case [CreateBucket should return 200 when all the parameters are correct] scheduled at [03-20-2023 16:34:21] \n","","","","    create_bucket_test.go:13: Test case [CreateBucket should return 200 when all the parameters are correct] exit at [03-20-2023 16:34:21]\n","--- PASS: TestCreateBucket/CreateBucket_should_return_200_when_all_the_parameters_are_correct (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateBucket/CreateBucket_should_return_500_when_one_of_more_required_parameters_are_missing","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    create_bucket_test.go:25: Test case [CreateBucket should return 500 when one of more required parameters are missing] scheduled at [03-20-2023 16:34:21] \n","","","","    create_bucket_test.go:25: Test case [CreateBucket should return 500 when one of more required parameters are missing] exit at [03-20-2023 16:34:21]\n","--- PASS: TestCreateBucket/CreateBucket_should_return_500_when_one_of_more_required_parameters_are_missing (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0.56,"Output":["","    zbox_client.go:46: Sending firebase SMS...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"sessionInfo\": \"AK-jXHDv6sBABkgDBO6h-YAxXIhbhJnnLnHP5djuYm-2QKriQANuWSEYt8M1A9QEohvdbJWcNmNPWWLTpKzaHLjcwjQ5U-1wQkVi6l5q6_DN4BOCPIdPhRxfO0ZhX9mwQKKj7UQqdvvfuXZNAEN8xVmK71vm8wvMcw\"\n","        } with status 200 OK\n","    zbox_client.go:70: Creating firebase token...\n","    http_client.go:57: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY returned {\n","          \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOTczZWUwZTE2ZjdlZWY0ZjkyMWQ1MGRjNjFkNzBiMmVmZWZjMTkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYm94LWIzM2ZkIiwiYXVkIjoiYm94LWIzM2ZkIiwiYXV0aF90aW1lIjoxNjc5MzI2NDYxLCJ1c2VyX2lkIjoiZTdTNDExS1JzeWJyalJ4d3huc3VOaGE0Yjc3MyIsInN1YiI6ImU3UzQxMUtSc3licmpSeHd4bnN1TmhhNGI3NzMiLCJpYXQiOjE2NzkzMjY0NjEsImV4cCI6MTY3OTMzMDA2MSwicGhvbmVfbnVtYmVyIjoiKzkxNzY5NjIyOTkyNSIsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsicGhvbmUiOlsiKzkxNzY5NjIyOTkyNSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBob25lIn19.Te_E8SG7x3jhxgwHCMQM-46d6qBztldWmS7UN4sXxr-UgwkbmCNyaqYZJJbwBsrchlWkBxaa-78ZAPXnF9_ffPlNr5qC3qGOTIlu9E7a3Q8WwhLS3d63hggwHXRbGEJgL7FWFxBJ17P-gtUV2UnxAaOIDKKcy5a8at404_jJG8SsYOXl914Usn60I9A-FPcGHkWKtAWipn3sOvY8HcZLYgESnwSlQyqp1Z7gR0nLmpupTDaDCdmFwmXRm7W7clFcSnS097R_o1zOMqowbkt2FshUh9TF4Jv7-CxlA1Fi7HJ1uhVjR5fi3yefQjmKjYyNCUy9IoasejxqOR6Rbn8tBQ\",\n","          \"refreshToken\": \"APJWN8d7c_kzLxaqeGhQc5r7sYJqC0Mkv4JbDLjuI-P2sEu0RCv0BTpoyVuddcd4s97fOOQzFHabwcUxr-FV53ezf5MrPUFiofZB1Y1zqwol4PZPQizU8qMTF0NRbvhcyubtt7BVlWvSxHpzrF9gSw8YJz9JiRfD_OnLiXuPHWoY1Tgo1uEkVzK884MQrSg9JpAWvuN1tjdR\",\n","          \"expiresIn\": \"3600\",\n","          \"localId\": \"e7S411KRsybrjRxwxnsuNha4b773\",\n","          \"isNewUser\": false,\n","          \"phoneNumber\": \"+917696229925\"\n","        } with status 200 OK\n","--- PASS: TestDexState (0.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"0box_test.go","TestFunctionDetail":{"Line":1615,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_2_times_with_same_phone_number_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1703: Test case [Create a DEX state 2 times with same phone number should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1703: Test case [Create a DEX state 2 times with same phone number should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_2_times_with_same_phone_number_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_with_invalid_csrf_token_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1658: Test case [Create a DEX state with invalid csrf token should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1658: Test case [Create a DEX state with invalid csrf token should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_with_invalid_csrf_token_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_with_invalid_field_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1684: Test case [Create a DEX state with invalid field should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1684: Test case [Create a DEX state with invalid field should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_with_invalid_field_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_with_invalid_firebase_token_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1670: Test case [Create a DEX state with invalid firebase token should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1670: Test case [Create a DEX state with invalid firebase token should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_with_invalid_firebase_token_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_with_invalid_phone_number_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1644: Test case [Create a DEX state with invalid phone number should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1644: Test case [Create a DEX state with invalid phone number should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_with_invalid_phone_number_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Create_a_DEX_state_with_valid_phone_number_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1630: Test case [Create a DEX state with valid phone number should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1630: Test case [Create a DEX state with valid phone number should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Create_a_DEX_state_with_valid_phone_number_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Get_DEX_state_with_invalid_phone_number_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1733: Test case [Get DEX state with invalid phone number should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1733: Test case [Get DEX state with invalid phone number should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Get_DEX_state_with_invalid_phone_number_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Get_DEX_state_with_valid_phone_number_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1718: Test case [Get DEX state with valid phone number should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1718: Test case [Get DEX state with valid phone number should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Get_DEX_state_with_valid_phone_number_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Get_a_DEX_state_with_invalid_csrf_token_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1742: Test case [Get a DEX state with invalid csrf token should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1742: Test case [Get a DEX state with invalid csrf token should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Get_a_DEX_state_with_invalid_csrf_token_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Update_DEX_state_with_invalid_csrf_token_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1806: Test case [Update DEX state with invalid csrf token should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1806: Test case [Update DEX state with invalid csrf token should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Update_DEX_state_with_invalid_csrf_token_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Update_DEX_state_with_invalid_data_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1820: Test case [Update DEX state with invalid data should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1820: Test case [Update DEX state with invalid data should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Update_DEX_state_with_invalid_data_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Update_DEX_state_with_invalid_phone_number_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1789: Test case [Update DEX state with invalid phone number should fail] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1789: Test case [Update DEX state with invalid phone number should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Update_DEX_state_with_invalid_phone_number_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestDexState/Update_DEX_state_with_valid_phone_number_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    0box_test.go:1752: Test case [Update DEX state with valid phone number should work] scheduled at [03-20-2023 16:34:21] \n","    0box_test.go:1752: Test case [Update DEX state with valid phone number should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestDexState/Update_DEX_state_with_valid_phone_number_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExecuteFaucet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestExecuteFaucet (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"execute_faucet_test.go","TestFunctionDetail":{"Line":12,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExecuteFaucet/Execute_Faucet_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    execute_faucet_test.go:17: Test case [Execute Faucet API call should be successful given a valid request] scheduled at [03-20-2023 16:34:21] \n","","","","    execute_faucet_test.go:17: Test case [Execute Faucet API call should be successful given a valid request] exit at [03-20-2023 16:34:21]\n","--- PASS: TestExecuteFaucet/Execute_Faucet_API_call_should_be_successful_given_a_valid_request (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","--- PASS: TestFileReferencePath (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"blobber_referencepath_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath/Get_file_ref_for_empty_allocation_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_referencepath_test.go:54: Test case [Get file ref for empty allocation should work] scheduled at [03-20-2023 16:34:21] \n","    blobber_referencepath_test.go:54: Test case [Get file ref for empty allocation should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestFileReferencePath/Get_file_ref_for_empty_allocation_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath/Get_file_ref_with_allocation_id,_remote_path_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_referencepath_test.go:18: Test case [Get file ref with allocation id, remote path should work] scheduled at [03-20-2023 16:34:21] \n","    blobber_referencepath_test.go:18: Test case [Get file ref with allocation id, remote path should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestFileReferencePath/Get_file_ref_with_allocation_id,_remote_path_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath/Get_file_ref_with_invalid_allocation_id_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_referencepath_test.go:85: Test case [Get file ref with invalid allocation id should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_referencepath_test.go:85: Test case [Get file ref with invalid allocation id should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestFileReferencePath/Get_file_ref_with_invalid_allocation_id_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath/Get_file_ref_with_invalid_remotepath_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_referencepath_test.go:142: Test case [Get file ref with invalid remotepath should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_referencepath_test.go:142: Test case [Get file ref with invalid remotepath should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestFileReferencePath/Get_file_ref_with_invalid_remotepath_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestFileReferencePath/Get_file_ref_with_invalid_sign_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_referencepath_test.go:115: Test case [Get file ref with invalid sign should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_referencepath_test.go:115: Test case [Get file ref with invalid sign should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestFileReferencePath/Get_file_ref_with_invalid_sign_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestGetBlobbersForNewAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_blobbers_for_new_allocation_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation/Alloc_blobbers_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_blobbers_for_new_allocation_test.go:18: Test case [Alloc blobbers API call should be successful given a valid request] scheduled at [03-20-2023 16:34:21] \n","","","","    get_blobbers_for_new_allocation_test.go:18: Test case [Alloc blobbers API call should be successful given a valid request] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetBlobbersForNewAllocation/Alloc_blobbers_API_call_should_be_successful_given_a_valid_request (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetBlobbersForNewAllocation/BROKEN_Alloc_blobbers_API_call_should_fail_gracefully_given_valid_request_but_does_not_see_0chain/issues/1319","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_blobbers_for_new_allocation_test.go:30: Test case [BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319] scheduled at [03-20-2023 16:34:21] \n","","","","    get_blobbers_for_new_allocation_test.go:30: Test case [BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetBlobbersForNewAllocation/BROKEN_Alloc_blobbers_API_call_should_fail_gracefully_given_valid_request_but_does_not_see_0chain/issues/1319 (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetLatestFinalizedMagicBlock","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestGetLatestFinalizedMagicBlock (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_latest_finalized_magic_block_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetLatestFinalizedMagicBlock/Different_node-lfmb-hash_provided,_return_http_200_and_return_the_lfmb_the_sharder_has","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_latest_finalized_magic_block_test.go:43: Test case [Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has] scheduled at [03-20-2023 16:34:21] \n","","","","    get_latest_finalized_magic_block_test.go:43: Test case [Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetLatestFinalizedMagicBlock/Different_node-lfmb-hash_provided,_return_http_200_and_return_the_lfmb_the_sharder_has (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetLatestFinalizedMagicBlock/Lfmb_node_hash_not_modified,_should_return_http_304_and_empty_body","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_latest_finalized_magic_block_test.go:17: Test case [Lfmb node hash not modified, should return http 304 and empty body] scheduled at [03-20-2023 16:34:21] \n","","","","    get_latest_finalized_magic_block_test.go:17: Test case [Lfmb node hash not modified, should return http 304 and empty body] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetLatestFinalizedMagicBlock/Lfmb_node_hash_not_modified,_should_return_http_304_and_empty_body (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetLatestFinalizedMagicBlock/No_param_provided,_should_return_http_200_and_current_return_whole_lfmb_message_as_before","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_latest_finalized_magic_block_test.go:28: Test case [No param provided, should return http 200 and current return whole lfmb message as before] scheduled at [03-20-2023 16:34:21] \n","","","","    get_latest_finalized_magic_block_test.go:28: Test case [No param provided, should return http 200 and current return whole lfmb message as before] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetLatestFinalizedMagicBlock/No_param_provided,_should_return_http_200_and_current_return_whole_lfmb_message_as_before (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCState","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestGetSCState (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_scstate_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCState/Get_SCState_of_faucet_SC,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_scstate_test.go:18: Test case [Get SCState of faucet SC, should work] scheduled at [03-20-2023 16:34:21] \n","","","","    get_scstate_test.go:18: Test case [Get SCState of faucet SC, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetSCState/Get_SCState_of_faucet_SC,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCState/Get_SCState_of_faucet_SC,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_scstate_test.go:34: Test case [Get SCState of faucet SC, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","","    get_scstate_test.go:34: Test case [Get SCState of faucet SC, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetSCState/Get_SCState_of_faucet_SC,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCStats","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestGetSCStats (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"get_scstats_test.go","TestFunctionDetail":{"Line":12,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCStats/Get_miner_stats_call_should_return_successfully","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_scstats_test.go:17: Test case [Get miner stats call should return successfully] scheduled at [03-20-2023 16:34:21] \n","","","","    get_scstats_test.go:17: Test case [Get miner stats call should return successfully] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetSCStats/Get_miner_stats_call_should_return_successfully (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestGetSCStats/Get_sharder_stats_call_should_return_successfully","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    get_scstats_test.go:33: Test case [Get sharder stats call should return successfully] scheduled at [03-20-2023 16:34:21] \n","","","    get_scstats_test.go:33: Test case [Get sharder stats call should return successfully] exit at [03-20-2023 16:34:21]\n","--- PASS: TestGetSCStats/Get_sharder_stats_call_should_return_successfully (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestHashnodeRoot","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","--- PASS: TestHashnodeRoot (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"blobber_hashnode_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestHashnodeRoot/Get_hashnode_root_for_non-existent_allocation_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_hashnode_test.go:53: Test case [Get hashnode root for non-existent allocation should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_hashnode_test.go:53: Test case [Get hashnode root for non-existent allocation should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestHashnodeRoot/Get_hashnode_root_for_non-existent_allocation_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestHashnodeRoot/Get_hashnode_root_from_blobber_for_an_empty_allocation_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_hashnode_test.go:18: Test case [Get hashnode root from blobber for an empty allocation should work] scheduled at [03-20-2023 16:34:21] \n","    blobber_hashnode_test.go:18: Test case [Get hashnode root from blobber for an empty allocation should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestHashnodeRoot/Get_hashnode_root_from_blobber_for_an_empty_allocation_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestHashnodeRoot/Get_hashnode_root_with_bad_signature_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_hashnode_test.go:78: Test case [Get hashnode root with bad signature should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_hashnode_test.go:78: Test case [Get hashnode root with bad signature should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestHashnodeRoot/Get_hashnode_root_with_bad_signature_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListBuckets","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestListBuckets (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"list_buckets_test.go","TestFunctionDetail":{"Line":10,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListBuckets/ListBuckets_should_return_200_when_all_the_parameters_are_correct","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    list_buckets_test.go:13: Test case [ListBuckets should return 200 when all the parameters are correct] scheduled at [03-20-2023 16:34:21] \n","","","","    list_buckets_test.go:13: Test case [ListBuckets should return 200 when all the parameters are correct] exit at [03-20-2023 16:34:21]\n","--- PASS: TestListBuckets/ListBuckets_should_return_200_when_all_the_parameters_are_correct (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListBuckets/ListBuckets_should_return_500_when_one_of_more_required_parameters_are_missing","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    list_buckets_test.go:24: Test case [ListBuckets should return 500 when one of more required parameters are missing] scheduled at [03-20-2023 16:34:21] \n","","","","    list_buckets_test.go:24: Test case [ListBuckets should return 500 when one of more required parameters are missing] exit at [03-20-2023 16:34:21]\n","--- PASS: TestListBuckets/ListBuckets_should_return_500_when_one_of_more_required_parameters_are_missing (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListObjects","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestListObjects (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"list_objects_test.go","TestFunctionDetail":{"Line":10,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListObjects/ListObjects_should_return_200_when_all_the_parameters_are_correct","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    list_objects_test.go:13: Test case [ListObjects should return 200 when all the parameters are correct] scheduled at [03-20-2023 16:34:21] \n","","","","    list_objects_test.go:13: Test case [ListObjects should return 200 when all the parameters are correct] exit at [03-20-2023 16:34:21]\n","--- PASS: TestListObjects/ListObjects_should_return_200_when_all_the_parameters_are_correct (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestListObjects/listObjects_should_return_500_when_trying_to_list_objects_from_un_existing_bucket","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    list_objects_test.go:24: Test case [listObjects should return 500 when trying to list objects from un existing bucket] scheduled at [03-20-2023 16:34:21] \n","","","","    list_objects_test.go:24: Test case [listObjects should return 500 when trying to list objects from un existing bucket] exit at [03-20-2023 16:34:21]\n","--- PASS: TestListObjects/listObjects_should_return_500_when_trying_to_list_objects_from_un_existing_bucket (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","--- PASS: TestObjectTree (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"blobber_objecttree_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree/Get_file_ref_for_empty_allocation_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_objecttree_test.go:53: Test case [Get file ref for empty allocation should work] scheduled at [03-20-2023 16:34:21] \n","    blobber_objecttree_test.go:53: Test case [Get file ref for empty allocation should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestObjectTree/Get_file_ref_for_empty_allocation_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree/Get_file_ref_with_invalid_allocation_id_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_objecttree_test.go:84: Test case [Get file ref with invalid allocation id should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_objecttree_test.go:84: Test case [Get file ref with invalid allocation id should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestObjectTree/Get_file_ref_with_invalid_allocation_id_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree/Get_file_ref_with_invalid_remotepath_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_objecttree_test.go:141: Test case [Get file ref with invalid remotepath should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_objecttree_test.go:141: Test case [Get file ref with invalid remotepath should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestObjectTree/Get_file_ref_with_invalid_remotepath_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree/Get_file_ref_with_invalid_sign_should_fail","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_objecttree_test.go:114: Test case [Get file ref with invalid sign should fail] scheduled at [03-20-2023 16:34:21] \n","    blobber_objecttree_test.go:114: Test case [Get file ref with invalid sign should fail] exit at [03-20-2023 16:34:21]\n","--- PASS: TestObjectTree/Get_file_ref_with_invalid_sign_should_fail (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestObjectTree/Get_object_tree_with_allocation_id,_remote_path_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","    blobber_objecttree_test.go:19: Test case [Get object tree with allocation id, remote path should work] scheduled at [03-20-2023 16:34:21] \n","    blobber_objecttree_test.go:19: Test case [Get object tree with allocation id, remote path should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestObjectTree/Get_object_tree_with_allocation_id,_remote_path_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestOpenChallenges","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestOpenChallenges (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"open_challenges_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestOpenChallenges/Open_Challenges_API_response_should_be_successful_decode_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    open_challenges_test.go:18: Test case [Open Challenges API response should be successful decode given a valid request] scheduled at [03-20-2023 16:34:21] \n","","","","    open_challenges_test.go:18: Test case [Open Challenges API response should be successful decode given a valid request] exit at [03-20-2023 16:34:21]\n","--- PASS: TestOpenChallenges/Open_Challenges_API_response_should_be_successful_decode_given_a_valid_request (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestRegisterWallet (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"register_wallet_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRegisterWallet/Register_wallet_API_call_should_be_successful_given_a_valid_request","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    register_wallet_test.go:19: Test case [Register wallet API call should be successful given a valid request] scheduled at [03-20-2023 16:34:21] \n","","","","    register_wallet_test.go:19: Test case [Register wallet API call should be successful given a valid request] exit at [03-20-2023 16:34:21]\n","--- PASS: TestRegisterWallet/Register_wallet_API_call_should_be_successful_given_a_valid_request (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRemoveBlobber","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestRemoveBlobber (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"remove_blobber_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestRemoveBlobber/Remove_blobber_in_allocation,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    remove_blobber_test.go:21: Test case [Remove blobber in allocation, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","","    remove_blobber_test.go:21: Test case [Remove blobber in allocation, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestRemoveBlobber/Remove_blobber_in_allocation,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestReplaceBlobber","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestReplaceBlobber (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"replace_blobber_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestReplaceBlobber/Check_token_accounting_of_a_blobber_replacing_in_allocation,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    replace_blobber_test.go:113: Test case [Check token accounting of a blobber replacing in allocation, should work] scheduled at [03-20-2023 16:34:21] \n","","","","    replace_blobber_test.go:113: Test case [Check token accounting of a blobber replacing in allocation, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestReplaceBlobber/Check_token_accounting_of_a_blobber_replacing_in_allocation,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestReplaceBlobber/Replace_blobber_in_allocation,_should_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    replace_blobber_test.go:22: Test case [Replace blobber in allocation, should work] scheduled at [03-20-2023 16:34:21] \n","","","","    replace_blobber_test.go:22: Test case [Replace blobber in allocation, should work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestReplaceBlobber/Replace_blobber_in_allocation,_should_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestReplaceBlobber/Replace_blobber_with_incorrect_blobber_ID_of_an_old_blobber,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    replace_blobber_test.go:82: Test case [Replace blobber with incorrect blobber ID of an old blobber, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","","    replace_blobber_test.go:82: Test case [Replace blobber with incorrect blobber ID of an old blobber, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestReplaceBlobber/Replace_blobber_with_incorrect_blobber_ID_of_an_old_blobber,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestReplaceBlobber/Replace_blobber_with_the_same_one_in_allocation,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    replace_blobber_test.go:54: Test case [Replace blobber with the same one in allocation, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","","    replace_blobber_test.go:54: Test case [Replace blobber with the same one in allocation, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestReplaceBlobber/Replace_blobber_with_the_same_one_in_allocation,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateBlobber","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestUpdateBlobber (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"update_blobber_test.go","TestFunctionDetail":{"Line":14,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateBlobber/Update_blobber_in_allocation_without_correct_delegated_client,_shouldn't_work","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    update_blobber_test.go:19: Test case [Update blobber in allocation without correct delegated client, shouldn't work] scheduled at [03-20-2023 16:34:21] \n","","","","    update_blobber_test.go:19: Test case [Update blobber in allocation without correct delegated client, shouldn't work] exit at [03-20-2023 16:34:21]\n","--- PASS: TestUpdateBlobber/Update_blobber_in_allocation_without_correct_delegated_client,_shouldn't_work (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestZs3Server","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestZs3Server (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"z3s_server_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestZs3Server/Zs3_server_should_return_500_when_the_action_doesn't_exist","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    z3s_server_test.go:19: Test case [Zs3 server should return 500 when the action doesn't exist] scheduled at [03-20-2023 16:34:21] \n","","","","    z3s_server_test.go:19: Test case [Zs3 server should return 500 when the action doesn't exist] exit at [03-20-2023 16:34:21]\n","--- PASS: TestZs3Server/Zs3_server_should_return_500_when_the_action_doesn't_exist (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestZs3Server/zs3_server_should_return_500_when_the_credentials_aren't_correct","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":0,"Output":["","","    z3s_server_test.go:30: Test case [zs3 server should return 500 when the credentials aren't correct] scheduled at [03-20-2023 16:34:21] \n","","","","    z3s_server_test.go:30: Test case [zs3 server should return 500 when the credentials aren't correct] exit at [03-20-2023 16:34:21]\n","--- PASS: TestZs3Server/zs3_server_should_return_500_when_the_credentials_aren't_correct (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
