@@ -39,6 +39,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -70,6 +71,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -145,6 +147,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -177,6 +180,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -332,6 +336,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -392,6 +397,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -477,6 +483,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -584,6 +591,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -636,6 +644,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -704,6 +713,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -754,6 +764,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -833,6 +844,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -911,6 +923,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -976,6 +989,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -1046,6 +1060,7 @@ func Test0Box(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 
 		require.NoError(t, err)
@@ -1079,6 +1094,7 @@ func Test0Box(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1251,6 +1267,7 @@ func Test0Box(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1329,6 +1346,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1378,12 +1396,13 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		// Get Wallet
-		wallets, _, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "bimp")
+		wallets, _, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
 		require.Equal(t, 1, len(wallets), "Wallet not created")
 		wallet := wallets[0]
 
@@ -1414,6 +1433,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1452,6 +1472,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1488,6 +1509,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1523,6 +1545,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1558,6 +1581,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1594,6 +1618,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1855,6 +1880,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"blimp",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1879,6 +1905,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1914,6 +1941,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1931,7 +1959,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			"blimp",
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1956,6 +1984,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1997,6 +2026,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2033,6 +2063,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"vult",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2069,6 +2100,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"vult",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2122,6 +2154,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2175,6 +2208,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"chalk",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2228,6 +2262,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"chimney",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2264,6 +2299,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			"bolt",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2300,6 +2336,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2335,6 +2372,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2384,6 +2422,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2425,6 +2464,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2449,6 +2489,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2505,6 +2546,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
+			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -2529,17 +2571,18 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 	})
+
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
 	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-	appType := [4]string{"blimp", "vult", "chimney", "bolt"}
+	appType := [5]string{"blimp", "vult", "chimney", "bolt", "chalk"}
 	for _, app := range appType {
 		wallets, _, _ := zboxClient.ListWalletKeys(t, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 		if wallets != nil {
-			t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
+			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
 			for _, wallet := range wallets {
 				message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
 				println(message, response, err)
