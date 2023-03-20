@@ -136,10 +136,11 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, o
 			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
 
-	_, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+	output, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
 	if err != nil {
 		return nil, err
 	}
+	t.Logf("faucet output: %v", output)
 
 	return cliutils.RunCommand(t, "./zbox register --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
