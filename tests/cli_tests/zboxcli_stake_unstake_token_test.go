@@ -199,6 +199,10 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
+		vs, err := getZboxCliVersion(t)
+		require.NoError(t, err)
+		t.Log("Get zboxcli version", vs)
+
 		blobbers := []climodel.BlobberInfo{}
 		output, err = listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
@@ -276,6 +280,12 @@ func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry boo
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+func getZboxCliVersion(t *test.SystemTest) ([]string, error) {
+	t.Log("Get zboxcli version...")
+	cmd := fmt.Sprintf("./zbox version %s --silent")
+	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
 func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {

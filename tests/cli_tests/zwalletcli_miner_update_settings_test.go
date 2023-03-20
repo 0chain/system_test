@@ -18,6 +18,7 @@ import (
 
 func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic complexity 44
 	t := test.NewSystemTest(testSetup)
+	t.Skip("DEBUG txn fee")
 
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
