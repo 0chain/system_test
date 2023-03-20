@@ -91,7 +91,7 @@ func displayMetricsMinerSharders(
 	//startSnapshot := getSnapshot(t, 0, 1, sharderUrl)
 	endSnapshot := getSnapshot(t, endRound-1, 1, sharderUrl)
 	require.Len(t, endSnapshot, 1)
-	lastRound := endSnapshot[0].Round
+	require.Equal(t, endRound, endSnapshot[0].Round)
 
 	// sum rewards from individual providers
 	var totalProviderTotalRewards, totalUnclaimedProviderRewards int64
@@ -110,9 +110,9 @@ func displayMetricsMinerSharders(
 	}
 
 	// sum rewards from reward provider table
-	rewardedRecorded := history.TotalRecordedRewards(t, 1, lastRound)
+	rewardedRecorded := history.TotalRecordedRewards(t, 1, endRound)
 	rewardedProviderRewards := history.TotalRecordedRewardsByType(
-		t, 1, lastRound,
+		t, 1, endRound,
 		[]climodel.Reward{
 			climodel.BlockRewardMiner, climodel.BlockRewardSharder,
 			climodel.FeeRewardMiner, climodel.FeeRewardSharder,
@@ -121,7 +121,7 @@ func displayMetricsMinerSharders(
 	)
 	rewardedDelegateRewards := history.TotalRecordedRewardsByType(
 		t,
-		1, lastRound,
+		1, endRound,
 		[]climodel.Reward{
 			climodel.BlockRewardMiner, climodel.BlockRewardSharder,
 			climodel.FeeRewardMiner, climodel.FeeRewardSharder,
@@ -136,7 +136,7 @@ func displayMetricsMinerSharders(
 		"miner and sharder should have equal block rewards")
 
 	_, _ = fmt.Println("from snapshot table")
-	_, _ = fmt.Println("\tround", lastRound)
+	_, _ = fmt.Println("\tround", endRound)
 	_, _ = fmt.Println("\ttotal minted", endSnapshot[0].TotalMint)
 	_, _ = fmt.Println("\tzcn supply", endSnapshot[0].ZCNSupply)
 	_, _ = fmt.Println("\ttotal mined", endSnapshot[0].MinedTotal)
@@ -154,7 +154,7 @@ func displayMetricsMinerSharders(
 	_, _ = fmt.Println("\treward per round", minerBlockReward+sharderBlockReward)
 	_, _ = fmt.Println("\tminer block reward", minerBlockReward)
 	_, _ = fmt.Println("\tsharder block reward", sharderBlockReward)
-	_, _ = fmt.Println("\tcalculated total reward", (minerBlockReward+sharderBlockReward)*lastRound)
+	_, _ = fmt.Println("\tcalculated total reward", (minerBlockReward+sharderBlockReward)*endRound)
 	_, _ = fmt.Println()
 }
 
@@ -250,15 +250,22 @@ func SSMSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 	challengesEnabled, ok := storageSettings.Boolean["challenge_enabled"]
 	require.True(t, ok, "missing challenge enabled setting")
 	require.Falsef(t, challengesEnabled, "challenge enabled setting should be false")
-	costCollectReward, ok := storageSettings.Numeric["cost.collect_reward"]
-	costCollectReward = costCollectReward
-	//require.Equal(t, 0, costCollectReward)
 
-	// cost.challenge_request set to zero
+	// costs all set to zero
+	checkCostValues(t, storageSettings.Numeric, 0)
+	checkCostValues(t, getMinerScMap(t), 0)
 
 	//  No blobbers
 	blobbers := getBlobbers(t)
 	require.Len(t, blobbers, 0)
+}
+
+func checkCostValues(t *test.SystemTest, settings map[string]float64, requiredCost int64) {
+	for key, value := range settings {
+		if strings.HasPrefix(key, "cost.") {
+			require.Equal(t, int64(value), requiredCost, "unexpected value for cost setting")
+		}
+	}
 }
 
 func getSnapshot(t *test.SystemTest, round int64, limit int, sharderBaseUrl string) []climodel.Snapshot {
@@ -272,11 +279,14 @@ func getSnapshot(t *test.SystemTest, round int64, limit int, sharderBaseUrl stri
 
 func createStakePools(
 	t *test.SystemTest, providerIds []string, tokens []float64, provider climodel.Provider,
-) func() {
+) [][]string {
 	require.True(t, len(tokens) > 0, "create greater than zero pools")
+	var wallets [][]string
 	for _, id := range providerIds {
+		var providerWallets []string
 		for delegate := 0; delegate < len(tokens); delegate++ {
 			wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
+			providerWallets = append(providerWallets, wallet)
 			registerWalletWithTokens(t, configPath, wallet, tokens[delegate])
 			output, err := minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
 				provider.String() + "_id": id,
@@ -285,18 +295,9 @@ func createStakePools(
 			require.NoError(t, err, "lock tokens in %s's stake pool", id)
 			require.Len(t, output, 1, "output, lock tokens in %s's stake pool", id)
 		}
+		wallets = append(wallets, providerWallets)
 	}
-	return func() {
-		for _, id := range providerIds {
-			for delegate := 0; delegate < len(tokens); delegate++ {
-				wallet := escapedTestName(t) + "_delegate_" + strconv.Itoa(delegate) + "_node_" + id
-				_, err := minerOrSharderUnlockForWallet(t, configPath, createParams(map[string]interface{}{
-					"id": id,
-				}), wallet, true)
-				require.NoError(t, err, "unlock tokens in %s's stake pool", id)
-			}
-		}
-	}
+	return wallets
 }
 
 func getBlobbers(t *test.SystemTest) []climodel.BlobberDetails {
