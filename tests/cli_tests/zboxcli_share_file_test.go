@@ -996,7 +996,6 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath":          "/blahblah.txt",
 		}
 		output, err = shareFileWithWallet(t, sharerWallet, configPath, shareParams)
-		t.Log(output)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "file_meta_error: Error getting object meta data from blobbers", output[0],
