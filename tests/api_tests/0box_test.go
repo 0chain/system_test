@@ -2143,6 +2143,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// FIXME change the error massege according to change in 0box.
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
