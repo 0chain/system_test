@@ -185,7 +185,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Shared encrypted file to public using auth ticket should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Shared encrypted file to public using auth ticket without encryptionkey flag should fail", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
