@@ -130,7 +130,11 @@ func SSMSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 
 	//  No blobbers
 	blobbers := getBlobbers(t)
-	require.Len(t, blobbers, 0)
+	require.Len(t, blobbers, 0, " should be no blobbers")
+
+	//No validators
+	validators := getValidators(t)
+	require.Len(t, validators, 0, "should be no validators")
 }
 
 func displayMetricsMinerSharders(
@@ -194,7 +198,7 @@ func displayMetricsMinerSharders(
 	_, _ = fmt.Println("\ttotal mined", endSnapshot[0].MinedTotal)
 	_, _ = fmt.Println("\ttotal rewards", endSnapshot[0].TotalRewards)
 	_, _ = fmt.Println("\ttransaction count", endSnapshot[0].TransactionsCount)
-	_, _ = fmt.Println("\ttotal transaction fee", history.TotalTransactionFees(t, 0, endRound))
+	_, _ = fmt.Println("\ttotal transaction fee", history.TotalTransactionFees(t, 1, endRound))
 	_, _ = fmt.Println("from rewards providers table")
 	_, _ = fmt.Println("\ttotal rewards table", rewardedRecorded)
 	_, _ = fmt.Println("\tproviders", rewardedProviderRewards)
@@ -264,7 +268,10 @@ func estimateReward(
 func checkCostValues(t *test.SystemTest, settings map[string]float64, requiredCost int64) {
 	for key, value := range settings {
 		if strings.HasPrefix(key, "cost.") {
-			require.Equal(t, int64(value), requiredCost, "unexpected value for cost setting")
+			if int64(value) != requiredCost {
+				fmt.Println(value, requiredCost)
+			}
+			require.Equalf(t, int64(value), requiredCost, "unexpected value for cost setting %s %v", key, value)
 		}
 	}
 }
@@ -301,12 +308,24 @@ func createStakePools(
 	return wallets
 }
 
-func getBlobbers(t *test.SystemTest) []climodel.BlobberDetails {
-	output, err := listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+func getValidators(t *test.SystemTest) []climodel.Validator {
+	output, err := listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
 
-	var blobberList []climodel.BlobberDetails
+	var validatorList []climodel.Validator
+	err = json.Unmarshal([]byte(output[0]), &validatorList)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	return validatorList
+}
+
+func getBlobbers(t *test.SystemTest) []climodel.Validator {
+	output, err := listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 1, strings.Join(output, "\n"))
+
+	var blobberList []climodel.Validator
 	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, strings.Join(output, "\n"))
 

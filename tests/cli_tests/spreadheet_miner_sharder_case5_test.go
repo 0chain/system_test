@@ -10,19 +10,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const transactionCost = 100
-
 // TestSpreadsheetMinerSharderCase1
 // 11 miners, 3 sharders to represent a scaled version of 111 miners and 30 sharders for mainnet
+// 2 blobbers and 2 validators
 // 1 delegate each, equal stake
 // Loadtest is off
-// Txn fee set to 100, Service charge set to 20%. Turn challenge off. No blobbers
+// Txn fee set to zero, Service charge set to 20%. Turn challenge off. No blobbers
 // Miners and sharders should get equal rewards. May need to find the right share ratio
 // Total rewards to all miners and sharders needs to be equal to the total minted tokens on the network.
 // Each miner/sharder delegate income should be equal and is based on rewards minus the service charge.
 // The delegate should also receive the service fee portion.
 // Total Rewards = Rewards from all miners and sharders
-func TestSpreadsheetMinerSharderCase4(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestSpreadsheetMinerSharderCase5(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	//  t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
@@ -36,7 +35,7 @@ func TestSpreadsheetMinerSharderCase4(testSetup *testing.T) { // nolint:gocyclo 
 	minerIds := getSortedMinerIds(t, sharderUrl)
 	sharderIds := getSortedSharderIds(t, sharderUrl)
 
-	SSMSCase4Setup(t, minerIds, sharderIds, sharderUrl)
+	SSMSCase5Setup(t, minerIds, sharderIds, sharderUrl)
 
 	// ----------------------------------- w
 	time.Sleep(time.Second * 3)
@@ -64,13 +63,13 @@ func TestSpreadsheetMinerSharderCase4(testSetup *testing.T) { // nolint:gocyclo 
 	history.Read(t, sharderUrl, true)
 
 	displayMetricsMinerSharders(
-		t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
+		t, history.To(), afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
 	)
 
 	//  })
 }
 
-func SSMSCase4Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
+func SSMSCase5Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
 	// 11 miners, 3 sharders
 	require.Len(t, minerIds, sSMSNumberMiners)
 	require.Len(t, sharderIds, sSMSNumberSharders)
@@ -114,15 +113,14 @@ func SSMSCase4Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 	require.Falsef(t, challengesEnabled, "challenge enabled setting should be false")
 
 	// costs all set to zero
-	// todo wait for https://github.com/0chain/0chain/issues/2231 to be fixed
-	// checkCostValues(t, storageSettings.Numeric, transactionCost)
-	// checkCostValues(t, getMinerScMap(t), transactionCost)
+	checkCostValues(t, storageSettings.Numeric, 0)
+	checkCostValues(t, getMinerScMap(t), 0)
 
 	//  No blobbers
 	blobbers := getBlobbers(t)
-	require.Len(t, blobbers, 0, " should be no blobbers")
+	require.Len(t, blobbers, 2, " should be two blobbers")
 
 	//No validators
 	validators := getValidators(t)
-	require.Len(t, validators, 0, "should be no validators")
+	require.Len(t, validators, 2, "should be two validators")
 }

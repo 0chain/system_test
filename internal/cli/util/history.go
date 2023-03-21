@@ -60,8 +60,8 @@ func (ch *ChainHistory) To() int64 {
 }
 
 func (ch *ChainHistory) TotalTransactionFees(t *test.SystemTest, from, to int64) int64 {
-	require.True(t, ch.from <= from)
-	require.True(t, ch.to >= to)
+	require.GreaterOrEqual(t, from, ch.from, "total transaction fees, from value out of range")
+	require.GreaterOrEqual(t, ch.to, to, "total transaction fees, to value out of range")
 	var total int64
 	for i := range ch.transactions {
 		if ch.transactions[i].Round >= from && ch.transactions[i].Round <= to {
