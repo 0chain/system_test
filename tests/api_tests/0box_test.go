@@ -2130,8 +2130,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName = "second allocation created as part of " + t.Name()
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
+		allocation_id := "new allocation for vult"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocation_id,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -2184,8 +2185,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName = "second allocation created as part of " + t.Name()
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
+		allocation_id := "new allocation id for blimp"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocation_id,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -2238,8 +2240,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName = "second allocation created as part of " + t.Name()
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
+		allocation_id := "new allocation for chalk"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocation_id,
 			allocationName,
 			allocationDescription,
 			allocationType,
