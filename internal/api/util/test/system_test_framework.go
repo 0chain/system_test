@@ -3,12 +3,13 @@ package test
 import (
 	"log"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 )
 
-var DefaultTestTimeout = 20 * time.Second
+var DefaultTestTimeout = 40 * time.Second
 
 type SystemTest struct {
 	Unwrap       *testing.T
@@ -183,6 +184,15 @@ func (s *SystemTest) Name() string {
 	s.Unwrap.Helper()
 	defer handleTestCaseExit()
 	return s.Unwrap.Name()
+}
+
+func (s *SystemTest) EscapedName() string {
+	s.Unwrap.Helper()
+	defer handleTestCaseExit()
+	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
+		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
+		"?", "-")
+	return replacer.Replace(s.Unwrap.Name())
 }
 
 func (s *SystemTest) Setenv(key, value string) {

@@ -1,5 +1,12 @@
 package model
 
+import (
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/go-resty/resty/v2"
+)
+
+const GB = float64(1024 * 1024 * 1024)
+
 type FirebaseSession struct {
 	SessionInfo string `json:"sessionInfo"`
 }
@@ -123,6 +130,13 @@ type ZboxGraphRequest struct {
 }
 
 type ZboxGraphInt64Response []int64
+type ZboxTotalInt64Response int64
+
+type ZboxGraphChallengesResponse struct {
+	TotalChallenges ZboxGraphInt64Response `json:"total"`
+	SuccessfulChallenges ZboxGraphInt64Response `json:"successful"`
+}
+
 type ZboxShareInfo struct {
 	AuthTicket string `json:"auth_ticket"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
 	Message    string `json:"message"`
@@ -222,3 +236,4 @@ type ZboxNftListByCollection struct {
 	NftList  []ZboxNft `json:"nfts_by_collection_id"`
 	NftCount int       `json:"total"`
 }
+type ZboxGraphEndpoint func(*test.SystemTest, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)

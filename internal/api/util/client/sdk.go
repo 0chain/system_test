@@ -66,7 +66,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (string, int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -107,5 +107,107 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
-	return filepath.Join("", filepath.Base(tmpFile.Name()))
+	return filepath.Join("", filepath.Base(tmpFile.Name())), actualSize
+}
+
+func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
+	t.Logf("Deleting file %s from allocation %s", fpath, allocationID)
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	err = sdkAllocation.DeleteFile("/" + filepath.Join("", filepath.Base(fpath)))
+	require.NoError(t, err)
+}
+
+func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	defer func(name string) {
+		_ = os.RemoveAll(name)
+	}(tmpFile.Name())
+
+	actualSize := fsize * 2
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemoteName: filepath.Base(fpath),
+		RemotePath: "/" + filepath.Join("", filepath.Base(fpath)),
+	}
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+		fileMeta, buf, true, false)
+	require.NoError(t, err)
+	require.Nil(t, chunkedUpload.Start())
+
+	return fpath, actualSize
+}
+
+func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	require.Greater(t, fsize, int64(0), "Cannot create a file with size less than 0")
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	defer func(name string) {
+		_ = os.RemoveAll(name)
+	}(tmpFile.Name())
+
+	actualSize := fsize / 2
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemoteName: filepath.Base(fpath),
+		RemotePath: "/" + filepath.Join("", filepath.Base(fpath)),
+	}
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+		fileMeta, buf, true, false)
+	require.NoError(t, err)
+	require.Nil(t, chunkedUpload.Start())
+
+	return fpath, actualSize
 }
