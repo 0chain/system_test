@@ -114,6 +114,7 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string, opt ...registe
 
 type registerWalletOption struct {
 	noPourAndReadPool bool
+	debugLogs         bool
 }
 
 type registerWalletOptionFunc func(*registerWalletOption)
@@ -121,6 +122,12 @@ type registerWalletOptionFunc func(*registerWalletOption)
 func withNoFaucetPour() registerWalletOptionFunc {
 	return func(o *registerWalletOption) {
 		o.noPourAndReadPool = true
+	}
+}
+
+func withDebugLogs() registerWalletOptionFunc {
+	return func(o *registerWalletOption) {
+		o.debugLogs = true
 	}
 }
 
@@ -141,6 +148,11 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, o
 		return nil, err
 	}
 	t.Logf("faucet output: %v", output)
+
+	if regOpt.debugLogs {
+		return cliutils.RunCommand(t, "./zbox register "+
+			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	}
 
 	return cliutils.RunCommand(t, "./zbox register --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)

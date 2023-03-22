@@ -192,8 +192,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := registerWallet(t, configPath, withDebugLogs())
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		t.Logf("output: %v", output)
 		txnHash := getTransactionHash(output, false)
 
 		// Wallet balance before staking tokens
