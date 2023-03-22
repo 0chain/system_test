@@ -109,7 +109,13 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, allocationID, allocationList[0].Id)
+		allocationFound := false
+		for _, allocation := range(allocationList) {
+			if allocation.Id == allocationID {
+				allocationFound = true
+			}
+		}
+		require.Equal(t, true, allocationFound)
 	})
 
 	t.RunSequentially("List allocation with invalid phone number should not work", func(t *test.SystemTest) {
