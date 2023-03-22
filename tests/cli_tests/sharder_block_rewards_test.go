@@ -26,7 +26,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder block rewards test skipped as it requires a debug event database")
@@ -147,7 +147,7 @@ func checkSharderBlockRewards(
 				case climodel.FeeRewardSharder:
 					rewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s not available to sharders", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s not available to sharders", pReward.RewardType.String())
 				}
 			}
 		}
@@ -257,7 +257,7 @@ func balanceSharderDelegatePoolBlockRewards(
 				case climodel.FeeRewardSharder:
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
-					require.Failf(t, "reward type %s not available to sharders stake pools;"+
+					require.Failf(t, "", "reward type %s not available to sharders stake pools;"+
 						" received by sharder %s on round %d", dReward.RewardType.String(), &dReward.PoolID, round)
 				}
 			}

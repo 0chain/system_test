@@ -42,7 +42,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
@@ -161,7 +161,7 @@ func checkMinerBlockRewards(
 				case climodel.FeeRewardMiner:
 					feeRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for miners", pReward.RewardType.String())
 				}
 			}
 		}

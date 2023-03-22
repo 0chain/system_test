@@ -24,7 +24,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Sharder share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
 		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -47,8 +47,9 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
 			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
-			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
+		time.Sleep(time.Second) // give time for last round to be saved
 		// ------------------------------------
 
 		afterSharders := getNodes(t, sharderIds, sharderUrl)
@@ -166,7 +167,7 @@ func checkSharderFeeAmounts(
 				case climodel.BlockRewardSharder:
 					blockRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for sharders", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for sharders", pReward.RewardType.String())
 				}
 			}
 			// If sharder is one of the chosen sharders, check fee payment is correct
@@ -300,7 +301,7 @@ func checkSharderDelegatePoolFeeAmounts(
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
 					require.Failf(t, "mismatched reward type",
-						"reward type %s not paid to sharder delegate pools", dReward.RewardType)
+						"", "reward type %s not paid to sharder delegate pools", dReward.RewardType)
 				}
 			}
 			if fees > 0 {
