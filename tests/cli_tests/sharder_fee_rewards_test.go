@@ -13,7 +13,6 @@ import (
 
 func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
 
 	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
