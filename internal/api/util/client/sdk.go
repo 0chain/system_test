@@ -30,11 +30,11 @@ type StatusCallback struct {
 	statusCB sdk.StatusCallback
 }
 
-func (cb *StatusCallback) Started(allocationId, filePath string, op int, totalBytes int) {
+func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
 	cb.statusCB.Started(allocationId, filePath, op, totalBytes)
 }
 
-func (cb *StatusCallback) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {
+func (cb *StatusCallback) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
 	cb.statusCB.InProgress(allocationId, filePath, op, completedBytes, data)
 }
 
@@ -42,13 +42,13 @@ func (cb *StatusCallback) RepairCompleted(filesRepaired int) {
 	cb.statusCB.RepairCompleted(filesRepaired)
 }
 
-func (cb *StatusCallback) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
+func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
 	cb.statusCB.Completed(allocationId, filePath, filename, mimetype, size, op)
 	cb.success = true
 	cb.wg.Done()
 }
 
-func (cb *StatusCallback) Error(allocationID string, filePath string, op int, err error) {
+func (cb *StatusCallback) Error(allocationID, filePath string, op int, err error) {
 	cb.statusCB.Error(allocationID, filePath, op, err)
 	cb.success = false
 	cb.err = err
@@ -98,7 +98,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (string, int64) {
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -154,7 +154,7 @@ func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -198,7 +198,7 @@ func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath str
 	return fpath, actualSize
 }
 
-func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 

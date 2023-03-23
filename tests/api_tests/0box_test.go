@@ -2060,7 +2060,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is cancelled. Check https://github.com/0chain/0chain/issues/2211
-				cond := allocatedStorageAfter == allocatedStorage && allocatedStorageAfter == int64(*latest)
+				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest))
 				allocatedStorage = allocatedStorageAfter
 
 				// get all blobbers
@@ -2068,7 +2068,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				expectedAllocatedStorage := calculateExpectedAllocated(allBlobbers)
-				cond = cond && allocatedStorageAfter == expectedAllocatedStorage
+				cond = cond && (allocatedStorageAfter == expectedAllocatedStorage)
 
 				return cond
 			})
