@@ -23,6 +23,38 @@ type SDKClient struct {
 	wallet      *model.SdkWallet
 }
 
+type StatusCallback struct {
+	wg       *sync.WaitGroup
+	success  bool
+	err      error
+	statusCB sdk.StatusCallback
+}
+
+func (cb *StatusCallback) Started(allocationId, filePath string, op int, totalBytes int) {
+	cb.statusCB.Started(allocationId, filePath, op, totalBytes)
+}
+
+func (cb *StatusCallback) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {
+	cb.statusCB.InProgress(allocationId, filePath, op, completedBytes, data)
+}
+
+func (cb *StatusCallback) RepairCompleted(filesRepaired int) {
+	cb.statusCB.RepairCompleted(filesRepaired)
+}
+
+func (cb *StatusCallback) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
+	cb.statusCB.Completed(allocationId, filePath, filename, mimetype, size, op)
+	cb.success = true
+	cb.wg.Done()
+}
+
+func (cb *StatusCallback) Error(allocationID string, filePath string, op int, err error) {
+	cb.statusCB.Error(allocationID, filePath, op, err)
+	cb.success = false
+	cb.err = err
+	cb.wg.Done()
+}
+
 func NewSDKClient(blockWorker string) *SDKClient {
 	sdkClient := &SDKClient{
 		blockWorker: blockWorker}
@@ -210,4 +242,16 @@ func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath st
 	require.Nil(t, chunkedUpload.Start())
 
 	return fpath, actualSize
+}
+
+func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, localpath string) {
+	t.Logf("Downloading file %s to %s from allocation %s", remotepath, localpath, allocationID)
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	err = sdkAllocation.DownloadFile(localpath, "/" + remotepath, false, &StatusCallback{ wg: &sync.WaitGroup{} })
+	require.NoError(t, err)
 }

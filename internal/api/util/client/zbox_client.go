@@ -1481,3 +1481,271 @@ func (c *ZboxClient) GetTotalAllocatedStorage(t *test.SystemTest) (*model.ZboxTo
 
 	return &data, resp, err
 }
+
+func (c *ZboxClient) GetGraphBlobberChallengesPassed(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber challenges passed using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-challenges-passed")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberChallengesCompleted(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber challenges completed using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-challenges-completed")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberChallengesOpen(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber challenges open using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-challenges-open")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberInactiveRounds(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber inactive rounds using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-inactive-rounds")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberWritePrice(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber write price using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-write-price")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberCapacity(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber capacity using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-capacity")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberAllocated(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber allocated using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-allocated")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) GetGraphBlobberSavedData(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber saved data using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-saved-data")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+// GetGraphBlobberReadData returns the blobber read price data
+func (c *ZboxClient) GetGraphBlobberReadData(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber read data using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-read-data")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+// GetGraphBlobberOffersTotal returns the blobber offers total
+func (c *ZboxClient) GetGraphBlobberOffersTotal(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber offers total using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-offers-total")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+// GetGraphBlobberUnstakeTotal
+func (c *ZboxClient) GetGraphBlobberUnstakeTotal(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber unstake total using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-unstake-total")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+// GetGraphBlobberStakeTotal
+func (c *ZboxClient) GetGraphBlobberStakeTotal(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
+	t.Logf("Getting graph blobber stake total using 0box...")
+	var data model.ZboxGraphInt64Response
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/graph-blobber-stake-total")
+	urlBuilder.queries.Set("id", blobberId)
+	urlBuilder.queries.Set("from", req.From)
+	urlBuilder.queries.Set("to", req.To)
+	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}

@@ -555,6 +555,7 @@ type SCRestGetBlobberResponse struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	TotalStake        int64             `json:"total_stake"`
 	SavedData		 int64             `json:"saved_data"`
+	ReadData		 int64			   `json:"read_data"`
 }
 
 type SCRestGetBlobbersResponse struct {
