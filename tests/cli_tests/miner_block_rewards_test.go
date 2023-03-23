@@ -42,38 +42,38 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	//	t.RunSequentiallyWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-	if !confirmDebugBuild(t) {
-		t.Skip("miner block rewards test skipped as it asserts a debug event database")
-	}
+	t.RunSequentiallyWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+		if !confirmDebugBuild(t) {
+			t.Skip("miner block rewards test skipped as it asserts a debug event database")
+		}
 
-	sharderUrl := getSharderUrl(t)
-	minerIds := getSortedMinerIds(t, sharderUrl)
-	assert.True(t, len(minerIds) > 0, "no miners found")
+		sharderUrl := getSharderUrl(t)
+		minerIds := getSortedMinerIds(t, sharderUrl)
+		assert.True(t, len(minerIds) > 0, "no miners found")
 
-	beforeMiners := getNodes(t, minerIds, sharderUrl)
+		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
-	// ------------------------------------
-	cliutils.Wait(t, 3*time.Second)
-	// ------------------------------------
+		// ------------------------------------
+		cliutils.Wait(t, 3*time.Second)
+		// ------------------------------------
 
-	afterMiners := getNodes(t, minerIds, sharderUrl)
+		afterMiners := getNodes(t, minerIds, sharderUrl)
 
-	// we add rewards at the end of the round, and they don't appear until the next round
+		// we add rewards at the end of the round, and they don't appear until the next round
 
-	startRound, endRound := getStartAndEndRounds(
-		t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
-	)
+		startRound, endRound := getStartAndEndRounds(
+			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
+		)
 
-	time.Sleep(time.Second) // give time for last round to be saved
-	history := cliutil.NewHistory(startRound, endRound)
-	history.Read(t, sharderUrl, true)
+		time.Sleep(time.Second) // give time for last round to be saved
+		history := cliutil.NewHistory(startRound, endRound)
+		history.Read(t, sharderUrl, true)
 
-	balanceMinerRewards(
-		t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
-	)
-	//})
+		balanceMinerRewards(
+			t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
+		)
+	})
 }
 
 func balanceMinerRewards(
