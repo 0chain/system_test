@@ -528,7 +528,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "rename_failed")
 	})
 
 	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
@@ -574,7 +574,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "rename_failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
