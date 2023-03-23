@@ -47,7 +47,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -78,7 +78,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -97,7 +97,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of " + t.Name()
@@ -152,7 +152,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -184,7 +184,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -203,7 +203,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of" + t.Name()
@@ -338,7 +338,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -357,7 +357,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		_, response, err = zboxClient.PostNftCollection(t,
@@ -397,7 +397,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -416,7 +416,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of" + t.Name()
@@ -481,7 +481,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -500,7 +500,7 @@ func Test0boxNft(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection as a part of " + t.Name()
@@ -568,7 +568,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftUpdated)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	// FIXME see: https://github.com/0chain/0box/issues/507
@@ -587,7 +587,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -614,7 +614,7 @@ func Test0boxNft(testSetup *testing.T) {
 		// require.Error(t, err) Fixme error is not send in error instead it is send
 		require.NoError(t, err)
 		require.NotNil(t, zboxNftCollectionId)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 }
 
@@ -1049,7 +1049,7 @@ func Test0Box(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
@@ -1081,7 +1081,7 @@ func Test0Box(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		wallets, response, err := zboxClient.ListWallets(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
@@ -1119,9 +1119,9 @@ func Test0Box(testSetup *testing.T) {
 		success, response, err := zboxClient.PostUserInfoBiography(t, "bio from "+escapedTestName(t), firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "biography saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating bio successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info Avatar should work", func(t *test.SystemTest) {
@@ -1133,9 +1133,9 @@ func Test0Box(testSetup *testing.T) {
 		success, response, err := zboxClient.PostUserInfoAvatar(t, avatarImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "avatar saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating avatar successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info background image should work", func(t *test.SystemTest) {
@@ -1148,9 +1148,9 @@ func Test0Box(testSetup *testing.T) {
 		success, response, err := zboxClient.PostUserInfoBackgroundImage(t, backgroundImagePath, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, success)
-		require.Equal(t, "background image saved", success.Success, "output not as expected", response.String())
+		require.Equal(t, "updating bgimage successful", success.Message, "output not as expected", response.String())
 	})
 
 	t.RunSequentially("Create User Info username should work", func(t *test.SystemTest) {
@@ -1253,7 +1253,7 @@ func Test0Box(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		t.Logf("Should return true when wallet exists")
 		data, response, err := zboxClient.CheckWalletExists(t, walletName, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -1275,7 +1275,7 @@ func Test0BoxFCM(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		response, err := zboxClient.CreateFCMToken(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Creating FCM Token with existing credentials should fail", func(t *test.SystemTest) {
@@ -1331,7 +1331,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		zboxWalletKeys, response, err := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
@@ -1380,7 +1380,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		// Get Wallet
 		wallets, _, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -1416,7 +1416,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		// Update Wallet
 		_, response, err = zboxClient.UpdateWallet(t, wallet.Mnemonic, "new_wallet_name", "new_wallet_description", firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -1454,7 +1454,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		type contactResponse struct {
 			Message string              `json:"message"`
@@ -1490,7 +1490,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		reqBody := "[{\"user_name\":\"artem\",\"phone_number\":\"+917696229925\"},{\"user_name\":\"artem2\",\"phone_number\":\"+917696229925\"}]"
 
@@ -1525,7 +1525,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		reqBody := "[{\"user_name\":\"artem\"}]"
 
@@ -1560,7 +1560,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		type contactResponse struct {
 			Message string              `json:"message"`
@@ -1596,7 +1596,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		type contactResponse struct {
 			Message string              `json:"message"`
@@ -1642,7 +1642,7 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 201, response.StatusCode())
 		require.NotNil(t, dexState)
 	})
 
@@ -1839,388 +1839,6 @@ func TestDexState(testSetup *testing.T) {
 	})
 }
 
-func Test0BoxAllocation(testSetup *testing.T) {
-	// todo: These tests are sequential and start with teardown as they all share a common phone number
-	t := test.NewSystemTest(testSetup)
-	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
-	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, allocationList, 0)
-	})
-
-	t.RunSequentially("Post allocation with invalid phonenumber should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			"1234567890",
-		)
-		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	})
-
-	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Id)
-	})
-
-	t.RunSequentially("List allocation with invalid phone number should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		_, _, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
-		require.Error(t, err)
-		// require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		// I guess this a bug. Will discuss it and fix it
-	})
-
-	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-	})
-
-	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	})
-
-	t.RunSequentially("Get an allocation with allocation present should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocation.Id)
-	})
-
-	t.RunSequentially("Get an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		_, response, err = zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
-		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	})
-
-	t.RunSequentially("Update an allocation with allocation present should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-		updatedAllocationName := "update allocation name"
-		allocationObjCreatedResponse, response, err = zboxClient.UpdateAllocation(t,
-			zboxClient.DefaultAllocationId,
-			updatedAllocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
-
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocation.Id)
-		require.Equal(t, updatedAllocationName, allocation.Name)
-	})
-
-	t.RunSequentially("Update an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-
-		updatedAllocationName := "update allocation name"
-		allocationObjCreatedResponse, response, err := zboxClient.UpdateAllocation(t,
-			zboxClient.DefaultAllocationId,
-			updatedAllocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
-	})
-}
-
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -2251,13 +1869,12 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus)
 	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
-	
 
 	t.Run("test /v2/graph-write-price", func(t *test.SystemTest) {
-		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphWritePrice))		
-		
+		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
+
 		t.Run("test graph data", func(t *test.SystemTest) {
-			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2278,17 +1895,17 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				// get all blobbers
 				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				printBlobbers(t, "After Update", allBlobbers)
-	
-				expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
-				roundingError := int64(1000);
 
-				data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+				expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
+				roundingError := int64(1000)
+
+				data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2316,7 +1933,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			// Get initial total challenge pools
-			data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2333,9 +1950,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			sdkClient.UploadFile(t, allocationID)
 
 			var totalChallengePoolsAfterAllocation int64
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				// Get total challenge pools
-				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2346,9 +1963,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Cancel the second allocation
 			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				// Get total challenge pools
-				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2363,12 +1980,12 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			// Get initial total challenge pools
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
 			allocatedStorage := (*data)[0]
-			
+
 			// Create a new allocation
 			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 			blobberRequirements.DataShards = 1
@@ -2377,8 +1994,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2390,33 +2007,33 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				allocatedStorage = allocatedStorageAfterAllocation
 				return cond
 			})
-			
+
 			// Reduce allocation size
 			apiClient.UpdateAllocation(t, sdkWallet, allocationID, &model.UpdateAllocationRequest{
 				Size: -1024,
 			}, client.TxSuccessfulStatus)
 
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				allocatedStorageAfter := (*data)[0]
-				cond := allocatedStorageAfter < allocatedStorage 
+				cond := allocatedStorageAfter < allocatedStorage
 				allocatedStorage = allocatedStorageAfter
 				return cond
 			})
 
 			// Add blobber to the allocation
-			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)	
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 			apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2433,8 +2050,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
 			// Check decreased + consistency
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2463,7 +2080,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			// Get initial used storage
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2480,8 +2097,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2496,8 +2113,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			t.Logf("Filename after update bigger : %v", fpath)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2513,8 +2130,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			t.Logf("Filename after update smaller : %v", fpath)
 
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2529,8 +2146,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			sdkClient.DeleteFile(t, allocationID, fpath)
 
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2546,8 +2163,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			_, fsize = sdkClient.UploadFile(t, allocationID)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2556,14 +2173,14 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				usedStorage = usedStorageAfter
 				return cond
 			})
-			
+
 			// Cancel the allocation
 			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
 			// Check decreased + consistency
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				// Get total challenge pools
-				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2576,10 +2193,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
- 
+
 				expectedSavedData := calculateExpectedSavedData(allBlobbers)
 				cond = cond && usedStorageAfter == expectedSavedData
-				
+
 				return cond
 			})
 		})
@@ -2588,8 +2205,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.Run("test /v2/graph-total-staked", func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalStaked))
 
-		t.Run("test graph data", func (t *test.SystemTest) {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+		t.Run("test graph data", func(t *test.SystemTest) {
+			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2604,8 +2221,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2613,21 +2230,21 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := (totalStakedAfter - totalStaked) == *(tokenomics.IntToZCN(1)) && totalStakedAfter == int64(*latest) 
+				cond := (totalStakedAfter-totalStaked) == *(tokenomics.IntToZCN(1)) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
 
 			// Get blobber balance before unlocking
 			blobberBalanceBefore := getClientStakeForSSCProvider(t, sdkWallet, targetBlobbers[0].ID)
-			
+
 			// Unlock a stake pool => should decrease
 			restake := unstakeBlobber(t, sdkWallet, targetBlobbers[0].ID)
 			defer restake()
-			
+
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2635,7 +2252,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := (totalStaked - totalStakedAfter) == blobberBalanceBefore && totalStakedAfter == int64(*latest) 
+				cond := (totalStaked-totalStakedAfter) == blobberBalanceBefore && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2649,10 +2266,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			confHash = apiClient.CreateStakePool(t, sdkWallet, 4, validatorId, float64(1.0), client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
-
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2660,18 +2276,18 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStakedAfter - totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
-				
+
 			// Unstake the validator
 			confHash = apiClient.UnlockStakePool(t, sdkWallet, 4, validatorId, client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2679,7 +2295,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStaked - totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2695,8 +2311,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2704,7 +2320,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStakedAfter - totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2714,8 +2330,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2723,7 +2339,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStaked - totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2738,8 +2354,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2747,7 +2363,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStakedAfter - totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2757,8 +2373,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2766,7 +2382,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalStaked(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := totalStaked - totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
 				totalStaked = totalStakedAfter
 				return cond
 			})
@@ -2776,8 +2392,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.Run("test /v2/graph-total-minted", func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
 
-		t.Run("test graph data", func (t *test.SystemTest) {
-			data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+		t.Run("test graph data", func(t *test.SystemTest) {
+			data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2789,24 +2405,24 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			blobberRequirements.ParityShards = 1
 			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
-			
+
 			// Upload a file
 			sdkClient.UploadFile(t, allocationID)
 
 			// Add/Remove blobber to the allocation
-			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)	
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 			apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID,
 				allocation.Blobbers[0].ID, allocationID, client.TxSuccessfulStatus)
-				
+
 			// Unlock the stake pool of the removed blobber
 			restake1 := unstakeBlobber(t, sdkWallet, allocation.Blobbers[0].ID)
 			defer restake1()
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2829,8 +2445,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			defer restake3()
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2847,15 +2463,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Create a new allocation
 			freeAllocData := &model.FreeAllocationData{
 				RecipientPublicKey: sdkWallet.PublicKey,
-				Marker: marker,
+				Marker:             marker,
 			}
-			freeAllocationBlobbers := apiClient.GetFreeAllocationBlobbers(t, sdkWallet, freeAllocData, client.HttpOkStatus)			
+			freeAllocationBlobbers := apiClient.GetFreeAllocationBlobbers(t, sdkWallet, freeAllocData, client.HttpOkStatus)
 			freeAllocationBlobbers.FreeAllocationData = *freeAllocData
 			apiClient.CreateFreeAllocation(t, sdkWallet, freeAllocationBlobbers, client.TxSuccessfulStatus)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -2874,7 +2490,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
-			data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -2894,15 +2510,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			t.Logf("Staking blobber %s", blobberId)
 			confHash := apiClient.CreateStakePool(t, sdkWallet, 3, blobberId, float64(1.0), client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
-			
+
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -2915,13 +2531,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			defer restake()
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == blobberBalanceBefore
+				cond := graphTotalLocked-totalLockedAfter == blobberBalanceBefore
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -2935,31 +2551,30 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			confHash = apiClient.CreateStakePool(t, sdkWallet, 4, validatorId, float64(1.0), client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
-
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
-				
+
 			// Unstake the validator
 			confHash = apiClient.UnlockStakePool(t, sdkWallet, 4, validatorId, client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == *tokenomics.IntToZCN(1.0)
+				cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -2975,13 +2590,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -2991,13 +2606,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == *tokenomics.IntToZCN(1.0)
+				cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3012,13 +2627,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3028,13 +2643,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == *tokenomics.IntToZCN(1.0)
+				cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3045,15 +2660,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			blobberRequirements.ParityShards = 1
 			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
-			
+
 			// Check increase by locked value
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(0.2)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(0.2)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3061,15 +2676,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Create write pool for the allocation
 			confHash = apiClient.CreateWritePool(t, sdkWallet, allocationID, float64(1.0), client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
-			
+
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3080,8 +2695,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 			// Check decrease and calculate cancellation charge
 			var cancellationCharge int64
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3098,13 +2713,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 			// Check decrease by (initial locked value + write pool value - cancellation charge)
 			t.Logf("Cancellation charge: %d", cancellationCharge)
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == (*tokenomics.IntToZCN(1.0) + *tokenomics.IntToZCN(0.2) - cancellationCharge)
+				cond := graphTotalLocked-totalLockedAfter == (*tokenomics.IntToZCN(1.0) + *tokenomics.IntToZCN(0.2) - cancellationCharge)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3114,13 +2729,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := totalLockedAfter - graphTotalLocked == *tokenomics.IntToZCN(1.0)
+				cond := totalLockedAfter-graphTotalLocked == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3130,13 +2745,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked - totalLockedAfter == *tokenomics.IntToZCN(1.0)
+				cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -3146,40 +2761,40 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.Run("test /v2/graph-challenges", func(t *test.SystemTest) {
 		t.Run("endpoint parameters", func(t *test.SystemTest) {
 			// should fail for invalid parameters
-			_, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: "AX", To: "20", DataPoints: "5" })
+			_, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "invalid from param")
-		
-			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: "10", To: "AX", DataPoints: "5" })
+
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "AX", DataPoints: "5"})
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "invalid to param")
-		
-			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: "10", To: "20", DataPoints: "AX" })
+
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "invalid data-points query param")
-		
+
 			// should fail for invalid parameters (end - start < points + 1)
-			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: "10000", To: "10010", DataPoints: "10" })
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "there must be at least one interval")
-		
+
 			// should fail for invalid parameters (end < start)
-			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: "10000", To: "1000", DataPoints: "10" })
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "to 1000 less than from 10000")
-		
+
 			// should succeed in case of 1 point
-			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
 			require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
-		
+
 			// should succeed in case of multiple points
 			minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
 			require.NoError(t, err)
 			latestRound := minerStats.LastFinalizedRound
-			data, resp, err = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
+			data, resp, err = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 10, len([]int64(data.TotalChallenges)))
@@ -3188,26 +2803,26 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			// Get initial graph data
-			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
 			require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
 			totalChallenges, successfulChallenges := data.TotalChallenges[0], data.SuccessfulChallenges[0]
-			
+
 			// Create an allocation
 			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 			blobberRequirements.DataShards = 1
 			blobberRequirements.ParityShards = 1
 			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
-	
+
 			// Upload a file
 			sdkClient.UploadFile(t, allocationID)
-			
+
 			// Check total challenges increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(data.TotalChallenges)))
@@ -3224,17 +2839,17 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				successfulChallenges = data.SuccessfulChallenges[0]
 				return cond
 			})
-			
+
 			// Add blobber to the allocation
-			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)	
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 			apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID,
 				allocation.Blobbers[0].ID, allocationID, client.TxSuccessfulStatus)
 
 			// Check total challenges increase + successful challenges increase because time has passed since the upload
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(data.TotalChallenges)))
@@ -3256,11 +2871,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-token-supply", func (t *test.SystemTest) {
+	t.Run("test /v2/graph-token-supply", func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
-			data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
@@ -3274,8 +2889,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3290,8 +2905,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3305,19 +2920,19 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			sdkClient.UploadFile(t, allocationID)
 
 			// Add/Remove blobber to the allocation
-			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)	
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 			apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID,
 				allocation.Blobbers[0].ID, allocationID, client.TxSuccessfulStatus)
-				
+
 			// Unlock the stake pool of the removed blobber
 			restake1 := unstakeBlobber(t, sdkWallet, allocation.Blobbers[0].ID)
 			defer restake1()
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3335,8 +2950,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increased
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3353,8 +2968,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			defer restake3()
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3371,15 +2986,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Create a new allocation
 			freeAllocData := &model.FreeAllocationData{
 				RecipientPublicKey: sdkWallet.PublicKey,
-				Marker: marker,
+				Marker:             marker,
 			}
-			freeAllocationBlobbers := apiClient.GetFreeAllocationBlobbers(t, sdkWallet, freeAllocData, client.HttpOkStatus)			
+			freeAllocationBlobbers := apiClient.GetFreeAllocationBlobbers(t, sdkWallet, freeAllocData, client.HttpOkStatus)
 			freeAllocationBlobbers.FreeAllocationData = *freeAllocData
 			apiClient.CreateFreeAllocation(t, sdkWallet, freeAllocationBlobbers, client.TxSuccessfulStatus)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3399,8 +3014,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased (staked tokens are burnt)
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3415,8 +3030,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increased (unstaked tokens are minted)
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3436,8 +3051,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased (staked tokens are burnt)
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3452,8 +3067,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increased (unstaked tokens are minted)
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3462,14 +3077,14 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				totalSupply = totalSupplyAfter
 				return cond
 			})
-			
+
 			// Create read pool
 			confHash = apiClient.CreateReadPool(t, sdkWallet, float64(1.0), client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
 			// Check decrease
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3484,8 +3099,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check increase
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
@@ -3520,7 +3135,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		totalBlobberCapacity := int64(*data)
-		
+
 		// Faucet the blobber owner wallet
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 
@@ -3536,7 +3151,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 
 		// Check increase
-		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -3553,7 +3168,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 
 		// Check decrease
-		wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -3573,7 +3188,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	
+
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
@@ -3582,7 +3197,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 	}
-	
+
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
 	require.NoError(t, err)
@@ -3601,9 +3216,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.Len(t, blobbers, 1)
 
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
-		
+
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
-		
+
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -3616,24 +3231,23 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			// Get initial value of one of the blobbers
-			data, resp, err := zboxClient.GetGraphBlobberChallengesPassed(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphBlobberChallengesPassed(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
 			challnegesPassed := (*data)[0]
 
-			data, resp, err = zboxClient.GetGraphBlobberChallengesCompleted(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err = zboxClient.GetGraphBlobberChallengesCompleted(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
 			challnegesCompleted := (*data)[0]
 
-			data, resp, err = zboxClient.GetGraphBlobberChallengesOpen(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err = zboxClient.GetGraphBlobberChallengesOpen(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
 			challnegesOpen := (*data)[0]
-
 
 			// Upload file
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
@@ -3641,22 +3255,22 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotZero(t, fsize)
 
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberChallengesPassed(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberChallengesPassed(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				challnegesPassedAfter := (*data)[0]
 				cond := challnegesPassedAfter > challnegesPassed
 
-				data, resp, err = zboxClient.GetGraphBlobberChallengesCompleted(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err = zboxClient.GetGraphBlobberChallengesCompleted(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				challnegesCompletedAfter := (*data)[0]
 				cond = cond && challnegesCompletedAfter > challnegesCompleted
 
-				data, resp, err = zboxClient.GetGraphBlobberChallengesOpen(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err = zboxClient.GetGraphBlobberChallengesOpen(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3699,7 +3313,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			targetBlobber := blobbers[0]
 
 			// Get initial value of one of the blobbers
-			data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
@@ -3713,8 +3327,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobber, client.TxSuccessfulStatus)
 
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3731,8 +3345,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobber, client.TxSuccessfulStatus)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberWritePrice(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3760,7 +3374,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			targetBlobber := blobbers[0]
 
 			// Get initial value of one of the blobbers
-			data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
@@ -3774,8 +3388,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobber, client.TxSuccessfulStatus)
 
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3792,8 +3406,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobber, client.TxSuccessfulStatus)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberCapacity(t, targetBlobber.ID, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3837,10 +3451,10 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			// Value before allocation
 			targetBlobber := (*allocationBlobbers.Blobbers)[0]
 			allocated := blobberAllocated[targetBlobber]
-			
+
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberAllocated(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberAllocated(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3857,8 +3471,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberAllocated(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberAllocated(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -3906,15 +3520,15 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 			// Upload a file
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
-			
+
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
-				cond := afterValue - savedData == fsize
+				cond := afterValue-savedData == fsize
 				if cond {
 					savedData = afterValue
 				}
@@ -3925,13 +3539,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			sdkClient.DeleteFile(t, allocationID, fpath)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
-				cond := savedData - afterValue == fsize
+				cond := savedData-afterValue == fsize
 				if cond {
 					savedData = afterValue
 				}
@@ -3942,13 +3556,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			_, fsize = sdkClient.UploadFile(t, allocationID)
 
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
-				cond := afterValue - savedData == fsize
+				cond := afterValue-savedData == fsize
 				if cond {
 					savedData = afterValue
 				}
@@ -3960,8 +3574,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4010,18 +3624,18 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 			// Upload a file
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
-			
+
 			// Download the file
 			sdkClient.DownloadFile(t, allocationID, fpath, "./downloaded")
 
 			// // Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberReadData(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberReadData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
-				cond := afterValue - readData == fsize
+				cond := afterValue-readData == fsize
 				if cond {
 					readData = afterValue
 				}
@@ -4049,7 +3663,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			for _, blobber := range blobbers {
 				data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
 					ProviderType: "blobber",
-					ProviderID:  blobber.ID,
+					ProviderID:   blobber.ID,
 				}, client.HttpOkStatus)
 				t.Logf("SP for blobber %v: %+v", blobber.ID, data)
 				require.NoError(t, err)
@@ -4067,10 +3681,10 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			// Value before allocation
 			targetBlobber := (*allocationBlobbers.Blobbers)[0]
 			offersTotal := blobberOffersTotal[targetBlobber]
-			
+
 			// Check increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4087,8 +3701,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check decreased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4117,7 +3731,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			targetBlobber := blobbers[0].ID
 			data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
 				ProviderType: "blobber",
-				ProviderID:  targetBlobber,
+				ProviderID:   targetBlobber,
 			}, client.HttpOkStatus)
 			t.Logf("SP for blobber %v: %+v", targetBlobber, data)
 			require.NoError(t, err)
@@ -4130,8 +3744,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check stake increased for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4148,15 +3762,15 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NotEmpty(t, confHash)
 
 			// Check unstake increased and stake decrease for the same blobber
-			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
 				cond := afterValue < stakeTotal
 
-				data, resp, err = zboxClient.GetGraphBlobberUnstakeTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err = zboxClient.GetGraphBlobberUnstakeTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4244,44 +3858,44 @@ func generateImage(t *test.SystemTest, localpath string) {
 func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemTest) {
 	return func(t *test.SystemTest) {
 		// should fail for invalid parameters
-		_, resp, err := endpoint(t, &model.ZboxGraphRequest{ From: "AX", To: "20", DataPoints: "5" })
+		_, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid from param")
-	
-		_, resp, err = endpoint(t, &model.ZboxGraphRequest{ From: "10", To: "AX", DataPoints: "5" })
+
+		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10", To: "AX", DataPoints: "5"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid to param")
-	
-		_, resp, err = endpoint(t, &model.ZboxGraphRequest{ From: "10", To: "20", DataPoints: "AX" })
+
+		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid data-points query param")
-	
+
 		// should fail for invalid parameters (end - start < points + 1)
-		_, resp, err = endpoint(t, &model.ZboxGraphRequest{ From: "10000", To: "10010", DataPoints: "10" })
+		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "there must be at least one interval")
-	
+
 		// should fail for invalid parameters (end < start)
-		_, resp, err = endpoint(t, &model.ZboxGraphRequest{ From: "10000", To: "1000", DataPoints: "10" })
+		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "to 1000 less than from 10000")
-	
+
 		// should succeed in case of 1 point
-		data, resp, err := endpoint(t, &model.ZboxGraphRequest{ DataPoints: "1" })
+		data, resp, err := endpoint(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 1, len([]int64(*data)))
-	
+
 		// should succeed in case of multiple points
 		minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
 		require.NoError(t, err)
 		latestRound := minerStats.LastFinalizedRound
-		data, resp, err = endpoint(t, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
+		data, resp, err = endpoint(t, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 10, len([]int64(*data)))
@@ -4291,38 +3905,38 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 func graphBlobberEndpointTestCases(endpoint model.ZboxGraphBlobberEndpoint, blobberId string) func(*test.SystemTest) {
 	return func(t *test.SystemTest) {
 		// should fail for invalid parameters
-		_, resp, _ := endpoint(t, "", &model.ZboxGraphRequest{ From: "AX", To: "20", DataPoints: "5" })
+		_, resp, _ := endpoint(t, "", &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "provider id not provided")
 
-		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{ From: "AX", To: "20", DataPoints: "5" })
+		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid from param")
-	
-		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{ From: "10", To: "AX", DataPoints: "5" })
+
+		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{From: "10", To: "AX", DataPoints: "5"})
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid to param")
-	
-		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{ From: "10", To: "20", DataPoints: "AX" })
+
+		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid data-points query param")
-	
+
 		// should fail for invalid parameters (end < start)
-		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{ From: "10000", To: "1000", DataPoints: "10" })
+		_, resp, _ = endpoint(t, blobberId, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "to 1000 less than from 10000")
-	
+
 		// should succeed in case of 1 point
-		data, resp, _ := endpoint(t, blobberId, &model.ZboxGraphRequest{ DataPoints: "1" })
+		data, resp, _ := endpoint(t, blobberId, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 1, len([]int64(*data)))
-	
+
 		// should succeed in case of multiple points
 		minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
 		require.NoError(t, err)
 		latestRound := minerStats.LastFinalizedRound
 		time.Sleep(5 * time.Second)
-		data, resp, err = endpoint(t, blobberId, &model.ZboxGraphRequest{ From: strconv.FormatInt(latestRound - int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10" })
+		data, resp, err = endpoint(t, blobberId, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 10, len([]int64(*data)))
@@ -4351,7 +3965,6 @@ func printBlobbers(t *test.SystemTest, tag string, blobbers []*model.SCRestGetBl
 		t.Logf("----------------------------------")
 	}
 }
-
 
 func calculateExpectedAvgWritePrice(blobbers []*model.SCRestGetBlobberResponse) (expectedAvgWritePrice int64) {
 	var totalWritePrice int64
@@ -4398,9 +4011,9 @@ func calculateCapacity(blobbers []*model.SCRestGetBlobberResponse) int64 {
 }
 
 func unstakeBlobber(t *test.SystemTest, wallet *model.Wallet, blobberId string) func() {
-	confHash := apiClient.UnlockStakePool(t, wallet, 3, blobberId,  client.TxSuccessfulStatus)
+	confHash := apiClient.UnlockStakePool(t, wallet, 3, blobberId, client.TxSuccessfulStatus)
 	require.NotEmpty(t, confHash)
-	return func () {
+	return func() {
 		// Re-stake the blobber
 		confHash := apiClient.CreateStakePool(t, wallet, 3, blobberId, float64(1.0), client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)

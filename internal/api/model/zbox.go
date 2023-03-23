@@ -101,8 +101,8 @@ type DexState struct {
 	Reference string `form:"reference" json:"reference" binding:"required"`
 }
 
-type ZboxSuccess struct {
-	Success string `json:"success"`
+type ZboxMessageResponse struct {
+	Message string `json:"message"`
 }
 
 type ZboxUsername struct {
