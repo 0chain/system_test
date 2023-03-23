@@ -191,9 +191,6 @@ func countMinerBlockRewards(
 					round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
-		if !foundBlockRewardPayment {
-			fmt.Println(foundBlockRewardPayment, "roundHistory", roundHistory)
-		}
 		assert.Truef(t, foundBlockRewardPayment,
 			"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
 	}
