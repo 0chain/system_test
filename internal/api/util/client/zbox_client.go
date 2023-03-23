@@ -440,9 +440,9 @@ func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phon
 	return *zboxWallets, resp, err
 }
 
-func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info biography using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -454,7 +454,7 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
@@ -469,12 +469,12 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
-func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info avatar using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -482,7 +482,7 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 	urlBuilder.SetPath("/v2/userinfo/avatar")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FileName: "avatar",
 		FilePath: filePath,
 		Headers: map[string]string{
@@ -498,12 +498,12 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
-func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info background using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -511,7 +511,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 	urlBuilder.SetPath("/v2/userinfo/bgimg")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FileName: "background",
 		FilePath: filePath,
 		Headers: map[string]string{
@@ -527,7 +527,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
 func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxUserInfo, *resty.Response, error) {
