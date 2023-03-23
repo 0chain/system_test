@@ -27,7 +27,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	defaultTotalNFT := "1"
 	defaultCollectionId := "default collection id for testing"
 
-	t.RunSequentially("Get NFT collection with zero nft collection should work", func(t *test.SystemTest) {
+	t.RunSequentially("List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -48,7 +48,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
-		zboxNftCollectionId, response, err := zboxClient.GetAllNft(t,
+		zboxNftCollectionIdList, response, err := zboxClient.GetAllNftCollectionId(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -56,7 +56,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxNftCollectionId)
+		require.NotNil(t, zboxNftCollectionIdList)
 	})
 
 	t.RunSequentially("Get NFT collection by collection id with zero nft collection should work", func(t *test.SystemTest) {
