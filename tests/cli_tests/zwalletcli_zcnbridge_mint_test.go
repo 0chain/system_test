@@ -25,7 +25,7 @@ func TestBridgeMint(testSetup *testing.T) {
 	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
 
-		output, err := mintWrappedZcnTokens(t, TransactionHash, false)
+		output, err := mintWrappedZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
@@ -34,7 +34,7 @@ func TestBridgeMint(testSetup *testing.T) {
 	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
 		t.Skip("Skipping due to deployment issue")
 
-		output, err := mintZcnTokens(t, TransactionHash, false)
+		output, err := mintZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
@@ -42,12 +42,11 @@ func TestBridgeMint(testSetup *testing.T) {
 }
 
 // nolint
-func mintZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
+func mintZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-mint-zcn %s --silent "+
+		"./zwallet bridge-mint-zcn --silent "+
 			"--configDir ./config --config %s --path %s",
-		transactionHash,
 		configPath,
 		configDir,
 	)
@@ -59,12 +58,11 @@ func mintZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]st
 }
 
 // nolint
-func mintWrappedZcnTokens(t *test.SystemTest, transactionHash string, retry bool) ([]string, error) {
+func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-mint-wzcn %s --silent "+
+		"./zwallet bridge-mint-wzcn --silent "+
 			"--configDir ./config --config %s --path %s",
-		transactionHash,
 		configPath,
 		configDir,
 	)

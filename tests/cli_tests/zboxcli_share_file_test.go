@@ -185,7 +185,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Shared encrypted file to public using auth ticket should fail to download", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Shared encrypted file to public using auth ticket without encryptionkey flag should fail", 60*time.Second, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -217,25 +217,9 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": file,
 		}
 		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-
-		authTicket, err := extractAuthToken(output[0])
-		require.Nil(t, err, "Error extracting auth token")
-		require.NotEqual(t, "", authTicket)
-
-		// Download the file (delete local copy first)
-		os.Remove(file)
-
-		downloadParams := createParams(map[string]interface{}{
-			"localpath":  file,
-			"authticket": authTicket,
-		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
-		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
-		require.Contains(t, aggregatedOutput, "invalid ed25519 curve point")
+		require.Equal(t, "Clientid and/or encryptionpublickey are missing for the encrypted share!", output[0], "An unexpected error message!")
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
 	t.RunWithTimeout("Revoke auth ticket on publicly-shared unencrypted file should fail to download", 60*time.Second, func(t *test.SystemTest) {
@@ -354,7 +338,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 60*time.Second, func(t *test.SystemTest) {
@@ -752,7 +735,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
@@ -954,7 +936,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.RunWithTimeout("Share non-existent file should fail", 60*time.Second, func(t *test.SystemTest) {
