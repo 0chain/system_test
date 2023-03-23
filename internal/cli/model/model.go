@@ -79,15 +79,14 @@ type Allocation struct {
 
 	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
 
-	StartTime            int64    `json:"start_time"`
-	Finalized            bool     `json:"finalized,omitempty"`
-	Canceled             bool     `json:"canceled,omitempty"`
-	MovedToChallenge     int64    `json:"moved_to_challenge,omitempty"`
-	MovedBack            int64    `json:"moved_back,omitempty"`
-	MovedToValidators    int64    `json:"moved_to_validators,omitempty"`
-	Curators             []string `json:"curators"`
-	FileOptions          uint16   `json:"file_options"`
-	ThirdPartyExtendable bool     `json:"third_party_extendable"`
+	StartTime            int64  `json:"start_time"`
+	Finalized            bool   `json:"finalized,omitempty"`
+	Canceled             bool   `json:"canceled,omitempty"`
+	MovedToChallenge     int64  `json:"moved_to_challenge,omitempty"`
+	MovedBack            int64  `json:"moved_back,omitempty"`
+	MovedToValidators    int64  `json:"moved_to_validators,omitempty"`
+	FileOptions          uint16 `json:"file_options"`
+	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {
@@ -741,6 +740,7 @@ var StorageFloatSettings = []string{
 	"block_reward.zeta.i",
 	"block_reward.zeta.k",
 	"block_reward.zeta.mu",
+	"stakepool.kill_slash",
 }
 
 var StorageCurrencySettigs = []string{
@@ -762,7 +762,6 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
-
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -784,12 +783,9 @@ var StorageIntSettings = []string{
 	"cost.add_free_storage_assigner",
 	"cost.free_allocation_request",
 	"cost.free_update_allocation",
-	"cost.add_curator",
-	"cost.remove_curator",
 	"cost.blobber_health_check",
 	"cost.update_blobber_settings",
 	"cost.pay_blobber_block_rewards",
-	"cost.curator_transfer_allocation",
 	"cost.challenge_request",
 	"cost.challenge_response",
 	"cost.generate_challenges",
@@ -806,6 +802,10 @@ var StorageIntSettings = []string{
 	"cost.stake_pool_pay_interests",
 	"cost.commit_settings_changes",
 	"cost.collect_reward",
+	"cost.kill_blobber",
+	"cost.kill_validator",
+	"cost.shutdown_blobber",
+	"cost.shutdown_validator",
 }
 var StorageBoolSettings = []string{
 	"challenge_enabled",
@@ -817,6 +817,7 @@ var StorageDurationSettings = []string{
 	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
 	"free_allocation_settings.duration",
+	"health_check_period",
 }
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
