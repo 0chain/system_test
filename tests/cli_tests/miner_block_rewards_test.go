@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -45,12 +45,12 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	t.RunSequentiallyWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
-			t.Skip("miner block rewards test skipped as it asserts a debug event database")
+			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
-		assert.True(t, len(minerIds) > 0, "no miners found")
+		require.True(t, len(minerIds) > 0, "no miners found")
 
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
@@ -84,7 +84,7 @@ func balanceMinerRewards(
 	history *cliutil.ChainHistory,
 ) {
 	minerScConfig := getMinerScMap(t)
-	assert.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
+	require.EqualValues(t, startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]),
 		"epoch changed during test, start %v finish %v",
 		startRound/int64(minerScConfig["epoch"]), endRound/int64(minerScConfig["epoch"]))
 
@@ -140,7 +140,7 @@ func checkMinerBlockRewards(
 				}
 				switch pReward.RewardType {
 				case climodel.BlockRewardMiner:
-					assert.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
 						"%s not round lottery winner %s but nevertheless paid with block reward."+
 							"only the round lottery winner shold get a miner block reward",
 						pReward.ProviderId, roundHistory.Block.MinerID)
@@ -150,7 +150,7 @@ func checkMinerBlockRewards(
 					} else {
 						expectedServiceCharge = minerBlockReward
 					}
-					assert.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
+					require.InDeltaf(t, expectedServiceCharge, pReward.Amount, delta,
 						"incorrect service charge %v for round %d"+
 							" service charge should be block reward %v multiplied by service ratio %v."+
 							"length stake pools %d",
@@ -161,12 +161,12 @@ func checkMinerBlockRewards(
 				case climodel.FeeRewardMiner:
 					feeRewards += pReward.Amount
 				default:
-					assert.Failf(t, "", "reward type %s is not available for miners", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for miners", pReward.RewardType.String())
 				}
 			}
 		}
 		actualReward := afterMiners[i].Reward - beforeMiners[i].Reward
-		assert.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
+		require.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
 			"rewards expected %v, change in miners reward during the test is %v", actualReward, feeRewards+blockRewards)
 	}
 }
@@ -184,14 +184,14 @@ func countMinerBlockRewards(
 		foundBlockRewardPayment := false
 		for _, pReward := range roundHistory.ProviderRewards {
 			if pReward.RewardType == climodel.BlockRewardMiner {
-				assert.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
+				require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundBlockRewardPayment = true
-				assert.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
 					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
 					round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
-		assert.Truef(t, foundBlockRewardPayment,
+		require.Truef(t, foundBlockRewardPayment,
 			"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
 	}
 	t.Log("about to test delegate pools")
@@ -231,22 +231,22 @@ func checkMinerDelegatePoolBlockRewards(
 					continue
 				}
 				_, isMinerPool := rewards[dReward.PoolID]
-				assert.Truef(t, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
+				require.Truef(t, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
 				switch dReward.RewardType {
 				case climodel.BlockRewardMiner:
 					_, found := poolsBlockRewarded[dReward.PoolID]
-					assert.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
+					require.False(t, found, "delegate pool %s paid a block reward more than once on round %d",
 						dReward.PoolID, round)
 					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
 					rewards[dReward.PoolID] += dReward.Amount
 				case climodel.FeeRewardMiner:
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
-					assert.Failf(t, "mismatched reward", "round %d, %s not available for miner", round, dReward.RewardType)
+					require.Failf(t, "mismatched reward", "round %d, %s not available for miner", round, dReward.RewardType)
 				}
 			}
 			if roundHistory.Block.MinerID != id {
-				assert.Len(t, poolsBlockRewarded, 0,
+				require.Len(t, poolsBlockRewarded, 0,
 					"delegate pools should not get a block reward unless their parent miner won the round lottery")
 			}
 			confirmPoolPayments(
@@ -255,7 +255,7 @@ func checkMinerDelegatePoolBlockRewards(
 		}
 		for poolId := range afterMiners[i].StakePool.Pools {
 			actualReward := afterMiners[i].StakePool.Pools[poolId].Reward - beforeMiners[i].StakePool.Pools[poolId].Reward
-			assert.InDeltaf(t, actualReward, rewards[poolId], delta,
+			require.InDeltaf(t, actualReward, rewards[poolId], delta,
 				"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
 			)
 		}
@@ -275,7 +275,7 @@ func confirmPoolPayments(
 	if numRewards > len(pools) {
 		numRewards = len(pools)
 	}
-	assert.Equal(t, len(poolsBlockRewarded), numRewards,
+	require.Equal(t, len(poolsBlockRewarded), numRewards,
 		"expected reward payments %d does not equal actual payment count %d", numRewards, len(poolsBlockRewarded))
 	var total float64
 	for id := range poolsBlockRewarded {
@@ -283,7 +283,7 @@ func confirmPoolPayments(
 	}
 	for id, reward := range poolsBlockRewarded {
 		expectedReward := (float64(pools[id].Balance) / total) * float64(totalReward)
-		assert.InDeltaf(t, expectedReward, float64(reward), 1,
+		require.InDeltaf(t, expectedReward, float64(reward), 1,
 			"delegate rewards. delegates should be rewarded in proportion to their stake."+
 				"total reward %d stake pools %v", totalReward, pools)
 	}
@@ -291,27 +291,27 @@ func confirmPoolPayments(
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
 	output, err := registerWallet(t, configPath)
-	assert.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	if funds {
 		output, err = executeFaucetWithTokens(t, configPath, 10)
-		assert.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	}
 
 	output, err = registerWalletForName(t, configPath, wallet)
-	assert.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
+	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
 	targetWallet, err := getWalletForName(t, configPath, wallet)
-	assert.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 	return targetWallet.ClientID
 }
 
 func confirmDebugBuild(t *test.SystemTest) bool {
 	globalCfg := getGlobalConfiguration(t, true)
 	value, found := globalCfg["server_chain.dbs.settings.debug"]
-	assert.True(t, found, "server_chain.dbs.settings.debug setting does not exists")
+	require.True(t, found, "server_chain.dbs.settings.debug setting does not exists")
 	debug, err := strconv.ParseBool(value.(string))
-	assert.NoErrorf(t, err, "edb debug should be boolean, actual value %v", value)
+	require.NoErrorf(t, err, "edb debug should be boolean, actual value %v", value)
 	return debug
 }
 
@@ -405,8 +405,8 @@ func keyValueSettingsToMap(
 
 func getMinerScMap(t *test.SystemTest) map[string]float64 {
 	output, err := getMinerSCConfig(t, configPath, true)
-	assert.NoError(t, err, "get miners sc config failed", strings.Join(output, "\n"))
-	assert.Greater(t, len(output), 0)
+	require.NoError(t, err, "get miners sc config failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0)
 	_, floatMap := keyValuePairStringToMap(output)
 	return floatMap
 }
@@ -425,14 +425,14 @@ func getSharderUrl(t *test.SystemTest) string {
 	t.Logf("getting sharder url...")
 	// Get sharder list.
 	output, err := getSharders(t, configPath)
-	assert.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
-	assert.Greater(t, len(output), 1)
-	assert.Equal(t, "MagicBlock Sharders", output[0])
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
 
 	var sharders map[string]climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
-	assert.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
-	assert.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 
@@ -512,13 +512,13 @@ func getStartAndEndRounds(
 	t *test.SystemTest,
 	beforeMiners, afterMiners, beforeSharders, afterSharders []climodel.Node,
 ) (startRound, endRound int64) {
-	assert.Equal(t, len(beforeMiners), len(afterMiners), "miner count mismatch")
-	assert.Equal(t, len(beforeSharders), len(afterSharders), "sharder count mismatch")
+	require.Equal(t, len(beforeMiners), len(afterMiners), "miner count mismatch")
+	require.Equal(t, len(beforeSharders), len(afterSharders), "sharder count mismatch")
 	if len(beforeMiners) > 0 {
 		startRound = beforeMiners[0].RoundServiceChargeLastUpdated - 1
 		endRound = afterMiners[0].RoundServiceChargeLastUpdated + 1
 	} else {
-		assert.True(t, len(beforeSharders) > 0, "no miners or sharders found")
+		require.True(t, len(beforeSharders) > 0, "no miners or sharders found")
 		startRound = beforeSharders[0].RoundServiceChargeLastUpdated - 1
 		endRound = afterSharders[0].RoundServiceChargeLastUpdated + 1
 	}
