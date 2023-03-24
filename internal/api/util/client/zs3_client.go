@@ -63,12 +63,12 @@ func createForm(form map[string]string) (string, io.Reader, error) {
 }
 
 func (c *ZS3Client) PutObject(t *test.SystemTest, queryParams, formData map[string]string) (*resty.Response, error) {
-	_, body, err := createForm(formData)
+	ct, body, err := createForm(formData)
 	if err != nil {
 		t.Log(err)
 		return nil, err
 	}
-	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetFiles(formData).SetQueryParams(queryParams).Post(c.zs3ServerUrl)
+	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetHeaders(map[string]string{"Content-Type": ct}).SetQueryParams(queryParams).Post(c.zs3ServerUrl)
 	if err != nil {
 		t.Log(err)
 		return nil, err
