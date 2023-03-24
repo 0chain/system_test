@@ -54,9 +54,32 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file",
 		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, formData)
+		resp, err := zs3Client.PutObject(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
-
+	t.Run("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "getObject",
+			"bucketName":      "system-test",
+			"objectName":      "test-file",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+	})
+	t.Run("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "removeObject",
+			"bucketName":      "system-test",
+			"objectName":      "test-file",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+	})
 }
