@@ -880,7 +880,7 @@ type SCRestGetUserStakePoolStatRequest struct {
 }
 
 type SCRestGetUserStakePoolStatResponse struct {
-	Pools    map[string]*([]StakePoolDelegatePoolInfo) `json:"pools"`
+	Pools    map[string]*[]StakePoolDelegatePoolInfo `json:"pools"`
 }
 
 type StakePoolDelegatePoolInfo struct {

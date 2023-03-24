@@ -91,7 +91,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (string, int64) {
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -147,7 +147,7 @@ func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -191,7 +191,7 @@ func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath str
 	return fpath, actualSize
 }
 
-func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (string, int64) {
+func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 

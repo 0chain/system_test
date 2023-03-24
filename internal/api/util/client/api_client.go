@@ -488,7 +488,7 @@ func (c *APIClient) V1SCRestGetAllValidators(t *test.SystemTest, requiredStatusC
 	return scRestGetValidatorsResponse, resp, err
 }
 
-func (c *APIClient) V1SCRestGetFirstBlobbers(t *test.SystemTest, blobbersCount int, requiredStatusCode int) ([]*model.SCRestGetBlobberResponse, *resty.Response, error) {
+func (c *APIClient) V1SCRestGetFirstBlobbers(t *test.SystemTest, blobbersCount, requiredStatusCode int) ([]*model.SCRestGetBlobberResponse, *resty.Response, error) {
 	var scRestGetBlobbersResponse *model.SCRestGetBlobbersResponse
 
 	urlBuilder := NewURLBuilder().
