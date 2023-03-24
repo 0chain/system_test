@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"testing"
@@ -3682,6 +3683,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
 
+		// TODO: Complete if needed
 		// t.Run("test graph data", func(t *test.SystemTest) {})
 	})
 
@@ -3987,7 +3989,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
-			// Get saved data of all blobbers
+			// Get read data of all blobbers
 			blobberReadData := make(map[string]int64)
 
 			blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
@@ -4012,7 +4014,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
 			
 			// Download the file
-			sdkClient.DownloadFile(t, allocationID, fpath, "./downloaded")
+			sdkClient.DownloadFile(t, allocationID, fpath, ".")
+			defer os.Remove(path.Join(".", fpath))
 
 			// // Check increased for the same blobber
 			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
@@ -4040,7 +4043,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
-			// Get saved data of all blobbers
+			// Get offers of all blobbers
 			blobberOffersTotal := make(map[string]int64)
 
 			blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
@@ -4048,7 +4051,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			for _, blobber := range blobbers {
 				data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
-					ProviderType: "blobber",
+					ProviderType: "3",
 					ProviderID:  blobber.ID,
 				}, client.HttpOkStatus)
 				t.Logf("SP for blobber %v: %+v", blobber.ID, data)
@@ -4109,14 +4112,14 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberStakeTotal, blobbers[0].ID))
+		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
 
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberUnstakeTotal, blobbers[0].ID))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			targetBlobber := blobbers[0].ID
 			data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
-				ProviderType: "blobber",
+				ProviderType: "3",
 				ProviderID:  targetBlobber,
 			}, client.HttpOkStatus)
 			t.Logf("SP for blobber %v: %+v", targetBlobber, data)
@@ -4131,7 +4134,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 			// Check stake increased for the same blobber
 			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err := zboxClient.GetGraphBlobberTotalStake(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4149,7 +4152,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 			// Check unstake increased and stake decrease for the same blobber
 			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
-				data, resp, err := zboxClient.GetGraphBlobberStakeTotal(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				data, resp, err := zboxClient.GetGraphBlobberTotalStake(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
@@ -4171,17 +4174,62 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-stake-total", func(t *test.SystemTest) {
+	t.Run("test /v2/graph-blobber-total-rewards", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
+		
+		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberStakeTotal, blobbers[0].ID))
+		t.Run("test graph data", func(t *test.SystemTest) {
+			// Get read data of all blobbers
+			blobberRewards := make(map[string]int64)
 
-		t.Run("test graph data", func(t *test.SystemTest) {})
+			blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			for _, blobber := range blobbers {
+				sp, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
+					ProviderType: "3",
+					ProviderID:  blobber.ID,
+				}, client.HttpOkStatus)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				blobberRewards[blobber.ID] = sp.Rewards
+			}
+
+			// Create allocation
+			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+			blobberRequirements.DataShards = 1
+			blobberRequirements.ParityShards = 1
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+
+			// Value before allocation
+			targetBlobber := (*allocationBlobbers.Blobbers)[0]
+			rewards := blobberRewards[targetBlobber]
+
+			// Upload a file
+			sdkClient.UploadFile(t, allocationID)
+			
+			// Check increased for the same blobber
+			wait.PoolImmediately(t, 2 * time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphBlobberTotalRewards(t, targetBlobber, &model.ZboxGraphRequest{ DataPoints: "1" })
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Len(t, *data, 1)
+				afterValue := (*data)[0]
+				cond := afterValue > rewards
+				if cond {
+					rewards = afterValue
+				}
+				return cond
+			})
+		})
 	})
+
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
