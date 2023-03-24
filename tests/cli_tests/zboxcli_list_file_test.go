@@ -496,6 +496,9 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
 			"List files with no parameter failed due to error", err,

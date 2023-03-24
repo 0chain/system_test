@@ -208,6 +208,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		allocationID := "123abc"
 
 		params := createParams(map[string]interface{}{
@@ -217,8 +220,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[3])
+		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 60*time.Second, func(t *test.SystemTest) {

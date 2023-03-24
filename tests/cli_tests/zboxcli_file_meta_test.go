@@ -370,6 +370,9 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
