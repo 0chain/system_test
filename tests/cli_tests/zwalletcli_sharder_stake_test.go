@@ -35,8 +35,9 @@ func TestSharderStake(testSetup *testing.T) {
 	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
 
 	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		if sharder.ID != sharderNodeDelegateWallet.ClientID {
+	for i, s := range sharders {
+		if s.ID != sharderNodeDelegateWallet.ClientID {
+			sharder = sharders[i]
 			break
 		}
 	}
@@ -81,30 +82,19 @@ func TestSharderStake(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
-		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
-		require.Nil(t, err, "error fetching Miner SC User pools")
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
-		require.Nil(t, err, "error unmarshalling pools info")
-
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     2,
 		}), true)
-		require.Nil(t, err, "error staking tokens against node")
+		require.NoError(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
-		// wait 50 rounds to see the pool become active
-		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     2,
 		}), true)
+
 		require.NoError(t, err, "error staking tokens against node: %s", output)
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
