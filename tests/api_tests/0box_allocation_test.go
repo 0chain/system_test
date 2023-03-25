@@ -35,7 +35,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Len(t, allocationList, 0)
 	})
 
-	t.RunSequentially("Post allocation with invalid phonenumber should not work", func(t *test.SystemTest) {
+	t.RunSequentially("LITE/Post allocation with invalid phonenumber should not work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
