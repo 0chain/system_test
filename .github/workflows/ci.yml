@@ -168,8 +168,9 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: false
-          run_api_tests: false
-          run_cli_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: truw
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
 
