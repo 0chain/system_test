@@ -696,6 +696,51 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
 
+	t.Run("Download Encrypted File Thumbnail Should Work", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		thumbnail := escapedTestName(t) + "thumbnail.png"
+		//nolint
+		thumbnailSize := generateThumbnail(t, thumbnail)
+
+		defer func() {
+			// Delete the downloaded thumbnail file
+			err = os.Remove(thumbnail)
+			require.Nil(t, err)
+		}()
+
+		filename := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+			"thumbnailpath": thumbnail,
+			"encrypt":       "",
+		})
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  localPath,
+			"thumbnail":  nil,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		stat, err := os.Stat(localPath)
+		require.Nil(t, err)
+		require.Equal(t, thumbnailSize, int(stat.Size()))
+	})
+
 	t.Run("Download to Non-Existent Path Should Work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
