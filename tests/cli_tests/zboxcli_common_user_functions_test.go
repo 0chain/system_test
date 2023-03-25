@@ -45,10 +45,9 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		// Wallet balance should decrease by locked amount
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 4.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err := getBalance(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 4.5, balance)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -80,10 +79,9 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
 
 		// Wallet balance should decrease by locked amount
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 4.300 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 2.2, balance)
 
 		createAllocationTestTeardown(t, allocationID)
 	})

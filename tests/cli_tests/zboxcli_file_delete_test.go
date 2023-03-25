@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -254,12 +253,11 @@ func TestFileDelete(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
 
-		output, err := getBalance(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 6.500 ZCN \(\d*\.?\d+ USD\)$`), output[0]) // 5+2 Faucet, 0.5 locked to allocation
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 5.4, balance)
 
-		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 		}), true)
@@ -276,10 +274,9 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 6.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err = getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 5.4, balance)
 	})
 
 	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
