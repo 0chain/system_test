@@ -19,6 +19,7 @@ import (
 
 func TestMinerFeesPayment(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skip till chain-side bugs are resolved")
 
 	t.Skip("Skipped till re-done")
 	mnconfig := getMinerSCConfiguration(t)
