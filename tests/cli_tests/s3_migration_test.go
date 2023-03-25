@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func S3MigrationTest(testSetup *testing.T) {
+func TestS3Migration(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -24,10 +24,7 @@ func S3MigrationTest(testSetup *testing.T) {
 
 func S3Migrate(t *test.SystemTest, accessKey, secretKey string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
-	cmd := fmt.Sprintf(
-		"./s3mgrt %s",
-		"help",
-	)
+	cmd := fmt.Sprintf("./s3mgrt %s", "help")
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
