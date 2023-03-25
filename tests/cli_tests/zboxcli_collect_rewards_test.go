@@ -238,19 +238,19 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		// Upload and download a file so blobber can accumulate rewards
-		allocSize := int64(2048)
-		filesize := int64(256)
+		allocSize := 100 * MB
+		filesize := 10 * MB
 		remotepath := "/"
 
 		// Use all 6 blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"data":   5,
+			"data":   1,
 			"parity": 1,
 		})
 
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		filename := generateFileAndUpload(t, allocationID, remotepath, int64(filesize))
 
 		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(filename)
