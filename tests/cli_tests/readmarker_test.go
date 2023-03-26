@@ -172,7 +172,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
 	})
 
-	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 120*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("After downloading a shared encrypted file, return a readmarker for each blobber used in download", 3*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -227,7 +227,7 @@ func TestReadMarker(testSetup *testing.T) {
 			"authticket": authTicket,
 			"localpath":  file,
 		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		require.Contains(t, output[len(output)-1], StatusCompletedCB)

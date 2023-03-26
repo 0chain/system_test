@@ -33,6 +33,10 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
+		// register wallet
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -42,8 +46,8 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 		output, err := cliutils.RunCommandWithoutRetry(cmd)
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
-		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
+		require.Len(t, output, 1)
+		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
