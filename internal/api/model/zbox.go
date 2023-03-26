@@ -17,15 +17,15 @@ type CSRFToken struct {
 }
 
 type ZboxWallet struct {
-	ClientID    string   			`json:"client_id"`
-	WalletId    int      			`json:"wallet_id"`
-	PhoneNumber string   			`json:"phone_number"`
-	Name        string   			`json:"name"`
-	Description string   			`json:"description"`
-	Mnemonic    string   			`json:"mnemonic"`
-	AppType     []string 			`json:"app_type"`
-	Allocation  []ZboxAllocation	`json:"allocation"`
-	LastUpdate  string   			`json:"last_update"`
+	ClientID    string           `json:"client_id"`
+	WalletId    int              `json:"wallet_id"`
+	PhoneNumber string           `json:"phone_number"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Mnemonic    string           `json:"mnemonic"`
+	AppType     []string         `json:"app_type"`
+	Allocation  []ZboxAllocation `json:"allocation"`
+	LastUpdate  string           `json:"last_update"`
 }
 
 type ZboxResourceExist struct {
@@ -40,13 +40,13 @@ type ZboxFCMResponse struct {
 }
 
 type ZboxAllocation struct {
-	Id             string   `json:"id"`
-	WalletId       int      `json:"wallet_id"`
-	Name           string   `json:"name"`
-	Description    string   `json:"random_description"`
-	AllocationType string   `json:"allocation_type"`
-	AppType        string   `json:"app_type"`
-	LastUpdate     string   `json:"last_update"`
+	Id             string `json:"id"`
+	WalletId       int    `json:"wallet_id"`
+	Name           string `json:"name"`
+	Description    string `json:"random_description"`
+	AllocationType string `json:"allocation_type"`
+	AppType        string `json:"app_type"`
+	LastUpdate     string `json:"last_update"`
 }
 
 type NftState struct {
@@ -61,13 +61,13 @@ type NftState struct {
 }
 
 type ZboxWalletKeys struct {
-	ClientId          string   `json:"client_id"`
-	WalletId          int      `json:"wallet_id"`
-	Name       		  string   `json:"name"`
-	Description 	  string   `json:"description"`
-	AppId             []string `json:"app_type"`
-	PublicKey         string   `json:"public_key"`
-	LastUpdate        string   `json:"last_update"`
+	ClientId    string   `json:"client_id"`
+	WalletId    int      `json:"wallet_id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	AppId       []string `json:"app_type"`
+	PublicKey   string   `json:"public_key"`
+	LastUpdate  string   `json:"last_update"`
 }
 
 type MessageContainer struct {
