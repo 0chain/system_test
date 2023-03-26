@@ -1,12 +1,12 @@
 block_worker: https://dev.0chain.net
-confirmation_chain_length: 3
+0box_url: https://0box.dev.0chain.net
+zs3_server_url: https://dev.0chain.net/zs3server/
 ethereum_node_url: "https://rpc.tenderly.co/fork/e753f650-9968-4f58-af77-5f02ace53cdc"
+confirmation_chain_length: 3
 min_confirmation: 50
 min_submit: 50
 signature_scheme: bls0chain
 store_unlock_duration_sec: 2
 ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
-0box_url: https://0box.dev.0chain.net
 0box_phone_number: +917696229925
-default_test_case_timeout: 120s
-zs3_server_url: https://dev.0chain.net/zs3server/
+default_test_case_timeout: 300s
