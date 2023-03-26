@@ -1145,9 +1145,12 @@ func TestDownload(testSetup *testing.T) {
 
 		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(otherFilename)
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
+		_, err = registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remotepath + filepath.Base(otherFilename),
