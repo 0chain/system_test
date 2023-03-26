@@ -23,7 +23,7 @@ func TestS3Migration(testSetup *testing.T) {
 }
 
 func S3Migrate(t *test.SystemTest, accessKey, secretKey string, retry bool) ([]string, error) {
-	t.Logf("Canceling allocation...")
+	t.Logf("test s3migration help command")
 	cmd := fmt.Sprintf("./s3mgrt %s", "help")
 
 	if retry {
