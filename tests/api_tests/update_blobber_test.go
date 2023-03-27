@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdateBlobber(testSetup *testing.T) {
+func TestCoreUpdateBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

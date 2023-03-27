@@ -19,7 +19,7 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-func TestFileStats(testSetup *testing.T) {
+func TestCoreFileStats(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

@@ -22,7 +22,7 @@ import (
 
 const StatusCompletedCB = "Status completed callback"
 
-func TestDownload(testSetup *testing.T) {
+func TestCoreDownload(testSetup *testing.T) {
 	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()

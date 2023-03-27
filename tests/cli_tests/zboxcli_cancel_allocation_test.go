@@ -18,7 +18,7 @@ var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
 )
 
-func TestCancelAllocation(testSetup *testing.T) {
+func TestCoreCancelAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

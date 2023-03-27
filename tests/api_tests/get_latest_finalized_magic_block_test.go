@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
+func TestCoreGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 

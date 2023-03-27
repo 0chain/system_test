@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMinerStake(testSetup *testing.T) {
+func TestCoreMinerStake(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {

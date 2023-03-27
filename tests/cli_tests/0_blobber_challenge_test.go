@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberChallenge(testSetup *testing.T) {
+func TestCoreBlobberChallenge(testSetup *testing.T) {
 	// todo: all of these tests poll for up to 2mins30s - is this reasonable?
 	t := test.NewSystemTest(testSetup)
 

@@ -27,7 +27,7 @@ const (
 	password = "password"
 )
 
-func TestEthRegisterAccount(testSetup *testing.T) {
+func TestCoreEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {

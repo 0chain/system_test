@@ -17,7 +17,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestBridgeBurn(testSetup *testing.T) {
+func TestCoreBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

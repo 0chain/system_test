@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestReadPoolLockUnlock(testSetup *testing.T) {
+func TestCoreReadPoolLockUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

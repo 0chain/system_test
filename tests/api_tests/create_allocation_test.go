@@ -10,7 +10,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 )
 
-func TestCreateAllocation(testSetup *testing.T) {
+func TestCoreCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestCoreFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

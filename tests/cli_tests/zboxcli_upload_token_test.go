@@ -17,7 +17,7 @@ import (
 
 const tokenUnit float64 = 1e+10
 
-func TestFileUploadTokenMovement(testSetup *testing.T) {
+func TestCoreFileUploadTokenMovement(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

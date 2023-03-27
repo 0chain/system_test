@@ -12,7 +12,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestRecoverWallet(testSetup *testing.T) {
+func TestCoreRecoverWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

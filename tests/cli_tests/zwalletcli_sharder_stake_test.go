@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSharderStake(testSetup *testing.T) {
+func TestCoreSharderStake(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {

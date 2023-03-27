@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestCoreFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

@@ -24,7 +24,7 @@ var (
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
 )
 
-func TestUpdateAllocation(testSetup *testing.T) {
+func TestCoreUpdateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

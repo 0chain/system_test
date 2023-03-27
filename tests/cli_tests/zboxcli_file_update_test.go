@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileUpdate(testSetup *testing.T) {
+func TestCoreFileUpdate(testSetup *testing.T) {
 	//todo: very slow executions observed
 	t := test.NewSystemTest(testSetup)
 

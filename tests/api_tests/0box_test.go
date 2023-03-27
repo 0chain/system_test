@@ -1024,7 +1024,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 	})
 }
 
-func Test0Box(testSetup *testing.T) {
+func TestCore0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)

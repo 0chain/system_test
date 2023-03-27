@@ -20,7 +20,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestUpload(testSetup *testing.T) {
+func TestCoreUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

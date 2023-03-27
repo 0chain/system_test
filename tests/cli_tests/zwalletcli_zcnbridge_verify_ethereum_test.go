@@ -16,7 +16,7 @@ const (
 	Address = "0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230"
 )
 
-func TestBridgeVerify(testSetup *testing.T) {
+func TestCoreBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

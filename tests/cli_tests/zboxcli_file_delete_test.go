@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileDelete(testSetup *testing.T) {
+func TestCoreFileDelete(testSetup *testing.T) {
 	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
 

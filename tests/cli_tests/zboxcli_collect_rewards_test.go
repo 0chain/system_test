@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberCollectRewards(testSetup *testing.T) {
+func TestCoreBlobberCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
@@ -200,7 +200,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 }
 
-func TestValidatorCollectRewards(testSetup *testing.T) {
+func TestCoreValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()

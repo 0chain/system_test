@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
+func TestCoreGetBlobbersForNewAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
