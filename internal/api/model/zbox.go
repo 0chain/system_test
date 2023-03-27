@@ -154,6 +154,11 @@ type ZboxNftCollection struct {
 	BatchSize              string `json:"batch_size"`
 }
 
+type ZboxNftCollectionList struct {
+	NftCollectionList  []ZboxNft `json:"collections"`
+	NftCollectionCount int       `json:"total"`
+}
+
 type ZboxNft struct {
 	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`
