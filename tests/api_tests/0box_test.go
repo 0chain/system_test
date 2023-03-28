@@ -76,7 +76,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -150,7 +150,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		zboxNftByCollectionId, response, err := zboxClient.GetAllNftByWalletId(t,
 			firebaseToken.IdToken,
@@ -182,7 +182,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -336,7 +336,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -395,7 +395,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -479,7 +479,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
@@ -1045,7 +1045,7 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-		require.Equal(t, description, zboxWallet.Description, "Description does not match expected") 
+		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 	})
 
 	t.RunSequentially("List wallet should work with zero wallets", func(t *test.SystemTest) {
