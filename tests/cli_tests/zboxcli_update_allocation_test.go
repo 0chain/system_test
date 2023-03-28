@@ -636,7 +636,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err = updateAllocation(t, configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "changes nothing")
