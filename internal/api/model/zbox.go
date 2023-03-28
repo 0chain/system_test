@@ -49,17 +49,6 @@ type ZboxAllocation struct {
 	LastUpdate     string `json:"last_update"`
 }
 
-type NftState struct {
-	AllocationId string `json:"allocation_id"`
-	CollectionId string `json:"collection_id"`
-	OwnedBy      string `json:"owned_by"`
-	Stage        string `json:"stage"`
-	Reference    string `json:"reference"`
-	NftActivity  string `json:"nft_activity"`
-	Metadata     string `json:"meta_data"`
-	NftImage     string `json:"nft_image"`
-}
-
 type ZboxWalletKeys struct {
 	ClientId    string   `json:"client_id"`
 	WalletId    int      `json:"wallet_id"`
@@ -155,30 +144,6 @@ type ZboxNftCollection struct {
 }
 
 type ZboxNft struct {
-	Id              int    `json:"id"`
-	AllocationId    string `json:"allocation_id"`
-	ClientId        string `json:"client_id"`
-	CollectionId    string `json:"collection_id"`
-	OwnedBy         string `json:"owned_by"`
-	Stage           int    `json:"stage"`
-	Reference       string `json:"reference"`
-	NftActivity     string `json:"nft_activity"`
-	MetaData        string `json:"meta_data"`
-	NftImage        string `json:"nft_image"`
-	IsMinted        bool   `json:"is_minted"`
-	AuthTicket      string `json:"auth_ticket"`
-	RemotePath      string `json:"remote_path"`
-	CreatedBy       string `json:"created_by"`
-	CreatorName     string `json:"creator_name"`
-	ContractAddress string `json:"contract_address"`
-	TokenId         string `json:"token_id"`
-	TokenStandard   string `json:"token_standard"`
-	CreatedAtDate   string `json:"created_at_date"`
-	LastUpdate      string `json:"last_update"`
-}
-
-// FIXME descripencies in post wallet nft structure and and get nft
-type ZboxNftAlt struct {
 	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`
 	ClientId        string `json:"client_id"`

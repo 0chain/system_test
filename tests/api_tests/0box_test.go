@@ -587,7 +587,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
-		zboxNftCollectionId, response, err := zboxClient.UpdateNftCollection(t,
+		_, response, err = zboxClient.UpdateNftCollection(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -607,9 +607,13 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		// FIXME: there should be validation on this update
 		// require.Error(t, err) Fixme error is not send in error instead it is send
+		// require.NoError(t, err)
+		// require.NotNil(t, zboxNftCollectionId)
+		// require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		errMssg := `{"error":"400: allocationID not valid"}`
 		require.NoError(t, err)
-		require.NotNil(t, zboxNftCollectionId)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, errMssg, response.String())
 	})
 }
 
