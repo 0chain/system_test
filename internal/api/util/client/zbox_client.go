@@ -1198,21 +1198,21 @@ func (c *ZboxClient) GetAllNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollectionList, resp, err
 }
 
-func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftListByCollection, *resty.Response, error) {
+func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftCollection, *resty.Response, error) {
 	t.Logf("Getting All nft collection using collection Id for 0box...")
-	var ZboxNftList *model.ZboxNftListByCollection
+	var ZboxNftCollection *model.ZboxNftCollection
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/nft/bycollection")
+	urlBuilder.SetPath("/v2/nft/collection")
 
 	queryParams := map[string]string{
 		"collection_id": collection_id,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:         &ZboxNftList,
+		Dst:         &ZboxNftCollection,
 		QueryParams: queryParams,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
@@ -1227,5 +1227,5 @@ func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return ZboxNftList, resp, err
+	return ZboxNftCollection, resp, err
 }
