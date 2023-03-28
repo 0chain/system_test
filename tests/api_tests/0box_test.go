@@ -1419,18 +1419,18 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		// Get Wallet
-		_, resp, _ := zboxClient.ListWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		_, resp, _ := zboxClient.ListWallets(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 
-		var wallets []model.ZboxWallet
+		var walletList model.ZboxWalletList
 
 		// store data to responseJson and read and println it
-		_ = json.Unmarshal([]byte(resp.String()), &wallets)
+		_ = json.Unmarshal([]byte(resp.String()), &walletList)
 
+		wallets := walletList.Data
 		require.Equal(t, 1, len(wallets), "Wallet not updated")
 		newWallet := wallets[0]
-		require.Equal(t, "new_wallet_name", newWallet.WalletName, "Wallet name not updated")
-		// Description is not working in PostWallet and Update is also not working for description
-		// require.Equal(t, "new_wallet_description", newWallet.WalletDescription, "Wallet description not updated")
+		require.Equal(t, "new_wallet_name", newWallet.Name, "Wallet name not updated")
+		require.Equal(t, "new_wallet_description", newWallet.Description, "Wallet description not updated")
 	})
 
 	t.RunSequentially("Contact Wallet should work with for single user", func(t *test.SystemTest) {
