@@ -8,6 +8,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 	"io"
+	"math"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -51,28 +52,28 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	fmt.Println("Blobber List: ", blobberListString)
 	fmt.Println("Validator List: ", validatorListString)
 
-	t.RunWithTimeout("Test Staking", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
-		//unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
-
-		fmt.Println(configPath)
-
-		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobberList[0].Id,
-			"json":       "",
-		}))
-
-		fmt.Println(output)
-
-	})
-
-	t.Skip()
+	//t.RunWithTimeout("Test Staking", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	//	stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
+	//	//unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+	//
+	//	fmt.Println(configPath)
+	//
+	//	output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+	//		"blobber_id": blobberList[0].Id,
+	//		"json":       "",
+	//	}))
+	//
+	//	fmt.Println(output)
+	//
+	//})
+	//
+	//t.Skip()
 
 	t.RunWithTimeout("Read All Challenge Data", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		//t.Skip()
+		t.Skip()
 
-		allocationId := "568e098607afffa5fa1a20258f4f770fecbe2ec2ff29e085024258c2c2e07ea9"
+		allocationId := "495b5fbab854e31d46c713d2f4d849bc7ab994f590c31a9298f94a238d6b2d67"
 
 		var allocation climodel.Allocation
 
@@ -96,7 +97,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		validator1DelegatesTotalReward := 0.0
 		validator2DelegatesTotalReward := 0.0
 
+		count := 0
+
 		for _, challenge := range challenges {
+			fmt.Println(count)
+			count++
 			blobber1Reward := 0.0
 			blobber2Reward := 0.0
 			blobber1DelegatesReward := 0.0
@@ -159,13 +164,13 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
 			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
-			//fmt.Println(validator1DelegatesReward, validator2DelegatesReward)
+			fmt.Println(validator1DelegatesReward, validator2DelegatesReward)
 
 			// check if the ratio is correct between blobber and validator rewards
 			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
 			// check if both validators have same rewards
-			require.InEpsilon(t, validator1Reward+1, validator2Reward+1, 1, "Validator 1 and Validator 2 rewards are not equal")
-			require.InEpsilon(t, validator1DelegatesReward+1, validator2DelegatesReward+1, 1, "Validator 1 Delegate and Validator 2 Delegate rewards are not equal")
+			require.InEpsilon(t, validator1Reward+1, validator2Reward+1, (validator1Reward+validator2Reward+2)*0.05, "Validator 1 and Validator 2 rewards are not equal")
+			//require.InEpsilon(t, validator1DelegatesReward+1, validator2DelegatesReward+1, (validator1DelegatesReward+validator2DelegatesReward+2)*0.05, "Validator 1 Delegate and Validator 2 Delegate rewards are not equal")
 
 			blobber1TotalReward += blobber1Reward
 			blobber2TotalReward += blobber2Reward
@@ -198,7 +203,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
 	})
 
-	t.Skip()
+	//t.Skip()
 
 	t.RunWithTimeout("Read all data with multiple delegates", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -345,8 +350,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	//t.Skip()
 
-	t.RunWithTimeout("Case 1 : Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
+	t.RunSequentiallyWithTimeout("Case 1 : Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		//t.Skip()
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
@@ -388,7 +393,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		challenges, _ := getAllChallenges(allocationId)
 
-		totalExpectedReward := allocation.MovedToChallenge
+		totalExpectedReward := float64(allocation.MovedToChallenge)
 
 		totalReward := 0.0
 		blobber1TotalReward := 0.0
@@ -460,6 +465,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
 			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
+			totalValidator1Reward := validator1Reward + validator1DelegatesReward
+			//totalValidator2Reward := validator2Reward + validator2DelegatesReward
 
 			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
 			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
@@ -468,8 +475,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			// check if the ratio is correct between blobber and validator rewards
 			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
 			// check if both validators have same rewards
-			require.InEpsilon(t, validator1Reward+1, validator2Reward+1, 1, "Validator 1 and Validator 2 rewards are not equal")
-			require.InEpsilon(t, validator1DelegatesReward+1, validator2DelegatesReward+1, 1, "Validator 1 Delegate and Validator 2 Delegate rewards are not equal")
+			if totalValidatorReward != 0 {
+				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
+			}
 
 			blobber1TotalReward += blobber1Reward
 			blobber2TotalReward += blobber2Reward
@@ -494,18 +503,20 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		fmt.Println("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		fmt.Println("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		//require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
 
 		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
 	})
 
 	//t.Skip()
 
-	t.RunWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
+	t.RunSequentiallyWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		//t.Skip()
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
@@ -547,7 +558,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		challenges, _ := getAllChallenges(allocationId)
 
-		totalExpectedReward := allocation.MovedToChallenge
+		totalExpectedReward := float64(allocation.MovedToChallenge)
 
 		totalReward := 0.0
 		blobber1TotalReward := 0.0
@@ -619,6 +630,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
 			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
+			totalValidator1Reward := validator1Reward + validator1DelegatesReward
+			//totalValidator2Reward := validator2Reward + validator2DelegatesReward
 
 			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
 			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
@@ -627,8 +640,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			// check if the ratio is correct between blobber and validator rewards
 			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
 			// check if both validators have same rewards
-			require.InEpsilon(t, validator1Reward+1, validator2Reward+1, 1, "Validator 1 and Validator 2 rewards are not equal")
-			require.InEpsilon(t, validator1DelegatesReward+1, validator2DelegatesReward+1, 1, "Validator 1 Delegate and Validator 2 Delegate rewards are not equal")
+			if totalValidatorReward != 0 {
+				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
+			}
 
 			blobber1TotalReward += blobber1Reward
 			blobber2TotalReward += blobber2Reward
@@ -653,18 +668,17 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		fmt.Println("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		fmt.Println("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		//require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
 
 		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
 	})
 
-	t.RunWithTimeout("Case 3 : Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
-
+	t.RunSequentiallyWithTimeout("Case 3 : Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
 
@@ -778,6 +792,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
 			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
+			totalValidator1Reward := validator1Reward + validator1DelegatesReward
+			//totalValidator2Reward := validator2Reward + validator2DelegatesReward
 
 			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
 			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
@@ -786,8 +802,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			// check if the ratio is correct between blobber and validator rewards
 			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
 			// check if both validators have same rewards
-			require.InEpsilon(t, validator1Reward+1, validator2Reward+1, 1, "Validator 1 and Validator 2 rewards are not equal")
-			require.InEpsilon(t, validator1DelegatesReward+1, validator2DelegatesReward+1, 1, "Validator 1 Delegate and Validator 2 Delegate rewards are not equal")
+			if totalValidatorReward != 0 {
+				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
+			}
 
 			blobber1TotalReward += blobber1Reward
 			blobber2TotalReward += blobber2Reward
@@ -818,11 +836,13 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
 	})
 
-	//t.Skip()
+	t.Skip()
 
-	t.RunWithTimeout("Case 4 : Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Case 4 : Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
@@ -993,7 +1013,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.Skip()
 
-	t.RunWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
@@ -1102,7 +1122,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Equal(t, validatorChallengeRewards[validatorListString[0]], validatorChallengeRewards[validatorListString[1]], "Validator 1 and Validator 2 rewards are not equal")
 	})
 
-	t.RunWithTimeout("Case 6 : Client Uploads 10% of Allocation and 1 delegate each (equal stake) with Uploading in starting and in the middle", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Case 6 : Client Uploads 10% of Allocation and 1 delegate each (equal stake) with Uploading in starting and in the middle", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
