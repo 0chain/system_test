@@ -700,7 +700,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.ExpirationDate+int64(expandedDuration.Seconds()), allocUpdated.ExpirationDate)
 	})
 
-	t.Run("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", func(t *test.SystemTest) {
+	t.RunSequentially("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
