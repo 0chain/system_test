@@ -282,9 +282,9 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 	return allocWalletList, resp, err
 }
 
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -413,9 +413,9 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 
 	return message, resp, err
 }
-func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletKeys, *resty.Response, error) {
+func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletKeysArr, *resty.Response, error) {
 	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletKeys
+	var zboxWallets *model.ZboxWalletKeysArr
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -715,9 +715,9 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletKeys, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletKeysArr, *resty.Response, error) {
 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWalletKeys *model.ZboxWalletKeys
+	var zboxWalletKeys *model.ZboxWalletKeysArr
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -741,9 +741,9 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 	return zboxWalletKeys, resp, err
 }
 
-func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Updating wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
