@@ -44,9 +44,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
+		ac := getAllocation(t, allocationID)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
 			fmt.Sprint("Expiration Time doesn't match: "+
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
