@@ -59,6 +59,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 				"values": oldValue,
 			}, true)
 		}()
+		_, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.NoError(t, err)
 
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
