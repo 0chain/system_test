@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +17,10 @@ import (
 
 func TestBlobberBlockRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
+	prevBlock := getLatestFinalizedBlock(t)
+
+	fmt.Println("prevBlock", prevBlock)
 
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -38,38 +43,122 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	//t.RunSequentially("Just read all the data", func(t *test.SystemTest) {
-	//
-	//	//for i, blobber := range blobberList {
-	//	//	fmt.Println("Blobber ", i, " : ", blobber.Id)
-	//	//	fmt.Println(getTotalBlockRewardsByBlobberID(blobber.Id))
-	//	//}
-	//
-	//	fmt.Println(getAllBlockRewards(blobberList))
-	//})
-	//
-	//t.Skip()
-
 	t.RunSequentiallyWithTimeout("Case 1: Free Reads, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		//stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   500 * MB,
+			"size":   1 * GB,
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "15m",
+			"expire": "20m",
 		})
 		fmt.Println("Allocation ID : ", allocationId)
 
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 50 * MB
+		filesize := 0.1 * GB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		curBlock := getLatestFinalizedBlock(t)
+
+		fmt.Println("curBlock", curBlock)
+
+		// 2. Get the block rewards for all the blobbers.
+
+		blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+		blobber1DelegateRewards := blobberBlockRewards[1]
+		blobber1Rewards := blobberBlockRewards[0] + blobber1DelegateRewards
+		blobber2DelegateRewards := blobberBlockRewards[3]
+		blobber2Rewards := blobberBlockRewards[2] + blobber2DelegateRewards
+
+		blobber1Percent := blobber1Rewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2Percent := blobber2Rewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		blobber1DelegatePercent := blobber1DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2DelegatePercent := blobber2DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		// print all values
+		fmt.Println("Blobber 1 Rewards : ", blobber1Rewards)
+		fmt.Println("Blobber 2 Rewards : ", blobber2Rewards)
+		fmt.Println("Blobber 1 Delegate Rewards : ", blobber1DelegateRewards)
+		fmt.Println("Blobber 2 Delegate Rewards : ", blobber2DelegateRewards)
+		fmt.Println("Blobber 1 Percent : ", blobber1Percent)
+		fmt.Println("Blobber 2 Percent : ", blobber2Percent)
+		fmt.Println("Blobber 1 Delegate Percent : ", blobber1DelegatePercent)
+		fmt.Println("Blobber 2 Delegate Percent : ", blobber2DelegatePercent)
+
+		// match if difference between their percent is less than 1%
+		require.True(t, blobber1Percent-blobber2Percent < 1, "Difference between blobber1 and blobber2 rewards is more than 1%")
+		require.True(t, blobber1DelegatePercent-blobber2DelegatePercent < 1, "Difference between blobber1 delegate and blobber2 delegate rewards is more than 1%")
+
+		prevBlock = getLatestFinalizedBlock(t)
+
+		// get all challenges
+		challenges, _ := getAllChallenges(allocationId)
+
+		for _, challenge := range challenges {
+			require.True(t, challenge.Passed, "All Challenges should be passed")
+		}
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+	})
+
+	t.Skip()
+
+	t.RunSequentiallyWithTimeout("Case 2: Different Write Price, Equal Read Price, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "20m",
+		})
+		fmt.Println("Allocation ID : ", allocationId)
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 0.1 * GB
 		filename := generateRandomTestFileName(t)
 
 		err = createFileWithSize(filename, int64(filesize))
@@ -84,77 +173,6 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 		fmt.Println(output)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		//// download the file
-		//err = os.Remove(filename)
-		//require.Nil(t, err)
-		//
-		//remoteFilepath := remotepath + filepath.Base(filename)
-		//
-		//output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-		//	"allocation": allocationId,
-		//	"remotepath": remoteFilepath,
-		//	"localpath":  os.TempDir() + string(os.PathSeparator),
-		//}), true)
-		//fmt.Println(output)
-		//require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-
-		// sleep for 2 minutes
-		time.Sleep(6 * time.Minute)
-
-		for i, blobber := range blobberList {
-			fmt.Println("Blobber ", i, " : ", blobber.Id)
-			fmt.Println(getTotalBlockRewardsByBlobberID(blobber.Id))
-		}
-
-		//2. Get the block rewards for all the blobbers.
-		blockRewards := getAllBlockRewards(blobberList)
-
-		for blobberId, amount := range blockRewards {
-			fmt.Println("Blobber ID : ", blobberId)
-			fmt.Println("Block Reward : ", amount)
-		}
-
-	})
-
-	t.Skip()
-
-	t.RunSequentiallyWithTimeout("Case 4: Free Reads, One delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
-
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   500 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-			"expire": "10m",
-		})
-
-		// Uploading 10% of allocation
-
-		remotepath := "/dir/"
-		filesize := 50 * MB
-		filename := generateRandomTestFileName(t)
-
-		err = createFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
 		// download the file
 		err = os.Remove(filename)
 		require.Nil(t, err)
@@ -166,142 +184,254 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			"remotepath": remoteFilepath,
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), true)
+		fmt.Println(output)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-		// sleep for 2 minutes
-		time.Sleep(6 * time.Minute)
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		curBlock := getLatestFinalizedBlock(t)
 
 		// 2. Get the block rewards for all the blobbers.
-		blockRewards := getAllBlockRewards(blobberList)
 
-		for blobberId, amount := range blockRewards {
-			fmt.Println("Blobber ID : ", blobberId)
-			fmt.Println("Block Reward : ", amount)
+		blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+		blobber1DelegateRewards := blobberBlockRewards[1]
+		blobber1Rewards := blobberBlockRewards[0] + blobber1DelegateRewards
+		blobber2DelegateRewards := blobberBlockRewards[3]
+		blobber2Rewards := blobberBlockRewards[2] + blobber2DelegateRewards
+
+		blobber1Percent := blobber1Rewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2Percent := blobber2Rewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		blobber1DelegatePercent := blobber1DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2DelegatePercent := blobber2DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		zetaBlobber1 := getZeta(0.1, 0.1)
+		zetaBlobber2 := getZeta(0.2, 0.1)
+
+		// print all values
+		fmt.Println("Blobber 1 Rewards : ", blobber1Rewards)
+		fmt.Println("Blobber 2 Rewards : ", blobber2Rewards)
+		fmt.Println("Blobber 1 Delegate Rewards : ", blobber1DelegateRewards)
+		fmt.Println("Blobber 2 Delegate Rewards : ", blobber2DelegateRewards)
+		fmt.Println("Blobber 1 Percent : ", blobber1Percent)
+		fmt.Println("Blobber 2 Percent : ", blobber2Percent)
+		fmt.Println("Blobber 1 Delegate Percent : ", blobber1DelegatePercent)
+		fmt.Println("Blobber 2 Delegate Percent : ", blobber2DelegatePercent)
+		fmt.Println("Zeta Blobber 1 : ", zetaBlobber1)
+		fmt.Println("Zeta Blobber 2 : ", zetaBlobber2)
+
+		// match if difference between their percent is less than 1%
+		require.InEpsilon(t, blobber1Rewards/blobber2Rewards, zetaBlobber1/zetaBlobber2, 0.1, "Difference between blobber1 and blobber2 rewards is more than 1%")
+
+		prevBlock = getLatestFinalizedBlock(t)
+
+		// get all challenges
+		challenges, _ := getAllChallenges(allocationId)
+
+		for _, challenge := range challenges {
+			require.True(t, challenge.Passed, "All Challenges should be passed")
 		}
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
 	})
 
-	t.RunSequentiallyWithTimeout("Case 6: Free Reads, One delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		//for _, blobber := range blobberList {
-		//	getTotalBlockRewardsByBlobberID(t, blobber.ID, configPath, true)
-		//}
-
+	t.RunSequentiallyWithTimeout("Case 3: Different Read Price, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
 
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
-
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   500 * MB,
+			"size":   1 * GB,
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
-		})
-
-		// Uploading 10% of allocation
-
-		remotepath := "/dir/"
-		filesize := 50 * MB
-		filename := generateRandomTestFileName(t)
-
-		err = createFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		// download the file
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		remoteFilepath := remotepath + filepath.Base(filename)
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
-		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-
-		// sleep for 2 minutes
-		time.Sleep(3 * time.Minute)
-
-		// 2. Get all the block rewards for blobber1.
-		totalBlockRewardForBlobber1 := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-		totalBlockRewardForBlobber2 := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
-
-		// 3. Stop the blobber1.
-		killProvider(blobberList[0].Id)
-
-		// 4. Sleep for 3 minutes.
-		time.Sleep(3 * time.Minute)
-
-		// 5. Get all the block rewards for blobber1.
-		totalBlockRewardForBlobber1AfterStop := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-		totalBlockRewardForBlobber2AfterStop := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
-
-		fmt.Println("Total Block Reward for Blobber 1 : ", totalBlockRewardForBlobber1)
-		fmt.Println("Total Block Reward for Blobber 2 : ", totalBlockRewardForBlobber2)
-		fmt.Println("Total Block Reward for Blobber 1 After Stop : ", totalBlockRewardForBlobber1AfterStop)
-		fmt.Println("Total Block Reward for Blobber 2 After Stop : ", totalBlockRewardForBlobber2AfterStop)
-	})
-
-	t.RunSequentiallyWithTimeout("Case 7: Free Reads, One delegate each, equal stake, client uploads nothing", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"tokens": 9.0,
-		}), false)
-
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   500 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-			"expire": "10m",
+			"expire": "20m",
 		})
 		fmt.Println("Allocation ID : ", allocationId)
 
-		// sleep for 2 minutes
-		time.Sleep(3 * time.Minute)
+		// Uploading 10% of allocation
 
-		// 2. Get all the block rewards for blobber1.
-		totalBlockRewardForBlobber1 := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-		totalBlockRewardForBlobber2 := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
+		remotepath := "/dir/"
+		filesize := 0.1 * GB
+		filename := generateRandomTestFileName(t)
 
-		// 3. Stop the blobber1.
-		killProvider(blobberList[0].Id)
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
-		// 4. Sleep for 3 minutes.
-		time.Sleep(3 * time.Minute)
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		fmt.Println(output)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		// 5. Get all the block rewards for blobber1.
-		totalBlockRewardForBlobber1AfterStop := getTotalBlockRewardsByBlobberID(blobberList[0].Id)
-		totalBlockRewardForBlobber2AfterStop := getTotalBlockRewardsByBlobberID(blobberList[1].Id)
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
 
-		fmt.Println("Total Block Reward for Blobber 1 : ", totalBlockRewardForBlobber1)
-		fmt.Println("Total Block Reward for Blobber 2 : ", totalBlockRewardForBlobber2)
+		remoteFilepath := remotepath + filepath.Base(filename)
 
-		fmt.Println("Total Block Reward for Blobber 1 After Stop : ", totalBlockRewardForBlobber1AfterStop)
-		fmt.Println("Total Block Reward for Blobber 2 After Stop : ", totalBlockRewardForBlobber2AfterStop)
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		fmt.Println(output)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		curBlock := getLatestFinalizedBlock(t)
+
+		// 2. Get the block rewards for all the blobbers.
+
+		blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+		blobber1DelegateRewards := blobberBlockRewards[1]
+		blobber1Rewards := blobberBlockRewards[0] + blobber1DelegateRewards
+		blobber2DelegateRewards := blobberBlockRewards[3]
+		blobber2Rewards := blobberBlockRewards[2] + blobber2DelegateRewards
+
+		blobber1Percent := blobber1Rewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2Percent := blobber2Rewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		blobber1DelegatePercent := blobber1DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2DelegatePercent := blobber2DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		zetaBlobber1 := getZeta(0.1, 0)
+		zetaBlobber2 := getZeta(0.1, 1)
+
+		// print all values
+		fmt.Println("Blobber 1 Rewards : ", blobber1Rewards)
+		fmt.Println("Blobber 2 Rewards : ", blobber2Rewards)
+		fmt.Println("Blobber 1 Delegate Rewards : ", blobber1DelegateRewards)
+		fmt.Println("Blobber 2 Delegate Rewards : ", blobber2DelegateRewards)
+		fmt.Println("Blobber 1 Percent : ", blobber1Percent)
+		fmt.Println("Blobber 2 Percent : ", blobber2Percent)
+		fmt.Println("Blobber 1 Delegate Percent : ", blobber1DelegatePercent)
+		fmt.Println("Blobber 2 Delegate Percent : ", blobber2DelegatePercent)
+		fmt.Println("Zeta Blobber 1 : ", zetaBlobber1)
+		fmt.Println("Zeta Blobber 2 : ", zetaBlobber2)
+
+		// match if difference between their percent is less than 1%
+		require.InEpsilon(t, blobber1Rewards/blobber2Rewards, zetaBlobber1/zetaBlobber2, 0.1, "Difference between blobber1 and blobber2 rewards is more than 1%")
+
+		prevBlock = getLatestFinalizedBlock(t)
+
+		// get all challenges
+		challenges, _ := getAllChallenges(allocationId)
+
+		for _, challenge := range challenges {
+			require.True(t, challenge.Passed, "All Challenges should be passed")
+		}
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
 	})
+
+	t.RunSequentiallyWithTimeout("Case 4: Free Reads, one delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "20m",
+		})
+		fmt.Println("Allocation ID : ", allocationId)
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 0.1 * GB
+		filename := generateRandomTestFileName(t)
+
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		fmt.Println(output)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// download the file
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		fmt.Println(output)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		curBlock := getLatestFinalizedBlock(t)
+
+		// 2. Get the block rewards for all the blobbers.
+
+		blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+		blobber1DelegateRewards := blobberBlockRewards[1]
+		blobber1Rewards := blobberBlockRewards[0]
+		blobber2DelegateRewards := blobberBlockRewards[3]
+		blobber2Rewards := blobberBlockRewards[2]
+
+		blobber1Percent := blobber1Rewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2Percent := blobber2Rewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		blobber1DelegatePercent := blobber1DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+		blobber2DelegatePercent := blobber2DelegateRewards / (blobber1Rewards + blobber2Rewards) * 100
+
+		// print all values
+		fmt.Println("Blobber 1 Rewards : ", blobber1Rewards)
+		fmt.Println("Blobber 2 Rewards : ", blobber2Rewards)
+		fmt.Println("Blobber 1 Delegate Rewards : ", blobber1DelegateRewards)
+		fmt.Println("Blobber 2 Delegate Rewards : ", blobber2DelegateRewards)
+		fmt.Println("Blobber 1 Percent : ", blobber1Percent)
+		fmt.Println("Blobber 2 Percent : ", blobber2Percent)
+		fmt.Println("Blobber 1 Delegate Percent : ", blobber1DelegatePercent)
+		fmt.Println("Blobber 2 Delegate Percent : ", blobber2DelegatePercent)
+
+		require.Equal(t, blobber1Rewards, blobber2Rewards, "Blobber1 and Blobber2 rewards should be equal")
+		require.InEpsilon(t, blobber1DelegateRewards/blobber2DelegateRewards, 1/2, 0.1, "Difference between blobber1 delegate and blobber2 delegate rewards is more than 1%")
+
+		// match if difference between their percent is less than 1%
+		require.True(t, blobber1Percent-blobber2Percent < 1, "Difference between blobber1 and blobber2 rewards is more than 1%")
+		require.True(t, blobber1DelegatePercent-blobber2DelegatePercent < 1, "Difference between blobber1 delegate and blobber2 delegate rewards is more than 1%")
+
+		prevBlock = getLatestFinalizedBlock(t)
+
+		// get all challenges
+		challenges, _ := getAllChallenges(allocationId)
+
+		for _, challenge := range challenges {
+			require.True(t, challenge.Passed, "All Challenges should be passed")
+		}
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+	})
+
 }
 
 func getAllBlockRewards(blobberList []climodel.BlobberInfo) map[string]int64 {
@@ -416,4 +546,80 @@ func getTotalBlockRewardsByBlobberID(blobberID string) int64 {
 	}
 
 	return result
+}
+
+func getBlockRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, blobber2 string) []int64 {
+	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/block-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber
+	var response map[string]interface{}
+
+	res, _ := http.Get(url)
+
+	// decode and save the res body to response
+	json.NewDecoder(res.Body).Decode(&response)
+
+	var result []int64
+
+	var blobber1TotalReward int64
+	blobber1TotalReward = 0
+	var blobber2TotalReward int64
+	blobber2TotalReward = 0
+
+	var blobber1ProviderReward int64
+	blobber1ProviderReward = 0
+	var blobber2ProviderReward int64
+	blobber2ProviderReward = 0
+
+	for _, providerReward := range response["provider_rewards"].([]interface{}) {
+		providerId := providerReward.(map[string]interface{})["provider_id"].(string)
+		amount := int64(providerReward.(map[string]interface{})["amount"].(float64))
+
+		if providerId == blobber1 {
+			blobber1TotalReward += amount
+			blobber1ProviderReward += amount
+		} else if providerId == blobber2 {
+			blobber2TotalReward += amount
+			blobber2ProviderReward += amount
+		}
+	}
+
+	var blobber1DelegateReward int64
+	blobber1DelegateReward = 0
+	var blobber2DelegateReward int64
+	blobber2DelegateReward = 0
+
+	for _, delegateRewards := range response["delegate_rewards"].([]interface{}) {
+		providerId := delegateRewards.(map[string]interface{})["provider_id"].(string)
+		amount := int64(delegateRewards.(map[string]interface{})["amount"].(float64))
+
+		if providerId == blobber1 {
+			blobber1TotalReward += amount
+			blobber1DelegateReward += amount
+		} else if providerId == blobber2 {
+			blobber2TotalReward += amount
+			blobber2DelegateReward += amount
+		}
+	}
+
+	result = append(result, blobber1ProviderReward)
+	result = append(result, blobber2ProviderReward)
+	result = append(result, blobber1DelegateReward)
+	result = append(result, blobber2DelegateReward)
+
+	result = append(result, blobber1TotalReward)
+	result = append(result, blobber2TotalReward)
+
+	return result
+}
+
+func getZeta(wp, rp float64) float64 {
+
+	i := float64(1)
+	k := float64(1)
+	mu := float64(1)
+
+	if wp == 0 {
+		return 0
+	}
+
+	return i - (k * (rp / (rp + (mu * wp))))
 }
