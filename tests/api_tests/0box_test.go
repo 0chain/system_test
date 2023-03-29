@@ -27,7 +27,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	defaultTotalNFT := "1"
 	collection_id := "collection id created as a part of testing nft collection"
 
-	t.RunSequentially("4 List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
+	t.RunSequentially("List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -57,11 +57,10 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxNftCollectionIdList)
-		require.Equal(t, zboxNftCollectionIdList.NftCollectionCount, 2)
-		fmt.Println(zboxNftCollectionIdList)
+		require.Equal(t, zboxNftCollectionIdList.NftCollectionCount, 0)
 	})
 
-	t.RunSequentially("4 Get NFT by collection with invalid collection id should give empty array", func(t *test.SystemTest) {
+	t.RunSequentially("Get NFT by collection with invalid collection id should give empty array", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -81,7 +80,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		zboxNftCollectionId, response, err := zboxClient.GetNftCollectionById(t,
+		_, response, err = zboxClient.GetNftCollectionById(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -90,11 +89,10 @@ func Test0boxNftCollection(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		fmt.Println(zboxNftCollectionId)
 		require.Equal(t, `{"error":"400: error getting nft collection"}`, response.String())
 	})
 
-	t.RunSequentially("4 Get NFT collection id with one nft collection id present should should work", func(t *test.SystemTest) {
+	t.RunSequentially("Get NFT collection id with one nft collection id present should should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
@@ -164,13 +162,13 @@ func Test0boxNftCollection(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
-		require.Equal(t, zboxNftCollectionIdList.NftCollectionCount, 3)
+		require.Equal(t, zboxNftCollectionIdList.NftCollectionCount, 1)
 
 	})
 
 	t.RunSequentially("Get NFT collection by collection id with one nft present should work", func(t *test.SystemTest) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		zboxNFTList, response, err := zboxClient.GetAllNftByCollectionId(t,
+		zboxNFTList, response, err := zboxClient.GetNftCollectionById(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
@@ -180,7 +178,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
 		require.NotNil(t, zboxNFTList)
-		//require.Equal(t, zboxNFTList.NftList)
+		require.Equal(t, zboxNFTList.NftCollection.CollectionId, collection_id)
 	})
 
 }

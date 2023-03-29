@@ -154,6 +154,31 @@ type ZboxNftCollection struct {
 	BatchSize              string `json:"batch_size"`
 }
 
+type ZboxNftCollectionAlt struct {
+	Id                     int    `json:"Id"`
+	AllocationId           string `json:"allocationId"`
+	CollectionId           string `json:"CollectionId"`
+	CreatedBy              string `json:"CreatedBy"`
+	CollectionName         string `json:"CollectionName"`
+	TotalNfts              int    `json:"TotalNfts"`
+	CollectionType         string `json:"CollectionType"`
+	Symbol                 string `json:"symbol"`
+	BaseUrl                string `json:"BaseUrl"`
+	LastUpdate             string `json:"UpdatedAt"`
+	CreatedAtDate          string `json:"CreatedAtDate"`
+	CollectionImage        string `json:"CollectionISmage"`
+	ColleectionBannerImage string `json:"CollectionBannerImage"`
+	CreatorName            string `json:"CreatorName"`
+	PricePerPack           int    `json:"PricePerPack"`
+	MaxMints               int    `json:"MaxMints"`
+	CurrMints              int    `json:"CurrMints"`
+	BatchSize              int    `json:"BatchSize"`
+	Deleted                string `json:"Deleted"`
+}
+
+type ZboxNftCollectionByIdAlt struct {
+	NftCollection ZboxNftCollectionAlt `json:"collections"`
+}
 type ZboxNftCollectionList struct {
 	ZboxNftCollection  []ZboxNftCollection `json:"collections"`
 	NftCollectionCount int                 `json:"total"`

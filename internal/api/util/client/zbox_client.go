@@ -1198,9 +1198,9 @@ func (c *ZboxClient) GetAllNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollectionList, resp, err
 }
 
-func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftCollection, *resty.Response, error) {
+func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftCollectionByIdAlt, *resty.Response, error) {
 	t.Logf("Getting All nft collection using collection Id for 0box...")
-	var ZboxNftCollection *model.ZboxNftCollection
+	var ZboxNftCollection *model.ZboxNftCollectionByIdAlt
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
