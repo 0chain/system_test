@@ -94,64 +94,6 @@ func ApiGetList[T any](t *test.SystemTest, url string, params map[string]string,
 	}
 }
 
-func ApiGetListRetries[T any](t *test.SystemTest, url string, params map[string]string, from, to int64, retries int) []T {
-	var out []T
-	var offset int64
-	for {
-		var temp []T
-		var raw []byte
-		var err error
-		for try := 1; try <= retries; try++ {
-			raw, err = getNextError(t, url, from, to, MaxQueryLimit, offset, params)
-			if err != nil {
-				t.Logf("retry %d, %v", try, err)
-			} else {
-				break
-			}
-		}
-		assert.NoError(t, err, "%s failed after %d retries", url, retries)
-
-		err = json.Unmarshal(raw, &temp)
-		assert.NoError(t, err, "deserializing JSON string `%s`: %v", string(raw), err)
-		out = append(out, temp...)
-		if len(temp) < MaxQueryLimit {
-			return out
-		}
-
-		offset += int64(len(temp))
-	}
-}
-
-func getNextError(t *test.SystemTest, url string, from, to, limit, offset int64, params map[string]string) ([]byte, error) {
-	params["start"] = strconv.FormatInt(from, 10)
-	params["end"] = strconv.FormatInt(to, 10)
-	if limit > 0 {
-		params["limit"] = strconv.FormatInt(limit, 10)
-	}
-	if offset > 0 {
-		params["offset"] = strconv.FormatInt(offset, 10)
-	}
-	url = addParms(url, params)
-	res, err := http.Get(url) //nolint:gosec
-	if err != nil {
-		return nil, fmt.Errorf("response %s; retrieving blocks %d to %d", url, from, to)
-	}
-	defer res.Body.Close()
-	if res.StatusCode < 200 && res.StatusCode >= 300 {
-		return nil, fmt.Errorf("failed API request %s, status code: %d: %v", url, res.StatusCode, err)
-	}
-	if res.Body == nil {
-		return nil, fmt.Errorf("request %s, API response must not be nil", url)
-	}
-
-	resBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("response %s, reading response body: %v", url, err)
-	}
-
-	return resBody, nil
-}
-
 func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, params map[string]string) []byte {
 	params["start"] = strconv.FormatInt(from, 10)
 	params["end"] = strconv.FormatInt(to, 10)
