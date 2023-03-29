@@ -25,7 +25,7 @@ type ZboxWallet struct {
 	Mnemonic    string           `json:"mnemonic"`
 	AppType     []string         `json:"app_type"`
 	Allocation  []ZboxAllocation `json:"allocation"`
-	PublicKey   string   	     `json:"public_key"`
+	PublicKey   string           `json:"public_key"`
 	LastUpdate  string           `json:"last_update"`
 }
 
