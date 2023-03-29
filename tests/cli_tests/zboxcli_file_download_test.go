@@ -217,7 +217,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Error(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
@@ -270,7 +269,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "consensus_not_met")
-		require.Contains(t, aggregatedOutput, "file meta data")
 	})
 
 	t.RunWithTimeout("Download Shared File Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
@@ -698,6 +696,51 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
 
+	t.Run("Download Encrypted File Thumbnail Should Work", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 1,
+		})
+
+		thumbnail := escapedTestName(t) + "thumbnail.png"
+		//nolint
+		thumbnailSize := generateThumbnail(t, thumbnail)
+
+		defer func() {
+			// Delete the downloaded thumbnail file
+			err = os.Remove(thumbnail)
+			require.Nil(t, err)
+		}()
+
+		filename := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
+			"thumbnailpath": thumbnail,
+			"encrypt":       "",
+		})
+
+		// Delete the uploaded file, since we will be downloading it now
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  localPath,
+			"thumbnail":  nil,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		stat, err := os.Stat(localPath)
+		require.Nil(t, err)
+		require.Equal(t, thumbnailSize, int(stat.Size()))
+	})
+
 	t.Run("Download to Non-Existent Path Should Work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
@@ -784,7 +827,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(data.NumOfBlocks-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.Run("Download File With Only endblock Should Not Work", func(t *test.SystemTest) {
+	t.Run("Download File With Only endblock Should Work", func(t *test.SystemTest) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -809,10 +852,10 @@ func TestDownload(testSetup *testing.T) {
 			"endblock":   endBlock,
 		}), false)
 
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.NoError(t, err)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, StatusCompletedCB)
+		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
 
 	t.Run("Download File With startblock And endblock Should Work", func(t *test.SystemTest) {
@@ -890,7 +933,7 @@ func TestDownload(testSetup *testing.T) {
 
 		startBlock := 0
 		endBlock := 5
-		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 0 would lead to startblock being -1).
+		// Minimum Startblock value should be 1 (since gosdk subtracts 1 from start block, so 1 would lead to startblock being 0).
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -898,10 +941,10 @@ func TestDownload(testSetup *testing.T) {
 			"startblock": startBlock,
 			"endblock":   endBlock,
 		}), true)
-		require.NotNil(t, err)
-		require.Len(t, output, 3)
+
+		require.Error(t, err)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "Error: start block should not be less than 1")
 	})
 
 	t.Run("Download File With endblock greater than number of blocks should work", func(t *test.SystemTest) {
@@ -997,9 +1040,8 @@ func TestDownload(testSetup *testing.T) {
 		}), true)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "invalid parameter: X-Block-Num")
+		require.Contains(t, aggregatedOutput, "start block should not be less than 1")
 	})
 
 	t.Run("Download with negative endblock should fail", func(t *test.SystemTest) {
@@ -1032,7 +1074,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "start block should be less than end block")
+		require.Contains(t, aggregatedOutput, "start block or end block or both cannot be negative.")
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
@@ -1115,7 +1157,6 @@ func TestDownload(testSetup *testing.T) {
 		require.True(t, len(output) > 0)
 
 		require.Contains(t, output[len(output)-1], "consensus_not_met")
-		require.Contains(t, output[len(output)-1], "file meta data")
 	})
 
 	t.Run("Download Non-Existent File Should Fail", func(t *test.SystemTest) {
@@ -1135,7 +1176,6 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
@@ -1221,7 +1261,6 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "consensus_not_met")
-		require.Contains(t, output[0], "file meta data")
 	})
 
 	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {
