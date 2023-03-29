@@ -65,7 +65,7 @@ type ZboxAllocationList struct {
 }
 
 type ZboxWalletArr []struct {
-	ZboxWallet
+	*ZboxWallet
 }
 
 type DexState struct {

@@ -296,7 +296,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			strconv.Itoa((*wallets)[0].WalletId),
+			strconv.Itoa(wallets[0].WalletId),
 		)
 
 		require.NoError(t, err)
@@ -1377,8 +1377,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 		// Get Wallet
 		wallets, _, _ := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.Equal(t, 1, len(*wallets), "Wallet not created")
-		wallet := (*wallets)[0]
+		require.Equal(t, 1, len(wallets), "Wallet not created")
+		wallet := wallets[0]
 
 		// Delete Wallet
 		_, response, _ = zboxClient.DeleteWallet(t, wallet.WalletId, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -1390,7 +1390,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 		// Get Wallet
 		wallets, _, _ = zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
-		require.Equal(t, 0, len(*wallets), "Wallet not deleted")
+		require.Equal(t, 0, len(wallets), "Wallet not deleted")
 	})
 
 	t.RunSequentially("Update Wallet with wallet present", func(t *test.SystemTest) {
@@ -1838,8 +1838,8 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	wallets, _, _ := zboxClient.GetWalletKeys(t, idToken, csrfToken, phoneNumber) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 	if wallets != nil {
-		t.Logf("Found [%v] existing wallets for [%v]", len(*wallets), phoneNumber)
-		for _, wallet := range *wallets {
+		t.Logf("Found [%v] existing wallets for [%v]", len(wallets), phoneNumber)
+		for _, wallet := range wallets {
 			message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
 			println(message, response, err)
 		}
