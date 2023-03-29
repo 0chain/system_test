@@ -25,6 +25,7 @@ type ZboxWallet struct {
 	Mnemonic    string           `json:"mnemonic"`
 	AppType     []string         `json:"app_type"`
 	Allocation  []ZboxAllocation `json:"allocation"`
+	PublicKey   string           `json:"public_key"`
 	LastUpdate  string           `json:"last_update"`
 }
 
@@ -49,16 +50,6 @@ type ZboxAllocation struct {
 	LastUpdate     string `json:"last_update"`
 }
 
-type ZboxWalletKeys struct {
-	ClientId    string   `json:"client_id"`
-	WalletId    int      `json:"wallet_id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	AppId       []string `json:"app_type"`
-	PublicKey   string   `json:"public_key"`
-	LastUpdate  string   `json:"last_update"`
-}
-
 type MessageContainer struct {
 	Message string `json:"message"`
 }
@@ -73,8 +64,8 @@ type ZboxAllocationList struct {
 	Allocs     []ZboxAllocation `json:"allocs"`
 }
 
-type ZboxWalletKeysArr []struct {
-	ZboxWalletKeys
+type ZboxWalletArr []struct {
+	*ZboxWallet
 }
 
 type DexState struct {
