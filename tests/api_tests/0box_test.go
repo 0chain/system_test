@@ -2131,7 +2131,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
 		allocation_id := "new allocation for vult"
-		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
+		_, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
 			allocationName,
 			allocationDescription,
@@ -2143,8 +2143,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		// FIXME change the error massege according to change in 0box.
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.Equal(t, `{"error":"400: allocation already exists for appType: vult"}`, response.String())
 	})
 
 	t.RunSequentially("Post multiple allocation for blimp should work", func(t *test.SystemTest) {
