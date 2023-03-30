@@ -56,6 +56,10 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
+		// get wallet balance
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "0.5",
@@ -68,6 +72,13 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
+		// get balance after creating allocation
+		balanceAfterAllocation, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
+		// Wallet balance should decrease by locked amount and txn fee
+		require.Less(t, balanceAfterAllocation, balance-0.5)
+
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "30m",
@@ -78,10 +89,11 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation updated with txId : ([a-f0-9]{64})"), output[0])
 
-		// Wallet balance should decrease by locked amount
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfterUpdate, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 2.2, balance)
+
+		// Wallet balance should decrease by locked amount and txn fee
+		require.Less(t, balanceAfterUpdate, balanceAfterAllocation-0.2)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
