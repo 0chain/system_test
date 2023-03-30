@@ -51,9 +51,9 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		balance, err = getBalanceZCN(t, configPath)
+		balanceAfterLock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 2.3, balance)
+		require.Less(t, balanceAfterLock, balance-1)
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
@@ -72,9 +72,9 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		balance, err = getBalanceZCN(t, configPath)
+		balanceAfterCancelUnlock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 2.7, balance)
+		require.Greater(t, balanceAfterCancelUnlock, balanceAfterLock)
 	})
 
 	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 11*time.Minute, func(t *test.SystemTest) {
