@@ -115,7 +115,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -159,7 +159,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultAppType,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
@@ -191,9 +191,10 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
+		allocationId := "allocation id  created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationId,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -203,7 +204,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
@@ -229,8 +230,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationId := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationId,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -240,7 +242,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"vult",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
@@ -266,8 +268,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -277,7 +280,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"vult",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocationName = "second allocation created as part of " + t.Name()
@@ -321,8 +324,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -332,7 +336,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocationName = "second allocation created as part of " + t.Name()
@@ -350,7 +354,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
@@ -376,8 +380,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -387,7 +392,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"chalk",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocationName = "second allocation created as part of " + t.Name()
@@ -405,7 +410,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"chalk",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 	})
 
@@ -431,8 +436,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -468,8 +474,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -505,8 +512,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -542,8 +550,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -553,11 +562,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		_, response, err = zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -592,8 +601,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -603,7 +613,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
@@ -659,8 +669,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -670,11 +681,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 		updatedAllocationName := "update allocation name"
 		allocationObjCreatedResponse, response, err = zboxClient.UpdateAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationID,
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,
