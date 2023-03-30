@@ -94,6 +94,10 @@ func TestReadMarker(testSetup *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
+		sharderUrl := getSharderUrl(t)
+		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
+		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
+
 		// Downloading encrypted file should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -101,10 +105,6 @@ func TestReadMarker(testSetup *testing.T) {
 			"localpath":  os.TempDir(),
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
-		sharderUrl := getSharderUrl(t)
-		beforeCount := CountReadMarkers(t, allocationId, sharderUrl)
-		require.Zero(t, beforeCount.ReadMarkersCount, "non zero read-marker count before download")
 
 		time.Sleep(time.Second * 20)
 
