@@ -22,6 +22,10 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
+		// get balance
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"expire": "6m",
@@ -36,10 +40,9 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
-		// Wallet balance before lock should be 4.5 ZCN
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfterAlloc, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.4, balance)
+		require.Less(t, balanceAfterAlloc, balance-0.5)
 
 		// Lock 1 token in Write pool amongst all blobbers
 		params := createParams(map[string]interface{}{
@@ -53,7 +56,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		balanceAfterLock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Less(t, balanceAfterLock, balance-1)
+		require.Less(t, balanceAfterLock, balanceAfterAlloc-1)
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
@@ -64,6 +67,10 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 
+		// get balance after cancel
+		balanceAfterCancel, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Unlock pool
 		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -72,9 +79,9 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		balanceAfterCancelUnlock, err := getBalanceZCN(t, configPath)
+		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Greater(t, balanceAfterCancelUnlock, balanceAfterLock)
+		require.Greater(t, balanceAfterUnlock, balanceAfterCancel)
 	})
 
 	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 11*time.Minute, func(t *test.SystemTest) {
@@ -97,7 +104,6 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance before lock should be 4.5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.4, balance)
 
 		// Lock 1 token in Write pool amongst all blobbers
 		params := createParams(map[string]interface{}{
@@ -109,10 +115,12 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		// Wallet balance should decrement from 4.5 to 3.5 ZCN
-		balance, err = getBalanceZCN(t, configPath)
+		// get balance after lock
+		balanceAfterLock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 2.3, balance)
+
+		// assert balance reduced by 1 ZCN and txn fee
+		require.Less(t, balanceAfterLock, balance-1)
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
@@ -126,6 +134,10 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
 
+		// get balance after finalize
+		balanceAfterFinalize, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Unlock pool
 		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -134,9 +146,12 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "unlocked", output[0])
 
-		balance, err = getBalanceZCN(t, configPath)
+		// get balance after unlock
+		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 2.7, balance)
+
+		// assert after unlock, balance is greater than after finalize, but need to pay fee
+		require.Greater(t, balanceAfterUnlock, balanceAfterFinalize)
 	}) //todo: this test takes on average 9 mins 20 seconds.. i'm not joking!!!
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
