@@ -123,7 +123,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocationList[0].Id)
+		require.Equal(t, allocationId, allocationList[0].Id)
 	})
 
 	t.RunSequentially("List allocation with invalid phone number should not work", func(t *test.SystemTest) {
@@ -266,27 +266,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationID,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-			"vult",
-		)
-		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		allocationName = "second allocation created as part of " + t.Name()
-		allocationDescription = "second allocation description created as part of " + t.Name()
-		allocationType = "second allocation type created as part of " + t.Name()
+		allocationName := "second allocation created as part of " + t.Name()
+		allocationDescription := "second allocation description created as part of " + t.Name()
+		allocationType := "second allocation type created as part of " + t.Name()
 		allocation_id := "new allocation for vult"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -617,10 +599,10 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
+		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocation.Id)
+		require.Equal(t, allocationID, allocation.Id)
 	})
 
 	t.RunSequentially("Get an allocation with allocation not present should not work", func(t *test.SystemTest) {
@@ -699,10 +681,10 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
+		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, zboxClient.DefaultAllocationId, allocation.Id)
+		require.Equal(t, allocationID, allocation.Id)
 		require.Equal(t, updatedAllocationName, allocation.Name)
 	})
 
@@ -727,10 +709,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationId := "allocation ID created as part of " + t.Name()
 
 		updatedAllocationName := "update allocation name"
 		allocationObjCreatedResponse, response, err := zboxClient.UpdateAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationId,
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,
