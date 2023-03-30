@@ -32,6 +32,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		cfg := map[string]string{}
 		for _, o := range output {
 			configPair := strings.Split(o, "\t")
+			require.Len(t, configPair, 2, "Configuration pair must have 2 items", strings.Join(output, "\n"))
 			cfg[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
 		}
 
