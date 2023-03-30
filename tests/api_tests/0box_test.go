@@ -724,7 +724,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "no allocation was updated for these details", allocationObjCreatedResponse.Message)
 	})
 }
 
@@ -1014,7 +1014,7 @@ func Test0boxNft(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
-			strconv.Itoa(wallets[0].WalletId),
+			strconv.Itoa(wallets.Data[0].WalletId),
 		)
 
 		require.NoError(t, err)
@@ -2113,8 +2113,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 		// Get Wallet
 		wallets, _, _ := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
-		require.Equal(t, 1, len(wallets), "Wallet not created")
-		wallet := wallets[0]
+		require.Equal(t, 1, len(wallets.Data), "Wallet not created")
+		wallet := wallets.Data[0]
 
 		// Delete Wallet
 		_, response, _ = zboxClient.DeleteWallet(t, wallet.WalletId, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
@@ -2126,7 +2126,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 		// Get Wallet
 		wallets, _, _ = zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
-		require.Equal(t, 0, len(wallets), "Wallet not deleted")
+		require.Equal(t, 0, len(wallets.Data), "Wallet not deleted")
 	})
 
 	t.RunSequentially("Update Wallet with wallet present", func(t *test.SystemTest) {
@@ -2154,13 +2154,13 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		// Get Wallet
-		_, resp, _ := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
+		walletList, resp, _ := zboxClient.GetWalletKeys(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
 
-		var walletList model.ZboxWalletList
+		//var walletList model.ZboxWalletList
 
 		// store data to responseJson and read and println it
-		_ = json.Unmarshal([]byte(resp.String()), &walletList)
-
+		//_ = json.Unmarshal([]byte(resp.String()), &walletList)
+		require.Equal(t, 200, resp.StatusCode())
 		wallets := walletList.Data
 		require.Equal(t, 1, len(wallets), "Wallet not updated")
 		newWallet := wallets[0]
@@ -2581,9 +2581,9 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	for _, app := range appType {
 		wallets, _, _ := zboxClient.GetWalletKeys(t, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
-		if wallets != nil {
-			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
-			for _, wallet := range wallets {
+		if wallets.Data != nil {
+			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets.Data), phoneNumber, app)
+			for _, wallet := range wallets.Data {
 				message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
 				println(message, response, err)
 			}

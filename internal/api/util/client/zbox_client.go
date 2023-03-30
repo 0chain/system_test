@@ -416,9 +416,9 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletList, *resty.Response, error) {
 	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletArr
+	var zboxWallets *model.ZboxWalletList
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
