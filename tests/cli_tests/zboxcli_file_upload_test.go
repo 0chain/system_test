@@ -87,7 +87,7 @@ func TestUpload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Upload File to Root Directory Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
