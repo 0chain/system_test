@@ -308,24 +308,23 @@ func TestMinerStake(testSetup *testing.T) {
 
 	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 10*time.Minute, func(t *test.SystemTest) {
 		// Note: if max stake is 100, then we will need ot run faucet pour 10 times which could cause timeout
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
-
 		maxStakeSAS, err := miner.Settings.MaxStake.Int64()
 		require.NoError(t, err)
 
 		maxStake := intToZCN(maxStakeSAS)
+		t.Log("max stake:", maxStake)
 
 		for i := 0; i < (int(maxStake)/9)+1; i++ {
-			_, err = executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet")
+			out, err := executeFaucetWithTokens(t, configPath, 9.0)
+			require.NoError(t, err, "error executing faucet")
+			t.Log("faucet output:", out)
 		}
-
-		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, maxStake)
+		t.Logf("finish faucet pour")
+		// get balance
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.GreaterOrEqual(t, balance, maxStake)
+		t.Log("balance: ", balance)
 
 		_, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
@@ -333,7 +332,6 @@ func TestMinerStake(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
 
-		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   intToZCN(maxStakeSAS)/2 + 1,
