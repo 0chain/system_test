@@ -794,7 +794,20 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// get allocation
 		updatedAlloc := getAllocation(t, allocationID)
-		require.Equal(t, alloc, updatedAlloc)
+
+		// Note: the zboxcli `getallocation` calls '/storagesc/allocation' API to get allocation and related blobbers,
+		// but we can't rely on the result to assert that nothing changed as the API get fresh blobber data from
+		// blobbers table each time the API is called. And because other tests cases could change blobbers,
+		// so we can't assert that the blobber info is not changed.
+		// Anyway, we should be able to assert that the allocation itself is not changed
+
+		// assert that allocation size is not changed
+		require.Equal(t, alloc.Size, updatedAlloc.Size)
+		// assert that allocation file options is not changed
+		require.Equal(t, alloc.FileOptions, updatedAlloc.FileOptions)
+		// assert that no more blobber was added
+		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
+
 	})
 }
 
