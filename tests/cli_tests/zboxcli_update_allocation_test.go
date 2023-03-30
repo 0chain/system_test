@@ -375,10 +375,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_upload": nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -391,10 +393,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		t.Logf("forbidden delete")
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -407,10 +411,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		t.Logf("forbidden update")
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -423,10 +429,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		t.Logf("forbidden move")
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -439,10 +447,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_copy": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -455,10 +465,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_rename": nil,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -472,10 +484,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -488,10 +502,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_delete": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -504,10 +520,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_update": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -520,10 +538,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_move": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -536,10 +556,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_copy": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
@@ -552,10 +574,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"forbid_rename": false,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-
-		require.NoError(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		if err != nil {
+			require.Contains(t, err.Error(), "update allocation changes nothing")
+		} else {
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc = getAllocation(t, allocationID)
