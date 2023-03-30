@@ -104,8 +104,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation created as part of " + t.Name()
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
+		allocationId := "allocation id created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			zboxClient.DefaultAllocationId,
+			allocationId,
 			allocationName,
 			allocationDescription,
 			allocationType,
