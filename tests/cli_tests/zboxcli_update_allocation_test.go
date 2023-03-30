@@ -221,10 +221,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 	})
 
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "2s"})
+	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "6m"})
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(7 * time.Minute)
 
 		expDuration := int64(1) // In hours
 
