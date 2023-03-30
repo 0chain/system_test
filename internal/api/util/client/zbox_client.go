@@ -415,9 +415,10 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 
 	return message, resp, err
 }
-func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletKeysArr, *resty.Response, error) {
+
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
 	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletKeysArr
+	var zboxWallets *model.ZboxWalletArr
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -717,31 +718,31 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletKeysArr, *resty.Response, error) {
-	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWalletKeys *model.ZboxWalletKeysArr
+// func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletArr, *resty.Response, error) {
+// 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
+// 	var zboxWalletKeys *model.ZboxWalletArr
 
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet/keys")
+// 	urlBuilder := NewURLBuilder()
+// 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+// 	require.NoError(t, err, "URL parse error")
+// 	urlBuilder.SetPath("/v2/wallet/keys")
 
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWalletKeys,
-		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-	return zboxWalletKeys, resp, err
-}
+// 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+// 		Dst: &zboxWalletKeys,
+// 		Headers: map[string]string{
+// 			"X-App-Client-ID":        X_APP_CLIENT_ID,
+// 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+// 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+// 			"X-App-Timestamp":        "1618213324",
+// 			"X-App-ID-TOKEN":         idToken,
+// 			"X-App-Phone-Number":     phoneNumber,
+// 			"X-CSRF-TOKEN":           csrfToken,
+// 			"X-APP-TYPE":             "blimp",
+// 		},
+// 		RequiredStatusCode: 200,
+// 	}, HttpGETMethod)
+// 	return *zboxWalletKeys, resp, err
+// }
 
 func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Updating wallet using 0box...")
