@@ -493,7 +493,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunWithTimeout("rename root path should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("rename root path should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		remotePath := "/"

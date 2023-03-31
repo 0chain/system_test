@@ -286,6 +286,7 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 				break
 			}
 		}
+		// TODO: fix me - rewards should be greater than 0
 		require.Greater(t, rewards, int64(0))
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{

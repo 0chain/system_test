@@ -174,7 +174,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// todo rewards not transferred to wallet until a collect reward transaction
-	t.RunSequentiallyWithTimeout("Staking tokens against miner should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentially("Staking tokens against miner should return interest to wallet", func(t *test.SystemTest) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
@@ -253,7 +253,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	///todo: again, too slow for a failure case
-	t.RunWithTimeout("Staking more tokens than max_stake of miner node should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

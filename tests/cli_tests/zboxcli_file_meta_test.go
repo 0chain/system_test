@@ -260,7 +260,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	// Failure Scenarios
 
-	t.RunWithTimeout("Get File Meta on Another Wallet File Should Fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID, otherfile string
 		allocationID := setupAllocation(t, configPath)
 
