@@ -31,7 +31,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 		for i := range startBlobbers {
 			setAvailability(t, startBlobbers[i].ID, false)
-			defer setAvailability(t, startBlobbers[i].ID, true) // nolint:gocritic
+			t.Cleanup(func() { setAvailability(t, startBlobbers[i].ID, true) })
 		}
 
 		betweenBlobbers := getBlobbers(t)
@@ -57,7 +57,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.NoError(t, err, strings.Join(output, "\n"))
 		afterAllocationId, err := getAllocationID(output[0])
 		require.NoError(t, err, "error getting allocation id")
-		defer createAllocationTestTeardown(t, afterAllocationId)
+		createAllocationTestTeardown(t, afterAllocationId)
 	})
 }
 
