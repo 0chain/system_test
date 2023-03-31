@@ -31,7 +31,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 		for i := range startBlobbers {
 			setAvailability(t, startBlobbers[i].ID, false)
-			defer setAvailability(t, startBlobbers[i].ID, true)
+			defer setAvailability(t, startBlobbers[i].ID, true) // nolint:gocritic
 		}
 
 		betweenBlobbers := getBlobbers(t)
