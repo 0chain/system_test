@@ -798,6 +798,8 @@ func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, re
 	require.Nil(t, err)
 
 	// Upload parameters
+	// log command with allocation id, filename and remotepath
+	t.Logf("Uploading file %s to allocation %s with remotepath %s", filename, allocationID, remotepath+filepath.Base(filename))
 	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"localpath":  filename,
