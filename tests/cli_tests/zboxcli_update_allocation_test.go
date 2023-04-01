@@ -22,6 +22,7 @@ import (
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+	costAllocationRegex   = regexp.MustCompile(`^Cost for the given allocation: [a-f0-9]{64}$`)
 )
 
 func TestUpdateAllocation(testSetup *testing.T) {
@@ -858,6 +859,14 @@ func assertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, s
 
 func getAllocationID(str string) (string, error) {
 	match := createAllocationRegex.FindStringSubmatch(str)
+	if len(match) < 2 {
+		return "", errors.New("allocation match not found")
+	}
+	return match[1], nil
+}
+
+func getAllocationCost(str string) (string, error) {
+	match := costAllocationRegex.FindStringSubmatch(str)
 	if len(match) < 2 {
 		return "", errors.New("allocation match not found")
 	}
