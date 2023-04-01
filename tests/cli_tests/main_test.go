@@ -78,6 +78,14 @@ const (
 	blobber2Wallet                  = "wallets/blobber2"
 	validator1Wallet                = "wallets/validator1"
 	validator2Wallet                = "wallets/validator2"
+	blobber1Delegate1Wallet         = "wallets/blobber1_delegate1"
+	blobber1Delegate2Wallet         = "wallets/blobber1_delegate2"
+	blobber2Delegate1Wallet         = "wallets/blobber2_delegate1"
+	blobber2Delegate2Wallet         = "wallets/blobber2_delegate2"
+	validator1Delegate1Wallet       = "wallets/validator1_delegate1"
+	validator1Delegate2Wallet       = "wallets/validator1_delegate2"
+	validator2Delegate1Wallet       = "wallets/validator2_delegate1"
+	validator2Delegate2Wallet       = "wallets/validator2_delegate2"
 )
 
 var (
