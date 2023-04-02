@@ -98,7 +98,9 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -178,7 +180,9 @@ func TestAllocation(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
@@ -274,7 +278,9 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))

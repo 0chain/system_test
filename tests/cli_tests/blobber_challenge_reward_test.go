@@ -331,7 +331,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 1 : Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		//t.Skip()
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		// Uploading 10% of allocation
 
@@ -489,7 +491,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		//t.Skip()
 		// Staking Tokens to all blobbers and validators
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		// Creating Allocation
 
@@ -651,19 +655,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 3 : Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
-		stakeTokensToBlobbersAndValidators(t,
-			[]climodel.BlobberInfo{
-				blobberList[0],
-			}, []climodel.Validator{
-				validatorList[0],
-			}, configPath, false, 1, 1)
-
-		stakeTokensToBlobbersAndValidators(t,
-			[]climodel.BlobberInfo{
-				blobberList[1],
-			}, []climodel.Validator{
-				validatorList[1],
-			}, configPath, false, 2, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, []float64{
+			1, 2, 1, 2,
+		}, 1)
 
 		// Creating Allocation
 
@@ -833,7 +827,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		v1D2Wallet, _ := getWalletForName(t, configPath, validator1Delegate2Wallet)
 		v2D1Wallet, _ := getWalletForName(t, configPath, validator2Delegate1Wallet)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, 1, 2)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, []float64{
+			1, 1, 1, 1, 1, 1, 1, 1,
+		}, 2)
 
 		// Creating Allocation
 
@@ -953,6 +949,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 						blobberDelegate2Reward += blobberDelegateChallengeReward.Amount
 						blobber1Delegate2TotalReward += blobberDelegateChallengeReward.Amount
 					}
+
+					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
 				} else {
 					if blobberDelegateChallengeReward.PoolId == b2D1Wallet.ClientID {
 						blobberDelegate1Reward += blobberDelegateChallengeReward.Amount
@@ -961,6 +959,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 						blobberDelegate2Reward += blobberDelegateChallengeReward.Amount
 						blobber2Delegate2TotalReward += blobberDelegateChallengeReward.Amount
 					}
+
+					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
 				}
 			}
 
@@ -982,15 +982,19 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 				if validatorDelegateChallengeReward.PoolId == v1D1Wallet.ClientID {
 					validator1Delegate1Reward += validatorDelegateChallengeReward.Amount
 					validator1Delegate1TotalReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				} else if validatorDelegateChallengeReward.PoolId == v1D2Wallet.ClientID {
 					validator1Delegate2Reward += validatorDelegateChallengeReward.Amount
 					validator1Delegate2TotalReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				} else if validatorDelegateChallengeReward.PoolId == v2D1Wallet.ClientID {
 					validator2Delegate1Reward += validatorDelegateChallengeReward.Amount
 					validator2Delegate1TotalReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				} else {
 					validator2Delegate2Reward += validatorDelegateChallengeReward.Amount
 					validator2Delegate2TotalReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				}
 			}
 
@@ -1124,7 +1128,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Staking Tokens to all blobbers and validators
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, 1, 2)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, []float64{
+			1, 1, 1, 1, 2, 2, 2, 2,
+		}, 2)
 
 		// Creating Allocation
 
@@ -1237,7 +1243,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 // TODO : teardown function
 
-func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, equal bool, tokens int, numDelegates int, options ...bool) {
+func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, equal bool, tokens []float64, numDelegates int, options ...bool) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
@@ -1252,15 +1258,12 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	validatorDelegates = append(validatorDelegates, validator2Delegate2Wallet)
 
 	idx := 0
+	tIdx := 0
 
 	for i := 0; i < numDelegates; i++ {
-		if i > 0 && !equal {
-			tokens++
-		}
-
 		for _, blobber := range blobbers {
 			// add balance to delegate wallet
-			_, err := executeFaucetWithTokensForWallet(t, configPath, blobberDelegates[idx], float64(tokens))
+			_, err := executeFaucetWithTokensForWallet(t, blobberDelegates[tIdx], configPath, tokens[idx])
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -1269,7 +1272,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 			// stake tokens
 			_, err = stakeTokensForWallet(t, configPath, blobberDelegates[idx], createParams(map[string]interface{}{
 				"blobber_id": blobber.Id,
-				"tokens":     tokens,
+				"tokens":     tokens[tIdx],
 			}), true)
 			if err != nil {
 				fmt.Println(err)
@@ -1277,19 +1280,16 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 			}
 
 			idx++
+			tIdx++
 		}
 	}
 
 	idx = 0
 
 	for i := 0; i < numDelegates; i++ {
-		if i > 0 && !equal {
-			tokens++
-		}
-
 		for _, validator := range validators {
 			// add balance to delegate wallet
-			_, err := executeFaucetWithTokensForWallet(t, configPath, validatorDelegates[idx], float64(tokens))
+			_, err := executeFaucetWithTokensForWallet(t, validatorDelegates[tIdx], configPath, tokens[idx])
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -1298,7 +1298,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 			// stake tokens
 			_, err = stakeTokensForWallet(t, configPath, validatorDelegates[idx], createParams(map[string]interface{}{
 				"validator_id": validator.ID,
-				"tokens":       tokens,
+				"tokens":       tokens[tIdx],
 			}), true)
 			if err != nil {
 				fmt.Println(err)
@@ -1306,6 +1306,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 			}
 
 			idx++
+			tIdx++
 		}
 	}
 }

@@ -46,7 +46,9 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 1 : 1 delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -105,7 +107,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 		require.Equal(t, downloadCost, totalDownloadRewards, "Download cost and total download rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	//t.Skip()

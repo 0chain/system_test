@@ -49,7 +49,9 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	return
 
 	t.RunSequentiallyWithTimeout("Test Cancel Allocation After Expiry Rewards when client uploads 10% of allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
