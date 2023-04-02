@@ -1025,86 +1025,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		}
 
-		for _, challenge := range challenges {
-			blobber1Reward := 0.0
-			blobber2Reward := 0.0
-			blobber1DelegatesReward := 0.0
-			blobber2DelegatesReward := 0.0
-			validator1Reward := 0.0
-			validator2Reward := 0.0
-			validator1DelegatesReward := 0.0
-			validator2DelegatesReward := 0.0
-
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-			require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
-
-			// check if challengeReward.BlobberRewards is empty and if yes continue
-			if len(challengeRewards.BlobberRewards) == 0 {
-				continue
-			}
-
-			blobberChallengeRewards := challengeRewards.BlobberRewards
-			validatorChallengeRewards := challengeRewards.ValidatorRewards
-			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
-			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
-
-			if blobberChallengeRewards[0].ProviderId == blobberListString[0] {
-				blobber1Reward += blobberChallengeRewards[0].Amount
-
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber1DelegatesReward += blobberDelegateChallengeReward.Amount
-				}
-
-			} else if blobberChallengeRewards[0].ProviderId == blobberListString[1] {
-				blobber2Reward += blobberChallengeRewards[0].Amount
-
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber2DelegatesReward += blobberDelegateChallengeReward.Amount
-				}
-			}
-
-			// blobber's both delegates should get equal rewards
-			blobber1Delegate1Reward := blobberDelegateChallengeRewards[0].Amount
-			blobber1Delegate2Reward := blobberDelegateChallengeRewards[1].Amount
-			fmt.Println("B : ", blobber1Delegate1Reward, blobber1Delegate2Reward)
-			//require.InEpsilon(t, blobber1Delegate1Reward+1, blobber1Delegate2Reward+1, 1, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-
-			// validator's both delegates should get equal rewards
-			validator1Delegate1Reward := validatorDelegateChallengeRewards[0].Amount
-			validator1Delegate2Reward := validatorDelegateChallengeRewards[1].Amount
-			fmt.Println("V : ", validator1Delegate1Reward, validator1Delegate2Reward)
-			//require.InEpsilon(t, validator1Delegate1Reward+1, validator1Delegate2Reward+1, 1, "Validator 1 and Validator 2 delegate rewards are not equal")
-
-			for _, validatorChallengeReward := range validatorChallengeRewards {
-				if validatorChallengeReward.ProviderId == validatorListString[0] {
-					validator1Reward += validatorChallengeReward.Amount
-				} else if validatorChallengeReward.ProviderId == validatorListString[1] {
-					validator2Reward += validatorChallengeReward.Amount
-				}
-			}
-
-			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
-				if validatorDelegateChallengeReward.ProviderId == validatorListString[0] {
-					validator1DelegatesReward += validatorDelegateChallengeReward.Amount
-				} else if validatorDelegateChallengeReward.ProviderId == validatorListString[1] {
-					validator2DelegatesReward += validatorDelegateChallengeReward.Amount
-				}
-			}
-
-			blobber1TotalReward += blobber1Reward
-			blobber2TotalReward += blobber2Reward
-			blobber1DelegatesTotalReward += blobber1DelegatesReward
-			blobber2DelegatesTotalReward += blobber2DelegatesReward
-			validator1TotalReward += validator1Reward
-			validator2TotalReward += validator2Reward
-			validator1DelegatesTotalReward += validator1DelegatesReward
-			validator2DelegatesTotalReward += validator2DelegatesReward
-		}
-
 		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
 
 		fmt.Println("Total Reward: ", totalReward)
@@ -1118,12 +1038,27 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		fmt.Println("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		fmt.Println("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		//require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
-		//
-		//require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
-		//require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-		//require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
-		//require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
+		fmt.Println("Blobber 1 Delegate 1 Total Reward: ", blobber1Delegate1TotalReward)
+		fmt.Println("Blobber 1 Delegate 2 Total Reward: ", blobber1Delegate2TotalReward)
+		fmt.Println("Blobber 2 Delegate 1 Total Reward: ", blobber2Delegate1TotalReward)
+		fmt.Println("Blobber 2 Delegate 2 Total Reward: ", blobber2Delegate2TotalReward)
+		fmt.Println("Validator 1 Delegate 1 Total Reward: ", validator1Delegate1TotalReward)
+		fmt.Println("Validator 1 Delegate 2 Total Reward: ", validator1Delegate2TotalReward)
+		fmt.Println("Validator 2 Delegate 1 Total Reward: ", validator2Delegate1TotalReward)
+		fmt.Println("Validator 2 Delegate 2 Total Reward: ", validator2Delegate2TotalReward)
+
+		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+
+		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		require.InEpsilon(t, validator1TotalReward/validator2TotalReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+		require.InEpsilon(t, validator1DelegatesTotalReward/validator2DelegatesTotalReward, 1, 0.05, "Validator 1 and Validator 2 delegate rewards are not equal")
+
+		require.InEpsilon(t, blobber1Delegate1TotalReward/blobber1Delegate2TotalReward, 1, 0.05, "Blobber 1 Delegate 1 and Blobber 1 Delegate 2 rewards are not equal")
+		require.InEpsilon(t, blobber2Delegate1TotalReward/blobber2Delegate2TotalReward, 1, 0.05, "Blobber 2 Delegate 1 and Blobber 2 Delegate 2 rewards are not equal")
+		require.InEpsilon(t, validator1Delegate1TotalReward/validator1Delegate2TotalReward, 1, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
+		require.InEpsilon(t, validator2Delegate1TotalReward/validator2Delegate2TotalReward, 1, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
+
 	})
 
 	t.RunSequentiallyWithTimeout("Case 5 : Client Uploads 10% of Allocation and 2 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
