@@ -386,14 +386,18 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		validator2DelegatesTotalReward := 0.0
 
 		for _, challenge := range challenges {
-			blobber1Reward := 0.0
-			blobber2Reward := 0.0
-			blobber1DelegatesReward := 0.0
-			blobber2DelegatesReward := 0.0
+
+			var isBlobber1 bool
+			if challenge.BlobberID == blobberList[0].Id {
+				isBlobber1 = true
+			}
+
+			blobberReward := 0.0
+			blobberDelegateReward := 0.0
 			validator1Reward := 0.0
 			validator2Reward := 0.0
-			validator1DelegatesReward := 0.0
-			validator2DelegatesReward := 0.0
+			validator1DelegateReward := 0.0
+			validator2DelegateReward := 0.0
 
 			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
 
@@ -412,57 +416,52 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
 			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
 
-			if blobberChallengeRewards[0].ProviderId == blobberListString[0] {
-				blobber1Reward += blobberChallengeRewards[0].Amount
+			blobberReward += blobberChallengeRewards[0].Amount
+			if isBlobber1 {
+				blobber1TotalReward += blobberChallengeRewards[0].Amount
+			} else {
+				blobber2TotalReward += blobberChallengeRewards[0].Amount
+			}
 
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber1DelegatesReward += blobberDelegateChallengeReward.Amount
-				}
-
-			} else if blobberChallengeRewards[0].ProviderId == blobberListString[1] {
-				blobber2Reward += blobberChallengeRewards[0].Amount
-
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber2DelegatesReward += blobberDelegateChallengeReward.Amount
+			for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
+				blobberDelegateReward += blobberDelegateChallengeReward.Amount
+				if isBlobber1 {
+					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
+				} else {
+					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
 				}
 			}
 
 			for _, validatorChallengeReward := range validatorChallengeRewards {
-				if validatorChallengeReward.ProviderId == validatorListString[0] {
+				if validatorChallengeReward.ProviderId == validatorList[0].ID {
 					validator1Reward += validatorChallengeReward.Amount
-				} else if validatorChallengeReward.ProviderId == validatorListString[1] {
+					validator1TotalReward += validatorChallengeReward.Amount
+				} else if validatorChallengeReward.ProviderId == validatorList[1].ID {
 					validator2Reward += validatorChallengeReward.Amount
+					validator2TotalReward += validatorChallengeReward.Amount
 				}
 			}
 
 			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
-				if validatorDelegateChallengeReward.ProviderId == validatorListString[0] {
-					validator1DelegatesReward += validatorDelegateChallengeReward.Amount
-				} else if validatorDelegateChallengeReward.ProviderId == validatorListString[1] {
-					validator2DelegatesReward += validatorDelegateChallengeReward.Amount
+				if validatorDelegateChallengeReward.ProviderId == validatorList[0].ID {
+					validator1DelegateReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
+				} else if validatorDelegateChallengeReward.ProviderId == validatorList[1].ID {
+					validator2DelegateReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				}
 			}
 
-			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
-			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
-			totalValidator1Reward := validator1Reward + validator1DelegatesReward
+			blobberTotalReward := blobberReward + blobberDelegateReward
+			validatorsTotalReward := validator1Reward + validator2Reward + validator1DelegateReward + validator2DelegateReward
+			totalChallengeReward := blobberTotalReward + validatorsTotalReward
 
-			// check if the ratio is correct between blobber and validator rewards
-			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
-			// check if both validators have same rewards
-			if totalValidatorReward != 0 {
-				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
-				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
-			}
+			// check if blobber got 97.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, blobberTotalReward, totalChallengeReward*0.975, totalChallengeReward*0.05, "Blobber Reward is not 97.5% of total challenge reward")
+			// check if validators got 2.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, validatorsTotalReward, totalChallengeReward*0.025, totalChallengeReward*0.05, "Validators Reward is not 2.5% of total challenge reward")
 
-			blobber1TotalReward += blobber1Reward
-			blobber2TotalReward += blobber2Reward
-			blobber1DelegatesTotalReward += blobber1DelegatesReward
-			blobber2DelegatesTotalReward += blobber2DelegatesReward
-			validator1TotalReward += validator1Reward
-			validator2TotalReward += validator2Reward
-			validator1DelegatesTotalReward += validator1DelegatesReward
-			validator2DelegatesTotalReward += validator2DelegatesReward
+			require.LessOrEqual(t, math.Abs(validator1Reward+validator1DelegateReward-validator2Reward-validator2DelegateReward), float64(3), "Validator 1 and Validator 2 rewards are not equal ")
 		}
 
 		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
@@ -483,9 +482,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
-		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 2)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -546,14 +544,18 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		validator2DelegatesTotalReward := 0.0
 
 		for _, challenge := range challenges {
-			blobber1Reward := 0.0
-			blobber2Reward := 0.0
-			blobber1DelegatesReward := 0.0
-			blobber2DelegatesReward := 0.0
+
+			var isBlobber1 bool
+			if challenge.BlobberID == blobberList[0].Id {
+				isBlobber1 = true
+			}
+
+			blobberReward := 0.0
+			blobberDelegateReward := 0.0
 			validator1Reward := 0.0
 			validator2Reward := 0.0
-			validator1DelegatesReward := 0.0
-			validator2DelegatesReward := 0.0
+			validator1DelegateReward := 0.0
+			validator2DelegateReward := 0.0
 
 			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
 
@@ -572,62 +574,52 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
 			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
 
-			if blobberChallengeRewards[0].ProviderId == blobberListString[0] {
-				blobber1Reward += blobberChallengeRewards[0].Amount
+			blobberReward += blobberChallengeRewards[0].Amount
+			if isBlobber1 {
+				blobber1TotalReward += blobberChallengeRewards[0].Amount
+			} else {
+				blobber2TotalReward += blobberChallengeRewards[0].Amount
+			}
 
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber1DelegatesReward += blobberDelegateChallengeReward.Amount
-				}
-
-			} else if blobberChallengeRewards[0].ProviderId == blobberListString[1] {
-				blobber2Reward += blobberChallengeRewards[0].Amount
-
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber2DelegatesReward += blobberDelegateChallengeReward.Amount
+			for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
+				blobberDelegateReward += blobberDelegateChallengeReward.Amount
+				if isBlobber1 {
+					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
+				} else {
+					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
 				}
 			}
 
 			for _, validatorChallengeReward := range validatorChallengeRewards {
-				if validatorChallengeReward.ProviderId == validatorListString[0] {
+				if validatorChallengeReward.ProviderId == validatorList[0].ID {
 					validator1Reward += validatorChallengeReward.Amount
-				} else if validatorChallengeReward.ProviderId == validatorListString[1] {
+					validator1TotalReward += validatorChallengeReward.Amount
+				} else if validatorChallengeReward.ProviderId == validatorList[1].ID {
 					validator2Reward += validatorChallengeReward.Amount
+					validator2TotalReward += validatorChallengeReward.Amount
 				}
 			}
 
 			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
-				if validatorDelegateChallengeReward.ProviderId == validatorListString[0] {
-					validator1DelegatesReward += validatorDelegateChallengeReward.Amount
-				} else if validatorDelegateChallengeReward.ProviderId == validatorListString[1] {
-					validator2DelegatesReward += validatorDelegateChallengeReward.Amount
+				if validatorDelegateChallengeReward.ProviderId == validatorList[0].ID {
+					validator1DelegateReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
+				} else if validatorDelegateChallengeReward.ProviderId == validatorList[1].ID {
+					validator2DelegateReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				}
 			}
 
-			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
-			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
-			totalValidator1Reward := validator1Reward + validator1DelegatesReward
-			//totalValidator2Reward := validator2Reward + validator2DelegatesReward
+			blobberTotalReward := blobberReward + blobberDelegateReward
+			validatorsTotalReward := validator1Reward + validator2Reward + validator1DelegateReward + validator2DelegateReward
+			totalChallengeReward := blobberTotalReward + validatorsTotalReward
 
-			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
-			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
-			//fmt.Println(validator1DelegatesReward, validator2DelegatesReward)
+			// check if blobber got 97.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, blobberTotalReward, totalChallengeReward*0.975, totalChallengeReward*0.05, "Blobber Reward is not 97.5% of total challenge reward")
+			// check if validators got 2.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, validatorsTotalReward, totalChallengeReward*0.025, totalChallengeReward*0.05, "Validators Reward is not 2.5% of total challenge reward")
 
-			// check if the ratio is correct between blobber and validator rewards
-			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
-			// check if both validators have same rewards
-			if totalValidatorReward != 0 {
-				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
-				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
-			}
-
-			blobber1TotalReward += blobber1Reward
-			blobber2TotalReward += blobber2Reward
-			blobber1DelegatesTotalReward += blobber1DelegatesReward
-			blobber2DelegatesTotalReward += blobber2DelegatesReward
-			validator1TotalReward += validator1Reward
-			validator2TotalReward += validator2Reward
-			validator1DelegatesTotalReward += validator1DelegatesReward
-			validator2DelegatesTotalReward += validator2DelegatesReward
+			require.LessOrEqual(t, math.Abs(validator1Reward+validator1DelegateReward-validator2Reward-validator2DelegateReward), float64(3), "Validator 1 and Validator 2 rewards are not equal ")
 		}
 
 		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
@@ -648,7 +640,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
-		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -710,14 +701,18 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		validator2DelegatesTotalReward := 0.0
 
 		for _, challenge := range challenges {
-			blobber1Reward := 0.0
-			blobber2Reward := 0.0
-			blobber1DelegatesReward := 0.0
-			blobber2DelegatesReward := 0.0
+
+			var isBlobber1 bool
+			if challenge.BlobberID == blobberList[0].Id {
+				isBlobber1 = true
+			}
+
+			blobberReward := 0.0
+			blobberDelegateReward := 0.0
 			validator1Reward := 0.0
 			validator2Reward := 0.0
-			validator1DelegatesReward := 0.0
-			validator2DelegatesReward := 0.0
+			validator1DelegateReward := 0.0
+			validator2DelegateReward := 0.0
 
 			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
 
@@ -736,62 +731,52 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
 			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
 
-			if blobberChallengeRewards[0].ProviderId == blobberListString[0] {
-				blobber1Reward += blobberChallengeRewards[0].Amount
+			blobberReward += blobberChallengeRewards[0].Amount
+			if isBlobber1 {
+				blobber1TotalReward += blobberChallengeRewards[0].Amount
+			} else {
+				blobber2TotalReward += blobberChallengeRewards[0].Amount
+			}
 
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber1DelegatesReward += blobberDelegateChallengeReward.Amount
-				}
-
-			} else if blobberChallengeRewards[0].ProviderId == blobberListString[1] {
-				blobber2Reward += blobberChallengeRewards[0].Amount
-
-				for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-					blobber2DelegatesReward += blobberDelegateChallengeReward.Amount
+			for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
+				blobberDelegateReward += blobberDelegateChallengeReward.Amount
+				if isBlobber1 {
+					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
+				} else {
+					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
 				}
 			}
 
 			for _, validatorChallengeReward := range validatorChallengeRewards {
-				if validatorChallengeReward.ProviderId == validatorListString[0] {
+				if validatorChallengeReward.ProviderId == validatorList[0].ID {
 					validator1Reward += validatorChallengeReward.Amount
-				} else if validatorChallengeReward.ProviderId == validatorListString[1] {
+					validator1TotalReward += validatorChallengeReward.Amount
+				} else if validatorChallengeReward.ProviderId == validatorList[1].ID {
 					validator2Reward += validatorChallengeReward.Amount
+					validator2TotalReward += validatorChallengeReward.Amount
 				}
 			}
 
 			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
-				if validatorDelegateChallengeReward.ProviderId == validatorListString[0] {
-					validator1DelegatesReward += validatorDelegateChallengeReward.Amount
-				} else if validatorDelegateChallengeReward.ProviderId == validatorListString[1] {
-					validator2DelegatesReward += validatorDelegateChallengeReward.Amount
+				if validatorDelegateChallengeReward.ProviderId == validatorList[0].ID {
+					validator1DelegateReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
+				} else if validatorDelegateChallengeReward.ProviderId == validatorList[1].ID {
+					validator2DelegateReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
 				}
 			}
 
-			totalBlobberReward := blobber1Reward + blobber2Reward + blobber1DelegatesReward + blobber2DelegatesReward
-			totalValidatorReward := validator1Reward + validator2Reward + validator1DelegatesReward + validator2DelegatesReward
-			totalValidator1Reward := validator1Reward + validator1DelegatesReward
-			//totalValidator2Reward := validator2Reward + validator2DelegatesReward
+			blobberTotalReward := blobberReward + blobberDelegateReward
+			validatorsTotalReward := validator1Reward + validator2Reward + validator1DelegateReward + validator2DelegateReward
+			totalChallengeReward := blobberTotalReward + validatorsTotalReward
 
-			//fmt.Println("Total Blobber Reward: ", totalBlobberReward)
-			//fmt.Println("Total Validator Reward: ", totalValidatorReward)
-			//fmt.Println(validator1DelegatesReward, validator2DelegatesReward)
+			// check if blobber got 97.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, blobberTotalReward, totalChallengeReward*0.975, totalChallengeReward*0.05, "Blobber Reward is not 97.5% of total challenge reward")
+			// check if validators got 2.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, validatorsTotalReward, totalChallengeReward*0.025, totalChallengeReward*0.05, "Validators Reward is not 2.5% of total challenge reward")
 
-			// check if the ratio is correct between blobber and validator rewards
-			require.InEpsilon(t, totalBlobberReward*0.025, totalValidatorReward, 1, "Blobber Validator Rewards ratio is not 2.5%")
-			// check if both validators have same rewards
-			if totalValidatorReward != 0 {
-				require.InEpsilon(t, (totalValidator1Reward*2)/totalValidatorReward, 1, 0.05, "Validator 1 and Validator 2 rewards are not equal")
-				require.LessOrEqual(t, math.Abs(validator2DelegatesReward-validator1DelegatesReward), float64(3), "Validator 1 reward is not less than Validator 2 reward")
-			}
-
-			blobber1TotalReward += blobber1Reward
-			blobber2TotalReward += blobber2Reward
-			blobber1DelegatesTotalReward += blobber1DelegatesReward
-			blobber2DelegatesTotalReward += blobber2DelegatesReward
-			validator1TotalReward += validator1Reward
-			validator2TotalReward += validator2Reward
-			validator1DelegatesTotalReward += validator1DelegatesReward
-			validator2DelegatesTotalReward += validator2DelegatesReward
+			require.LessOrEqual(t, math.Abs(validator1Reward+validator1DelegateReward-validator2Reward-validator2DelegateReward), float64(3), "Validator 1 and Validator 2 rewards are not equal ")
 		}
 
 		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
@@ -812,13 +797,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
-		require.InEpsilon(t, (validator1TotalReward+validator1DelegatesTotalReward)/(validator2TotalReward+validator2DelegatesTotalReward), 1, 0.05, "Validator 1 Total and Validator 2 Total rewards are not equal")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4 : Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		// Staking Tokens to all blobbers and validators
 
 		// Delegate Wallets
 		b1D1Wallet, _ := getWalletForName(t, configPath, blobber1Delegate1Wallet)
