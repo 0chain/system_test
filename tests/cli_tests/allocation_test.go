@@ -174,6 +174,8 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("passedChallenges", passedChallenges)
 		fmt.Println("failedChallenges", failedChallenges)
 
+		require.Equal(t, passedChallenges, failedChallenges, "All Challenges should be passed")
+
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
