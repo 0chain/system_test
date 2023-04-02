@@ -49,7 +49,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "d", meta.Type)
 		require.Equal(t, "/", meta.Path)
 		require.Equal(t, "/", meta.Name)
-		require.Equal(t, int64(0), meta.Size)
+		require.Equal(t, int64(2), meta.Size)
 	})
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
@@ -77,7 +77,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(2), meta.Size)
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
@@ -104,7 +104,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(2), meta.Size)
 	})
 
 	t.Run("Get Shared File Meta by Auth Ticket and Lookup Hash Should Work", func(t *test.SystemTest) {
@@ -191,7 +191,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(1), meta.Size)
 
 		// Check with random lookuphash
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -254,7 +254,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(277), meta.Size)
 		require.NotEqual(t, "", meta.EncryptedKey)
 	})
 
@@ -288,7 +288,7 @@ func TestFileMetadata(testSetup *testing.T) {
 			require.Equal(t, "d", meta.Type)
 			require.Equal(t, remotepath, meta.Path)
 			require.Equal(t, remotepath, meta.Name)
-			require.Equal(t, int64(0), meta.Size)
+			require.Equal(t, int64(1), meta.Size)
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)

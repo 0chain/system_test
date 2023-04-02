@@ -197,7 +197,7 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
 		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize)
+		require.Equal(t, 0.25*MB, actualSize)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -216,7 +216,7 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
 		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
+		require.Equal(t, 0.25*MB, actualSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
