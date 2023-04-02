@@ -45,7 +45,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	t.RunSequentiallyWithTimeout("Case 1: Free Reads, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -240,7 +240,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 3: Different Read Price, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -340,7 +340,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: Free Reads, one delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 2, 1, 2,
 		}, 1)
 

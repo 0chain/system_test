@@ -98,7 +98,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -278,7 +278,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 

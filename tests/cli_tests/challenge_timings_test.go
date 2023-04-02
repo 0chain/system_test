@@ -39,7 +39,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	t.RunSequentiallyWithTimeout("Case 1: 1 allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -79,7 +79,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 2: 1 allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -118,7 +118,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 3: 10 allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -160,7 +160,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: 10 allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -202,7 +202,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: 10 allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
