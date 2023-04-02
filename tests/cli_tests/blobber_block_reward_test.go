@@ -44,7 +44,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	t.RunSequentiallyWithTimeout("Case 1: Free Reads, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -134,13 +134,13 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			require.True(t, challenge.Passed, "All Challenges should be passed")
 		}
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Case 2: Different Write Price, Equal Read Price, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -234,11 +234,11 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			require.True(t, challenge.Passed, "All Challenges should be passed")
 		}
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 3: Different Read Price, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, 1, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -332,11 +332,11 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			require.True(t, challenge.Passed, "All Challenges should be passed")
 		}
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: Free Reads, one delegate each, unequal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false)
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, false, 1, 1)
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -429,7 +429,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			require.True(t, challenge.Passed, "All Challenges should be passed")
 		}
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath)
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
 }
