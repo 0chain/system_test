@@ -180,7 +180,7 @@ func TestAllocation(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
