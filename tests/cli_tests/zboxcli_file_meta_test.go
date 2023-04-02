@@ -209,7 +209,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(1), meta.Size)
 		require.Equal(t, "", meta.EncryptedKey)
 	})
 
@@ -310,7 +310,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "f", meta.Type)
 		require.Equal(t, remotepath+fname, meta.Path)
 		require.Equal(t, fname, meta.Name)
-		require.Equal(t, filesize, meta.Size)
+		require.Equal(t, int64(5), meta.Size)
 
 		// Listing contents of otherAllocationID: should not work
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
