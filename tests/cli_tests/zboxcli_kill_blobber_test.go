@@ -84,7 +84,8 @@ func TestKillBlobber(testSetup *testing.T) {
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)
-		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"), "")
+		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"),
+			"after killing a blobber there should no longer be enough blobbers for this allocation")
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
@@ -102,8 +103,8 @@ func TestKillBlobber(testSetup *testing.T) {
 		}), true)
 		require.Error(t, err, "kill blobber by non-smartcontract owner should fail")
 		require.Len(t, output, 1)
+		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
-
 }
 
 func killBlobber(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
