@@ -18,10 +18,8 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
 	t.Parallel()
-
-	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
+	t.Run("Create allocation for locking cost equal to minimum cost should not work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"cost": ""}
@@ -61,7 +59,8 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		newCost, err := strconv.ParseFloat(allocationCost, 32)
-		newAllocCost := strconv.FormatFloat(newCost-0.1, 'E', -1, 32)
+		newCost -= 0.1
+		newAllocCost := strconv.FormatFloat(newCost, 'e', -1, 32)
 		options = map[string]interface{}{"lock": newAllocCost}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
