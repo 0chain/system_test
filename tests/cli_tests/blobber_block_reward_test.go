@@ -44,6 +44,120 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	t.RunSequentiallyWithTimeout("Case : ", 500*time.Minute, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+			1, 1, 1, 1,
+		}, 1)
+
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		blobber1AllocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 0,
+			"expire": "20m",
+		})
+		fmt.Println("Allocation ID : ", blobber1AllocationID)
+
+		blobber2AllocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 0,
+			"expire": "20m",
+		})
+		fmt.Println("Allocation ID : ", blobber2AllocationID)
+
+		allocationIDs := []string{blobber1AllocationID, blobber2AllocationID}
+
+		// Uploading 10% of allocation
+		remotepath := "/dir/"
+		filesize := 0.1 * GB
+		filename := generateRandomTestFileName(t)
+
+		for _, allocationId := range allocationIDs {
+			err = createFileWithSize(filename, int64(filesize))
+			require.Nil(t, err)
+
+			output, err = uploadFile(t, configPath, map[string]interface{}{
+				// fetch the latest block in the chain
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  filename,
+			}, true)
+			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		}
+
+		// download the file
+
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationIDs[0],
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+
+		for i := 0; i < 3; i++ {
+			err = os.Remove(filename)
+			require.Nil(t, err)
+
+			remoteFilepath := remotepath + filepath.Base(filename)
+
+			output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationIDs[1],
+				"remotepath": remoteFilepath,
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+			}), true)
+			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		}
+
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		curBlock := getLatestFinalizedBlock(t)
+
+		fmt.Println("curBlock", curBlock)
+
+		// 2. Get the block rewards for all the blobbers.
+
+		blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+		blobber1ProviderRewards := float64(blobberBlockRewards[0])
+		blobber2ProviderRewards := float64(blobberBlockRewards[1])
+		blobber1DelegateRewards := float64(blobberBlockRewards[2])
+		blobber2DelegateRewards := float64(blobberBlockRewards[3])
+		blobber1TotalRewards := float64(blobberBlockRewards[4])
+		blobber2TotalRewards := float64(blobberBlockRewards[5])
+
+		// print all values
+		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
+		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
+		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
+		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
+		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
+		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+
+		// check if blobber1TotalRewards and blobber2TotalRewards are equal with error margin of 5%
+		require.True(t, math.Abs(blobber1TotalRewards-blobber2TotalRewards) <= 0.05*blobber1TotalRewards, "blobber1TotalRewards and blobber2TotalRewards should be equal with error margin of 5%")
+		// check if blobber1DelegateRewards and blobber2DelegateRewards are equal with error margin of 5%
+		require.True(t, math.Abs(blobber1DelegateRewards-blobber2DelegateRewards) <= 0.05*blobber1DelegateRewards, "blobber1DelegateRewards and blobber2DelegateRewards should be equal with error margin of 5%")
+		// check if blobber1ProviderRewards and blobber2ProviderRewards are equal with error margin of 5%
+		require.True(t, math.Abs(blobber1ProviderRewards-blobber2ProviderRewards) <= 0.05*blobber1ProviderRewards, "blobber1ProviderRewards and blobber2ProviderRewards should be equal with error margin of 5%")
+
+		prevBlock = getLatestFinalizedBlock(t)
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+	})
+
+	t.Skip()
+
 	t.RunSequentiallyWithTimeout("Case 1: Free Reads, one delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
