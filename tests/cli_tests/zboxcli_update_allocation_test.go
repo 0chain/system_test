@@ -22,7 +22,8 @@ import (
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
-	costAllocationRegex   = regexp.MustCompile(`^Cost for the given allocation: [a-f0-9]{64}$`)
+	costAllocationRegex   = regexp.MustCompile(`^Cost for the given allocation:`)
+	extractCostAllocation = regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 )
 
 func TestUpdateAllocation(testSetup *testing.T) {
@@ -865,12 +866,19 @@ func getAllocationID(str string) (string, error) {
 	return match[1], nil
 }
 
-func getAllocationCost(str string) (string, error) {
+func checkAllocationCostPresent(str string) (string, error) {
 	match := costAllocationRegex.FindStringSubmatch(str)
-	if len(match) < 2 {
+	if len(match) < 1 {
+		return "", errors.New("allocation cost match not found")
+	}
+	return match[0], nil
+}
+func getAllocationCost(str string) (string, error) {
+	match := extractCostAllocation.FindStringSubmatch(str)
+	if len(match) < 1 {
 		return "", errors.New("allocation match not found")
 	}
-	return match[1], nil
+	return match[0], nil
 }
 
 func createParams(params map[string]interface{}) string {
