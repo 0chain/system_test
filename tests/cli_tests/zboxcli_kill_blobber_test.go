@@ -55,6 +55,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"),
 			output[0], "Allocation creation output did not match expected")
 		allocationID, err := getAllocationID(output[0])
+		require.NoError(t, err)
 		createAllocationTestTeardown(t, allocationID)
 
 		spBefore := getStakePoolInfo(t, blobberToKill)
