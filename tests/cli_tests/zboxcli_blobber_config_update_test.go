@@ -332,6 +332,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
+		newIsAvailable := !intialBlobberInfo.IsAvailable
 		min_stake, err := intialBlobberInfo.StakePoolSettings.MinStake.Int64()
 		require.Nil(t, err)
 		newMinStake := intToZCN(min_stake) + 1
@@ -347,6 +348,10 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
+
+		if !newIsAvailable {
+			t.Cleanup(func() { setAvailability(t, intialBlobberInfo.ID, true) })
+		}
 
 		var finalBlobberInfo climodel.BlobberDetails
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
@@ -365,6 +370,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		max_stake, err = finalBlobberInfo.StakePoolSettings.MaxStake.Int64()
 		require.Nil(t, err)
 		require.Equal(t, newMaxStake, intToZCN(max_stake))
+		require.Equal(t, newIsAvailable, finalBlobberInfo.IsAvailable)
 	})
 }
 
