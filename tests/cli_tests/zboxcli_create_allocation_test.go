@@ -42,7 +42,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
-
 	})
 
 	t.Run("Create allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
@@ -65,7 +64,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		options = map[string]interface{}{"lock": newAllocCost}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
