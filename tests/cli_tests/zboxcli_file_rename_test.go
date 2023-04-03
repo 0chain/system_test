@@ -198,7 +198,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"destname":   destName,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, "file already exists", strings.Join(output, " "))
+		require.Contains(t, strings.Join(output, " "), "file already exists")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
