@@ -333,12 +333,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
 		newIsAvailable := !intialBlobberInfo.IsAvailable
-		min_stake, err := intialBlobberInfo.StakePoolSettings.MinStake.Int64()
+		minStake, err := intialBlobberInfo.StakePoolSettings.MinStake.Int64()
 		require.Nil(t, err)
-		newMinStake := intToZCN(min_stake) + 1
-		max_stake, err := intialBlobberInfo.StakePoolSettings.MaxStake.Int64()
+		newMinStake := intToZCN(minStake) + 1
+		maxStake, err := intialBlobberInfo.StakePoolSettings.MaxStake.Int64()
 		require.Nil(t, err)
-		newMaxStake := intToZCN(max_stake) - 1
+		newMaxStake := intToZCN(maxStake) - 1
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice, "service_charge": newServiceCharge, "read_price": newReadPrice, "num_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -364,12 +364,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
-		min_stake, err = finalBlobberInfo.StakePoolSettings.MinStake.Int64()
+		minStake, err = finalBlobberInfo.StakePoolSettings.MinStake.Int64()
 		require.Nil(t, err)
-		require.Equal(t, newMinStake, intToZCN(min_stake))
-		max_stake, err = finalBlobberInfo.StakePoolSettings.MaxStake.Int64()
+		require.Equal(t, newMinStake, intToZCN(minStake))
+		maxStake, err = finalBlobberInfo.StakePoolSettings.MaxStake.Int64()
 		require.Nil(t, err)
-		require.Equal(t, newMaxStake, intToZCN(max_stake))
+		require.Equal(t, newMaxStake, intToZCN(maxStake))
 		require.Equal(t, newIsAvailable, finalBlobberInfo.IsAvailable)
 	})
 }
