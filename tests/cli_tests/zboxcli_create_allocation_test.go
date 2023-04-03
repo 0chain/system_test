@@ -59,6 +59,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		newCost, err := strconv.ParseFloat(allocationCost, 32)
+		require.Nil(t, err, "There is some parsing issue")
 		newCost -= 0.1
 		newAllocCost := strconv.FormatFloat(newCost, 'e', -1, 32)
 		options = map[string]interface{}{"lock": newAllocCost}
