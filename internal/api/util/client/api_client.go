@@ -382,7 +382,7 @@ func estimateTxnFee(t *test.SystemTest, c *APIClient, transactionPutRequest *mod
 		MinerServiceProvider)
 
 	var fee = struct {
-		Fee int64 `josn:"fee"`
+		Fee int64 `json:"fee"`
 	}{}
 	require.Nil(t, err)
 
