@@ -340,7 +340,19 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err)
 		newMaxStake := intToZCN(maxStake) - 1
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice, "service_charge": newServiceCharge, "read_price": newReadPrice, "num_delegates": newNumberOfDelegates, "max_offer_duration": newMaxOfferDuration, "capacity": newCapacity, "min_lock_demand": newMinLockDemand, "min_stake": newMinStake, "max_stake": newMaxStake}))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id":         intialBlobberInfo.ID,
+			"write_price":        newWritePrice,
+			"service_charge":     newServiceCharge,
+			"read_price":         newReadPrice,
+			"num_delegates":      newNumberOfDelegates,
+			"max_offer_duration": newMaxOfferDuration,
+			"capacity":           newCapacity,
+			"min_lock_demand":    newMinLockDemand,
+			"min_stake":          newMinStake,
+			"max_stake":          newMaxStake,
+			"is_available":       newIsAvailable,
+		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "blobber settings updated successfully", output[0])
