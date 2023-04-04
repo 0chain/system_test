@@ -5,11 +5,6 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const (
-	AccessKey       = "rootroot"
-	SecretAccessKey = "rootroot"
-)
-
 type ZS3Client struct {
 	BaseHttpClient
 	zs3ServerUrl string
