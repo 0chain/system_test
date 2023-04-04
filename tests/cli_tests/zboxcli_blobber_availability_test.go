@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -28,9 +29,9 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			}
 		}
 		require.NotEqual(t, blobberToDeactivate, "", "no active blobbers")
-		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
+		require.True(t, activeBlobbers > 2, "need at least three active blobbers")
 		dataShards := 1
-		parityShards := activeBlobbers - 1
+		parityShards := activeBlobbers - dataShards
 
 		output, err := executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
