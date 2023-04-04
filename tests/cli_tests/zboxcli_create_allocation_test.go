@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -18,6 +17,7 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
 	t.Parallel()
 	t.Run("Create allocation for locking cost equal to minimum cost should not work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
@@ -25,10 +25,8 @@ func TestCreateAllocation(testSetup *testing.T) {
 		options := map[string]interface{}{"cost": ""}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Len(t, output, 1)
 
-		_, err = checkAllocationCostPresent(output[0])
-		require.Nil(t, err, "allocation cost not fetched", strings.Join(output, "\n"))
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
@@ -52,17 +50,12 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 
-		_, err = checkAllocationCostPresent(output[0])
-		require.Nil(t, err, "allocation cost not fetched", strings.Join(output, "\n"))
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		newCost, err := strconv.ParseFloat(allocationCost, 32)
-		require.Nil(t, err, "There is some parsing issue")
-		newCost -= 0.1
-		newAllocCost := strconv.FormatFloat(newCost, 'e', -1, 32)
-		options = map[string]interface{}{"lock": newAllocCost}
-		output, err = createNewAllocation(t, configPath, createParams(options))
+		mustFailCost := allocationCost - 0.1
+		options = map[string]interface{}{"lock": mustFailCost}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
