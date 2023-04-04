@@ -86,6 +86,7 @@ const (
 	validator1Delegate2Wallet       = "wallets/validator1_delegate2"
 	validator2Delegate1Wallet       = "wallets/validator2_delegate1"
 	validator2Delegate2Wallet       = "wallets/validator2_delegate2"
+	fixedAllocationOwnerWallet      = "wallets/fixed_allocation_owner"
 )
 
 var (

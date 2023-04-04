@@ -59,7 +59,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			"parity": 0,
 			"expire": "20m",
 		})
-		fmt.Println("Allocation ID : ", blobber1AllocationID)
+		fmt.Println("Allocation ID : ", blobberList[0].Id, blobber1AllocationID)
 
 		blobber2AllocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
@@ -68,7 +68,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 			"parity": 0,
 			"expire": "20m",
 		})
-		fmt.Println("Allocation ID : ", blobber2AllocationID)
+		fmt.Println("Allocation ID : ", blobberList[0].Id, blobber2AllocationID)
 
 		allocationIDs := []string{blobber1AllocationID, blobber2AllocationID}
 
@@ -119,7 +119,7 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 		}
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(20 * time.Minute)
 
 		curBlock := getLatestFinalizedBlock(t)
 
