@@ -19,7 +19,8 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
-	t.Run("Create allocation for locking cost equal to minimum cost should not work", func(t *test.SystemTest) {
+
+	t.Run("Create allocation for locking cost equal to minimum cost should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"cost": ""}
