@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
