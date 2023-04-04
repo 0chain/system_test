@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -16,44 +17,67 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
 		startBlobbers := getBlobbers(t)
+		var blobberToDeactivate *model.BlobberDetails
+		var activeBlobbers int
 		for i := range startBlobbers {
-			setAvailability(t, startBlobbers[i].ID, true)
+			if startBlobbers[i].IsAvailable {
+				activeBlobbers++
+				if blobberToDeactivate == nil {
+					blobberToDeactivate = &startBlobbers[i]
+				}
+			}
 		}
+		require.NotEqual(t, blobberToDeactivate, "", "no active blobbers")
+		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
+		dataShards := 1
+		parityShards := activeBlobbers - 1
 
 		output, err := executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5"}))
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"data":   strconv.Itoa(dataShards),
+			"parity": strconv.Itoa(parityShards),
+			"lock":   "1.5",
+		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		beforeAllocationId, err := getAllocationID(output[0])
 		require.NoError(t, err, "error getting allocation id")
 		defer createAllocationTestTeardown(t, beforeAllocationId)
 
-		for i := range startBlobbers {
-			setAvailability(t, startBlobbers[i].ID, false)
-			t.Cleanup(func() { setAvailability(t, startBlobbers[i].ID, true) })
-		}
+		setAvailability(t, blobberToDeactivate.ID, false)
+		t.Cleanup(func() { setAvailability(t, blobberToDeactivate.ID, true) })
 
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
-			require.Equal(t, false, betweenBlobbers[i].IsAvailable)
+			if betweenBlobbers[i].ID == blobberToDeactivate.ID {
+				require.Falsef(t, betweenBlobbers[i].IsAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
+			}
 		}
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5"}))
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"data":   strconv.Itoa(dataShards),
+			"parity": strconv.Itoa(parityShards),
+			"lock":   "1.5",
+		}))
 		require.Error(t, err, "create allocation should fail")
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], " is not currently available for new allocations"))
 
-		for i := range startBlobbers {
-			setAvailability(t, startBlobbers[i].ID, true)
-		}
+		setAvailability(t, blobberToDeactivate.ID, true)
 
 		afterBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
-			require.Equal(t, false, afterBlobbers[i].IsAvailable)
+			if afterBlobbers[i].ID == blobberToDeactivate.ID {
+				require.Truef(t, betweenBlobbers[i].IsAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
+			}
 		}
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{"lock": "0.5"}))
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"data":   strconv.Itoa(dataShards),
+			"parity": strconv.Itoa(parityShards),
+			"lock":   "1.5",
+		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		afterAllocationId, err := getAllocationID(output[0])
 		require.NoError(t, err, "error getting allocation id")
