@@ -1334,6 +1334,28 @@ func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param 
 	}
 }
 
+func downloadFileFromOneBlobber(t *test.SystemTest, cliConfigFilename, blobberID string, param string, retry bool) ([]string, error) {
+	return downloadFileFromOneBlobberForWallet(t, blobberID, escapedTestName(t), cliConfigFilename, param, retry)
+}
+
+func downloadFileFromOneBlobberForWallet(t *test.SystemTest, blobberID, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 15*time.Second) // TODO replace with pollers
+	t.Logf("Downloading file...")
+	cmd := fmt.Sprintf(
+		"./zbox download %s --silent --wallet %s --configDir ./config --config %s --blobber_id %s",
+		param,
+		wallet+"_wallet.json",
+		cliConfigFilename,
+		blobberID,
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
 func generateChecksum(t *test.SystemTest, filePath string) string {
 	t.Logf("Generating checksum for file [%v]...", filePath)
 
