@@ -821,3 +821,31 @@ var StorageDurationSettings = []string{
 }
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
+
+type BlobberInfoDetailed struct {
+	Id    string `json:"id"`
+	Url   string `json:"url"`
+	Terms struct {
+		ReadPrice        int     `json:"read_price"`
+		WritePrice       int     `json:"write_price"`
+		MinLockDemand    float64 `json:"min_lock_demand"`
+		MaxOfferDuration int64   `json:"max_offer_duration"`
+	} `json:"terms"`
+	Capacity          int64 `json:"capacity"`
+	Allocated         int   `json:"allocated"`
+	LastHealthCheck   int   `json:"last_health_check"`
+	StakePoolSettings struct {
+		DelegateWallet string  `json:"delegate_wallet"`
+		MinStake       int64   `json:"min_stake"`
+		MaxStake       int64   `json:"max_stake"`
+		NumDelegates   int     `json:"num_delegates"`
+		ServiceCharge  float64 `json:"service_charge"`
+	} `json:"stake_pool_settings"`
+	TotalStake               int64 `json:"total_stake"`
+	UsedAllocation           int   `json:"used_allocation"`
+	TotalOffers              int   `json:"total_offers"`
+	TotalServiceCharge       int   `json:"total_service_charge"`
+	UncollectedServiceCharge int   `json:"uncollected_service_charge"`
+	IsKilled                 bool  `json:"is_killed"`
+	IsShutdown               bool  `json:"is_shutdown"`
+}

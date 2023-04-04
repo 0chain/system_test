@@ -289,13 +289,8 @@ func listBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]strin
 }
 
 func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	t.Log("Staking tokens...")
-	cmd := fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename)
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
+	output, err := stakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)
+	return output, err
 }
 
 func stakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
@@ -314,8 +309,8 @@ func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 }
 
 func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Log("Unlocking tokens from stake pool...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
+	output, err := unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params)
+	return output, err
 }
 
 func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
