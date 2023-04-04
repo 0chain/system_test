@@ -19,7 +19,6 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 const (
@@ -56,7 +55,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		cliutils.Wait(t, 3*time.Second)
+		cliutil.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
