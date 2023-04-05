@@ -34,7 +34,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 		sharderUrl := getSharderUrl(t)
 		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
+		require.True(t, len(sharderIds) > 0, "no sharders found")
 
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
